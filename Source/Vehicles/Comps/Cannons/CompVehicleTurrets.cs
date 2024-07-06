@@ -942,6 +942,7 @@ namespace Vehicles
 			Scribe_Collections.Look(ref turretQuotas, nameof(turretQuotas), LookMode.Reference, LookMode.Value, ref tmpListTurrets, ref tmpListTurretQuota);
 			Scribe_Collections.Look(ref backupQuotas, nameof(backupQuotas), LookMode.Deep);
 
+			turrets ??= new List<VehicleTurret>();
 			turretQuotas ??= new Dictionary<VehicleTurret, int>();
 			backupQuotas ??= new List<BackupTurretQuota>();
 		}

@@ -28,15 +28,10 @@ namespace Vehicles
 		{
 			get
 			{
-				if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
+				if (!overlays.NullOrEmpty())
 				{
-					for (int i = 0; i < overlays.Count; i++)
+					foreach (GraphicOverlay graphicOverlay in overlays)
 					{
-						GraphicOverlay graphicOverlay = overlays[i];
-						if (graphicOverlay == null)
-						{
-							graphicOverlay = vehicle.VehicleDef.drawProperties.overlays[i];
-						}
 						yield return graphicOverlay;
 					}
 				}

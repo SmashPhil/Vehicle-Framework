@@ -38,9 +38,14 @@
 	
 	<!-- Stats -->
 	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
-	
+	<VF_StatsReport_Deployed>Deployed</VF_StatsReport_Deployed>
+
 	<!-- Designators -->
-	
+	<VF_RoadZoneExpand>Road zone expand</VF_RoadZoneExpand>
+	<VF_RoadZoneExpandDesc>Create a zone where your vehicles will prefer to move through. Zones applied near the edge of the map will have priority for caravans.</VF_RoadZoneExpandDesc>
+	<VF_RoadZoneClear>Road zone clear</VF_RoadZoneClear>
+	<VF_RoadZoneClearDesc>Create a zone where your vehicles will prefer to move through. Zones applied near the edge of the map will have priority for caravans.</VF_RoadZoneClearDesc>
+
 	<!-- Tooltips -->
 	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
 	<VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>

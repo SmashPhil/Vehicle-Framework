@@ -27,53 +27,54 @@ namespace Vehicles
 		private int pageCount;
 		private static PatternDef selectedPattern;
 
-		public static float hue;
-		public static float saturation;
-		public static float value;
+		private float hue;
+		private float saturation;
+		private float value;
 
-		//must keep as fields for pass-by-ref
-		public static ColorInt CurrentColorOne;
-		public static ColorInt CurrentColorTwo;
-		public static ColorInt CurrentColorThree;
+		private ColorInt currentColorOne;
+		private ColorInt currentColorTwo;
+		private ColorInt currentColorThree;
 
-		public static string colorOneHex;
-		public static string colorTwoHex;
-		public static string colorThreeHex;
+		private string colorOneHex;
+		private string colorTwoHex;
+		private string colorThreeHex;
 
-		public static int colorSelected = 1;
-		public static float additionalTiling = 1;
-		public static float displacementX = 0;
-		public static float displacementY = 0;
-		public static float initialDragDifferenceX = 0;
-		public static float initialDragDifferenceY = 0;
+		private int colorSelected = 1;
+		private float additionalTiling = 1;
+		private float displacementX = 0;
+		private float displacementY = 0;
+		private float initialDragDifferenceX = 0;
+		private float initialDragDifferenceY = 0;
 
-		private static bool showPatterns = true;
-		private static bool mouseOver = false;
+		private bool showPatterns = true;
+		private bool mouseOver = false;
 
 		private Dialog_ColorPicker() 
 		{
 		}
 
-		private static VehicleDef VehicleDef { get; set; }
+		private VehiclePawn Vehicle { get; set; } 
 
-		private static Rot8? DisplayRotation { get; set; }
+		private VehicleDef VehicleDef { get; set; }
 
-		private static PatternData PatternData { get; set; }
+		private Rot8? DisplayRotation { get; set; }
 
-		private static List<PatternDef> AvailablePatterns { get; set; }
+		private PatternData PatternData { get; set; }
+
+		private List<PatternDef> AvailablePatterns { get; set; }
 
 		/// <summary>
 		/// ColorOne, ColorTwo, ColorThree, PatternDef, Displacement, Tiles
 		/// </summary>
-		private static Action<Color, Color, Color, PatternDef, Vector2, float> OnSave { get; set; }
+		private Action<Color, Color, Color, PatternDef, Vector2, float> OnSave { get; set; }
 
-		public static int CurrentSelectedPalette { get; set; }
+		private int CurrentSelectedPalette { get; set; }
 
 		public override Vector2 InitialSize => new Vector2(900f, 540f);
 
-		public static string ColorToHex(Color col) => ColorUtility.ToHtmlStringRGB(col);
+		private string ColorToHex(Color col) => ColorUtility.ToHtmlStringRGB(col);
 
-		public static bool HexToColor(string hexColor, out Color color) => ColorUtility.TryParseHtmlString("#" + hexColor, out color);
+		private bool HexToColor(string hexColor, out Color color) => ColorUtility.TryParseHtmlString("#" + hexColor, out color);
 
 		/// <summary>
 		/// Open ColorPicker for <paramref name="vehicle"/> and apply changes via <paramref name="onSave"/>
@@ -82,10 +83,12 @@ namespace Vehicles
 		/// <param name="onSave"></param>
 		public static void OpenColorPicker(VehiclePawn vehicle, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
 		{
-			VehicleDef = vehicle.VehicleDef;
-			OnSave = onSave;
-			PatternData = new PatternData(vehicle);
-			Open();
+			Dialog_ColorPicker colorPicker = new Dialog_ColorPicker();
+			colorPicker.Vehicle = vehicle;
+			colorPicker.VehicleDef = vehicle.VehicleDef;
+			colorPicker.OnSave = onSave;
+			colorPicker.PatternData = new PatternData(vehicle);
+			Open(colorPicker);
 		}
 
 		/// <summary>
@@ -95,15 +98,16 @@ namespace Vehicles
 		/// <param name="onSave"></param>
 		public static void OpenColorPicker(VehicleDef vehicleDef, Action<Color, Color, Color, PatternDef, Vector2, float> onSave)
 		{
-			VehicleDef = vehicleDef;
-			OnSave = onSave;
-			PatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-			Open();
+			Dialog_ColorPicker colorPicker = new Dialog_ColorPicker();
+			colorPicker.Vehicle = null;
+			colorPicker.VehicleDef = vehicleDef;
+			colorPicker.OnSave = onSave;
+			colorPicker.PatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
+			Open(colorPicker);
 		}
 
-		private static void Open()
+		private static void Open(Dialog_ColorPicker colorPicker)
 		{
-			Dialog_ColorPicker colorPicker = new Dialog_ColorPicker();
 			colorPicker.Init();
 			Find.WindowStack.Add(colorPicker);
 		}
@@ -156,9 +160,9 @@ namespace Vehicles
 		public override void PostOpen()
 		{
 			base.PostOpen();
-			colorOneHex = ColorToHex(CurrentColorOne.ToColor);
-			colorTwoHex = ColorToHex(CurrentColorTwo.ToColor);
-			colorThreeHex = ColorToHex(CurrentColorThree.ToColor);
+			colorOneHex = ColorToHex(currentColorOne.ToColor);
+			colorTwoHex = ColorToHex(currentColorTwo.ToColor);
+			colorThreeHex = ColorToHex(currentColorThree.ToColor);
 		}
 
 		public override void DoWindowContents(Rect inRect)
@@ -209,8 +213,16 @@ namespace Vehicles
 			{
 				Rect vehicleDefRect = displayRect.AtZero();
 				HandleDisplacementDrag(vehicleDefRect);
-				VehicleGraphics.DrawVehicleDef(vehicleDefRect, VehicleDef, new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern,
-				new Vector2(displacementX, displacementY), additionalTiling), DisplayRotation, withoutTurrets: true);
+				PatternData patternData = new PatternData(currentColorOne.ToColor, currentColorTwo.ToColor, currentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
+				if (false && Vehicle != null) //TODO - render vehicle instance
+				{
+					VehicleGraphics.DrawVehicle(vehicleDefRect, Vehicle, patternData, DisplayRotation);
+				}
+				else
+				{
+					VehicleGraphics.DrawVehicleDef(vehicleDefRect, VehicleDef, patternData, DisplayRotation, withoutTurrets: true);
+				}
+				
 			}
 			Widgets.EndGroup();
 			
@@ -327,11 +339,18 @@ namespace Vehicles
 				PatternDef pattern = AvailablePatterns[i];
 				displayRect.x = outRect.x + (iteration % GridDimensionColumns) * sqrGridSize;
 				displayRect.y = outRect.y + (Mathf.FloorToInt(iteration / GridDimensionRows)) * gridSize;
-				PatternData patternData = new PatternData(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
+				PatternData patternData = new PatternData(currentColorOne.ToColor, currentColorTwo.ToColor, currentColorThree.ToColor, pattern, new Vector2(displacementX, displacementY), additionalTiling);
 
 				Widgets.BeginGroup(displayRect);
 				{
-					VehicleGraphics.DrawVehicleDef(displayRect.AtZero(), VehicleDef, patternData, DisplayRotation, withoutTurrets: true);
+					if (false && Vehicle != null) //TODO - Allow rendering of vehicle instance for color picker
+					{
+						VehicleGraphics.DrawVehicle(displayRect.AtZero(), Vehicle, patternData, DisplayRotation, withoutTurrets: true);
+					}
+					else
+					{
+						VehicleGraphics.DrawVehicleDef(displayRect.AtZero(), VehicleDef, patternData, DisplayRotation, withoutTurrets: true);
+					}
 				}
 				Widgets.EndGroup();
 
@@ -390,7 +409,7 @@ namespace Vehicles
 			Rect reverseRect = new Rect(colorContainerRect.x + 11f, 20, SwitchSize / 2.75f, SwitchSize / 2.75f);
 			if (Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
 			{
-				SetColors(CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentColorOne.ToColor);
+				SetColors(currentColorTwo.ToColor, currentColorThree.ToColor, currentColorOne.ToColor);
 				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			TooltipHandler.TipRegion(reverseRect, "VF_SwapColors".Translate());
@@ -418,19 +437,19 @@ namespace Vehicles
 			if (colorSelected != 1 && Widgets.ButtonInvisible(c1Rect))
 			{
 				colorSelected = 1;
-				SetColor(CurrentColorOne.ToColor);
+				SetColor(currentColorOne.ToColor);
 				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			if (colorSelected != 2 && Widgets.ButtonInvisible(c2Rect))
 			{
 				colorSelected = 2;
-				SetColor(CurrentColorTwo.ToColor);
+				SetColor(currentColorTwo.ToColor);
 				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 			if (colorSelected != 3 && Widgets.ButtonInvisible(c3Rect))
 			{
 				colorSelected = 3;
-				SetColor(CurrentColorThree.ToColor);
+				SetColor(currentColorThree.ToColor);
 				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
 
@@ -451,7 +470,7 @@ namespace Vehicles
 			{
 				if (CurrentSelectedPalette >= 0 && CurrentSelectedPalette < ColorStorage.PaletteCount)
 				{
-					VehicleMod.settings.colorStorage.AddPalette(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, CurrentSelectedPalette);
+					VehicleMod.settings.colorStorage.AddPalette(currentColorOne.ToColor, currentColorTwo.ToColor, currentColorThree.ToColor, CurrentSelectedPalette);
 					SoundDefOf.Click.PlayOneShotOnCamera();
 				}
 				else
@@ -509,7 +528,7 @@ namespace Vehicles
 		{
 			if (Widgets.ButtonText(buttonRect, "VF_ApplyButton".Translate()))
 			{
-				OnSave(CurrentColorOne.ToColor, CurrentColorTwo.ToColor, CurrentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
+				OnSave(currentColorOne.ToColor, currentColorTwo.ToColor, currentColorThree.ToColor, selectedPattern, new Vector2(displacementX, displacementY), additionalTiling);
 				Close(true);
 			}
 			buttonRect.x += ButtonWidth;
@@ -537,32 +556,32 @@ namespace Vehicles
 			}
 		}
 
-		public static ColorInt ApplyActionSwitch(ActionRef<ColorInt, string> action)
+		private ColorInt ApplyActionSwitch(ActionRef<ColorInt, string> action)
 		{
 			switch(colorSelected)
 			{
 				case 1:
-					action(ref CurrentColorOne, ref colorOneHex);
-					return CurrentColorOne;
+					action(ref currentColorOne, ref colorOneHex);
+					return currentColorOne;
 				case 2:
-					action(ref CurrentColorTwo, ref colorTwoHex);
-					return CurrentColorTwo;
+					action(ref currentColorTwo, ref colorTwoHex);
+					return currentColorTwo;
 				case 3:
-					action(ref CurrentColorThree, ref colorThreeHex);
-					return CurrentColorThree;
+					action(ref currentColorThree, ref colorThreeHex);
+					return currentColorThree;
 				default:
 					throw new ArgumentOutOfRangeException("ColorSelection out of range. Must be between 1 and 3.");
 			}
 		}
 
-		public void SetColors(Color col1, Color col2, Color col3)
+		private void SetColors(Color col1, Color col2, Color col3)
 		{
-			CurrentColorOne = new ColorInt(col1);
-			CurrentColorTwo = new ColorInt(col2);
-			CurrentColorThree = new ColorInt(col3);
-			colorOneHex = ColorToHex(CurrentColorOne.ToColor);
-			colorTwoHex = ColorToHex(CurrentColorTwo.ToColor);
-			colorThreeHex = ColorToHex(CurrentColorThree.ToColor);
+			currentColorOne = new ColorInt(col1);
+			currentColorTwo = new ColorInt(col2);
+			currentColorThree = new ColorInt(col3);
+			colorOneHex = ColorToHex(currentColorOne.ToColor);
+			colorTwoHex = ColorToHex(currentColorTwo.ToColor);
+			colorThreeHex = ColorToHex(currentColorThree.ToColor);
 			ApplyActionSwitch(delegate (ref ColorInt c, ref string hex) 
 			{ 
 				Color.RGBToHSV(c.ToColor, out hue, out saturation, out value); 
@@ -580,18 +599,18 @@ namespace Vehicles
 			Color.RGBToHSV(curColor.ToColor, out hue, out saturation, out value);
 		}
 
-		public bool SetColor(string hex)
+		private bool SetColor(string hex)
 		{
 			if (HexToColor(hex, out Color color))
 			{
-				CurrentColorOne = new ColorInt(color);
-				Color.RGBToHSV(CurrentColorOne.ToColor, out hue, out saturation, out value);
+				currentColorOne = new ColorInt(color);
+				Color.RGBToHSV(currentColorOne.ToColor, out hue, out saturation, out value);
 				return true;
 			}
 			return false;
 		}
 
-		public void SetColor(float h, float s, float b)
+		private void SetColor(float h, float s, float b)
 		{
 			ColorInt curColor = ApplyActionSwitch(delegate(ref ColorInt c, ref string hex) 
 			{ 

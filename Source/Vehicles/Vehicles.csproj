@@ -162,7 +162,11 @@
     <Compile Include="CustomFeatures\Upgrades\Node\ActionUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeTextEntry.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
+    <Compile Include="CustomFeatures\Areas\Area_Road.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
+    <Compile Include="Gizmo\Designators\Designator_AreaRoadExpand.cs" />
+    <Compile Include="Gizmo\Designators\Designator_AreaRoadClear.cs" />
+    <Compile Include="Gizmo\Designators\Designator_AreaRoad.cs" />
     <Compile Include="Gizmo\Gizmo_VehicleCaravanInfo.cs" />
     <Compile Include="Graphics\Dialogs\Dialog_StatSettings.cs" />
     <Compile Include="Graphics\Graphic\Graphics\Animated\Graphic_ReversePropeller.cs" />
@@ -185,6 +189,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
     <Compile Include="Harmony\DebugProperties.cs" />
+    <Compile Include="Harmony\PatchCategories\Areas.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
@@ -217,7 +222,7 @@
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
     <Compile Include="Turrets\Turret\TargetLock.cs" />
     <Compile Include="Turrets\Turret\TurretComponentRequirement.cs" />
-    <Compile Include="UpgradeInProgress.cs" />
+    <Compile Include="CustomFeatures\Upgrades\UpgradeInProgress.cs" />
     <Compile Include="Utility\DesignatorCache.cs" />
     <Compile Include="AI\Incidents\IncidentWorker_ShuttleDowned.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_FollowVehicle.cs" />
@@ -382,7 +387,6 @@
     <Compile Include="Gizmo\AltitudeMeter.cs" />
     <Compile Include="Gizmo\Command_LoadToAerialTransport.cs" />
     <Compile Include="Gizmo\Landing\Command_ActionHighlighter.cs" />
-    <Compile Include="Gizmo\Landing\Zone_Runway.cs" />
     <Compile Include="Harmony\PatchCategories\Combat.cs" />
     <Compile Include="Harmony\PatchCategories\WorldObjects.cs" />
     <Compile Include="Misc\DefOf\AerialVehicleArrivalModeDefOf.cs" />

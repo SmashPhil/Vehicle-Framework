@@ -150,9 +150,101 @@ namespace Vehicles
 			}
 		}
 
+		public static Rect AdjustRectToVehicleDef(VehicleDef vehicleDef, Rect rect, Rot8 rot)
+		{
+			Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
+			
+			bool elongated = rot.IsHorizontal || rot.IsDiagonal;
+
+			Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rot);
+			float scaledWidth = rectSize.x;
+			float scaledHeight = rectSize.y;
+			if (elongated)
+			{
+				scaledWidth = rectSize.y;
+				scaledHeight = rectSize.x;
+			}
+			float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
+			float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
+
+			return new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
+		}
+
 		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null, List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
 		{
-			DrawVehicleDef(rect, vehicle.VehicleDef, patternData: vehicle.patternData, rot: rot, extraOverlays: extraOverlays, extraTurrets: extraTurrets, excludeTurrets: excludeTurrets);
+			DrawVehicle(rect, vehicle, vehicle.patternData, rot: rot, extraOverlays: extraOverlays, extraTurrets: extraTurrets, excludeTurrets: excludeTurrets);
+		}
+
+		public static void DrawVehicle(Rect rect, VehiclePawn vehicle, PatternData patternData, Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
+		{
+			VehicleDef vehicleDef = vehicle.VehicleDef;
+			try
+			{
+				overlayRenderer.Clear();
+				if (rect.width != rect.height)
+				{
+					SmashLog.WarningOnce("Drawing VehicleDef with non-uniform rect. VehicleDefs are best drawn in square rects which will then be adjusted to fit.", nameof(DrawVehicleDef).GetHashCode());
+				}
+				
+				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
+				Rect adjustedRect = AdjustRectToVehicleDef(vehicleDef, rect, rotDrawn);
+
+				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;
+
+				PatternData pattern = patternData;
+				if (pattern is null)
+				{
+					pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
+				}
+
+				Texture2D mainTex = VehicleTex.VehicleTexture(vehicleDef, rotDrawn, out float angle);
+
+				Material material = null;
+				if (graphic.Shader.SupportsRGBMaskTex())
+				{
+					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
+					RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
+				}
+
+				if (vehicle.CompVehicleTurrets != null)
+				{
+					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
+					{
+						foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, vehicle.CompVehicleTurrets.turrets.OrderBy(t => t.drawLayer), pattern, excludeTurrets: excludeTurrets))
+						{
+							overlayRenderer.Add(turretRenderData);
+						}
+						if (!extraTurrets.NullOrEmpty())
+						{
+							foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGraphicsProperties(rect, vehicleDef, rotDrawn, extraTurrets.OrderBy(t => t.drawLayer), pattern, excludeTurrets: excludeTurrets))
+							{
+								overlayRenderer.Add(turretRenderData);
+							}
+						}
+					}
+				}
+
+				foreach (RenderData renderData in RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicle, rotDrawn, pattern: pattern, extraOverlays: extraOverlays))
+				{
+					overlayRenderer.Add(renderData);
+				}
+
+				overlayRenderer.FinalizeForRendering();
+
+				overlayRenderer.RenderLayer(GUILayer.Lower);
+
+				DrawVehicleFitted(adjustedRect, angle, mainTex, material);
+
+				overlayRenderer.RenderLayer(GUILayer.Upper);
+			}
+			catch (Exception ex)
+			{
+				SmashLog.Error($"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex}");
+			}
+			finally
+			{
+				overlayRenderer.Clear();
+			}
 		}
 
 		/// <summary>
@@ -164,39 +256,22 @@ namespace Vehicles
 		/// <param name="material"></param>
 		public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
 		{
-			//string drawStep = string.Empty;
 			try
 			{
+				overlayRenderer.Clear();
 				if (rect.width != rect.height)
 				{
 					SmashLog.WarningOnce("Drawing VehicleDef with non-uniform rect. VehicleDefs are best drawn in square rects which will then be adjusted to fit.", nameof(DrawVehicleDef).GetHashCode());
 				}
-				//drawStep = "Setting rect and adjusted positioning.";
-				Vector2 rectSize = vehicleDef.ScaleDrawRatio(rect.size);
+
 				Rot8 rotDrawn = rot ?? vehicleDef.drawProperties.displayRotation;
+				Rect adjustedRect = AdjustRectToVehicleDef(vehicleDef, rect, rotDrawn);
 
-				bool elongated = rotDrawn.IsHorizontal || rotDrawn.IsDiagonal;
-
-				Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rotDrawn);
-				float scaledWidth = rectSize.x;
-				float scaledHeight = rectSize.y;
-				if (elongated)
-				{
-					scaledWidth = rectSize.y;
-					scaledHeight = rectSize.x;
-				}
-				float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
-				float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
-
-				Rect adjustedRect = new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
-
-				//drawStep = "Retrieving cached graphic and pattern";
-				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;// VehicleTex.CachedGraphics[vehicleDef];
+				Graphic_Vehicle graphic = vehicleDef.graphicData.Graphic as Graphic_Vehicle;
 
 				PatternData pattern = patternData;
 				if (pattern is null)
 				{
-					//drawStep = "Setting default color";
 					pattern = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData);
 				}
 
@@ -205,13 +280,10 @@ namespace Vehicles
 				Material material = null;
 				if (graphic.Shader.SupportsRGBMaskTex())
 				{
-					//drawStep = $"Fetching material for {vehicleDef}";
-
 					material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
 					RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
 				}
 
-				//drawStep = "Attempting to retrieve turret overlays";
 				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
 					if (!withoutTurrets || Prefs.UIScale == 1) //NOTE: Temporary fix until Ludeon fixes vanilla bug with matrix rotations inside GUI groups
@@ -229,7 +301,7 @@ namespace Vehicles
 						}
 					}
 				}
-				//drawStep = "Retrieving graphic overlays";
+
 				foreach (RenderData renderData in RetrieveAllOverlaySettingsGraphicsProperties(rect, vehicleDef, rotDrawn, pattern: pattern, extraOverlays: extraOverlays))
 				{
 					overlayRenderer.Add(renderData);
@@ -239,10 +311,8 @@ namespace Vehicles
 
 				overlayRenderer.RenderLayer(GUILayer.Lower);
 
-				//drawStep = "Rendering main texture";
 				DrawVehicleFitted(adjustedRect, angle, mainTex, material);
 
-				//drawStep = "Rendering overlays with layer >= 0";
 				overlayRenderer.RenderLayer(GUILayer.Upper);
 			}
 			catch (Exception ex)
@@ -252,6 +322,27 @@ namespace Vehicles
 			finally
 			{
 				overlayRenderer.Clear();
+			}
+		}
+
+		public static IEnumerable<RenderData> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect, VehiclePawn vehicle, Rot8 rot, PatternData pattern = null, List<GraphicOverlay> extraOverlays = null)
+		{
+			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.Overlays)
+			{
+				if (graphicOverlay.data.renderUI)
+				{
+					yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicle.VehicleDef, rot, graphicOverlay, pattern: pattern);
+				}
+			}
+			if (!extraOverlays.NullOrEmpty())
+			{
+				foreach (GraphicOverlay graphicOverlay in extraOverlays)
+				{
+					if (graphicOverlay.data.renderUI)
+					{
+						yield return RetrieveOverlaySettingsGraphicsProperties(rect, vehicle.VehicleDef, rot, graphicOverlay, pattern: pattern);
+					}
+				}
 			}
 		}
 
@@ -279,7 +370,7 @@ namespace Vehicles
 		public static RenderData RetrieveOverlaySettingsGraphicsProperties(Rect rect, VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay, PatternData pattern)
 		{
 			Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-			Graphic graphic = graphicOverlay.Graphic;
+			Graphic graphic = graphicOverlay.data.graphicData.Graphic;
 			Texture2D texture;
 			Material material = null;
 
@@ -317,23 +408,24 @@ namespace Vehicles
 		{
 			foreach (VehicleTurret turret in turrets)
 			{
+				VehicleTurret turretRef = turret.reference ?? turret;
 				if (!turret.parentKey.NullOrEmpty())
 				{
 					//continue; //Attached turrets temporarily disabled from rendering
 				}
 				if (!turret.NoGraphic)
 				{
-					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turret, patternData);
+					yield return RetrieveTurretSettingsGraphicsProperties(rect, vehicleDef, rot, turretRef, patternData);
 				}
 				if (excludeTurrets != null && (excludeTurrets.Contains(turret.key) || excludeTurrets.Contains(turret.parentKey)))
 				{
 					continue; //Skip if optional parameter contains turret's or parent turret's key.
 				}
-				if (!turret.TurretGraphics.NullOrEmpty())
+				if (!turretRef.TurretGraphics.NullOrEmpty())
 				{
-					foreach (VehicleTurret.TurretDrawData turretDrawData in turret.TurretGraphics)
+					foreach (VehicleTurret.TurretDrawData turretDrawData in turretRef.TurretGraphics) //Use turrets from def to avoid writing over vehicle instance's material
 					{
-						Rect turretRect = TurretRect(rect, vehicleDef, turret, rot);
+						Rect turretRect = TurretRect(rect, vehicleDef, turretRef, rot);
 						Material material = null;
 						if (turretDrawData.graphic.Shader.SupportsMaskTex())
 						{
@@ -344,7 +436,7 @@ namespace Vehicles
 							material = RGBMaterialPool.Get(turretDrawData, Rot8.North);
 							RGBMaterialPool.SetProperties(turretDrawData, patternData, turretDrawData.graphic.TexAt, turretDrawData.graphic.MaskAt);
 						}
-						yield return new RenderData(turretRect, turretDrawData.graphic.TexAt(Rot8.North), material, turretDrawData.graphicDataRGB.DrawOffsetFull(rot).y + turret.DrawLayerOffset, turret.defaultAngleRotated + rot.AsAngle);
+						yield return new RenderData(turretRect, turretDrawData.graphic.TexAt(Rot8.North), material, turretDrawData.graphicDataRGB.DrawOffsetFull(rot).y + turretRef.DrawLayerOffset, turretRef.defaultAngleRotated + rot.AsAngle);
 					}
 				}
 			}

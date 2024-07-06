@@ -44,7 +44,7 @@ namespace Vehicles
 		[LoadAlias("costList")] //TODO 1.6 - switch to costList
 		public List<ThingDefCountClass> ingredients = new List<ThingDefCountClass>();
 
-		public float refundFraction = 0.75f;
+		public float refundFraction = 0.5f; //Default in vanilla deconstructing is 50%
 		public SimpleDictionary<ThingDef, float> refundLeavings = new SimpleDictionary<ThingDef, float>();
 
 		public List<GraphicDataOverlay> graphicOverlays;
@@ -215,6 +215,17 @@ namespace Vehicles
 				{
 					upgrade.Init(this);
 					HasGraphics |= upgrade.HasGraphics;
+				}
+			}
+		}
+
+		public void PostLoad()
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (Upgrade upgrade in upgrades)
+				{
+					upgrade.PostLoad();
 				}
 			}
 		}

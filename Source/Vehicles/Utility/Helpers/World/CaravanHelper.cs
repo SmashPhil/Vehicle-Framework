@@ -224,28 +224,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Toggle state of caravan between land and sea
-		/// </summary>
-		/// <param name="caravan"></param>
-		/// <param name="dock"></param>
-		[Obsolete("Do not use, very buggy", error: true)]
-		public static void ToggleDocking(Caravan caravan, bool dock = false)
-		{
-			if (caravan.HasBoat() && caravan is VehicleCaravan vehicleCaravan)
-			{
-				if (!dock)
-				{
-					BoardAllCaravanPawns(vehicleCaravan);
-				}
-				else
-				{
-					List<VehiclePawn> ships = caravan.PawnsListForReading.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
-					ships.ForEach(b => b.DisembarkAll());
-				}
-			}
-		}
-
-		/// <summary>
 		/// Spawn DockedBoat object to store boats on World map
 		/// </summary>
 		/// <param name="caravan"></param>

@@ -28,6 +28,8 @@ namespace Vehicles
 		public string key;
 		public string groupKey;
 
+		[Unsaved]
+		public VehicleTurret reference;
 		[TweakField]
 		public VehicleTurretDef turretDef;
 
@@ -480,7 +482,6 @@ namespace Vehicles
 			}
 		}
 
-		//TODO 1.6 - rename
 		public virtual List<TurretDrawData> TurretGraphics
 		{
 			get
@@ -688,6 +689,7 @@ namespace Vehicles
 
 		public void Init(VehicleTurret reference)
 		{
+			this.reference = reference;
 			groupKey = reference.groupKey;
 			parentKey = reference.parentKey;
 

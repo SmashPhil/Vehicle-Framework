@@ -37,7 +37,11 @@ namespace Vehicles
 		/// </summary>
 		public abstract void Refund(VehiclePawn vehicle);
 
-		public void Init(UpgradeNode node)
+		public virtual void PostLoad()
+		{
+		}
+
+		public virtual void Init(UpgradeNode node)
 		{
 			this.node = node;
 		}

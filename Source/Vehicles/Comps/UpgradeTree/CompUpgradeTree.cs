@@ -8,15 +8,18 @@ using Verse.Sound;
 using SmashTools;
 using static UnityEngine.Scripting.GarbageCollector;
 using Verse.Noise;
+using System.Text;
 
 namespace Vehicles
 {
 	[StaticConstructorOnStartup]
-	public class CompUpgradeTree : VehicleComp
+	public class CompUpgradeTree : VehicleComp, IRefundable
 	{
 		private static readonly Material UnderfieldMat = MaterialPool.MatFrom("Things/Building/BuildingFrame/Underfield", ShaderDatabase.Transparent);
 		private static readonly Texture2D CornerTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Corner", true);
 		private static readonly Texture2D TileTex = ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Tile", true);
+
+		private static StringBuilder inspectStringBuilder = new StringBuilder();
 
 		private Material cachedCornerMat;
 		private Material cachedTileMat;
@@ -29,7 +32,7 @@ namespace Vehicles
 
 		public ThingOwner<Thing> upgradeContainer = new ThingOwner<Thing>();
 
-		private Dictionary<string, List<UpgradeState>> states { get; set; } = new Dictionary<string, List<UpgradeState>>();
+		private Dictionary<string, List<UpgradeState>> States { get; set; } = new Dictionary<string, List<UpgradeState>>();
 
 		public CompProperties_UpgradeTree Props => (CompProperties_UpgradeTree)props;
 
@@ -91,6 +94,34 @@ namespace Vehicles
 					}
 				}
 				return true;
+			}
+		}
+
+		IEnumerable<(ThingDef thingDef, float count)> IRefundable.Refunds
+		{
+			get
+			{
+				if (!upgradeContainer.NullOrEmpty())
+				{
+					foreach (Thing thing in upgradeContainer)
+					{
+						yield return (thing.def, thing.stackCount);
+					}
+				}
+				if (!upgrades.NullOrEmpty())
+				{
+					foreach (string upgradeKey in upgrades)
+					{
+						UpgradeNode node = Props.def.GetNode(upgradeKey);
+						if (node != null && !node.ingredients.NullOrEmpty())
+						{
+							foreach (ThingDefCountClass thingDefCountClass in node.ingredients)
+							{
+								yield return (thingDefCountClass.thingDef, thingDefCountClass.count);
+							}
+						}
+					}
+				}
 			}
 		}
 
@@ -180,35 +211,15 @@ namespace Vehicles
 		{
 			if (!node.ingredients.NullOrEmpty())
 			{
-				List<ThingDefCount> refundList = new List<ThingDefCount>();
-				foreach (ThingDefCountClass thingDefCountClass in node.ingredients)
+				ThingOwner<Thing> thingOwner = new ThingOwner<Thing>();
+				foreach (ThingDefCountClass thingDefCount in node.ingredients)
 				{
-					(ThingDef thingDef, float count) = (thingDefCountClass.thingDef, thingDefCountClass.count);
-					int refundCount;
-					if (!node.refundLeavings.NullOrEmpty() && node.refundLeavings.TryGetValue(thingDef, out float fraction))
-					{
-						refundCount = Mathf.RoundToInt(count * fraction);
-					}
-					else
-					{
-						refundCount = Mathf.RoundToInt(count * node.refundFraction);
-					}
-					if (refundCount > 0)
-					{
-						refundList.Add(new ThingDefCount(thingDef, refundCount));
-					}
+					Thing thing = ThingMaker.MakeThing(thingDefCount.thingDef);
+					float multiplier = Ext_Vehicles.RefundMaterialCount(Vehicle.VehicleDef, DestroyMode.Deconstruct);
+					thing.stackCount = GenMath.RoundRandom(thingDefCount.count * multiplier);
+					thingOwner.TryAdd(thing);
 				}
-				if (!refundList.NullOrEmpty())
-				{
-					ThingOwner<Thing> thingOwner = new ThingOwner<Thing>();
-					foreach (ThingDefCount thingDefCount in refundList)
-					{
-						Thing thing = ThingMaker.MakeThing(thingDefCount.ThingDef);
-						thing.stackCount = thingDefCount.Count;
-						thingOwner.TryAdd(thing);
-					}
-					thingOwner.TryDropAllOutsideVehicle(Vehicle.Map, Vehicle.OccupiedRect());
-				}
+				thingOwner.TryDropAllOutsideVehicle(Vehicle.Map, Vehicle.OccupiedRect());
 			}
 		}
 
@@ -331,21 +342,21 @@ namespace Vehicles
 
 		public void AddSettings(UpgradeState state)
 		{
-			if (!states.ContainsKey(state.key))
+			if (!States.ContainsKey(state.key))
 			{
-				states[state.key] = new List<UpgradeState>();
+				States[state.key] = new List<UpgradeState>();
 			}
-			states[state.key].Add(state);
+			States[state.key].Add(state);
 		}
 
 		public bool TryGetStates(string key, out List<UpgradeState> outList)
 		{
-			return states.TryGetValue(key, out outList);
+			return States.TryGetValue(key, out outList);
 		}
 
 		public void RemoveSettings(UpgradeState state)
 		{
-			if (!states.TryGetValue(state.key, out List<UpgradeState> innerList))
+			if (!States.TryGetValue(state.key, out List<UpgradeState> innerList))
 			{
 				Log.Error($"Unable to locate {state.key} in state cache.");
 				return;
@@ -478,6 +489,28 @@ namespace Vehicles
 			Vehicle.AddEvent(VehicleEventDefOf.VehicleUpgradeRefundEnqueued, PrepVehicleForWork);
 		}
 
+		public override string CompInspectStringExtra()
+		{
+			if (upgrade != null)
+			{
+				if (!StoredCostSatisfied)
+				{
+					inspectStringBuilder.Clear();
+					foreach (ThingDefCountClass thingDefCount in NodeUnlocking.ingredients)
+					{
+						int count = upgradeContainer.TotalStackCountOfDef(thingDefCount.thingDef);
+						if (count > 0)
+						{
+							inspectStringBuilder.AppendWithComma(thingDefCount.Summary);
+						}
+					}
+					return inspectStringBuilder.ToString();
+				}
+				return $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
+			}
+			return null;
+		}
+		
 		public override void PostExposeData()
 		{
 			base.PostExposeData();

@@ -151,7 +151,7 @@ namespace Vehicles
 		private void RecacheTextEntries()
 		{
 			textEntries.Clear();
-			return;
+
 			if (SelectedNode != null && SelectedNode.upgradeExplanation != null)
 			{
 				textEntryHeight = Text.CalcHeight(SelectedNode.upgradeExplanation, InfoScreenWidth - 10);
@@ -165,7 +165,7 @@ namespace Vehicles
 						textEntries.Add(textEntry);
 					}
 				}
-				textEntryHeight = textEntries.Count * InfoPanelRowHeight;
+				textEntryHeight = textEntries.Count * Text.LineHeightOf(GameFont.Small);
 			}
 		}
 
@@ -590,21 +590,10 @@ namespace Vehicles
 			Rect descriptionRect = new Rect(innerInfoRect.x, costListRect.y + costY, innerInfoRect.width, descriptionHeight);
 			Widgets.Label(descriptionRect, InfoNode.description);
 			
-			if (Vehicle.CompUpgradeTree.NodeUnlocking == InfoNode)
-			{
-				//string workLabel = $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
-				//textHeight = Text.CalcHeight(workLabel, upgradeInfoRect.width);
-				//Rect workLabelRect = new Rect(upgradeInfoRect.x, upgradeInfoRect.y, upgradeInfoRect.width, textHeight);
-				//Widgets.Label(workLabelRect, workLabel);
-
-				//upgradeInfoRect.y += textHeight;
-				//upgradeInfoRect.height -= textHeight;
-			}
-
 			if (SelectedNode != null)
 			{
 				bool hasGraphics = SelectedNode.HasGraphics;
-				bool showUpgradeList = false; //!SelectedNode.upgrades.NullOrEmpty();
+				bool showUpgradeList = !SelectedNode.upgrades.NullOrEmpty();
 
 				if (hasGraphics || showUpgradeList)
 				{
@@ -628,7 +617,6 @@ namespace Vehicles
 
 				Rect tempButtonRect = buttonRect;
 				tempButtonRect.width = innerInfoRect.width;
-
 			}
 
 			GUIState.Pop();
@@ -641,14 +629,14 @@ namespace Vehicles
 			Rect innerInfoRect = rect.ContractedBy(5);
 
 			Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
-			VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
+			VehicleGraphics.DrawVehicleDef(vehicleOriginalRect, Vehicle.VehicleDef);
 
 			float arrowSize = InfoPanelArrowPointerSize;
 			Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
 			Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
 
 			Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
-			VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode), extraTurrets: renderTurrets, excludeTurrets: excludeTurrets);
+			VehicleGraphics.DrawVehicleDef(vehicleNewRect, Vehicle.VehicleDef, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode), extraTurrets: renderTurrets, excludeTurrets: excludeTurrets);
 
 			GUIState.Pop();
 		}
