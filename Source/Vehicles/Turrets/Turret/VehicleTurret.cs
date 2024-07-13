@@ -540,9 +540,17 @@ namespace Vehicles
 		{
 			get
 			{
-				yield return SubGizmo_RemoveAmmo(this);
-				yield return SubGizmo_ReloadFromInventory(this);
+				if (turretDef.magazineCapacity > 0)
+				{
+					if (turretDef.ammunition != null)
+					{
+						yield return SubGizmo_RemoveAmmo(this);
+					}
+					yield return SubGizmo_ReloadFromInventory(this);
+				}
+
 				yield return SubGizmo_FireMode(this);
+
 				if (autoTargeting)
 				{
 					yield return SubGizmo_AutoTarget(this);
@@ -2061,7 +2069,11 @@ namespace Vehicles
 				},
 				onClick = delegate ()
 				{
-					if (turret.turretDef.genericAmmo)
+					if (turret.turretDef.ammunition is null)
+					{
+						turret.ReloadCannon();
+					}
+					else if (turret.turretDef.genericAmmo)
 					{
 						if (!turret.vehicle.inventory.innerContainer.Contains(turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault()))
 						{
@@ -2081,7 +2093,7 @@ namespace Vehicles
 							ThingDef ammo = ammoAvailable[i];
 							options.Add(new FloatMenuOption(ammoAvailable[i].LabelCap, delegate ()
 							{
-								turret.ReloadCannon(ammo, true);
+								turret.ReloadCannon(ammo, ammo != turret.savedAmmoType);
 							}));
 						}
 						if (options.NullOrEmpty())

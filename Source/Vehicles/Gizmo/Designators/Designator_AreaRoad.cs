@@ -24,6 +24,23 @@ namespace Vehicles
 			useMouseIcon = true;
 		}
 
+		//public override void ProcessInput(Event ev)
+		//{
+		//	if (!CheckCanInteract())
+		//	{
+		//		return;
+		//	}
+		//	if (Designator_AreaAllowed.selectedArea != null)
+		//	{
+		//		base.ProcessInput(ev);
+		//	}
+		//	AreaUtility.MakeAllowedAreaListFloatMenu(delegate (Area a)
+		//	{
+		//		Designator_AreaAllowed.selectedArea = a;
+		//		this.<> n__0(ev);
+		//	}, false, true, base.Map);
+		//}
+
 		public override void DesignateSingleCell(IntVec3 cell)
 		{
 			if (mode == DesignateMode.Add)

@@ -171,6 +171,7 @@ namespace Vehicles
 			EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents();
 
 			RGBMaterialPool.Release(this);
+			graphic = null;
 
 			if (!cachedComps.NullOrEmpty())
 			{
@@ -183,7 +184,6 @@ namespace Vehicles
 				}
 			}
 
-			ResetGraphic();
 			base.Destroy(mode);
 		}
 

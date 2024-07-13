@@ -31,7 +31,11 @@ namespace Vehicles
 		{
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
-				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns), 
+				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(LordJob_AssaultColony), nameof(LordJob_AssaultColony.CreateGraph)),
+				//	new HarmonyMethod(typeof(NPCAI),
+				//	nameof()));
+
+				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns),
 						parameters: new Type[] { typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool) }),
 					prefix: new HarmonyMethod(typeof(NPCAI),
 					nameof(InjectVehiclesIntoPawnKindGroupPrepare)),

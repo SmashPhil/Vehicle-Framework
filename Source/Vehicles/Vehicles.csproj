@@ -657,6 +657,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AI\Designators\" />
+    <Folder Include="AI\Lords\Raids\" />
     <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
     <Folder Include="CustomFeatures\AerialVehicles\Skyfaller\Bombs\" />

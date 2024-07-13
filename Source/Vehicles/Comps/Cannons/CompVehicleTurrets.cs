@@ -493,7 +493,7 @@ namespace Vehicles
 				TurretData turretData = turretQueue[i];
 				try
 				{
-					if (!turretData.turret.cannonTarget.IsValid || turretData.turret.shellCount <= 0)
+					if (!turretData.turret.cannonTarget.IsValid || !turretData.turret.HasAmmo)
 					{
 						DequeueTurret(turretData);
 						continue;
@@ -512,8 +512,7 @@ namespace Vehicles
 						turretData.shots--;
 						turretData.ticksTillShot = turretData.turret.TicksPerShot;
 
-						bool outOfAmmo = turretData.turret.turretDef.ammunition != null && turretData.turret.shellCount <= 0;
-						if (turretData.turret.OnCooldown || turretData.shots == 0 || outOfAmmo)
+						if (turretData.turret.OnCooldown || turretData.shots == 0 || !turretData.turret.HasAmmo)
 						{
 							//If target doesn't persist, immediately set target to invalid
 							if (turretData.turret.targetPersists)
@@ -538,7 +537,7 @@ namespace Vehicles
 									turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 								}
 							}
-							if (outOfAmmo)
+							if (!turretData.turret.HasAmmo)
 							{
 								turretData.turret.ReloadCannon();
 							}
@@ -550,7 +549,6 @@ namespace Vehicles
 					{
 						turretData.ticksTillShot--;
 					}
-					turretQueue[i] = turretData;
 				}
 				catch (Exception ex)
 				{
@@ -947,11 +945,15 @@ namespace Vehicles
 			backupQuotas ??= new List<BackupTurretQuota>();
 		}
 
-		public struct TurretData : IExposable
+		public class TurretData : IExposable
 		{
 			public int shots;
 			public int ticksTillShot;
 			public VehicleTurret turret;
+
+			public TurretData()
+			{
+			}
 
 			public TurretData(int shots, int ticksTillShot, VehicleTurret turret)
 			{

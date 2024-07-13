@@ -155,9 +155,11 @@ namespace Vehicles
 
 		public static void RegisterKeyBindingDefs()
 		{
+#if DEBUG
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_RestartGame, GenCommandLine.Restart);
-			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => Find.WindowStack.Add(new QuickStartMenu()));
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => UnitTesting.OpenMenu());
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, () => VehiclesModSettings.OpenWithContext());
+#endif
 		}
 
 		public static void FillVehicleLordJobTypes()

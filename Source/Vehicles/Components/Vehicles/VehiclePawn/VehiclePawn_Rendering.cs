@@ -396,7 +396,7 @@ namespace Vehicles
 
 		public void ResetGraphic()
 		{
-			graphic = null;
+			graphic = GenerateGraphic();
 		}
 
 		//TODO 1.6 - Make private and rename to ResetMaterialProperties

@@ -152,6 +152,9 @@ namespace Vehicles
 		{
 			textEntries.Clear();
 
+			textEntryHeight = 0;
+			return;
+
 			if (SelectedNode != null && SelectedNode.upgradeExplanation != null)
 			{
 				textEntryHeight = Text.CalcHeight(SelectedNode.upgradeExplanation, InfoScreenWidth - 10);
@@ -603,7 +606,7 @@ namespace Vehicles
 				Rect textEntryRect = new Rect(innerInfoRect.x, descriptionRect.yMax + 10, innerInfoRect.width, textEntryHeight);
 				if (showUpgradeList)
 				{
-					DrawUpgradeList(textEntryRect);
+					//DrawUpgradeList(textEntryRect);
 				}
 
 				if (hasGraphics)
