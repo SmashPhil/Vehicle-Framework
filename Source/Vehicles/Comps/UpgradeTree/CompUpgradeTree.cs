@@ -188,8 +188,9 @@ namespace Vehicles
 			{
 				if (!node.upgrades.NullOrEmpty())
 				{
-					foreach (Upgrade upgrade in node.upgrades)
+					for (int i = node.upgrades.Count - 1; i >= 0; i--)
 					{
+						Upgrade upgrade = node.upgrades[i];
 						try
 						{
 							upgrade.Refund(Vehicle);
@@ -200,14 +201,14 @@ namespace Vehicles
 						}
 					}
 				}
-				RefundNode(node);
+				RefundIngredients(node);
 				node.RemoveOverlays(Vehicle);
 				node.resetSound?.PlayOneShot(new TargetInfo(Vehicle.Position, Vehicle.Map));
 				Vehicle.EventRegistry[VehicleEventDefOf.VehicleUpgradeRefundCompleted].ExecuteEvents();
 			}
 		}
 
-		private void RefundNode(UpgradeNode node)
+		private void RefundIngredients(UpgradeNode node)
 		{
 			if (!node.ingredients.NullOrEmpty())
 			{
@@ -440,12 +441,6 @@ namespace Vehicles
 			InitializeUpgradeTree();
 		}
 
-		public override void PostLoad()
-		{
-			base.PostLoad();
-			ReloadUnlocks();
-		}
-
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
@@ -518,6 +513,11 @@ namespace Vehicles
 			Scribe_Values.Look(ref nodeUnlocking, nameof(nodeUnlocking));
 			Scribe_Deep.Look(ref upgrade, nameof(upgrade));
 			Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer));
+
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				ReloadUnlocks();
+			}
 		}
 	}
 }

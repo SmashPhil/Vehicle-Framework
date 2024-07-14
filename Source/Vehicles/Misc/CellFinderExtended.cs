@@ -218,6 +218,19 @@ namespace Vehicles
 
 			if (Rand.Chance(roadChance))
 			{
+				CacheAndShuffleMapEdgeCells(map);
+
+				Area_Road roadArea = map.areaManager.Get<Area_Road>();
+				foreach (IntVec3 cell in mapEdgeCells)
+				{
+					IntVec3 paddedCell = cell.PadForHitbox(map, largestVehicleDef);
+					if (roadArea[paddedCell] && validator(paddedCell))
+					{
+						result = paddedCell;
+						return true;
+					}
+				}
+
 				foreach (IntVec3 cell in map.roadInfo.roadEdgeTiles)
 				{
 					IntVec3 paddedCell = cell.PadForHitbox(map, largestVehicleDef);
@@ -238,14 +251,8 @@ namespace Vehicles
 					return true;
 				}
 			}
-			
-			if (mapEdgeCells.NullOrEmpty() || map.Size != mapEdgeCellsSize)
-			{
-				mapEdgeCellsSize = map.Size;
-				mapEdgeCells = CellRect.WholeMap(map).EdgeCells.ToList();
-			}
 
-			mapEdgeCells.Shuffle();
+			CacheAndShuffleMapEdgeCells(map);
 
 			foreach (IntVec3 cell in mapEdgeCells)
 			{
@@ -281,6 +288,17 @@ namespace Vehicles
 				}
 			}
 			return false;
+		}
+
+		private static void CacheAndShuffleMapEdgeCells(Map map)
+		{
+			if (mapEdgeCells.NullOrEmpty() || map.Size != mapEdgeCellsSize)
+			{
+				mapEdgeCellsSize = map.Size;
+				mapEdgeCells = CellRect.WholeMap(map).EdgeCells.ToList();
+			}
+
+			mapEdgeCells.Shuffle();
 		}
 	}
 }

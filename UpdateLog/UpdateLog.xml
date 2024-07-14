@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1680</currentVersion>
+  <currentVersion>1.5.1681</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -11,6 +11,8 @@
 - Upgrading FuelCapacity wouldn't update amount needed to refuel, causing pawns to attempt to refuel in a loop.
 
 - Under specific circumstances a vehicle would become 'incapacitated'
+
+- Overlays would attempt to initialize outside of the main thread when loading a save.
 
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Vehicle Region step during map generation
@@ -26,7 +28,7 @@
 - Upgrades will refund % of cost if upgrade is reset or vehicle is deconstructed / destroyed.
 
 &lt;b&gt;Modders&lt;/b&gt;
-
+- Added CompUpgrade for adding / removing comps from upgrades
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->

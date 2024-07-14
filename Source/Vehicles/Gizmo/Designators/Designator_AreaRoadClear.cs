@@ -16,7 +16,7 @@ namespace Vehicles
 		{
 			defaultLabel = "VF_RoadZoneClear".Translate();
 			defaultDesc = "VF_RoadZoneClearDesc".Translate();
-			icon = ContentFinder<Texture2D>.Get("UI/Designators/SnowClearAreaOff", true);
+			icon = ContentFinder<Texture2D>.Get("UI/Designators/RoadAreaOff");
 			soundDragSustain = SoundDefOf.Designate_DragAreaDelete;
 			soundDragChanged = null;
 			soundSucceeded = SoundDefOf.Designate_ZoneDelete;

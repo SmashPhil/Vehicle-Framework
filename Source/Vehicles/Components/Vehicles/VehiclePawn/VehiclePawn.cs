@@ -13,6 +13,7 @@ using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
 using SmashTools.Animations;
+using System.Reflection;
 
 namespace Vehicles
 {
@@ -153,6 +154,12 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostMake()
+		{
+			base.PostMake();
+			this.EnsureUncachedCompList();
+		}
+
 		private void GenerateInventory()
 		{
 			if (VehicleDef.npcProperties?.raidParamsDef?.inventory != null)
@@ -196,7 +203,17 @@ namespace Vehicles
 			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
 
-			graphicOverlay.Init();
+			if (!UnityData.IsInMainThread)
+			{
+				LongEventHandler.ExecuteWhenFinished(delegate ()
+				{
+					graphicOverlay.Init();
+				});
+			}
+			else
+			{
+				graphicOverlay.Init();
+			}
 
 			ReleaseSustainerTarget(); //Ensure SustainerTarget and sustainer manager is given a clean slate to work with
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
@@ -257,6 +274,21 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
+
+			Scribe_Collections.Look(ref activatableComps, nameof(activatableComps), lookMode: LookMode.Deep);
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				SyncActivatableComps();
+			}
+
+			if (!deactivatedComps.NullOrEmpty())
+			{
+				foreach (ThingComp comp in deactivatedComps)
+				{
+					comp.PostExposeData();
+				}
+			}
+
 			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
 			Scribe_Deep.Look(ref ignition, nameof(ignition), new object[] { this });
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
@@ -281,13 +313,14 @@ namespace Vehicles
 			Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing), false);
 			Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
 
-			Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad));
+			Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
 
 			Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
 			Scribe_Collections.Look(ref bills, nameof(bills), LookMode.Deep);
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
+				this.EnsureUncachedCompList();
 				PostLoad();
 			}
 		}

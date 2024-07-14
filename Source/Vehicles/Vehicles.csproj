@@ -19,7 +19,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
+    <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
     <DefineConstants>TRACE;DEBUG;FISHING_DISABLED,DISABLE_WEIGHTS</DefineConstants>
@@ -150,6 +150,7 @@
     <Compile Include="AI\JobDrivers\VehicleJobDriver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_DisassembleVehicle.cs" />
     <Compile Include="Components\Vehicles\VehicleSustainers.cs" />
+    <Compile Include="CustomFeatures\Upgrades\Node\CompUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeSetting_Turret.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\SoundUpgrade.cs" />
     <Compile Include="CustomFeatures\Upgrades\Node\Settings\UpgradeState.cs" />

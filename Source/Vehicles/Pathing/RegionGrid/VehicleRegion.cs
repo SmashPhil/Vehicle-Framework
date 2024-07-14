@@ -36,7 +36,7 @@ namespace Vehicles
 
 		private readonly ConcurrentDictionary<Pawn, Danger> cachedDangers = new ConcurrentDictionary<Pawn, Danger>();
 
-		public uint[] closedIndex = new uint[VehicleRegionTraverser.NumWorkers];
+		public uint[] closedIndex = new uint[VehicleRegionTraverser.WorkerCount];
 
 		private readonly ConcurrentListerThings listerThings = new ConcurrentListerThings(ListerThingsUse.Region);
 
