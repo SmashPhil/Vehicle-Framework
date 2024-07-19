@@ -87,11 +87,7 @@ namespace Vehicles
 			}
 			if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
 			{
-				Rot8? endRot = null;
-				if (IsDragging)
-				{
-					endRot = Rotation;
-				}
+				Rot8 endRot = IsDragging ? Rotation : Rot8.Invalid;
 				vehicle.vehiclePather.SetEndRotation(endRot);
 
 				FleckMaker.Static(cell, vehicle.Map, FleckDefOf.FeedbackGoto, 1f);

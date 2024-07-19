@@ -14,6 +14,7 @@
 
 - Overlays would attempt to initialize outside of the main thread when loading a save.
 
+- Vehicle role removal upgrade refunding would add the role copied from the upgrade, rather than checking if it was originally from the vehicle def.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Parallelized Vehicle Region generation when loading a map.
 

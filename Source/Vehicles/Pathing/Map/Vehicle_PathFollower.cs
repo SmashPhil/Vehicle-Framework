@@ -50,6 +50,7 @@ namespace Vehicles
 		public PawnPath curPath;
 		private PawnPath pathToAssign; //Explicitly used for Thread Safety. DO NOT TOUCH
 		private PathEndMode peMode;
+		private Rot8 endRot = Rot8.Invalid;
 
 		[Obsolete]
 		private List<CancellationTokenSource> tokenSources = new List<CancellationTokenSource>();
@@ -73,8 +74,6 @@ namespace Vehicles
 			CollisionsLookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f);
 			CollisionsLookAheadDistance = CheckAheadNodesForCollisions + CollisionsLookAheadStartingIndex; //N cells away from vehicle's front;
 		}
-
-		public Rot8? EndRotation { get; private set; }
 
 		public bool CanEnterDoors { get; private set; }
 
@@ -130,9 +129,9 @@ namespace Vehicles
 			}
 		}
 
-		public void SetEndRotation(Rot8? rot)
+		public void SetEndRotation(Rot8 rot)
 		{
-			EndRotation = rot;
+			endRot = rot;
 		}
 
 		public void ExposeData()
@@ -360,9 +359,9 @@ namespace Vehicles
 
 		private void PatherArrived()
 		{
-			if (EndRotation.HasValue)
+			if (endRot.IsValid)
 			{
-				vehicle.FullRotation = EndRotation.Value;
+				vehicle.FullRotation = endRot;
 			}
 			StopDead();
 			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
@@ -375,7 +374,7 @@ namespace Vehicles
 		public void PatherFailed()
 		{
 			StopDead();
-			SetEndRotation(null);
+			SetEndRotation(Rot8.Invalid);
 			vehicle.jobs?.curDriver?.Notify_PatherFailed();
 			CalculatingPath = false;
 		}
