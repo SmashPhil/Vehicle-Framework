@@ -110,6 +110,7 @@
     <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart_Deployed.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
+    <Compile Include="Components\Vehicles\Misc\VehicleOrientationController.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
     <Compile Include="Components\Vehicles\VehicleNPCProperties.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
@@ -129,6 +130,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckOneShot.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\Range.cs" />
+    <Compile Include="CustomFeatures\Areas\Area_RoadAvoidal.cs" />
     <Compile Include="CustomFeatures\Misc\Rendering\DynamicShadowData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\DirectionalProtocolProperties.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Properties\PropellerProtocolProperties.cs" />
@@ -193,12 +195,14 @@
     <Compile Include="Harmony\PatchCategories\Areas.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
+    <Compile Include="Harmony\UnitTesting\RaidTesting.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
     <Compile Include="Misc\DefModExtension\ReduceExplosionOnWater.cs" />
     <Compile Include="Misc\DefModExtension\RoofDefPositionStateDefModExtension.cs" />
+    <Compile Include="Misc\DefModExtension\VehicleRaiderDefModExtension.cs" />
     <Compile Include="Misc\DefOf\HistoryEventDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\KeyBindingDefOf_Vehicles.cs" />
     <Compile Include="Misc\DefOf\SkyfallerDefOf.cs" />

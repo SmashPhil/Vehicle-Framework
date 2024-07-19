@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1681</currentVersion>
+  <currentVersion>1.5.1685</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -15,18 +15,23 @@
 - Overlays would attempt to initialize outside of the main thread when loading a save.
 
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicle Region step during map generation
+- Parallelized Vehicle Region generation when loading a map.
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Only explosive mortar shells will have their explosion radius reduced when impacting water, as opposed to every shell.
-
 &lt;b&gt;Players&lt;/b&gt;
 - Added Road zone to direct vehicles over paths, and to note which edges to try and exit from for caravans.
 
 - Items dropped from cargo will be placed outside of the vehicle's hitbox.
 
+- Vehicles can drag-to-rotate by holding right click when ordering to go to a location. This will rotate the vehicle to face this rotation after arriving at the destination.
+
+- Aerial vehicles with forced rotations for animations can now be rotated during landing, which will rotate the vehicle to face this rotation after it has landed.
+
 - Upgrades will refund % of cost if upgrade is reset or vehicle is deconstructed / destroyed.
 
+- Only explosive mortar shells will have their explosion radius reduced when impacting water, as opposed to every shell.
+
+- VehicleTurret aim pies hidden if vehicle is not selected.
 &lt;b&gt;Modders&lt;/b&gt;
 - Added CompUpgrade for adding / removing comps from upgrades
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;

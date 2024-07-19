@@ -1,5 +1,4 @@
-﻿using SmashTools;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,13 +8,13 @@ using Verse;
 
 namespace Vehicles
 {
-	public class Area_Road : Area
+	public class Area_RoadAvoidal : Area
 	{
-		public Area_Road()
+		public Area_RoadAvoidal()
 		{
 		}
 
-		public Area_Road(AreaManager areaManager) : base(areaManager)
+		public Area_RoadAvoidal(AreaManager areaManager) : base(areaManager)
 		{
 		}
 
@@ -27,13 +26,13 @@ namespace Vehicles
 		{
 			get
 			{
-				return new ColorInt(0, 0, 0).ToColor;
+				return new ColorInt(125, 25, 25).ToColor;
 			}
 		}
 
 		public override string GetUniqueLoadID()
 		{
-			return $"Area_{ID}_VehicleRoad";
+			return $"Area_{ID}_VehicleRoadAvoidal";
 		}
 	}
 }

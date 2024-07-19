@@ -1103,7 +1103,7 @@ namespace Vehicles
 					}
 					else
 					{
-						TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+						TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell);
 						if (attachedTo != null)
 						{
 							TurretRotationTargeted -= attachedTo.TurretRotation;
@@ -1467,7 +1467,7 @@ namespace Vehicles
 
 		protected virtual void DrawAimPie()
 		{
-			if (TargetLocked && ReadyToFire)
+			if (TargetLocked && ReadyToFire && Find.Selector.SingleSelectedThing == vehicle)
 			{
 				float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
 				GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
@@ -1606,7 +1606,7 @@ namespace Vehicles
 			}
 			else
 			{
-				TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+				TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell);
 				if (attachedTo != null)
 				{
 					TurretRotationTargeted -= attachedTo.TurretRotation;

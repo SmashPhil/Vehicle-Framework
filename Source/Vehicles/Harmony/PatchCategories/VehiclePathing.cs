@@ -132,43 +132,15 @@ namespace Vehicles
 							__result = null;
 							return false;
 						}
-						//if (!vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.East) || !vehicle.CellRectStandable(vehicle.Map, curLoc, Rot4.North))
-						//{
-						//	continue;
-						//}
 						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
 						{
-							__result = new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null, MenuOptionPriority.Default, null, null, 0f, null, null);
+							__result = new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
 							return false;
 						}
 						
 						__result = new FloatMenuOption("GoHere".Translate(), delegate ()
 						{
-							Job job = new Job(JobDefOf.Goto, curLoc);
-							bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
-							bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
-							bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, Rot8.Invalid).NotNullAndAny(cell => cell.InBounds(pawn.Map) && pawn.Map.exitMapGrid.IsExitCell(cell));
-							if (exitCell || vehicleCellsOverlapExit)
-							{
-								job.exitMapOnArrival = true;
-							}
-							else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid && isOnEdge && vehicle.Map.Parent.GetComponent<FormCaravanComp>() is FormCaravanComp formCaravanComp
-								 && MessagesRepeatAvoider.MessageShowAllowed("MessagePlayerTriedToLeaveMapViaExitGrid-" +
-								vehicle.Map.uniqueID, 60f))
-							{
-								if (formCaravanComp.CanFormOrReformCaravanNow)
-								{
-									Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
-								}
-								else
-								{
-									Messages.Message("MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate(), vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
-								}
-							}
-							if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-							{
-								FleckMaker.Static(curLoc, vehicle.Map, FleckDefOf.FeedbackGoto, 1f);
-							}
+							VehicleOrientationController.StartOrienting(vehicle, curLoc, clickCell);
 						}, MenuOptionPriority.GoHere, null, null, 0f, null, null)
 						{
 							autoTakeable = true,

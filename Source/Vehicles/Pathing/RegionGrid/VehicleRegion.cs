@@ -444,7 +444,7 @@ namespace Vehicles
 					}
 				}
 			}
-			return Danger.None; //Vehicles don't need danger detection right now
+			return Danger.None; //TODO - Vehicles don't need danger detection right now, but may need for Goto jobs
 		}
 
 		/// <summary>

@@ -16,7 +16,7 @@ namespace Vehicles
 				VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
 				skyfaller.vehicle = vehicle;
 				GenSpawn.Spawn(skyfaller, target.Cell, map, rot);
-			}, null, null, null, vehicle.VehicleDef.rotatable && vehicle.CompVehicleLauncher.launchProtocol.LandingProperties?.forcedRotation is null, true);
+			}, null, null, null, vehicle.VehicleDef.rotatable, true);
 		}
 
 		public override bool TryResolveRaidSpawnCenter(IncidentParms parms)

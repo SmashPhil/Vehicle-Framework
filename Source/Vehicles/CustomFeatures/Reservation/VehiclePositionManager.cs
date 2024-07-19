@@ -4,6 +4,7 @@ using System.Linq;
 using Verse;
 using Verse.AI;
 using SmashTools;
+using System.Collections.Concurrent;
 
 namespace Vehicles
 {
@@ -13,13 +14,13 @@ namespace Vehicles
 	/// <remarks>Only ever read / written to from MainThread</remarks>
 	public class VehiclePositionManager : DetachedMapComponent
 	{
-		private readonly Dictionary<IntVec3, VehiclePawn> occupiedCells = new Dictionary<IntVec3, VehiclePawn>();
-		private readonly Dictionary<VehiclePawn, CellRect> occupiedRect = new Dictionary<VehiclePawn, CellRect>();
+		private readonly ConcurrentDictionary<IntVec3, VehiclePawn> occupiedCells = new ConcurrentDictionary<IntVec3, VehiclePawn>();
+		private readonly ConcurrentDictionary<VehiclePawn, CellRect> occupiedRect = new ConcurrentDictionary<VehiclePawn, CellRect>();
 
 		public VehiclePositionManager(Map map) : base(map)
 		{
-			occupiedCells = new Dictionary<IntVec3, VehiclePawn>();
-			occupiedRect = new Dictionary<VehiclePawn, CellRect>();
+			occupiedCells = new ConcurrentDictionary<IntVec3, VehiclePawn>();
+			occupiedRect = new ConcurrentDictionary<VehiclePawn, CellRect>();
 		}
 
 		public List<VehiclePawn> AllClaimants => occupiedRect.Keys.ToList();
@@ -53,10 +54,10 @@ namespace Vehicles
 			{
 				foreach (IntVec3 cell in rect)
 				{
-					occupiedCells.Remove(cell);
+					occupiedCells.TryRemove(cell, out _);
 				}
 			}
-			return occupiedRect.Remove(vehicle);
+			return occupiedRect.TryRemove(vehicle, out _);
 		}
 	}
 }

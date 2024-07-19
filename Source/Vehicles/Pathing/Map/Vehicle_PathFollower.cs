@@ -74,6 +74,8 @@ namespace Vehicles
 			CollisionsLookAheadDistance = CheckAheadNodesForCollisions + CollisionsLookAheadStartingIndex; //N cells away from vehicle's front;
 		}
 
+		public Rot8? EndRotation { get; private set; }
+
 		public bool CanEnterDoors { get; private set; }
 
 		public int LookAheadDistance { get; private set; }
@@ -126,6 +128,11 @@ namespace Vehicles
 			{
 				PatherFailed();
 			}
+		}
+
+		public void SetEndRotation(Rot8? rot)
+		{
+			EndRotation = rot;
 		}
 
 		public void ExposeData()
@@ -353,6 +360,10 @@ namespace Vehicles
 
 		private void PatherArrived()
 		{
+			if (EndRotation.HasValue)
+			{
+				vehicle.FullRotation = EndRotation.Value;
+			}
 			StopDead();
 			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 			if (vehicle.jobs.curJob != null)
@@ -364,6 +375,7 @@ namespace Vehicles
 		public void PatherFailed()
 		{
 			StopDead();
+			SetEndRotation(null);
 			vehicle.jobs?.curDriver?.Notify_PatherFailed();
 			CalculatingPath = false;
 		}

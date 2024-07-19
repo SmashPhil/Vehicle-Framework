@@ -11,6 +11,11 @@ namespace Vehicles
 
 		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn) => pawn.Map.GetCachedMapComponent<ListerVehiclesRepairable>().RepairsForFaction(pawn.Faction);
 
+		public override Danger MaxPathDanger(Pawn pawn)
+		{
+			return Danger.Deadly;
+		}
+
 		public override bool CanBeWorkedOn(VehiclePawn vehicle)
 		{
 			return vehicle.statHandler.NeedsRepairs;

@@ -21,20 +21,20 @@ namespace Vehicles
 	/// </summary>
 	public class VehiclePathFinder
 	{
-		public const int OffRoadCost = 50;
+		public const float RoadCostMultiplier = 0.5f;
+		public const float RoadAvoidalCost = 250;
+		public const float RoadHeuristicWeight = 0.15f;
 
-		public const int Cost_OutsideAllowedArea = 600;
-		private const int Cost_VehicleCollision = 1000;
 		private const int NodesToOpenBeforeRegionBasedPathing = 100000;
 		public const int DefaultMoveTicksCardinal = 13;
 		public const int DefaultMoveTicksDiagonal = 18;
 		private const int SearchLimit = 160000;
-		private const int TurnCostTicks = 2;
+		private const int TurnCostTicks = 3;
 		private const float SecondsBetweenDraws = 0;
 
-		public const float RootPosWeight = 0.75f;
+		private const float RootPosWeight = 0.75f;
 
-		internal Dictionary<IntVec3, float> postCalculatedCells = new Dictionary<IntVec3, float>();
+		private Dictionary<IntVec3, float> postCalculatedCells = new Dictionary<IntVec3, float>();
 
 		private VehicleMapping mapping;
 		private VehicleDef vehicleDef;
@@ -51,6 +51,7 @@ namespace Vehicles
 		private VehicleRegionCostCalculatorWrapper regionCostCalculator;
 
 		private Area_Road roadGrid;
+		private Area_RoadAvoidal roadAvoidalGrid;
 		private EdificeGrid edificeGrid;
 		private BlueprintGrid blueprintGrid;
 
@@ -82,22 +83,46 @@ namespace Vehicles
 			-1 //NorthWest
 		};
 
-		private static readonly SimpleCurve NonRegionBasedHeuristicStrength_DistanceCurve = new SimpleCurve
+		private static readonly SimpleCurve nonRegionBasedHeuristicCurve = new SimpleCurve
 		{
 			{
-				new CurvePoint(40f, 1f),
+				new CurvePoint(50f, 1f),
 				true
 			},
 			{
-				new CurvePoint(120f, 2.8f),
+				new CurvePoint(120f, 2f),
 				true
 			}
 		};
 
-		private static readonly SimpleCurve RegionHeuristicWeightByNodesOpened = new SimpleCurve
+		private static readonly SimpleCurve heuristicWeightByNodesOpened = new SimpleCurve
 		{
 			{
-				new CurvePoint(0f, 1f),
+				new CurvePoint(0, 0),
+				true
+			},
+			{
+				new CurvePoint(25, 0),
+				true
+			},
+			{
+				new CurvePoint(50, 0.5f),
+				true
+			},
+			{
+				new CurvePoint(150, 1f),
+				true
+			},
+		};
+
+		private static readonly SimpleCurve regionHeuristicWeightByNodesOpened = new SimpleCurve
+		{
+			{
+				new CurvePoint(0f, 0),
+				true
+			},
+			{
+				new CurvePoint(250, 0),
 				true
 			},
 			{
@@ -123,6 +148,7 @@ namespace Vehicles
 			this.mapping = mapping;
 			this.vehicleDef = vehicleDef;
 			roadGrid = mapping.map.areaManager.Get<Area_Road>();
+			roadAvoidalGrid = mapping.map.areaManager.Get<Area_RoadAvoidal>();
 			edificeGrid = mapping.map.edificeGrid;
 			blueprintGrid = mapping.map.blueprintGrid;
 			cellIndices = mapping.map.cellIndices;
@@ -182,6 +208,7 @@ namespace Vehicles
 			
 			int x = dest.Cell.x;
 			int z = dest.Cell.z;
+			int vehicleSize = vehicleDef.Size.x * vehicleDef.Size.z;
 			int startIndex = cellIndices.CellToIndex(start);
 			int destIndex = cellIndices.CellToIndex(dest.Cell);
 			ByteGrid byteGrid = vehicle.GetAvoidGrid(true);
@@ -244,7 +271,8 @@ namespace Vehicles
 
 				if (drawPaths)
 				{
-					DebugFlash(prevCell, calcGrid[startIndex].knownCost / (500f * vehicleDef.Size.Area), calcGrid[startIndex].knownCost.ToString("0"));
+					float colorWeight = Mathf.Lerp(5000, 15000, vehicleSize / 15f);
+					DebugFlash(prevCell, calcGrid[startIndex].knownCost / colorWeight, calcGrid[startIndex].knownCost.ToString("0"));
 				}
 
 				if (singleRect && startIndex == destIndex) //Single cell vehicles
@@ -268,7 +296,7 @@ namespace Vehicles
 					int cellIntX = x2 + directions[i];
 					int cellIntZ = z2 + directions[i + 8];
 
-					if (cellIntX >= mapSizeX || cellIntZ >= mapSizeZ)
+					if (cellIntX < 0 || cellIntX >= mapSizeX || cellIntZ < 0 || cellIntZ >= mapSizeZ)
 					{
 						goto SkipNode; //skip out of bounds
 					}
@@ -342,33 +370,41 @@ namespace Vehicles
 							int cellToCheckIndex = cellIndices.CellToIndex(cellInRect);
 
 							//Give priority to roads if faction is non-hostile to player
-							int offRoadCost = 0;
-							if (!vehicle.Faction.HostileTo(Faction.OfPlayer) && !roadGrid[cellToCheckIndex])
+							float roadMultiplier = 1;
+							float roadExtraCost = 0;
+							if (!vehicle.Faction.HostileTo(Faction.OfPlayer))
 							{
-								offRoadCost = OffRoadCost;
+								if (roadGrid[cellToCheckIndex])
+								{
+									roadMultiplier = RoadCostMultiplier;
+								}
+								else if (roadAvoidalGrid[cellToCheckIndex])
+								{
+									roadExtraCost = RoadAvoidalCost;
+								}
 							}
 
+							float cellCost = pathGrid[cellToCheckIndex] * roadMultiplier + roadExtraCost;
 							if (cellInRect == cellToCheck)
 							{
-								rootCost = pathGrid[cellToCheckIndex] * RootPosWeight + offRoadCost;
+								rootCost = cellCost * RootPosWeight;
 							}
 							else
 							{
-								totalAreaCost += pathGrid[cellToCheckIndex] * (1 - RootPosWeight) + offRoadCost;
+								totalAreaCost += cellCost * (1 - RootPosWeight);
 							}
 						}
-						tickCost += Mathf.RoundToInt(totalAreaCost / (minSize * 2 - 1)); //minSize^2 - 1 to account for average of all cells except root
+						if (vehicleSize > 1)
+						{
+							tickCost += Mathf.RoundToInt(totalAreaCost / (vehicleSize - 1)); //size - 1 to account for average of all cells except root
+						}
 						tickCost += Mathf.RoundToInt(rootCost);
 						tickCost += drafted ? topGrid[cellIndex].extraDraftedPerceivedPathCost : topGrid[cellIndex].extraNonDraftedPerceivedPathCost;
 						if (byteGrid != null)
 						{
 							tickCost += byteGrid[cellIndex] * 8;
 						}
-						//TODO - make thread safe for thing list retrieval
-						if (ThreadHelper.AnyVehicleBlockingPathAt(cellToCheck, vehicle) != null)
-						{
-							tickCost += Cost_VehicleCollision;
-						}
+						
 						if (!blueprintGrid.InnerArray[cellIndex].NullOrEmpty())
 						{
 							int blueprintCost = 0;
@@ -387,7 +423,10 @@ namespace Vehicles
 						ushort status = calcGrid[cellIndex].status;
 
 						//For debug path drawing
-						postCalculatedCells[cellToCheck] = calculatedCost;
+						if (VehicleMod.settings.debug.debugDrawVehiclePathCosts)
+						{
+							postCalculatedCells[cellToCheck] = calculatedCost;
+						}
 
 						if (status == statusClosedValue || status == statusOpenValue)
 						{
@@ -403,7 +442,9 @@ namespace Vehicles
 						}
 						if (weightedHeuristics)
 						{
-							calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex) * RegionHeuristicWeightByNodesOpened.Evaluate(nodesOpened));
+							int pathCostFromDestToRegion = Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex));
+							float heuristicWeight = regionHeuristicWeightByNodesOpened.Evaluate(nodesOpened);
+							calcGrid[cellIndex].heuristicCost = pathCostFromDestToRegion * heuristicWeight;
 							if (calcGrid[cellIndex].heuristicCost < 0)
 							{
 								Log.ErrorOnce($"Heuristic cost overflow for vehicle {vehicle} pathing from {start} to {dest}.", vehicle.GetHashCode() ^ "FVPHeuristicCostOverflow".GetHashCode());
@@ -414,8 +455,14 @@ namespace Vehicles
 						{
 							int dx = Math.Abs(cellIntX - x);
 							int dz = Math.Abs(cellIntZ - z);
-							int num21 = GenMath.OctileDistance(dx, dz, Mathf.RoundToInt(ticksCardinal), Mathf.RoundToInt(ticksDiagonal));
-							calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(num21 * heuristicStrength);
+							int octileDist = GenMath.OctileDistance(dx, dz, Mathf.RoundToInt(ticksCardinal), Mathf.RoundToInt(ticksDiagonal));
+							float heuristicWeight = heuristicWeightByNodesOpened.Evaluate(nodesOpened);
+							float roadHeuristicMultiplier = 1;
+							if (!vehicle.Faction.HostileTo(Faction.OfPlayer) && roadGrid[cellIndex])
+							{
+								roadHeuristicMultiplier *= RoadHeuristicWeight;
+							}
+							calcGrid[cellIndex].heuristicCost = Mathf.RoundToInt(octileDist * heuristicStrength * heuristicWeight) * roadHeuristicMultiplier;
 						}
 						float costWithHeuristic = calculatedCost + calcGrid[cellIndex].heuristicCost;
 						if (costWithHeuristic < 0)
@@ -634,7 +681,10 @@ namespace Vehicles
 		/// <param name="label"></param>
 		private void DebugFlash(IntVec3 cell, float colorPct, string label)
 		{
-			DebugFlash(cell, mapping.map, colorPct, label);
+			if (cell.InBounds(mapping.map))
+			{
+				DebugFlash(cell, mapping.map, colorPct, label);
+			}
 		}
 
 		/// <summary>
@@ -646,8 +696,8 @@ namespace Vehicles
 		/// <param name="label"></param>
 		private static void DebugFlash(IntVec3 cell, Map map, float colorPct, string label, int duration = 50)
 		{
-			map.debugDrawer.FlashCell(cell, colorPct, text: label, duration: duration);
-			//CoroutineManager.QueueOrInvoke(() => map.DrawCell_ThreadSafe(cell, colorPct, label, duration), SecondsBetweenDraws);
+			//map.debugDrawer.FlashCell(cell, colorPct, text: label, duration: duration);
+			CoroutineManager.QueueOrInvoke(() => map.debugDrawer.FlashCell(cell, colorPct, label, duration), SecondsBetweenDraws);
 		}
 
 		/// <summary>
@@ -755,7 +805,7 @@ namespace Vehicles
 		private float DetermineHeuristicStrength(VehiclePawn vehicle, IntVec3 start, LocalTargetInfo dest)
 		{
 			float lengthHorizontal = (start - dest.Cell).LengthHorizontal;
-			return Mathf.RoundToInt(NonRegionBasedHeuristicStrength_DistanceCurve.Evaluate(lengthHorizontal));
+			return Mathf.RoundToInt(nonRegionBasedHeuristicCurve.Evaluate(lengthHorizontal));
 		}
 
 		/// <summary>

@@ -22,6 +22,7 @@ namespace Vehicles
 		private static void AddVehicleAreas(AreaManager __instance, List<Area> ___areas)
 		{
 			___areas.Add(new Area_Road(__instance));
+			___areas.Add(new Area_RoadAvoidal(__instance));
 		}
 	}
 }
