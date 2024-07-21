@@ -303,8 +303,7 @@ namespace Vehicles
 			if (VehicleDef.drawerType == DrawerType.RealtimeOnly)
 			{
 				Vector3 drawPos = DrawPos;
-				float rotation = this.CalculateAngle(out _);
-				DrawAt(drawPos, FullRotation, rotation, compDraw: false);
+				DrawAt(drawPos, FullRotation, 0, compDraw: false);
 			}
 			Comps_PostDraw();
 		}
@@ -326,7 +325,7 @@ namespace Vehicles
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, rot, northSouthRotation);
+			Drawer.renderer.RenderPawnAt(drawLoc, rot, extraRotation, northSouthRotation);
 
 			//TODO - consolidate rendering to new pawn node render system
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)

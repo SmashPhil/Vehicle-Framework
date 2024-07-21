@@ -42,7 +42,7 @@ namespace Vehicles
 
 		private void DoBottomButtons(Rect rect)
 		{
-			if (Widgets.ButtonText(rect, "ApplyButton".Translate()))
+			if (Widgets.ButtonText(rect, "VF_ApplyButton".Translate()))
 			{
 				onComplete(color);
 				Close(true);

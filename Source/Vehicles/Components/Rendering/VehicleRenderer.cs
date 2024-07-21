@@ -35,20 +35,20 @@ namespace Vehicles
 		public PawnFirefoamDrawer FirefoamOverlays => firefoamOverlays;
 
 		//TODO 1.6 - Rename to RenderVehicleAt
-		public void RenderPawnAt(Vector3 drawLoc, float angle, bool northSouthRotation)
+		public void RenderPawnAt(Vector3 drawLoc, float extraRotation, bool northSouthRotation)
 		{
-			RenderPawnAt(drawLoc, angle, vehicle.Rotation, northSouthRotation);
+			RenderPawnAt(drawLoc, vehicle.FullRotation, extraRotation, northSouthRotation);
 		}
 
 		//TODO 1.6 - Rename to RenderVehicleAt
-		public void RenderPawnAt(Vector3 drawLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
+		public void RenderPawnAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
 
-			RenderVehicle(drawLoc, angle, bodyFacing, northSouthRotation);
+			RenderVehicle(drawLoc, rot, extraRotation, northSouthRotation);
 
 			//TODO - Draw dynamic shadows
 
@@ -62,25 +62,25 @@ namespace Vehicles
 			}
 		}
 
-		private void RenderVehicle(Vector3 rootLoc, float angle, Rot4 rot, bool northSouthRotation)
+		private void RenderVehicle(Vector3 rootLoc, Rot8 rot, float extraRotation, bool northSouthRotation)
 		{
 			if (vehicle.Spawned)
 			{
 				vehicle.UpdateRotationAndAngle();
 			}
-			(Vector3 aboveBodyPos, Rot8 fullRot) = RenderVehicleInternal(rootLoc, angle, rot, northSouthRotation);
-			vehicle.DrawExplosiveWicks(aboveBodyPos, fullRot);
-			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, fullRot);
+			Vector3 aboveBodyPos = RenderVehicleInternal(rootLoc, rot, rot.AsRotationAngle, extraRotation, northSouthRotation);
+			vehicle.DrawExplosiveWicks(aboveBodyPos, rot);
+			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, extraRotation, rot);
 		}
 
-		private (Vector3 aboveBodyPos, Rot8 rot) RenderVehicleInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
+		private Vector3 RenderVehicleInternal(Vector3 rootLoc, Rot4 bodyFacing, float angle, float extraRotation, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
 			
-			Quaternion quaternion = Quaternion.AngleAxis(angle * (northSouthRotation ? -1 : 1), Vector3.up);
+			Quaternion quaternion = Quaternion.AngleAxis((angle + extraRotation) * (northSouthRotation ? -1 : 1), Vector3.up);
 
 			Vector3 aboveBodyPos = rootLoc + vehicle.VehicleGraphic.DrawOffset(bodyFacing);
 			aboveBodyPos.y += YOffset_Body;
@@ -109,7 +109,7 @@ namespace Vehicles
 			{
 				Graphics.DrawMesh(mesh, drawLoc, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
 			}
-			return (aboveBodyPos, vehicleRot);
+			return aboveBodyPos;
 		}
 
 		public void ProcessPostTickVisuals(int ticksPassed)

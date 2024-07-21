@@ -55,7 +55,8 @@ namespace Vehicles
 
 		public void DrawAt(Vector3 loc)
 		{
-			renderer.RenderPawnAt(loc, vehicle.CalculateAngle(out bool northSouthRotation), northSouthRotation);
+			vehicle.CalculateAngle(out bool northSouthRotation);
+			renderer.RenderPawnAt(loc, 0, northSouthRotation);
 		}
 
 		public void Notify_Spawned()
