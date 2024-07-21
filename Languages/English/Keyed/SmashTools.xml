@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<ST_AnimationWindow>Animation</ST_AnimationWindow>
+	<ST_AnimationWindow>Animator</ST_AnimationWindow>
+	<ST_ControllerWindow>Controller</ST_ControllerWindow>
 	<ST_CreateNewClip>Create New Clip...</ST_CreateNewClip>
 
 	<ST_RemoveProperties>Remove Properties</ST_RemoveProperties>

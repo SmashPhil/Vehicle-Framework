@@ -320,18 +320,15 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Called from skyfaller and launch protocol classes when vehicle is unspawned
+		/// Draw vehicle while unspawned
 		/// </summary>
-		/// <param name="drawLoc"></param>
-		/// <param name="rotation"></param>
-		/// <param name="flip"></param>
 		public virtual void DrawAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool flip = false, bool compDraw = true)
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, northSouthRotation);
+			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, rot, northSouthRotation);
 
-			//TODO - consolidate rendering to VehicleRenderer
+			//TODO - consolidate rendering to new pawn node render system
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns();

@@ -34,43 +34,46 @@ namespace Vehicles
 		[Obsolete("Not currently implemented, still WIP. Do not reference.", error: true)]
 		public PawnFirefoamDrawer FirefoamOverlays => firefoamOverlays;
 
+		//TODO 1.6 - Rename to RenderVehicleAt
 		public void RenderPawnAt(Vector3 drawLoc, float angle, bool northSouthRotation)
+		{
+			RenderPawnAt(drawLoc, angle, vehicle.Rotation, northSouthRotation);
+		}
+
+		//TODO 1.6 - Rename to RenderVehicleAt
+		public void RenderPawnAt(Vector3 drawLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
 				graphics.ResolveAllGraphics();
 			}
 
-			RenderPawnInternal(drawLoc, angle, northSouthRotation);
-			
-			if (vehicle.def.race.specialShadowData != null)
-			{
-				//if (shadowGraphic == null)
-				//{
-				//	shadowGraphic = new Graphic_DynamicShadow(vehicle.def.race.specialShadowData);
-				//}
-				//shadowGraphic.Draw(drawLoc, Rot4.North, vehicle, 0f);
-			}
+			RenderVehicle(drawLoc, angle, bodyFacing, northSouthRotation);
+
+			//TODO - Draw dynamic shadows
+
 			if (graphics.vehicle.VehicleGraphic?.ShadowGraphic != null)
 			{
 				graphics.vehicle.VehicleGraphic.ShadowGraphic.Draw(drawLoc, vehicle.FullRotation, vehicle, 0f);
 			}
 			if (vehicle.Spawned && !vehicle.Dead)
 			{
-				//vehicle.stances.StanceTrackerDraw();
 				vehicle.vehiclePather.PatherDraw();
 			}
 		}
 
-		private void RenderPawnInternal(Vector3 rootLoc, float angle, bool northSouthRotation)
+		private void RenderVehicle(Vector3 rootLoc, float angle, Rot4 rot, bool northSouthRotation)
 		{
-			vehicle.UpdateRotationAndAngle();
-			(Vector3 aboveBodyPos, Rot8 rot) = RenderPawnInternal(rootLoc, angle, vehicle.Rotation, northSouthRotation);
-			vehicle.DrawExplosiveWicks(aboveBodyPos, rot);
-			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, rot);
+			if (vehicle.Spawned)
+			{
+				vehicle.UpdateRotationAndAngle();
+			}
+			(Vector3 aboveBodyPos, Rot8 fullRot) = RenderVehicleInternal(rootLoc, angle, rot, northSouthRotation);
+			vehicle.DrawExplosiveWicks(aboveBodyPos, fullRot);
+			vehicle.graphicOverlay.RenderGraphicOverlays(aboveBodyPos, angle, fullRot);
 		}
 
-		private (Vector3 aboveBodyPos, Rot8 rot) RenderPawnInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
+		private (Vector3 aboveBodyPos, Rot8 rot) RenderVehicleInternal(Vector3 rootLoc, float angle, Rot4 bodyFacing, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
