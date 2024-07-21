@@ -98,7 +98,9 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
 
+#if DEBUG
 			Scribe_Values.Look(ref debugAllowRaiders, nameof(debugAllowRaiders));
+#endif
 		}
 
 		public override void DrawSection(Rect rect)
@@ -114,9 +116,9 @@ namespace Vehicles
 			{
 				GUIState.Push();
 				{
-#if DEBUG
 					listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
+#if DEBUG
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges, "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
 #endif
 

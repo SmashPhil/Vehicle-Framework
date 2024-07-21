@@ -313,7 +313,7 @@ namespace Vehicles
 			Drawer.DrawAt(drawLoc);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				handler.RenderPawns();
+				handler.RenderPawns(FullRotation);
 			}
 			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
@@ -330,7 +330,7 @@ namespace Vehicles
 			//TODO - consolidate rendering to new pawn node render system
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				handler.RenderPawns();
+				handler.RenderPawns(rot);
 			}
 			if (compDraw) //Temp fix till I get to cleaning up these 3 Draw methods
 			{

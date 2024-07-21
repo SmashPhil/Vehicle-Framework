@@ -125,15 +125,15 @@ namespace Vehicles
 			return true;
 		}
 
-		public void RenderPawns()
+		public void RenderPawns(Rot8 rot)
 		{
 			if (role.PawnRenderer != null)
 			{
 				foreach (Pawn pawn in handlers)
 				{
-					Vector3 position = vehicle.DrawPos + role.PawnRenderer.DrawOffsetFor(vehicle.FullRotation);
-					Rot4 rot = role.PawnRenderer.RotFor(vehicle.FullRotation);
-					pawn.Drawer.renderer.RenderPawnAt(position, rotOverride: rot);
+					Vector3 position = vehicle.DrawPos + role.PawnRenderer.DrawOffsetFor(rot);
+					Rot4 bodyFacing = role.PawnRenderer.RotFor(rot);
+					pawn.Drawer.renderer.RenderPawnAt(position, rotOverride: bodyFacing);
 				}
 			}
 		}

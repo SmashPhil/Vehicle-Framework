@@ -24,4 +24,7 @@
 
 	<ST_DopesheetTab>Dopesheet</ST_DopesheetTab>
 	<ST_CurvesTab>Curves</ST_CurvesTab>
+
+	<ST_Layers>Layers</ST_Layers>
+	<ST_Parameters>Parameters</ST_Parameters>
 </LanguageData>
