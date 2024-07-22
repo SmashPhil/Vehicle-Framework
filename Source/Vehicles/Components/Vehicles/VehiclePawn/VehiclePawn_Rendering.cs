@@ -29,6 +29,8 @@ namespace Vehicles
 		public PatternData patternData;
 		private RetextureDef retextureDef;
 
+		private AnimationController controller;
+
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
 		[AnimationProperty(Name = "Rotation")]
@@ -58,7 +60,7 @@ namespace Vehicles
 
 		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
 
-		AnimationController IAnimator.Controller => throw new NotImplementedException();
+		AnimationController IAnimator.Controller => controller;
 
 		IEnumerable<object> IAnimator.ExtraAnimators
 		{

@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
+	<ST_Copy>Copy</ST_Copy>
+	<ST_Paste>Paste</ST_Paste>
+
 	<ST_AnimationWindow>Animator</ST_AnimationWindow>
 	<ST_ControllerWindow>Controller</ST_ControllerWindow>
 	<ST_CreateNewClip>Create New Clip...</ST_CreateNewClip>
@@ -27,4 +30,6 @@
 
 	<ST_Layers>Layers</ST_Layers>
 	<ST_Parameters>Parameters</ST_Parameters>
+	<ST_CreateState>Create State</ST_CreateState>
+	<ST_CrateSubState>Create Sub-State Machine</ST_CrateSubState>
 </LanguageData>
