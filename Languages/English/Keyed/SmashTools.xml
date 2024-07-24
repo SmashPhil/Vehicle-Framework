@@ -31,5 +31,8 @@
 	<ST_Layers>Layers</ST_Layers>
 	<ST_Parameters>Parameters</ST_Parameters>
 	<ST_CreateState>Create State</ST_CreateState>
-	<ST_CrateSubState>Create Sub-State Machine</ST_CrateSubState>
+	<ST_CreateSubState>Create Sub-State Machine</ST_CreateSubState>
+	<ST_MakeTransition>Make Transition</ST_MakeTransition>
+	<ST_SetStateDefault>Set as Layer Default State</ST_SetStateDefault>
+	<ST_CreateBlendTree>Create new BlendTree in State</ST_CreateBlendTree>
 </LanguageData>

@@ -33,11 +33,13 @@ namespace Vehicles
 
 		internal DedicatedThread dedicatedThread;
 
-		private bool initialized;
-
 		public VehicleMapping(Map map) : base(map)
 		{
 		}
+
+		public bool ComponentsInitialized { get; private set; } = false;
+
+		public bool RegionsInitialized { get; private set; } = false;
 
 		/// <summary>
 		/// VehicleDefs which have created and 'own' a set of regions
@@ -95,7 +97,7 @@ namespace Vehicles
 					return null;
 				}
 #endif
-				if (!initialized)
+				if (!ComponentsInitialized)
 				{
 					ConstructComponents();
 				}
@@ -193,7 +195,7 @@ namespace Vehicles
 		{
 			base.FinalizeInit();
 
-			if (!initialized)
+			if (!ComponentsInitialized)
 			{
 				ConstructComponents();
 			}
@@ -282,6 +284,8 @@ namespace Vehicles
 				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 			});
 			DeepProfiler.End();
+
+			RegionsInitialized = true;
 		}
 
 		/// <summary>
@@ -295,7 +299,7 @@ namespace Vehicles
 
 			owners.Clear();
 
-			initialized = true;
+			ComponentsInitialized = true;
 
 			GenerateAllPathData();
 

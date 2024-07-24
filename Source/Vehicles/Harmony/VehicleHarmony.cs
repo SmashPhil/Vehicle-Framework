@@ -92,6 +92,8 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(RegisterTweakFieldsInEditor);
 			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
 
+			Utilities.InvokeWithLogging(RegisterVehicleAreas);
+
 			if (DebugProperties.debug)
 			{
 				//DebugHelper.Local.VehicleDef = DefDatabase<VehicleDef>.GetNamedSilentFail("VF_TestMarshal");
@@ -210,6 +212,12 @@ namespace Vehicles
 			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetEast)), string.Empty, string.Empty, UISettingsType.FloatBox);
 			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetSouth)), string.Empty, string.Empty, UISettingsType.FloatBox);
 			EditWindow_TweakFields.RegisterField(AccessTools.Field(typeof(GraphicDataRGB), nameof(GraphicData.drawOffsetWest)), string.Empty, string.Empty, UISettingsType.FloatBox);
+		}
+
+		private static void RegisterVehicleAreas()
+		{
+			Ext_Map.RegisterArea<Area_Road>();
+			Ext_Map.RegisterArea<Area_RoadAvoidal>();
 		}
 	}
 }

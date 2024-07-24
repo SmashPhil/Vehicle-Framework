@@ -40,6 +40,7 @@ namespace Vehicles
 					RoadTypeOption("VF_RoadType_Avoid".Translate(), RoadType.Avoid)
 				};
 				Find.WindowStack.Add(new FloatMenu(options));
+				return;
 			}
 			base.ProcessInput(ev);
 

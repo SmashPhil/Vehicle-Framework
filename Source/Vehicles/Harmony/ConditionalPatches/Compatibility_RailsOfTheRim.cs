@@ -20,12 +20,12 @@ namespace Vehicles
 
 		public override void PatchAll(ModMetaData mod, Harmony harmony)
 		{
-			Type alertClassType = AccessTools.TypeByName("RoadsOfTheRim.Patch_Alert_CaravanIdle_GetReport");
+			Type alertClassType = AccessTools.TypeByName("RailsAndRoadsOfTheRim.Alert_CaravanIdle_GetReport");
 			harmony.Patch(original: AccessTools.Method(alertClassType, "Postfix"),
 				transpiler: new HarmonyMethod(typeof(Compatibility_RailsOfTheRim),
 				nameof(GetAlertReportIdleConstructionVehicle)));
 
-			Type gizmoClassType = AccessTools.TypeByName("RoadsOfTheRim.WorldObjectComp_Caravan");
+			Type gizmoClassType = AccessTools.TypeByName("RailsAndRoadsOfTheRim.WorldObjectComp_Caravan");
 			harmony.Patch(original: AccessTools.Method(gizmoClassType, "CaravanCurrentState"),
 				postfix: new HarmonyMethod(typeof(Compatibility_RailsOfTheRim),
 				nameof(CaravanStateVehiclePather)));

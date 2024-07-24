@@ -518,7 +518,15 @@ namespace Vehicles
 
 		private static void RegisterInVehicleRegions(Thing thing, Map map)
 		{
+			if (MapGenerator.mapBeingGenerated != null)
+			{
+				return; //Map is being generated, there will be a full region rebuild post-init
+			}
 			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+			if (!mapping.RegionsInitialized)
+			{
+				return; //Map hasn't finished building regions, there will be a full region rebuild post-init
+			}
 			if (mapping.ThreadAvailable)
 			{
 				AsyncRegionRegisterAction asyncAction = AsyncPool<AsyncRegionRegisterAction>.Get();

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Verse;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -19,10 +20,9 @@ namespace Vehicles
 				nameof(AddVehicleAreas)));
 		}
 
-		private static void AddVehicleAreas(AreaManager __instance, List<Area> ___areas)
+		private static void AddVehicleAreas(AreaManager __instance)
 		{
-			___areas.Add(new Area_Road(__instance));
-			___areas.Add(new Area_RoadAvoidal(__instance));
+			Ext_Map.TryAddAreas(__instance.map);
 		}
 	}
 }
