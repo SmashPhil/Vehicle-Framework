@@ -260,6 +260,8 @@ namespace Vehicles
 				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 			}
 			DeepProfiler.End();
+
+			RegionsInitialized = true;
 		}
 
 		private void GenerateRegionsAsync(StringBuilder eventTextBuilder)

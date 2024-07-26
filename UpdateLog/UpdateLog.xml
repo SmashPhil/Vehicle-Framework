@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1690</currentVersion>
+  <currentVersion>1.5.1692</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -17,6 +17,8 @@
 - Vehicle role removal upgrade refunding would add the role copied from the upgrade, rather than checking if it was originally from the vehicle def.
 
 - Compatibility patch for Rails and Roads of the Rim
+
+- AsyncRegionRegisterAction exception when loading a map, causing some regions to become malformed in the process.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Parallelized Vehicle Region generation when loading a map.
 
