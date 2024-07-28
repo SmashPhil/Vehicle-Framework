@@ -588,15 +588,9 @@ namespace Vehicles
 
 			readonly int IComparable<RenderData>.CompareTo(RenderData other)
 			{
-				if (this.layer < other.layer)
-				{
-					return -1;
-				}
-				else if (this.layer == other.layer)
-				{
-					return 0;
-				}
-				return 1;
+				if (layer < other.layer) return -1;
+				if (layer > other.layer) return 1;
+				return 0;
 			}
 		}
 

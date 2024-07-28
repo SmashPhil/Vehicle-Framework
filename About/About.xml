@@ -2,7 +2,7 @@
   <name>Vehicle Framework</name>
   <author>Smash Phil</author>
   <packageId>SmashPhil.VehicleFramework</packageId>
-  <modVersion>1.5.1694</modVersion>
+  <modVersion>1.5.1695</modVersion>
   <supportedVersions>
     <li>1.4</li>
     <li>1.5</li>
@@ -18,7 +18,5 @@
       <downloadUrl>https://github.com/pardeike/HarmonyRimWorld/releases/latest</downloadUrl>
     </li>
   </modDependencies>
-  <description><![CDATA[<b><color=orange>Vehicle Framework</color></b>
-
-Enables the creation of vehicles in RimWorld.]]></description>
+  <description><![CDATA[Framework which allows the creation of vehicles in RimWorld.]]></description>
 </ModMetaData>
