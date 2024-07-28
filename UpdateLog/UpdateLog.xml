@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1692</currentVersion>
+  <currentVersion>1.5.1694</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -19,6 +19,10 @@
 - Compatibility patch for Rails and Roads of the Rim
 
 - AsyncRegionRegisterAction exception when loading a map, causing some regions to become malformed in the process.
+
+- Vehicle leaks would not reset their status when repaired once the fuel count had reached 0.
+
+- CompUpgradeTree attempting to validate listers even if the vehicle is unspawned but being ticked elsewhere (such as in Save Our Ship 2 when traveling between ships).
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Parallelized Vehicle Region generation when loading a map.
 

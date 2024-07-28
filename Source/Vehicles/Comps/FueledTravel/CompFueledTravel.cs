@@ -456,15 +456,12 @@ namespace Vehicles
 		public void LeakTick()
 		{
 			//Validate leak every so often
-			if (Props.leakDef != null && fuel > 0 && Find.TickManager.TicksGame % TicksPerLeakCheck == 0 && !FuelComponents.NullOrEmpty())
+			if (Find.TickManager.TicksGame % TicksPerLeakCheck == 0 && !FuelComponents.NullOrEmpty())
 			{
 				leaking = false;
 				foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
 				{
-					if (component.HealthPercent <= fuelLeak.maxHealth)
-					{
-						leaking = true;
-					}
+					leaking |= component.HealthPercent <= fuelLeak.maxHealth;
 				}
 			}
 
@@ -483,7 +480,7 @@ namespace Vehicles
 					if (Find.TickManager.TicksGame % ticksPerLeak == 0)
 					{
 						ConsumeFuel(FuelPerLeak);
-						if (Vehicle.Spawned && !EmptyTank)
+						if (Vehicle.Spawned && Props.leakDef != null && !EmptyTank)
 						{
 							IntVec2 offset = component.props.hitbox.cells.RandomElementWithFallback(fallback: IntVec2.Zero);
 							IntVec3 leakCell = new IntVec3(Vehicle.Position.x + offset.x, 0, Vehicle.Position.z + offset.z);

@@ -457,6 +457,11 @@ namespace Vehicles
 
 		public void ValidateListers()
 		{
+			if (!Vehicle.Spawned)
+			{
+				return;
+			}
+
 			if (NodeUnlocking != null)
 			{
 				if (upgrade.Removal || StoredCostSatisfied)
