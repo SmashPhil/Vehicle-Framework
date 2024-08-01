@@ -519,7 +519,10 @@ namespace Vehicles
 			Scribe_Deep.Look(ref upgrade, nameof(upgrade));
 			Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer));
 
-			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			upgrades ??= new HashSet<string>();
+			upgradeContainer ??= new ThingOwner<Thing>();
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
 				ReloadUnlocks();
 			}

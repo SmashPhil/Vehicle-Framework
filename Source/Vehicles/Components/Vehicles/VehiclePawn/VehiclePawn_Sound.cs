@@ -12,6 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
@@ -39,6 +40,36 @@ namespace Vehicles
 			{
 				sustainers.EndAll();
 			}
+		}
+
+		[AnimationEvent]
+		private void PlaySound(SoundDef soundDef)
+		{
+			if (Spawned)
+			{
+				soundDef.PlayOneShot(this);
+			}
+		}
+
+		[AnimationEvent]
+		private void PlaySustainer(SoundDef soundDef)
+		{
+			if (Spawned)
+			{
+				sustainers.Spawn(this, soundDef);
+			}
+		}
+
+		[AnimationEvent]
+		private void EndSustainer(SoundDef soundDef)
+		{
+			sustainers.EndAll(soundDef);
+		}
+
+		[AnimationEvent]
+		private void EndAllSustainers()
+		{
+			sustainers.EndAll();
 		}
 	}
 }

@@ -126,6 +126,7 @@
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
+    <Compile Include="CustomFeatures\AerialVehicles\Events\AnimationEvents.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\DirectionalTakeoff.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckData.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Launching\Misc\FleckOneShot.cs" />

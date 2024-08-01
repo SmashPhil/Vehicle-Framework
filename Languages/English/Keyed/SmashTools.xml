@@ -24,7 +24,10 @@
 	<ST_AddKeyFrame>Add keyframe</ST_AddKeyFrame>
 	<ST_AddAnimationEvent>Add event</ST_AddAnimationEvent>
 	<ST_AddProperty>Add Property</ST_AddProperty>
-
+	<ST_Injected>Injected</ST_Injected>
+	<ST_UnsupportedType>UnsupportedType</ST_UnsupportedType>
+	<ST_NoFunctionSelected>No Function Selected</ST_NoFunctionSelected>
+	
 	<ST_DopesheetTab>Dopesheet</ST_DopesheetTab>
 	<ST_CurvesTab>Curves</ST_CurvesTab>
 
