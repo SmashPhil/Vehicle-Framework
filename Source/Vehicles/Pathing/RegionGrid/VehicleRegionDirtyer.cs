@@ -38,6 +38,7 @@ namespace Vehicles
 					{
 						yield return cell;
 					}
+					SetAllClean();
 				}
 			}
 		}

@@ -87,7 +87,6 @@ namespace Vehicles
 				Log.Error($"Exception while rebuilding vehicle regions for {createdFor}. Exception={ex}");
 			}
 			newRegions.Clear();
-			mapping[createdFor].VehicleRegionDirtyer.SetAllClean();
 			Initialized = true;
 			UpdatingRegion = false;
 		}

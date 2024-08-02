@@ -212,7 +212,9 @@ namespace Vehicles
 			int startIndex = cellIndices.CellToIndex(start);
 			int destIndex = cellIndices.CellToIndex(dest.Cell);
 			ByteGrid byteGrid = vehicle.GetAvoidGrid(true);
-			
+			roadGrid ??= mapping.map.areaManager.Get<Area_Road>();
+			roadAvoidalGrid ??= mapping.map.areaManager.Get<Area_RoadAvoidal>();
+
 			bool passAllDestroyableThings = traverseParms.mode == TraverseMode.PassAllDestroyableThings || traverseParms.mode == TraverseMode.PassAllDestroyableThingsNotWater;
 			bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater && traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 			CellRect cellRect = CalculateDestinationRect(dest, peMode);
