@@ -341,25 +341,13 @@ namespace Vehicles
 		{
 			if (owners.Count > 0 && vehicleRegionGridIndexChecking < owners.Count)
 			{
-				//if (owners.Count > 0 && vehicleRegionGridIndexChecking < owners.Count)
-				//{
-				//	VehicleDef vehicleDef = owners[vehicleRegionGridIndexChecking];
-				//	VehiclePathData vehiclePathData = this[vehicleDef];
-				//	AsyncRegionRebuildAction rebuildAction = AsyncPool<AsyncRegionRebuildAction>.Get();
-				//	rebuildAction.Set(this, vehiclePathData);
-				//	dedicatedThread.Queue(rebuildAction);
-				//	//vehiclePathData.VehicleRegionGrid.UpdateClean();
-				//	//vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-				//	vehicleRegionGridIndexChecking++;
-				//	if (vehicleRegionGridIndexChecking >= owners.Count)
-				//	{
-				//		vehicleRegionGridIndexChecking = 0;
-				//	}
-				//}
 				VehicleDef vehicleDef = owners[vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
-				vehiclePathData.VehicleRegionGrid.UpdateClean();
-				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
+				AsyncRegionRebuildAction rebuildAction = AsyncPool<AsyncRegionRebuildAction>.Get();
+				rebuildAction.Set(this, vehiclePathData);
+				dedicatedThread.Queue(rebuildAction);
+				//vehiclePathData.VehicleRegionGrid.UpdateClean();
+				//vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
 				vehicleRegionGridIndexChecking++;
 				if (vehicleRegionGridIndexChecking >= owners.Count)
 				{
