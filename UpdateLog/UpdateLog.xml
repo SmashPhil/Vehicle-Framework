@@ -6,7 +6,9 @@
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This update includes many Quality of Life features such as designating roads, reorienting aerial vehicles upon landing, reorienting vehicles upon pathing to a destination, and more.
 
+Be sure to take a look at the full list down below, and as always if you have feedback feel free to drop by the discord. Thanks!
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Upgrading FuelCapacity wouldn't update amount needed to refuel, causing pawns to attempt to refuel in a loop.
 
@@ -27,7 +29,6 @@
 - CompUpgradeTree attempting to validate listers even if the vehicle is unspawned but being ticked elsewhere (such as in Save Our Ship 2 when traveling between ships).
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Parallelized Vehicle Region generation when loading a map.
-
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 &lt;b&gt;Players&lt;/b&gt;
 - Added Road zone to direct vehicles over paths, and to note which edges to try and exit from for caravans.
@@ -50,7 +51,7 @@ Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyf
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->
