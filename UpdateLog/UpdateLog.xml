@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1700</currentVersion>
+  <currentVersion>1.5.1701</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -9,6 +9,9 @@
 This update includes many Quality of Life features such as designating roads, reorienting aerial vehicles upon landing, reorienting vehicles upon pathing to a destination, and more.
 
 Be sure to take a look at the full list down below, and as always if you have feedback feel free to drop by the discord. Thanks!
+
+Note: This version is a hotfix of 1.5.1700, fixing the issue where Camera+'s and Mark That Pawn's patch on vehicle rendering broke. 
+If you removed either during the wait, you can now safely re-add them.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Upgrading FuelCapacity wouldn't update amount needed to refuel, causing pawns to attempt to refuel in a loop.
 

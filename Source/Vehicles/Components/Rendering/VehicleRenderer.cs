@@ -35,13 +35,14 @@ namespace Vehicles
 		public PawnFirefoamDrawer FirefoamOverlays => firefoamOverlays;
 
 		//TODO 1.6 - Rename to RenderVehicleAt
+		//Mark That Pawn and Camera+ have patches on this method
 		public void RenderPawnAt(Vector3 drawLoc, float extraRotation, bool northSouthRotation)
 		{
-			RenderPawnAt(drawLoc, vehicle.FullRotation, extraRotation, northSouthRotation);
+			RenderPawnAt_TEMP(drawLoc, vehicle.FullRotation, extraRotation, northSouthRotation);
 		}
 
 		//TODO 1.6 - Rename to RenderVehicleAt
-		public void RenderPawnAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool northSouthRotation)
+		public void RenderPawnAt_TEMP(Vector3 drawLoc, Rot8 rot, float extraRotation, bool northSouthRotation)
 		{
 			if (!graphics.AllResolved)
 			{
