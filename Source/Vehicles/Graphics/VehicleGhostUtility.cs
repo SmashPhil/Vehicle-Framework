@@ -5,12 +5,64 @@ using HarmonyLib;
 using Verse;
 using RimWorld;
 using SmashTools;
+using System.Security.Cryptography;
 
 namespace Vehicles
 {
 	public static class VehicleGhostUtility
 	{
+		public static readonly Color whiteGhostColor = new Color(1, 1, 1, 0.5f);
+
 		public static Dictionary<int, Graphic> cachedGhostGraphics = new Dictionary<int, Graphic>();
+
+		public static void DrawGhostVehicleDef(IntVec3 center, Rot8 rot, VehicleDef vehicleDef, Color ghostCol, AltitudeLayer drawAltitude, VehiclePawn vehicle = null)
+		{
+			Graphic baseGraphic = vehicleDef.graphic;
+			Graphic graphic = GhostUtility.GhostGraphicFor(baseGraphic, vehicleDef, ghostCol);
+			Vector3 loc = GenThing.TrueCenter(center, rot, vehicleDef.Size, drawAltitude.AltitudeFor());
+
+			Rot8 baseRot = rot;
+			float baseAngle = rot.AsRotationAngle;
+			//If diagonal rotated from North / South, vanilla draw needs adjustment in order to use the right graphics
+			if (baseRot.IsDiagonal) 
+			{
+				switch (baseRot.AsInt) 
+				{
+					case 4:
+						baseRot = Rot8.North;
+						baseAngle = 45;
+						break;
+					case 5:
+						baseRot = Rot8.South;
+						baseAngle = -45;
+						break;
+					case 6:
+						baseRot = Rot8.South;
+						baseAngle = 45;
+						break;
+					case 7:
+						baseRot = Rot8.North;
+						baseAngle = -45;
+						break;
+				}
+			}
+			graphic.DrawFromDef(loc, baseRot, vehicleDef, baseAngle);
+			
+			DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude, thing: vehicle);
+		}
+
+		public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef, Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
+		{
+			Vector3 loc = GenThing.TrueCenter(center, rot, vehicleDef.Size, drawAltitude.AltitudeFor());
+			foreach ((Graphic graphic, float rotation) in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
+			{
+				graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, vehicleDef, thing, rotation);
+			}
+			if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets)
+			{
+				vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
+			}
+		}
 
 		public static Graphic_Turret GhostGraphicFor(this VehicleDef vehicleDef, VehicleTurret turret, Color ghostColor)
 		{

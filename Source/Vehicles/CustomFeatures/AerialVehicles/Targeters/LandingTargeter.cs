@@ -236,7 +236,7 @@ namespace Vehicles
 		{
 			if (allowRotating)
 			{
-				Rect winRect = new Rect(0, Verse.UI.screenHeight - 35 - 90f, 200f, 90f);
+				Rect winRect = new Rect(0, UI.screenHeight - 35 - 90f, 200f, 90f);
 				Find.WindowStack.ImmediateWindow(73095, winRect, WindowLayer.GameUI, delegate
 				{
 					RotationDirection rotationDirection = RotationDirection.None;

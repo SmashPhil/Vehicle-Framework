@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Verse;
 
@@ -12,16 +13,18 @@ namespace Vehicles
 		public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
 		public delegate bool VehicleRegionProcessor(VehicleRegion reg);
 
-		private static Queue<BFSWorker> freeWorkers = new Queue<BFSWorker>();
+		private static readonly Queue<BFSWorker> freeWorkers;
 
-		public static int NumWorkers = 8;
-
-		public static readonly VehicleRegionEntry PassAll = (VehicleRegion from, VehicleRegion to) => true;
+		private static object workerQueueLock = new object();
 
 		static VehicleRegionTraverser()
 		{
+			freeWorkers = new Queue<BFSWorker>();
 			RecreateWorkers();
 		}
+
+		/// Will always have more workers than needed, not known at this time which vehicles can piggy
+		public static int WorkerCount => VehicleHarmony.AllMoveableVehicleDefs.Count;
 
 		/// <summary>
 		/// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
@@ -35,12 +38,12 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, VehicleDef vehicleDef, int regionLookCount, TraverseParms traverseParams, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion regionA = VehicleGridsUtility.GetRegion(A, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion regionA = VehicleRegionAndRoomQuery.RegionAt(A, map, vehicleDef, traversableRegionTypes);
 			if (regionA is null)
 			{
 				return false;
 			}
-			VehicleRegion regionB = VehicleGridsUtility.GetRegion(B, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion regionB = VehicleRegionAndRoomQuery.RegionAt(B, map, vehicleDef, traversableRegionTypes);
 			if (regionB is null)
 			{
 				return false;
@@ -95,10 +98,13 @@ namespace Vehicles
 		/// </summary>
 		public static void RecreateWorkers()
 		{
-			freeWorkers.Clear();
-			for (int i = 0; i < NumWorkers; i++)
+			lock (workerQueueLock)
 			{
-				freeWorkers.Enqueue(new BFSWorker(i));
+				freeWorkers.Clear();
+				for (int i = 0; i < WorkerCount; i++)
+				{
+					freeWorkers.Enqueue(new BFSWorker(i));
+				}
 			}
 		}
 
@@ -114,7 +120,7 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static void BreadthFirstTraverse(IntVec3 start, Map map, VehicleDef vehicleDef, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion region = VehicleGridsUtility.GetRegion(start, map, vehicleDef, traversableRegionTypes);
+			VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(start, map, vehicleDef, traversableRegionTypes);
 			if (region is null) return;
 			BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
 		}
@@ -129,20 +135,24 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			if (freeWorkers.Count == 0)
+			BFSWorker bfsWorker;
+			lock (workerQueueLock)
 			{
-				Log.Error("No free workers for BFS. Either BFS recurred deeper than " + NumWorkers + ", or a bug has put this system in an inconsistent state. Resetting.");
-				return;
+				if (freeWorkers.Count == 0)
+				{
+					Log.Error($"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
+					return;
+				}
+				if (root is null)
+				{
+					Log.Error("BFS with null root region.");
+					return;
+				}
+				bfsWorker = freeWorkers.Dequeue();
 			}
-			if(root is null)
-			{
-				Log.Error("BFS with null root region.");
-				return;
-			}
-			BFSWorker bfsworker = freeWorkers.Dequeue();
 			try
 			{
-				bfsworker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
+				bfsWorker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
 			}
 			catch(Exception ex)
 			{
@@ -150,8 +160,11 @@ namespace Vehicles
 			}
 			finally
 			{
-				bfsworker.Clear();
-				freeWorkers.Enqueue(bfsworker);
+				bfsWorker.Clear();
+				lock (workerQueueLock)
+				{
+					freeWorkers.Enqueue(bfsWorker);
+				}
 			}
 		}
 
@@ -256,7 +269,10 @@ namespace Vehicles
 			/// <param name="traversableRegionTypes"></param>
 			public void BreadthFirstTraverseWork(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
 			{
-				if ((root.type & traversableRegionTypes) == RegionType.None) return;
+				if ((root.type & traversableRegionTypes) == RegionType.None)
+				{
+					return;
+				}
 				closedIndex += 1u;
 				open.Clear();
 				numRegionsProcessed = 0;

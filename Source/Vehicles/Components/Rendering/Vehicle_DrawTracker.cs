@@ -2,6 +2,7 @@
 using Verse;
 using RimWorld;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
@@ -14,8 +15,6 @@ namespace Vehicles
 		public PawnUIOverlay ui; //reimplement for better control over vehicle overlays (names should show despite animal Prefs set to none, traders inside should transfer question mark, etc.)
 		public VehicleTrackMaker trackMaker; //reimplement for vehicle specific "footprints"
 		public Vehicle_RecoilTracker rTracker;
-
-		
 
 		public Vehicle_DrawTracker(VehiclePawn vehicle)
 		{
@@ -56,7 +55,8 @@ namespace Vehicles
 
 		public void DrawAt(Vector3 loc)
 		{
-			renderer.RenderPawnAt(loc, vehicle.CalculateAngle(out bool northSouthRotation), northSouthRotation);
+			vehicle.CalculateAngle(out bool northSouthRotation);
+			renderer.RenderPawnAt(loc, 0, northSouthRotation);
 		}
 
 		public void Notify_Spawned()

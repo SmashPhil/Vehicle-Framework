@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Verse;
-using RimWorld;
 
 namespace Vehicles
 {
-	//REDO
-	public class Zone_Runway //: Zone
+	public class ReduceExplosionOnWater : DefModExtension
 	{
-
 	}
 }

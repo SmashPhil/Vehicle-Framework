@@ -66,6 +66,18 @@ namespace Vehicles
 			}
 		}
 
+		public override void PostLoad()
+		{
+			base.PostLoad();
+			if (!nodes.NullOrEmpty())
+			{
+				foreach (UpgradeNode node in nodes)
+				{
+					node.PostLoad();
+				}
+			}
+		}
+
 		public UpgradeNode GetNode(string key)
 		{
 			if (key.NullOrEmpty())

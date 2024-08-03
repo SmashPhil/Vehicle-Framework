@@ -108,7 +108,7 @@ namespace Vehicles
 					float fillPercent = refuelable.Fuel / refuelable.FuelCapacity;
 					Widgets.FillableBar(rect, fillPercent, VehicleTex.FullBarTex, VehicleTex.EmptyBarTex, false);
 
-					float num = refuelable.TargetFuelLevel / refuelable.FuelCapacity;
+					float num = refuelable.TargetFuelPercent;
 					float num2 = rect.x + num * rect.width - ArrowSize / 2;
 					float num3 = rect.y - ArrowSize;
 					GUI.DrawTexture(new Rect(num2, num3, ArrowSize, ArrowSize), UIElements.TargetLevelArrow);
@@ -133,7 +133,7 @@ namespace Vehicles
 
 			Dialog_Slider dialog_Slider = new Dialog_Slider(textGetter, min, max, delegate (int value)
 			{
-				refuelable.TargetFuelLevel = value;
+				refuelable.TargetFuelPercent = value / refuelable.FuelCapacity;
 			}, startingValue);
 			Find.WindowStack.Add(dialog_Slider);
 		}

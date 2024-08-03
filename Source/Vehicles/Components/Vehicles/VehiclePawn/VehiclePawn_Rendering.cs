@@ -29,8 +29,15 @@ namespace Vehicles
 		public PatternData patternData;
 		private RetextureDef retextureDef;
 
+		private AnimationController controller;
+
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
+		[AnimationProperty(Name = "Rotation")]
+		private float rotation = 0;
+		[AnimationProperty(Name = "Position")]
+		private Vector3 position = Vector3.zero;
+		
 		private Graphic_Vehicle graphic;
 
 		public PatternData patternToPaint;
@@ -45,13 +52,26 @@ namespace Vehicles
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
-		public override Vector3 DrawPos => Drawer.DrawPos;
+		public override Vector3 DrawPos => Drawer.DrawPos + position;
 
 		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
 
 		public ThingWithComps Thing => this;
 
-		public ModContentPack ModContentPack => VehicleDef.modContentPack;
+		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
+
+		AnimationController IAnimator.Controller => controller;
+
+		IEnumerable<object> IAnimator.ExtraAnimators
+		{
+			get
+			{
+				foreach (object thingComp in cachedComps)
+				{
+					yield return thingComp;
+				}
+			}
+		}
 
 		public bool CrashLanded
 		{
@@ -85,7 +105,7 @@ namespace Vehicles
 				{
 					return 0f;
 				}
-				return angle;
+				return angle + rotation;
 			}
 			set
 			{
@@ -285,8 +305,7 @@ namespace Vehicles
 			if (VehicleDef.drawerType == DrawerType.RealtimeOnly)
 			{
 				Vector3 drawPos = DrawPos;
-				float rotation = this.CalculateAngle(out _);
-				DrawAt(drawPos, FullRotation, rotation, compDraw: false);
+				DrawAt(drawPos, FullRotation, 0, compDraw: false);
 			}
 			Comps_PostDraw();
 		}
@@ -296,27 +315,24 @@ namespace Vehicles
 			Drawer.DrawAt(drawLoc);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				handler.RenderPawns();
+				handler.RenderPawns(FullRotation);
 			}
 			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
 
 		/// <summary>
-		/// Called from skyfaller and launch protocol classes when vehicle is unspawned
+		/// Draw vehicle while unspawned
 		/// </summary>
-		/// <param name="drawLoc"></param>
-		/// <param name="rotation"></param>
-		/// <param name="flip"></param>
 		public virtual void DrawAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool flip = false, bool compDraw = true)
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt(drawLoc, extraRotation, northSouthRotation);
+			Drawer.renderer.RenderPawnAt(drawLoc, rot, extraRotation, northSouthRotation);
 
-			//TODO - consolidate rendering to VehicleRenderer
+			//TODO - consolidate rendering to new pawn node render system
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
-				handler.RenderPawns();
+				handler.RenderPawns(rot);
 			}
 			if (compDraw) //Temp fix till I get to cleaning up these 3 Draw methods
 			{
@@ -378,7 +394,7 @@ namespace Vehicles
 
 		public void ResetGraphic()
 		{
-			graphic = null;
+			graphic = GenerateGraphic();
 		}
 
 		//TODO 1.6 - Make private and rename to ResetMaterialProperties
@@ -1112,12 +1128,12 @@ namespace Vehicles
 						}));
 						if (CompVehicleLauncher != null)
 						{
-							options.Add(new FloatMenuOption("Open in animator", OpenInAnimator));
+							options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
 						}
 #if DEBUG
 						if (CompVehicleLauncher != null)
 						{
-							options.Add(new FloatMenuOption("Open in animator (test version)", OpenInAnimator_New));
+							options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimator_New));
 						}
 #endif
 						if (!options.NullOrEmpty())

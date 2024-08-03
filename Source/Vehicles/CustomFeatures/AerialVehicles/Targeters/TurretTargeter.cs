@@ -140,7 +140,7 @@ namespace Vehicles
 
 					if (mouseTarget != Turret.vehicle)
 					{
-						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(mouseTarget.Cell, map));
+						Turret.AlignToAngleRestricted((float)Turret.TurretLocation.ToIntVec3().AngleToCell(mouseTarget.Cell));
 					}
 				}
 			}

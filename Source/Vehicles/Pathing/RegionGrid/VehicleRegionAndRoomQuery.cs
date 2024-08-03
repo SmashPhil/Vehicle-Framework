@@ -8,20 +8,21 @@ namespace Vehicles
 	/// </summary>
 	public static class VehicleRegionAndRoomQuery
 	{
-		/// <summary>
-		/// Retrieve region at <paramref name="c"/> for <paramref name="vehicleDef"/>
-		/// </summary>
-		/// <param name="c"></param>
-		/// <param name="map"></param>
-		/// <param name="vehicleDef"></param>
-		/// <param name="allowedRegionTypes"></param>
 		public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			if (!cell.InBounds(map))
+			return RegionAt(cell, map.GetCachedMapComponent<VehicleMapping>(), vehicleDef, allowedRegionTypes);
+		}
+
+		/// <summary>
+		/// Retrieve region at <paramref name="cell"/> for <paramref name="vehicleDef"/>
+		/// </summary>
+		public static VehicleRegion RegionAt(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		{
+			if (!cell.InBounds(mapping.map))
 			{
 				return null;
 			}
-			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
+			VehicleRegion validRegionAt = mapping[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
 			if (validRegionAt != null && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
 			{
 				return validRegionAt;

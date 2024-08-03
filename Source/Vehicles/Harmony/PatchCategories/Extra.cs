@@ -74,7 +74,7 @@ namespace Vehicles
 		{
 			if (Event.current.type == EventType.MouseDown)
 			{
-				if(Event.current.button == 1 && ___selected.Count > 0)
+				if (Event.current.button == 1 && ___selected.Count > 0)
 				{
 					if(___selected.Count > 1)
 					{

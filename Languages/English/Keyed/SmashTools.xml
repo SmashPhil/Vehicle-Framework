@@ -1,8 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <LanguageData>
-	<ST_AnimationWindow>Animation</ST_AnimationWindow>
+	<ST_Copy>Copy</ST_Copy>
+	<ST_Paste>Paste</ST_Paste>
+
+	<ST_AnimationWindow>Animator</ST_AnimationWindow>
+	<ST_ControllerWindow>Controller</ST_ControllerWindow>
 	<ST_CreateNewClip>Create New Clip...</ST_CreateNewClip>
+
+	<ST_RemoveProperties>Remove Properties</ST_RemoveProperties>
+	<ST_AddKey>Add Key</ST_AddKey>
+	<ST_RemoveKey>Delete Key</ST_RemoveKey>
 
 	<ST_PreviewAnimation>Preview</ST_PreviewAnimation>
 	<ST_PreviewAnimationTooltip>Enable/disable preview mode of entity's animation in-game</ST_PreviewAnimationTooltip>
@@ -16,7 +24,18 @@
 	<ST_AddKeyFrame>Add keyframe</ST_AddKeyFrame>
 	<ST_AddAnimationEvent>Add event</ST_AddAnimationEvent>
 	<ST_AddProperty>Add Property</ST_AddProperty>
-
+	<ST_Injected>Injected</ST_Injected>
+	<ST_UnsupportedType>UnsupportedType</ST_UnsupportedType>
+	<ST_NoFunctionSelected>No Function Selected</ST_NoFunctionSelected>
+	
 	<ST_DopesheetTab>Dopesheet</ST_DopesheetTab>
 	<ST_CurvesTab>Curves</ST_CurvesTab>
+
+	<ST_Layers>Layers</ST_Layers>
+	<ST_Parameters>Parameters</ST_Parameters>
+	<ST_CreateState>Create State</ST_CreateState>
+	<ST_CreateSubState>Create Sub-State Machine</ST_CreateSubState>
+	<ST_MakeTransition>Make Transition</ST_MakeTransition>
+	<ST_SetStateDefault>Set as Layer Default State</ST_SetStateDefault>
+	<ST_CreateBlendTree>Create new BlendTree in State</ST_CreateBlendTree>
 </LanguageData>

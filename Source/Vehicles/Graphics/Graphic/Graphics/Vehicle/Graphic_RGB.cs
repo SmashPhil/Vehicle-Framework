@@ -51,6 +51,8 @@ namespace Vehicles
 
 		public virtual bool WestDiagonalRotated => westDiagonalRotated;
 
+		public bool DiagonalRotated => EastDiagonalRotated || WestDiagonalRotated;
+
 		public override bool ShouldDrawRotated => (data is null || data.drawRotated) && (MatEast == MatNorth || MatWest == MatNorth);
 
 		public override float DrawRotatedExtraAngleOffset => drawRotatedExtraAngleOffset;

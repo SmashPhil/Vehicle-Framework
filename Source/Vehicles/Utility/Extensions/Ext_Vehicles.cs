@@ -10,9 +10,14 @@ using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using System.Reflection;
+using HarmonyLib;
+using static UnityEngine.Scripting.GarbageCollector;
+using Verse.Noise;
 
 namespace Vehicles
 {
+	[StaticConstructorOnStartup]
 	public static class Ext_Vehicles
 	{
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -274,9 +279,12 @@ namespace Vehicles
 				}
 			}
 
-			foreach (VehicleComp comp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+			foreach (ThingComp comp in vehicle.AllComps)
 			{
-				comp.EventRegistration();
+				if (comp is VehicleComp vehicleComp)
+				{
+					vehicleComp.EventRegistration();
+				}
 			}
 		}
 
@@ -312,29 +320,31 @@ namespace Vehicles
 
 		public static void RefundMaterials(this VehiclePawn vehicle, Map map, DestroyMode mode, List<Thing> listOfLeavingsOut = null)
 		{
-			switch (mode)
-			{
-				case DestroyMode.KillFinalize:
-					vehicle.RefundMaterials(map, mode, multiplier: 0.25f);
-					break;
-				case DestroyMode.Deconstruct:
-					vehicle.RefundMaterials(map, mode, multiplier: vehicle.VehicleDef.resourcesFractionWhenDeconstructed);
-					break;
-				case DestroyMode.Cancel:
-				case DestroyMode.Refund:
-					vehicle.RefundMaterials(map, mode, 1);
-					break;
-				default:
-					GenLeaving.DoLeavingsFor(vehicle, map, mode, vehicle.OccupiedRect(), null, listOfLeavingsOut);
-					break;
-			}
+			float multiplier = RefundMaterialCount(vehicle.VehicleDef, mode);
+			vehicle.RefundMaterials(map, mode, multiplier: multiplier);
 		}
 
-		public static void RefundMaterials(this VehiclePawn vehicle, Map map, DestroyMode mode, float multiplier, Predicate<IntVec3> nearPlaceValidator = null)
+		public static float RefundMaterialCount(VehicleDef vehicleDef, DestroyMode mode)
 		{
-			List<ThingDefCountClass> thingDefs = vehicle.VehicleDef.buildDef.CostListAdjusted(vehicle.Stuff);
+			return mode switch
+			{
+				DestroyMode.Vanish => 0,
+				DestroyMode.WillReplace => 0,
+				DestroyMode.KillFinalize => 0.25f,
+				DestroyMode.KillFinalizeLeavingsOnly => 0,
+				DestroyMode.Deconstruct => vehicleDef.resourcesFractionWhenDeconstructed,
+				DestroyMode.FailConstruction => 0.5f,
+				DestroyMode.Cancel => 1,
+				DestroyMode.Refund => 1,
+				DestroyMode.QuestLogic => 0,
+				_ => throw new ArgumentException("Unknown destroy mode " + mode),
+			};
+		}
+
+		public static void RefundMaterials(this VehiclePawn vehicle, Map map, DestroyMode mode, float multiplier)
+		{
 			ThingOwner<Thing> thingOwner = new ThingOwner<Thing>();
-			foreach (ThingDefCountClass thingDefCountClass in thingDefs)
+			foreach (ThingDefCountClass thingDefCountClass in vehicle.VehicleDef.buildDef.CostListAdjusted(vehicle.Stuff))
 			{
 				if (thingDefCountClass.thingDef == ThingDefOf.ReinforcedBarrel && !Find.Storyteller.difficulty.classicMortars)
 				{
@@ -375,35 +385,76 @@ namespace Vehicles
 				Thing thing = vehicle.inventory.innerContainer[i];
 				thingOwner.TryAddOrTransfer(thing);
 			}
-			foreach (IRefundable refundable in vehicle.AllComps.Where(comp => comp is IRefundable))
+			foreach (ThingComp thingComp in vehicle.AllComps)
 			{
-				foreach ((ThingDef refundDef, float count) in refundable.Refunds)
+				if (thingComp is IRefundable refundable)
 				{
-					if (refundDef != null)
+					foreach ((ThingDef refundDef, float count) in refundable.Refunds)
 					{
-						int countRounded = GenMath.RoundRandom(count);
-						if (countRounded > 0)
+						if (refundDef != null)
 						{
-							Thing thing2 = ThingMaker.MakeThing(refundDef);
-							thing2.stackCount = countRounded;
-							thingOwner.TryAdd(thing2);
+							Thing thing = ThingMaker.MakeThing(refundDef);
+							thing.stackCount = GenMath.RoundRandom(count * multiplier);
+							thingOwner.TryAdd(thing);
 						}
 					}
 				}
 			}
-			RotatingList<IntVec3> occupiedCells = vehicle.OccupiedRect().Cells.InRandomOrder(null).ToRotatingList();
-			while (thingOwner.Count > 0)
+			TryDropAllOutsideVehicle(thingOwner, map, vehicle.OccupiedRect(), DestroyMode.Refund);
+		}
+
+		public static bool TryDropOutsideVehicle(this ThingOwner container, Thing thing, Map map, CellRect cellRect, DestroyMode mode = DestroyMode.Refund)
+		{
+			IntVec3 cell = cellRect.EdgeCells.RandomElement();
+			if (mode == DestroyMode.KillFinalize && !map.areaManager.Home[cell])
+			{
+				thing.SetForbidden(true, warnOnFail: false);
+			}
+			return container.TryDrop(thing, ThingPlaceMode.Near, thing.stackCount, out _, null, nearPlaceValidator: CanPlaceAt);
+
+			bool CanPlaceAt(IntVec3 cell)
+			{
+				if (!cell.InBounds(map))
+				{
+					return false;
+				}
+				if (map.thingGrid.ThingAt<VehiclePawn>(cell) != null)
+				{
+					return false;
+				}
+				return map.pathing.Normal.pathGrid.WalkableFast(cell);
+			}
+		}
+
+		public static bool TryDropAllOutsideVehicle(this ThingOwner container, Map map, CellRect cellRect, DestroyMode mode = DestroyMode.Refund)
+		{
+			RotatingList<IntVec3> occupiedCells = cellRect.EdgeCells.InRandomOrder().ToRotatingList();
+			while (container.Count > 0)
 			{
 				IntVec3 cell = occupiedCells.Next;
 				if (mode == DestroyMode.KillFinalize && !map.areaManager.Home[cell])
 				{
-					thingOwner[0].SetForbidden(true, false);
+					container[0].SetForbidden(true, warnOnFail: false);
 				}
-				if (!thingOwner.TryDrop(thingOwner[0], cell, map, ThingPlaceMode.Near, out _, null, nearPlaceValidator))
+				if (!container.TryDrop(container[0], cell, map, ThingPlaceMode.Near, out _, null, nearPlaceValidator: CanPlaceAt))
 				{
-					Log.Warning($"Failing to place all leavings for destroyed vehicle {vehicle} at {vehicle.OccupiedRect().CenterCell}");
-					return;
+					Log.Warning($"Failing to drop all from container {container.Owner}");
+					return false;
 				}
+			}
+			return true;
+
+			bool CanPlaceAt(IntVec3 cell)
+			{
+				if (!cell.InBounds(map))
+				{
+					return false;
+				}
+				if (map.thingGrid.ThingAt<VehiclePawn>(cell) != null)
+				{
+					return false;
+				}
+				return map.pathing.Normal.pathGrid.WalkableFast(cell);
 			}
 		}
 

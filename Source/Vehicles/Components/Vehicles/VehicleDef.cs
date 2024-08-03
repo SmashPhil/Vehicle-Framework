@@ -328,17 +328,27 @@ namespace Vehicles
 			return new Vector2(width, height);
 		}
 
-		public VehicleRole CreateRole(string roleKey)
+		public VehicleRole GetRole(string key)
 		{
 			if (!properties.roles.NullOrEmpty())
 			{
 				foreach (VehicleRole vehicleRole in properties.roles)
 				{
-					if (vehicleRole.key == roleKey)
+					if (vehicleRole.key == key)
 					{
-						return new VehicleRole(vehicleRole);
+						return vehicleRole;
 					}
 				}
+			}
+			return null;
+		}
+
+		public VehicleRole CreateRole(string key)
+		{
+			VehicleRole roleReference = GetRole(key);
+			if (roleReference != null)
+			{
+				return new VehicleRole(roleReference);
 			}
 			if (GetCompProperties<CompProperties_UpgradeTree>() is CompProperties_UpgradeTree compPropertiesUpgradeTree)
 			{
@@ -354,7 +364,7 @@ namespace Vehicles
 								{
 									foreach (RoleUpgrade roleUpgrade in vehicleUpgrade.roles)
 									{
-										if (roleUpgrade.key == roleKey && roleUpgrade.editKey.NullOrEmpty())
+										if (roleUpgrade.key == key && roleUpgrade.editKey.NullOrEmpty())
 										{
 											return RoleUpgrade.RoleFromUpgrade(roleUpgrade);
 										}
@@ -364,10 +374,10 @@ namespace Vehicles
 						}
 					}
 				}
-				Log.Error($"Unable to create role {roleKey}. Matching VehicleRole not found in VehicleDef ({defName}) or UpgradeTreeDef ({compPropertiesUpgradeTree.def.defName})");
+				Log.Error($"Unable to create role {key}. Matching VehicleRole not found in VehicleDef ({defName}) or UpgradeTreeDef ({compPropertiesUpgradeTree.def.defName})");
 				return null;
 			}
-			Log.Error($"Unable to create role {roleKey}. Matching VehicleRole not found in VehicleDef ({defName}).");
+			Log.Error($"Unable to create role {key}. Matching VehicleRole not found in VehicleDef ({defName}).");
 			return null;
 		}
 

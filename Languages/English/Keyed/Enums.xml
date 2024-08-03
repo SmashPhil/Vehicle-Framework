@@ -18,4 +18,7 @@
 	<VF_VehicleTracksNone>None</VF_VehicleTracksNone>
 	<VF_VehicleTracksVanilla>Vanilla</VF_VehicleTracksVanilla>
 	<VF_VehicleTracksFull>Full</VF_VehicleTracksFull>
+
+	<VF_RoadType_Prioritize>Prioritize</VF_RoadType_Prioritize>
+	<VF_RoadType_Avoid>Avoid</VF_RoadType_Avoid>
 </LanguageData>

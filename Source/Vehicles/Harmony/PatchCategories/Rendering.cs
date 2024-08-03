@@ -250,24 +250,16 @@ namespace Vehicles
 			return true;
 		}
 
-		public static void DrawGhostVehicle(IntVec3 center, Rot8 rot, ThingDef thingDef, Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
+		private static void DrawGhostVehicle(IntVec3 center, Rot8 rot, ThingDef thingDef, Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
 		{
 			if (thingDef is VehicleBuildDef def)
 			{
 				VehicleDef vehicleDef = def.thingToSpawn;
-				Vector3 loc = GenThing.TrueCenter(center, rot, def.Size, drawAltitude.AltitudeFor());
-				foreach ((Graphic graphic, float rotation) in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
-				{
-					graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, def, thing, /*rot.AsAngle +*/ rotation);
-				}
-				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets)
-				{
-					vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
-				}
+				VehicleGhostUtility.DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude, thing: thing);
 			}
 		}
 
-		public static IEnumerable<CodeInstruction> RenderOverlaysCenterVehicle(IEnumerable<CodeInstruction> instructions)
+		private static IEnumerable<CodeInstruction> RenderOverlaysCenterVehicle(IEnumerable<CodeInstruction> instructions)
 		{
 			List<CodeInstruction> instructionList = instructions.ToList();
 			for (int i = 0; i < instructionList.Count; i++)
@@ -284,7 +276,7 @@ namespace Vehicles
 			}
 		}
 
-		public static Vector3 VehicleTrueCenterReroute(Vector3 trueCenter, Thing thing)
+		private static Vector3 VehicleTrueCenterReroute(Vector3 trueCenter, Thing thing)
 		{
 			if (thing is VehiclePawn vehicle)
 			{
@@ -293,7 +285,7 @@ namespace Vehicles
 			return trueCenter;
 		}
 
-		public static bool TrueCenterVehicle(Thing t, ref Vector3 __result)
+		private static bool TrueCenterVehicle(Thing t, ref Vector3 __result)
 		{
 			if (t is VehiclePawn vehicle)
 			{
@@ -312,22 +304,22 @@ namespace Vehicles
 		}
 
 		/* ---------------- Hooks onto Targeter calls ---------------- */
-		public static void DrawTargeters()
+		private static void DrawTargeters()
 		{
 			Targeters.OnGUITargeters();
 		}
 
-		public static void ProcessTargeterInputEvents()
+		private static void ProcessTargeterInputEvents()
 		{
 			Targeters.ProcessTargeterInputEvents();
 		}
 
-		public static void TargeterUpdate()
+		private static void TargeterUpdate()
 		{
 			Targeters.UpdateTargeters();
 		}
 
-		public static void TargeterStop()
+		private static void TargeterStop()
 		{
 			Targeters.StopAllTargeters();
 		}

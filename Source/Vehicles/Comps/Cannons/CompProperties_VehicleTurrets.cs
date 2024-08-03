@@ -11,7 +11,7 @@ namespace Vehicles
 		//deploy time in seconds
 		//[PostToSettings(Label = "VF_DeployTime", Translate = true, UISettingsType = UISettingsType.FloatBox)]
 		[NumericBoxValues(MinValue = 0)]
-		[ActionOnSettingsInput(typeof(CompProperties_VehicleTurrets), nameof(CompProperties_VehicleTurrets.RecacheAllTurrets))]
+		[ActionOnSettingsInput(typeof(CompProperties_VehicleTurrets), nameof(RecacheAllTurrets))]
 		public float deployTime = 0;
 
 		public List<VehicleTurret> turrets = new List<VehicleTurret>();

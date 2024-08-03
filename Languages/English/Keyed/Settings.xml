@@ -96,6 +96,8 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	
 	<!-- Combat -->
 	<VF_CombatSettings>Combat</VF_CombatSettings>
+	<VF_ShellExplosionsOnWater>Reduce Explosions on Water</VF_ShellExplosionsOnWater>
+	<VF_ShellExplosionsOnWaterTooltip>Explosive shells over water have their explosion radius reduced and sound effect changed to a splash.</VF_ShellExplosionsOnWaterTooltip>
 	<VF_RunOverPawns>Run Over Pawns</VF_RunOverPawns>
 	<VF_RunOverPawnsTooltip>Vehicles can run over pawns and apply blunt damage based on mass and speed.</VF_RunOverPawnsTooltip>
 	<VF_ChanceToRunOverFriendlies>Friendly Fire Chance</VF_ChanceToRunOverFriendlies>

@@ -25,13 +25,23 @@ namespace Vehicles
 			new CurvePoint(150, 20),
 		};
 
+		private static readonly HashSet<PawnsArrivalModeDef> vehicleArrivalModes = new HashSet<PawnsArrivalModeDef>();
+
 		private static readonly List<VehicleDef> availableVehicleDefs = new List<VehicleDef>();
 
 		public void PatchMethods()
 		{
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
-				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns), 
+				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
+				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkInGroups);
+				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkInDistributed);
+
+				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(LordJob_AssaultColony), nameof(LordJob_AssaultColony.CreateGraph)),
+				//	new HarmonyMethod(typeof(NPCAI),
+				//	nameof()));
+
+				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns),
 						parameters: new Type[] { typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool) }),
 					prefix: new HarmonyMethod(typeof(NPCAI),
 					nameof(InjectVehiclesIntoPawnKindGroupPrepare)),
@@ -49,18 +59,23 @@ namespace Vehicles
 		private static void InjectVehiclesIntoPawnKindGroupPrepare(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
 		{
 			Debug.Message($"Attempting generation for raid. Faction={parms.faction?.def.LabelCap ?? "Null"}");
-			if (parms.faction == null || parms.faction.def == FactionDefOf.Mechanoid)
+			if (parms.faction == null)
 			{
 				return;
 			}
-
+			var raiderDME = parms.faction.def.GetModExtension<VehicleRaiderDefModExtension>();
+			if (raiderDME == null)
+			{
+				return;
+			}
+			HashSet<PawnsArrivalModeDef> allowedArrivalModes = raiderDME.arrivalModes ?? vehicleArrivalModes;
+			
 			if (!availableVehicleDefs.NullOrEmpty())
 			{
 				Log.Warning($"Injecting vehicles into PawnKingGroup when previous iteration hasn't finished.");
 			}
-
 			Debug.Message($"[PREFIX] Generating with points: {parms.points}");
-			float vehicleBudget = (parms.points - 250) / 2;
+			float vehicleBudget = raiderDME.pointMultiplier * (parms.points - 250) / 2;
 			if (vehicleBudget > 0)
 			{
 				float budgetSpent = 0;

@@ -1,0 +1,116 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1659</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+A memory leak was brought to my attention recently. A fix for this issue is included within this update.  I've also made this change retroactively, meaning those of you who still play on the 1.4 version will also receive this bugfix.
+
+Since the release of Anomaly and RimWorld 1.5, I've received many caravan related bug reports. I'll be doing a 2nd pass over caravan mechanics to fix some longstanding issues, as well as spend some time improving caravan UI.
+
+As for vehicle raids, I'm still working on the AI so the first iteration isn't ready yet, but I'll be sure to post an announcement when it goes live. It's a very time consuming process and bugfixes / performance improvements always have priority. But keep an eye out! There will be a toggle in the mod settings for this experimental feature in the near future.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Thread safe coroutine queue implementation wouldn't clear after scene changes, resulting in memory leak on save reloads.
+
+- Duplicate path and regen calculations during map generation.
+
+- Beach size would still be set to max vanilla size with beach multiplier set to 0%
+
+- Compatibility patch for Roads of the Rim unable to find class type.
+
+- Event maps not unfogging the map when arriving from an aerial vehicle.
+
+- 1.4 version would still try to fetch build date.
+
+- Red squares would render upon constructing a wall.
+
+- Vehicles with overlays would throw an error when repainting.
+
+- Pawn reservations wouldn't clear properly when the pawn died, resulting in the vehicle being unable to be destroyed.
+
+- Prisoner faction would sometimes reset upon traveling in an aerial vehicle.
+
+- Upgrade WorkGiver would fail to designate job to pawns, resulting in pawns getting frozen until interrupted or the upgrade was completed.
+
+- Colonists being able to be ordered to board non-player vehicles.
+
+- Input text boxes would become right justified upon exiting the Vehicle Framework mod settings.
+
+- Upgradeable aerial vehicles would throw exceptions upon leaving the map.
+
+- Role upgrades wouldn't recache turret status.
+
+- Turret upgrades would not pull back the right turret if same key as default turret is used.
+
+- Turret deployment not canceling targeting
+
+- Most recently spawned turret's settings would be applied to all vehicles on the map upon loading a save.
+
+- PawnRenderer not rendering at right offset with turret and overlay drawOffsets
+
+- Missing translation keys
+&lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Improved rendering performance of vehicle UI icons.
+
+- Reduced memory allocation for region building.
+
+- Improved map generation time for vehicle regions.
+
+Note: Due to the memory-leak fix, map generation has been made syncronous for all vehicle grids. This will be optimized in a later update.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Turret auto-loading settings will persist even if turret is removed from an upgrade and re-added later.
+
+&lt;b&gt;Players&lt;/b&gt;
+- Added 'Off Road Multiplier' to VF Mod Settings under 'Vehicles'
+
+- Upgrade removal reduced to 30% of work cost.
+&lt;b&gt;Modders&lt;/b&gt;
+- Added more upgrade types
+
+- Added deploy/undeploy event types for CompVehicleTurrets
+
+- Added upgrade states, allowing for upgrades that can be reapplied (such as swapping turrets)
+
+- Added texture swapping
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

@@ -13,12 +13,13 @@ namespace Vehicles
 		public const int NotificationSquishInterval = 60;
 		public int delayLandingTicks;
 		private bool punchedRoof = false;
+		public Rot4 rotatePostLanding = Rot4.Invalid;
 
 		private static CompProperties_VehicleLauncher vehicleLauncherProps;
 		
-		private static readonly Color ghostColor = new Color(1, 1, 1, 0.5f);
-		
 		public bool LandingSpotOccupied { get; private set; }
+
+		public Rot4 LandingRotation => rotatePostLanding.IsValid ? rotatePostLanding : Rotation;
 
 		public CompProperties_VehicleLauncher VehicleLauncherProps
 		{
@@ -61,7 +62,7 @@ namespace Vehicles
 				{
 					LandingSpotOccupied |= thing is VehiclePawn;
 				}
-				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(Position, Rotation))
+				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(Position, LandingRotation))
 				{
 					VehicleDamager.NotifyNearbyPawnsOfDangerousPosition(Map, cell);
 				}
@@ -72,13 +73,13 @@ namespace Vehicles
 		{
 			vehicle.CompVehicleLauncher.launchProtocol.Release();
 			vehicle.CompVehicleLauncher.inFlight = false;
-			if (VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(Position, Rotation), Map))
+			if (VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(Position, LandingRotation), Map))
 			{
 				GenExplosion.DoExplosion(Position, Map, Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z), DamageDefOf.Bomb, vehicle);
 			}
 			else
 			{
-				GenSpawn.Spawn(vehicle, Position, Map, Rotation);
+				GenSpawn.Spawn(vehicle, Position, Map, LandingRotation);
 				vehicle.TryDamageObstructions();
 				if (VehicleMod.settings.main.deployOnLanding)
 				{
@@ -92,7 +93,8 @@ namespace Vehicles
 		{
 			if (VehicleMod.settings.main.drawLandingGhost)
 			{
-				GhostDrawer.DrawGhostThing(Position, Rotation, vehicle.VehicleDef, vehicle.VehicleGraphic, LandingSpotOccupied ? LandingTargeter.GhostOccupiedColor : ghostColor, AltitudeLayer.Blueprint, vehicle);
+				Color ghostcolor = LandingSpotOccupied ? LandingTargeter.GhostOccupiedColor : VehicleGhostUtility.whiteGhostColor;
+				GhostDrawer.DrawGhostThing(Position, LandingRotation, vehicle.VehicleDef, vehicle.VehicleGraphic, ghostcolor, AltitudeLayer.Blueprint, vehicle);
 			}
 		}
 
@@ -100,7 +102,7 @@ namespace Vehicles
 		{
 			punchedRoof = true;
 
-			CellRect cellRect = GenAdj.OccupiedRect(Position, Rotation, vehicle.VehicleDef.Size);
+			CellRect cellRect = GenAdj.OccupiedRect(Position, LandingRotation, vehicle.VehicleDef.Size);
 			if (cellRect.Any(cell => Ext_Vehicles.IsRoofed(cell, Map)))
 			{
 				RoofDef roofDef = cellRect.Cells.First(cell => Ext_Vehicles.IsRoofed(cell, Map)).GetRoof(Map);

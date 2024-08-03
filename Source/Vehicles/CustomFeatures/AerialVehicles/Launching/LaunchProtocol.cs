@@ -630,7 +630,7 @@ namespace Vehicles
 				}
 				if (vehicle.CompVehicleLauncher.ControlInFlight && vehicle.CompVehicleTurrets != null) //REDO - strafe specific properties
 				{
-					//yield return FloatMenuOption_StrafeMap(parent, tile);
+					//yield return FloatMenuOption_StrafeMap(mapParent, tile);
 				}
 			}
 			if (Find.WorldObjects.SettlementAt(tile) is Settlement settlement)

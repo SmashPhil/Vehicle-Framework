@@ -57,6 +57,7 @@ namespace Vehicles
 		public float delayDeployOnLanding = 0;
 
 		/* Combat */
+		public bool reduceExplosionsOnWater = true;
 		public bool runOverPawns = true;
 		public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.Vanilla;
 		public float friendlyFireChance = 0.5f;
@@ -114,6 +115,7 @@ namespace Vehicles
 			delayDeployOnLanding = 0;
 
 			/* Combat */
+			reduceExplosionsOnWater = true;
 			runOverPawns = true;
 			friendlyFire = VehicleTracksFriendlyFire.Vanilla;
 			friendlyFireChance = 0.5f;
@@ -163,6 +165,7 @@ namespace Vehicles
 			//Scribe_Values.Look(ref dynamicWorldDrawing, nameof(dynamicWorldDrawing), defaultValue: false);
 			Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
+			Scribe_Values.Look(ref reduceExplosionsOnWater, nameof(reduceExplosionsOnWater), defaultValue: true);
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
 			Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.Vanilla);
 			Scribe_Values.Look(ref friendlyFireChance, nameof(friendlyFireChance), defaultValue: 0.5f);
@@ -275,6 +278,7 @@ namespace Vehicles
 
 					listingStandard.Header("VF_CombatSettings".Translate(), ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
 					listingStandard.Gap(4);
+					listingStandard.CheckboxLabeled("VF_ShellExplosionsOnWater".Translate(), ref reduceExplosionsOnWater, "VF_ShellExplosionsOnWaterTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_RunOverPawns".Translate(), ref runOverPawns, "VF_RunOverPawnsTooltip".Translate());
 					if (runOverPawns)
 					{
@@ -285,7 +289,6 @@ namespace Vehicles
 								VehicleTracksFriendlyFire.None => "VF_VehicleTracksNone".Translate(),
 								VehicleTracksFriendlyFire.Vanilla => "VF_VehicleTracksVanilla".Translate(),
 								VehicleTracksFriendlyFire.Custom => "ScenariosCustom".Translate(),
-								//VehicleTracksFriendlyFire.Full => "VF_VehicleTracksFull".Translate(),
 								_ => friendlyFire.ToString(),
 							};
 						});

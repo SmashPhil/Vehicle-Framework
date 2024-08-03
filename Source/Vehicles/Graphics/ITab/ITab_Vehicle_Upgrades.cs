@@ -151,7 +151,10 @@ namespace Vehicles
 		private void RecacheTextEntries()
 		{
 			textEntries.Clear();
+
+			textEntryHeight = 0;
 			return;
+
 			if (SelectedNode != null && SelectedNode.upgradeExplanation != null)
 			{
 				textEntryHeight = Text.CalcHeight(SelectedNode.upgradeExplanation, InfoScreenWidth - 10);
@@ -165,7 +168,7 @@ namespace Vehicles
 						textEntries.Add(textEntry);
 					}
 				}
-				textEntryHeight = textEntries.Count * InfoPanelRowHeight;
+				textEntryHeight = textEntries.Count * Text.LineHeightOf(GameFont.Small);
 			}
 		}
 
@@ -214,6 +217,29 @@ namespace Vehicles
 			}
 			renderTurrets.Clear();
 			excludeTurrets.Clear();
+		}
+
+		private IEnumerable<UpgradeNode> GetDisablerNodes(UpgradeNode upgradeNode)
+		{
+			if (!upgradeNode.disableIfUpgradeNodeEnabled.NullOrEmpty())
+			{
+				UpgradeNode disableNode = Vehicle.CompUpgradeTree.Props.def.GetNode(upgradeNode.disableIfUpgradeNodeEnabled);
+				if (disableNode != null)
+				{
+					yield return disableNode;
+				}
+			}
+			if (!upgradeNode.disableIfUpgradeNodesEnabled.NullOrEmpty())
+			{
+				foreach (string key in upgradeNode.disableIfUpgradeNodesEnabled)
+				{
+					UpgradeNode disableNode = Vehicle.CompUpgradeTree.Props.def.GetNode(key);
+					if (disableNode != null)
+					{
+						yield return disableNode;
+					}
+				}
+			}
 		}
 
 		private Vector2 GridCoordinateToScreenPos(IntVec2 coord)
@@ -370,23 +396,26 @@ namespace Vehicles
 						Vector2 end = GridCoordinateToScreenPos(prerequisite.GridCoordinate);
 
 						Color color = DisabledLineColor;
-						if (!string.IsNullOrEmpty(upgradeNode.disableIfUpgradeNodeEnabled) && Vehicle.CompUpgradeTree.Props.def.GetNode(upgradeNode.disableIfUpgradeNodeEnabled) is UpgradeNode prereqNode)
+
+						if (Vehicle.CompUpgradeTree.NodeUnlocked(upgradeNode))
 						{
-							Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosAdjusted(prereqNode.GridCoordinate, prereqNode.drawSize), prerequisite.drawSize);
+							color = Color.white;
+						}
+						foreach (UpgradeNode disabledNode in GetDisablerNodes(upgradeNode))
+						{
+							Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosAdjusted(disabledNode.GridCoordinate, disabledNode.drawSize), prerequisite.drawSize);
 							if (!Vehicle.CompUpgradeTree.Upgrading && Mouse.IsOver(prerequisiteRect))
 							{
 								color = Color.red;
 							}
-						}
-						else if (Vehicle.CompUpgradeTree.NodeUnlocked(upgradeNode))
-						{
-							color = Color.white;
 						}
 						Widgets.DrawLine(start, end, color, 2f);
 					}
 				}
 			}
 			GUIState.Reset();
+
+			Rect detailRect = Rect.zero;
 
 			foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
 			{
@@ -430,7 +459,12 @@ namespace Vehicles
 					}
 				}
 
-				if (Widgets.ButtonInvisible(upgradeRect, true))
+				if (InfoNode != null)
+				{
+					detailRect = GetDetailRect(rect);
+				}
+
+				if (!Mouse.IsOver(detailRect) && Widgets.ButtonInvisible(upgradeRect, true))
 				{
 					if (SelectedNode != upgradeNode)
 					{
@@ -451,7 +485,7 @@ namespace Vehicles
 
 			if (InfoNode != null)
 			{
-				Rect detailRect = GetDetailRect(rect);
+				detailRect = GetDetailRect(rect);
 				//detailRect.position += TabRect.position;
 				Widgets.BeginGroup(detailRect);
 				{
@@ -559,21 +593,10 @@ namespace Vehicles
 			Rect descriptionRect = new Rect(innerInfoRect.x, costListRect.y + costY, innerInfoRect.width, descriptionHeight);
 			Widgets.Label(descriptionRect, InfoNode.description);
 			
-			if (Vehicle.CompUpgradeTree.NodeUnlocking == InfoNode)
-			{
-				//string workLabel = $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
-				//textHeight = Text.CalcHeight(workLabel, upgradeInfoRect.width);
-				//Rect workLabelRect = new Rect(upgradeInfoRect.x, upgradeInfoRect.y, upgradeInfoRect.width, textHeight);
-				//Widgets.Label(workLabelRect, workLabel);
-
-				//upgradeInfoRect.y += textHeight;
-				//upgradeInfoRect.height -= textHeight;
-			}
-
 			if (SelectedNode != null)
 			{
 				bool hasGraphics = SelectedNode.HasGraphics;
-				bool showUpgradeList = false; //!SelectedNode.upgrades.NullOrEmpty();
+				bool showUpgradeList = !SelectedNode.upgrades.NullOrEmpty();
 
 				if (hasGraphics || showUpgradeList)
 				{
@@ -583,7 +606,7 @@ namespace Vehicles
 				Rect textEntryRect = new Rect(innerInfoRect.x, descriptionRect.yMax + 10, innerInfoRect.width, textEntryHeight);
 				if (showUpgradeList)
 				{
-					DrawUpgradeList(textEntryRect);
+					//DrawUpgradeList(textEntryRect);
 				}
 
 				if (hasGraphics)
@@ -597,7 +620,6 @@ namespace Vehicles
 
 				Rect tempButtonRect = buttonRect;
 				tempButtonRect.width = innerInfoRect.width;
-
 			}
 
 			GUIState.Pop();
@@ -610,14 +632,14 @@ namespace Vehicles
 			Rect innerInfoRect = rect.ContractedBy(5);
 
 			Rect vehicleOriginalRect = new Rect(innerInfoRect.x, innerInfoRect.y, innerInfoRect.height, innerInfoRect.height);
-			VehicleGraphics.DrawVehicle(vehicleOriginalRect, Vehicle);
+			VehicleGraphics.DrawVehicleDef(vehicleOriginalRect, Vehicle.VehicleDef);
 
 			float arrowSize = InfoPanelArrowPointerSize;
 			Rect arrowPointerRect = new Rect(vehicleOriginalRect.xMax + 5, vehicleOriginalRect.y + vehicleOriginalRect.height / 2 - arrowSize / 2, arrowSize, arrowSize);
 			Widgets.DrawTextureFitted(arrowPointerRect, TexData.TutorArrowRight, 1);
 
 			Rect vehicleNewRect = new Rect(arrowPointerRect.xMax + 5, vehicleOriginalRect.y, vehicleOriginalRect.width, vehicleOriginalRect.height);
-			VehicleGraphics.DrawVehicle(vehicleNewRect, Vehicle, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode), extraTurrets: renderTurrets, excludeTurrets: excludeTurrets);
+			VehicleGraphics.DrawVehicleDef(vehicleNewRect, Vehicle.VehicleDef, extraOverlays: Vehicle.CompUpgradeTree.Props.TryGetOverlays(InfoNode), extraTurrets: renderTurrets, excludeTurrets: excludeTurrets);
 
 			GUIState.Pop();
 		}
@@ -796,9 +818,9 @@ namespace Vehicles
 
 			bool DisabledAndMouseOver()
 			{
-				if (!string.IsNullOrEmpty(node.disableIfUpgradeNodeEnabled) && Vehicle.CompUpgradeTree.Props.def.GetNode(node.disableIfUpgradeNodeEnabled) is UpgradeNode prereqNode)
+				foreach (UpgradeNode disabledNode in GetDisablerNodes(node))
 				{
-					Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosAdjusted(prereqNode.GridCoordinate, prereqNode.drawSize), prereqNode.drawSize);
+					Rect prerequisiteRect = new Rect(GridCoordinateToScreenPosAdjusted(disabledNode.GridCoordinate, disabledNode.drawSize), disabledNode.drawSize);
 					if (!Vehicle.CompUpgradeTree.Upgrading && Mouse.IsOver(prerequisiteRect))
 					{
 						return true;

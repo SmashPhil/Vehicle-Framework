@@ -219,7 +219,14 @@ namespace Vehicles
 						Log.Error($"Attempting to create new role with existing key. If the upgrade is for modifying an existing role, an editKey must be specified.");
 						return;
 					}
-					vehicle.AddRole(RoleUpgrade.RoleFromUpgrade(roleUpgrade));
+					if (vehicle.VehicleDef.GetRole(roleUpgrade.key) is VehicleRole roleReference)
+					{
+						vehicle.AddRole(new VehicleRole(roleReference));
+					}
+					else
+					{
+						vehicle.AddRole(RoleUpgrade.RoleFromUpgrade(roleUpgrade));
+					}
 				}
 			}
 		}

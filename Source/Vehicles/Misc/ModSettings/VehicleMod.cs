@@ -22,8 +22,6 @@ namespace Vehicles
 		public static VehicleMod mod;
 		public static VehicleDef selectedDef;
 
-		public static Color SemiLightGrey = new Color(0.1f, 0.1f, 0.1f);
-
 		public static Vector2 saveableFieldsScrollPosition;
 		public static Vector2 vehicleDefsScrollPosition;
 		public static float scrollableViewHeight;
@@ -226,12 +224,12 @@ namespace Vehicles
 					CurrentSection = settings.vehicles;
 					_ = VehicleDefs; //Trigger recache
 				}, () => CurrentSection == settings.vehicles));
-				/*
+#if DEBUG
 				tabs.Add(new TabRecord("VF_Upgrades".Translate(), delegate()
 				{
 					CurrentSection = settings.upgrades;
 				}, () => CurrentSection == settings.upgrades));
-				*/
+#endif
 			}
 			tabs.Add(new TabRecord("VF_DevMode".Translate(), delegate()
 			{

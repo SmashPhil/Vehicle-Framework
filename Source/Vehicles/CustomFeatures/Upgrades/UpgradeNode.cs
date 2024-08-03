@@ -36,10 +36,16 @@ namespace Vehicles
 		public List<string> replaces;
 
 		public string disableIfUpgradeNodeEnabled; //TODO - Remove in 1.6 in favor of disable conditions
+		public List<string> disableIfUpgradeNodesEnabled; //TODO - Remove in 1.6 in favor of disable conditions
 
 		public List<ResearchProjectDef> researchPrerequisites = new List<ResearchProjectDef>();
 		public List<string> prerequisiteNodes = new List<string>();
+
+		[LoadAlias("costList")] //TODO 1.6 - switch to costList
 		public List<ThingDefCountClass> ingredients = new List<ThingDefCountClass>();
+
+		public float refundFraction = 0.5f; //Default in vanilla deconstructing is 50%
+		public SimpleDictionary<ThingDef, float> refundLeavings = new SimpleDictionary<ThingDef, float>();
 
 		public List<GraphicDataOverlay> graphicOverlays;
 
@@ -170,71 +176,13 @@ namespace Vehicles
 			return false;
 		}
 
-		public bool IsStuffable(ThingDef def)
-		{
-			return false;
-			//foreach (IngredientFilter ingredient in ingredients)
-			//{
-			//	if (ingredient.StuffableDef(def))
-			//	{
-			//		return true;
-			//	}
-			//}
-			//return false;
-		}
-
-		public IEnumerable<ThingDefCountClass> PotentiallyMissingIngredients(Pawn pawn, Map map)
-		{
-			foreach (ThingDefCountClass thingDefCount in ingredients)
-			{
-				bool flag = false;
-				List<Thing> list = map.listerThings.ThingsInGroup(ThingRequestGroup.HaulableEver);
-				for (int j = 0; j < list.Count; j++)
-				{
-					Thing thing = list[j];
-					if ((pawn is null || !thing.IsForbidden(pawn)) && !thing.Position.Fogged(map))
-					{
-						flag = true;
-						break;
-					}
-				}
-				if (!flag)
-				{
-					yield return thingDefCount;
-					//if (ingredient.IsFixedIngredient)
-					//{
-					//	yield return ingredient.CountClass;
-					//}
-					//else
-					//{
-					//	ThingDef thingDef = (from x in ingredient.filter.AllowedThingDefs
-					//	orderby x.BaseMarketValue
-					//	select x).FirstOrDefault((ThingDef x) => ingredient.filter.Allows(x));
-					//	if (thingDef != null)
-					//	{
-					//		yield return new ThingDefCountClass(thingDef, ingredient.count);
-					//	}
-					//}
-				}
-			}
-			yield break;
-		}
-
 		public int MatchedItemCount(VehiclePawn vehicle, ThingDef def)
 		{
-			if (IsIngredient(def) && IsStuffable(def))
-			{
-				return vehicle.CompUpgradeTree.upgradeContainer.InnerListForReading.Where(t => t.def.stuffProps.categories.NotNullAndAny(c => def.stuffProps.categories.Contains(c))).Count();
-			}
 			return vehicle.CompUpgradeTree.upgradeContainer.InnerListForReading.Where(t => t.def == def).Count();
 		}
 
 		public int TotalItemCountRequired(ThingDef def)
 		{
-			//if (IsIngredient(def) && IsStuffable(def))
-			//{
-			//	return ingredients.FirstOrDefault(i => i.stuffableDefs.Contains(def)).count;
-			//}
 			return ingredients.FirstOrDefault(thingDefCount => thingDefCount.thingDef == def).count;
 		}
 
@@ -267,6 +215,17 @@ namespace Vehicles
 				{
 					upgrade.Init(this);
 					HasGraphics |= upgrade.HasGraphics;
+				}
+			}
+		}
+
+		public void PostLoad()
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (Upgrade upgrade in upgrades)
+				{
+					upgrade.PostLoad();
 				}
 			}
 		}

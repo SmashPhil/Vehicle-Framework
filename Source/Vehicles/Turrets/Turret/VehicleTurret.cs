@@ -28,6 +28,8 @@ namespace Vehicles
 		public string key;
 		public string groupKey;
 
+		[Unsaved]
+		public VehicleTurret reference;
 		[TweakField]
 		public VehicleTurretDef turretDef;
 
@@ -480,7 +482,6 @@ namespace Vehicles
 			}
 		}
 
-		//TODO 1.6 - rename
 		public virtual List<TurretDrawData> TurretGraphics
 		{
 			get
@@ -539,9 +540,17 @@ namespace Vehicles
 		{
 			get
 			{
-				yield return SubGizmo_RemoveAmmo(this);
-				yield return SubGizmo_ReloadFromInventory(this);
+				if (turretDef.magazineCapacity > 0)
+				{
+					if (turretDef.ammunition != null)
+					{
+						yield return SubGizmo_RemoveAmmo(this);
+					}
+					yield return SubGizmo_ReloadFromInventory(this);
+				}
+
 				yield return SubGizmo_FireMode(this);
+
 				if (autoTargeting)
 				{
 					yield return SubGizmo_AutoTarget(this);
@@ -688,6 +697,7 @@ namespace Vehicles
 
 		public void Init(VehicleTurret reference)
 		{
+			this.reference = reference;
 			groupKey = reference.groupKey;
 			parentKey = reference.parentKey;
 
@@ -1093,7 +1103,7 @@ namespace Vehicles
 					}
 					else
 					{
-						TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+						TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell);
 						if (attachedTo != null)
 						{
 							TurretRotationTargeted -= attachedTo.TurretRotation;
@@ -1457,7 +1467,7 @@ namespace Vehicles
 
 		protected virtual void DrawAimPie()
 		{
-			if (TargetLocked && ReadyToFire)
+			if (TargetLocked && ReadyToFire && Find.Selector.SingleSelectedThing == vehicle)
 			{
 				float facing = cannonTarget.Thing != null ? (cannonTarget.Thing.DrawPos - TurretLocation).AngleFlat() : (cannonTarget.Cell - TurretLocation.ToIntVec3()).AngleFlat;
 				GenDraw.DrawAimPieRaw(TurretLocation + new Vector3(aimPieOffset.x, Altitudes.AltInc, aimPieOffset.y).RotatedBy(TurretRotation), facing, (int)(PrefireTickCount * 0.5f));
@@ -1596,7 +1606,7 @@ namespace Vehicles
 			}
 			else
 			{
-				TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell, vehicle.Map);
+				TurretRotationTargeted = TurretLocation.ToIntVec3().AngleToCell(cannonTarget.Cell);
 				if (attachedTo != null)
 				{
 					TurretRotationTargeted -= attachedTo.TurretRotation;
@@ -2059,7 +2069,11 @@ namespace Vehicles
 				},
 				onClick = delegate ()
 				{
-					if (turret.turretDef.genericAmmo)
+					if (turret.turretDef.ammunition is null)
+					{
+						turret.ReloadCannon();
+					}
+					else if (turret.turretDef.genericAmmo)
 					{
 						if (!turret.vehicle.inventory.innerContainer.Contains(turret.turretDef.ammunition.AllowedThingDefs.FirstOrDefault()))
 						{
@@ -2079,7 +2093,7 @@ namespace Vehicles
 							ThingDef ammo = ammoAvailable[i];
 							options.Add(new FloatMenuOption(ammoAvailable[i].LabelCap, delegate ()
 							{
-								turret.ReloadCannon(ammo, true);
+								turret.ReloadCannon(ammo, ammo != turret.savedAmmoType);
 							}));
 						}
 						if (options.NullOrEmpty())

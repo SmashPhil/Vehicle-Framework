@@ -38,6 +38,7 @@ namespace Vehicles
 					{
 						yield return cell;
 					}
+					SetAllClean();
 				}
 			}
 		}
@@ -189,7 +190,9 @@ namespace Vehicles
 					}
 				}
 				region.links.Clear();
+#if !DISABLE_WEIGHTS
 				region.ClearWeights();
+#endif
 				if (addCellsToDirtyCells)
 				{
 					lock (dirtyCellsLock)

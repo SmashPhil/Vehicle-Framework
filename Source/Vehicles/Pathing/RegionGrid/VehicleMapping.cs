@@ -3,12 +3,15 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Linq;
+using System.Threading.Tasks;
+using System.Text;
 using Verse;
 using UnityEngine;
 using HarmonyLib;
 using SmashTools;
 using SmashTools.Performance;
-using System.Text;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Vehicles
 {
@@ -30,11 +33,13 @@ namespace Vehicles
 
 		internal DedicatedThread dedicatedThread;
 
-		private bool initialized;
-
 		public VehicleMapping(Map map) : base(map)
 		{
 		}
+
+		public bool ComponentsInitialized { get; private set; } = false;
+
+		public bool RegionsInitialized { get; private set; } = false;
 
 		/// <summary>
 		/// VehicleDefs which have created and 'own' a set of regions
@@ -92,7 +97,7 @@ namespace Vehicles
 					return null;
 				}
 #endif
-				if (!initialized)
+				if (!ComponentsInitialized)
 				{
 					ConstructComponents();
 				}
@@ -190,16 +195,36 @@ namespace Vehicles
 		{
 			base.FinalizeInit();
 
-			if (!initialized)
+			if (!ComponentsInitialized)
 			{
 				ConstructComponents();
 			}
 
 			Ext_Map.StashLongEventText();
-
+			
 			StringBuilder eventTextBuilder = new StringBuilder();
 
-			DeepProfiler.Start("Vehicle PathGrids".Translate());
+			DeepProfiler.Start("Vehicle PathGrids");
+			GeneratePathGrids(eventTextBuilder);
+			DeepProfiler.End();
+
+			DeepProfiler.Start("Vehicle Regions");
+			GenerateRegionsAsync(eventTextBuilder);
+			DeepProfiler.End();
+
+			DeepProfiler.Start("Fetching DedicatedThread");
+			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
+			DeepProfiler.End();
+
+			Ext_Map.RevertLongEventText();
+		}
+
+		private void GeneratePathGrids(StringBuilder eventTextBuilder)
+		{
+			if (vehicleData.NullOrEmpty())
+			{
+				return;
+			}
 			foreach (VehiclePathData vehiclePathData in vehicleData)
 			{
 				//Needs to check validity, non-pathing vehicles are still indexed since sequential vehicles will have higher index numbers
@@ -213,7 +238,14 @@ namespace Vehicles
 					vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
 				}
 			}
-			DeepProfiler.End();
+		}
+
+		private void GenerateRegions(StringBuilder eventTextBuilder)
+		{
+			if (owners.NullOrEmpty())
+			{
+				return;
+			}
 
 			DeepProfiler.Start("Vehicle Regions");
 			foreach (VehicleDef vehicleDef in owners)
@@ -229,11 +261,33 @@ namespace Vehicles
 			}
 			DeepProfiler.End();
 
-			DeepProfiler.Start("Fetching DedicatedThread");
-			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
+			RegionsInitialized = true;
+		}
+
+		private void GenerateRegionsAsync(StringBuilder eventTextBuilder)
+		{
+			if (owners.NullOrEmpty())
+			{
+				return;
+			}
+			if (owners.Count < 3)
+			{
+				GenerateRegions(eventTextBuilder);
+				return;
+			}
+
+			LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
+
+			DeepProfiler.Start("Vehicle Regions");
+			Parallel.ForEach(owners, delegate (VehicleDef vehicleDef)
+			{
+				VehiclePathData vehiclePathData = this[vehicleDef];
+				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
+				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
+			});
 			DeepProfiler.End();
 
-			Ext_Map.RevertLongEventText();
+			RegionsInitialized = true;
 		}
 
 		/// <summary>
@@ -247,7 +301,7 @@ namespace Vehicles
 
 			owners.Clear();
 
-			initialized = true;
+			ComponentsInitialized = true;
 
 			GenerateAllPathData();
 

@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using SmashTools;
 using UnityEngine;
 using Verse;
 
@@ -14,11 +15,12 @@ namespace Vehicles
 
 		public Dialog_GiveVehicleName(VehiclePawn vehicle)
 		{
-			forcePause = true;
+			forcePause = false;
 			doCloseX = true;
 			closeOnClickedOutside = true;
 			absorbInputAroundWindow = true;
 			closeOnClickedOutside = true;
+			closeOnAccept = true;
 			curName = vehicle.Label;
 			this.vehicle = vehicle;
 		}
@@ -56,57 +58,62 @@ namespace Vehicles
 			return true;
 		}
 
+		public override void OnAcceptKeyPressed()
+		{
+			AcceptName();
+		}
+
 		public override void DoWindowContents(Rect inRect)
 		{
+			GUIState.Push();
 			Text.Font = GameFont.Medium;
-			bool flag = false;
-			if(Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return)
-			{
-				flag = true;
-				Event.current.Use();
-			}
-			//GUI.SetNextControlName("RenameField");
-			string text = CurVehicleName.ToString().Replace(" '' ", " ");
-			Widgets.Label(new Rect(15f, 15f, 500f, 50f), text);
+			
+			string curLabel = CurVehicleName.ToString().Replace(" '' ", " ");
+			Widgets.Label(new Rect(15f, 15f, 500f, 50f), curLabel);
 
 			Text.Font = GameFont.Small;
-			string text2 = Widgets.TextField(new Rect(15f, 50f, inRect.width - 15f - 15f, 35f), curName);
+			string label = Widgets.TextField(new Rect(15f, 50f, inRect.width - 15f - 15f, 35f), curName);
 
-			if (text2.Length < MaxNameLength)
+			if (label.Length < MaxNameLength)
 			{
-				curName = text2;
+				curName = label;
 			}
 			Rect buttonRect = new Rect(MarginSize, inRect.height - 35f - MarginSize, (inRect.width / 2) - MarginSize, 35f);
-			if (Widgets.ButtonText(buttonRect, "VF_OkName".Translate()) || flag)
+			if (Widgets.ButtonText(buttonRect, "VF_OkName".Translate()))
 			{
-				AcceptanceReport acceptanceReport = NameIsValid(curName);
-				if(!acceptanceReport.Accepted)
+				AcceptName();
+			}
+			buttonRect.x += buttonRect.width;
+			if (Widgets.ButtonText(buttonRect, "VF_RemoveName".Translate()))
+			{
+				vehicle.Name = null;
+				Close();
+			}
+			GUIState.Pop();
+		}
+
+		private void AcceptName()
+		{
+			AcceptanceReport acceptanceReport = NameIsValid(curName);
+			if (!acceptanceReport.Accepted)
+			{
+				if (acceptanceReport.Reason.NullOrEmpty())
 				{
-					if (acceptanceReport.Reason.NullOrEmpty())
-					{
-						Messages.Message("VF_InvalidName".Translate(), MessageTypeDefOf.RejectInput, false);
-					}
-					else
-					{
-						Messages.Message(acceptanceReport.Reason, MessageTypeDefOf.RejectInput, false);
-					}
+					Messages.Message("VF_InvalidName".Translate(), MessageTypeDefOf.RejectInput, false);
 				}
 				else
 				{
-					if(string.IsNullOrEmpty(curName))
-					{
-						curName = vehicle.Name.ToStringFull;
-					}
-					vehicle.Name = CurVehicleName;
-					Find.WindowStack.TryRemove(this, true);
+					Messages.Message(acceptanceReport.Reason, MessageTypeDefOf.RejectInput, false);
 				}
+				return;
 			}
-			buttonRect.x += buttonRect.width;
-			if (Widgets.ButtonText(buttonRect, "VF_RemoveName".Translate()) || flag)
+
+			if (string.IsNullOrEmpty(curName))
 			{
-				vehicle.Name = null;
-				Find.WindowStack.TryRemove(this, true);
+				curName = vehicle.Name.ToStringFull;
 			}
+			vehicle.Name = CurVehicleName;
+			Close();
 		}
 	}
 }

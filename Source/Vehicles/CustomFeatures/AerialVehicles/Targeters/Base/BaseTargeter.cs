@@ -7,7 +7,6 @@ using SmashTools;
 
 namespace Vehicles
 {
-	[MustImplement("BeginTargeting")]
 	public abstract class BaseTargeter
 	{
 		protected VehiclePawn vehicle;
