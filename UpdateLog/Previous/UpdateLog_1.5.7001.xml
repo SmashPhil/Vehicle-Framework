@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.5.1701</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>GameInit</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This update includes many Quality of Life features such as designating roads, reorienting aerial vehicles upon landing, reorienting vehicles upon pathing to a destination, and more.
+
+Be sure to take a look at the full list down below, and as always if you have feedback feel free to drop by the discord. Thanks!
+
+Note: This version is a hotfix of 1.5.1700, fixing the issue where Camera+'s and Mark That Pawn's patch on vehicle rendering broke. 
+If you removed either during the wait, you can now safely re-add them.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Upgrading FuelCapacity wouldn't update amount needed to refuel, causing pawns to attempt to refuel in a loop.
+
+- Under specific circumstances a vehicle would become 'incapacitated'
+
+- Overlays would attempt to initialize outside of the main thread when loading a save.
+
+- Vehicle role removal upgrade refunding would add the role copied from the upgrade, rather than checking if it was originally from the vehicle def.
+
+- Compatibility patch for Rails and Roads of the Rim
+
+- AsyncRegionRegisterAction exception when loading a map, causing some regions to become malformed in the process.
+
+- Concurrency issue when updating regions, resulting in invalid regions marked for dirtying not having their cells persist in the dirty set.
+
+- Vehicle leaks would not reset their status when repaired once the fuel count had reached 0.
+
+- CompUpgradeTree attempting to validate listers even if the vehicle is unspawned but being ticked elsewhere (such as in Save Our Ship 2 when traveling between ships).
+&lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Parallelized Vehicle Region generation when loading a map.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+&lt;b&gt;Players&lt;/b&gt;
+- Added Road zone to direct vehicles over paths, and to note which edges to try and exit from for caravans.
+
+- Items dropped from cargo will be placed outside of the vehicle's hitbox.
+
+- Vehicles can drag-to-rotate by holding right click when ordering to go to a location. This will rotate the vehicle to face this rotation after arriving at the destination.
+
+- Aerial vehicles with forced rotations for animations can now be rotated during landing, which will rotate the vehicle to face this rotation after it has landed.
+
+- Upgrades will refund % of cost if upgrade is reset or vehicle is deconstructed / destroyed.
+
+- Only explosive mortar shells will have their explosion radius reduced when impacting water, as opposed to every shell.
+
+- VehicleTurret aim pies hidden if vehicle is not selected.
+&lt;b&gt;Modders&lt;/b&gt;
+- Added CompUpgrade for adding / removing comps from upgrades
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>

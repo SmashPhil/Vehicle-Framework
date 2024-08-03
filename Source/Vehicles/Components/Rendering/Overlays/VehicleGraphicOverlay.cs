@@ -78,13 +78,13 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void RenderGraphicOverlays(Vector3 drawPos, float angle, Rot8 rot)
+		public virtual void RenderGraphicOverlays(Vector3 drawPos, float extraRotation, Rot8 rot)
 		{
 			float extraAngle;
 			foreach (GraphicOverlay graphicOverlay in Overlays)
 			{
-				float overlayAngle = angle;
-				extraAngle = graphicOverlay.data.rotation;
+				float overlayAngle = rot.AsRotationAngle;
+				extraAngle = graphicOverlay.data.rotation + extraRotation;
 				Vector3 overlayDrawPos = drawPos;
 				if (graphicOverlay.data.component != null)
 				{
