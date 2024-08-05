@@ -38,7 +38,7 @@ namespace Vehicles
 
 		public uint[] closedIndex = new uint[VehicleRegionTraverser.WorkerCount];
 
-		private readonly ConcurrentListerThings listerThings = new ConcurrentListerThings(ListerThingsUse.Region);
+		//private readonly ConcurrentListerThings listerThings = new ConcurrentListerThings(ListerThingsUse.Region);
 
 		public CellRect extentsClose;
 		public CellRect extentsLimit;
@@ -73,7 +73,7 @@ namespace Vehicles
 		/// <summary>
 		/// Concurrent lister things for thread safe caching
 		/// </summary>
-		public ConcurrentListerThings ListerThings => listerThings;
+		public ConcurrentListerThings ListerThings => null;// listerThings;
 
 		/// <summary>
 		/// Yield all cells in the region
@@ -242,14 +242,6 @@ namespace Vehicles
 				stringBuilder.AppendLine("makeTick: " + debug_makeTick);
 				stringBuilder.AppendLine("extentsClose: " + extentsClose);
 				stringBuilder.AppendLine("extentsLimit: " + extentsLimit);
-				stringBuilder.AppendLine("ListerThings:");
-				if (listerThings.AllThings != null)
-				{
-					foreach (Thing thing in ListerThings.AllThings)
-					{
-						stringBuilder.AppendLine($"  --{thing}");
-					}
-				}
 				return stringBuilder.ToString();
 			}
 		}
@@ -465,7 +457,6 @@ namespace Vehicles
 		/// </summary>
 		public void Notify_MyMapRemoved()
 		{
-			listerThings.Clear();
 			mapIndex = -1;
 		}
 
@@ -535,13 +526,6 @@ namespace Vehicles
 #if !DISABLE_WEIGHTS
 				DrawWeights();
 #endif
-			}
-			if (debugRegionType.HasFlag(DebugRegionType.Things))
-			{
-				foreach (Thing thing in listerThings.AllThings)
-				{
-					CellRenderer.RenderSpot(thing.TrueCenter(), (thing.thingIDNumber % 256) / 256f, 0.15f);
-				}
 			}
 		}
 

@@ -97,6 +97,10 @@ namespace Vehicles
 					return null;
 				}
 #endif
+				if (!ComponentsInitialized)
+				{
+					ConstructComponents();
+				}
 				return vehicleData[vehicleDef.DefIndex];
 			}
 		}

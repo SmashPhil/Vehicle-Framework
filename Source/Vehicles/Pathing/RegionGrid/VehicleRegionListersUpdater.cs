@@ -21,6 +21,7 @@ namespace Vehicles
 		/// <param name="mapping"></param>
 		public static void DeregisterInRegions(Thing thing, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
+			return;
 			if (!ConcurrentListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return;
@@ -45,6 +46,7 @@ namespace Vehicles
 		/// <param name="mapping"></param>
 		public static void RegisterInRegions(Thing thing, VehicleMapping mapping, VehicleDef vehicleDef)
 		{
+			return;
 			if (!ConcurrentListerThings.EverListable(thing.def, ListerThingsUse.Region))
 			{
 				return;

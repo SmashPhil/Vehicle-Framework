@@ -21,14 +21,6 @@ namespace Vehicles
 			{
 				return RegionType.None;
 			}
-			if (cell.GetDoor(mapping.map) != null)
-			{
-				return RegionType.Portal;
-			}
-			if (cell.GetFence(mapping.map) != null)
-			{
-				return RegionType.None; //TODO - Add settings available to player for configuring fence traversal
-			}
 			if (!vehicleDef.WidthStandable(mapping.map, cell))
 			{
 				return RegionType.None;
@@ -37,21 +29,11 @@ namespace Vehicles
 			{
 				return RegionType.None;
 			}
-			if (mapping[vehicleDef].VehiclePathGrid.WalkableFast(cell))
-			{
-				return RegionType.Normal;
-			}
-			return RegionType.None;
-
-			//List<Thing> thingList = cell.GetThingList(mapping.map);
-			//for (int i = 0; i < thingList.Count; i++)
+			//if (mapping[vehicleDef].VehiclePathGrid.WalkableFast(cell))
 			//{
-			//	if (thingList[i].def.Fillage == FillCategory.Full)
-			//	{
-			//		return RegionType.None;
-			//	}
+			//	return RegionType.Normal;
 			//}
-			//return RegionType.ImpassableFreeAirExchange;
+			return RegionType.Normal;
 		}
 
 		//TODO - Account for non-uniform combinations (eg. Y shape)
