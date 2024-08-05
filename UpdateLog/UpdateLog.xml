@@ -1,23 +1,20 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1701</currentVersion>
+  <currentVersion>1.5.1703</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-
+Small list of bugfixes addressing issues that cropped up from the last update.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Graphic Overlays not rendering diagonally
 
-- Refuel job floating point error, resulting in colonists attempting to refuel indefinitely if fuel was set to 99.99% full.
-&lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Refuel job floating point error, resulting in colonists attempting to refuel indefinitely if fuel was set to 99.99% full.  
 
-&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-&lt;b&gt;Players&lt;/b&gt;
+- VehicleCaravan would throw an exception when trying to satisfy pawn needs.
 
-&lt;b&gt;Modders&lt;/b&gt;
-
+- Mlie's reupload of Rails and Roads of the Rim still being incompatible due to type name changes.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->

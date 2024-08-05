@@ -542,7 +542,10 @@ namespace Vehicles
 						}
 						break;
 					case Need_Comfort _:
-						need.CurLevel = handler.role.Comfort; //TODO - add comfort factor for roles
+						if (handler != null)
+						{
+							need.CurLevel = handler.role.Comfort; //TODO - add comfort factor for roles
+						}
 						break;
 					case Need_Outdoors _:
 						if (handler == null || handler.role.Exposed)
