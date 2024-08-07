@@ -94,11 +94,11 @@ namespace Vehicles
 			{
 				Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode, nameof(debugSpawnVehicleBuildingGodMode));
 			}
-			
+
+#if DEBUG
 			Scribe_Values.Look(ref debugUseMultithreading, nameof(debugUseMultithreading), defaultValue: true);
 			Scribe_Values.Look(ref debugLoadAssetBundles, nameof(debugLoadAssetBundles), defaultValue: true);
 
-#if DEBUG
 			Scribe_Values.Look(ref debugAllowRaiders, nameof(debugAllowRaiders));
 #endif
 		}

@@ -492,6 +492,7 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
+    <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRebuildAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
     <Compile Include="Utility\Helpers\TranslationHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />

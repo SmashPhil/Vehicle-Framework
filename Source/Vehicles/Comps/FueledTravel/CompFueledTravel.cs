@@ -56,7 +56,7 @@ namespace Vehicles
 
 		public bool FullTank => Mathf.Approximately(fuel, TargetFuelLevel);
 
-		public int FuelCountToFull => Mathf.RoundToInt(TargetFuelLevel - Fuel);
+		public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
 
 		public float TargetFuelPercent
 		{
@@ -241,6 +241,7 @@ namespace Vehicles
 		/// </summary>
 		private void RefuelHalfway()
 		{
+			ConsumeFuel(float.MaxValue);
 			Refuel(FuelCapacity / 2f);
 		}
 
@@ -368,15 +369,6 @@ namespace Vehicles
 				};
 				yield return new Command_Action
 				{
-					defaultLabel = "Debug: Set fuel to 0.1",
-					action = delegate ()
-					{
-						fuel = 0f;
-						Refuel(0.1f);
-					}
-				};
-				yield return new Command_Action
-				{
 					defaultLabel = "Debug: Set fuel to half",
 					action = delegate ()
 					{
@@ -389,6 +381,15 @@ namespace Vehicles
 					action = delegate ()
 					{
 						Refuel(FuelCapacity);
+					}
+				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Debug: Set fuel to 99.99%",
+					action = delegate ()
+					{
+						ConsumeFuel(float.MaxValue);
+						Refuel(FuelCapacity * 0.999999f);
 					}
 				};
 			}
