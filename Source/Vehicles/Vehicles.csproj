@@ -22,7 +22,7 @@
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FISHING_DISABLED,DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS,FISHING_DISABLED,DISABLE_WEIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -192,6 +192,7 @@
     <Compile Include="Harmony\ConditionalPatches\Compatibility_VEFishing.cs" />
     <Compile Include="Harmony\ConditionalPatches\Compatibility_SOS2.cs" />
     <Compile Include="Harmony\ConditionalPatches\ConditionalVehiclePatch.cs" />
+    <Compile Include="Harmony\Debug.cs" />
     <Compile Include="Harmony\DebugProperties.cs" />
     <Compile Include="Harmony\PatchCategories\Areas.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
@@ -223,6 +224,7 @@
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
+    <Compile Include="Pathing\RegionGrid\GridOwners.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionManager.cs" />
     <Compile Include="Turrets\Projectiles\Projectile_Deflected.cs" />
     <Compile Include="Turrets\Turret\Rendering\VehicleTurretRenderData.cs" />
@@ -410,7 +412,7 @@
     <Compile Include="Misc\ModSettings\SettingsSection\SettingsSection.cs" />
     <Compile Include="Misc\ModSettings\SettingsValueInfo.cs" />
     <Compile Include="Misc\ModSettings\VehicleMod.cs" />
-    <Compile Include="Harmony\PatchCategories\Debug.cs" />
+    <Compile Include="Harmony\PatchCategories\Debugging.cs" />
     <Compile Include="Harmony\PatchCategories\Extra.cs" />
     <Compile Include="Harmony\PatchCategories\Construction.cs" />
     <Compile Include="Harmony\PatchCategories\Components.cs" />
@@ -492,8 +494,6 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
-    <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRebuildAction.cs" />
-    <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionRegisterAction.cs" />
     <Compile Include="Utility\Helpers\TranslationHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanInfoHelper.cs" />
@@ -631,7 +631,6 @@
     <Compile Include="Pathing\RegionGrid\VehicleRegionGrid.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionLink.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionLinkDatabase.cs" />
-    <Compile Include="Pathing\RegionGrid\VehicleRegionListersUpdater.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionMaker.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionTraverser.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionTypeUtility.cs" />

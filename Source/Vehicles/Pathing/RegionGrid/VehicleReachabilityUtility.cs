@@ -65,8 +65,7 @@ namespace Vehicles
 			List<Map> maps = Find.Maps;
 			for (int i = 0; i < maps.Count; i++)
 			{
-				maps[i].reachability.ClearCacheFor(vehicle);
-				MapComponentCache<VehicleMapping>.GetComponent(maps[i])[vehicle.VehicleDef].VehicleReachability.ClearCacheFor(vehicle);
+				maps[i].GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.ClearCacheFor(vehicle);
 			}
 		}
 	}

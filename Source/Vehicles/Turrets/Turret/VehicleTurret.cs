@@ -7,6 +7,7 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -2151,6 +2152,7 @@ namespace Vehicles
 			};
 		}
 
+		[NoProfiling]
 		public (Texture2D mainTex, Texture2D maskTex) GetTextures(Rot8 rot)
 		{
 			throw new NotImplementedException();

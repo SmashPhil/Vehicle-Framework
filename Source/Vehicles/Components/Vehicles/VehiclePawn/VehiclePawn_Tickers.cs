@@ -12,6 +12,7 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
+using SmashTools.Performance;
 
 namespace Vehicles
 {

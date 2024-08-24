@@ -125,7 +125,6 @@ namespace Vehicles
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool NodeUnlocked(UpgradeNode node)
 		{
 			return upgrades.Contains(node.key);

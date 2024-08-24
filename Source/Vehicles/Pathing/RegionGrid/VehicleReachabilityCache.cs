@@ -16,15 +16,15 @@ namespace Vehicles
 		private ConcurrentDictionary<CachedEntry, bool> cacheDict = new ConcurrentDictionary<CachedEntry, bool>();
 
 		[ThreadStatic]
-		private static ConcurrentSet<CachedEntry> tmpCachedEntries;
+		private static HashSet<CachedEntry> tmpCachedEntries;
 
-		private static ConcurrentSet<CachedEntry> CachedEntries
+		private static HashSet<CachedEntry> CachedEntries
 		{
 			get
 			{
 				if (tmpCachedEntries == null)
 				{
-					tmpCachedEntries = new ConcurrentSet<CachedEntry>();
+					tmpCachedEntries = new HashSet<CachedEntry>();
 				}
 				return tmpCachedEntries;
 			}
@@ -52,12 +52,9 @@ namespace Vehicles
 		/// <summary>
 		/// Retrieve cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
 		/// </summary>
-		/// <param name="A"></param>
-		/// <param name="B"></param>
-		/// <param name="traverseParms"></param>
-		public BoolUnknown CachedResultFor(VehicleRoom A, VehicleRoom B, TraverseParms traverseParms)
+		public BoolUnknown CachedResultFor(VehicleRoom from, VehicleRoom to, TraverseParms traverseParms)
 		{
-			if (cacheDict.TryGetValue(new CachedEntry(A.ID, B.ID, traverseParms), out bool reachable))
+			if (cacheDict.TryGetValue(new CachedEntry(from.id, to.id, traverseParms), out bool reachable))
 			{
 				return reachable ? BoolUnknown.True : BoolUnknown.False;
 			}
@@ -67,13 +64,9 @@ namespace Vehicles
 		/// <summary>
 		/// Add cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
 		/// </summary>
-		/// <param name="A"></param>
-		/// <param name="B"></param>
-		/// <param name="traverseParams"></param>
-		/// <param name="reachable"></param>
-		public void AddCachedResult(VehicleRoom A, VehicleRoom B, TraverseParms traverseParams, bool reachable)
+		public void AddCachedResult(VehicleRoom from, VehicleRoom to, TraverseParms traverseParams, bool reachable)
 		{
-			CachedEntry key = new CachedEntry(A.ID, B.ID, traverseParams);
+			CachedEntry key = new CachedEntry(from.id, to.id, traverseParams);
 			cacheDict.TryAdd(key, reachable);
 		}
 
@@ -84,14 +77,14 @@ namespace Vehicles
 		public void ClearFor(VehiclePawn vehicle)
 		{
 			CachedEntries.Clear();
-			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
+			foreach ((CachedEntry entry, bool result) in cacheDict)
 			{
-				if (keyValuePair.Key.TraverseParms.pawn == vehicle)
+				if (entry.traverseParms.pawn == vehicle)
 				{
-					CachedEntries.Add(keyValuePair.Key);
+					CachedEntries.Add(entry);
 				}
 			}
-			foreach (CachedEntry cachedEntry in CachedEntries.Keys)
+			foreach (CachedEntry cachedEntry in CachedEntries)
 			{
 				cacheDict.TryRemove(cachedEntry, out _);
 			}
@@ -105,14 +98,14 @@ namespace Vehicles
 		public void ClearForHostile(Thing hostileTo)
 		{
 			CachedEntries.Clear();
-			foreach(KeyValuePair<CachedEntry, bool> keyValuePair in cacheDict)
+			foreach ((CachedEntry entry, bool result) in cacheDict)
 			{
-				if (keyValuePair.Key.TraverseParms.pawn is Pawn pawn && pawn.HostileTo(hostileTo))
+				if (entry.traverseParms.pawn is Pawn pawn && pawn.HostileTo(hostileTo))
 				{
-					CachedEntries.Add(keyValuePair.Key);
+					CachedEntries.Add(entry);
 				}
 			}
-			foreach (CachedEntry cachedEntry in CachedEntries.Keys)
+			foreach (CachedEntry cachedEntry in CachedEntries)
 			{
 				cacheDict.TryRemove(cachedEntry, out _);
 			}
@@ -120,32 +113,29 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Cached result data for reachability between two <see cref="VehicleRoom"/>
+		/// Cached result data for reachability between two <see cref="VehicleRegion"/>
 		/// </summary>
-		[StructLayout(LayoutKind.Sequential, Size = 1)]
-		private struct CachedEntry : IEquatable<CachedEntry>
+		private readonly struct CachedEntry : IEquatable<CachedEntry>
 		{
-			public CachedEntry(int firstRoomID, int secondRoomID, TraverseParms traverseParms)
+			public readonly int from;
+			public readonly int to;
+			public readonly TraverseParms traverseParms;
+
+			public CachedEntry(int from, int to, TraverseParms traverseParms)
 			{
 				this = default;
-				if(firstRoomID < secondRoomID)
+				if (from < to)
 				{
-					FirstRoomID = firstRoomID;
-					SecondRoomID = secondRoomID;
+					this.from = from;
+					this.to = to;
 				}
 				else
 				{
-					FirstRoomID = secondRoomID;
-					SecondRoomID = firstRoomID;
+					this.from = to;
+					this.to = from;
 				}
-				TraverseParms = traverseParms;
+				this.traverseParms = traverseParms;
 			}
-
-			public int FirstRoomID { get; private set; }
-
-			public int SecondRoomID { get; private set; }
-
-			public TraverseParms TraverseParms { get; private set; }
 
 			public static bool operator ==(CachedEntry lhs, CachedEntry rhs)
 			{
@@ -157,20 +147,20 @@ namespace Vehicles
 				return !lhs.Equals(rhs);
 			}
 
-			public override bool Equals(object obj)
+			public override readonly bool Equals(object obj)
 			{
 				return obj is CachedEntry entry && Equals(entry);
 			}
 
-			public bool Equals(CachedEntry other)
+			public readonly bool Equals(CachedEntry other)
 			{
-				return FirstRoomID == other.FirstRoomID && SecondRoomID == other.SecondRoomID && TraverseParms == other.TraverseParms;
+				return from == other.from && to == other.to && traverseParms == other.traverseParms;
 			}
 
-			public override int GetHashCode()
+			public override readonly int GetHashCode()
 			{
-				int seed = Gen.HashCombineInt(FirstRoomID, SecondRoomID);
-				return Gen.HashCombineStruct(seed, TraverseParms);
+				int seed = Gen.HashCombineInt(from, to);
+				return Gen.HashCombineStruct(seed, traverseParms);
 			}
 		}
 	}

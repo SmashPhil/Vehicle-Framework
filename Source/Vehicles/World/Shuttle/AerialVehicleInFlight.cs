@@ -348,7 +348,7 @@ namespace Vehicles
 						defaultLabel = "Debug: Land at Nearest Player Settlement",
 						action = delegate ()
 						{
-							Debug.DebugLandAerialVehicle(this);
+							Debugging.DebugLandAerialVehicle(this);
 						}
 					};
 					yield return new Command_Action

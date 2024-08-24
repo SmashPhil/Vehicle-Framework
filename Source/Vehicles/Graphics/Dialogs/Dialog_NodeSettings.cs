@@ -4,7 +4,7 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class Dialog_NodeSettings : SingleWindow
+	public class Dialog_NodeSettings : Window
 	{
 		private const float ModSettingsDefaultWidth = 900;
 
@@ -20,7 +20,7 @@ namespace Vehicles
 			UpgradeNode = node;
 
 			closeOnClickedOutside = true;
-			closeOnAnyClickOutside = true;
+			onlyOneOfTypeAllowed = true;
 			closeOnCancel = true;
 			doCloseX = true;
 			

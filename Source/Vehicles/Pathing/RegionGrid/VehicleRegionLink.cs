@@ -164,7 +164,6 @@ namespace Vehicles
 			return new IntVec3(span.root.x + length, 0, span.root.z);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static SimpleColor WeightColor(float weight)
 		{
 			return colorWeights.Evaluate(weight);
@@ -174,7 +173,6 @@ namespace Vehicles
 		/// Get opposite region linking to <paramref name="region"/>
 		/// </summary>
 		/// <param name="reg"></param>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public VehicleRegion GetOtherRegion(VehicleRegion region)
 		{
 			return (region != RegionA) ? RegionA : RegionB;
@@ -201,7 +199,7 @@ namespace Vehicles
 		/// </summary>
 		public override string ToString()
 		{
-			return $"({regions.Where(region => region != null).Select(region => region.id.ToString()).ToCommaList(false)}, regions=[spawn={span}, hash={UniqueHashCode()}])";
+			return $"({regions.Where(region => region != null).Select(region => region.ID.ToString()).ToCommaList(false)}, regions=[spawn={span}, hash={UniqueHashCode()}])";
 		}
 	}
 }

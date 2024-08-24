@@ -12,60 +12,35 @@ using RimWorld;
 using RimWorld.Planet;
 using LudeonTK;
 using SmashTools;
-using static UnityEngine.Scripting.GarbageCollector;
 
 namespace Vehicles
 {
-	internal class Debug : IPatchCategory
+	internal class Debugging : IPatchCategory
 	{
-		public static void Message(string text)
-		{
-			if (VehicleMod.settings.debug.debugLogging)
-			{
-				SmashLog.Message(text);
-			}
-		}
-
-		public static void Warning(string text)
-		{
-			if (VehicleMod.settings.debug.debugLogging)
-			{
-				SmashLog.Warning(text);
-			}
-		}
-
-		public static void Error(string text)
-		{
-			if (VehicleMod.settings.debug.debugLogging)
-			{
-				SmashLog.Error(text);
-			}
-		}
-
 		public void PatchMethods()
 		{
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
-				postfix: new HarmonyMethod(typeof(Debug),
+				postfix: new HarmonyMethod(typeof(Debugging),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
 
 			if (DebugProperties.debug)
 			{
 				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
-				//	postfix: new HarmonyMethod(typeof(Debug),
+				//	postfix: new HarmonyMethod(typeof(Debugging),
 				//	nameof(DebugSettlementPaths)));
 				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
-				//	prefix: new HarmonyMethod(typeof(Debug),
+				//	prefix: new HarmonyMethod(typeof(Debugging),
 				//	nameof(DebugWorldObjects)));
 			}
 
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloodFillerFog), nameof(FloodFillerFog.FloodUnfog)),
-			//	prefix: new HarmonyMethod(typeof(Debug),
+			//	prefix: new HarmonyMethod(typeof(Debugging),
 			//	nameof(TestPrefix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
-			//	postfix: new HarmonyMethod(typeof(Debug),
+			//	postfix: new HarmonyMethod(typeof(Debugging),
 			//	nameof(TestPostfix)));
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
-			//	finalizer: new HarmonyMethod(typeof(Debug),
+			//	finalizer: new HarmonyMethod(typeof(Debugging),
 			//	nameof(ExceptionCatcher)));
 
 			//Type modType = AccessTools.TypeByName("SaveOurShip2.TEMPStopRedErrorOnTakeoff");
@@ -74,7 +49,7 @@ namespace Vehicles
 			//VehicleHarmony.Harmony.Unpatch(original: AccessTools.Method(modType, "Postfix"), HarmonyPatchType.Postfix);
 
 			//VehicleHarmony.Patch(original: AccessTools.Method(modType, "Postfix"),
-			//	prefix: new HarmonyMethod(typeof(Debug),
+			//	prefix: new HarmonyMethod(typeof(Debugging),
 			//	nameof(TestModPatch)));
 		}
 
@@ -169,25 +144,25 @@ namespace Vehicles
 		[DebugAction(VehicleHarmony.VehiclesLabel, "Draw Hitbox Size", allowedGameStates = AllowedGameStates.PlayingOnMap)]
 		private static void DebugDrawHitbox()
 		{
-			DebugTool tool = null;
+            LudeonTK.DebugTool tool = null;
 			IntVec3 first;
-			tool = new DebugTool("first corner...", delegate ()
+			tool = new LudeonTK.DebugTool("first corner...", delegate ()
 			{
 				first = UI.MouseCell();
 				string label = "second corner...";
-				Action action = delegate ()
+                Action action = delegate ()
 				{
-					IntVec3 second = UI.MouseCell();
-					CellRect cellRect = CellRect.FromLimits(first, second).ClipInsideMap(Find.CurrentMap);
-					IntVec3 center = cellRect.ThingPositionFromRect();
+                    IntVec3 second = UI.MouseCell();
+                    CellRect cellRect = CellRect.FromLimits(first, second).ClipInsideMap(Find.CurrentMap);
+                    IntVec3 center = cellRect.ThingPositionFromRect();
 					foreach (IntVec3 cell in cellRect)
 					{
-						IntVec3 diff = cell - center;
-						Current.Game.CurrentMap.debugDrawer.FlashCell(cell, 0.75f, diff.ToIntVec2.ToString(), 3600);
+                        IntVec3 diff = cell - center;
+                        Current.Game.CurrentMap.debugDrawer.FlashCell(cell, 0.75f, diff.ToIntVec2.ToString(), 3600);
 					}
-					DebugTools.curTool = tool;
+                    DebugTools.curTool = tool;
 				};
-				DebugTools.curTool = new DebugTool(label, action, first);
+                DebugTools.curTool = new LudeonTK.DebugTool(label, action, first);
 			});
 			DebugTools.curTool = tool;
 		}

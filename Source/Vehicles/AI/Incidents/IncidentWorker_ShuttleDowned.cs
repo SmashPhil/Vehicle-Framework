@@ -7,6 +7,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using Verse.Noise;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -117,6 +118,7 @@ namespace Vehicles
 			Find.LetterStack.ReceiveLetter(choiceLetter, null);
 		}
 
+		[NoProfiling]
 		protected override bool TryExecuteWorker(IncidentParms parms)
 		{
 			throw new NotImplementedException("Shuttle downed event cannot be called through the Worker");

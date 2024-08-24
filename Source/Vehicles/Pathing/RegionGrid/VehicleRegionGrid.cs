@@ -1,7 +1,8 @@
-﻿using System;
+﻿using SmashTools;
+using SmashTools.Performance;
 using System.Collections.Generic;
+using System.Threading;
 using Verse;
-using SmashTools;
 
 namespace Vehicles
 {
@@ -12,14 +13,15 @@ namespace Vehicles
     {
 		private const int CleanSquaresPerFrame = 16;
 
-		//Only accessed from the same thread within the same method, so it is thread safe.
+		//Thread Safe - Only accessed from the same thread within the same method
 		private readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
-
+		
+		//Thread safe - Only used inside UpdateClean
 		private int curCleanIndex;
-		private readonly VehicleRegion[] regionGrid; //TODO - needs checking for thread safety
+		private readonly VehicleRegion[] regionGrid;
 
 		public readonly ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
-
+		
 		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
 			regionGrid = new VehicleRegion[mapping.map.cellIndices.NumGridCells];
@@ -49,10 +51,11 @@ namespace Vehicles
 					int count = mapping.map.cellIndices.NumGridCells;
 					for (int i = 0; i < count; i++)
 					{
-						if (regionGrid[i] != null && !allRegionsYielded.Contains(regionGrid[i]))
+						VehicleRegion region = GetRegionAt(i);
+						if (region != null && !allRegionsYielded.Contains(region))
 						{
-							yield return regionGrid[i];
-							allRegionsYielded.Add(regionGrid[i]);
+							yield return region;
+							allRegionsYielded.Add(region);
 						}
 					}
 				}
@@ -76,10 +79,11 @@ namespace Vehicles
 					int count = mapping.map.cellIndices.NumGridCells;
 					for (int i = 0; i < count; i++)
 					{
-						if (regionGrid[i] != null && regionGrid[i].valid && !allRegionsYielded.Contains(regionGrid[i]))
+						VehicleRegion region = GetRegionAt(i);
+						if (region != null && region.valid && !allRegionsYielded.Contains(region))
 						{
-							yield return regionGrid[i];
-							allRegionsYielded.Add(regionGrid[i]);
+							yield return region;
+							allRegionsYielded.Add(region);
 						}
 					}
 				}
@@ -87,7 +91,6 @@ namespace Vehicles
 				{
 					allRegionsYielded.Clear();
 				}
-				yield break;
 			}
 		}
 
@@ -108,8 +111,7 @@ namespace Vehicles
 				Log.Warning($"Trying to get valid vehicle region for {createdFor} at {cell} but RegionAndRoomUpdater is disabled. The result may be incorrect.");
 			}
 			mapping[createdFor].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-			VehicleRegion region = regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
-
+			VehicleRegion region = GetRegionAt(cell);
 			return (region != null && region.valid) ? region : null;
 		}
 
@@ -139,7 +141,7 @@ namespace Vehicles
 				Log.Error("Tried to get valid region out of bounds at " + cell);
 				return null;
 			}
-			VehicleRegion region = regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
+			VehicleRegion region = GetRegionAt(cell);
 			return region != null && region.valid ? region : null;
 		}
 
@@ -147,9 +149,19 @@ namespace Vehicles
 		/// Get any existing region at <paramref name="cell"/>
 		/// </summary>
 		/// <param name="cell"></param>
-		public VehicleRegion GetRegionAt_NoRebuild_InvalidAllowed(IntVec3 cell)
+		public VehicleRegion GetRegionAt(IntVec3 cell)
 		{
-			return regionGrid[mapping.map.cellIndices.CellToIndex(cell)];
+			int index = mapping.map.cellIndices.CellToIndex(cell);
+			return GetRegionAt(index);
+		}
+
+		/// <summary>
+		/// Get any existing region at <paramref name="cell"/>
+		/// </summary>
+		/// <param name="cell"></param>
+		public VehicleRegion GetRegionAt(int index)
+		{
+			return regionGrid[index];
 		}
 
 		/// <summary>
@@ -159,7 +171,16 @@ namespace Vehicles
 		/// <param name="reg"></param>
 		public void SetRegionAt(IntVec3 cell, VehicleRegion region)
 		{
-			regionGrid[mapping.map.cellIndices.CellToIndex(cell)] = region;
+			int index = mapping.map.cellIndices.CellToIndex(cell);
+			Interlocked.CompareExchange(ref regionGrid[index], region, regionGrid[index]);
+		}
+
+		public void SetRegionAt(int index, VehicleRegion region)
+		{
+			VehicleRegion other = regionGrid[index];
+			other?.DecrementRefCount();
+			region?.IncrementRefCount();
+			Interlocked.CompareExchange(ref regionGrid[index], region, regionGrid[index]);
 		}
 
 		/// <summary>
@@ -176,7 +197,8 @@ namespace Vehicles
 				VehicleRegion region = regionGrid[curCleanIndex];
 				if (region != null && !region.valid)
 				{
-					regionGrid[curCleanIndex] = null;
+					VehicleRegionMaker.PushToBuffer(region);
+					SetRegionAt(curCleanIndex, null);
 				}
 				curCleanIndex++;
 			}
@@ -201,11 +223,8 @@ namespace Vehicles
 			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(mapping.map))
 			{
-				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
-				if (regionAt_NoRebuild_InvalidAllowed != null)
-				{
-					regionAt_NoRebuild_InvalidAllowed.DebugDrawMouseover(debugRegionType);
-				}
+				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt(intVec);
+				regionAt_NoRebuild_InvalidAllowed?.DebugDrawMouseover(debugRegionType);
 			}
 		}
 
@@ -217,11 +236,8 @@ namespace Vehicles
 			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(mapping.map))
 			{
-				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt_NoRebuild_InvalidAllowed(intVec);
-				if (regionAt_NoRebuild_InvalidAllowed != null)
-				{
-					regionAt_NoRebuild_InvalidAllowed.DebugOnGUIMouseover(debugRegionType);
-				}
+				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt(intVec);
+				regionAt_NoRebuild_InvalidAllowed?.DebugOnGUIMouseover(debugRegionType);
 			}
 		}
 	}

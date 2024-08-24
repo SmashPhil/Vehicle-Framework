@@ -29,10 +29,6 @@ namespace Vehicles
 			{
 				return RegionType.None;
 			}
-			//if (mapping[vehicleDef].VehiclePathGrid.WalkableFast(cell))
-			//{
-			//	return RegionType.Normal;
-			//}
 			return RegionType.Normal;
 		}
 
