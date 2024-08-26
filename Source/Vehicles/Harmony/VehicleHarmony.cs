@@ -13,6 +13,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using UpdateLogTool;
+using System.Diagnostics;
 
 namespace Vehicles
 {
@@ -33,6 +34,8 @@ namespace Vehicles
 
 		private static string methodPatching = string.Empty;
 
+		public static readonly GridOwners gridOwners = new GridOwners();
+
 		internal static List<UpdateLog> updates = new List<UpdateLog>();
 		
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
@@ -42,6 +45,8 @@ namespace Vehicles
 		internal static string BuildDatePath => Path.Combine(VehicleMMD.RootDir.FullName, "BuildDate.txt");
 
 		public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
+
+		public static List<VehicleDef> AllVehicleOwners => gridOwners.Owners;
 
 		static VehicleHarmony()
 		{
@@ -144,7 +149,7 @@ namespace Vehicles
 			}
 		}
 
-		public static void RegisterDisplayStats()
+		private static void RegisterDisplayStats()
 		{
 			VehicleInfoCard.RegisterStatDef(StatDefOf.Flammability);
 
@@ -155,16 +160,14 @@ namespace Vehicles
 			//VehicleInfoCard.RegisterStatDef(StatDefOf.SellPriceFactor);
 		}
 
-		public static void RegisterKeyBindingDefs()
+		private static void RegisterKeyBindingDefs()
 		{
-#if DEBUG
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_RestartGame, GenCommandLine.Restart);
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => UnitTesting.OpenMenu());
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, () => VehiclesModSettings.OpenWithContext());
-#endif
 		}
 
-		public static void FillVehicleLordJobTypes()
+		private static void FillVehicleLordJobTypes()
 		{
 			VehicleIncidentSwapper.RegisterLordType(typeof(LordJob_ArmoredAssault));
 		}
@@ -177,6 +180,7 @@ namespace Vehicles
 		internal static void RecacheMoveableVehicleDefs()
 		{
 			AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(PathingHelper.ShouldCreateRegions).ToList();
+			gridOwners.Init();
 			if (!Find.Maps.NullOrEmpty())
 			{
 				foreach (Map map in Find.Maps)

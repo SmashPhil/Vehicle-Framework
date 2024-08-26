@@ -4,9 +4,11 @@ using System.Linq;
 using RimWorld;
 using Verse.AI;
 using Verse;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
+	[NoProfiling]
 	public abstract class JobGiver_VehicleAI : ThinkNode_JobGiver
 	{
 		protected virtual bool RequireLOS

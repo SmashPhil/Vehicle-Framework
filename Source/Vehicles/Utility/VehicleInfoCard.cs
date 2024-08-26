@@ -233,7 +233,6 @@ namespace Vehicles
 			DrawStatsWorker(rect);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private static void TryRecacheEntries()
 		{
 			if (cachedDrawEntries.NullOrEmpty())

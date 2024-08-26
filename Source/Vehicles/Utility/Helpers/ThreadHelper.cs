@@ -15,43 +15,6 @@ namespace Vehicles
 	public static class ThreadHelper
 	{
 		/// <summary>
-		/// <paramref name="cell"/> is impassable for <paramref name="vehicle"/>
-		/// </summary>
-		/// <remarks>Method is Thread-safe for multithreaded pathfinding</remarks>
-		/// <param name="c"></param>
-		/// <param name="map"></param>
-		/// <param name="vehicle"></param>
-		[Obsolete]
-		public static bool ImpassableReverseThreaded(IntVec3 cell, Map map, Pawn vehicle)
-		{
-			if (cell == vehicle.Position)
-			{
-				return false;
-			}
-			else if (!cell.InBounds(map))
-			{
-				return true;
-			}
-			try
-			{
-				//Create new list for thread safety
-				List<Thing> list = new List<Thing>(map.thingGrid.ThingsListAtFast(cell));
-				for (int i = 0; i < list.Count; i++)
-				{
-					if (list[i].ImpassableForVehicles())
-					{
-						return true;
-					}
-				}
-			}
-			catch(Exception ex)
-			{
-				Log.ErrorOnce($"Exception Thrown in ThreadId [{Thread.CurrentThread.ManagedThreadId}] Exception: {ex.StackTrace}", vehicle.thingIDNumber ^ Thread.CurrentThread.ManagedThreadId);
-			}
-			return false;
-		}
-
-		/// <summary>
 		/// Any other vehicle is blocking the path of <paramref name="vehicle"/> at <paramref name="cell"/>
 		/// </summary>
 		/// <remarks>Exceptions thrown during Task will be handled at the TaskFactory level</remarks>

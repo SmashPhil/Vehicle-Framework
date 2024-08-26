@@ -274,7 +274,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-
+			
 			Scribe_Collections.Look(ref activatableComps, nameof(activatableComps), lookMode: LookMode.Deep);
 			activatableComps ??= new List<ActivatableThingComp>();
 			if (Scribe.mode == LoadSaveMode.LoadingVars)

@@ -126,53 +126,46 @@ namespace Vehicles
 		/// <param name="minLink"></param>
 		public int GetRegionDistance(VehicleRegion region, out VehicleRegionLink minLink)
 		{
-			if (regionMinLink.TryGetValue(region.id, out minLink))
+			if (regionMinLink.TryGetValue(region.ID, out minLink))
 			{
 				return distances[minLink];
 			}
 			while (queue.Count != 0)
 			{
 				RegionLinkQueueEntry regionLinkQueueEntry = queue.Pop();
-				int num = distances[regionLinkQueueEntry.Link];
-				if(regionLinkQueueEntry.Cost == num)
+				int cachedDistance = distances[regionLinkQueueEntry.Link];
+				if(regionLinkQueueEntry.Cost == cachedDistance)
 				{
 					VehicleRegion otherRegion = regionLinkQueueEntry.Link.GetOtherRegion(regionLinkQueueEntry.From);
 					if(!(otherRegion is null) && otherRegion.valid)
 					{
-						int num2 = 0;
-						if(!(otherRegion.door is null))
-						{
-							num2 = VehiclePathFinder.GetBuildingCost(otherRegion.door, traverseParms, traverseParms.pawn);
-							if (num2 == int.MaxValue) continue;
-							num2 += OctileDistance(1, 0, Mathf.RoundToInt(moveTicksCardinal), Mathf.RoundToInt(moveTicksDiagonal));
-						}
 						int minPathCost = RegionMedianPathCost(otherRegion);
 						foreach(VehicleRegionLink regionLink in otherRegion.links.Keys)
 						{
 							if(regionLink != regionLinkQueueEntry.Link && regionLink.GetOtherRegion(otherRegion).type.Passable())
 							{
-								int num3 = (otherRegion.door is null) ? RegionLinkDistance(regionLinkQueueEntry.Link, regionLink, minPathCost) : num2;
-								num3 = Math.Max(num3, 1);
-								int num4 = num + num3;
-								int estimatedPathCost = MinimumRegionLinkDistance(destinationCell, regionLink) + num4;
+								int linkDistance = RegionLinkDistance(regionLinkQueueEntry.Link, regionLink, minPathCost);
+								linkDistance = Math.Max(linkDistance, 1);
+								int totalDistance = cachedDistance + linkDistance;
+								int estimatedPathCost = MinimumRegionLinkDistance(destinationCell, regionLink) + totalDistance;
 								if (distances.TryGetValue(regionLink, out int num5))
 								{
-									if(num4 < num5)
+									if (totalDistance < num5)
 									{
-										distances[regionLink] = num4;
-										queue.Push(new RegionLinkQueueEntry(otherRegion, regionLink, num4, estimatedPathCost));
+										distances[regionLink] = totalDistance;
+										queue.Push(new RegionLinkQueueEntry(otherRegion, regionLink, totalDistance, estimatedPathCost));
 									}
 								}
 								else
 								{
-									distances.Add(regionLink, num4);
-									queue.Push(new RegionLinkQueueEntry(otherRegion, regionLink, num4, estimatedPathCost));
+									distances.Add(regionLink, totalDistance);
+									queue.Push(new RegionLinkQueueEntry(otherRegion, regionLink, totalDistance, estimatedPathCost));
 								}
 							}
 						}
-						if (!regionMinLink.ContainsKey(otherRegion.id))
+						if (!regionMinLink.ContainsKey(otherRegion.ID))
 						{
-							regionMinLink.Add(otherRegion.id, regionLinkQueueEntry.Link);
+							regionMinLink.Add(otherRegion.ID, regionLinkQueueEntry.Link);
 							if(otherRegion == region)
 							{
 								minLink = regionLinkQueueEntry.Link;

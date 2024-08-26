@@ -1,17 +1,12 @@
-﻿using System;
-using System.Reflection;
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Text;
-using Verse;
-using UnityEngine;
-using HarmonyLib;
-using SmashTools;
+﻿using SmashTools;
 using SmashTools.Performance;
-using System.Diagnostics;
-using System.Threading;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using UnityEngine;
+using Verse;
 
 namespace Vehicles
 {
@@ -25,8 +20,6 @@ namespace Vehicles
 		private const int TempIncidentMapId = 1;
 
 		private VehiclePathData[] vehicleData;
-		private int[] piggyToOwner;
-		private List<VehicleDef> owners = new List<VehicleDef>();
 
 		private VehicleDef buildingFor;
 		private int vehicleRegionGridIndexChecking = 0;
@@ -44,7 +37,8 @@ namespace Vehicles
 		/// <summary>
 		/// VehicleDefs which have created and 'own' a set of regions
 		/// </summary>
-		public List<VehicleDef> Owners => owners;
+		[Obsolete("Use VehicleHarmony.gridOwners instead")]
+		public List<VehicleDef> Owners => VehicleHarmony.gridOwners.Owners;
 
 		public DedicatedThread Thread => dedicatedThread;
 
@@ -101,34 +95,32 @@ namespace Vehicles
 				{
 					ConstructComponents();
 				}
-				VehiclePathData pathData = vehicleData[vehicleDef.DefIndex];
-				if (!pathData.IsValid)
-				{
-					Log.Error($"Unable to retrieve path data on {map} for {vehicleDef.defName}. Was this VehicleDef created postload? Self-correcting...");
-					Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
-					if (!UnityData.IsInMainThread)
-					{
-						Log.Error($"Unable to generate path data outside of the main thread. May encounter thread safety issues.");
-						return null;
-						
-					}
-					return GeneratePathData(vehicleDef);
-				}
-				return pathData;
+				return vehicleData[vehicleDef.DefIndex];
 			}
 		}
 
-		internal static DedicatedThread GetDedicatedThread(Map map)
+		internal void InitThread(Map map)
 		{
+			if (dedicatedThread != null)
+			{
+				ReleaseThread();
+			}
 			if (!VehicleMod.settings.debug.debugUseMultithreading)
 			{
 				Log.Warning($"Loading map without DedicatedThread. This will cause performance issues. Map={map}.");
-				return null;
+				return;
 			}
 			if (map.info?.parent == null)
 			{
-				return null; //MapParent won't have reference resolved when loading from save, GetDedicatedThread will be called a 2nd time on PostLoadInit
+				return; //MapParent won't have reference resolved when loading from save, GetDedicatedThread will be called a 2nd time on PostLoadInit
 			}
+			DedicatedThread thread = GetDedicatedThread(map);
+			thread.update += UpdateRegions;
+			dedicatedThread = thread;
+		}
+
+		private static DedicatedThread GetDedicatedThread(Map map)
+		{
 			DedicatedThread thread;
 			if (map.IsPlayerHome)
 			{
@@ -151,34 +143,30 @@ namespace Vehicles
 		/// Check if <paramref name="vehicleDef"/> is an owner of a region set
 		/// </summary>
 		/// <param name="vehicleDef"></param>
+		[Obsolete("Use VehicleHarmony.gridOwners instead")]
 		public bool IsOwner(VehicleDef vehicleDef)
 		{
-			return piggyToOwner[vehicleDef.DefIndex] == vehicleDef.DefIndex;
+			return VehicleHarmony.gridOwners.IsOwner(vehicleDef);
 		}
 
+		[Obsolete("Use VehicleHarmony.gridOwners instead")]
 		public VehicleDef GetOwner(VehicleDef vehicleDef)
 		{
-			int id = piggyToOwner[vehicleDef.DefIndex];
-			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == id);
-		}
-
-		public VehicleDef GetOwner(int ownerId)
-		{
-			return VehicleHarmony.AllMoveableVehicleDefs.FirstOrDefault(vehicleDef => vehicleDef.DefIndex == ownerId);
+			return VehicleHarmony.gridOwners.GetOwner(vehicleDef);
 		}
 
 		public List<VehicleDef> GetPiggies(VehicleDef ownerDef)
 		{
 			List<VehicleDef> owners = new List<VehicleDef>();
-			if (!IsOwner(ownerDef))
+			if (!VehicleHarmony.gridOwners.IsOwner(ownerDef))
 			{
 				return owners;
 			}
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
-				if (!IsOwner(vehicleDef))
+				if (!VehicleHarmony.gridOwners.IsOwner(vehicleDef))
 				{
-					VehicleDef matchingOwnerDef = GetOwner(vehicleDef);
+					VehicleDef matchingOwnerDef = VehicleHarmony.gridOwners.GetOwner(vehicleDef);
 					if (matchingOwnerDef == ownerDef)
 					{
 						owners.Add(vehicleDef);
@@ -199,22 +187,20 @@ namespace Vehicles
 			{
 				ConstructComponents();
 			}
+			RegenerateGrids();
+		}
 
+		public void RegenerateGrids()
+		{
 			Ext_Map.StashLongEventText();
-			
+
 			StringBuilder eventTextBuilder = new StringBuilder();
-
-			DeepProfiler.Start("Vehicle PathGrids");
 			GeneratePathGrids(eventTextBuilder);
-			DeepProfiler.End();
-
-			DeepProfiler.Start("Vehicle Regions");
 			GenerateRegionsAsync(eventTextBuilder);
-			DeepProfiler.End();
-
-			DeepProfiler.Start("Fetching DedicatedThread");
-			dedicatedThread = GetDedicatedThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
-			DeepProfiler.End();
+			if (!ThreadAlive)
+			{
+				InitThread(map); //Init dedicated thread after map generation to avoid duplicate pathgrid and region recalcs
+			}
 
 			Ext_Map.RevertLongEventText();
 		}
@@ -242,13 +228,12 @@ namespace Vehicles
 
 		private void GenerateRegions(StringBuilder eventTextBuilder)
 		{
-			if (owners.NullOrEmpty())
+			if (VehicleHarmony.gridOwners.Owners.NullOrEmpty())
 			{
 				return;
 			}
 
-			DeepProfiler.Start("Vehicle Regions");
-			foreach (VehicleDef vehicleDef in owners)
+			foreach (VehicleDef vehicleDef in VehicleHarmony.gridOwners.Owners)
 			{
 				eventTextBuilder.Clear();
 				eventTextBuilder.AppendLine("VF_GeneratingRegions".Translate());
@@ -259,18 +244,17 @@ namespace Vehicles
 				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
 				vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
 			}
-			DeepProfiler.End();
 
 			RegionsInitialized = true;
 		}
 
 		private void GenerateRegionsAsync(StringBuilder eventTextBuilder)
 		{
-			if (owners.NullOrEmpty())
+			if (VehicleHarmony.gridOwners.Owners.NullOrEmpty())
 			{
 				return;
 			}
-			if (owners.Count < 3)
+			if (VehicleHarmony.gridOwners.Owners.Count < 3)
 			{
 				GenerateRegions(eventTextBuilder);
 				return;
@@ -279,7 +263,7 @@ namespace Vehicles
 			LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
 
 			DeepProfiler.Start("Vehicle Regions");
-			Parallel.ForEach(owners, delegate (VehicleDef vehicleDef)
+			Parallel.ForEach(VehicleHarmony.gridOwners.Owners, delegate (VehicleDef vehicleDef)
 			{
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionAndRoomUpdater.Enabled = true;
@@ -297,9 +281,6 @@ namespace Vehicles
 		{
 			int size = DefDatabase<VehicleDef>.DefCount;
 			vehicleData = new VehiclePathData[size];
-			piggyToOwner = new int[size].Populate(-1);
-
-			owners.Clear();
 
 			ComponentsInitialized = true;
 
@@ -315,7 +296,7 @@ namespace Vehicles
 			{
 				if (dedicatedThread == null)
 				{
-					dedicatedThread = GetDedicatedThread(map);
+					InitThread(map);
 				}
 			}
 		}
@@ -328,40 +309,30 @@ namespace Vehicles
 		internal bool ReleaseThread()
 		{
 			Debug.Message($"<color=orange>Releasing thread {Thread.id}.</color>");
-			return dedicatedThread.Release();
+			bool released = dedicatedThread.Release();
+			dedicatedThread.update -= UpdateRegions;
+			dedicatedThread = null;
+			return released;
 		}
 
-		/// <summary>
-		/// Update vehicle regions sequentially
-		/// </summary>
-		/// <remarks>
-		/// Only one VehicleDef's RegionGrid updates per frame so performance doesn't scale with vehicle count
-		/// </remarks>
 		public override void MapComponentUpdate()
 		{
-			if (owners.Count > 0 && vehicleRegionGridIndexChecking < owners.Count)
+			if (!ThreadAlive)
 			{
-				//if (owners.Count > 0 && vehicleRegionGridIndexChecking < owners.Count)
-				//{
-				//	VehicleDef vehicleDef = owners[vehicleRegionGridIndexChecking];
-				//	VehiclePathData vehiclePathData = this[vehicleDef];
-				//	AsyncRegionRebuildAction rebuildAction = AsyncPool<AsyncRegionRebuildAction>.Get();
-				//	rebuildAction.Set(this, vehiclePathData);
-				//	dedicatedThread.Queue(rebuildAction);
-				//	//vehiclePathData.VehicleRegionGrid.UpdateClean();
-				//	//vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-				//	vehicleRegionGridIndexChecking++;
-				//	if (vehicleRegionGridIndexChecking >= owners.Count)
-				//	{
-				//		vehicleRegionGridIndexChecking = 0;
-				//	}
-				//}
-				VehicleDef vehicleDef = owners[vehicleRegionGridIndexChecking];
+				UpdateRegions();
+			}
+		}
+
+		private void UpdateRegions()
+		{
+			if (VehicleHarmony.gridOwners.Owners.Count > 0 && vehicleRegionGridIndexChecking < VehicleHarmony.gridOwners.Owners.Count)
+			{
+				VehicleDef vehicleDef = VehicleHarmony.gridOwners.Owners[vehicleRegionGridIndexChecking];
 				VehiclePathData vehiclePathData = this[vehicleDef];
 				vehiclePathData.VehicleRegionGrid.UpdateClean();
 				vehiclePathData.VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
 				vehicleRegionGridIndexChecking++;
-				if (vehicleRegionGridIndexChecking >= owners.Count)
+				if (vehicleRegionGridIndexChecking >= VehicleHarmony.gridOwners.Owners.Count)
 				{
 					vehicleRegionGridIndexChecking = 0;
 				}
@@ -372,13 +343,14 @@ namespace Vehicles
 		{
 			Ext_Map.StashLongEventText();
 			LongEventHandler.SetCurrentEventText("VF_GeneratingPathData".Translate());
-			DeepProfiler.Start("Generating VehiclePathData");
+			foreach (VehicleDef vehicleDef in VehicleHarmony.AllVehicleOwners)
+			{
+				GeneratePathData(vehicleDef);
+			}
 			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading) //Even shuttles need path data for landing
 			{
 				GeneratePathData(vehicleDef);
 			}
-			DeepProfiler.End();
-
 			Ext_Map.RevertLongEventText();
 		}
 
@@ -386,60 +358,37 @@ namespace Vehicles
 		/// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
 		/// </summary>
 		/// <param name="vehicleDef"></param>
-		private VehiclePathData GeneratePathData(VehicleDef vehicleDef, bool compress = true)
+		private VehiclePathData GeneratePathData(VehicleDef vehicleDef)
 		{
 			VehiclePathData vehiclePathData = new VehiclePathData(vehicleDef);
 			vehicleData[vehicleDef.DefIndex] = vehiclePathData;
-			bool newOwner = false;
+			bool isOwner = VehicleHarmony.gridOwners.IsOwner(vehicleDef);
 
 			buildingFor = vehicleDef;
 			{
 				vehiclePathData.VehiclePathGrid = new VehiclePathGrid(this, vehicleDef);
 				vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
 
-				if (TryGetOwner(vehiclePathData, out int ownerId) && compress)
+				if (isOwner)
 				{
-					//Piggy back off vehicles with similar width + impassability
-					piggyToOwner[vehicleDef.DefIndex] = ownerId;
-					vehiclePathData.ReachabilityData = vehicleData[ownerId].ReachabilityData;
+					vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef, vehiclePathData);
 				}
 				else
 				{
-					vehiclePathData.ReachabilityData = new VehicleReachabilitySettings(this, vehicleDef, vehiclePathData);
-					AddOwner(vehicleDef);
-					newOwner = true;
+					VehicleDef ownerDef = VehicleHarmony.gridOwners.GetOwner(vehicleDef); //Will return itself if it's an owner
+					vehiclePathData.ReachabilityData = vehicleData[ownerDef.DefIndex].ReachabilityData;
 				}
 			}
 			buildingFor = null;
 
 			vehiclePathData.VehiclePathGrid.PostInit();
 			vehiclePathData.VehiclePathFinder.PostInit();
-			if (newOwner)
+			if (isOwner)
 			{
 				vehiclePathData.ReachabilityData.PostInit();
 			}
 
 			return vehiclePathData;
-		}
-
-		private void AddOwner(VehicleDef vehicleDef)
-		{
-			piggyToOwner[vehicleDef.DefIndex] = vehicleDef.DefIndex;
-			owners.Add(vehicleDef);
-		}
-
-		private bool TryGetOwner(VehiclePathData vehiclePathData, out int ownerId)
-		{
-			foreach (VehicleDef checkingOwner in owners)
-			{
-				ownerId = checkingOwner.DefIndex;
-				if (vehiclePathData.MatchesReachability(vehicleData[ownerId]))
-				{
-					return true;
-				}
-			}
-			ownerId = -1;
-			return false;
 		}
 
 		/// <summary>
@@ -448,18 +397,9 @@ namespace Vehicles
 		/// <remarks>Stores data strictly for deviations from vanilla regarding impassable values</remarks>
 		public class VehiclePathData
 		{
-			private readonly HashSet<ThingDef> impassableThingDefs;
-			private readonly HashSet<TerrainDef> impassableTerrain;
-			private readonly int size;
-			private readonly bool defaultTerrainImpassable;
-
 			public VehiclePathData(VehicleDef vehicleDef)
 			{
 				Owner = vehicleDef;
-				size = Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z);
-				defaultTerrainImpassable = vehicleDef.properties.defaultTerrainImpassable;
-				impassableThingDefs = vehicleDef.properties.customThingCosts.Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key).ToHashSet();
-				impassableTerrain = vehicleDef.properties.customTerrainCosts.Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key).ToHashSet();
 
 				VehiclePathGrid = null;
 				VehiclePathFinder = null;
@@ -467,8 +407,6 @@ namespace Vehicles
 			}
 
 			public bool IsValid => Owner != null;
-
-			public bool UsesRegions => Owner.vehicleMovementPermissions > VehiclePermissions.NotAllowed;
 
 			public VehicleDef Owner { get; }
 
@@ -489,16 +427,6 @@ namespace Vehicles
 			public VehicleRegionAndRoomUpdater VehicleRegionAndRoomUpdater => ReachabilityData.regionAndRoomUpdater;
 
 			public VehicleRegionDirtyer VehicleRegionDirtyer => ReachabilityData.regionDirtyer;
-
-			public bool MatchesReachability(VehiclePathData other)
-			{
-				if (!other.IsValid)
-				{
-					return false;
-				}
-				return UsesRegions == other.UsesRegions && size == other.size && defaultTerrainImpassable == other.defaultTerrainImpassable &&
-					impassableThingDefs.SetEquals(other.impassableThingDefs) && impassableTerrain.SetEquals(other.impassableTerrain);
-			}
 		}
 
 		public class VehicleReachabilitySettings

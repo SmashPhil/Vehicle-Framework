@@ -263,7 +263,6 @@ namespace Vehicles
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void TryResumePathingAfterLoading()
 		{
 			if (moving)
@@ -295,7 +294,6 @@ namespace Vehicles
 			return null;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private bool AtDestinationPosition()
 		{
 			return VehicleReachabilityImmediate.CanReachImmediateVehicle(vehicle, destination, peMode);
@@ -311,7 +309,6 @@ namespace Vehicles
 			return null;
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void PatherDraw()
 		{
 			if (DebugViewSettings.drawPaths && curPath != null && Find.Selector.IsSelected(vehicle))
@@ -320,7 +317,6 @@ namespace Vehicles
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool MovedRecently(int ticks)
 		{
 			return Find.TickManager.TicksGame - lastMovedTick <= ticks;
@@ -600,7 +596,6 @@ namespace Vehicles
 			return Mathf.Max(tickCost, 1f);
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		private float CostToPayThisTick()
 		{
 			return Mathf.Max(1, nextCellCostTotal / MaxMoveTicks);
@@ -662,7 +657,6 @@ namespace Vehicles
 			}
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public PawnPath GenerateNewPath_Concurrent()
 		{
 			return GenerateNewPath(CancellationToken.None);

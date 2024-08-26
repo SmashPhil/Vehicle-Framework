@@ -21,7 +21,6 @@ namespace Vehicles
 		private const int SampleSize = 180;
 
 		private static WeatherDef permanentWeatherDef;
-		private static double[][] averageMilliseconds;
 
 		[UnitTest(Category = "Performance", Name = "Permanent Weather (Heavy Snow)", GameState = GameState.Playing)]
 		private static void UnitTest_SetPermanentWeather()
@@ -43,8 +42,6 @@ namespace Vehicles
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				Messages.Message("Patching ComponentCaching for unit testing.", MessageTypeDefOf.NeutralEvent);
-				averageMilliseconds = new double[3][];
-				averageMilliseconds.Populate(new double[SampleSize]);
 
 				VehicleHarmony.Patch(AccessTools.Method(typeof(GameComponentUtility), nameof(GameComponentUtility.GameComponentUpdate)),
 					postfix: new HarmonyMethod(typeof(PerformanceTesting), nameof(ComponentCacheProfile)));
@@ -78,43 +75,29 @@ namespace Vehicles
 			if (Find.CurrentMap is Map map)
 			{
 				Log.Clear();
-				ProfilerWatch.Start();
-
-				//GetComponent
-				_ = map.GetComponent<VehicleMapping>();
-				TimeSpan vanillaSample = ProfilerWatch.Get();
-				averageMilliseconds[0][Find.TickManager.TicksGame % SampleSize] = vanillaSample.TotalMilliseconds;
-
-				//ComponentCache
-				_ = map.GetCachedMapComponent<VehicleMapping>();
-				TimeSpan componentCacheSample = ProfilerWatch.Get();
-				averageMilliseconds[1][Find.TickManager.TicksGame % SampleSize] = componentCacheSample.TotalMilliseconds;
-
-				//MapComponentCache
-				_ = MapComponentCache<VehicleMapping>.GetComponent(map);
-				TimeSpan genericCacheSample = ProfilerWatch.Get();
-				averageMilliseconds[2][Find.TickManager.TicksGame % SampleSize] = genericCacheSample.TotalMilliseconds;
-				
-				ProfilerWatch.End();
-
-				double vanillaAverage = averageMilliseconds[0].Average();
-				double componentAverage = averageMilliseconds[1].Average();
-				double genericAverage = averageMilliseconds[2].Average();
-
-				Log.Message($"GetComponent: {vanillaAverage:0.0000}ms");
-				Log.Message($"ComponentCache: {componentAverage:0.0000}ms");
-				Log.Message($"MapComponentCache: {genericAverage:0.0000}ms");
-
-				string winner = "GetComponent";
-				if (componentAverage < vanillaAverage || genericAverage < vanillaAverage)
+				ProfilerWatch.Start("Component Caching");
 				{
-					winner = genericAverage < componentAverage ? "MapComponentCache" : "ComponentCache";
+					//GetComponent
+					ProfilerWatch.Start("Vanilla");
+					{
+						_ = map.GetComponent<VehicleMapping>();
+					}
+					ProfilerWatch.Stop();
+
+					//ComponentCache - inline
+					ProfilerWatch.Start("ComponentCache inlined");
+					{
+						_ = map.GetCachedMapComponent<VehicleMapping>();
+					}
+					ProfilerWatch.Stop();
+
+					ProfilerWatch.Start("MapComponentCache");
+					{
+						_ = MapComponentCache<VehicleMapping>.GetComponent(map);
+					}
+					ProfilerWatch.Stop();
 				}
-				else if (componentAverage == vanillaAverage && genericAverage == vanillaAverage)
-				{
-					winner = "Roughly Equal";
-				}
-				Log.Message($"Fastest: {winner}");
+				ProfilerWatch.Stop();
 			}
 		}
 	}

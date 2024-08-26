@@ -18,7 +18,7 @@ namespace Vehicles
 	internal class VehiclePathing : IPatchCategory
 	{
 		private static readonly HashSet<IntVec3> hitboxUpdateCells = new HashSet<IntVec3>();
-
+		
 		public void PatchMethods()
 		{
 			//TODO - Implement in 1.5 with more testing and drag-to-rotate
@@ -72,6 +72,16 @@ namespace Vehicles
 				nameof(SetRotationAndUpdateVehicleRegionsClipping)),
 				postfix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(SetRotationAndUpdateVehicleRegions)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThingGrid), nameof(ThingGrid.Register)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(MonitorThingGridRegisterStart)),
+				finalizer: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(MonitorThingGridRegisterEnd)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ThingGrid), nameof(ThingGrid.Deregister)),
+				prefix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(MonitorThingGridDeregisterStart)),
+				finalizer: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(MonitorThingGridDeregisterEnd)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenStep_RocksFromGrid), nameof(GenStep_RocksFromGrid.Generate)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
@@ -476,6 +486,26 @@ namespace Vehicles
 			}
 		}
 
+		private static void MonitorThingGridRegisterStart(ThingGrid __instance)
+		{
+			Monitor.Enter(__instance);
+		}
+
+		private static void MonitorThingGridRegisterEnd(ThingGrid __instance)
+		{
+			Monitor.Exit(__instance);
+		}
+
+		private static void MonitorThingGridDeregisterStart(ThingGrid __instance)
+		{
+			Monitor.Enter(__instance);
+		}
+
+		private static void MonitorThingGridDeregisterEnd(ThingGrid __instance)
+		{
+			Monitor.Exit(__instance);
+		}
+
 		private static void DisableRegionUpdatingRockGen(Map map)
 		{
 			if (!map.TileInfo.WaterCovered)
@@ -484,90 +514,16 @@ namespace Vehicles
 			}
 		}
 
-		private static void Notify_ThingAffectingVehicleRegionsSpawned(Thing b)
-		{
-			//Some mods patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
-			if (b.Spawned)
-			{
-				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, true);
-			}
-		}
-
-		private static void Notify_ThingAffectingVehicleRegionsDespawned(Thing b)
-		{
-			//Some mods patch the SpawnSetup method and despawn the object immediately. Extra check is necessary
-			if (b.Spawned)
-			{
-				PathingHelper.ThingAffectingRegionsStateChange(b, b.Map, false);
-			}
-		}
-
 		/* ---- Helper Methods related to patches ---- */
 
 		private static void SpawnAndNotifyVehicleRegions(Thing thing, Map map)
 		{
-			RegisterInVehicleRegions(thing, map);
 			PathingHelper.ThingAffectingRegionsStateChange(thing, map, true);
 		}
 
 		private static void DeSpawnAndNotifyVehicleRegions(Thing thing, Map map)
 		{
-			DeregisterInVehicleRegions(thing, map);
 			PathingHelper.ThingAffectingRegionsStateChange(thing, map, false);
-		}
-
-		private static void RegisterInVehicleRegions(Thing thing, Map map)
-		{
-			if (MapGenerator.mapBeingGenerated != null)
-			{
-				return; //Map is being generated, there will be a full region rebuild post-init
-			}
-			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-			if (!mapping.RegionsInitialized)
-			{
-				return; //Map hasn't finished building regions, there will be a full region rebuild post-init
-			}
-			if (mapping.ThreadAvailable)
-			{
-				AsyncRegionRegisterAction asyncAction = AsyncPool<AsyncRegionRegisterAction>.Get();
-				asyncAction.Set(mapping, thing, true);
-				mapping.dedicatedThread.Queue(asyncAction);
-			}
-			else
-			{
-				RegisterInRegions(thing, mapping);
-			}
-		}
-
-		private static void DeregisterInVehicleRegions(Thing thing, Map map)
-		{
-			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-			if (mapping.ThreadAvailable)
-			{
-				AsyncRegionRegisterAction asyncAction = AsyncPool<AsyncRegionRegisterAction>.Get();
-				asyncAction.Set(mapping, thing, false);
-				mapping.dedicatedThread.Queue(asyncAction);
-			}
-			else
-			{
-				DeregisterInRegions(thing, mapping);
-			}
-		}
-
-		internal static void RegisterInRegions(Thing thing, VehicleMapping mapping)
-		{
-			foreach (VehicleDef vehicleDef in mapping.Owners)
-			{
-				VehicleRegionListersUpdater.RegisterInRegions(thing, mapping, vehicleDef);
-			}
-		}
-
-		internal static void DeregisterInRegions(Thing thing, VehicleMapping mapping)
-		{
-			foreach (VehicleDef vehicleDef in mapping.Owners)
-			{
-				VehicleRegionListersUpdater.DeregisterInRegions(thing, mapping, vehicleDef);
-			}
 		}
 	}
 }

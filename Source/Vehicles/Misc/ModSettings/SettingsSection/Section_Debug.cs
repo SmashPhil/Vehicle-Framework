@@ -278,7 +278,7 @@ namespace Vehicles
 				}
 #endif
 
-				if (listingStandard.ButtonText("Regenerate All Regions"))
+				if (listingStandard.ButtonText("Regenerate All Grids"))
 				{
 					LongEventHandler.QueueLongEvent(delegate ()
 					{
@@ -286,17 +286,9 @@ namespace Vehicles
 						foreach (Map map in Find.Maps)
 						{
 							VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-							foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
-							{
-								mapping[vehicleDef].VehiclePathGrid.RecalculateAllPerceivedPathCosts();
-								if (mapping.IsOwner(vehicleDef))
-								{
-									mapping[vehicleDef].VehicleRegionDirtyer.SetAllDirty();
-									mapping[vehicleDef].VehicleRegionAndRoomUpdater.TryRebuildVehicleRegions();
-								}
-							}
+							mapping.RegenerateGrids();
 						}
-					}, "Regenerating Regions", false, null);
+					}, "Regenerating Regions", true, null);
 				}
 
 				if (listingStandard.ButtonText("Clear Region Cache"))
@@ -331,7 +323,7 @@ namespace Vehicles
 					VehicleMapping mapComp = map.GetCachedMapComponent<VehicleMapping>();
 					if (debugUseMultithreading)
 					{
-						mapComp.dedicatedThread = VehicleMapping.GetDedicatedThread(map);
+						mapComp.InitThread(map);
 					}
 					else
 					{

@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using Verse;
+using SmashTools.Performance;
+using static SmashTools.Debug;
 using UnityEngine;
-using SmashTools;
-using System.Threading.Tasks;
-using Verse.Noise;
+using Verse;
 
 namespace Vehicles
 {
@@ -15,6 +13,7 @@ namespace Vehicles
 	public class VehicleRegionAndRoomUpdater : VehicleRegionManager
     {
 		private readonly List<VehicleRegion> newRegions = new List<VehicleRegion>();
+
 		private readonly List<VehicleRoom> newRooms = new List<VehicleRoom>();
 		private readonly HashSet<VehicleRoom> reusedOldRooms = new HashSet<VehicleRoom>();
 
@@ -100,13 +99,19 @@ namespace Vehicles
 			VehicleMapping.VehiclePathData pathData = mapping[createdFor];
 			foreach (IntVec3 cell in pathData.VehicleRegionDirtyer.DirtyCells)
 			{
-				if (VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor, RegionType.Set_All) == null)
+				if (!cell.InBounds(mapping.map))
 				{
-					VehicleRegion region = pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell);
-					if (region != null)
-					{
-						newRegions.Add(region);
-					}
+					continue;
+				}
+				VehicleRegion region = pathData.VehicleRegionGrid.GetRegionAt(cell);
+				bool needsNew = region == null || !region.valid;
+
+				// Buffer should never hold a region which still has references in the region grid.
+				Assert(region == null || !region.Suspended, $"{region} has been pushed to buffer prematurely.");
+
+				if (needsNew && pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell, out region))
+				{
+					newRegions.Add(region);
 				}
 			}
 		}

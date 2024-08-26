@@ -23,7 +23,7 @@ namespace Vehicles
 				return null;
 			}
 			VehicleRegion validRegionAt = mapping[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
-			if (validRegionAt != null && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
+			if (validRegionAt != null && allowedRegionTypes.HasFlag(validRegionAt.type))
 			{
 				return validRegionAt;
 			}

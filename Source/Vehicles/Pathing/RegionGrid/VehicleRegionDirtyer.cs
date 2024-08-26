@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using Verse;
 using SmashTools;
 using Verse.Noise;
+using SmashTools.Performance;
 
 namespace Vehicles
 {
@@ -16,31 +17,13 @@ namespace Vehicles
     {
 		private readonly HashSet<IntVec3> dirtyCells = new HashSet<IntVec3>();
 
-		private readonly ConcurrentSet<VehicleRegion> regionsToDirty = new ConcurrentSet<VehicleRegion>();
-		private readonly ConcurrentSet<VehicleRegion> regionsToDirtyFromWalkability = new ConcurrentSet<VehicleRegion>();
-
-		private object dirtyCellsLock = new object();
+		//Thread Safe - only called accessible within the same thread through AsyncAction or directly called from PathingHelper (w/ multithreading disabled)
+		private readonly HashSet<VehicleRegion> regionsToDirty = new HashSet<VehicleRegion>();
+		//Thread Safe - only accessed within the same method
+		private readonly HashSet<VehicleRegion> regionsToDirtyFromWalkability = new HashSet<VehicleRegion>();
 
 		public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
-		}
-
-		/// <summary>
-		/// <see cref="dirtyCells"/> getter
-		/// </summary>
-		public IEnumerable<IntVec3> DirtyCells
-		{
-			get
-			{
-				lock (dirtyCellsLock)
-				{
-					foreach (IntVec3 cell in dirtyCells)
-					{
-						yield return cell;
-					}
-					SetAllClean();
-				}
-			}
 		}
 
 		/// <summary>
@@ -50,22 +33,25 @@ namespace Vehicles
 		{
 			get
 			{
-				lock (dirtyCellsLock)
+				lock (dirtyCells)
 				{
 					return dirtyCells.Count > 0;
 				}
 			}
 		}
 
-		/// <summary>
-		/// Clear all dirtyed cells
-		/// </summary>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		internal void SetAllClean()
+		public IEnumerable<IntVec3> DirtyCells
 		{
-			lock (dirtyCellsLock)
+			get
 			{
-				dirtyCells.Clear();
+				lock (dirtyCells)
+				{
+					foreach (IntVec3 cell in dirtyCells)
+					{
+						yield return cell;
+					}
+					dirtyCells.Clear();
+				}
 			}
 		}
 
@@ -74,7 +60,7 @@ namespace Vehicles
 		/// </summary>
 		internal void SetAllDirty()
 		{
-			lock (dirtyCellsLock)
+			lock (dirtyCells)
 			{
 				dirtyCells.Clear();
 				foreach (IntVec3 cell in mapping.map)
@@ -102,7 +88,7 @@ namespace Vehicles
 				IntVec3 adjCell = cell + GenAdj.AdjacentCellsAndInside[i];
 				if (adjCell.InBounds(mapping.map))
 				{
-					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt_NoRebuild_InvalidAllowed(adjCell);
+					VehicleRegion regionAt_NoRebuild_InvalidAllowed = mapping[createdFor].VehicleRegionGrid.GetRegionAt(adjCell);
 					if (regionAt_NoRebuild_InvalidAllowed != null && regionAt_NoRebuild_InvalidAllowed.valid)
 					{
 						SetRegionDirty(regionAt_NoRebuild_InvalidAllowed);
@@ -111,7 +97,7 @@ namespace Vehicles
 			}
 			if (GenGridVehicles.Walkable(cell, createdFor, mapping))
 			{
-				lock (dirtyCellsLock)
+				lock (dirtyCells)
 				{
 					dirtyCells.Add(cell);
 				}
@@ -130,13 +116,13 @@ namespace Vehicles
 					regionsToDirty.Add(validRegionAt_NoRebuild);
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
 			regionsToDirty.Clear();
 		}
-
+		
 		public void Notify_ThingAffectingRegionsDespawned(CellRect occupiedRect)
 		{
 			regionsToDirty.Clear();
@@ -151,27 +137,22 @@ namespace Vehicles
 					}
 				}
 			}
-			foreach (VehicleRegion vehicleRegion in regionsToDirty.Keys)
+			foreach (VehicleRegion vehicleRegion in regionsToDirty)
 			{
 				SetRegionDirty(vehicleRegion);
 			}
 			regionsToDirty.Clear();
 
-			lock (dirtyCellsLock)
+			lock (dirtyCells)
 			{
-				foreach (IntVec3 cell in occupiedRect)
-				{
-					dirtyCells.Add(cell);
-				}
+				dirtyCells.AddRange(occupiedRect);
 			}
 		}
 
 		/// <summary>
 		/// Set <paramref name="region"/> to dirty status, marking it for update
 		/// </summary>
-		/// <param name="region"></param>
-		/// <param name="addCellsToDirtyCells"></param>
-		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true, bool dirtyLinkedRegions = true)
+		private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true, bool dirtyLinkedRegions = false)
 		{
 			try
 			{
@@ -195,7 +176,7 @@ namespace Vehicles
 #endif
 				if (addCellsToDirtyCells)
 				{
-					lock (dirtyCellsLock)
+					lock (dirtyCells)
 					{
 						foreach (IntVec3 intVec in region.Cells)
 						{

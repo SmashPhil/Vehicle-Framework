@@ -24,8 +24,6 @@ namespace Vehicles
 		private static readonly Dictionary<ThingDef, List<VehicleDef>> regionEffecters = new Dictionary<ThingDef, List<VehicleDef>>();
 		private static readonly Dictionary<TerrainDef, List<VehicleDef>> terrainEffecters = new Dictionary<TerrainDef, List<VehicleDef>>();
 
-		private static readonly List<List<Thing>> snapshotListsSynchronous = new List<List<Thing>>();
-
 		/// <summary>
 		/// VehicleDef , &lt;TerrainDef Tag,pathCost&gt;
 		/// </summary>
@@ -40,14 +38,6 @@ namespace Vehicles
 		public static bool ShouldCreateRegions(VehicleDef vehicleDef)
 		{
 			return SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public static List<Thing> SnapshotThingGridAt(Map map, IntVec3 cell)
-		{
-			List<Thing> thingList = AsyncPool<List<Thing>>.Get();
-			thingList.AddRange(map.thingGrid.ThingsListAt(cell));
-			return thingList;
 		}
 
 		/// <summary>
@@ -224,42 +214,21 @@ namespace Vehicles
 				if (mapping.ThreadAvailable)
 				{
 					CellRect occupiedRect = thing.OccupiedRect();
-					List<List<Thing>> snapshotLists = AsyncPool<List<List<Thing>>>.Get();
-					for (int i = occupiedRect.minZ; i <= occupiedRect.maxZ; i++)
-					{
-						for (int j = occupiedRect.minX; j <= occupiedRect.maxX; j++)
-						{
-							IntVec3 cell = new IntVec3(j, 0, i);
-							List<Thing> snapshotList = SnapshotThingGridAt(map, cell);
-							snapshotLists.Add(snapshotList);
-						}
-					}
 					AsyncRegionAction asyncAction = AsyncPool<AsyncRegionAction>.Get();
-					asyncAction.Set(mapping, vehicleDefs, snapshotLists, occupiedRect, spawned);
+					asyncAction.Set(mapping, vehicleDefs, occupiedRect, spawned);
 					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
 				{
 					CellRect occupiedRect = thing.OccupiedRect();
-					snapshotListsSynchronous.Clear();
-					for (int i = occupiedRect.minZ; i <= occupiedRect.maxZ; i++)
-					{
-						for (int j = occupiedRect.minX; j <= occupiedRect.maxX; j++)
-						{
-							IntVec3 cell = new IntVec3(j, 0, i);
-							List<Thing> snapshotList = map.thingGrid.ThingsListAt(cell);
-							snapshotListsSynchronous.Add(snapshotList);
-						}
-					}
 					if (spawned)
 					{
-						ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs, snapshotListsSynchronous);
+						ThingInRegionSpawned(occupiedRect, mapping, vehicleDefs);
 					}
 					else
 					{
-						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs, snapshotListsSynchronous);
+						ThingInRegionDespawned(occupiedRect, mapping, vehicleDefs);
 					}
-					snapshotListsSynchronous.Clear();
 				}
 			}
 		}
@@ -267,11 +236,11 @@ namespace Vehicles
 		/// <summary>
 		/// Thread safe event for triggering dirtyer events
 		/// </summary>
-		internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
+		internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, snapshotLists);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(occupiedRect);
@@ -280,11 +249,11 @@ namespace Vehicles
 			}
 		}
 
-		internal static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs, List<List<Thing>> snapshotLists)
+		internal static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping, List<VehicleDef> vehicleDefs)
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect, snapshotLists);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
 				if (mapping.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(occupiedRect);
@@ -338,10 +307,9 @@ namespace Vehicles
 		{
 			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
-				List<Thing> thingList = mapping.map.thingGrid.ThingsListAt(cell);
 				foreach (VehicleDef vehicleDef in mapping.Owners)
 				{
-					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
+					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
 			}
 		}
@@ -357,26 +325,24 @@ namespace Vehicles
 			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
 			if (!mapping.Owners.NullOrEmpty())
 			{
-				List<Thing> thingList = map.thingGrid.ThingsListAt(cell);
 				if (mapping.ThreadAvailable)
 				{
-					List<Thing> snapshotList = SnapshotThingGridAt(map, cell);
 					AsyncPathingAction asyncAction = AsyncPool<AsyncPathingAction>.Get();
-					asyncAction.Set(mapping, snapshotList, cell);
+					asyncAction.Set(mapping, cell);
 					mapping.dedicatedThread.Queue(asyncAction);
 				}
 				else
 				{
-					RecalculatePerceivedPathCostAtFor(mapping, cell, thingList);
+					RecalculatePerceivedPathCostAtFor(mapping, cell);
 				}
 			}
 		}
 
-		internal static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell, List<Thing> thingList)
+		internal static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell)
 		{
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
-				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell, thingList);
+				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 			}
 		}
 
@@ -561,7 +527,7 @@ namespace Vehicles
 		public static void DisableAllRegionUpdaters(Map map)
 		{
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-			foreach (VehicleDef vehicleDef in mapping.Owners)
+			foreach (VehicleDef vehicleDef in VehicleHarmony.gridOwners.Owners)
 			{
 				VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
 				pathData.VehicleRegionAndRoomUpdater.Enabled = false;

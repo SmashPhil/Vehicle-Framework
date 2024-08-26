@@ -6,6 +6,7 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using System.Threading;
 
 namespace Vehicles
 {
@@ -98,15 +99,15 @@ namespace Vehicles
 		/// <summary>
 		/// Recalculate path cost for tile <paramref name="vehicle"/> is registered on
 		/// </summary>
-		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect, List<List<Thing>> snapshotLists)
+		public void RecalculatePerceivedPathCostUnderRect(CellRect cellRect)
 		{
 			int index = 0;
-			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
+			for (int z = cellRect.minZ; z <= cellRect.maxZ; z++)
 			{
-				for (int j = cellRect.minX; j <= cellRect.maxX; j++)
+				for (int x = cellRect.minX; x <= cellRect.maxX; x++)
 				{
-					IntVec3 cell = new IntVec3(j, 0, i);
-					RecalculatePerceivedPathCostAt(cell, snapshotLists[index]);
+					IntVec3 cell = new IntVec3(x, 0, z);
+					RecalculatePerceivedPathCostAt(cell);
 					index++;
 				}
 			}
@@ -116,7 +117,7 @@ namespace Vehicles
 		/// Recalculate and recache path cost at <paramref name="cell"/>
 		/// </summary>
 		/// <param name="cell"></param>
-		public void RecalculatePerceivedPathCostAt(IntVec3 cell, List<Thing> thingList)
+		public void RecalculatePerceivedPathCostAt(IntVec3 cell)
 		{
 			if (!cell.InBounds(mapping.map))
 			{
@@ -128,7 +129,8 @@ namespace Vehicles
 			{
 				debugString = new StringBuilder();
 			}
-			pathGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, thingList, debugString);
+			int cost = CalculatedCostAt(cell, debugString);
+			Interlocked.Exchange(ref pathGrid[mapping.map.cellIndices.CellToIndex(cell)], cost);
 			debugString?.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
 			bool walkabilityChanged = WalkableFast(cell) != walkable;
 			if (VehicleMod.settings.debug.debugPathCostChanges)
@@ -149,7 +151,7 @@ namespace Vehicles
 		{
 			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
-				RecalculatePerceivedPathCostAt(cell, mapping.map.thingGrid.ThingsListAt(cell));
+				RecalculatePerceivedPathCostAt(cell);
 			}
 		}
 
@@ -157,9 +159,9 @@ namespace Vehicles
 		/// Calculate cost for <see cref="vehicleDef"/> at <paramref name="cell"/>
 		/// </summary>
 		/// <param name="cell"></param>
-		public int CalculatedCostAt(IntVec3 cell, List<Thing> thingList, StringBuilder stringBuilder = null)
+		public int CalculatedCostAt(IntVec3 cell, StringBuilder stringBuilder = null)
 		{
-			return CalculatePathCostFor(vehicleDef, mapping.map, cell, thingList, stringBuilder);
+			return CalculatePathCostFor(vehicleDef, mapping.map, cell, stringBuilder);
 		}
 
 		/// <summary>
@@ -168,7 +170,7 @@ namespace Vehicles
 		/// <param name="vehicleDef"></param>
 		/// <param name="map"></param>
 		/// <param name="cell"></param>
-		public static int CalculatePathCostFor(VehicleDef vehicleDef, Map map, IntVec3 cell, List<Thing> thingList, StringBuilder stringBuilder = null)
+		public static int CalculatePathCostFor(VehicleDef vehicleDef, Map map, IntVec3 cell, StringBuilder stringBuilder = null)
 		{
 			stringBuilder?.AppendLine($"Starting calculation for {vehicleDef} at {cell}.");
 			int pathCost = 0;
@@ -186,7 +188,7 @@ namespace Vehicles
 				stringBuilder?.AppendLine($"Starting Terrain check.");
 				if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 				{
-					stringBuilder?.AppendLine($"custom turrain cost: {customPathCost}");
+					stringBuilder?.AppendLine($"custom terrain cost: {customPathCost}");
 					pathCost = customPathCost;
 				}
 				else if (terrainDef.passability == Traversability.Impassable)
@@ -200,41 +202,51 @@ namespace Vehicles
 					return ImpassableCost;
 				}
 
-				stringBuilder?.AppendLine($"Starting ThingList check.");
-				if (!thingList.NullOrEmpty())
+				ThingGrid thingGrid = map.thingGrid;
+				Monitor.Enter(thingGrid);
+				try
 				{
-					int thingCost = 0;
-					foreach (Thing thing in thingList)
+					List<Thing> thingList = thingGrid.ThingsListAt(cell);
+					stringBuilder?.AppendLine($"Starting ThingList check.");
+					if (!thingList.NullOrEmpty())
 					{
-						int thingPathCost = 0;
-						if (thing is null || !thing.Spawned || thing.Destroyed || thing is VehiclePawn vehicle)
+						int thingCost = 0;
+						foreach (Thing thing in thingList)
 						{
-							continue;
-						}
-						else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out thingPathCost))
-						{
-							if (thingPathCost >= ImpassableCost)
+							int thingPathCost = 0;
+							if (thing is null || !thing.Spawned || thing.Destroyed || thing is VehiclePawn vehicle)
 							{
-								stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+								continue;
+							}
+							else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def, out thingPathCost))
+							{
+								if (thingPathCost >= ImpassableCost)
+								{
+									stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+									return ImpassableCost;
+								}
+							}
+							else if (thing.ImpassableForVehicles())
+							{
+								stringBuilder?.AppendLine($"thingDef is impassable: {thingPathCost}");
 								return ImpassableCost;
 							}
+							else
+							{
+								thingPathCost = thing.def.pathCost;
+							}
+							stringBuilder?.AppendLine($"thingPathCost: {thingPathCost}");
+							if (thingPathCost > thingCost)
+							{
+								thingCost = thingPathCost;
+							}
 						}
-						else if (thing.ImpassableForVehicles())
-						{
-							stringBuilder?.AppendLine($"thingDef is impassable: {thingPathCost}");
-							return ImpassableCost;
-						}
-						else
-						{
-							thingPathCost = thing.def.pathCost;
-						}
-						stringBuilder?.AppendLine($"thingPathCost: {thingPathCost}");
-						if (thingPathCost > thingCost)
-						{
-							thingCost = thingPathCost;
-						}
+						pathCost += thingCost;
 					}
-					pathCost += thingCost;
+				}
+				finally
+				{
+					Monitor.Exit(thingGrid);
 				}
 				
 				SnowCategory snowCategory = map.snowGrid.GetCategory(cell);

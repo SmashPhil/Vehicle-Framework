@@ -77,20 +77,6 @@ namespace Vehicles
 			return fallback;
 		}
 
-		public static float TryGetValue(VehicleDef def, StatDef statDef, float fallback)
-		{
-			throw new NotImplementedException("StatDef SettingsCache"); //This would have to be patched onto vanilla for the settings values to be retrieved.  This will need to be looked into later
-
-			//if (VehicleMod.settings.vehicles.vanillaStats.TryGetValue(def.defName, out var dict))
-			//{
-			//	if (dict.TryGetValue(statDef.defName, out float value))
-			//	{
-			//		return value;
-			//	}
-			//}
-			//return fallback;
-		}
-
 		public static float TryGetValue(VehicleDef def, VehicleStatDef statDef, float fallback)
 		{
 			if (VehicleMod.settings.vehicles.vehicleStats.TryGetValue(def.defName, out var dict))

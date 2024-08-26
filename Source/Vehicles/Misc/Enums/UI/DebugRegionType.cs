@@ -9,7 +9,6 @@ namespace Vehicles
 		Regions = 1 << 1,
 		Links = 1 << 2,
 		Weights = 1 << 3,
-		Things = 1 << 4,
-		PathCosts = 1 << 5
+		PathCosts = 1 << 4
 	}
 }

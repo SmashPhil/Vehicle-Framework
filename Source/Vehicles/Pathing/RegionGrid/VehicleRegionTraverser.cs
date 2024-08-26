@@ -10,6 +10,8 @@ namespace Vehicles
 	/// </summary>
 	public static class VehicleRegionTraverser
 	{
+		public const int WorkerCount = 8;
+
 		public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
 		public delegate bool VehicleRegionProcessor(VehicleRegion reg);
 
@@ -22,9 +24,6 @@ namespace Vehicles
 			freeWorkers = new Queue<BFSWorker>();
 			RecreateWorkers();
 		}
-
-		/// Will always have more workers than needed, not known at this time which vehicles can piggy
-		public static int WorkerCount => VehicleHarmony.AllMoveableVehicleDefs.Count;
 
 		/// <summary>
 		/// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
@@ -65,32 +64,6 @@ namespace Vehicles
 			}
 			BreadthFirstTraverse(regionA, entryCondition, regionProcessor, regionLookCount, traversableRegionTypes);
 			return found;
-		}
-
-		/// <summary>
-		/// Perform BFS with <paramref name="region"/>
-		/// </summary>
-		/// <param name="region"></param>
-		/// <param name="entryCondition"></param>
-		/// <param name="maxRegions"></param>
-		/// <param name="inRadiusMark"></param>
-		/// <param name="traversableRegionTypes"></param>
-		public static void MarkRegionsBFS(VehicleRegion region, VehicleRegionEntry entryCondition, int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
-		{
-			BreadthFirstTraverse(region, entryCondition, delegate (VehicleRegion r)
-			{
-				r.mark = inRadiusMark;
-				return false;
-			}, maxRegions, traversableRegionTypes);
-		}
-
-		/// <summary>
-		/// Region is a doorway
-		/// </summary>
-		/// <param name="region"></param>
-		public static bool ShouldCountRegion(VehicleRegion region)
-		{
-			return !region.IsDoorway;
 		}
 
 		/// <summary>
@@ -280,18 +253,11 @@ namespace Vehicles
 				while (open.Count > 0)
 				{
 					VehicleRegion region = open.Dequeue();
-					if (DebugProperties.debug)
-					{
-						region.Debug_Notify_Traversed();
-					}
 					if (regionProcessor != null && regionProcessor(region))
 					{
 						return;
 					}
-					if (ShouldCountRegion(region))
-					{
-						numRegionsProcessed++;
-					}
+					numRegionsProcessed++;
 					if (numRegionsProcessed >= maxRegions)
 					{
 						return;
