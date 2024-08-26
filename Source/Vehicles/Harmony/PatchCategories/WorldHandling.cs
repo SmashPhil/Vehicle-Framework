@@ -202,6 +202,10 @@ namespace Vehicles
 
 		public static void AllAerialVehicles_AliveOrDead(ref List<Pawn> __result)
 		{
+			if (VehicleWorldObjectsHolder.Instance == null)
+			{
+				return;
+			}
 			foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance.AerialVehicles)
 			{
 				__result.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
