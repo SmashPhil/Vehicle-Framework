@@ -197,7 +197,7 @@ namespace Vehicles
 			Log.Message(report.ToString());
 		}
 
-		[UnitTest(Category = "Performance", Name = "Material Memory Management", GameState = GameState.Playing)]
+		[StartupAction(Category = "Performance", Name = "Material Memory Management", GameState = GameState.Playing)]
 		private static void UnitTest_MaterialMemoryManagement()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()

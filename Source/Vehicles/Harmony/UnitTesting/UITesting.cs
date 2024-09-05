@@ -16,7 +16,7 @@ namespace Vehicles
 	/// </summary>
 	public static class UITesting
 	{
-		[UnitTest(Category = "UI", Name = "Regions", GameState = GameState.Playing)]
+		[StartupAction(Category = "UI", Name = "Regions", GameState = GameState.Playing)]
 		private static void UnitTest_RegionsOn()
 		{
 			Prefs.DevMode = true;
@@ -44,7 +44,7 @@ namespace Vehicles
 			});
 		}
 
-		[UnitTest(Category = "UI", Name = "Color Dialog", GameState = GameState.Playing)]
+		[StartupAction(Category = "UI", Name = "Color Dialog", GameState = GameState.Playing)]
 		private static void UnitTest_ColorDialog()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -76,7 +76,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open update menu for all previous versions
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.Playing)]
+		[StartupAction(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.Playing)]
 		private static void UnitTest_ShowUpdates()
 		{
 			VehicleMod.settings.debug.ShowAllUpdates();
@@ -85,7 +85,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open Mod Settings
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Mod Settings", GameState = GameState.OnStartup)]
+		[StartupAction(Category = "UI", Name = "Mod Settings", GameState = GameState.OnStartup)]
 		private static void UnitTest_ModSettings()
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
@@ -95,7 +95,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open blank Graph Editor
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Graph Editor", GameState = GameState.OnStartup)]
+		[StartupAction(Category = "UI", Name = "Graph Editor", GameState = GameState.OnStartup)]
 		private static void UnitTest_GraphEditor()
 		{
 			Dialog_GraphEditor settings = new Dialog_GraphEditor();
@@ -105,7 +105,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, spawn vehicle, open Graph Editor for vehicle
 		/// </summary>
-		[UnitTest(Category = "UI", Name = "Animation Editor", GameState = GameState.Playing)]
+		[StartupAction(Category = "UI", Name = "Animation Editor", GameState = GameState.Playing)]
 		private static void UnitTest_AnimationEditor()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -154,7 +154,7 @@ namespace Vehicles
 			}
 		}
 
-		[UnitTest(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
+		[StartupAction(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
 		private static void UnitTest_VehicleAreaManager()
 		{
 			Prefs.DevMode = true;

@@ -29,15 +29,14 @@ namespace Vehicles
 		public PatternData patternData;
 		private RetextureDef retextureDef;
 
-		private AnimationController controller;
-
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 
 		[AnimationProperty(Name = "Rotation")]
 		private float rotation = 0;
 		[AnimationProperty(Name = "Position")]
 		private Vector3 position = Vector3.zero;
-		
+
+		private AnimationManager animator;
 		private Graphic_Vehicle graphic;
 
 		public PatternData patternToPaint;
@@ -60,16 +59,25 @@ namespace Vehicles
 
 		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
 
-		AnimationController IAnimator.Controller => controller;
+		AnimationController IAnimator.Controller => animator?.controller;
 
-		IEnumerable<object> IAnimator.ExtraAnimators
+		string IAnimationObject.ObjectId => nameof(VehiclePawn);
+
+		IEnumerable<IAnimationObject> IAnimator.ExtraAnimators
 		{
 			get
 			{
-				foreach (object thingComp in cachedComps)
+				foreach (ThingComp thingComp in AllComps)
 				{
-					yield return thingComp;
+					if (thingComp is VehicleComp vehicleComp)
+					{
+						yield return vehicleComp;
+					}
 				}
+				//foreach (GraphicOverlay graphicOverlay in graphicOverlay.Overlays)
+				//{ 					
+				//	yield return graphicOverlay;
+				//}
 			}
 		}
 
@@ -1131,10 +1139,7 @@ namespace Vehicles
 							options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
 						}
 #if DEBUG
-						if (CompVehicleLauncher != null)
-						{
-							options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimator_New));
-						}
+						options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimator_New));
 #endif
 						if (!options.NullOrEmpty())
 						{

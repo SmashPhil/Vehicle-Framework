@@ -241,7 +241,7 @@ namespace Vehicles
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
 				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
-				if (mapping.IsOwner(vehicleDef))
+				if (VehicleHarmony.gridOwners.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsSpawned(occupiedRect);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
@@ -254,7 +254,7 @@ namespace Vehicles
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
 				mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
-				if (mapping.IsOwner(vehicleDef))
+				if (VehicleHarmony.gridOwners.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleRegionDirtyer.Notify_ThingAffectingRegionsDespawned(occupiedRect);
 					mapping[vehicleDef].VehicleReachability.ClearCache();
@@ -284,7 +284,7 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				if (mapping.IsOwner(vehicleDef))
+				if (VehicleHarmony.gridOwners.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}
@@ -296,7 +296,7 @@ namespace Vehicles
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-				if (!mapping.Owners.NullOrEmpty())
+				if (!VehicleHarmony.AllVehicleOwners.NullOrEmpty())
 				{
 					RecalculateAllPerceivedPathCosts(mapping);
 				}
@@ -307,7 +307,7 @@ namespace Vehicles
 		{
 			foreach (IntVec3 cell in mapping.map.AllCells)
 			{
-				foreach (VehicleDef vehicleDef in mapping.Owners)
+				foreach (VehicleDef vehicleDef in VehicleHarmony.AllVehicleOwners)
 				{
 					mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
 				}
@@ -323,7 +323,7 @@ namespace Vehicles
 		public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
 		{
 			VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-			if (!mapping.Owners.NullOrEmpty())
+			if (!VehicleHarmony.AllVehicleOwners.NullOrEmpty())
 			{
 				if (mapping.ThreadAvailable)
 				{

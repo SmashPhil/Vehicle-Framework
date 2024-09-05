@@ -6,10 +6,11 @@ using Verse;
 using Verse.AI;
 using SmashTools;
 using UnityEngine;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public class VehicleComp : ThingComp
+	public class VehicleComp : ThingComp, IAnimationObject
 	{
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 
@@ -19,6 +20,8 @@ namespace Vehicles
 		public virtual bool TickByRequest => false;
 
 		public virtual IEnumerable<AnimationDriver> Animations { get; }
+
+		string IAnimationObject.ObjectId => GetType().Name;
 
 		public virtual IEnumerable<Gizmo> CompCaravanGizmos()
 		{

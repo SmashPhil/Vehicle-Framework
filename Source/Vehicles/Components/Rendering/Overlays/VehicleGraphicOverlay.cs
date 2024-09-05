@@ -24,7 +24,9 @@ namespace Vehicles
 			rotationRegistry = new ExtraRotationRegistry(this);
 		}
 
-		public IEnumerable<GraphicOverlay> Overlays
+		public List<GraphicOverlay> Overlays => overlays;
+
+		public IEnumerable<GraphicOverlay> AllOverlays
 		{
 			get
 			{
@@ -81,7 +83,7 @@ namespace Vehicles
 		public virtual void RenderGraphicOverlays(Vector3 drawPos, float extraRotation, Rot8 rot)
 		{
 			float extraAngle;
-			foreach (GraphicOverlay graphicOverlay in Overlays)
+			foreach (GraphicOverlay graphicOverlay in AllOverlays)
 			{
 				float overlayAngle = rot.AsRotationAngle;
 				extraAngle = graphicOverlay.data.rotation + extraRotation;
@@ -154,7 +156,7 @@ namespace Vehicles
 
 		public void Notify_ColorChanged()
 		{
-			foreach (GraphicOverlay graphicOverlay in Overlays)
+			foreach (GraphicOverlay graphicOverlay in AllOverlays)
 			{
 				graphicOverlay.Notify_ColorChanged();
 			}

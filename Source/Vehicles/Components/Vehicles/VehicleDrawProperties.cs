@@ -4,6 +4,7 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
@@ -33,6 +34,8 @@ namespace Vehicles
 		/// GraphicDataOverlays used for instantiating <see cref="overlays"/>
 		/// </summary>
 		public List<GraphicDataOverlay> graphicOverlays = new List<GraphicDataOverlay>();
+
+		public AnimationController controller;
 
 		[Unsaved]
 		[TweakField]

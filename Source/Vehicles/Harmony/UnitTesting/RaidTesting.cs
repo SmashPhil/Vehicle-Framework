@@ -11,7 +11,7 @@ namespace Vehicles
 {
 	public static class RaidTesting
 	{
-		[UnitTest(Category = "Raids", Name = "Raid Enemy (Land | 3000)", GameState = GameState.Playing)]
+		[StartupAction(Category = "Raids", Name = "Raid Enemy (Land | 3000)", GameState = GameState.Playing)]
 		private static void UnitTest_CaravanFormation()
 		{
 			Prefs.DevMode = true;

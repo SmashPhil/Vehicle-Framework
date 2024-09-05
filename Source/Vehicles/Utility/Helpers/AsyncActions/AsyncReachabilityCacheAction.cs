@@ -25,7 +25,7 @@ namespace Vehicles
 		{
 			foreach (VehicleDef vehicleDef in vehicleDefs)
 			{
-				if (mapping.IsOwner(vehicleDef))
+				if (VehicleHarmony.gridOwners.IsOwner(vehicleDef))
 				{
 					mapping[vehicleDef].VehicleReachability.ClearCache();
 				}

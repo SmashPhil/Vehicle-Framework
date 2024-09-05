@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AnimationController>
+	<parameters />
+	<layers>
+		<li>
+			<name>Base Layer</name>
+			<states>
+				<li>
+					<name>Entry</name>
+					<guid>8ca33609-65fe-4428-b4eb-0483fa06a901</guid>
+					<position>(-48, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Entry</stateType>
+					<transitions>
+						<li>
+							<exitTime>0</exitTime>
+							<toStateGuid>481d378c-41f9-4289-afa6-af54961bf743</toStateGuid>
+							<conditions />
+						</li>
+						<li>
+							<exitTime>0</exitTime>
+							<toStateGuid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</toStateGuid>
+							<conditions />
+						</li>
+						<li>
+							<exitTime>0</exitTime>
+							<toStateGuid>24125168-d593-47e8-93fc-f38c4ad04298</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Exit</name>
+					<guid>043ab0e3-a33e-464e-8ff3-493177a06256</guid>
+					<position>(32, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Exit</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>New State</name>
+					<guid>481d378c-41f9-4289-afa6-af54961bf743</guid>
+					<position>(-23, 15)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Default</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>New State 0</name>
+					<guid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</guid>
+					<position>(-15, 5)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>New State 1</name>
+					<guid>24125168-d593-47e8-93fc-f38c4ad04298</guid>
+					<position>(-16, -5)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions />
+				</li>
+			</states>
+		</li>
+	</layers>
+</AnimationController>

@@ -153,8 +153,8 @@ namespace Vehicles
 			textEntries.Clear();
 
 			textEntryHeight = 0;
-			return;
 
+			/*
 			if (SelectedNode != null && SelectedNode.upgradeExplanation != null)
 			{
 				textEntryHeight = Text.CalcHeight(SelectedNode.upgradeExplanation, InfoScreenWidth - 10);
@@ -170,6 +170,7 @@ namespace Vehicles
 				}
 				textEntryHeight = textEntries.Count * Text.LineHeightOf(GameFont.Small);
 			}
+			*/
 		}
 
 		private void RecacheTurretRenderers()

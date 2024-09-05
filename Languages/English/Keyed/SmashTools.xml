@@ -3,6 +3,7 @@
 <LanguageData>
 	<ST_Copy>Copy</ST_Copy>
 	<ST_Paste>Paste</ST_Paste>
+	<ST_Delete>Delete</ST_Delete>
 
 	<ST_AnimationWindow>Animator</ST_AnimationWindow>
 	<ST_ControllerWindow>Controller</ST_ControllerWindow>
@@ -38,4 +39,15 @@
 	<ST_MakeTransition>Make Transition</ST_MakeTransition>
 	<ST_SetStateDefault>Set as Layer Default State</ST_SetStateDefault>
 	<ST_CreateBlendTree>Create new BlendTree in State</ST_CreateBlendTree>
+
+	<ST_MotionFile>Motion</ST_MotionFile>
+	<ST_MotionSpeed>Speed</ST_MotionSpeed>
+	<ST_MotionSpeedMultiplier>Multiplier</ST_MotionSpeedMultiplier>
+	<ST_MotionTime>Motion Time</ST_MotionTime>
+	<ST_Mirror>Mirror</ST_Mirror>
+	<ST_CycleOffset>Cycle Offset</ST_CycleOffset>
+	<ST_WriteDefaults>Write Defaults</ST_WriteDefaults>
+	<ST_TransitionList>Transitions</ST_TransitionList>
+	<ST_TransitionSolo>Solo</ST_TransitionSolo>
+	<ST_TransitionMute>Mute</ST_TransitionMute>
 </LanguageData>

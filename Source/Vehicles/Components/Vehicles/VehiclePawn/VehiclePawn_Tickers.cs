@@ -120,6 +120,7 @@ namespace Vehicles
 				sustainers.Tick();
 				if (Spawned)
 				{
+					animator?.AnimationTick();
 					vehiclePather.PatherTick();
 					stances.StanceTrackerTick();
 					if (Drafted || Deploying)

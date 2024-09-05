@@ -56,7 +56,7 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Tick method for <see cref="AnimationManager"/> with total ticks passed since start.
+		/// Tick method for <see cref="AnimationSimulator"/> with total ticks passed since start.
 		/// </summary>
 		/// <param name="ticksPassed"></param>
 		protected override int AnimationEditorTick_Landing(int ticksPassed)

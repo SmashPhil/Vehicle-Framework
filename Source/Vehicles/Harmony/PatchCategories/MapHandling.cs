@@ -198,7 +198,7 @@ namespace Vehicles
 			{
 				Map searchMap = maps[i];
 				VehicleMapping mapping = searchMap.GetCachedMapComponent<VehicleMapping>();
-				List<VehicleDef> owners = mapping.Owners;
+				List<VehicleDef> owners = VehicleHarmony.AllVehicleOwners;
 				for (int o = 0; o < owners.Count; o++)
 				{
 					VehicleMapping.VehiclePathData pathData = mapping[owners[o]];

@@ -33,7 +33,7 @@ namespace Vehicles
 
 		public void UpdateRegistry(float addRotation)
 		{
-			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
+			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlays)
 			{
 				if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 				{
@@ -44,9 +44,9 @@ namespace Vehicles
 
 		public void Reset()
 		{
-			if (!vehicleGraphicOverlay.Overlays.NullOrEmpty())
+			if (!vehicleGraphicOverlay.AllOverlays.NullOrEmpty())
 			{
-				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.Overlays)
+				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlays)
 				{
 					if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 					{

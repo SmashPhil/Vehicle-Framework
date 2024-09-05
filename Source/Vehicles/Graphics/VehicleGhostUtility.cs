@@ -104,6 +104,7 @@ namespace Vehicles
 					graphicData.CopyFrom(graphic.data);
 					graphicData.drawOffsetWest = graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West
 					graphicData.shadowData = null;
+					graphicData.shaderType = ShaderTypeDefOf.EdgeDetect;
 					_ = graphicData.Graphic;
 
 					graphic = GraphicDatabase.Get(graphic.GetType(), graphic.path, ShaderTypeDefOf.EdgeDetect.Shader, graphic.drawSize, ghostColor, Color.white, graphicData, null);

@@ -7,6 +7,7 @@ using SmashTools;
 
 namespace Vehicles
 {
+	[Obsolete] //TODO - Remove in 1.6
 	public class VehicleAreaManager : MapComponent
 	{
 

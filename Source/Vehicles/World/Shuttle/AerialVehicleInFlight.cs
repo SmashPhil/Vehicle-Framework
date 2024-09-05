@@ -166,7 +166,7 @@ namespace Vehicles
 		public virtual void Initialize()
 		{
 			position = base.DrawPos;
-			rotatorGraphics = vehicle.graphicOverlay.Overlays.Where(g => g.Graphic is Graphic_Rotator).Select(g => g.Graphic).Cast<Graphic_Rotator>().ToList();
+			rotatorGraphics = vehicle.graphicOverlay.AllOverlays.Where(g => g.Graphic is Graphic_Rotator).Select(g => g.Graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
 		public virtual Vector3 DrawPosAhead(int ticksAhead) => Vector3.Slerp(position, flightPath.First.GetCenter(this), transition + speedPctPerTick * ticksAhead);
@@ -209,7 +209,7 @@ namespace Vehicles
 
 		protected virtual void RenderGraphicOverlays(Vector3 normalized, Vector3 direction, Vector3 size)
 		{
-			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.Overlays)
+			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.AllOverlays)
 			{
 				Material material = graphicOverlay.Graphic.MatAt(FullRotation);
 				float quatRotation = 90;

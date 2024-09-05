@@ -163,7 +163,7 @@ namespace Vehicles
 		private static void RegisterKeyBindingDefs()
 		{
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_RestartGame, GenCommandLine.Restart);
-			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => UnitTesting.OpenMenu());
+			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_QuickStartMenu, () => StartupTest.OpenMenu());
 			MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings, () => VehiclesModSettings.OpenWithContext());
 		}
 

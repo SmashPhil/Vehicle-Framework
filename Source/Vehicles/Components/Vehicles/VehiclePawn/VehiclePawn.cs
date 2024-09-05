@@ -147,7 +147,6 @@ namespace Vehicles
 			ageTracker.BirthAbsTicks = 0;
 			health.Reset();
 			statHandler.InitializeComponents();
-
 			if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
 			{
 				GenerateInventory();
@@ -214,7 +213,10 @@ namespace Vehicles
 			{
 				graphicOverlay.Init();
 			}
-
+			if (VehicleDef.drawProperties.controller != null)
+			{
+				animator = new AnimationManager(this, VehicleDef.drawProperties.controller);
+			}
 			ReleaseSustainerTarget(); //Ensure SustainerTarget and sustainer manager is given a clean slate to work with
 			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
 			if (Drafted)

@@ -1,15 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using HarmonyLib;
-using Verse;
-using Verse.Sound;
+using LudeonTK;
 using RimWorld;
 using SmashTools;
-using SmashTools.Performance;
+using SmashTools.Debugging;
+using UnityEngine;
 using UpdateLogTool;
-using LudeonTK;
+using Verse;
+using Verse.Sound;
 
 namespace Vehicles
 {
@@ -212,7 +211,7 @@ namespace Vehicles
 				if (listingStandard.ButtonText("VF_DevMode_OpenQuickTestSettings".Translate()))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					UnitTesting.OpenMenu();
+					StartupTest.OpenMenu();
 				}
 #endif
 
@@ -250,6 +249,11 @@ namespace Vehicles
 				}
 
 #if DEBUG
+				if (listingStandard.ButtonText("Run Unit Tests"))
+				{
+					SoundDefOf.Click.PlayOneShotOnCamera();
+					UnitTestManager.ExecuteTests();
+				}
 				if (listingStandard.ButtonText("Output Material Cache"))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
@@ -268,8 +272,8 @@ namespace Vehicles
 						}
 						Log.Message("-------");
 						VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-						Log.Message($"Total Owners = {mapping.Owners.Count}");
-						foreach (VehicleDef vehicleDef in mapping.Owners)
+						Log.Message($"Total Owners = {VehicleHarmony.AllVehicleOwners.Count}");
+						foreach (VehicleDef vehicleDef in VehicleHarmony.AllVehicleOwners)
 						{
 							List<VehicleDef> piggies = mapping.GetPiggies(vehicleDef);
 							Log.Message($"Owner: {vehicleDef} Piggies=({string.Join(",", piggies.Select(def => def.defName))})");

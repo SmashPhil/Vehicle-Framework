@@ -17,7 +17,7 @@ namespace Vehicles
 	/// </summary>
 	public static class WorldTesting
 	{
-		[UnitTest(Category = "Map", Name = "Strafe Targeting", GameState = GameState.Playing)]
+		[StartupAction(Category = "Map", Name = "Strafe Targeting", GameState = GameState.Playing)]
 		private static void UnitTest_StrafeTargeting()
 		{
 			Prefs.DevMode = true;
@@ -38,7 +38,7 @@ namespace Vehicles
 			});
 		}
 
-		[UnitTest(Category = "World", Name = "Caravan Formation", GameState = GameState.Playing)]
+		[StartupAction(Category = "World", Name = "Caravan Formation", GameState = GameState.Playing)]
 		private static void UnitTest_CaravanFormation()
 		{
 			Prefs.DevMode = true;
@@ -58,7 +58,7 @@ namespace Vehicles
 		/// <summary>
 		/// Load up game, open route planner
 		/// </summary>
-		[UnitTest(Category = "World", Name = "World Route Planner", GameState = GameState.Playing)]
+		[StartupAction(Category = "World", Name = "World Route Planner", GameState = GameState.Playing)]
 		private static void UnitTest_RoutePlanner()
 		{
 			Prefs.DevMode = true;
@@ -66,7 +66,7 @@ namespace Vehicles
 			VehicleRoutePlanner.Instance.Start();
 		}
 
-		[UnitTest(Category = "World", Name = "New Game", GameState = GameState.OnStartup)]
+		[StartupAction(Category = "World", Name = "New Game", GameState = GameState.OnStartup)]
 		private static void GenerateNewWorld()
 		{
 			LongEventHandler.QueueLongEvent(delegate ()
