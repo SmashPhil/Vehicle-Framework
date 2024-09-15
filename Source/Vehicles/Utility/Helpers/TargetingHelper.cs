@@ -8,6 +8,9 @@ using RimWorld;
 
 namespace Vehicles
 {
+	/// <summary>
+	/// Target util for finding best attack target for VehicleTurret
+	/// </summary>
 	public static class TargetingHelper
 	{
 		/// <summary>
@@ -20,7 +23,7 @@ namespace Vehicles
 			TargetScanFlags targetScanFlags = turret.turretDef.targetScanFlags;
 			Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, delegate (Thing thing)
 			{
-				return TurretTargeter.TargetMeetsRequirements(turret, thing);
+				return TargetMeetsRequirements(turret, thing);
 			}, canTakeTargetsCloserThanEffectiveMinRange: false);
 			if (thing != null)
 			{
@@ -284,6 +287,135 @@ namespace Vehicles
 			}
 			//num += _  - add additional cost based on how close to friendly fire
 			return num * target.TargetPriorityFactor;
+		}
+
+		public static bool TargetMeetsRequirements(VehicleTurret turret, LocalTargetInfo target)
+		{
+			if (target == turret.vehicle)
+			{
+				return false;
+			}
+			Map map = turret.vehicle.Map;
+			if (map == null)
+			{
+				return false;
+			}
+			if (!turret.InRange(target))
+			{
+				return false;
+			}
+			if (!turret.AngleBetween(target.CenterVector3))
+			{
+				return false;
+			}
+			if (turret.ProjectileDef.projectile.flyOverhead)
+			{
+				return true; //Skip LOS check
+			}
+			if (!TargetValidator(turret, map, target))
+			{
+				return false;
+			}
+			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
+			if (target.HasThing && scanFlags.HasFlag(TargetScanFlags.NeedLOSToAll) ||
+								   (scanFlags.HasFlag(TargetScanFlags.NeedLOSToPawns) && target.Thing is Pawn) ||
+								   (scanFlags.HasFlag(TargetScanFlags.NeedLOSToNonPawns) && target.Thing is not Pawn))
+			{
+				if (!target.Thing.Spawned || target.Thing.Destroyed)
+				{
+					return false;
+				}
+				if (!turret.vehicle.CanSee(target.Thing, validator: (IntVec3 cell) => LOSValidator(turret, map, target, cell)))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		private static bool LOSValidator(VehicleTurret turret, Map map, LocalTargetInfo target, IntVec3 cell)
+		{
+			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
+			if (scanFlags.HasFlag(TargetScanFlags.LOSBlockableByGas) && !LOSThroughGas(map, cell))
+			{
+				return false;
+			}
+			if (scanFlags.HasFlag(TargetScanFlags.NeedNotUnderThickRoof) && !LOSUnderRoof(map, cell))
+			{
+				return false;
+			}
+			return true;
+		}
+
+		private static bool TargetValidator(VehicleTurret turret, Map map, LocalTargetInfo target)
+		{
+			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
+			if (scanFlags.HasFlag(TargetScanFlags.NeedThreat) && !LOSHasThreat(turret.vehicle, target.Thing))
+			{
+				return false;
+			}
+			if (scanFlags.HasFlag(TargetScanFlags.NeedActiveThreat) && !LOSHasActiveThreat(turret.vehicle, target.Thing))
+			{
+				return false;
+			}
+			if (scanFlags.HasFlag(TargetScanFlags.NeedAutoTargetable) && !LOSIsAutoTargetable(target.Thing))
+			{
+				return false;
+			}
+			if (scanFlags.HasFlag(TargetScanFlags.NeedNonBurning) && !LOSIsNonBurning(target.Thing))
+			{
+				return false;
+			}
+			return true;
+		}
+
+		private static bool LOSThroughGas(Map map, IntVec3 cell)
+		{
+			return !cell.AnyGas(map, GasType.BlindSmoke);
+		}
+
+		private static bool LOSUnderRoof(Map map, IntVec3 cell)
+		{
+			RoofDef roof = cell.GetRoof(map);
+			if (roof != null && roof.isThickRoof)
+			{
+				return false;
+			}
+			return true;
+		}
+
+		// TODO - Needs further testing
+		private static bool LOSHasThreat(VehiclePawn vehicle, Thing thing)
+		{
+			if (thing is not IAttackTarget target)
+			{
+				return false;
+			}
+			return !target.ThreatDisabled(vehicle);
+		}
+
+		// TODO - Needs further testing
+		private static bool LOSHasActiveThreat(VehiclePawn vehicle, Thing thing)
+		{
+			if (thing is not IAttackTarget target)
+			{
+				return false;
+			}
+			return GenHostility.IsActiveThreatTo(target, vehicle.Faction);
+		}
+
+		private static bool LOSIsAutoTargetable(Thing thing)
+		{
+			if (thing is not IAttackTarget target)
+			{
+				return false;
+			}
+			return AttackTargetFinder.IsAutoTargetable(target);
+		}
+
+		private static bool LOSIsNonBurning(Thing thing)
+		{
+			return thing is null || !thing.IsBurning();
 		}
 	}
 }

@@ -11,6 +11,7 @@ namespace Vehicles
 			DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
 		}
 
+		// Vehicle Caravans
 		public static DutyDef PrepareVehicleCaravan_BoardVehicle;
 
 		public static DutyDef PrepareVehicleCaravan_GatherItems;
@@ -25,14 +26,16 @@ namespace Vehicles
 
 		public static DutyDef TravelOrWaitVehicle;
 
-		public static DutyDef TravelOrLeaveOcean;
-
-		/* AI Duties */
-		public static DutyDef ArmoredAssault;
-
 		public static DutyDef FollowVehicle;
 
-		public static DutyDef EscortVehicle;
-	}
+		// Vehicle NPC AI
+		public static DutyDef VF_RangedAggressive;
 
+		public static DutyDef VF_RangedSupport;
+
+		/* Vehicle NPC AI */
+		public static DutyDef VF_ArmoredAssault;
+
+		public static DutyDef VF_EscortVehicle;
+	}
 }

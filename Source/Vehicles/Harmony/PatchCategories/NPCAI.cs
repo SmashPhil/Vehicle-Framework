@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define ENABLE_RAIDERS
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -31,6 +33,7 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
+#if UNSTABLE && ENABLE_RAIDERS
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
 				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
@@ -54,6 +57,7 @@ namespace Vehicles
 					postfix: new HarmonyMethod(typeof(NPCAI),
 					nameof(InjectVehiclesIntoRaidPassthrough)));
 			}
+#endif
 		}
 
 		private static void InjectVehiclesIntoPawnKindGroupPrepare(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)

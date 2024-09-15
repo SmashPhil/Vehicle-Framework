@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Threading;
 using Verse;
 
 namespace Vehicles
@@ -15,15 +16,7 @@ namespace Vehicles
 		public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
 		public delegate bool VehicleRegionProcessor(VehicleRegion reg);
 
-		private static readonly Queue<BFSWorker> freeWorkers;
-
-		private static object workerQueueLock = new object();
-
-		static VehicleRegionTraverser()
-		{
-			freeWorkers = new Queue<BFSWorker>();
-			RecreateWorkers();
-		}
+		private static readonly ThreadLocal<Queue<BFSWorker>> freeWorkers = new(CreateWorkers);
 
 		/// <summary>
 		/// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
@@ -69,16 +62,14 @@ namespace Vehicles
 		/// <summary>
 		/// Requeue <see cref="BFSWorker"/> workers
 		/// </summary>
-		public static void RecreateWorkers()
+		private static Queue<BFSWorker> CreateWorkers()
 		{
-			lock (workerQueueLock)
+			Queue<BFSWorker> workerQueue = new Queue<BFSWorker>(WorkerCount);
+			for (int i = 0; i < WorkerCount; i++)
 			{
-				freeWorkers.Clear();
-				for (int i = 0; i < WorkerCount; i++)
-				{
-					freeWorkers.Enqueue(new BFSWorker(i));
-				}
+				workerQueue.Enqueue(new BFSWorker(i));
 			}
+			return workerQueue;
 		}
 
 		/// <summary>
@@ -108,21 +99,18 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			BFSWorker bfsWorker;
-			lock (workerQueueLock)
+			Queue<BFSWorker> workers = freeWorkers.Value;
+			if (workers.Count == 0)
 			{
-				if (freeWorkers.Count == 0)
-				{
-					Log.Error($"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
-					return;
-				}
-				if (root is null)
-				{
-					Log.Error("BFS with null root region.");
-					return;
-				}
-				bfsWorker = freeWorkers.Dequeue();
+				Log.Error($"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
+				return;
 			}
+			if (root is null)
+			{
+				Log.Error("BFS with null root region.");
+				return;
+			}
+			BFSWorker bfsWorker = workers.Dequeue();
 			try
 			{
 				bfsWorker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
@@ -134,10 +122,7 @@ namespace Vehicles
 			finally
 			{
 				bfsWorker.Clear();
-				lock (workerQueueLock)
-				{
-					freeWorkers.Enqueue(bfsWorker);
-				}
+				workers.Enqueue(bfsWorker);
 			}
 		}
 

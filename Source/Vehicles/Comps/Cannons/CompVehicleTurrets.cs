@@ -630,7 +630,7 @@ namespace Vehicles
 			{
 				foreach (VehicleTurret turret in turrets)
 				{
-					if (turret.AutoTarget)
+					if (!turret.TurretDisabled)
 					{
 						return true;
 					}

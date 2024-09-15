@@ -42,9 +42,9 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (vehicleDef.npcProperties?.raidParamsDef != null)
+			if (vehicleDef.npcProperties?.raidParams != null)
 			{
-				if (!vehicleDef.npcProperties.raidParamsDef.Allows(faction, arrivalModeDef))
+				if (!vehicleDef.npcProperties.raidParams.Allows(faction, arrivalModeDef))
 				{
 					return false;
 				}

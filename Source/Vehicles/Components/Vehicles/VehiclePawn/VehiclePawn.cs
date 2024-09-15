@@ -161,9 +161,9 @@ namespace Vehicles
 
 		private void GenerateInventory()
 		{
-			if (VehicleDef.npcProperties?.raidParamsDef?.inventory != null)
+			if (VehicleDef.npcProperties?.raidParams?.inventory != null)
 			{
-				foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.raidParamsDef.inventory)
+				foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.raidParams.inventory)
 				{
 					foreach (Thing thing in inventoryOption.GenerateThings())
 					{

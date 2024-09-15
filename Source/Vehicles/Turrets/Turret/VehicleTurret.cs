@@ -56,7 +56,7 @@ namespace Vehicles
 		public Vector2 angleRestricted = Vector2.zero;
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int drawLayer = 1;
-
+		
 		public float defaultAngleRotated = 0f;
 		public string gizmoLabel;
 
@@ -1086,7 +1086,7 @@ namespace Vehicles
 					return TurretTargeter.Turret == this;
 				}
 
-				if (IsTargetable && !TurretTargeter.TargetMeetsRequirements(this, cannonTarget))
+				if (IsTargetable && !TargetingHelper.TargetMeetsRequirements(this, cannonTarget))
 				{
 					SetTarget(LocalTargetInfo.Invalid);
 					TargetLocked = false;

@@ -55,7 +55,7 @@ namespace Vehicles
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StunHandler), nameof(StunHandler.StunFor)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
-				nameof(StunVehicleConditionally)));
+				nameof(StunVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(StaggerHandler), nameof(StaggerHandler.StaggerFor)),
 				prefix: new HarmonyMethod(typeof(HealthAndStats),
 				nameof(StaggerVehicleConditionally)));
@@ -248,7 +248,7 @@ namespace Vehicles
 			return true;
 		}
 
-		public static bool StunVehicleConditionally(int ticks, Thing instigator, Thing ___parent)
+		public static bool StunVehicle(int ticks, Thing instigator, Thing ___parent)
 		{
 			if (___parent is VehiclePawn vehicle)
 			{

@@ -6,6 +6,8 @@ using UnityEngine;
 using Verse;
 using RimWorld;
 using SmashTools;
+using System.Reflection;
+using HarmonyLib;
 
 namespace Vehicles
 {
@@ -17,6 +19,8 @@ namespace Vehicles
 		private const float ChanceFallthroughHit = 1;
 		private const float ChanceMinorDeflectHit = 0.75f;
 		private const float ChanceMajorDeflectHit = 0.75f;
+
+		private static FieldInfo StunFromEMP = AccessTools.Field(typeof(StunHandler), "stunFromEMP");
 
 		//Debugging only
 		private readonly List<Pair<IntVec2, int>> debugCellHighlight = new List<Pair<IntVec2, int>>();
@@ -463,6 +467,19 @@ namespace Vehicles
 			if (defApplied.workerClass == typeof(DamageWorker_Extinguish))
 			{
 				TryExtinguishFire(dinfo, hitCell);
+			}
+			if (defApplied == DamageDefOf.EMP)
+			{
+#if DEBUG
+				// TODO - This needs better handling, 100% stun rate is not acceptible and 'adaptation' makes no sense for vehicles
+				float chanceToStun = 1;
+				if (Rand.Chance(chanceToStun))
+				{
+					float stunDuration = dinfo.Amount * 30;
+					StunFromEMP.SetValue(vehicle.stances.stunner, true);
+					vehicle.stances.stunner.StunFor(Mathf.RoundToInt(stunDuration), dinfo.Instigator);
+				}
+#endif
 			}
 			if (!defApplied.harmsHealth)
 			{

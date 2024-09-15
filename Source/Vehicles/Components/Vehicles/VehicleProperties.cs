@@ -31,6 +31,8 @@ namespace Vehicles
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "VF_ManhunterTargetsVehicle", Tooltip = "VF_ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
 		public bool manhunterTargetsVehicle = false;
+		[PostToSettings(Label = "VF_AffectedByEMP", Tooltip = "VF_AffectedByEMPTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
+		public bool affectedByEMP = true;
 
 		public string iconTexPath;
 		public bool generateThingIcon = true;

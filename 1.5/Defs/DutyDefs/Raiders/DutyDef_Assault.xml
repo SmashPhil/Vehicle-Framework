@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<DutyDef>
+		<defName>VF_RangedAggressive</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_RangedSupport"/>
+				
+				<li Class="JobGiver_AITrashColonyClose" />
+				<li Class="JobGiver_AITrashBuildingsDistant" />
+				<li Class="JobGiver_AIGotoNearestHostile" />
+				<li Class="JobGiver_AITrashBuildingsDistant">
+					<attackAllInert>true</attackAllInert>
+				</li>
+				<li Class="JobGiver_AISapper">
+					<canMineNonMineables>false</canMineNonMineables>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>VF_RangedSupport</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug">
+					<onlyIfInDanger>true</onlyIfInDanger>
+				</li>
+				<li Class="JobGiver_AIDefendEscortee">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AIFollowEscortee"/>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li> 
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>8</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>VF_EscortVehicle</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug">
+					<onlyIfInDanger>true</onlyIfInDanger>
+				</li>
+				<li Class="JobGiver_AIDefendEscortee">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AIFollowEscortee"/>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyVeryUrgentNeeds</treeDef>
+				</li> 
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>8</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>VF_ArmoredAssault</defName>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="JobGiver_TakeCombatEnhancingDrug" />
+				<li Class="JobGiver_AIFightEnemies">
+					<targetAcquireRadius>65</targetAcquireRadius>
+					<targetKeepRadius>72</targetKeepRadius>
+				</li>
+				<li Class="JobGiver_AITrashColonyClose" />
+				<li Class="JobGiver_AITrashBuildingsDistant" />
+				<li Class="JobGiver_AIGotoNearestHostile" />
+				<li Class="JobGiver_AITrashBuildingsDistant">
+					<attackAllInert>true</attackAllInert>
+				</li>
+				<li Class="JobGiver_AISapper">
+					<canMineNonMineables>false</canMineNonMineables>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<!-- Escort -->
+
+	<!-- ExitMapRandom -->
+
+	<!-- ExitMapBest -->
+
+	<!-- ExitMapBestAndDefendSelf -->
+</Defs>

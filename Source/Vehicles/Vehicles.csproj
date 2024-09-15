@@ -11,7 +11,7 @@
     <RootNamespace>Vehicles</RootNamespace>
     <AssemblyName>Vehicles</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>8.0</LangVersion>
+    <LangVersion>preview</LangVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <PreBuildEvent>
@@ -22,7 +22,7 @@
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS,FISHING_DISABLED,DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,12 +32,23 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>FISHING_DISABLED,DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>RELEASE;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
     <Prefer32Bit>false</Prefer32Bit>
     <NoWarn>CS0649</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
+    <OutputPath>bin\UNSTABLE\</OutputPath>
+    <DefineConstants>TRACE;UNSTABLE;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
+    <Optimize>true</Optimize>
+    <NoWarn>CS0649</NoWarn>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>preview</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Assembly-CSharp">
@@ -90,6 +101,8 @@
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_RangedSupport.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_CombatFormation.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_VehicleAI.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_AIBreachWalls.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
@@ -102,6 +115,7 @@
     <Compile Include="Components\Rendering\Tracks\VehicleTrack.cs" />
     <Compile Include="Components\Rendering\VehicleTrackMaker.cs" />
     <Compile Include="Components\Rendering\VehicleTweener.cs" />
+    <Compile Include="Components\Vehicles\AI\TargetCategory.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\IndicatorDef.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor.cs" />
     <Compile Include="Components\Vehicles\Health\Reactors\Reactor_FuelLeak.cs" />
@@ -112,7 +126,8 @@
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\VehicleOrientationController.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
-    <Compile Include="Components\Vehicles\VehicleNPCProperties.cs" />
+    <Compile Include="Components\Vehicles\AI\Strategies\StrategyWorker.cs" />
+    <Compile Include="Components\Vehicles\AI\VehicleNPCProperties.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Combat.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Comps.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Handlers.cs" />
@@ -122,7 +137,8 @@
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Tickers.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Health.cs" />
     <Compile Include="Components\Vehicles\VehiclePawn\VehiclePawn_Rendering.cs" />
-    <Compile Include="Components\Vehicles\VehicleRaidParamsDef.cs" />
+    <Compile Include="Components\Vehicles\AI\VehicleRaidParamsDef.cs" />
+    <Compile Include="Components\Vehicles\AI\VehicleStrategyDef.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_LoadMap.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\AerialFloatMenuOptions\AerialVehicleArrivalAction_OfferGifts.cs" />
     <Compile Include="CustomFeatures\AerialVehicles\Events\AerialAnimationEvents.cs" />
@@ -451,7 +467,6 @@
     <Compile Include="Components\Construction\VehicleBuildDef.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleType.cs" />
     <Compile Include="Misc\Enums\Turret\TurretType.cs" />
-    <Compile Include="Turrets\Components\TargetPriorityDef.cs" />
     <Compile Include="Components\NPC\VehicleAI.cs" />
     <Compile Include="Misc\Saving\SaveableDefPair.cs" />
     <Compile Include="Misc\Saving\SaveablePair.cs" />
@@ -493,6 +508,9 @@
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncReachabilityCacheAction.cs" />
+    <Compile Include="Utility\Helpers\Combat\CombatFormationHelper.cs" />
+    <Compile Include="Utility\Helpers\Combat\CombatPositionFinder.cs" />
+    <Compile Include="Utility\Helpers\Combat\CombatTargetFinder.cs" />
     <Compile Include="Utility\Helpers\TranslationHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanInfoHelper.cs" />
@@ -661,7 +679,6 @@
     <Compile Include="World\WorldObjectComps\AirDefense.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="AI\Designators\" />
     <Folder Include="AI\Lords\Raids\" />
     <Folder Include="Components\Rendering\PawnRenderNode\" />
     <Folder Include="Comps\Fishing\" />
