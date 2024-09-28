@@ -11,6 +11,7 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using UnityEngine;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -54,7 +55,7 @@ namespace Vehicles
 
 		protected virtual bool ExtraTargetValidator(VehiclePawn vehicle, Thing target)
 		{
-			return target.Faction != Faction.OfPlayer && (!humanlikesOnly || target is not Pawn pawn || pawn.RaceProps.Humanlike);
+			return target.Faction.HostileTo(vehicle.Faction) && (!humanlikesOnly || target is not Pawn pawn || pawn.RaceProps.Humanlike);
 		}
 
 		public override ThinkNode DeepCopy(bool resolve = true)
@@ -67,11 +68,9 @@ namespace Vehicles
 
 		protected override Job TryGiveJob(Pawn pawn)
 		{
-			if (pawn is not VehiclePawn vehicle)
-			{
-				Log.Error($"Trying to assign vehicle job to non-vehicle pawn. This is not allowed!");
-				return null;
-			}
+			VehiclePawn vehicle = pawn as VehiclePawn;
+			Assert(vehicle != null, "Trying to assign vehicle job to non-vehicle pawn.");
+
 			UpdateEnemyTarget(vehicle);
 			if (vehicle.mindState.enemyTarget is not Thing enemyTarget)
 			{
@@ -83,21 +82,24 @@ namespace Vehicles
 			}
 			if (OnlyUseRanged)
 			{
-				if (!TryFindCombatPosition(vehicle, out IntVec3 intVec))
+				if (!TryFindCombatPosition(vehicle, out IntVec3 cell))
 				{
 					return null;
 				}
-				if (intVec == vehicle.Position)
+				Job job;
+				if (cell == vehicle.Position)
 				{
-					return JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, ExpiryInterval.RandomInRange, true);
+					job = JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, vehicle);
 				}
-				Job job = JobMaker.MakeJob(JobDefOf.Goto, intVec);
+				else
+				{
+					job = JobMaker.MakeJob(JobDefOf.Goto, cell);
+				}
 				job.expiryInterval = ExpiryInterval.RandomInRange;
 				job.checkOverrideOnExpire = true;
 				return job;
 			}
 			// TODO - Add special case for how vehicles should handle pawns being within melee range
-			// TODO - Add ramming capability
 			return null;
 		}
 

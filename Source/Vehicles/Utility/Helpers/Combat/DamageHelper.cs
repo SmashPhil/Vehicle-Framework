@@ -2,6 +2,7 @@
 using Verse.Sound;
 using RimWorld;
 using SmashTools;
+using UnityEngine;
 
 namespace Vehicles
 {
@@ -52,6 +53,43 @@ namespace Vehicles
 				applyDamageToExplosionCellsNeighbors: proj.def.projectile.applyDamageToExplosionCellsNeighbors,
 				preExplosionSpawnThingDef: preExplosionSpawnThingDef, preExplosionSpawnChance: proj.def.projectile.preExplosionSpawnChance, preExplosionSpawnThingCount: proj.def.projectile.preExplosionSpawnThingCount, 
 				chanceToStartFire: chanceToStartFire, damageFalloff: proj.def.projectile.explosionDamageFalloff);
+		}
+
+		public static float EMPChanceToStun(VehicleEMPSeverity severity)
+		{
+			return severity switch
+			{
+				VehicleEMPSeverity.Tiny => 0.075f,
+				VehicleEMPSeverity.Minor => 0.125f,
+				VehicleEMPSeverity.Moderate => 0.15f,
+				VehicleEMPSeverity.Severe => 0.25f,
+				_ => 0f,
+			};
+		}
+
+		/// <returns>Length of stun measured in ticks</returns>
+		public static int EMPStunLength(VehicleEMPSeverity severity, float damage)
+		{
+			return severity switch
+			{
+				VehicleEMPSeverity.Tiny => Mathf.RoundToInt(damage * Rand.Range(0.5f, 1.5f)),
+				VehicleEMPSeverity.Minor => Mathf.RoundToInt(damage * Rand.Range(2f, 3f)),
+				VehicleEMPSeverity.Moderate => Mathf.RoundToInt(damage * Rand.Range(2f, 3f)),
+				VehicleEMPSeverity.Severe => Mathf.RoundToInt(damage * Rand.Range(2.5f, 4f)),
+				_ => 0,
+			};
+		}
+
+		public static float EMPStunDamage(VehicleEMPSeverity severity)
+		{
+			return severity switch
+			{
+				VehicleEMPSeverity.Tiny => 0,
+				VehicleEMPSeverity.Minor => 0.01f,
+				VehicleEMPSeverity.Moderate => 0.025f,
+				VehicleEMPSeverity.Severe => 0.075f,
+				_ => 0,
+			};
 		}
 	}
 }

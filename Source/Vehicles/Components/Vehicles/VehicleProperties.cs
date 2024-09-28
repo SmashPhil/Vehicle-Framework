@@ -31,8 +31,18 @@ namespace Vehicles
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "VF_ManhunterTargetsVehicle", Tooltip = "VF_ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
 		public bool manhunterTargetsVehicle = false;
-		[PostToSettings(Label = "VF_AffectedByEMP", Tooltip = "VF_AffectedByEMPTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
-		public bool affectedByEMP = true;
+		[PostToSettings(Label = "VF_CanAdaptToEMP", Tooltip = "VF_CanAdaptToEMPTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
+		[DisableSettingConditional(MemberType = typeof(VehicleDef), Property = nameof(VehicleDef.CanDisableEMPSetting), DisableIfEqualTo = true, DisableReason = "VF_VehicleCannotStun")]
+		public bool canAdaptToEMP = false;
+
+		/// <summary>
+		/// Player-facing only, allowing players to disable emp stuns for a vehicle without having to modify components via patches.
+		/// Only enabled if any component within the vehicle has an emp severity > None.
+		/// </summary>
+		[Unsaved]
+		[PostToSettings(Label = "VF_EMPStuns", Tooltip = "VF_EMPStunsTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]
+		[DisableSettingConditional(MemberType = typeof(VehicleDef), Property = nameof(VehicleDef.CanDisableEMPSetting), DisableIfEqualTo = true, DisableReason = "VF_VehicleCannotStun")]
+		public bool empStuns = false;
 
 		public string iconTexPath;
 		public bool generateThingIcon = true;
@@ -103,7 +113,7 @@ namespace Vehicles
 			customTerrainCosts ??= new SimpleDictionary<TerrainDef, int>();
 			customThingCosts ??= new SimpleDictionary<ThingDef, int>();
 			customSnowCategoryTicks ??= new SimpleDictionary<SnowCategory, int>();
-			
+
 			if (riverCost > 0)
 			{
 				float minWidth = vehicleDef.Size.x * Ext_Math.Sqrt2;
@@ -123,6 +133,8 @@ namespace Vehicles
 					role.ResolveReferences(vehicleDef);
 				}
 			}
+			empStuns = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties), nameof(empStuns), 
+				fallback: vehicleDef.components.NotNullAndAny(props => props.empSeverity > VehicleEMPSeverity.None));
 		}
 
 		public void PostDefDatabase(VehicleDef vehicleDef)

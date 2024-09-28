@@ -40,7 +40,7 @@
     <NoWarn>CS0649</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
-    <OutputPath>bin\UNSTABLE\</OutputPath>
+    <OutputPath>..\..\1.5\Assemblies\</OutputPath>
     <DefineConstants>TRACE;UNSTABLE;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
     <Optimize>true</Optimize>
     <NoWarn>CS0649</NoWarn>
@@ -101,11 +101,14 @@
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_GotoNearestHostile.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_RangedSupport.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_CombatFormation.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_VehicleAI.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_AIBreachWalls.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
+    <Compile Include="AI\ThinkNode\ThinkNode_ConditionalHasTurret.cs" />
+    <Compile Include="AI\ThinkNode\ThinkNode_ConditionalVehicle.cs" />
     <Compile Include="AI\WorkGiver\VehicleWorkGiver.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_CarryToVehicle.cs" />
     <Compile Include="AI\WorkGiver\WorkGiver_HelpGatheringItemsForVehicleCaravan.cs" />
@@ -123,6 +126,7 @@
     <Compile Include="Components\Vehicles\Health\StatCache.cs" />
     <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart_Deployed.cs" />
     <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_BodyIntegrity.cs" />
+    <Compile Include="Components\Vehicles\Health\StatWorkers\VehicleStatWorker_MoveSpeed.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatDrawEntry.cs" />
     <Compile Include="Components\Vehicles\Misc\VehicleOrientationController.cs" />
     <Compile Include="Components\Vehicles\Misc\Vehicle_IgnitionController.cs" />
@@ -214,6 +218,7 @@
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\RaidTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_MapGrids.cs" />
     <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
@@ -229,9 +234,11 @@
     <Compile Include="Misc\DefOf\VehicleStatCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleStatUpgradeCategoryDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleTurretEventDefOf.cs" />
+    <Compile Include="Misc\Enums\Debug\FlashGridType.cs" />
     <Compile Include="Misc\Enums\Turret\DeploymentType.cs" />
     <Compile Include="Misc\Enums\UI\WorldPathingDebugType.cs" />
     <Compile Include="Misc\Enums\Vehicle\UpgradeType.cs" />
+    <Compile Include="Misc\Enums\Vehicle\VehicleEMPSeverity.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleStrategy.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleTracksFriendlyFire.cs" />
     <Compile Include="Misc\Interfaces\IDebugLordMeetingPoint.cs" />
@@ -385,7 +392,7 @@
     <Compile Include="Misc\DefOf\VehicleClamorDefOf.cs" />
     <Compile Include="Misc\DefOf\VehicleEventDefOf.cs" />
     <Compile Include="Misc\Enums\Turret\TurretDisableType.cs" />
-    <Compile Include="Misc\Enums\UI\DebugRegionType.cs" />
+    <Compile Include="Misc\Enums\Debug\DebugRegionType.cs" />
     <Compile Include="Misc\Enums\Vehicle\VehicleEnabledFor.cs" />
     <Compile Include="Misc\Interfaces\ICustomSettingsDrawer.cs" />
     <Compile Include="Misc\Interfaces\IRefundable.cs" />
@@ -517,7 +524,7 @@
     <Compile Include="Utility\Helpers\Combat\ProjectileHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\DamageHelper.cs" />
     <Compile Include="Utility\Helpers\DebugHelper.cs" />
-    <Compile Include="Utility\Helpers\HediffHelper.cs" />
+    <Compile Include="Utility\Helpers\HealthHelper.cs" />
     <Compile Include="Utility\Helpers\MapHelper.cs" />
     <Compile Include="Utility\Helpers\ModSettingsHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\RaidInjectionHelper.cs" />

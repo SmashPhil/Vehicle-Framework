@@ -31,95 +31,112 @@ namespace Vehicles
 			}
 		}
 
+		public static void PushTargeter(BaseTargeter targeter)
+		{
+			if (CurrentTargeter == targeter) return;
+
+			CurrentTargeter?.StopTargeting();
+			CurrentTargeter = targeter;
+		}
+
+		public static void PushTargeter(BaseWorldTargeter targeter)
+		{
+			if (CurrentWorldTargeter == targeter) return;
+
+			CurrentWorldTargeter?.StopTargeting();
+			CurrentWorldTargeter = targeter;
+		}
+
+		public static void StopTargeter(BaseTargeter targeter)
+		{
+			if (CurrentTargeter != targeter) return;
+
+			CurrentTargeter.StopTargeting();
+			CurrentTargeter = null;
+		}
+
+		public static void StopTargeter(BaseWorldTargeter targeter)
+		{
+			if (CurrentWorldTargeter != targeter) return;
+
+			CurrentWorldTargeter.StopTargeting();
+			CurrentWorldTargeter = null;
+		}
+
 		/* ------ Map Targeters ------ */
-		internal static void StopAllTargeters()
+		internal static void OnGUITargeter()
 		{
-			foreach (BaseTargeter targeter in targeters)
+			if (CurrentTargeter == null) return;
+
+			if (!CurrentTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.StopTargeting();
-				}
+				StopTargeter(CurrentTargeter);
+				return;
 			}
+			CurrentTargeter.TargeterOnGUI();
 		}
 
-		internal static void OnGUITargeters()
+		internal static void UpdateTargeter()
 		{
-			foreach (BaseTargeter targeter in targeters)
+			if (CurrentTargeter == null) return;
+
+			if (!CurrentTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.TargeterOnGUI();
-				}
+				StopTargeter(CurrentTargeter);
+				return;
 			}
+			CurrentTargeter.TargeterUpdate();
 		}
 
-		internal static void UpdateTargeters()
+		internal static void ProcessTargeterInputEvent()
 		{
-			foreach (BaseTargeter targeter in targeters)
-			{
-				if (targeter.IsTargeting)
-				{
-					targeter.TargeterUpdate();
-				}
-			}
-		}
+			if (CurrentTargeter == null) return;
 
-		internal static void ProcessTargeterInputEvents()
-		{
-			foreach (BaseTargeter targeter in targeters)
+			if (!CurrentTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.ProcessInputEvents();
-				}
+				StopTargeter(CurrentTargeter);
+				return;
 			}
+			CurrentTargeter.ProcessInputEvents();
 		}
 		/* --------------------------- */
 
 		/* ----- World Targeters ----- */
-		internal static void StopAllWorldTargeters()
+		
+		internal static void OnGUIWorldTargeter()
 		{
-			foreach (BaseWorldTargeter targeter in worldTargeters)
+			if (CurrentWorldTargeter == null) return;
+
+			if (!CurrentWorldTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.StopTargeting();
-				}
+				StopTargeter(CurrentWorldTargeter);
+				return;
 			}
+			CurrentWorldTargeter.TargeterOnGUI();
 		}
 
-		internal static void OnGUIWorldTargeters()
+		internal static void UpdateWorldTargeter()
 		{
-			foreach (BaseWorldTargeter targeter in worldTargeters)
+			if (CurrentWorldTargeter == null) return;
+
+			if (!CurrentWorldTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.TargeterOnGUI();
-				}
+				StopTargeter(CurrentWorldTargeter);
+				return;
 			}
+			CurrentWorldTargeter.TargeterUpdate();
 		}
 
-		internal static void UpdateWorldTargeters()
+		internal static void ProcessWorldTargeterInputEvent()
 		{
-			foreach (BaseWorldTargeter targeter in worldTargeters)
-			{
-				if (targeter.IsTargeting)
-				{
-					targeter.TargeterUpdate();
-				}
-			}
-		}
+			if (CurrentWorldTargeter == null) return;
 
-		internal static void ProcessWorldTargeterInputEvents()
-		{
-			foreach (BaseWorldTargeter targeter in worldTargeters)
+			if (!CurrentWorldTargeter.IsTargeting)
 			{
-				if (targeter.IsTargeting)
-				{
-					targeter.ProcessInputEvents();
-				}
+				StopTargeter(CurrentWorldTargeter);
+				return;
 			}
+			CurrentWorldTargeter.ProcessInputEvents();
 		}
 		/* --------------------------- */
 	}

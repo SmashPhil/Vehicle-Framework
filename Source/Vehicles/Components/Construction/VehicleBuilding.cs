@@ -39,21 +39,6 @@ namespace Vehicles
 			}
 		}
 
-		public virtual void InspectOpen()
-		{
-			VehicleInfoCard.Init(VehicleDef);
-		}
-
-		public virtual void InspectClose()
-		{
-			VehicleInfoCard.Clear();
-		}
-
-		public virtual void DrawInspectDialog(Rect rect)
-		{
-			VehicleInfoCard.Draw(rect);
-		}
-
 		public virtual float DoInspectPaneButtons(float x)
 		{
 			Rect rect = new Rect(x, 0f, Extra.IconBarDim, Extra.IconBarDim);
@@ -61,11 +46,9 @@ namespace Vehicles
 
 			if (Prefs.DevMode)
 			{
-				rect.x -= rect.width;
-				usedWidth += rect.width;
-				{
-					//TODO - add devmode options related to constructions
-				}
+				//rect.x -= rect.width;
+				//usedWidth += rect.width;
+				//TODO - add devmode options related to constructions
 			}
 			return usedWidth;
 		}
@@ -79,7 +62,7 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_References.Look(ref vehicle, "vehicle", true);
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 		}
 	}
 }

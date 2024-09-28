@@ -20,7 +20,7 @@ namespace Vehicles
 		{
 			return new CompVehicleTurrets.TurretData()
 			{
-				shots = CurrentFireMode.shotsPerBurst,
+				shots = CurrentFireMode.shotsPerBurst.RandomInRange,
 				ticksTillShot = (CurrentFireMode.ticksBetweenShots / GroupTurrets.Count) * GroupTurrets.FindIndex(t => t == this),
 				turret = this
 			};

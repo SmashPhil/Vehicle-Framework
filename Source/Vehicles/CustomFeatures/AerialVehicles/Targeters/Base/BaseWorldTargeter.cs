@@ -30,6 +30,11 @@ namespace Vehicles
 
 		public abstract void TargeterUpdate();
 
+		public virtual void OnStart()
+		{
+			Targeters.PushTargeter(this);
+		}
+
 		protected virtual GlobalTargetInfo CurrentTargetUnderMouse()
 		{
 			if (!IsTargeting)

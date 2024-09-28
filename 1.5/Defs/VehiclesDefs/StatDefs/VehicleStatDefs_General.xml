@@ -6,6 +6,7 @@
 		<defName>MoveSpeed</defName>
 		<label>Move Speed</label>
 		<description>Speed of movement in cells per second.</description>
+		<workerClass>Vehicles.VehicleStatWorker_MoveSpeed</workerClass>
 		<category>VehicleBasics</category>
 		<defaultBaseValue>3.5</defaultBaseValue>
 		<minValue>0</minValue>

@@ -37,6 +37,9 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapDeiniter), "NotifyEverythingWhichUsesMapReference"),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(NotifyEverythingWhichUsesMapReferencePost)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GasGrid), nameof(GasGrid.GasCanMoveTo)),
+				postfix: new HarmonyMethod(typeof(MapHandling),
+				nameof(GasCanMoveThroughVehicle)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MapInterface), nameof(MapInterface.MapInterfaceUpdate)),
 				postfix: new HarmonyMethod(typeof(MapHandling),
 				nameof(DebugUpdateVehicleRegions)));
@@ -214,6 +217,15 @@ namespace Vehicles
 						}
 					}
 				}
+			}
+		}
+
+		private static void GasCanMoveThroughVehicle(IntVec3 cell, ref bool __result, Map ___map)
+		{
+			if (__result)
+			{
+				VehiclePawn vehicle = ___map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
+				__result = vehicle == null || vehicle.VehicleDef.Fillage != FillCategory.Full;
 			}
 		}
 

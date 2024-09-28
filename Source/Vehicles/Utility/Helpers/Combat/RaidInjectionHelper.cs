@@ -42,12 +42,13 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (vehicleDef.npcProperties?.raidParams != null)
+			if (vehicleDef.npcProperties == null)
 			{
-				if (!vehicleDef.npcProperties.raidParams.Allows(faction, arrivalModeDef))
-				{
-					return false;
-				}
+				return false;
+			}
+			if (vehicleDef.npcProperties.raidParams != null && !vehicleDef.npcProperties.raidParams.Allows(faction, arrivalModeDef))
+			{
+				return false;
 			}
 			return true;
 		}

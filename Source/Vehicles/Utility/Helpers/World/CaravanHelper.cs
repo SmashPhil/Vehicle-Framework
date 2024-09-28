@@ -311,8 +311,7 @@ namespace Vehicles
 				{
 					if (pawn.Spawned)
 					{
-						assignedSeats[pawn].vehicle.GiveLoadJob(pawn, assignedSeats[pawn].handler);
-						assignedSeats[pawn].vehicle.Notify_Boarded(pawn);
+						assignedSeats[pawn].vehicle.TryAddPawn(pawn, assignedSeats[pawn].handler);
 					}
 					else if (!pawn.IsInVehicle())
 					{

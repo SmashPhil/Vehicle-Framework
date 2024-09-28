@@ -57,6 +57,8 @@ namespace Vehicles
 
 		public ThingWithComps Thing => this;
 
+		public RetextureDef Retexture => retextureDef;
+
 		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
 
 		AnimationController IAnimator.Controller => animator?.controller;
@@ -1077,21 +1079,6 @@ namespace Vehicles
 			CompVehicleTurrets?.turrets.ForEach(c => c.ResolveCannonGraphics(patternData, true));
 
 			patternToPaint = null;
-		}
-
-		public virtual void InspectOpen()
-		{
-			VehicleInfoCard.Init(this);
-		}
-
-		public virtual void InspectClose()
-		{
-			VehicleInfoCard.Clear();
-		}
-
-		public virtual void DrawInspectDialog(Rect rect)
-		{
-			VehicleInfoCard.Draw(rect);
 		}
 
 		public virtual float DoInspectPaneButtons(float x)

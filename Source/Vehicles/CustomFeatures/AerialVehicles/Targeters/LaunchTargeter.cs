@@ -47,6 +47,7 @@ namespace Vehicles
 			FlightPath.Clear();
 			TotalDistance = 0;
 			TotalFuelCost = 0;
+			Instance.OnStart();
 		}
 
 		public static void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
@@ -63,6 +64,7 @@ namespace Vehicles
 			FlightPath.Clear();
 			TotalDistance = 0;
 			TotalFuelCost = 0;
+			Instance.OnStart();
 		}
 
 		public static void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
@@ -77,6 +79,7 @@ namespace Vehicles
 			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
 			Instance.onUpdate = onUpdate;
 			Instance.extraLabelGetter = extraLabelGetter;
+			Instance.OnStart();
 		}
 
 		public void ContinueTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
@@ -90,6 +93,7 @@ namespace Vehicles
 			Instance.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
 			Instance.onUpdate = onUpdate;
 			Instance.extraLabelGetter = extraLabelGetter;
+			Instance.OnStart();
 		}
 
 		public override void RegisterActionOnTile(int tile, AerialVehicleArrivalAction arrivalAction)

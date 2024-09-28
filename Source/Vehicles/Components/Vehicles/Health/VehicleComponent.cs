@@ -1,10 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Linq;
+using System.Reflection;
+using HarmonyLib;
 using RimWorld;
-using Verse;
 using SmashTools;
+using UnityEngine;
+using Verse;
 
 namespace Vehicles
 {
@@ -91,7 +93,13 @@ namespace Vehicles
 			{
 				ReduceDamageFromArmor(ref dinfo, out penetration);
 			}
-			
+
+			// EMP Damage always penetrates
+			if (dinfo.Def == DamageDefOf.EMP)
+			{
+				penetration = Penetration.Electrified;
+			}
+
 			health -= dinfo.Amount;
 			float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
 			health = health.Clamp(0, MaxHealth);
@@ -117,7 +125,12 @@ namespace Vehicles
 				}
 			}
 
-			if (penetration > Penetration.Penetrated || health > (MaxHealth / 2f))
+			if (penetration == Penetration.Electrified)
+			{
+				// Damage is based on %, penetrated damage should be set to 0 for post-emp calculations
+				dinfo.SetAmount(0); 
+			}
+			else if (penetration < Penetration.Penetrated || health > (MaxHealth / 2f))
 			{
 				//Don't fallthrough until part is below 50% health or damage has penetrated
 				dinfo.SetAmount(0);
@@ -128,6 +141,34 @@ namespace Vehicles
 				dinfo.SetAmount(remainingDamage);
 			}
 			return penetration;
+		}
+
+		/// <returns>Amount to stun vehicle for</returns>
+		public int ApplyEMPDamage(ref DamageInfo dinfo, ref bool adapted)
+		{
+			adapted = false;
+			if (!vehicle.VehicleDef.properties.empStuns)
+			{
+				return 0;
+			}
+
+			VehicleEMPSeverity severity = props.empSeverity;
+			if (severity == VehicleEMPSeverity.None)
+			{
+				return 0;
+			}
+
+			int stunTicks = 0;
+			float chanceToStun = DamageHelper.EMPChanceToStun(severity);
+			if (Rand.Chance(chanceToStun))
+			{
+				// Applied in VehicleStatHandler, will only apply the highest duration of all 'stunned' components in this in
+				stunTicks = DamageHelper.EMPStunLength(severity, dinfo.Amount);
+				float damage = DamageHelper.EMPStunDamage(severity);
+				dinfo.SetAmount(damage * MaxHealth);
+				TakeDamage(vehicle, dinfo, ignoreArmor: true);
+			}
+			return stunTicks;
 		}
 
 		public virtual void HealComponent(float amount)
@@ -268,10 +309,11 @@ namespace Vehicles
 
 		public enum Penetration
 		{
-			Penetrated,
 			NonPenetrated,
-			Diminished,
 			Deflected,
+			Diminished,
+			Penetrated,
+			Electrified,
 		}
 
 		public struct DamageResult

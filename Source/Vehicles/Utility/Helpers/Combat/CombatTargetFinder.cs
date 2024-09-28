@@ -16,16 +16,16 @@ namespace Vehicles
 			float maxTravelRadiusFromLocus = float.MaxValue, bool onlyRanged = false)
 		{
 			// TODO - Use VehicleRegionTraverser for reachability search
-			Thing attackTarget = GenClosest.ClosestThingReachable(vehicle.Position, vehicle.Map, 
+			Thing attackTarget = GenClosest.ClosestThingReachable(vehicle.Position, vehicle.Map,
 				ThingRequest.ForGroup(ThingRequestGroup.AttackTarget), PathEndMode.Touch, 
 				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn), maxDistance: maxDistance,
-				validator: (Thing target) => validator(target) && ShouldIgnoreNoncombatant(vehicle, target, scanFlags), 
+				validator: (Thing target) => (validator == null || validator(target)) && !ShouldIgnoreNonCombatant(vehicle, target, scanFlags), 
 				searchRegionsMax: maxDistance > 800 ? -1 : 40);
 
 			return attackTarget;
 		}
 
-		private static bool ShouldIgnoreNoncombatant(VehiclePawn vehicle, Thing thing, TargetScanFlags scanFlags)
+		private static bool ShouldIgnoreNonCombatant(VehiclePawn vehicle, Thing thing, TargetScanFlags scanFlags)
 		{
 			if (thing is not Pawn pawn)
 			{
@@ -39,11 +39,7 @@ namespace Vehicles
 			{
 				return true;
 			}
-			if (GenSight.LineOfSightToThing(vehicle.Position, pawn, vehicle.Map))
-			{
-				return false;
-			}
-			return true;
+			return !GenSight.LineOfSightToThing(vehicle.Position, pawn, vehicle.Map);
 		}
 	}
 }

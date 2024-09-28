@@ -75,9 +75,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterUpdate)),
 				postfix: new HarmonyMethod(typeof(Rendering),
 				nameof(TargeterUpdate)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Targeter), nameof(Targeter.StopTargeting)),
-				postfix: new HarmonyMethod(typeof(Rendering),
-				nameof(TargeterStop)));
 		}
 
 		/// <summary>
@@ -306,22 +303,17 @@ namespace Vehicles
 		/* ---------------- Hooks onto Targeter calls ---------------- */
 		private static void DrawTargeters()
 		{
-			Targeters.OnGUITargeters();
+			Targeters.OnGUITargeter();
 		}
 
 		private static void ProcessTargeterInputEvents()
 		{
-			Targeters.ProcessTargeterInputEvents();
+			Targeters.ProcessTargeterInputEvent();
 		}
 
 		private static void TargeterUpdate()
 		{
-			Targeters.UpdateTargeters();
-		}
-
-		private static void TargeterStop()
-		{
-			Targeters.StopAllTargeters();
+			Targeters.UpdateTargeter();
 		}
 		/* ----------------------------------------------------------- */
 	}

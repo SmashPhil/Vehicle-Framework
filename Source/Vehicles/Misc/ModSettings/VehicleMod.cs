@@ -1,4 +1,6 @@
-﻿using System;
+﻿//#define UPGRADES_TAB
+
+using System;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
@@ -224,7 +226,7 @@ namespace Vehicles
 					CurrentSection = settings.vehicles;
 					_ = VehicleDefs; //Trigger recache
 				}, () => CurrentSection == settings.vehicles));
-#if DEBUG
+#if UPGRADES_TAB
 				tabs.Add(new TabRecord("VF_Upgrades".Translate(), delegate()
 				{
 					CurrentSection = settings.upgrades;

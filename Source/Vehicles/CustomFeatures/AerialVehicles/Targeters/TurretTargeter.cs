@@ -52,6 +52,7 @@ namespace Vehicles
 			Instance.mouseAttachment = mouseAttachment;
 			Instance.map = turret.vehicle.Map;
 
+			Instance.OnStart();
 			Turret.StartTicking();
 		}
 

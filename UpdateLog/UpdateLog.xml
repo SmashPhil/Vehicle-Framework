@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1734</currentVersion>
+  <currentVersion>1.5.1756</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -12,13 +12,28 @@
 
 - Raiders still attacking vehicles with no pawns inside if turret was set to auto-target
 
+- Vehicles not deregistering from cover grid when rotating.
+
+- Mods using vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting.
+
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Targeters don't run unless activated.
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added 1st iteration of raiders, locked behind a toggle in the mod settings. Note: This is an experimental feature, you may encounter bugs or horrible game balance. 
+&lt;b&gt;This feature is opt-in while it remains experimental.&lt;/b&gt; Vehicles that are not configured for raids, won't spawn in them. If you have no vehicles that can spawn in raids, then you won't get vehicle raids.
+
+- Vehicles can be temporarily disabled by EMPs.
 &lt;b&gt;Players&lt;/b&gt;
+- Vehicles consume 50% less fuel while idle
 
+- Added more entries to vehicle info cards including build costs, total health, turrets, etc.
 &lt;b&gt;Modders&lt;/b&gt;
+- Added NPC Properties for configuring vehicles in raids.
 
+- Added affectedByEMP bool to vehicle properties.
+
+- FireMode shotsPerBurst and ticksBetweenBursts are now IntRange, allowing for varied burst counts and varied timing between bursts to make machine gun fire less robotic.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->

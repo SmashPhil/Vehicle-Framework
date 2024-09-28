@@ -17,18 +17,21 @@ namespace Vehicles
 	public static class UITesting
 	{
 		[StartupAction(Category = "UI", Name = "Regions", GameState = GameState.Playing)]
-		private static void UnitTest_RegionsOn()
+		private static void StartupAction_RegionsOn()
 		{
-			Prefs.DevMode = true;
-			CameraJumper.TryHideWorld();
-			VehicleMod.settings.debug.RegionDebugMenu();
+			LongEventHandler.ExecuteWhenFinished(delegate ()
+			{
+				Prefs.DevMode = true;
+				CameraJumper.TryHideWorld();
+				VehicleMod.settings.debug.RegionDebugMenu();
+			});
 		}
 
 		/// <summary>
 		/// Load up game, find available vehicle with upgrade tree, focus camera on vehicle
 		/// </summary>
-		//[UnitTest(Category = "UI", Name = "Upgrade Menu")]
-		private static void UnitTest_UpgradeMenu()
+		[StartupAction(Category = "UI", Name = "Upgrade Menu")]
+		private static void StartupAction_UpgradeMenu()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
@@ -36,7 +39,7 @@ namespace Vehicles
 				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.CompUpgradeTree != null);
 				if (map is null || vehicle is null)
 				{
-					SmashLog.Error($"Unable to execute unit test <method>UnitTestUpgradeMenu</method> post load.");
+					SmashLog.Error($"Unable to execute startup action <method>UnitTestUpgradeMenu</method> post load.");
 					return;
 				}
 				CameraJumper.TryJump(vehicle);
@@ -45,23 +48,25 @@ namespace Vehicles
 		}
 
 		[StartupAction(Category = "UI", Name = "Color Dialog", GameState = GameState.Playing)]
-		private static void UnitTest_ColorDialog()
+		private static void StartupAction_ColorDialog()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
 				if (map is null)
 				{
-					SmashLog.Error($"Unable to execute unit test <method>{nameof(UnitTest_ColorDialog )}</method> post load. No map.");
+					SmashLog.Error($"Unable to execute startup action <method>{nameof(StartupAction_ColorDialog)}</method> post load. No map.");
 					return;
 				}
-				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex());
+				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle && 
+				vehicle.VehicleGraphic.Shader.SupportsRGBMaskTex());
 				if (vehicle is null)
 				{
-					var vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => vehicleDef.graphicData.shaderType is RGBShaderTypeDef).ToList();
+					var vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => 
+						vehicleDef.graphicData.shaderType is RGBShaderTypeDef).ToList();
 					if (vehicleDefs.NullOrEmpty())
 					{
-						SmashLog.Error($"Unable to execute unit test <method>{nameof(UnitTest_ColorDialog)}</method>. No vehicle defs to use as test case.");
+						SmashLog.Error($"Unable to execute startup action <method>{nameof(StartupAction_ColorDialog)}</method>. No vehicle defs to use as test case.");
 						return;
 					}
 					VehicleDef vehicleDef = vehicleDefs.FirstOrDefault();
@@ -77,7 +82,7 @@ namespace Vehicles
 		/// Load up game, open update menu for all previous versions
 		/// </summary>
 		[StartupAction(Category = "UI", Name = "Previous Versions Menu", GameState = GameState.Playing)]
-		private static void UnitTest_ShowUpdates()
+		private static void StartupAction_ShowUpdates()
 		{
 			VehicleMod.settings.debug.ShowAllUpdates();
 		}
@@ -86,7 +91,7 @@ namespace Vehicles
 		/// Load up game, open Mod Settings
 		/// </summary>
 		[StartupAction(Category = "UI", Name = "Mod Settings", GameState = GameState.OnStartup)]
-		private static void UnitTest_ModSettings()
+		private static void StartupAction_ModSettings()
 		{
 			Dialog_ModSettings settings = new Dialog_ModSettings(VehicleMod.mod);
 			Find.WindowStack.Add(settings);
@@ -96,7 +101,7 @@ namespace Vehicles
 		/// Load up game, open blank Graph Editor
 		/// </summary>
 		[StartupAction(Category = "UI", Name = "Graph Editor", GameState = GameState.OnStartup)]
-		private static void UnitTest_GraphEditor()
+		private static void StartupAction_GraphEditor()
 		{
 			Dialog_GraphEditor settings = new Dialog_GraphEditor();
 			Find.WindowStack.Add(settings);
@@ -106,14 +111,14 @@ namespace Vehicles
 		/// Load up game, spawn vehicle, open Graph Editor for vehicle
 		/// </summary>
 		[StartupAction(Category = "UI", Name = "Animation Editor", GameState = GameState.Playing)]
-		private static void UnitTest_AnimationEditor()
+		private static void StartupAction_AnimationEditor()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
 				Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
 				if (map is null)
 				{
-					SmashLog.Error($"Unable to execute unit test {nameof(UnitTest_AnimationEditor)}. No map.");
+					SmashLog.Error($"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No map.");
 					return;
 				}
 				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle);
@@ -122,7 +127,7 @@ namespace Vehicles
 					VehicleDef vehicleDef = GetVehicleDefAnimator();
 					if (vehicleDef is null)
 					{
-						SmashLog.Error($"Unable to execute unit test {nameof(UnitTest_AnimationEditor)}. No vehicle defs to use as test case.");
+						SmashLog.Error($"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No vehicle defs to use as test case.");
 						return;
 					}
 					vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
@@ -155,7 +160,7 @@ namespace Vehicles
 		}
 
 		[StartupAction(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]
-		private static void UnitTest_VehicleAreaManager()
+		private static void StartupAction_VehicleAreaManager()
 		{
 			Prefs.DevMode = true;
 			CameraJumper.TryHideWorld();
@@ -165,7 +170,7 @@ namespace Vehicles
 			}
 			else
 			{
-				SmashLog.Error($"Tried to unit test <type>{nameof(UnitTest_VehicleAreaManager)}</type> with null current map.");
+				SmashLog.Error($"Tried to startup action <type>{nameof(StartupAction_VehicleAreaManager)}</type> with null current map.");
 			}
 		}
 	}

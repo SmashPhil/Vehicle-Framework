@@ -27,6 +27,7 @@ namespace Vehicles
 			Instance.actionWhenFinished = actionWhenFinished;
 			Instance.mouseAttachment = mouseAttachment;
 			Instance.map = vehicle.Map;
+			Instance.OnStart();
 		}
 
 		public override void StopTargeting()

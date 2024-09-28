@@ -242,6 +242,11 @@ namespace Vehicles
 				return;
 			}
 
+			if (vehicle.stances.stunner.Stunned)
+			{
+				return; // TODO - apply deceleration
+			}
+
 			if (VehicleMod.settings.debug.debugDrawBumpers)
 			{
 				GenDraw.DrawFieldEdges(bumperCells);
@@ -311,7 +316,8 @@ namespace Vehicles
 
 		public void PatherDraw()
 		{
-			if (DebugViewSettings.drawPaths && curPath != null && Find.Selector.IsSelected(vehicle))
+			if (curPath != null && (vehicle.Faction == Faction.OfPlayer || DebugViewSettings.drawPaths)
+				&& Find.Selector.IsSelected(vehicle))
 			{
 				curPath.DrawPath(vehicle);
 			}
@@ -360,7 +366,6 @@ namespace Vehicles
 				vehicle.FullRotation = endRot;
 			}
 			StopDead();
-			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 			if (vehicle.jobs.curJob != null)
 			{
 				vehicle.jobs.curDriver.Notify_PatherArrived();
@@ -485,7 +490,6 @@ namespace Vehicles
 			}
 			
 			SetupMoveIntoNextCell();
-			vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
 		}
 
 		private void SetupMoveIntoNextCell()

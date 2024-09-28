@@ -9,6 +9,8 @@ using Verse.Sound;
 using RimWorld;
 using HarmonyLib;
 using SmashTools;
+using static Verse.Dialog_InfoCard;
+using System.Reflection;
 
 namespace Vehicles
 {
@@ -16,7 +18,7 @@ namespace Vehicles
 	{
 		private static VehiclePawn vehicle;
 		private static VehicleDef vehicleDef;
-		private static InfoCardTab tab;
+		private static Dialog_InfoCard infoCard;
 
 		private static float listHeight;
 		private static float rightPanelHeight;
@@ -24,34 +26,43 @@ namespace Vehicles
 		private static Vector2 scrollPosition = Vector2.zero;
 		private static Vector2 scrollPositionRightPanel = Vector2.zero;
 		private static ScrollPositioner scrollPositioner = new ScrollPositioner();
-		private static QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
 
 		private static VehicleStatDrawEntry selectedEntry;
 		private static VehicleStatDrawEntry mousedOverEntry;
 		private static List<VehicleStatDrawEntry> cachedDrawEntries = new List<VehicleStatDrawEntry>();
 		internal static List<StatDef> displayedStatDefs = new List<StatDef>();
 
+		private static FieldInfo tabFieldInfo;
+
+		static VehicleInfoCard()
+		{
+			tabFieldInfo = AccessTools.Field(typeof(Dialog_InfoCard), "tab");
+		}
+
 		public static void RegisterStatDef(StatDef statDef)
 		{
 			displayedStatDefs.Add(statDef);
 		}
 
-		public static void Init(VehiclePawn vehicle)
+		public static void Init(VehiclePawn vehicle, Dialog_InfoCard infoCard)
 		{
 			VehicleInfoCard.vehicle = vehicle;
 			VehicleInfoCard.vehicleDef = vehicle.VehicleDef;
+			VehicleInfoCard.infoCard = infoCard;
 			Reset();
 		}
 
-		public static void Init(VehicleDef vehicleDef)
+		public static void Init(VehicleDef vehicleDef, Dialog_InfoCard infoCard)
 		{
 			VehicleInfoCard.vehicleDef = vehicleDef;
+			VehicleInfoCard.infoCard = infoCard;
 			Reset();
 		}
 
 		public static void Reset()
 		{
-			tab = InfoCardTab.Stats;
+			infoCard.CommonSearchWidget.Reset();
+			tabFieldInfo.SetValue(infoCard, InfoCardTab.Stats);
 			scrollPosition = Vector2.zero;
 			cachedDrawEntries.Clear();
 			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.InfoCard, KnowledgeAmount.Total);
@@ -59,39 +70,39 @@ namespace Vehicles
 
 		private static bool Matching(VehicleStatDrawEntry drawEntry)
 		{
-			return quickSearchWidget.filter.Matches(drawEntry.LabelCap);
+			return infoCard.CommonSearchWidget.filter.Matches(drawEntry.LabelCap);
 		}
 
 		public static void Clear()
 		{
 			vehicle = null;
 			vehicleDef = null;
+			infoCard = null;
 			mousedOverEntry = null;
 			selectedEntry = null;
-			quickSearchWidget.Reset();
 		}
 
-		//TEMP (Needs proper hook for info card patch in Gizmos.VehicleInfoCardOverride
-		public static void DrawFor(Rect rect, VehicleDef vehicleDef)
+		public static void DrawFor(Rect rect, VehicleDef vehicleDef, Dialog_InfoCard infoCard, InfoCardTab tab)
 		{
 			if (VehicleInfoCard.vehicleDef != vehicleDef)
 			{
-				Init(vehicleDef);
+				Clear();
+				Init(vehicleDef, infoCard);
 			}
-			Draw(rect.ContractedBy(18));
+			Draw(rect.ContractedBy(18), tab);
 		}
 
-		//TEMP
-		public static void DrawFor(Rect rect, VehiclePawn vehicle)
+		public static void DrawFor(Rect rect, VehiclePawn vehicle, Dialog_InfoCard infoCard, InfoCardTab tab)
 		{
 			if (VehicleInfoCard.vehicle != vehicle)
 			{
-				Init(vehicle);
+				Clear();
+				Init(vehicle, infoCard);
 			}
-			Draw(rect.ContractedBy(18));
+			Draw(rect.ContractedBy(18), tab);
 		}
 
-		public static void Draw(Rect rect)
+		public static void Draw(Rect rect, InfoCardTab tab)
 		{
 			if (vehicle != null || vehicleDef != null)
 			{
@@ -106,52 +117,37 @@ namespace Vehicles
 					yMax = rect.yMax - 20
 				};
 				List<TabRecord> list = new List<TabRecord>();
-				TabRecord item = new TabRecord("TabStats".Translate(), delegate ()
+				TabRecord statsTab = new TabRecord("TabStats".Translate(), delegate ()
 				{
-					tab = InfoCardTab.Stats;
+					tabFieldInfo.SetValue(infoCard, InfoCardTab.Stats);
 				}, tab == InfoCardTab.Stats);
-				list.Add(item);
+				list.Add(statsTab);
 
-				TabRecord item2 = new TabRecord("TabHealth".Translate(), delegate ()
+				TabRecord healthTab = new TabRecord("TabHealth".Translate(), delegate ()
 				{
-					tab = InfoCardTab.Health;
+					tabFieldInfo.SetValue(infoCard, InfoCardTab.Health);
 				}, tab == InfoCardTab.Health);
-				list.Add(item2);
+				list.Add(healthTab);
 
-				TabRecord item3 = new TabRecord("TabRecords".Translate(), delegate ()
+				TabRecord recordsTab = new TabRecord("TabRecords".Translate(), delegate ()
 				{
-					tab = InfoCardTab.Records;
+					tabFieldInfo.SetValue(infoCard, InfoCardTab.Records);
 				}, tab == InfoCardTab.Records);
-				list.Add(item3);
-				TabDrawer.DrawTabs(tabRect, list, 200f);
-				FillCard(tabRect.ContractedBy(18f));
-
-				if (tab == InfoCardTab.Stats)
-				{
-					Rect searchBarRect = new Rect(0, rect.height - Window.QuickSearchSize.y, Window.QuickSearchSize.x, Window.QuickSearchSize.y);
-					quickSearchWidget.OnGUI(searchBarRect, cachedDrawEntries.Clear);
-				}
+				list.Add(recordsTab);
+				//TabDrawer.DrawTabs(tabRect, list, 200f);
+				FillCard(tabRect.ContractedBy(18f), tab);
 			}
 		}
 
-		private static void FillCard(Rect rect)
+		private static void FillCard(Rect rect, InfoCardTab tab)
 		{
 			switch (tab)
 			{
 				case InfoCardTab.Stats:
-					if (vehicle != null)
-					{
-						DrawStatsReport(rect);
-					}
-					else
-					{
-						DrawStatsReport(rect);
-					}
+					DrawStatsReport(rect);
 					break;
 				case InfoCardTab.Health:
 					DrawHealthScreen();
-					break;
-				case InfoCardTab.Upgrades:
 					break;
 				case InfoCardTab.Records:
 					break;
@@ -181,7 +177,8 @@ namespace Vehicles
 		private static VehicleStatDrawEntry DescriptionEntry()
 		{
 			string description = vehicle != null ? vehicle.DescriptionFlavor : vehicleDef.description;
-			return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "Description".Translate(), string.Empty, description, 99999, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(vehicleDef.descriptionHyperlinks));
+			return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "Description".Translate(), 
+				string.Empty, description, 99999, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(vehicleDef.descriptionHyperlinks));
 		}
 
 		private static IEnumerable<VehicleStatDrawEntry> StatsToDraw()
@@ -205,15 +202,15 @@ namespace Vehicles
 
 		private static void FinalizeCachedDrawEntries(IEnumerable<VehicleStatDrawEntry> stats)
 		{
-			cachedDrawEntries = stats.OrderBy(drawEntry => drawEntry.category.displayOrder)
+			cachedDrawEntries = [.. stats.OrderBy(drawEntry => drawEntry.CategoryDisplayOrder)
 									 .ThenByDescending(drawEntry => drawEntry.DisplayPriorityWithinCategory)
-									 .ThenBy(drawEntry => drawEntry.LabelCap).ToList();
-			quickSearchWidget.noResultsMatched = !cachedDrawEntries.Any();
+									 .ThenBy(drawEntry => drawEntry.LabelCap)];
+			infoCard.CommonSearchWidget.noResultsMatched = !cachedDrawEntries.Any();
 			if (selectedEntry != null)
 			{
 				selectedEntry = cachedDrawEntries.FirstOrDefault((VehicleStatDrawEntry drawEntry) => drawEntry.Matching(selectedEntry));
 			}
-			if (quickSearchWidget.filter.Active)
+			if (infoCard.CommonSearchWidget.filter.Active)
 			{
 				foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
 				{
@@ -238,6 +235,7 @@ namespace Vehicles
 			if (cachedDrawEntries.NullOrEmpty())
 			{
 				cachedDrawEntries.AddRange(StatsToDraw().Where(statDrawEntry => statDrawEntry.ShouldDisplay));
+				cachedDrawEntries.AddRange(vehicleDef.SpecialDisplayStats(vehicle).Where(statDrawEntry => statDrawEntry.ShouldDisplay));
 				FinalizeCachedDrawEntries(cachedDrawEntries);
 			}
 		}
@@ -296,10 +294,10 @@ namespace Vehicles
 					mousedOverEntry = null;
 					foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
 					{
-						if (drawEntry.category.LabelCap != categoryLabel)
+						if (drawEntry.CategoryLabel != categoryLabel)
 						{
-							Widgets.ListSeparator(ref curY, viewRect.width, drawEntry.category.LabelCap);
-							categoryLabel = drawEntry.category.LabelCap;
+							Widgets.ListSeparator(ref curY, viewRect.width, drawEntry.CategoryLabel);
+							categoryLabel = drawEntry.CategoryLabel;
 						}
 						bool highlightLabel = false;
 						bool lowlightLabel = false;
@@ -307,7 +305,7 @@ namespace Vehicles
 						bool matched = false;
 
 						GUI.color = Color.white;
-						if (quickSearchWidget.filter.Active)
+						if (infoCard.CommonSearchWidget.filter.Active)
 						{
 							if (Matching(drawEntry))
 							{
@@ -319,7 +317,7 @@ namespace Vehicles
 								lowlightLabel = true;
 							}
 						}
-						Rect drawRect = new Rect(8f, curY, viewRect.width - 8f, 30f);
+						Rect drawRect = new Rect(8f, curY, viewRect.width - 8, 30f);
 						curY += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
 						{
 							SelectEntry(drawEntry, true);
@@ -339,59 +337,45 @@ namespace Vehicles
 
 				scrollPositioner.ScrollVertically(ref scrollPosition, outRect.size);
 				outRect = panelRect.ContractedBy(10f);
-				VehicleStatDrawEntry statDrawEntry = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
-				if (statDrawEntry != null)
+				VehicleStatDrawEntry descriptionStat = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
+				if (descriptionStat != null)
 				{
-					Rect rect5 = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
-					string explanationText = statDrawEntry.GetExplanationText(vehicleDef, vehicle);
+					Rect rightPanelRect = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
+					string explanationText = descriptionStat.GetExplanationText(vehicleDef, vehicle);
 					float panelHeight = 0f;
-					Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rect5, true);
+					Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rightPanelRect, true);
 					{
-						Rect rect6 = rect5;
-						rect6.width -= 4f;
-						Widgets.Label(rect6, explanationText);
-						float textHeight = Text.CalcHeight(explanationText, rect6.width) + 10f;
+						Rect descriptionRect = rightPanelRect;
+						descriptionRect.width -= 4f;
+						Widgets.Label(descriptionRect, explanationText);
+						float textHeight = Text.CalcHeight(explanationText, descriptionRect.width) + 10f;
 						panelHeight += textHeight;
-						DrawHyperlinks(rect6, statDrawEntry, textHeight);
-
-						rightPanelHeight = panelHeight;
+						panelHeight += DrawHyperlinks(descriptionRect, descriptionStat, textHeight);
 					}
 					Widgets.EndScrollView();
+
+					rightPanelHeight = panelHeight;
 				}
 			}
 			GUIState.Pop();
 		}
 
-		private static void DrawHyperlinks(Rect rect, VehicleStatDrawEntry statDrawEntry, float textHeight)
+		private static float DrawHyperlinks(Rect rect, VehicleStatDrawEntry statDrawEntry, float textHeight)
 		{
-			if (vehicle == null)
+			float heightTaken = 0;
+			Rect hyperlinkRect = new Rect(rect.x, rect.y + textHeight, rect.width, textHeight);
+			Color color = GUI.color;
+			GUI.color = Widgets.NormalOptionColor;
+			foreach (Dialog_InfoCard.Hyperlink hyperlink in statDrawEntry.GetHyperlinks(vehicle))
 			{
-				return;
+				float hyperlinkHeight = Text.CalcHeight(hyperlink.Label, hyperlinkRect.width);
+				Widgets.HyperlinkWithIcon(hyperlinkRect, hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
+				hyperlinkRect.y += hyperlinkHeight;
+				heightTaken += hyperlinkHeight;
 			}
-			IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = statDrawEntry.GetHyperlinks(vehicle);
-			if (hyperlinks != null)
-			{
-				Rect rect7 = new Rect(rect.x, rect.y + textHeight, rect.width, rect.height - textHeight);
-				Color color = GUI.color;
-				GUI.color = Widgets.NormalOptionColor;
-				foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
-				{
-					float num4 = Text.CalcHeight(hyperlink.Label, rect7.width);
-					Widgets.HyperlinkWithIcon(new Rect(rect7.x, rect7.y, rect7.width, num4), hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
-					rect7.y += num4;
-					rect7.height -= num4;
-					textHeight += num4;
-				}
-				GUI.color = color;
-			}
-		}
+			GUI.color = color;
 
-		private enum InfoCardTab : byte
-		{
-			Stats,
-			Health,
-			Upgrades,
-			Records
+			return heightTaken;
 		}
 	}
 }

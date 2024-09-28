@@ -44,6 +44,7 @@ namespace Vehicles
 			this.cell = cell;
 			this.clickCell = clickCell;
 			this.clickPos = UI.MouseMapPosition();
+			OnStart();
 		}
 
 		public static void StartOrienting(VehiclePawn dragging, IntVec3 cell)
@@ -97,11 +98,6 @@ namespace Vehicles
 
 		public override void ProcessInputEvents()
 		{
-			if (!IsTargeting)
-			{
-				return;
-			}
-
 			if (!Input.GetMouseButton(1))
 			{
 				ConfirmOrientation();
@@ -110,10 +106,6 @@ namespace Vehicles
 
 		public override void TargeterUpdate()
 		{
-			if (!IsTargeting)
-			{
-				return;
-			}
 			timeHeldDown += Time.deltaTime;
 			float dragDistance = Vector3.Distance(clickPos, UI.MouseMapPosition());
 			if (timeHeldDown >= HoldTimeThreshold || dragDistance >= DragThreshold || dragDistance <= -DragThreshold)

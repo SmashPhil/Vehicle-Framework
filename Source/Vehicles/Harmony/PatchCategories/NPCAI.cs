@@ -1,4 +1,4 @@
-﻿//#define ENABLE_RAIDERS
+﻿#define ENABLE_RAIDERS
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ using RimWorld;
 using RimWorld.Planet;
 using HarmonyLib;
 using SmashTools;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -33,7 +34,7 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
-#if UNSTABLE && ENABLE_RAIDERS
+#if (UNSTABLE || DEBUG) && ENABLE_RAIDERS
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
 				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
@@ -44,8 +45,9 @@ namespace Vehicles
 				//	new HarmonyMethod(typeof(NPCAI),
 				//	nameof()));
 
+				// Generation
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns),
-						parameters: new Type[] { typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool) }),
+						parameters: [typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool)]),
 					prefix: new HarmonyMethod(typeof(NPCAI),
 					nameof(InjectVehiclesIntoPawnKindGroupPrepare)),
 					postfix: new HarmonyMethod(typeof(NPCAI),
@@ -56,6 +58,14 @@ namespace Vehicles
 					nameof(InjectVehiclesIntoRaidPrepare)),
 					postfix: new HarmonyMethod(typeof(NPCAI),
 					nameof(InjectVehiclesIntoRaidPassthrough)));
+
+				// AI Behavior
+#if !RELEASE
+
+				VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobGiver_AIFightEnemy), "TryGiveJob"),
+					prefix: new HarmonyMethod(typeof(NPCAI),
+					nameof(DisableVanillaJobForVehicle)));
+#endif
 			}
 #endif
 		}
@@ -67,27 +77,28 @@ namespace Vehicles
 			{
 				return;
 			}
-			var raiderDME = parms.faction.def.GetModExtension<VehicleRaiderDefModExtension>();
-			if (raiderDME == null)
+			var raiderModExtension = parms.faction.def.GetModExtension<VehicleRaiderDefModExtension>();
+			if (raiderModExtension == null)
 			{
 				return;
 			}
-			HashSet<PawnsArrivalModeDef> allowedArrivalModes = raiderDME.arrivalModes ?? vehicleArrivalModes;
+			HashSet<PawnsArrivalModeDef> allowedArrivalModes = raiderModExtension.arrivalModes ?? vehicleArrivalModes;
 			
 			if (!availableVehicleDefs.NullOrEmpty())
 			{
 				Log.Warning($"Injecting vehicles into PawnKingGroup when previous iteration hasn't finished.");
 			}
 			Debug.Message($"[PREFIX] Generating with points: {parms.points}");
-			float vehicleBudget = raiderDME.pointMultiplier * (parms.points - 250) / 2;
+			float vehicleBudget = raiderModExtension.pointMultiplier * (parms.points - 250) / 2;
 			if (vehicleBudget > 0)
 			{
 				float budgetSpent = 0;
 				int vehicleCount = 1;// Mathf.FloorToInt(raidersToReplaceCurve.Evaluate(parms.pawnCount));
 				VehicleCategory category = RaidInjectionHelper.GetResolvedCategory(parms);
-				List<VehicleDef> availableDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => RaidInjectionHelper.ValidRaiderVehicle(vehicleDef, category, null, parms.faction, vehicleBudget)).ToList();
+				List<VehicleDef> availableDefs = DefDatabase<VehicleDef>.AllDefsListForReading
+					.Where(vehicleDef => RaidInjectionHelper.ValidRaiderVehicle(vehicleDef, category, null, parms.faction, vehicleBudget)).ToList();
 				Debug.Message($"[PREFIX] Vehicle Budget: {vehicleBudget} AvailableDefs: {availableDefs.Count}");
-				if (vehicleCount > 0 && !availableDefs.NullOrEmpty())
+				if (vehicleCount > 0 && !availableDefs.NullOrEmpty()) 
 				{
 					availableVehicleDefs.Clear();
 					for (int i = 0; i < vehicleCount; i++)
@@ -98,8 +109,8 @@ namespace Vehicles
 						budgetSpent += vehicleDef.combatPower;
 						Debug.Message($"[PREFIX] Adding {vehicleDef}");
 					}
+					parms.points -= budgetSpent;
 				}
-				parms.points -= budgetSpent;
 			}
 		}
 
@@ -108,21 +119,25 @@ namespace Vehicles
 			if (!availableVehicleDefs.NullOrEmpty())
 			{
 				Debug.Message($"[POSTFIX] Injecting vehicles with points: {parms.points}");
-				List<VehiclePawn> vehicles = new List<VehiclePawn>();
+				List<Pawn> raiderHumanlikes = outPawns.Where(outPawns => outPawns.RaceProps.Humanlike).ToList();
 				foreach (VehicleDef vehicleDef in availableVehicleDefs)
 				{
 					//TODO - add check to ensure enough pawns are available to crew vehicle
 					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleDef, parms.faction, randomizeColors: true, randomizeMask: true));
-					int crewCount = vehicle.PawnCountToOperateLeft;
-					for (int i = crewCount; i >= 0; i--)
+					while (vehicle.SeatsAvailable > 0 && raiderHumanlikes.Count > 0)
 					{
-						Pawn pawn = outPawns.Pop();
-						vehicle.Notify_Boarded(pawn);
+						Pawn pawn = raiderHumanlikes.Pop();
+						outPawns.Remove(pawn);
+						VehicleHandler handler = vehicle.NextAvailableHandler(priorityHandlers: true);
+						handler ??= vehicle.NextAvailableHandler();
+						if (!vehicle.TryAddPawn(pawn, handler))
+						{
+							Trace(false, $"Unable to add {pawn} to {handler} during raid generation.");
+							outPawns.Add(pawn);
+						}
 					}
-					vehicles.Add(vehicle);
+					outPawns.Add(vehicle);
 				}
-				outPawns.AddRange(vehicles);
-
 				availableVehicleDefs.Clear();
 			}
 		}
@@ -154,25 +169,45 @@ namespace Vehicles
 			}
 		}
 
-		private static void InjectVehiclesIntoRaidPassthrough(ref List<Pawn> __result, IncidentParms parms, List<VehicleDef> __state)
+		private static void InjectVehiclesIntoRaidPassthrough(List<Pawn> __result, IncidentParms parms, List<VehicleDef> __state)
 		{
 			if (!__state.NullOrEmpty())
 			{
-				List<VehiclePawn> vehicles = new List<VehiclePawn>();
+				List<Pawn> raiderHumanlikes = __result.Where(outPawns => outPawns.RaceProps.Humanlike).ToList();
 				foreach (VehicleDef vehicleDef in __state)
 				{
 					//TODO - add check to ensure enough pawns are available to crew vehicle
 					VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(new VehicleGenerationRequest(vehicleDef, parms.faction, randomizeColors: true, randomizeMask: true));
-					int crewCount = vehicle.PawnCountToOperateLeft;
-					for (int i = crewCount; i >= 0; i--)
+					while (vehicle.SeatsAvailable > 0 && raiderHumanlikes.Count > 0)
 					{
-						Pawn pawn = __result.Pop();
-						vehicle.Notify_Boarded(pawn);
+						Pawn pawn = raiderHumanlikes.Pop();
+						__result.Remove(pawn);
+						VehicleHandler handler = vehicle.NextAvailableHandler(priorityHandlers: true);
+						if (!vehicle.TryAddPawn(pawn, handler))
+						{
+							Trace(false, $"Unable to add {pawn} to {handler} during raid generation.");
+							__result.Add(pawn);
+						}
 					}
-					vehicles.Add(vehicle);
+					__result.Add(vehicle);
 				}
-				__result.AddRange(vehicles);
 			}
 		}
+
+		#region AI Behavior
+		
+
+		private static bool DisableVanillaJobForVehicle(Pawn pawn, ref Job __result)
+		{
+			if (pawn is VehiclePawn)
+			{
+				Assert(false, $"Vehicle should never even try to be assigned this job. Vehicle={pawn.LabelCap}");
+				__result = null;
+				return false;
+			}
+			return true;
+		}
+
+		#endregion
 	}
 }

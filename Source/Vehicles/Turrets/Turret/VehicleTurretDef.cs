@@ -7,6 +7,7 @@ using Verse.AI;
 using RimWorld;
 using SmashTools;
 using HarmonyLib;
+using System.Text;
 
 namespace Vehicles
 {
@@ -74,13 +75,15 @@ namespace Vehicles
 		public float minRange = 0;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float reloadTimer = 5;
-        
-        public LinearCurve reloadTimerMultiplierPerCrewCount;
+
+		public LinearCurve reloadTimerMultiplierPerCrewCount;
 
         [TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float warmUpTimer = 3;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
 		public float autoRefuelProportion = 2;
+		[TweakField(SettingsType = UISettingsType.Checkbox)]
+		public bool empDisables = false;
 
 		/// <summary>
 		/// Sounds
@@ -110,6 +113,84 @@ namespace Vehicles
 		string ITweakFields.Label => nameof(VehicleTurretDef);
 
 		string ITweakFields.Category => string.Empty;//$"{defName} (Def)";
+
+		/// <summary>
+		/// Used in <see cref="VehicleDef.SpecialDisplayStats(VehiclePawn)"/> for info card.
+		/// </summary>
+		public virtual IEnumerable<VehicleStatDrawEntry> SpecialDisplayStats(int displayOrder)
+		{
+			// Description
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "Description".Translate(),
+								string.Empty, description, 99999, hyperlinks: Dialog_InfoCard.DefsToHyperlinks(descriptionHyperlinks));
+			// Rotatable
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_Rotatable".Translate(),
+							(turretType == TurretType.Rotatable).ToStringYesNo(), "VF_RotatableTooltip".Translate(), 9000);
+			// MagazineCapacity (infinity if <= 0)
+			string magazineCapacityLabel = magazineCapacity <= 0 ? "\u221E" : magazineCapacity.ToString();
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_MagazineCapacity".Translate(),
+							magazineCapacityLabel, "VF_MagazineCapacityTooltip".Translate(), 6000);
+			// Min and Max range
+			if (minRange > 0)
+			{
+				yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_MinRange".Translate(),
+													minRange.ToString("F0"), "VF_MinRangeTooltip".Translate(), 5010);
+			}
+			float maxRangeActual = maxRange < 0 ? VehicleTurret.DefaultMaxRange : maxRange;
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_MaxRange".Translate(),
+													maxRangeActual.ToString("F0"), "VF_MaxRangeTooltip".Translate(), 5000);
+			// Warmup time
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_WarmupTime".Translate(),
+							"VF_WarmupTimeValue".Translate(warmUpTimer.ToStringByStyle(ToStringStyle.FloatOne)), 
+							"VF_WarmupTimeTooltip".Translate(), 4010);
+			// Reload time
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_ReloadTime".Translate(),
+							"VF_ReloadTimeValue".Translate(reloadTimer.ToStringByStyle(ToStringStyle.FloatOne)), 
+							"VF_ReloadTimeTooltip".Translate(), 4000);
+
+			// RotationSpeed
+			string rotationSpeedReadout = autoSnapTargeting ? "VF_Instant".Translate() : 
+				"VF_RotationSpeedValue".Translate(Mathf.RoundToInt(rotationSpeed * 60));
+			// rotationSpeed in infoCard is deg/sec (x60 of rotationSpeed) so it's more human readable.
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_RotationSpeed".Translate(), rotationSpeedReadout, 
+				"VF_RotationSpeedTooltip".Translate(), 3000);
+
+			StringBuilder fireModeExplanation = new StringBuilder();
+			// FireModes
+			foreach (FireMode fireMode in fireModes)
+			{
+				fireModeExplanation.AppendLine();
+				fireModeExplanation.AppendLine(fireMode.label);
+
+				int roundsPerMinute;
+				if (fireMode.shotsPerBurst.TrueMax > 1)
+				{
+					roundsPerMinute = fireMode.RoundsPerMinute;
+				}
+				else
+				{
+					roundsPerMinute = Mathf.RoundToInt(60f / (warmUpTimer + reloadTimer));
+				}
+
+				fireModeExplanation.AppendLine($"    {"VF_RateOfFire".Translate()}: {"VF_RateOfFireValue".Translate(RoundsPerMinuteClean(roundsPerMinute))}");
+				if (fireMode.ticksBetweenBursts.TrueMax > fireMode.ticksBetweenShots)
+				{
+					string shotsPerBurst = fireMode.shotsPerBurst.min == fireMode.shotsPerBurst.max ? fireMode.shotsPerBurst.min.ToString() 
+						: fireMode.shotsPerBurst.ToString();
+					fireModeExplanation.AppendLine($"    {"VF_ShotsPerBurst".Translate()}: {shotsPerBurst}");
+				}
+				fireModeExplanation.AppendLine($"    {"VF_ShotGroup".Translate()}: {"VF_ShotGroupValue".Translate(fireMode.spreadRadius)}");
+			}
+			yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_FireModes".Translate(),
+												string.Empty, $"{"VF_FireModesTooltip".Translate() }{Environment.NewLine}{fireModeExplanation}", 99998);
+		}
+
+		private int RoundsPerMinuteClean(int roundsPerMinute)
+		{
+			if (roundsPerMinute < 25) return roundsPerMinute;
+			if (roundsPerMinute < 100) return roundsPerMinute.RoundTo(5);
+			if (roundsPerMinute < 1000) return roundsPerMinute.RoundTo(10);
+			return roundsPerMinute.RoundTo(50);
+		}
 
 		public void OnFieldChanged()
 		{
@@ -153,7 +234,7 @@ namespace Vehicles
 		{
 			if (targetScanFlags == TargetScanFlags.None)
 			{
-				targetScanFlags = TargetScanFlags.NeedActiveThreat | TargetScanFlags.NeedAutoTargetable;
+				//targetScanFlags = TargetScanFlags.NeedActiveThreat | TargetScanFlags.NeedAutoTargetable;
 				if (projectile?.projectile != null)
 				{
 					if (!projectile.projectile.flyOverhead)
@@ -206,7 +287,7 @@ namespace Vehicles
 			}
 			if (fireModes.NullOrEmpty() || fireModes.Any(f => !f.IsValid))
 			{
-				yield return $"Empty or Invalid FireMode in <field>fireModes</field> list. Must include at least 1 entry with non-negative numbers.".ConvertRichText();
+				yield return $"Empty or Invalid <field>fireModes</field> list. Must include at least 1 entry with non-negative numbers.".ConvertRichText();
 			}
 			if (ammunition is null && projectile is null)
 			{
@@ -249,7 +330,7 @@ namespace Vehicles
 					yield return "Generic ammo turrets will only use the first <type>ThingDef</type> in <field>ammunition</field>. Consider removing all other entries but the first.".ConvertRichText();
 				}
 			}
-			if (fireModes.Any(f => f.ticksBetweenShots > f.ticksBetweenBursts))
+			if (fireModes.Any(f => f.ticksBetweenShots > f.ticksBetweenBursts.TrueMin))
 			{
 				yield return "Setting <field>ticksBetweenBursts</field> with a lower tick count than <field>ticksBetweenShots</field> will produce odd shooting behavior. Please set to either the same amount (fully automatic) or greater than.".ConvertRichText();
 			}

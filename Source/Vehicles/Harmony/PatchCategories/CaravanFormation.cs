@@ -209,8 +209,7 @@ namespace Vehicles
 				VehicleHandler handler = aerialVehicle.vehicle.handlers.FirstOrDefault(handler => handler.AreSlotsAvailable);
 				if (handler != null)
 				{
-					aerialVehicle.vehicle.GiveLoadJob(pawn, handler);
-					aerialVehicle.vehicle.Notify_Boarded(pawn);
+					aerialVehicle.vehicle.TryAddPawn(pawn, handler);
 					return false;
 				}
 			}

@@ -29,6 +29,7 @@ namespace Vehicles
 		public bool debugDrawBumpers;
 		public bool debugDrawLordMeetingPoint;
 		public bool debugDrawFleePoint;
+		public FlashGridType debugDrawFlashGrid = FlashGridType.None;
 
 		public bool debugLogging;
 		public bool debugPathCostChanges;
@@ -56,6 +57,7 @@ namespace Vehicles
 			debugDrawBumpers = false;
 			debugDrawLordMeetingPoint = false;
 			debugDrawFleePoint = false;
+			debugDrawFlashGrid = FlashGridType.None;
 
 			debugLogging = false;
 			debugPathCostChanges = false;
@@ -82,6 +84,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref debugDrawBumpers, nameof(debugDrawBumpers));
 			Scribe_Values.Look(ref debugDrawLordMeetingPoint, nameof(debugDrawLordMeetingPoint));
 			Scribe_Values.Look(ref debugDrawFleePoint, nameof(debugDrawFleePoint));
+			Scribe_Values.Look(ref debugDrawFlashGrid, nameof(debugDrawFlashGrid));
 
 			Scribe_Values.Look(ref debugLogging, nameof(debugLogging));
 			Scribe_Values.Look(ref debugPathCostChanges, nameof(debugPathCostChanges));
@@ -168,17 +171,28 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("Load AssetBundles", ref debugLoadAssetBundles);
 #endif
 
-					listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, "VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, "VF_DevMode_DebugDrawHitboxTooltip".Translate());
+					listingStandard.Header("VF_DevMode_Drawers".Translate(), ListingExtension.BannerColor, 
+						fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawUpgradeNodeGrid".Translate(), ref debugDrawNodeGrid, 
+						"VF_DevMode_DebugDrawUpgradeNodeGridTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawHitbox".Translate(), ref debugDrawHitbox, 
+						"VF_DevMode_DebugDrawHitboxTooltip".Translate());
 
 #if DEBUG
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, "VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehicleTracks".Translate(), ref debugDrawVehicleTracks, 
+						"VF_DevMode_DebugDrawVehicleTracksTooltip".Translate());
 #endif
 
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, "VF_DevMode_DebugDrawBumpersTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawLordMeetingPoint".Translate(), ref debugDrawLordMeetingPoint, "VF_DevMode_DebugDrawLordMeetingPointTooltip".Translate());
-					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(), ref debugDrawFleePoint, "VF_DevMode_DebugDrawFleePointsTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawBumpers".Translate(), ref debugDrawBumpers, 
+						"VF_DevMode_DebugDrawBumpersTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawLordMeetingPoint".Translate(), ref debugDrawLordMeetingPoint, 
+						"VF_DevMode_DebugDrawLordMeetingPointTooltip".Translate());
+					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(), ref debugDrawFleePoint, 
+						"VF_DevMode_DebugDrawFleePointsTooltip".Translate());
+#if !RELEASE // Disabled in VehicleMapping.MapComponentUpdate for Release builds
+					listingStandard.EnumSliderLabeled("VF_DevMode_DebugDrawCoverGrid".Translate(), ref debugDrawFlashGrid,
+						"VF_DevMode_DebugDrawCoverGridTooltip".Translate(), string.Empty, valueNameGetter: (FlashGridType type) => type.ToString());
+#endif
 
 					listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
@@ -252,7 +266,7 @@ namespace Vehicles
 				if (listingStandard.ButtonText("Run Unit Tests"))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					UnitTestManager.ExecuteTests();
+					UnitTestManager.RunAll();
 				}
 				if (listingStandard.ButtonText("Output Material Cache"))
 				{

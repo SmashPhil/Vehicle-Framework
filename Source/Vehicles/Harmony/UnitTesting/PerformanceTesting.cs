@@ -23,7 +23,7 @@ namespace Vehicles
 		private static WeatherDef permanentWeatherDef;
 
 		[StartupAction(Category = "Performance", Name = "Permanent Weather (Heavy Snow)", GameState = GameState.Playing)]
-		private static void UnitTest_SetPermanentWeather()
+		private static void StartupAction_SetPermanentWeather()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{
@@ -37,7 +37,7 @@ namespace Vehicles
 		}
 
 		[StartupAction(Category = "Performance", Name = "Component Caching", GameState = GameState.Playing)]
-		private static void UnitTest_ProfileComponentCaching()
+		private static void StartupAction_ProfileComponentCaching()
 		{
 			LongEventHandler.ExecuteWhenFinished(delegate ()
 			{

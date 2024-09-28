@@ -294,21 +294,22 @@ namespace Vehicles
 			return true;
 		}
 
-		public static bool VehicleInfoCardOverride(Rect inRect, Thing ___thing, ThingDef ___def)
+		public static bool VehicleInfoCardOverride(Rect inRect, Dialog_InfoCard __instance, Thing ___thing, ThingDef ___def, 
+			Dialog_InfoCard.InfoCardTab ___tab)
 		{
 			if (___def is VehicleBuildDef buildDef)
 			{
-				VehicleInfoCard.DrawFor(inRect, buildDef.thingToSpawn);
+				VehicleInfoCard.DrawFor(inRect, buildDef.thingToSpawn, __instance, ___tab);
 				return false;
 			}
 			else if (___thing is VehicleBuilding building)
 			{
-				VehicleInfoCard.DrawFor(inRect, building.VehicleDef);
+				VehicleInfoCard.DrawFor(inRect, building.VehicleDef, __instance, ___tab);
 				return false;
 			}
 			else if (___thing is VehiclePawn vehicle)
 			{
-				VehicleInfoCard.DrawFor(inRect, vehicle);
+				VehicleInfoCard.DrawFor(inRect, vehicle, __instance, ___tab);
 				return false;
 			}
 			return true;

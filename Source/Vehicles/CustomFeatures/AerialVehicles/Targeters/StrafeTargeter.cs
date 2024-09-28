@@ -41,6 +41,7 @@ namespace Vehicles
 
 			start = IntVec3.Invalid;
 			end = IntVec3.Invalid;
+			OnStart();
 		}
 
 		public override void StopTargeting()

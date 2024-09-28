@@ -47,7 +47,9 @@
 	<VF_DevMode_DebugDrawLordMeetingPointTooltip>Highlights the cell where the Form Vehicle Caravan meeting point has been set.</VF_DevMode_DebugDrawLordMeetingPointTooltip>
 	<VF_DevMode_DebugDrawFleePoints>Draw Flee Points</VF_DevMode_DebugDrawFleePoints>
 	<VF_DevMode_DebugDrawFleePointsTooltip>Draw pawns' attempts to flee from incoming vehicle collisions.</VF_DevMode_DebugDrawFleePointsTooltip>
-	
+	<VF_DevMode_DebugDrawCoverGrid>Draw Cover Grid</VF_DevMode_DebugDrawCoverGrid>
+	<VF_DevMode_DebugDrawCoverGridTooltip>Draws cover grid values as color map on current map.</VF_DevMode_DebugDrawCoverGridTooltip>
+
 	<!-- Pathing -->
 	<VF_DevMode_DebugPathfinderDebugging>Local Pathing</VF_DevMode_DebugPathfinderDebugging>
 	<VF_DevMode_DebugPathfinderDebuggingTooltip>Open menu for debugging various outputs of pathfinding (both cell based and region based)</VF_DevMode_DebugPathfinderDebuggingTooltip>

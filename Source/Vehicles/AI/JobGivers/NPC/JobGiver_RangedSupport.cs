@@ -15,7 +15,8 @@ namespace Vehicles
 		protected override bool TryFindCombatPosition(VehiclePawn vehicle, out IntVec3 dest)
 		{
 			Thing enemyTarget = vehicle.mindState.enemyTarget;
-			return CombatPositionFinder.TryFindCastPosition(vehicle, enemyTarget, 50, false, out dest);
+			float distance = vehicle.CompVehicleTurrets.MaxRange * vehicle.VehicleDef.npcProperties.targetPositionRadiusPercent;
+			return CombatPositionFinder.TryFindCastPosition(vehicle, enemyTarget, distance, false, out dest);
 		}
 
 		protected override void UpdateEnemyTarget(VehiclePawn vehicle)
@@ -29,7 +30,8 @@ namespace Vehicles
 			}
 			if (thing == null)
 			{
-				thing = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, onlyRanged: true);
+				thing = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, validator: (Thing target) => ExtraTargetValidator(vehicle, target),	
+					minDistance: vehicle.CompVehicleTurrets.MinRange, maxDistance: vehicle.CompVehicleTurrets.MaxRange, onlyRanged: true);
 				if (thing != null)
 				{
 					Notify_EngagedTarget(vehicle.mindState);
@@ -39,7 +41,8 @@ namespace Vehicles
 			}
 			else
 			{
-				Thing thing2 = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, onlyRanged: true);
+				Thing thing2 = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, validator: (Thing target) => ExtraTargetValidator(vehicle, target),
+					minDistance: vehicle.CompVehicleTurrets.MinRange, maxDistance: vehicle.CompVehicleTurrets.MaxRange, onlyRanged: true);
 				if (thing2 == null && !vehicle.VehicleDef.npcProperties.runDownTargets)
 				{
 					thing = null;

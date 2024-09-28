@@ -28,16 +28,6 @@ namespace Vehicles
 				return multiplier;
 			}
 		}
-			
-		public virtual bool CanApplyStun(Thing instigator)
-		{
-			return false;
-		}
-
-		public virtual bool CanApplyStagger()
-		{
-			return false;
-		}
 
 		public float FriendlyFireChance(Pawn pawn)
 		{

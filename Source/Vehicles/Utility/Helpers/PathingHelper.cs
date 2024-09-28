@@ -40,6 +40,25 @@ namespace Vehicles
 			return SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(vehicleDef.vehicleMovementPermissions), vehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed;
 		}
 
+		public static bool TryGetStandableCell(VehiclePawn vehicle, IntVec3 cell)
+		{
+			int num = GenRadial.NumCellsInRadius(2.9f);
+			IntVec3 curLoc;
+			for (int i = 0; i < num; i++)
+			{
+				curLoc = GenRadial.RadialPattern[i] + cell;
+				if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && 
+					(!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
+				{
+					if (curLoc == vehicle.Position || vehicle.beached)
+					{
+						return false;
+					}
+					return true;
+				}
+			}
+			return false;
+		}
 		/// <summary>
 		/// Register any <seealso cref="TerrainDef"/>s with tags "PassableVehicles" or "ImpassableVehicles"
 		/// </summary>
@@ -362,12 +381,16 @@ namespace Vehicles
 			return VehicleImpassableInCell(map, new IntVec3(x, 0, z));
 		}
 
-		public static bool TryFindNearestStandableCell(VehiclePawn vehicle, IntVec3 cell, out IntVec3 result)
+		public static bool TryFindNearestStandableCell(VehiclePawn vehicle, IntVec3 cell, out IntVec3 result, float radius = -1)
 		{
-			int num = GenRadial.NumCellsInRadius(Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z) * 2);
+			if (radius < 0)
+			{
+				radius = Mathf.Min(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z) * 2;
+			}
+			int radialCount = GenRadial.NumCellsInRadius(radius);
 			result = IntVec3.Invalid;
 			IntVec3 curLoc;
-			for (int i = 0; i < num; i++)
+			for (int i = 0; i < radialCount; i++)
 			{
 				curLoc = GenRadial.RadialPattern[i] + cell;
 				if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc, maxPossibleSize: true)))

@@ -5,6 +5,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using RimWorld;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -312,14 +313,14 @@ namespace Vehicles
 			{
 				return true; //Skip LOS check
 			}
-			if (!TargetValidator(turret, map, target))
+			if (target.HasThing && !TargetValidator(turret, map, target))
 			{
 				return false;
 			}
 			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
-			if (target.HasThing && scanFlags.HasFlag(TargetScanFlags.NeedLOSToAll) ||
+			if (target.HasThing && (scanFlags.HasFlag(TargetScanFlags.NeedLOSToAll) ||
 								   (scanFlags.HasFlag(TargetScanFlags.NeedLOSToPawns) && target.Thing is Pawn) ||
-								   (scanFlags.HasFlag(TargetScanFlags.NeedLOSToNonPawns) && target.Thing is not Pawn))
+								   (scanFlags.HasFlag(TargetScanFlags.NeedLOSToNonPawns) && target.Thing is not Pawn)))
 			{
 				if (!target.Thing.Spawned || target.Thing.Destroyed)
 				{
@@ -349,6 +350,7 @@ namespace Vehicles
 
 		private static bool TargetValidator(VehicleTurret turret, Map map, LocalTargetInfo target)
 		{
+			Assert(target.HasThing, $"non-Thing target passed to TargetValidator. Will always be false if any scan flags are set.");
 			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
 			if (scanFlags.HasFlag(TargetScanFlags.NeedThreat) && !LOSHasThreat(turret.vehicle, target.Thing))
 			{

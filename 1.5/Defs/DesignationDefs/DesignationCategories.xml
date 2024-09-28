@@ -4,10 +4,12 @@
     <defName>VF_Vehicles</defName>
     <label>Vehicles</label>
     <order>24</order>
-	
+
     <specialDesignatorClasses>
-		<li>Designator_Cancel</li>
-		<li>Designator_Deconstruct</li>
-	</specialDesignatorClasses>
+      <li>Designator_Cancel</li>
+      <li>Designator_Deconstruct</li>
+      <li>Vehicles.Designator_AreaRoadExpand</li>
+      <li>Vehicles.Designator_AreaRoadClear</li>
+    </specialDesignatorClasses>
   </DesignationCategoryDef>
 </Defs>

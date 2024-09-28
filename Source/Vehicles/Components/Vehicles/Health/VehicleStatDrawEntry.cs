@@ -5,13 +5,17 @@ using System.Text;
 using UnityEngine;
 using Verse;
 using RimWorld;
+using SmashTools;
 
 namespace Vehicles
 {
 	public class VehicleStatDrawEntry
 	{
-		public StatCategoryDef category;
+		private StatCategoryDef category;
 		public VehicleStatDef stat;
+
+		public string categoryLabel;
+		public int categoryDisplayOrder;
 
 		private int displayOrderWithinCategory;
 		private float value;
@@ -35,7 +39,8 @@ namespace Vehicles
 			displayOrderWithinCategory = stat.displayPriorityInCategory;
 		}
 
-		public VehicleStatDrawEntry(StatCategoryDef category, string label, string valueString, string reportText, int displayPriorityWithinCategory, string overrideReportTitle = null, IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = null, bool forceUnfinalizedMode = false)
+		public VehicleStatDrawEntry(StatCategoryDef category, string label, string valueString, string reportText, int displayPriorityWithinCategory, 
+			string overrideReportTitle = null, IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = null, bool forceUnfinalizedMode = false)
 		{
 			this.category = category;
 			stat = null;
@@ -50,15 +55,17 @@ namespace Vehicles
 			this.forceUnfinalizedMode = forceUnfinalizedMode;
 		}
 
-		public VehicleStatDrawEntry(StatCategoryDef category, VehicleStatDef stat)
+		public VehicleStatDrawEntry(string categoryLabel, int categoryDisplayOrder, string label, string valueString, string reportText, int displayPriorityWithinCategory, 
+			string overrideReportTitle = null, IEnumerable<Dialog_InfoCard.Hyperlink> hyperlinks = null, bool forceUnfinalizedMode = false) : this(null, label, valueString, 
+				reportText, displayPriorityWithinCategory, overrideReportTitle, hyperlinks, forceUnfinalizedMode)
 		{
-			this.category = category;
-			this.stat = stat;
-			label = null;
-			value = 0f;
-			valueString = "-";
-			displayOrderWithinCategory = stat.displayPriorityInCategory;
+			this.categoryLabel = categoryLabel;
+			this.categoryDisplayOrder = categoryDisplayOrder;
 		}
+
+		public string CategoryLabel => category?.LabelCap ?? categoryLabel;
+
+		public int CategoryDisplayOrder => category?.displayOrder ?? categoryDisplayOrder;
 
 		public bool ShouldDisplay => stat == null || !Mathf.Approximately(value, stat.hideAtValue);
 
@@ -94,15 +101,20 @@ namespace Vehicles
 
 		public IEnumerable<Dialog_InfoCard.Hyperlink> GetHyperlinks(VehiclePawn vehicle)
 		{
-			if (hyperlinks != null)
+			if (!hyperlinks.NullOrEmpty())
 			{
-				return hyperlinks;
+				foreach (Dialog_InfoCard.Hyperlink hyperlink in hyperlinks)
+				{
+					yield return hyperlink;
+				}
 			}
-			if (stat != null)
+			if (stat != null && vehicle != null)
 			{
-				return stat.Worker.GetInfoCardHyperlinks(vehicle);
+				foreach (Dialog_InfoCard.Hyperlink hyperlink in stat.Worker.GetInfoCardHyperlinks(vehicle))
+				{
+					yield return hyperlink;
+				}
 			}
-			return null;
 		}
 
 		public string GetExplanationText(VehicleDef vehicleDef, VehiclePawn forVehicle = null)
@@ -150,8 +162,8 @@ namespace Vehicles
 
 		public float Draw(float x, float y, float width, bool selected, bool highlightLabel, bool lowlightLabel, Action clickedCallback, Action mousedOverCallback, Vector2 scrollPosition, Rect scrollOutRect)
 		{
-			float num = width * 0.45f;
-			Rect rect = new Rect(8f, y, width, Text.CalcHeight(ValueString, num));
+			float textWidth = width * 0.45f;
+			Rect rect = new Rect(x, y, width, Text.CalcHeight(ValueString, textWidth));
 			if (y - scrollPosition.y + rect.height >= 0f && y - scrollPosition.y <= scrollOutRect.height)
 			{
 				GUI.color = Color.white;
@@ -171,13 +183,12 @@ namespace Vehicles
 				{
 					GUI.color = Color.grey;
 				}
-				Rect rect2 = rect;
-				rect2.width -= num;
-				Widgets.Label(rect2, LabelCap);
-				Rect rect3 = rect;
-				rect3.x = rect2.xMax;
-				rect3.width = num;
-				Widgets.Label(rect3, ValueString);
+				Rect labelRect = rect;
+				labelRect.width -= textWidth;
+				Widgets.Label(labelRect, LabelCap);
+				Rect valueRect = rect;
+				valueRect.xMin = labelRect.xMax;
+				Widgets.Label(valueRect, ValueString);
 				GUI.color = Color.white;
 				if (stat != null && Mouse.IsOver(rect))
 				{

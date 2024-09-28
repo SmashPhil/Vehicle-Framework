@@ -35,6 +35,7 @@ namespace Vehicles
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
 			this.onUpdate = onUpdate;
+			OnStart();
 		}
 
 		public void BeginTargeting(VehiclePawn vehicle, Func<GlobalTargetInfo, float, bool> action, AerialVehicleInFlight aerialVehicle, bool canTargetTiles, Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false, Action onUpdate = null,
@@ -45,6 +46,7 @@ namespace Vehicles
 			this.mouseAttachment = mouseAttachment;
 			this.closeWorldTabWhenFinished = closeWorldTabWhenFinished;
 			this.onUpdate = onUpdate;
+			OnStart();
 		}
 
 		public override void StopTargeting()

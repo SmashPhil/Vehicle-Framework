@@ -1041,8 +1041,7 @@ namespace Vehicles
 
 					if (pawn.Spawned)
 					{
-						aerial.vehicle.GiveLoadJob(pawn, handler);
-						aerial.vehicle.Notify_Boarded(pawn);
+						aerial.vehicle.TryAddPawn(pawn, handler);
 					}
 					else if (!pawn.IsInVehicle())
 					{

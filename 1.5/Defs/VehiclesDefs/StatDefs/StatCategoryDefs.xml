@@ -2,26 +2,38 @@
 
 <Defs>
 	<StatCategoryDef>
-		<defName>VehicleBasics</defName>
-		<label>Basics</label>
-		<displayOrder>50</displayOrder>
-	</StatCategoryDef>
-	
-	<StatCategoryDef>
 		<defName>VehicleBasicsImportant</defName>
 		<label>Basics</label>
 		<displayOrder>10</displayOrder>
 	</StatCategoryDef>
-	
+
 	<StatCategoryDef>
-		<defName>VehicleCombat</defName>
-		<label>Combat</label>
-		<displayOrder>60</displayOrder>
+		<defName>VehicleBasics</defName>
+		<label>Basics</label>
+		<displayOrder>11</displayOrder>
 	</StatCategoryDef>
 	
 	<StatCategoryDef>
 		<defName>VehicleAerial</defName>
 		<label>Aerial</label>
+		<displayOrder>60</displayOrder>
+	</StatCategoryDef>
+
+	<StatCategoryDef>
+		<defName>VehicleRefuelable</defName>
+		<label>Refuelable</label>
+		<displayOrder>70</displayOrder>
+	</StatCategoryDef>
+
+	<StatCategoryDef>
+		<defName>VehicleCombat</defName>
+		<label>Combat</label>
 		<displayOrder>80</displayOrder>
+	</StatCategoryDef>
+
+	<StatCategoryDef>
+		<defName>VehicleTurrets</defName>
+		<label>Turrets</label>
+		<displayOrder>90</displayOrder>
 	</StatCategoryDef>
 </Defs>

@@ -247,7 +247,7 @@ namespace Vehicles
 					bool pawnsLostAtSea = false;
 					foreach (Pawn pawn in AllPawnsAboard)
 					{
-						if (HediffHelper.AttemptToDrown(pawn))
+						if (HealthHelper.AttemptToDrown(pawn))
 						{
 							pawnsLostAtSea = true;
 							downWithShipString.AppendLine(pawn.LabelCap);
@@ -309,6 +309,11 @@ namespace Vehicles
 					case VehicleComponent.Penetration.Penetrated:
 						{
 							effecterDef = VehicleDef.BodyType.damageEffecter;
+						}
+						break;
+					case VehicleComponent.Penetration.Electrified:
+						{
+							effecterDef = VehicleDef.BodyType.electrifiedEffect;
 						}
 						break;
 					default:

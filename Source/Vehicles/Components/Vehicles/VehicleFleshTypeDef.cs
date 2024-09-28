@@ -10,6 +10,7 @@ namespace Vehicles
 		public EffecterDef diminishedEffect;
 		public EffecterDef deflectionEffect;
 		public EffecterDef deflectionEffectBullet;
+		public EffecterDef electrifiedEffect;
 
 		public SoundDef soundImpactDeflect;
 		public SoundDef soundImpactDiminished;

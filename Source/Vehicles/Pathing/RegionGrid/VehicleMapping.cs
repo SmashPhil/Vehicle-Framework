@@ -1,4 +1,6 @@
-﻿using SmashTools;
+﻿using RimWorld.Planet;
+using SmashTools;
+using SmashTools.Debugging;
 using SmashTools.Performance;
 using System;
 using System.Collections.Generic;
@@ -104,6 +106,14 @@ namespace Vehicles
 			if (dedicatedThread != null)
 			{
 				ReleaseThread();
+			}
+			if (UnitTestManager.RunningUnitTests)
+			{
+				// Don't automatically initialize thread while running unit tests. DedicatedThread will be 
+				// part of the testing and the state must remain consistent while transitioning between scenes.
+				// Regions and path grids will also need to remain synchronous during testing.
+				Debug.Message($"Skipping DedicatedThread. Running UnitTests.");
+				return;
 			}
 			if (!VehicleMod.settings.debug.debugUseMultithreading)
 			{
@@ -308,6 +318,8 @@ namespace Vehicles
 
 		internal bool ReleaseThread()
 		{
+			if (dedicatedThread == null) return false;
+
 			Debug.Message($"<color=orange>Releasing thread {Thread.id}.</color>");
 			bool released = dedicatedThread.Release();
 			dedicatedThread.update -= UpdateRegions;
@@ -320,6 +332,70 @@ namespace Vehicles
 			if (!ThreadAlive)
 			{
 				UpdateRegions();
+			}
+#if !RELEASE
+			FlashGridType flashGridType = VehicleMod.settings.debug.debugDrawFlashGrid;
+			if (flashGridType != FlashGridType.None)
+			{
+				if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow)
+				{
+					switch (flashGridType)
+					{
+						case FlashGridType.CoverGrid:
+							FlashCoverGrid();
+							break;
+						case FlashGridType.GasGrid:
+							FlashGasGrid();
+							break;
+						case FlashGridType.PositionManager:
+							FlashClaimants();
+							break;
+						default:
+							Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
+							break;
+					}
+				}
+			}
+#endif
+		}
+
+		private void FlashCoverGrid()
+		{
+			if (!Find.TickManager.Paused)
+			{
+				foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+				{
+					float cover = CoverUtility.TotalSurroundingCoverScore(cell, map);
+					map.debugDrawer.FlashCell(cell, cover / 8, cover.ToString("F2"), duration: 1);
+				}
+			}
+		}
+
+		private void FlashGasGrid()
+		{
+			if (!Find.TickManager.Paused)
+			{
+				foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+				{
+					if (!map.gasGrid.GasCanMoveTo(cell)) continue;
+
+					float gas = map.gasGrid.DensityPercentAt(cell, GasType.BlindSmoke);
+					map.debugDrawer.FlashCell(cell, gas / 8, gas.ToString("F2"), duration: 1);
+				}
+			}
+		}
+
+		private void FlashClaimants()
+		{
+			if (!Find.TickManager.Paused)
+			{
+				var manager = map.GetCachedMapComponent<VehiclePositionManager>();
+				foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+				{
+					if (!manager.PositionClaimed(cell)) continue;
+
+					map.debugDrawer.FlashCell(cell, 1, duration: 1);
+				}
 			}
 		}
 

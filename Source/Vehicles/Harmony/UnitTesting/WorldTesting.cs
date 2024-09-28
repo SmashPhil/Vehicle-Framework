@@ -18,7 +18,7 @@ namespace Vehicles
 	public static class WorldTesting
 	{
 		[StartupAction(Category = "Map", Name = "Strafe Targeting", GameState = GameState.Playing)]
-		private static void UnitTest_StrafeTargeting()
+		private static void StartupAction_StrafeTargeting()
 		{
 			Prefs.DevMode = true;
 			LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -26,7 +26,7 @@ namespace Vehicles
 				Settlement settlement = Find.WorldObjects.Settlements.FirstOrDefault(settlement => settlement.Faction.IsPlayer);
 				if (settlement == null)
 				{
-					SmashLog.Error($"Unable to execute unit test {nameof(WorldTesting)}. No map to form player caravan from.");
+					SmashLog.Error($"Unable to execute startup action {nameof(WorldTesting)}. No map to form player caravan from.");
 					return;
 				}
 				Map map = Find.CurrentMap;
@@ -39,7 +39,7 @@ namespace Vehicles
 		}
 
 		[StartupAction(Category = "World", Name = "Caravan Formation", GameState = GameState.Playing)]
-		private static void UnitTest_CaravanFormation()
+		private static void StartupAction_CaravanFormation()
 		{
 			Prefs.DevMode = true;
 			LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -48,7 +48,7 @@ namespace Vehicles
 				Settlement settlement = Find.WorldObjects.Settlements.FirstOrDefault(settlement => settlement.Faction.IsPlayer);
 				if (settlement == null)
 				{
-					SmashLog.Error($"Unable to execute unit test {nameof(WorldTesting)}. No map to form player caravan from.");
+					SmashLog.Error($"Unable to execute startup action {nameof(WorldTesting)}. No map to form player caravan from.");
 					return;
 				}
 				Find.WindowStack.Add(new Dialog_FormVehicleCaravan(settlement.Map));
@@ -59,7 +59,7 @@ namespace Vehicles
 		/// Load up game, open route planner
 		/// </summary>
 		[StartupAction(Category = "World", Name = "World Route Planner", GameState = GameState.Playing)]
-		private static void UnitTest_RoutePlanner()
+		private static void StartupAction_RoutePlanner()
 		{
 			Prefs.DevMode = true;
 			CameraJumper.TryShowWorld();

@@ -40,6 +40,15 @@
 	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
 	<VF_StatsReport_Deployed>Deployed</VF_StatsReport_Deployed>
 
+	<!-- Info Card -->
+	<VF_CrewCount>Crew</VF_CrewCount>
+	<VF_CrewCountDesc>Number of crew and passengers that can fit inside of this vehicle.</VF_CrewCountDesc>
+	<VF_PaintableDesc>Vehicle can be painted with patterns.</VF_PaintableDesc>
+	<VF_Upgradeable>Upgradeable</VF_Upgradeable>
+	<VF_UpgradeableDesc>Vehicle can be modifed through an upgrade tree.</VF_UpgradeableDesc>
+	<VF_FuelType>Fuel Type</VF_FuelType>
+	<VF_FuelTypeDesc>What resource this vehicle consumes in order to operate.</VF_FuelTypeDesc>
+	
 	<!-- Designators -->
 	<VF_RoadZoneExpand>Road area</VF_RoadZoneExpand>
 	<VF_RoadZoneExpandDesc>Create an area where vehicles will prioritize or avoid moving through.
@@ -52,7 +61,7 @@
 	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
 	<VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>
 	<VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
-	<VF_SwapColors>Cycle colors between each other.\nColorOne -> ColorTwo -> ColorThree</VF_SwapColors>
+	<VF_SwapColors>Cycle colors between each other.\nColorOne -&gt; ColorTwo -&gt; ColorThree</VF_SwapColors>
 	<VF_StartFishing>Fish</VF_StartFishing>
 	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
 	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>

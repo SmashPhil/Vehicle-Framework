@@ -36,7 +36,7 @@
 					</subNodes>
 				</li>
 				
-				<!-- Idle Ship -->
+				<!-- Idle Vehicle -->
 				<li Class= "Vehicles.JobGiver_AwaitOrders"/>
 			</subNodes>
 		</thinkRoot>

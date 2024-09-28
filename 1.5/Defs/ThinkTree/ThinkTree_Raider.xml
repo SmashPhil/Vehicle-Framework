@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThinkTreeDef>
+		<defName>Vehicle_AssaultColony</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
+					<subNodes>
+						<!-- Run down targets that are too close -->
+
+						<!-- Shoot targets within range -->
+						<li Class="Vehicles.ThinkNode_ConditionalHasTurret">
+							<subNodes>
+								<li Class = "Vehicles.JobGiver_RangedSupport"/>
+							</subNodes>
+						</li>
+						<!-- Run down targets within distance -->
+
+						<!-- Carry pawns closer before deploying -->
+						<li Class="Vehicles.JobGiver_GotoNearestHostile">
+							<overrideExpiryInterval>60</overrideExpiryInterval>
+						</li>
+
+						<!-- Provide overwatch -->
+						
+						<!-- Idle rather than continue to humanlike nodes -->
+						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+					</subNodes>
+				</li>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+</Defs>

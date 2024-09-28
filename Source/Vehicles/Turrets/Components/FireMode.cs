@@ -19,11 +19,11 @@ namespace Vehicles
 		public string texPath;
 
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
-		public int shotsPerBurst;
+		public IntRange shotsPerBurst;
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int ticksBetweenShots;
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
-		public int ticksBetweenBursts;
+		public IntRange ticksBetweenBursts;
 		[TweakField(SettingsType = UISettingsType.IntegerBox)]
 		public int burstsTillWarmup = 1;
 		[TweakField(SettingsType = UISettingsType.FloatBox)]
@@ -50,20 +50,32 @@ namespace Vehicles
 			}
 		}
 
+		public int RoundsPerMinute
+		{
+			get
+			{
+				if (ticksBetweenBursts.TrueMin > ticksBetweenShots)
+				{
+					float roundsPerSecond = 60f / ticksBetweenShots;
+					float secondsPerBurst = shotsPerBurst.Average / roundsPerSecond;
+					float totalBurstCycle = secondsPerBurst + ticksBetweenBursts.TrueMin.TicksToSeconds();
+					float burstsPerMinute = 60f / totalBurstCycle;
+					return Mathf.RoundToInt(burstsPerMinute * shotsPerBurst.Average);
+				}
+				return Mathf.RoundToInt(3600f / ticksBetweenShots);
+			}
+		}
+
 		public bool IsValid
 		{
 			get
 			{
-				return shotsPerBurst > 0;
+				return shotsPerBurst.TrueMin > 0;
 			}
 		}
 
-		public (float timeBetweenBursts, float timeBetweenShots) GetRelativeTime()
-		{
-			return (ticksBetweenBursts / 60f, ticksBetweenShots / 60f);
-		}
-
 		public static bool operator ==(FireMode fm1, FireMode fm2) => fm1.Equals(fm2);
+
 		public static bool operator !=(FireMode fm1, FireMode fm2) => !fm1.Equals(fm2);
 
 		public override bool Equals(object obj)
@@ -78,7 +90,7 @@ namespace Vehicles
 
 		public override int GetHashCode()
 		{
-			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts), shotsPerBurst), burstsTillWarmup), ticksBetweenShots);
+			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts.GetHashCode()), shotsPerBurst.GetHashCode()), burstsTillWarmup), ticksBetweenShots);
 		}
 	}
 }

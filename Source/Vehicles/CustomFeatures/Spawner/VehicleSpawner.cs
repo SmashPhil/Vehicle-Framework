@@ -138,8 +138,7 @@ namespace Vehicles
 				{
 					Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist, faction ));
 					pawn.SetFactionDirect(faction);
-					vehicle.GiveLoadJob(pawn, handler);
-					vehicle.Notify_Boarded(pawn);
+					vehicle.TryAddPawn(pawn, handler);
 				}
 			}
 			return vehicle;

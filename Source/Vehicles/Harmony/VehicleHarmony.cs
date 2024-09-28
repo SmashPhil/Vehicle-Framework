@@ -14,6 +14,7 @@ using RimWorld.Planet;
 using SmashTools;
 using UpdateLogTool;
 using System.Diagnostics;
+using SmashTools.Debugging;
 
 namespace Vehicles
 {
@@ -98,6 +99,10 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(PatternDef.GenerateMaterials);
 
 			Utilities.InvokeWithLogging(RegisterVehicleAreas);
+
+#if DEBUG
+			UnitTestManager.onUnitTestStateChange += ForceSynchronousMaps;
+#endif
 
 			if (DebugProperties.debug)
 			{
@@ -222,6 +227,27 @@ namespace Vehicles
 		{
 			Ext_Map.RegisterArea<Area_Road>();
 			Ext_Map.RegisterArea<Area_RoadAvoidal>();
+		}
+
+		/// <summary>
+		/// Force maps to operate synchronously for the duration of unit tests
+		/// </summary>
+		private static void ForceSynchronousMaps(bool value)
+		{
+			if (Current.ProgramState == ProgramState.Entry) return;
+
+			foreach (Map map in Find.Maps)
+			{
+				VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+				if (value)
+				{
+					mapping.ReleaseThread();
+				}
+				else
+				{
+					mapping.InitThread(map);
+				}
+			}
 		}
 	}
 }

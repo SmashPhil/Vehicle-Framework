@@ -43,7 +43,8 @@ namespace Vehicles
 		public float animationPunchAt = 0.95f;
 
 		[PostToSettings(Label = "VF_SpaceFlight", Translate = true, Tooltip = "VF_SpaceFlightTooltip", UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
-		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.SOS2, CompatibilityPackageIds.RimNauts, CompatibilityPackageIds.Universum })]
+		/// Changes to MayRequireAny will require additional changes in <see cref="VehicleDef.SpecialDisplayStats(VehiclePawn)"/>
+		[DisableSettingConditional(MayRequireAny = [CompatibilityPackageIds.SOS2, CompatibilityPackageIds.RimNauts, CompatibilityPackageIds.Universum])]
 		public bool spaceFlight = false;
 
 		public bool faceDirectionOfTravel = true;

@@ -60,6 +60,7 @@ namespace Vehicles
 			});
 
 			TryStartNextTargeter();
+			OnStart();
 		}
 
 		public override void StopTargeting()

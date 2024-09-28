@@ -12,7 +12,7 @@ namespace Vehicles
 	public static class RaidTesting
 	{
 		[StartupAction(Category = "Raids", Name = "Raid Enemy (Land | 3000)", GameState = GameState.Playing)]
-		private static void UnitTest_CaravanFormation()
+		private static void StartupAction_CaravanFormation()
 		{
 			Prefs.DevMode = true;
 			LongEventHandler.ExecuteWhenFinished(delegate ()

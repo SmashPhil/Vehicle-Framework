@@ -29,6 +29,10 @@ namespace Vehicles
 		private List<VehicleTurret> tmpListTurrets = new List<VehicleTurret>();
 		private List<int> tmpListTurretQuota = new List<int>();
 
+		public float MinRange { get; private set; }
+
+		public float MaxRange { get; private set; }
+
 		public bool CanDeploy { get; private set; }
 
 		public bool Deployed => deployed;
@@ -38,8 +42,6 @@ namespace Vehicles
 		public bool ShouldStopTicking => tickers.Count == 0;
 
 		public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
-
-		public float MinRange => turrets.Max(x => x.turretDef.minRange);
 
 		public IEnumerable<(ThingDef thingDef, float count)> Refunds
 		{
@@ -65,19 +67,6 @@ namespace Vehicles
 					}
 				}
 				return true;
-			}
-		}
-
-		public float MaxRangeGrouped
-		{
-			get
-			{
-				IEnumerable<VehicleTurret> cannonRange = turrets.Where(x => x.turretDef.maxRange <= GenRadial.MaxRadialPatternRadius);
-				if (!cannonRange.NotNullAndAny())
-				{
-					return (float)Math.Floor(GenRadial.MaxRadialPatternRadius);
-				}
-				return cannonRange.Min(x => x.turretDef.maxRange);
 			}
 		}
 
@@ -202,6 +191,8 @@ namespace Vehicles
 					}
 				}
 			}
+
+			CacheBoundaries();
 		}
 
 		public bool RemoveTurret(string key)
@@ -595,6 +586,11 @@ namespace Vehicles
 				for (int i = tickers.Count - 1; i >= 0; i--)
 				{
 					VehicleTurret turret = tickers[i];
+					if (Vehicle.stances.stunner.Stunned && turret.turretDef.empDisables)
+					{
+						continue;
+					}
+
 					if (!turret.Tick())
 					{
 						DequeueTicker(turret);
@@ -876,6 +872,15 @@ namespace Vehicles
 			}
 		}
 
+		public void CacheBoundaries()
+		{
+			if (!turrets.NullOrEmpty())
+			{
+				MinRange = turrets.Min(turret => turret.MinRange);
+				MaxRange = turrets.Min(turret => turret.MaxRange);
+			}
+		}
+
 		public void RecacheDeployment()
 		{
 			CanDeploy = SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(CompProperties_VehicleTurrets), nameof(CompProperties_VehicleTurrets.deployTime), Props.deployTime) > 0;
@@ -913,7 +918,7 @@ namespace Vehicles
 				step = "Recaching turret permissions";
 				RecacheTurretPermissions();
 				RecacheTurretComponents();
-
+				CacheBoundaries();
 				if (!respawningAfterLoad)
 				{
 					step = "Setting quota levels";

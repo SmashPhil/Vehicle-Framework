@@ -23,6 +23,7 @@ namespace Vehicles
 					defName = $"{vehicleDef.defName}_Blueprint",
 					label = vehicleDef.label,
 					description = vehicleDef.description,
+					modContentPack = vehicleDef.modContentPack,
 
 					thingClass = typeof(VehicleBuilding),
 					thingToSpawn = vehicleDef,
@@ -55,7 +56,7 @@ namespace Vehicles
 					{
 						canPlaceOverImpassablePlant = false,
 						paintable = false
-					}
+					},
 				};
 				vehicleDef.designationCategory = null; //Purge designation category from non-buildable VehiclePawn
 				impliedBuildDef.graphicData.CopyFrom(vehicleDef.graphicData);

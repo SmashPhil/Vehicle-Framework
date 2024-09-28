@@ -43,6 +43,11 @@
 	
 	<VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
 	<VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+	<VF_EMPStuns>EMP Stuns</VF_EMPStuns>
+	<VF_EMPStunsTooltip>EMP weapons will temporarily disable this vehicle.</VF_EMPStunsTooltip>
+	<VF_CanAdaptToEMP>Can Adapt</VF_CanAdaptToEMP>
+	<VF_CanAdaptToEMPTooltip>Can adapt to emp damage and become temporarily immune from stuns.</VF_CanAdaptToEMPTooltip>
+	<VF_VehicleCannotStun>Vehicle has no stunnable components.</VF_VehicleCannotStun>
 	<VF_FishingEnabled>Can Fish</VF_FishingEnabled>
 	<VF_FishingEnabledTooltip>Enables fishing when stationary over water.</VF_FishingEnabledTooltip>
 	
@@ -56,6 +61,9 @@
 	<VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
 	<VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
 	
+	<VF_DeployTime>Deploy Time</VF_DeployTime>
+
+	<!-- CompFueledTravel -->
 	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
 	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
 	<VF_FuelConsumptionRate>Fuel Rate</VF_FuelConsumptionRate>
@@ -66,9 +74,10 @@
 	<VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
 	<VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
 	<VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
-	
 	<VF_FuelConsumptionWorld>Fuel Rate %</VF_FuelConsumptionWorld>
 	<VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+
+	<!-- CompVehicleLauncher -->
 	<VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
 	<VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>
 	<VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
@@ -80,14 +89,37 @@
 	<VF_CanRoofPunchTooltip>Vehicle can punch through roofs when landing.</VF_CanRoofPunchTooltip>
 	<VF_SpaceFlight>Space Faring</VF_SpaceFlight>
 	<VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
-	
 	<VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
 	<VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
 	<VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
 	<VF_MaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VF_MaxAltitudeTooltip>
 	<VF_MaxFallRate>Max Fall Rate</VF_MaxFallRate>
 	<VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
-	
 	<VF_Instant>Instant</VF_Instant>
-	<VF_DeployTime>Deploy Time</VF_DeployTime>
+
+	<!-- CompVehicleTurrets -->
+	<VF_Rotatable>Rotatable</VF_Rotatable>
+	<VF_RotatableTooltip>Whether turret can rotate to aim toward its target, or is static and can only shoot in the direction it's facing.</VF_RotatableTooltip>
+	<VF_MagazineCapacity>Magazine Capacity</VF_MagazineCapacity>
+	<VF_MagazineCapacityTooltip>How many shots this turret can shoot before having to reload.</VF_MagazineCapacityTooltip>
+	<VF_MinRange>Min Range</VF_MinRange>
+	<VF_MinRangeTooltip>The minimum range of this turret.</VF_MinRangeTooltip>
+	<VF_MaxRange>Max Range</VF_MaxRange>
+	<VF_MaxRangeTooltip>The maximum range of this turret.</VF_MaxRangeTooltip>
+	<VF_WarmupTime>Warmup Time</VF_WarmupTime>
+	<VF_WarmupTimeValue>{0}s</VF_WarmupTimeValue>
+	<VF_WarmupTimeTooltip>Time it takes to aim before shooting.</VF_WarmupTimeTooltip>
+	<VF_ReloadTime>Reload Time</VF_ReloadTime>
+	<VF_ReloadTimeValue>{0}s</VF_ReloadTimeValue>
+	<VF_ReloadTimeTooltip>Time it takes to reload.</VF_ReloadTimeTooltip>
+	<VF_RotationSpeed>Rotation Speed</VF_RotationSpeed>
+	<VF_RotationSpeedValue>{0} deg/s</VF_RotationSpeedValue>
+	<VF_RotationSpeedTooltip>How quickly this turret rotates to face its target.</VF_RotationSpeedTooltip>
+	<VF_FireModes>Firing Modes</VF_FireModes>
+	<VF_FireModesTooltip>Rates of fire this turret can be set to.</VF_FireModesTooltip>
+	<VF_RateOfFire>Rate of fire</VF_RateOfFire>
+	<VF_RateOfFireValue>{0} rounds per minute</VF_RateOfFireValue>
+	<VF_ShotsPerBurst>Shots per burst</VF_ShotsPerBurst>
+	<VF_ShotGroup>Shot Group</VF_ShotGroup>
+	<VF_ShotGroupValue>{0} cells</VF_ShotGroupValue>
 </LanguageData>

@@ -58,8 +58,7 @@ namespace Vehicles
 			Toil toil = new Toil();
 			toil.initAction = delegate ()
 			{
-				vehicle.GiveLoadJob(pawn, handler);
-				vehicle.Notify_Boarded(pawn);
+				vehicle.TryAddPawn(pawn, handler);
 			};
 			toil.defaultCompleteMode = ToilCompleteMode.Instant;
 			return toil;

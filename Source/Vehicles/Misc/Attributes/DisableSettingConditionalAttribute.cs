@@ -30,6 +30,8 @@ namespace Vehicles
 		public object DisableIfEqualTo { get; set; } = Unassigned;
 		public object DisableIfNotEqualTo { get; set; } = Unassigned;
 
+		public string DisableReason { get; set; }
+
 		/// <summary>
 		/// Setting is disabled if this mod is not found in the active mod list
 		/// </summary>
@@ -69,13 +71,27 @@ namespace Vehicles
 				if (!DisableIfEqualTo.Equals(Unassigned))
 				{
 					object value = propertyInfo.GetValue(parent);
-					tooltip = BuildDisabledReport(propertyInfo, "=", value);
+					if (DisableReason.NullOrEmpty())
+					{
+						tooltip = BuildDisabledReport(propertyInfo, "=", value);
+					}
+					else
+					{
+						tooltip = DisableReason.Translate();
+					}
 					return value.Equals(DisableIfEqualTo);
 				}
 				if (!DisableIfNotEqualTo.Equals(Unassigned))
 				{
 					object value = propertyInfo.GetValue(parent);
-					tooltip = BuildDisabledReport(propertyInfo, "≠", value);
+					if (DisableReason.NullOrEmpty())
+					{
+						tooltip = BuildDisabledReport(propertyInfo, "≠", value);
+					}
+					else
+					{
+						tooltip = DisableReason.Translate();
+					}
 					return !value.Equals(DisableIfNotEqualTo);
 				}
 			}
@@ -109,7 +125,14 @@ namespace Vehicles
 					{
 						value = fieldInfo.GetValue(parent);
 					}
-					tooltip = BuildDisabledReport(fieldInfo, "=", value);
+					if (DisableReason.NullOrEmpty())
+					{
+						tooltip = BuildDisabledReport(fieldInfo, "=", value);
+					}
+					else
+					{
+						tooltip = DisableReason.Translate();
+					}
 					return value.Equals(DisableIfEqualTo);
 				}
 				if (!DisableIfNotEqualTo.Equals(Unassigned))
@@ -118,7 +141,14 @@ namespace Vehicles
 					{
 						value = fieldInfo.GetValue(parent);
 					}
-					tooltip = BuildDisabledReport(fieldInfo, "≠", value);
+					if (DisableReason.NullOrEmpty())
+					{
+						tooltip = BuildDisabledReport(fieldInfo, "≠", value);
+					}
+					else
+					{
+						tooltip = DisableReason.Translate();
+					}
 					return !value.Equals(DisableIfNotEqualTo);
 				}
 			}
@@ -137,6 +167,10 @@ namespace Vehicles
 
 		private static object Parent(VehicleDef vehicleDef, MemberInfo memberInfo)
 		{
+			if (memberInfo.DeclaringType == typeof(VehicleDef))
+			{
+				return vehicleDef;
+			}
 			object parent = IterateTypesForParent(vehicleDef, memberInfo);
 			if (parent == null && !vehicleDef.comps.NullOrEmpty())
 			{

@@ -106,9 +106,9 @@ namespace Vehicles
 		{
 			if (pawn is VehiclePawn vehicle)
 			{
+				__result = null;
 				if (suppressAutoTakeableGoto)
 				{
-					__result = null;
 					return false;
 				}
 				if (vehicle.Faction != Faction.OfPlayer || !vehicle.CanMoveFinal)
@@ -129,37 +129,21 @@ namespace Vehicles
 
 				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
 				
-				int num = GenRadial.NumCellsInRadius(2.9f);
-				IntVec3 curLoc;
-				for (int i = 0; i < num; i++)
+				if (PathingHelper.TryFindNearestStandableCell(vehicle, clickCell, out IntVec3 result))
 				{
-					curLoc = GenRadial.RadialPattern[i] + clickCell;
-
-					if (GenGridVehicles.Standable(curLoc, vehicle, vehicle.Map) && (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
+					__result = new FloatMenuOption("GoHere".Translate(), delegate ()
 					{
-						if (curLoc == vehicle.Position || vehicle.beached)
-						{
-							__result = null;
-							return false;
-						}
-						if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, curLoc, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
-						{
-							__result = new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
-							return false;
-						}
-						
-						__result = new FloatMenuOption("GoHere".Translate(), delegate ()
-						{
-							VehicleOrientationController.StartOrienting(vehicle, curLoc, clickCell);
-						}, MenuOptionPriority.GoHere, null, null, 0f, null, null)
-						{
-							autoTakeable = true,
-							autoTakeablePriority = 10f
-						};
-						return false;
-					}
+						VehicleOrientationController.StartOrienting(vehicle, result, clickCell);
+					}, MenuOptionPriority.GoHere, null, null, 0f, null, null)
+					{
+						autoTakeable = true,
+						autoTakeablePriority = 10f
+					};
 				}
-				__result = null;
+				if (!VehicleReachabilityUtility.CanReachVehicle(vehicle, clickCell, PathEndMode.OnCell, Danger.Deadly, TraverseMode.ByPawn))
+				{
+					__result = new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
+				}
 				return false;
 			}
 			else
@@ -452,6 +436,10 @@ namespace Vehicles
 		{
 			if (__instance.Spawned)
 			{
+				if (__instance is VehiclePawn vehicle)
+				{
+					vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
+				}
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
 			}
 		}
@@ -467,19 +455,26 @@ namespace Vehicles
 				hitboxUpdateCells.Clear();
 				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.East));
 				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.North));
-
+				
 				foreach (IntVec3 cell in hitboxUpdateCells)
 				{
 					vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
 				}
-
+				
 				hitboxUpdateCells.Clear();
+
+				vehicle.Map.coverGrid.DeRegister(vehicle);
 			}
 			return true;
 		}
 
 		private static void SetRotationAndUpdateVehicleRegions(Thing __instance)
 		{
+			if (__instance is VehiclePawn vehicle && vehicle.Spawned)
+			{
+				vehicle.Map.coverGrid.Register(vehicle);
+				vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
+			}
 			if (__instance.Spawned && (__instance.def.size.x != 1 || __instance.def.size.z != 1))
 			{
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);

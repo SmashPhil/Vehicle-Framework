@@ -266,7 +266,7 @@ namespace Vehicles
 
 		public bool ReadyToFire => groupKey.NullOrEmpty() ? (burstTicks <= 0 && ReloadTicks <= 0 && !TurretDisabled) : GroupTurrets.Any(t => t.burstTicks <= 0 && t.ReloadTicks <= 0 && !t.TurretDisabled);
 
-		public bool FullAuto => CurrentFireMode.ticksBetweenBursts == CurrentFireMode.ticksBetweenShots;
+		public bool FullAuto => CurrentFireMode.ticksBetweenBursts.TrueMin == CurrentFireMode.ticksBetweenShots;
 
 		public int ReloadTicks => reloadTicks;
 
@@ -395,11 +395,11 @@ namespace Vehicles
 				{
 					if (!CanOverheat)
 					{
-						return CurrentFireMode.shotsPerBurst * 3;
+						return CurrentFireMode.shotsPerBurst.TrueMax * 3;
 					}
 					return Mathf.CeilToInt(MaxHeatCapacity / turretDef.cooldown.heatPerShot);
 				}
-				return CurrentFireMode.shotsPerBurst;
+				return CurrentFireMode.shotsPerBurst.RandomInRange;
 			}
 		}
 
@@ -891,7 +891,7 @@ namespace Vehicles
 
 		public virtual void ActivateBurstTimer()
 		{
-			burstTicks = CurrentFireMode.ticksBetweenBursts;
+			burstTicks = CurrentFireMode.ticksBetweenBursts.RandomInRange;
 			burstsTillWarmup--;
 			
 			if (burstsTillWarmup <= 0)
@@ -1145,7 +1145,7 @@ namespace Vehicles
 		{
 			return new CompVehicleTurrets.TurretData()
 			{
-				shots = CurrentFireMode.shotsPerBurst,
+				shots = CurrentFireMode.shotsPerBurst.RandomInRange,
 				ticksTillShot = 0,
 				turret = this
 			};

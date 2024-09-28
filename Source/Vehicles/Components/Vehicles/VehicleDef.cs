@@ -9,6 +9,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using static Vehicles.VehicleUpgrade;
+using System.Text;
 
 namespace Vehicles
 {
@@ -93,6 +94,14 @@ namespace Vehicles
 
 		public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
 
+		public CompProperties_FueledTravel CompPropsFueledTravel { get; private set; }
+
+		public CompProperties_VehicleLauncher CompPropsVehicleLauncher { get; private set; }
+
+		public CompProperties_VehicleTurrets CompPropsVehicleTurrets { get; private set; }
+
+		public CompProperties_UpgradeTree CompPropsUpgradeTree { get; private set; }
+
 		/// <summary>
 		/// Icon used for LoadCargo gizmo
 		/// </summary>
@@ -133,6 +142,24 @@ namespace Vehicles
 
 		string ITweakFields.Category => defName;
 
+		public bool CanDisableEMPSetting
+		{
+			get
+			{
+				if (!components.NullOrEmpty())
+				{
+					foreach (VehicleComponentProperties props in components)
+					{
+						if (props.empSeverity > VehicleEMPSeverity.None)
+						{
+							return false;
+						}
+					}
+				}
+				return true;
+			}
+		}
+
 		public void OnFieldChanged()
 		{
 		}
@@ -145,7 +172,9 @@ namespace Vehicles
 		/// </remarks>
 		public override void ResolveReferences()
 		{
-			if (GetCompProperties<CompProperties_UpgradeTree>() != null)
+			CacheCompProperties();
+
+			if (CompPropsUpgradeTree != null)
 			{
 				inspectorTabs.Add(typeof(ITab_Vehicle_Upgrades));
 			}
@@ -220,6 +249,14 @@ namespace Vehicles
 			properties.PostDefDatabase(this);
 			drawProperties.PostDefDatabase(this);
 			graphicData.pattern ??= PatternDefOf.Default;
+		}
+
+		private void CacheCompProperties()
+		{
+			CompPropsFueledTravel = GetCompProperties<CompProperties_FueledTravel>();
+			CompPropsVehicleLauncher = GetCompProperties<CompProperties_VehicleLauncher>();
+			CompPropsVehicleTurrets = GetCompProperties<CompProperties_VehicleTurrets>();
+			CompPropsUpgradeTree = GetCompProperties<CompProperties_UpgradeTree>();
 		}
 
 		/// <summary>
@@ -354,22 +391,17 @@ namespace Vehicles
 			{
 				foreach (UpgradeNode node in compPropertiesUpgradeTree.def.nodes)
 				{
-					if (!node.upgrades.NullOrEmpty())
+					if (node.upgrades.NullOrEmpty()) continue;
+
+					foreach (Upgrade upgrade in node.upgrades)
 					{
-						foreach (Upgrade upgrade in node.upgrades)
+						if (upgrade is not VehicleUpgrade vehicleUpgrade) continue;
+						if (vehicleUpgrade.roles.NullOrEmpty()) continue;
+						foreach (RoleUpgrade roleUpgrade in vehicleUpgrade.roles)
 						{
-							if (upgrade is VehicleUpgrade vehicleUpgrade)
+							if (roleUpgrade.key == key && roleUpgrade.editKey.NullOrEmpty())
 							{
-								if (!vehicleUpgrade.roles.NullOrEmpty())
-								{
-									foreach (RoleUpgrade roleUpgrade in vehicleUpgrade.roles)
-									{
-										if (roleUpgrade.key == key && roleUpgrade.editKey.NullOrEmpty())
-										{
-											return RoleUpgrade.RoleFromUpgrade(roleUpgrade);
-										}
-									}
-								}
+								return RoleUpgrade.RoleFromUpgrade(roleUpgrade);
 							}
 						}
 					}
@@ -379,6 +411,94 @@ namespace Vehicles
 			}
 			Log.Error($"Unable to create role {key}. Matching VehicleRole not found in VehicleDef ({defName}).");
 			return null;
+		}
+
+		public virtual IEnumerable<VehicleStatDrawEntry> SpecialDisplayStats(VehiclePawn vehicle = null)
+		{
+			foreach (VehicleStatDrawEntry buildableStatEntry in buildDef.SpecialDisplayStats())
+			{
+				yield return buildableStatEntry;
+			}
+
+			(int current, int max, string explanation) health = vehicle?.GetTotalHealth() ?? this.GetTotalHealth();
+			yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "HitPointsBasic".Translate().CapitalizeFirst(), 
+				$"{health.current} / {health.max}", $"{"Stat_HitPoints_Desc".Translate()}{Environment.NewLine}{Environment.NewLine}{health.explanation}", 99998);
+
+			StringBuilder crewExplanation = new StringBuilder();
+			int crewCount = 0;
+			List<VehicleRole> roles = vehicle?.handlers.Select(h => h.role).ToList() ?? properties.roles;
+			if (!properties.roles.NullOrEmpty())
+			{
+				crewExplanation.AppendLine();
+				foreach (VehicleRole role in roles)
+				{
+					crewCount += role.Slots;
+					crewExplanation.AppendLine($"x{role.Slots}  {role.label}");
+				}
+			}
+			yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasicsImportant, "VF_CrewCount".Translate().CapitalizeFirst(),
+								crewCount.ToString(), $"{"VF_CrewCountDesc".Translate()}{Environment.NewLine}{crewExplanation}", 99995);
+
+			if (CompPropsFueledTravel != null)
+			{
+				ThingDef fuelType = CompPropsFueledTravel.fuelType;
+				yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable, "VF_FuelType".Translate().CapitalizeFirst(),
+					fuelType.LabelCap, "VF_FuelTypeDesc".Translate(), 4500);
+				float fuelConsumptionRate = vehicle?.CompFueledTravel.FuelEfficiency ?? CompPropsFueledTravel.fuelConsumptionRate;
+				yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable, "VF_FuelConsumptionRate".Translate().CapitalizeFirst(),
+					fuelConsumptionRate.ToString("0.##"), "VF_FuelConsumptionRateTooltip".Translate(), 4501);
+				float fuelCapacity = vehicle?.CompFueledTravel.FuelCapacity ?? CompPropsFueledTravel.fuelCapacity;
+				yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable, "VF_FuelCapacity".Translate().CapitalizeFirst(),
+					fuelCapacity.ToStringByStyle(ToStringStyle.Integer), "VF_FuelCapacityTooltip".Translate(), 4502);
+			}
+
+			if (CompPropsVehicleTurrets != null)
+			{
+				List<VehicleTurret> turrets = vehicle?.CompVehicleTurrets.turrets ?? CompPropsVehicleTurrets.turrets;
+				if (!turrets.NullOrEmpty())
+				{
+					for (int i = 0; i < turrets.Count; i++)
+					{
+						VehicleTurret turret = turrets[i];
+						foreach (VehicleStatDrawEntry statDrawEntry in turret.turretDef.SpecialDisplayStats(VehicleStatCategoryDefOf.VehicleTurrets.displayOrder + i))
+						{
+							yield return statDrawEntry;
+						}
+					}
+				}
+			}
+
+			if (CompPropsVehicleLauncher != null)
+			{
+				if (ModsConfig.IsActive(CompatibilityPackageIds.SOS2) || ModsConfig.IsActive(CompatibilityPackageIds.RimNauts) || 
+					ModsConfig.IsActive(CompatibilityPackageIds.Universum))
+				{
+					bool spaceFlight = vehicle?.CompVehicleLauncher.SpaceFlight ?? CompPropsVehicleLauncher.spaceFlight;
+					yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable, "VF_SpaceFlight".Translate().CapitalizeFirst(),
+						spaceFlight.ToStringYesNo(), "VF_SpaceFlightTooltip".Translate(), 1000);
+				}
+			}
+			
+			if (fillPercent > 0f)
+			{
+				yield return new VehicleStatDrawEntry(StatCategoryDefOf.Building, "CoverEffectiveness".Translate(),
+					this.BaseBlockChance().ToStringPercent(), "CoverEffectivenessExplanation".Translate(), 2000);
+			}
+
+			yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasics, "VF_Upgradeable".Translate(),
+					(CompPropsUpgradeTree != null).ToStringYesNo(), "VF_UpgradeableDesc".Translate(), 6001);
+			if (VehicleMod.settings.main.useCustomShaders)
+			{
+				yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleBasics, "Stat_Building_Paintable".Translate(), 
+					graphicData.shaderType.Shader.SupportsRGBMaskTex().ToStringYesNo(), "VF_PaintableDesc".Translate(), 6000);
+			}
+			
+			if (modContentPack != null && !modContentPack.IsCoreMod)
+			{
+				yield return new VehicleStatDrawEntry(StatCategoryDefOf.Source, "Stat_Source_Label".Translate(), modContentPack.Name, 
+					$"{(modContentPack.IsOfficialMod ? "Stat_Source_OfficialExpansionReport".Translate() : 
+					"Stat_Source_ModReport".Translate())}: {modContentPack.Name}", 90000);
+			}
 		}
 
 		/// <summary>

@@ -20,6 +20,7 @@ namespace Vehicles
 		public float efficiencyWeight = 1;
 		public float hitWeight = 1;
 		public List<StatModifier> armor;
+		public VehicleEMPSeverity empSeverity = VehicleEMPSeverity.None;
 		public bool priorityStatEfficiency = false;
 
 		public ComponentHitbox hitbox = new ComponentHitbox();
