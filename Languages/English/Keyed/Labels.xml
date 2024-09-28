@@ -107,6 +107,7 @@
 	<VF_NoFlightSpeed>Unable to launch with Flight Speed = 0.</VF_NoFlightSpeed>
 	<VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
 	<VF_CannotLaunchImmobile>{0} cannot launch without being able to move.</VF_CannotLaunchImmobile>
+	<VF_CannotLaunchRotated>{0} cannot launch because it is rotated.</VF_CannotLaunchRotated>
 	<VF_CannotLaunchOverEncumbered>{0} cannot launch while over-encumbered.</VF_CannotLaunchOverEncumbered>
 	
 	<VF_TabCargo>Cargo</VF_TabCargo>
