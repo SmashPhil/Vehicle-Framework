@@ -313,7 +313,6 @@ namespace Vehicles
 				}
 				GUIState.Pop();
 
-				//GUI.Label(rect, destLabel);
 				WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 			}
 			if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
