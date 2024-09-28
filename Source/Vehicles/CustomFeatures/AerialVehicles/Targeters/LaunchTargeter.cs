@@ -208,6 +208,7 @@ namespace Vehicles
 						TotalFuelCost = Mathf.RoundToInt(finalFuelCost);
 						TotalDistance = finalDistance;
 						string fuelCostLabel = "VF_VehicleFuelCost".Translate(TotalFuelCost);
+						Text.Font = GameFont.Small;
 						Vector2 textSize = Text.CalcSize(fuelCostLabel);
 						Rect labelPosition = new Rect(mousePosition.x, mousePosition.y + textSize.y + 20f, textSize.x, textSize.y);
 						float bgWidth = textSize.x * 1.2f;
@@ -223,7 +224,7 @@ namespace Vehicles
 							{
 								GUI.color = Color.white;
 								GUI.DrawTexture(bgRect, TexUI.GrayTextBG);
-								GUI.Label(rect, text);
+								Widgets.Label(rect, text);
 							}
 							GUIState.Pop();
 						}
@@ -231,7 +232,7 @@ namespace Vehicles
 						{
 							GUI.color = Color.white;
 							GUI.DrawTexture(new Rect(labelPosition.x - textSize.x * 0.1f, labelPosition.y, bgWidth, textSize.y), TexUI.GrayTextBG);
-							GUI.Label(labelPosition, fuelCostLabel);
+							Widgets.Label(labelPosition, fuelCostLabel);
 						}
 					}
 					GUIState.Pop();
@@ -312,7 +313,6 @@ namespace Vehicles
 				}
 				GUIState.Pop();
 
-				//GUI.Label(rect, destLabel);
 				WorldRendererUtility.DrawQuadTangentialToPlanet(start, BaseFeedbackTexSize * Find.WorldGrid.averageTileSize, 0.018f, WorldMaterials.CurTargetingMat);
 			}
 			if (FlightPath.Count < vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes && arg.IsValid)
