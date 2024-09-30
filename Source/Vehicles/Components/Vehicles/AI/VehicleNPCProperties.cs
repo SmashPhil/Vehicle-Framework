@@ -14,6 +14,8 @@ namespace Vehicles
 		/// If targets get within minimum distance, vehicle will chase them down and run them over.
 		/// </summary>
 		public bool runDownTargets = false;
+		public bool reverseWhileFleeing = true;
+
 		/// <summary>
 		/// Preferred distance from target based on max range of turrets. If <see cref="stopToShoot"/> is false, vehicle will ignore this.
 		/// </summary>

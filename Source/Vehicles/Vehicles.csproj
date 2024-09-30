@@ -101,11 +101,16 @@
     <Compile Include="AI\JobDrivers\JobDriver_DisassembleVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_ExitMap.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_ExitMapBest.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_GotoNearestHostile.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_ProtectVehicle.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_RangedSupport.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_CombatFormation.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_SabotageVehicle.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_VehicleAI.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_AIBreachWalls.cs" />
+    <Compile Include="AI\Lords\LordJob_SabotageVehicleAndExit.cs" />
     <Compile Include="AI\Lords\LordToil_PrepareCaravan_GatherAnimalsForVehicles.cs" />
     <Compile Include="AI\ThinkNode\ThinkNode_ConditionalHasTurret.cs" />
     <Compile Include="AI\ThinkNode\ThinkNode_ConditionalVehicle.cs" />

@@ -12,5 +12,6 @@ namespace Vehicles
 		CoverGrid,
 		GasGrid,
 		PositionManager,
+		ThingGrid,
 	}
 }

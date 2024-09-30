@@ -25,11 +25,10 @@ namespace Vehicles.Testing
 			Assert(map != null, "Map is null");
 			Assert(DefDatabase<VehicleDef>.AllDefsListForReading.Count > 0, "No vehicles to test with");
 
-			int _ = 0;
 			// Should always be at least 1 vehicle for unit tests to execute assuming debug vehicle is enabled
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
 			{
-				if (vehicleDef.vehicleType == VehicleType.Land && VehiclePathGrid.PassableTerrainCost(vehicleDef, TerrainDefOf.PackedDirt, ref _))
+				if (vehicleDef.vehicleType == VehicleType.Land && VehiclePathGrid.PassableTerrainCost(vehicleDef, TerrainDefOf.PackedDirt, out _))
 				{
 					yield return () => TestVehicleDef(vehicleDef, map);
 				}
@@ -41,6 +40,7 @@ namespace Vehicles.Testing
 			UTResult result;
 
 			VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
+			TerrainDef terrainDef = TerrainDefOf.Concrete;
 
 			bool success = CellFinderExtended.TryFindRandomCenterCell(map, Validator, out IntVec3 cell)
 				|| CellFinder.TryFindRandomCell(map, Validator, out cell);
@@ -48,15 +48,17 @@ namespace Vehicles.Testing
 
 			if (!success) return result;
 
-			int maxSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
+			int maxSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
 			CellRect testArea = CellRect.CenteredOn(cell, maxSize).ExpandedBy(5);
 			GenDebug.ClearArea(testArea, map);
 			foreach (IntVec3 terrainCell in testArea)
 			{
-				map.terrainGrid.SetTerrain(terrainCell, TerrainDefOf.Concrete);
+				map.terrainGrid.SetTerrain(terrainCell, terrainDef);
 			}
 
 			IntVec3 reposition = cell + new IntVec3(maxSize, 0, 0);
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
 
 			#region PositionManager
 
@@ -91,6 +93,74 @@ namespace Vehicles.Testing
 			}
 
 			#endregion PositionManager
+
+			#region ThingGrid
+
+			ThingGrid thingGrid = map.thingGrid;
+			{
+				GenSpawn.Spawn(vehicle, cell, map);
+				HitboxTester<VehiclePawn> positionTester = new(vehicle, map,
+					(cell) => thingGrid.ThingAt(cell, ThingCategory.Pawn) as VehiclePawn,
+					(thing) => thing == vehicle);
+				positionTester.Start();
+
+				// Validate spawned vehicle registers in thingGrid
+				success = positionTester.Hitbox(true);
+				result.Add("ThingGrid (Spawn)", success);
+
+				// Validate position set updates thingGrid
+				vehicle.Position = reposition;
+				success = positionTester.Hitbox(true);
+				vehicle.Position = cell;
+				result.Add("ThingGrid (set_Position)", success);
+
+				// Validate rotation set updates thingGrid
+				vehicle.Rotation = Rot4.East;
+				success = positionTester.Hitbox(true);
+				vehicle.Rotation = Rot4.North;
+				result.Add("ThingGrid (set_Rotation)", success);
+
+				// Validate despawning deregisters from thingGrid
+				vehicle.DeSpawn();
+				success = positionTester.All(false);
+				result.Add("ThingGrid (DeSpawn)", success);
+			}
+
+			#endregion
+
+			#region PathGrid
+
+			VehiclePathGrid pathGrid = pathData.VehiclePathGrid;
+			{
+				//GenSpawn.Spawn(vehicle, cell, map);
+				//HitboxTester<int> positionTester = new(vehicle, map,
+				//	(cell) => pathGrid.CalculatedCostAt(cell),
+				//	(cost) => cost == VehiclePathGrid.TerrainCostAt(vehicleDef, terrainDef));
+				//positionTester.Start();
+
+				//// Validate spawned vehicle registers in thingGrid
+				//success = positionTester.Hitbox(true);
+				//result.Add("ThingGrid (Spawn)", success);
+
+				//// Validate position set updates thingGrid
+				//vehicle.Position = reposition;
+				//success = positionTester.Hitbox(true);
+				//vehicle.Position = cell;
+				//result.Add("ThingGrid (set_Position)", success);
+
+				//// Validate rotation set updates thingGrid
+				//vehicle.Rotation = Rot4.East;
+				//success = positionTester.Hitbox(true);
+				//vehicle.Rotation = Rot4.North;
+				//result.Add("ThingGrid (set_Rotation)", success);
+
+				//// Validate despawning deregisters from thingGrid
+				//vehicle.DeSpawn();
+				//success = positionTester.All(false);
+				//result.Add("ThingGrid (DeSpawn)", success);
+			}
+
+			#endregion
 
 			#region CoverGrid
 

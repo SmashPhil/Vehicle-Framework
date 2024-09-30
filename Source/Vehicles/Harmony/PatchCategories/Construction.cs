@@ -14,7 +14,7 @@ namespace Vehicles
 	{
 		public void PatchMethods()
 		{
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGenerator), nameof(PawnGenerator.GeneratePawn), parameters: new Type[] { typeof(PawnGenerationRequest) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGenerator), nameof(PawnGenerator.GeneratePawn), parameters: [typeof(PawnGenerationRequest)]),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(GenerateVehiclePawn)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Frame), nameof(Frame.CompleteConstruction)),
@@ -23,7 +23,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(ListerBuildingsRepairable), nameof(ListerBuildingsRepairable.Notify_BuildingRepaired)),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(Notify_RepairedVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), new Type[] { typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool), typeof(bool) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), [typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool), typeof(bool)]),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(RegisterThingSpawned)));
 			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(DesignationCategoryDef), nameof(DesignationCategoryDef.ResolvedAllowedDesignators)),
@@ -32,7 +32,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Deconstruct), nameof(Designator.CanDesignateThing)),
 				postfix: new HarmonyMethod(typeof(Construction),
 				nameof(AllowDeconstructVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenLeaving), nameof(GenLeaving.DoLeavingsFor), new Type[] { typeof(Thing), typeof(Map), typeof(DestroyMode), typeof(List<Thing>) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenLeaving), nameof(GenLeaving.DoLeavingsFor), [typeof(Thing), typeof(Map), typeof(DestroyMode), typeof(List<Thing>)]),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(DoUnsupportedVehicleRefunds)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Destroy)),
@@ -172,18 +172,21 @@ namespace Vehicles
 				{
 					rot = vehicle.VehicleDef.defaultPlacingRot;
 				}
+				Debug.Message($"Verifying {vehicle}'s spawn position.");
 				VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 				bool standable = true;
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
 				{
 					if (!cell.InBounds(map) || !GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell))
 					{
+						Debug.Message($"Invalid spawn location for {vehicle}. Performing radial search for better location");
 						standable = false;
 						break;
 					}
 				}
 				if (standable)
 				{
+					Debug.Message($"Spawn position check passed. Spawning...");
 					return true; //If location is still valid, skip to spawning
 				}
 				Rot4 tmpRot = rot;
@@ -191,7 +194,7 @@ namespace Vehicles
 				{
 					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, tmpRot))
 					{
-						if (!GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
+						if (!cell2.InBounds(map) || !GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
 						{
 							return false;
 						}
@@ -202,6 +205,7 @@ namespace Vehicles
 					Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
 					return false;
 				}
+				Debug.Message($"Changed spawn location to {newLoc}.");
 				loc = newLoc;
 			}
 			else if (newThing is Pawn pawn && !pawn.Dead)

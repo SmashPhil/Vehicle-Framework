@@ -863,60 +863,6 @@ namespace Vehicles
 		private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
 		{
 			bool result;
-			/**
-			if (pawns.HasBoat())
-			{
-				//Rot4 rotFromTo = Find.WorldGrid.GetRotFromTo(__instance.CurrentTile, ___startingTile); WHEN WORLD GRID IS ESTABLISHED
-				Rot4 rotFromTo;
-				if (Find.World.CoastDirectionAt(map.Tile).IsValid)
-				{
-					rotFromTo = Find.World.CoastDirectionAt(map.Tile);
-				}
-				else if(!Find.WorldGrid[map.Tile]?.Rivers?.NullOrEmpty() ?? false)
-				{
-					List<Tile.RiverLink> rivers = Find.WorldGrid[map.Tile].Rivers;
-					Tile.RiverLink river = WorldHelper.BiggestRiverOnTile(Find.WorldGrid[map.Tile].Rivers);
-
-					float angle = Find.WorldGrid.GetHeadingFromTo(map.Tile, rivers.OrderBy(r => r.river.degradeThreshold).FirstOrDefault().neighbor);
-					if (angle < 45)
-					{
-						rotFromTo = Rot4.South;
-					}
-					else if (angle < 135)
-					{
-						rotFromTo = Rot4.East;
-					}
-					else if (angle < 225)
-					{
-						rotFromTo = Rot4.North;
-					}
-					else if (angle < 315)
-					{
-						rotFromTo = Rot4.West;
-					}
-					else
-					{
-						rotFromTo = Rot4.South;
-					}
-				}
-				else
-				{
-					Log.Warning("No Coastline or River detected on map: " + map.uniqueID + ". Selecting edge of map with most water cells.");
-					int n = CellRect.WholeMap(map).GetEdgeCells(Rot4.North).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v, map))).Count();
-					int e = CellRect.WholeMap(map).GetEdgeCells(Rot4.East).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v, map))).Count();
-					int s = CellRect.WholeMap(map).GetEdgeCells(Rot4.South).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v, map))).Count();
-					int w = CellRect.WholeMap(map).GetEdgeCells(Rot4.West).Where(x => pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().All(v => GenGridVehicles.Standable(x, v, map))).Count();
-					rotFromTo = Ext_Map.Max4IntToRot(n, e, s, w);
-				}
-				result = TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo, out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Clockwise),
-					out spot) || TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Rotated(RotationDirection.Counterclockwise), out spot) ||
-					TryFindExitSpotOnWater(pawns, reachableForEveryColonist, rotFromTo.Opposite, out spot); 
-				
-				Pawn pawn = pawns.FindAll(p => p.IsBoat()).MaxBy(x => x.def.size.z);
-				pawn.ClampToMap(ref spot, map);
-				return result;
-			}
-			**/
 			CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile, out Rot4 primary, out Rot4 secondary);
 			result = (primary != Rot4.Invalid && TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) || (secondary != Rot4.Invalid &&
 				TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) ||

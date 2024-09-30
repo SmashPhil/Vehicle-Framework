@@ -8,6 +8,7 @@ using Verse.Sound;
 using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
+using Verse.AI;
 
 namespace Vehicles
 {
@@ -918,9 +919,9 @@ namespace Vehicles
 		{
 			bool cooldownTicked = TurretCooldownTick();
 			bool reloadTicked = TurretReloadTick();
-			bool autoTicked = TurretAutoTick();
 			bool rotationTicked = TurretRotationTick();
 			bool targeterTicked = TurretTargeterTick();
+			bool autoTicked = TurretAutoTick();
 			bool recoilTicked = false;
 			if (recoilTracker != null)
 			{
@@ -1003,7 +1004,7 @@ namespace Vehicles
 					}
 					if (!cannonTarget.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
 					{
-						if (this.TryGetTarget(out LocalTargetInfo autoTarget))
+						if (this.TryGetTarget(out LocalTargetInfo autoTarget, additionalFlags: TargetScanFlags.NeedAutoTargetable))
 						{
 							AlignToAngleRestricted(TurretLocation.AngleToPoint(autoTarget.Thing.DrawPos));
 							SetTarget(autoTarget);

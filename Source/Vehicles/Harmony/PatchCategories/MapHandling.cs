@@ -20,7 +20,7 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BeachMaker), nameof(BeachMaker.Init)),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(BeachMakerTranspiler)));
-			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(RiverMaker), parameters: new Type[] { typeof(Vector3), typeof(float), typeof(RiverDef) }),
+			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(RiverMaker), parameters: [typeof(Vector3), typeof(float), typeof(RiverDef)]),
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(RiverMakerTranspiler)));
 			//Compiler generated method from GenStep_Terrain.GenerateRiverLookupTexture

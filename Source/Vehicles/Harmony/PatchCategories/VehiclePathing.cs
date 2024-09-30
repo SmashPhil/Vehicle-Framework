@@ -42,10 +42,10 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), nameof(Pawn_PathFollower.StartPath)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(StartVehiclePath)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.AdjacentTo8WayOrInside), parameters: new Type[] { typeof(IntVec3), typeof(Thing) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.AdjacentTo8WayOrInside), parameters: [typeof(IntVec3), typeof(Thing)]),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(AdjacentTo8WayOrInsideVehicle)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: new Type[] { typeof(Thing) }),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenAdj), nameof(GenAdj.OccupiedRect), parameters: [typeof(Thing)]),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(OccupiedRectVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.RecalculateAllPerceivedPathCosts)),
@@ -444,37 +444,18 @@ namespace Vehicles
 			}
 		}
 
-		private static bool SetRotationAndUpdateVehicleRegionsClipping(Thing __instance, Rot4 value)
+		private static bool SetRotationAndUpdateVehicleRegionsClipping(Thing __instance, Rot4 value, ref Rot4 ___rotationInt)
 		{
-			if (__instance is VehiclePawn vehicle && vehicle.Spawned)
+			if (__instance is VehiclePawn vehicle)
 			{
-				if (!vehicle.OccupiedRectShifted(IntVec2.Zero, value).InBounds(vehicle.Map))
-				{
-					return false;
-				}
-				hitboxUpdateCells.Clear();
-				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.East));
-				hitboxUpdateCells.AddRange(vehicle.OccupiedRectShifted(IntVec2.Zero, Rot4.North));
-				
-				foreach (IntVec3 cell in hitboxUpdateCells)
-				{
-					vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
-				}
-				
-				hitboxUpdateCells.Clear();
-
-				vehicle.Map.coverGrid.DeRegister(vehicle);
+				vehicle.SetRotationInt(value, ref ___rotationInt);
+				return false;
 			}
 			return true;
 		}
 
 		private static void SetRotationAndUpdateVehicleRegions(Thing __instance)
 		{
-			if (__instance is VehiclePawn vehicle && vehicle.Spawned)
-			{
-				vehicle.Map.coverGrid.Register(vehicle);
-				vehicle.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
-			}
 			if (__instance.Spawned && (__instance.def.size.x != 1 || __instance.def.size.z != 1))
 			{
 				PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);

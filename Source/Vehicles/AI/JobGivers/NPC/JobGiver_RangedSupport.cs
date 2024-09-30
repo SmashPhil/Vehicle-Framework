@@ -41,17 +41,17 @@ namespace Vehicles
 			}
 			else
 			{
-				Thing thing2 = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, validator: (Thing target) => ExtraTargetValidator(vehicle, target),
-					minDistance: vehicle.CompVehicleTurrets.MinRange, maxDistance: vehicle.CompVehicleTurrets.MaxRange, onlyRanged: true);
-				if (thing2 == null && !vehicle.VehicleDef.npcProperties.runDownTargets)
-				{
-					thing = null;
-				}
-				else if (thing2 != null && thing2 != thing)
-				{
-					Notify_EngagedTarget(vehicle.mindState);
-					thing = thing2;
-				}
+				//Thing thing2 = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags, validator: (Thing target) => ExtraTargetValidator(vehicle, target),
+				//	minDistance: vehicle.CompVehicleTurrets.MinRange, maxDistance: vehicle.CompVehicleTurrets.MaxRange, onlyRanged: true);
+				//if (thing2 == null && !vehicle.VehicleDef.npcProperties.runDownTargets)
+				//{
+				//	thing = null;
+				//}
+				//else if (thing2 != null && thing2 != thing)
+				//{
+				//	Notify_EngagedTarget(vehicle.mindState);
+				//	thing = thing2;
+				//}
 			}
 			vehicle.mindState.enemyTarget = thing;
 			if (thing is Pawn && thing.Faction == Faction.OfPlayer && vehicle.Position.InHorDistOf(thing.Position, 60f))

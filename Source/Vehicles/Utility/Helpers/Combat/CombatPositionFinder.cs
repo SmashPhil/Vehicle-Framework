@@ -13,8 +13,11 @@ namespace Vehicles
 		public static bool TryFindCastPosition(VehiclePawn vehicle, Thing target, float maxDist, bool wantsCover, out IntVec3 dest)
 		{
 			dest = vehicle.Position;
-			return vehicle.Position.InHorDistOf(target.Position, maxDist) && 
+			bool found = false;
+
+			found = vehicle.Position.InHorDistOf(target.Position, maxDist) &&
 				GenSight.LineOfSightToThing(vehicle.Position, target, vehicle.Map, skipFirstCell: true);
+			return found;
 			//IntVec3 vehiclePos = vehicle.Position;
 			//IntVec3 targetPos = target.Position;
 			//ByteGrid avoidGrid = vehicle.GetAvoidGrid(false);

@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Verse;
 using RimWorld;
 using SmashTools;
+using Verse;
+using Verse.AI;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -272,6 +274,70 @@ namespace Vehicles
 
 			result = IntVec3.Invalid;
 			return false;
+		}
+
+		public static bool TryFindBestExitSpot(VehiclePawn vehicle, out IntVec3 cell, TraverseMode mode = TraverseMode.ByPawn)
+		{
+			Assert(vehicle.Spawned, "Trying to find exit spot for despawned vehicle.");
+
+			cell = IntVec3.Invalid;
+			Map map = vehicle.Map;
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+			if (!pathData.VehicleReachability.CanReachMapEdge(vehicle.Position, TraverseParms.For(vehicle)))
+			{
+				return false;
+			}
+			// More attempts allowed than vanilla since failing to find an exit location for vehicles would mean
+			// ditching. This may have a non-negligeable impact on game balance for maps with narrow map edges.
+			int sqrRadius = 0;
+			for (int i = 0; i < 100; i++)
+			{
+				sqrRadius += 4;
+				if (!CellFinder.TryFindRandomCellNear(vehicle.Position, map, sqrRadius, null, out IntVec3 searchCell))
+				{
+					continue;
+				}
+				int x = searchCell.x;
+				cell = new IntVec3(0, 0, searchCell.z).PadForHitbox(map, vehicle.VehicleDef);
+				if (vehicle.Map.Size.z - searchCell.z < x)
+				{
+					x = map.Size.z - searchCell.z;
+					cell = new IntVec3(searchCell.x, 0, map.Size.z - 1).PadForHitbox(map, vehicle.VehicleDef);
+				}
+				if (map.Size.x - searchCell.x < x)
+				{
+					x = map.Size.x - searchCell.x;
+					cell = new IntVec3(map.Size.x - 1, 0, searchCell.z).PadForHitbox(map, vehicle.VehicleDef);
+				}
+				if (searchCell.z < x)
+				{
+					cell = new IntVec3(searchCell.x, 0, 0).PadForHitbox(map, vehicle.VehicleDef);
+				}
+				if (cell.Standable(vehicle, map) &&
+					pathData.VehicleReachability.CanReachVehicle(vehicle.Position, cell, PathEndMode.OnCell, mode, Danger.Deadly))
+				{
+					return true;
+				}
+			}
+
+			// Last attempt to find any exit location before giving up and ditching vehicle
+			for (int i = 0; i < Rot4.RotationCount; i++)
+			{
+				if (CellFinderExtended.TryFindRandomEdgeCellWith(Validator, map, new Rot4(i), vehicle.VehicleDef, 0, out cell))
+				{
+					return true;
+				}
+			}
+			cell = IntVec3.Invalid;
+			return false;
+
+			bool Validator(IntVec3 cell)
+			{
+				IntVec3 paddedCell = cell.PadForHitbox(map, vehicle);
+				return pathData.VehicleReachability.CanReachVehicle(vehicle.Position, paddedCell,
+					PathEndMode.OnCell, TraverseParms.For(vehicle));
+			}
 		}
 
 		public static bool TryRadialSearchForCell(IntVec3 cell, Map map, float radius, Predicate<IntVec3> validator, out IntVec3 result)

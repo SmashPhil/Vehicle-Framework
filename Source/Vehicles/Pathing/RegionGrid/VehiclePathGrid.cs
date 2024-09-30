@@ -182,10 +182,8 @@ namespace Vehicles
 					stringBuilder?.AppendLine($"Unable to retrieve terrain at {cell}.");
 					return ImpassableCost;
 				}
-				pathCost = terrainDef.pathCost;
-				stringBuilder?.AppendLine($"def pathCost = {pathCost}");
-
-				if (!PassableTerrainCost(vehicleDef, terrainDef, ref pathCost, stringBuilder))
+				
+				if (!PassableTerrainCost(vehicleDef, terrainDef, out pathCost, stringBuilder))
 				{
 					return ImpassableCost;
 				}
@@ -256,9 +254,16 @@ namespace Vehicles
 			return pathCost;
 		}
 
-		public static bool PassableTerrainCost(VehicleDef vehicleDef, TerrainDef terrainDef, ref int pathCost, StringBuilder stringBuilder = null)
+		public static bool PassableTerrainCost(VehicleDef vehicleDef, TerrainDef terrainDef, out int pathCost, StringBuilder stringBuilder = null)
 		{
-			stringBuilder?.AppendLine($"Starting Terrain check.");
+			pathCost = TerrainCostAt(vehicleDef, terrainDef, stringBuilder);
+			return pathCost < ImpassableCost;
+		}
+
+		public static int TerrainCostAt(VehicleDef vehicleDef, TerrainDef terrainDef, StringBuilder stringBuilder = null)
+		{
+			int pathCost = terrainDef.pathCost;
+			stringBuilder?.AppendLine($"Starting Terrain check. Default Cost = {pathCost}");
 			if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
 			{
 				stringBuilder?.AppendLine($"custom terrain cost: {customPathCost}");
@@ -267,14 +272,14 @@ namespace Vehicles
 			else if (terrainDef.passability == Traversability.Impassable)
 			{
 				stringBuilder?.AppendLine($"terrainDef impassable: {ImpassableCost}");
-				return false;
+				return ImpassableCost;
 			}
 			else if (vehicleDef.properties.defaultTerrainImpassable)
 			{
 				stringBuilder?.AppendLine($"defaultTerrain is impassable and no custom pathCost was found.");
-				return false;
+				return ImpassableCost;
 			}
-			return true;
+			return pathCost;
 		}
 	}
 }

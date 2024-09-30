@@ -71,6 +71,24 @@ namespace Vehicles
 			ForcePawnFlee(pawn, fleeCell);
 		}
 
+		public static float FriendlyFireChance(VehiclePawn vehicle, Pawn pawn)
+		{
+			if (pawn.Faction != Faction.OfPlayer) return 0;
+
+			float multiplier = 1;
+			if (pawn.Faction == vehicle.Faction)
+			{
+				multiplier = 0.5f;
+			}
+			return multiplier * VehicleMod.settings.main.friendlyFire switch
+			{
+				VehicleTracksFriendlyFire.None => 0,
+				VehicleTracksFriendlyFire.Vanilla => Find.Storyteller.difficulty.friendlyFireChanceFactor,
+				VehicleTracksFriendlyFire.Custom => VehicleMod.settings.main.friendlyFireChance,
+				_ => throw new NotImplementedException(nameof(VehicleTracksFriendlyFire)),
+			};
+		}
+
 		public static void Notify_DangerousVehiclePath(this Pawn pawn, VehiclePawn vehicle)
 		{
 			if (pawn is VehiclePawn)
@@ -82,6 +100,10 @@ namespace Vehicles
 				return;
 			}
 			if (pawn.Downed || pawn.Dead || pawn.InMentalState)
+			{
+				return;
+			}
+			if (FriendlyFireChance(vehicle, pawn) == 0)
 			{
 				return;
 			}

@@ -59,7 +59,7 @@ namespace Vehicles
 		/* Combat */
 		public bool reduceExplosionsOnWater = true;
 		public bool runOverPawns = true;
-		public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.Vanilla;
+		public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.None;
 		public float friendlyFireChance = 0.5f;
 
 		/* Upgrades */
@@ -117,7 +117,7 @@ namespace Vehicles
 			/* Combat */
 			reduceExplosionsOnWater = true;
 			runOverPawns = true;
-			friendlyFire = VehicleTracksFriendlyFire.Vanilla;
+			friendlyFire = VehicleTracksFriendlyFire.None;
 			friendlyFireChance = 0.5f;
 
 			/* Upgrades */
@@ -167,7 +167,7 @@ namespace Vehicles
 
 			Scribe_Values.Look(ref reduceExplosionsOnWater, nameof(reduceExplosionsOnWater), defaultValue: true);
 			Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
-			Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.Vanilla);
+			Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.None);
 			Scribe_Values.Look(ref friendlyFireChance, nameof(friendlyFireChance), defaultValue: 0.5f);
 			Scribe_Values.Look(ref drawUpgradeInformationScreen, nameof(drawUpgradeInformationScreen), defaultValue: true);
 			Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);

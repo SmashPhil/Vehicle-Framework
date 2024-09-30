@@ -784,43 +784,42 @@ namespace Vehicles
 
 		private void WarnPawnsImpendingCollision()
 		{
-			if (curPath != null)
+			if (curPath == null) return;
+
+			collisionCells.Clear();
+			IntVec3 previous = IntVec3.Invalid;
+			IntVec3 next;
+			int nodeIndex = CollisionsLookAheadStartingIndex;
+			while (nodeIndex < CollisionsLookAheadStartingIndex + MaxCheckAheadNodesForCollisions && nodeIndex < curPath.NodesLeftCount)
 			{
-				collisionCells.Clear();
-				IntVec3 previous = IntVec3.Invalid;
-				IntVec3 next;
-				int nodeIndex = CollisionsLookAheadStartingIndex;
-				while (nodeIndex < CollisionsLookAheadStartingIndex + MaxCheckAheadNodesForCollisions && nodeIndex < curPath.NodesLeftCount)
+				next = curPath.Peek(nodeIndex);
+				Rot8 rot = Ext_Map.DirectionToCell(previous, next);
+
+				CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
+				foreach (IntVec3 cell in vehicleRect)
 				{
-					next = curPath.Peek(nodeIndex);
-					Rot8 rot = Ext_Map.DirectionToCell(previous, next);
-					
-					CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
-					foreach (IntVec3 cell in vehicleRect)
+					if (!cell.InBounds(vehicle.Map) || !collisionCells.Add(cell)) continue;
+
+					List<Thing> thingList = cell.GetThingList(vehicle.Map);
+					//Reverse iterate in case a thing or pawn is destroyed from being run over
+					for (int i = thingList.Count - 1; i >= 0; i--)
 					{
-						if (cell.InBounds(vehicle.Map) && collisionCells.Add(cell))
+						Thing thing = thingList[i];
+						if (thing is not Pawn pawn) continue;
+
+						Room room = RegionAndRoomQuery.RoomAt(cell, vehicle.Map, RegionType.Set_Passable);
+						Room pawnRoom = RegionAndRoomQuery.GetRoom(pawn, RegionType.Set_Passable);
+						if (pawnRoom == null || pawnRoom.CellCount == 1 || (room == pawnRoom
+							&& GenSight.LineOfSight(vehicle.Position, pawn.Position, vehicle.Map)))
 						{
-							var thingList = cell.GetThingList(vehicle.Map);
-							for (int i = thingList.Count - 1; i >= 0; i--) //Reverse iterate in case a thing or pawn is destroyed from being run over
-							{
-								Thing thing = thingList[i];
-								if (thing is Pawn pawn)
-								{
-									Room room = RegionAndRoomQuery.RoomAt(cell, vehicle.Map, RegionType.Set_Passable);
-									Room pawnRoom = RegionAndRoomQuery.GetRoom(pawn, RegionType.Set_Passable);
-									if (pawnRoom == null || pawnRoom.CellCount == 1 || (room == pawnRoom && GenSight.LineOfSight(vehicle.Position, pawn.Position, vehicle.Map)))
-									{
-										pawn.Notify_DangerousVehiclePath(vehicle);
-									}
-								}
-							}
+							pawn.Notify_DangerousVehiclePath(vehicle);
 						}
 					}
-					previous = next;
-					nodeIndex++;
 				}
-				collisionCells.Clear();
+				previous = next;
+				nodeIndex++;
 			}
+			collisionCells.Clear();
 		}
 
 		public enum PathRequest

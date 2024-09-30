@@ -29,30 +29,14 @@ namespace Vehicles
 			}
 		}
 
-		public float FriendlyFireChance(Pawn pawn)
-		{
-			float multiplier = 1;
-			if (pawn.Faction == Faction)
-			{
-				multiplier = 0.5f;
-			}
-			return multiplier * VehicleMod.settings.main.friendlyFire switch
-			{
-				VehicleTracksFriendlyFire.None => 0,
-				VehicleTracksFriendlyFire.Vanilla => Find.Storyteller.difficulty.friendlyFireChanceFactor,
-				VehicleTracksFriendlyFire.Custom => VehicleMod.settings.main.friendlyFireChance,
-				_ => throw new NotImplementedException(nameof(VehicleTracksFriendlyFire)),
-			};
-		}
-
 		public void CheckForCollisions(float moveSpeed)
 		{
 			CellRect occupiedRect = this.OccupiedRect();
 			foreach (IntVec3 cell in occupiedRect)
 			{
-				if (Map.thingGrid.ThingAt(cell, ThingCategory.Pawn) is Pawn pawn && !(pawn is VehiclePawn))
+				if (Map.thingGrid.ThingAt(cell, ThingCategory.Pawn) is Pawn pawn && pawn is not VehiclePawn)
 				{
-					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(FriendlyFireChance(pawn)))
+					if (pawn.Faction.HostileTo(Faction) || Rand.Chance(VehicleDamager.FriendlyFireChance(this, pawn)))
 					{
 						(float pawnDamage, float vehicleDamage) = CalculateImpactDamage(pawn, this, moveSpeed);
 						Pawn culprit = GetPriorityHandlers(HandlingTypeFlags.Movement)?.FirstOrDefault(handler => handler.handlers.Any)?.handlers.InnerListForReading.FirstOrDefault();

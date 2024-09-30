@@ -19,11 +19,29 @@
 
 						<!-- Carry pawns closer before deploying -->
 						<li Class="Vehicles.JobGiver_GotoNearestHostile">
+							<urgency>Walk</urgency>
 							<overrideExpiryInterval>60</overrideExpiryInterval>
 						</li>
 
 						<!-- Provide overwatch -->
 						
+						<!-- Idle rather than continue to humanlike nodes -->
+						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+					</subNodes>
+				</li>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+
+	<ThinkTreeDef>
+		<defName>Vehicle_ExitMapBest</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
+					<subNodes>
+						<li Class="Vehicles.JobGiver_ExitMapBest">
+							<defaultLocomotion>Walk</defaultLocomotion>
+						</li>
 						<!-- Idle rather than continue to humanlike nodes -->
 						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
 					</subNodes>

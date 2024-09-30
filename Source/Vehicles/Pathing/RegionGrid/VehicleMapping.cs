@@ -350,6 +350,9 @@ namespace Vehicles
 						case FlashGridType.PositionManager:
 							FlashClaimants();
 							break;
+						case FlashGridType.ThingGrid:
+							FlashThingGrid();
+							break;
 						default:
 							Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
 							break;
@@ -393,6 +396,20 @@ namespace Vehicles
 				foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
 				{
 					if (!manager.PositionClaimed(cell)) continue;
+
+					map.debugDrawer.FlashCell(cell, 1, duration: 1);
+				}
+			}
+		}
+
+		private void FlashThingGrid()
+		{
+			if (!Find.TickManager.Paused)
+			{
+				foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+				{
+					Thing thing = map.thingGrid.ThingAt(cell, ThingCategory.Pawn);
+					if (thing is not VehiclePawn) continue;
 
 					map.debugDrawer.FlashCell(cell, 1, duration: 1);
 				}

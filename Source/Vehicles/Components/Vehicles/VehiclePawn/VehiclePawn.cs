@@ -41,35 +41,6 @@ namespace Vehicles
 			}
 		}
 
-		public Rot8 FullRotation
-		{
-			get
-			{
-				if (!VehicleDef.graphicData.drawRotated)
-				{
-					return Rot8.North;
-				}
-				return new Rot8(Rotation, Angle);
-			}
-			set
-			{
-				if (value == FullRotation)
-				{
-					return;
-				}
-				Rotation = value;
-				Angle = 0;
-				if (value == Rot8.NorthEast || value == Rot8.SouthWest)
-				{
-					Angle = -45;
-				}
-				else if (value == Rot8.SouthEast || value == Rot8.NorthWest)
-				{
-					Angle = 45;
-				}
-			}
-		}
-
 		public Pawn FindPawnWithBestStat(StatDef stat, Predicate<Pawn> pawnValidator = null)
 		{
 			Pawn pawn = null;
@@ -292,12 +263,13 @@ namespace Vehicles
 				}
 			}
 
-			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), new object[] { this });
-			Scribe_Deep.Look(ref ignition, nameof(ignition), new object[] { this });
-			Scribe_Deep.Look(ref statHandler, nameof(statHandler), new object[] { this });
+			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), [this]);
+			Scribe_Deep.Look(ref ignition, nameof(ignition), [this]);
+			Scribe_Deep.Look(ref statHandler, nameof(statHandler), [this]);
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
 
 			Scribe_Values.Look(ref angle, nameof(angle));
+			Scribe_Values.Look(ref reverse, nameof(reverse));
 			Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
 
 			Scribe_Deep.Look(ref patternData, nameof(patternData));
@@ -306,7 +278,10 @@ namespace Vehicles
 
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
-				patternData = new PatternData(VehicleDef.graphicData.color, VehicleDef.graphicData.colorTwo, VehicleDef.graphicData.colorThree, PatternDefOf.Default, Vector2.zero, 0);
+				patternData = new PatternData(VehicleDef.graphicData.color, 
+											  VehicleDef.graphicData.colorTwo, 
+											  VehicleDef.graphicData.colorThree,
+											  PatternDefOf.Default, Vector2.zero, 0);
 				retextureDef = null;
 				patternToPaint = null;
 			}

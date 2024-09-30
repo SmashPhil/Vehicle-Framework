@@ -18,10 +18,14 @@ namespace Vehicles
 		/// Find best attack target for VehicleTurret
 		/// </summary>
 		/// <seealso cref="BestAttackTarget(VehicleTurret, TargetScanFlags, Predicate{Thing}, float, float, IntVec3, float, bool, bool)"/>
-		public static bool TryGetTarget(this VehicleTurret turret, out LocalTargetInfo targetInfo, TargetingParameters param = null)
+		public static bool TryGetTarget(this VehicleTurret turret, out LocalTargetInfo targetInfo, TargetScanFlags? additionalFlags = null)
 		{
 			targetInfo = LocalTargetInfo.Invalid;
 			TargetScanFlags targetScanFlags = turret.turretDef.targetScanFlags;
+			if (additionalFlags != null)
+			{
+				targetScanFlags |= additionalFlags.Value;
+			}
 			Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, delegate (Thing thing)
 			{
 				return TargetMeetsRequirements(turret, thing);
@@ -37,7 +41,9 @@ namespace Vehicles
 		/// <summary>
 		/// Best attack target for VehicleTurret
 		/// </summary>
-		public static IAttackTarget BestAttackTarget(VehicleTurret turret, TargetScanFlags flags, Predicate<Thing> validator = null, float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default(IntVec3), float maxTravelRadiusFromLocus = 3.4028235E+38f, bool canBash = false, bool canTakeTargetsCloserThanEffectiveMinRange = true)
+		public static IAttackTarget BestAttackTarget(VehicleTurret turret, TargetScanFlags flags, Predicate<Thing> validator = null, 
+			float minDist = 0f, float maxDist = 9999f, IntVec3 locus = default, float maxTravelRadiusFromLocus = float.MaxValue,
+			bool canTakeTargetsCloserThanEffectiveMinRange = true)
 		{
 			VehiclePawn searcherPawn = turret.vehicle;
 

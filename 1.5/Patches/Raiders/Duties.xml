@@ -10,4 +10,20 @@
 			</li>
 		</value>
 	</Operation>
+
+	<Operation Class = "PatchOperationReplace">
+		<xpath>Defs/DutyDef[defName = "ExitMapBest"]/thinkNode</xpath>
+		<value>
+			<thinkNode Class="ThinkNode_Priority">
+				<subNodes>
+					<li Class = "ThinkNode_Subtree">
+						<treeDef>Vehicle_ExitMapBest</treeDef>
+					</li>
+					<li Class="JobGiver_ExitMapBest">
+						<defaultLocomotion>Walk</defaultLocomotion>
+					</li>
+				</subNodes>
+			</thinkNode>
+		</value>
+	</Operation>
 </Patch>

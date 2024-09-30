@@ -13,6 +13,9 @@ namespace Vehicles
 {
 	public class JobGiver_GotoNearestHostile : ThinkNode_JobGiver
 	{
+		private const int ExpiryInterval = 360;
+
+		private LocomotionUrgency urgency = LocomotionUrgency.Jog;
 		private bool ignoreNonCombatants;
 		private bool humanlikesOnly;
 		private int overrideExpiryInterval = -1;
@@ -48,8 +51,8 @@ namespace Vehicles
 				// Humanlikes-only
 				if (humanlikesOnly && attackTarget.Thing is Pawn targetPawn && !targetPawn.RaceProps.Humanlike) continue;
 				// No line of sight
-				if (attackTarget.Thing is Pawn innerTargetPawn && (innerTargetPawn.IsCombatant() || !ignoreNonCombatants) 
-					&& !GenSight.LineOfSightToThing(vehicle.Position, innerTargetPawn, vehicle.Map, false, null)) continue;
+				//if (attackTarget.Thing is Pawn innerTargetPawn && (innerTargetPawn.IsCombatant() || !ignoreNonCombatants) 
+				//	&& !GenSight.LineOfSightToThing(vehicle.Position, innerTargetPawn, vehicle.Map, false, null)) continue;
 
 				Thing thing = (Thing)attackTarget;
 				int dist = thing.Position.DistanceToSquared(vehicle.Position);
@@ -61,12 +64,14 @@ namespace Vehicles
 			}
 			if (target != null)
 			{
-				float radius = target is VehiclePawn targetVehicle ? Mathf.Min(targetVehicle.VehicleDef.Size.x, targetVehicle.VehicleDef.Size.z) * 2 : 10;
+				float radius = target is VehiclePawn targetVehicle ? Mathf.Max(targetVehicle.VehicleDef.Size.x, targetVehicle.VehicleDef.Size.z) * 2 : 10;
 				if (!PathingHelper.TryFindNearestStandableCell(vehicle, target.Position, out IntVec3 result, radius: radius))
 				{
+					Log.Error($"Couldn't find standable cell near {target}");
 					return null;
 				}
 				Job job = JobMaker.MakeJob(JobDefOf.Goto, result);
+				job.locomotionUrgency = urgency;
 				job.checkOverrideOnExpire = true;
 				if (overrideInstancedExpiryInterval > 0)
 				{
@@ -74,7 +79,7 @@ namespace Vehicles
 				}
 				else
 				{
-					job.expiryInterval = ((overrideExpiryInterval > 0) ? overrideExpiryInterval : 500);
+					job.expiryInterval = (overrideExpiryInterval > 0) ? overrideExpiryInterval : ExpiryInterval;
 				}
 				job.collideWithPawns = true;
 				return job;

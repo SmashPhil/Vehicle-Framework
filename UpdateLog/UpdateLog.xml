@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1756</currentVersion>
+  <currentVersion>1.5.1758</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -13,6 +13,8 @@
 - Raiders still attacking vehicles with no pawns inside if turret was set to auto-target
 
 - Vehicles not deregistering from cover grid when rotating.
+
+- Vehicles could spawn out of bounds at certain angles when arriving with vanilla-chosen spawn position.
 
 - Mods using vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting.
 

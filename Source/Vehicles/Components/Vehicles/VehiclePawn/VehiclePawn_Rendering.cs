@@ -30,6 +30,7 @@ namespace Vehicles
 		private RetextureDef retextureDef;
 
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
+		private bool reverse = false;
 
 		[AnimationProperty(Name = "Rotation")]
 		private float rotation = 0;
@@ -119,11 +120,58 @@ namespace Vehicles
 			}
 			set
 			{
-				if (value == angle)
+				if (value == angle) return;
+				if (Reverse)
+				{
+					angle *= -1; // Flips across axis (negative = NE & SW, positive = NW & SE)
+				}
+				angle = value;
+			}
+		}
+
+		public Rot8 FullRotation
+		{
+			get
+			{
+				if (!VehicleDef.graphicData.drawRotated)
+				{
+					return Rot8.North;
+				}
+				return new Rot8(Rotation, Angle);
+			}
+			set
+			{
+				if (value == FullRotation)
 				{
 					return;
 				}
-				angle = value;
+				Rotation = value;
+				Angle = 0;
+				if (value == Rot8.NorthEast || value == Rot8.SouthWest)
+				{
+					Angle = -45;
+				}
+				else if (value == Rot8.SouthEast || value == Rot8.NorthWest)
+				{
+					Angle = 45;
+				}
+			}
+		}
+
+		/// <summary>
+		/// Vehicle is in reverse, flipping rotation for pathing
+		/// </summary>
+		public bool Reverse
+		{
+			get
+			{
+				return reverse;
+			}
+			set
+			{
+				if (reverse == value) return;
+
+				reverse = value;
 			}
 		}
 
@@ -248,6 +296,42 @@ namespace Vehicles
 					{
 						yield return animationDriver;
 					}
+				}
+			}
+		}
+
+		internal void SetRotationInt(Rot4 value, ref Rot4 rotationInt)
+		{
+			if (Reverse)
+			{
+				value = value.Opposite;
+			}
+			if (rotationInt == value) return;
+
+			if (Spawned)
+			{
+				// Don't let near-edge turns go through if it would put the vehicle out of bounds.
+				if (!this.OccupiedRectShifted(IntVec2.Zero, value).InBounds(Map))
+				{
+					return;
+				}
+				Map.thingGrid.Deregister(this);
+				Map.coverGrid.DeRegister(this);
+			}
+
+			rotationInt = value;
+
+			if (Spawned)
+			{
+				Map.thingGrid.Register(this);
+				Map.coverGrid.Register(this);
+				Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
+
+				CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, value);
+				CellRect newRect = this.OccupiedRectShifted(IntVec2.Zero, rotationInt);
+				foreach (IntVec3 cell in oldRect.Encapsulate(newRect))
+				{
+					Map.pathing.RecalculatePerceivedPathCostAt(cell);
 				}
 			}
 		}
@@ -560,15 +644,6 @@ namespace Vehicles
 
 		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			foreach (Type type in VehicleDef.designatorTypes)
-			{
-				Designator designator = DesignatorCache.Get(type);
-				if (designator != null)
-				{
-					//yield return designator;
-				}
-			}
-
 			if (Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
 			{
 				yield break;
@@ -580,6 +655,18 @@ namespace Vehicles
 				{
 					yield return gizmo;
 				}
+			}
+
+			if (DebugSettings.ShowDevGizmos && Spawned)
+			{
+				yield return new Command_Action
+				{
+					defaultLabel = $"Gear: {(Reverse ? "Reverse" : "Drive")}",
+					action = delegate ()
+					{
+						Reverse = !Reverse;
+					}
+				};
 			}
 
 			bool upgrading = CompUpgradeTree != null && CompUpgradeTree.Upgrading;
