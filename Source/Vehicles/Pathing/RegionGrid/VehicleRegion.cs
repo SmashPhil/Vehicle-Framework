@@ -9,6 +9,7 @@ using Verse;
 using RimWorld;
 using SmashTools;
 using System.Threading;
+using static SmashTools.Debug;
 using Verse.Noise;
 
 namespace Vehicles
@@ -25,6 +26,7 @@ namespace Vehicles
 		private int id = -1;
 		private VehicleDef vehicleDef;
 		private int referenceCount;
+		private int cellCount;
 
 		private VehicleRoom room;
 
@@ -37,7 +39,7 @@ namespace Vehicles
 		private Dictionary<int, Weight> weights = new Dictionary<int, Weight>();
 #endif
 
-		public uint[] closedIndex = new uint[VehicleRegionTraverser.WorkerCount];
+		public ThreadLocal<uint[]> closedIndex = new(() => new uint[VehicleRegionTraverser.WorkerCount]);
 
 		public CellRect extentsClose;
 		public CellRect extentsLimit;
@@ -87,6 +89,29 @@ namespace Vehicles
 		}
 
 		public int ReferenceCount => referenceCount;
+
+		public int CellCount
+		{
+			get
+			{
+				if (cellCount < 0)
+				{
+					VehicleRegionGrid regions = mapping[vehicleDef].VehicleRegionGrid;
+					for (int z = extentsClose.minZ; z <= extentsClose.maxZ; z++)
+					{
+						for (int x = extentsClose.minX; x <= extentsClose.maxX; x++)
+						{
+							IntVec3 cell = new IntVec3(x, 0, z);
+							if (regions.GetRegionAt(cell) == this)
+							{
+								Interlocked.Increment(ref cellCount);
+							}
+						}
+					}
+				}
+				return cellCount;
+			}
+		}
 
 		/// <summary>
 		/// Yield all cells in the region
@@ -258,6 +283,7 @@ namespace Vehicles
 			this.vehicleDef = vehicleDef;
 			this.id = id;
 			referenceCount = 0;
+			cellCount = -1;
 			precalculatedHashCode = Gen.HashCombineInt(id, vehicleDef.GetHashCode());
 			debugMakeTick = Find.TickManager.TicksGame;
 
@@ -270,7 +296,7 @@ namespace Vehicles
 
 			reachedIndex = 0;
 			newRegionGroupIndex = -1;
-
+			
 			Suspended = false;
 		}
 

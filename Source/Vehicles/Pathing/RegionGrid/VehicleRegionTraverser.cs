@@ -2,7 +2,9 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using SmashTools;
 using Verse;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -16,7 +18,7 @@ namespace Vehicles
 		public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
 		public delegate bool VehicleRegionProcessor(VehicleRegion reg);
 
-		private static readonly ThreadLocal<Queue<BFSWorker>> freeWorkers = new(CreateWorkers);
+		private static readonly ThreadLocal<Queue<BFSWorker>> workers = new(CreateWorkers);
 
 		/// <summary>
 		/// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
@@ -99,18 +101,19 @@ namespace Vehicles
 		/// <param name="traversableRegionTypes"></param>
 		public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
 		{
-			Queue<BFSWorker> workers = freeWorkers.Value;
-			if (workers.Count == 0)
-			{
-				Log.Error($"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
-				return;
-			}
 			if (root is null)
 			{
 				Log.Error("BFS with null root region.");
 				return;
 			}
-			BFSWorker bfsWorker = workers.Dequeue();
+			
+			if (workers.Value.Count == 0)
+			{
+				Trace(false, $"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
+				return;
+			}
+			BFSWorker bfsWorker = workers.Value.Dequeue();
+
 			try
 			{
 				bfsWorker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions, traversableRegionTypes);
@@ -122,7 +125,7 @@ namespace Vehicles
 			finally
 			{
 				bfsWorker.Clear();
-				workers.Enqueue(bfsWorker);
+				workers.Value.Enqueue(bfsWorker);
 			}
 		}
 
@@ -209,12 +212,13 @@ namespace Vehicles
 			/// <param name="region"></param>
 			private void QueueNewOpenRegion(VehicleRegion region)
 			{
-				if (region.closedIndex[closedArrayPos] == closedIndex)
+				if (region.closedIndex.Value[closedArrayPos] == closedIndex)
 				{
-					throw new InvalidOperationException($"Region is already closed; you can't open it. Region={region}");
+					Log.Warning($"Already closed");
+					//throw new InvalidOperationException($"Region is already closed; you can't open it. Region={region} Index={closedArrayPos}");
 				}
 				open.Enqueue(region);
-				region.closedIndex[closedArrayPos] = closedIndex;
+				region.closedIndex.Value[closedArrayPos] = closedIndex;
 			}
 
 			/// <summary>
@@ -227,7 +231,7 @@ namespace Vehicles
 			/// <param name="traversableRegionTypes"></param>
 			public void BreadthFirstTraverseWork(VehicleRegion root, VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
 			{
-				if ((root.type & traversableRegionTypes) == RegionType.None)
+				if (root.type == RegionType.None)
 				{
 					return;
 				}
@@ -252,7 +256,7 @@ namespace Vehicles
 						for (int j = 0; j < 2; j++)
 						{
 							VehicleRegion region2 = regionLink.regions[j];
-							if (region2 != null && region2.closedIndex[closedArrayPos] != closedIndex && (region2.type & traversableRegionTypes) != RegionType.None &&
+							if (region2 != null && region2.closedIndex.Value[closedArrayPos] != closedIndex && (region2.type & traversableRegionTypes) != RegionType.None &&
 								(entryCondition is null || entryCondition(region, region2)))
 							{
 								QueueNewOpenRegion(region2);

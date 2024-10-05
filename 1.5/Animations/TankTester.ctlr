@@ -15,17 +15,17 @@
 					<stateType>Entry</stateType>
 					<transitions>
 						<li>
-							<exitTime>0</exitTime>
+							<exitTicks>0</exitTicks>
 							<toStateGuid>481d378c-41f9-4289-afa6-af54961bf743</toStateGuid>
 							<conditions />
 						</li>
 						<li>
-							<exitTime>0</exitTime>
+							<exitTicks>0</exitTicks>
 							<toStateGuid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</toStateGuid>
 							<conditions />
 						</li>
 						<li>
-							<exitTime>0</exitTime>
+							<exitTicks>0</exitTicks>
 							<toStateGuid>24125168-d593-47e8-93fc-f38c4ad04298</toStateGuid>
 							<conditions />
 						</li>

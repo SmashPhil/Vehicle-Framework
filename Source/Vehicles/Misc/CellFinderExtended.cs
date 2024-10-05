@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using Verse;
 using Verse.AI;
 using static SmashTools.Debug;
@@ -13,6 +14,7 @@ namespace Vehicles
 	{
 		private static List<IntVec3> mapEdgeCells;
 		private static IntVec3 mapEdgeCellsSize;
+		private static List<VehicleRegion> workingRegions = new List<VehicleRegion>();
 
 		public static bool TryFindRandomEdgeCell(Rot4 dir, Map map, Predicate<IntVec3> validator, int offset, out IntVec3 result)
 		{
@@ -137,16 +139,80 @@ namespace Vehicles
 			return pawn.ClampToMap(CellFinder.RandomEdgeCell(dir, map), map, padding);
 		}
 
-		public static bool TryFindRandomReachableCellNear(IntVec3 root, Map map, VehicleDef vehicleDef, float radius, TraverseParms traverseParms, Predicate<IntVec3> validator, Predicate<VehicleRegion> regionValidator, out IntVec3 result)
+		public static bool TryFindRandomReachableCellNear(IntVec3 root, Map map, VehicleDef vehicleDef, float radius, TraverseParms traverseParms, 
+			Predicate<IntVec3> extraValidator, Predicate<VehicleRegion> regionValidator, out IntVec3 result, int maxRegions = 999999)
 		{
 			if (map is null)
 			{
-				Log.ErrorOnce("Tried to find reachable cell using SPExtended in a null map", 61037855);
+				Log.Error("Tried to find reachable cell using a null map");
 				result = IntVec3.Invalid;
 				return false;
 			}
-			Rot4 dir = Find.World.CoastDirectionAt(map.Tile).IsValid ? Find.World.CoastDirectionAt(map.Tile) : !Find.WorldGrid[map.Tile].Rivers.NullOrEmpty() ? Ext_Map.RiverDirection(map) : Rot4.Invalid;
-			return TryFindRandomEdgeCell(dir, map, (IntVec3 c) => GenGridVehicles.Standable(c, vehicleDef, map) && !c.Fogged(map), 0, out result);
+			//return TryFindRandomEdgeCell(Rot4.Invalid, map, (IntVec3 c) => GenGridVehicles.Standable(c, vehicleDef, map) && !c.Fogged(map), 0, out result);
+
+			VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(root, map, vehicleDef, RegionType.Set_Passable);
+			if (region == null)
+			{
+				result = IntVec3.Invalid;
+				return false;
+			}
+			workingRegions.Clear();
+			float radSquared = radius * radius;
+			VehicleRegionTraverser.BreadthFirstTraverse(root, map, vehicleDef,
+				(VehicleRegion from, VehicleRegion to) => to.Allows(traverseParms, true) 
+				&& (radius > 1000f || to.extentsClose.ClosestDistSquaredTo(root) <= radSquared)
+				&& (regionValidator == null || regionValidator(to)), 
+				delegate (VehicleRegion region)
+			{
+				workingRegions.Add(region);
+				return false;
+			}, maxRegions, RegionType.Set_Passable);
+			
+			while (workingRegions.Count > 0)
+			{
+				VehicleRegion currentRegion = workingRegions.RandomElementByWeight((VehicleRegion region) => region.CellCount);
+				if (currentRegion.TryFindRandomCellInRegion(Validator, out result))
+				{
+					workingRegions.Clear();
+					return true;
+				}
+				workingRegions.Remove(currentRegion);
+			}
+			result = IntVec3.Invalid;
+			workingRegions.Clear();
+			return false;
+
+			bool Validator(IntVec3 cell)
+			{
+				return (cell - root).LengthHorizontalSquared <= radSquared && (extraValidator == null || extraValidator(cell));
+			}
+		}
+
+		public static bool TryFindRandomCellInRegion(this VehicleRegion region, Predicate<IntVec3> validator, out IntVec3 result)
+		{
+			for (int i = 0; i < 10; i++)
+			{
+				result = region.RandomCell;
+				if (validator == null || validator(result))
+				{
+					return true;
+				}
+			}
+			List<IntVec3> cells = AsyncPool<List<IntVec3>>.Get();
+			cells.AddRange(region.Cells);
+			cells.Shuffle();
+			for (int j = 0; j < cells.Count; j++)
+			{
+				result = cells[j];
+				if (validator == null || validator(result))
+				{
+					return true;
+				}
+			}
+			result = region.RandomCell;
+			cells.Clear();
+			AsyncPool<List<IntVec3>>.Return(cells);
+			return false;
 		}
 
 		public static IntVec3 RandomClosewalkCellNear(IntVec3 root, Map map, VehicleDef vehicleDef, int radius, Predicate<IntVec3> validator = null)

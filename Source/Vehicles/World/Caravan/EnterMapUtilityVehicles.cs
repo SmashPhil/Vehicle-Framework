@@ -108,7 +108,7 @@ namespace Vehicles
 		{
 			if (enterMode == CaravanEnterMode.Edge)
 			{
-				return FindNearEdgeCell(map, caravan, extraCellValidator);
+				return FindNearEdgeCell(map, caravan.LeadVehicle.VehicleDef, caravan.Faction, extraCellValidator);
 			}
 			if (enterMode != CaravanEnterMode.Center)
 			{
@@ -117,39 +117,86 @@ namespace Vehicles
 			return FindCenterCell(map, caravan.LeadVehicle.VehicleDef, extraCellValidator);
 		}
 
-		private static IntVec3 FindNearEdgeCell(Map map, VehicleCaravan caravan, Predicate<IntVec3> extraCellValidator)
+		private static IntVec3 FindNearEdgeCell(Map map, VehicleDef vehicleDef, Faction faction, Predicate<IntVec3> extraCellValidator)
 		{
-			bool baseValidator(IntVec3 x) => caravan.VehiclesListForReading.Any(v => GenGridVehicles.Standable(x, v, map)) && !x.Fogged(map);
-			Faction hostFaction = map.ParentFaction;
 			IntVec3 root;
-			if (caravan.HasBoat())
+			Rot4 rot = Rot4.Random;
+			if (vehicleDef.vehicleType == VehicleType.Sea)
 			{
-				if (CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && (extraCellValidator == null || extraCellValidator(x)) &&
-					((hostFaction != null && map.reachability.CanReachFactionBase(x, hostFaction)) ||
-					(hostFaction == null && map.reachability.CanReachBiggestMapEdgeDistrict(x))), map, CalculateEdgeToSpawnBoatOn(map), CellFinder.EdgeRoadChance_Ignore, out root))
-				{
-					return CellFinderExtended.RandomClosewalkCellNear(root, map, caravan.LeadVehicle.VehicleDef, 5);
-				}
-				if (CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && (extraCellValidator is null || extraCellValidator(x)), map, CellFinder.EdgeRoadChance_Always, out root))
-				{
-					return CellFinderExtended.RandomClosewalkCellNear(root, map, caravan.LeadVehicle.VehicleDef, 5);
-				}
+				rot = CalculateEdgeToSpawnBoatOn(map);
 			}
-			else
+			RoadPreference preference = RoadPreferenceFor(faction);
+			while (preference > RoadPreference.Invalid)
 			{
-				if (CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && (extraCellValidator == null || extraCellValidator(x)) &&
-					((hostFaction != null && map.reachability.CanReachFactionBase(x, hostFaction)) ||
-					(hostFaction == null && map.reachability.CanReachBiggestMapEdgeDistrict(x))), map, CellFinder.EdgeRoadChance_Always, out root))
+				if (TryFindCellWithBestPreference(preference, out root))
 				{
-					return CellFinder.RandomClosewalkCellNear(root, map, 5, null);
+					return root;
 				}
-				if (CellFinder.TryFindRandomEdgeCellWith((IntVec3 x) => baseValidator(x) && (extraCellValidator is null || extraCellValidator(x)), map, CellFinder.EdgeRoadChance_Always, out root))
-				{
-					return CellFinder.RandomClosewalkCellNear(root, map, 5, null);
-				}
+				preference--;
 			}
 			Log.Warning("Could not find any valid edge cell.");
 			return CellFinder.RandomCell(map);
+
+			bool TryFindCellWithBestPreference(RoadPreference preference, out IntVec3 root)
+			{
+				root = IntVec3.Invalid;
+				if (TryFindNearEdgeCell(map, vehicleDef, rot, preference, extraCellValidator, out root)) return true;
+				if (TryFindNearEdgeCell(map, vehicleDef, rot.Opposite, preference, extraCellValidator, out root)) return true;
+				if (TryFindNearEdgeCell(map, vehicleDef, rot.Rotated(RotationDirection.Clockwise), preference, extraCellValidator, out root)) return true;
+				if (TryFindNearEdgeCell(map, vehicleDef, rot.Rotated(RotationDirection.Counterclockwise), preference, extraCellValidator, out root)) return true;
+				return false;
+			}
+		}
+
+		private static bool TryFindNearEdgeCell(Map map, VehicleDef vehicleDef, Rot4 rot, RoadPreference roadPref, Predicate < IntVec3> extraCellValidator, out IntVec3 root)
+		{
+			Faction hostFaction = map.ParentFaction;
+			if (CellFinderExtended.TryFindRandomEdgeCellWith((IntVec3 cell) => Validator(cell) &&
+					(extraCellValidator == null || extraCellValidator(cell)) &&
+					((hostFaction != null && map.reachability.CanReachFactionBase(cell, hostFaction)) ||
+					(hostFaction == null && map.reachability.CanReachBiggestMapEdgeDistrict(cell))) &&
+					AllowsPreference(map, cell, roadPref),
+					map, rot, vehicleDef, CellFinder.EdgeRoadChance_Always, out root))
+			{
+				return true;
+			}
+			if (CellFinderExtended.TryFindRandomEdgeCellWith((IntVec3 x) => Validator(x) &&
+				(extraCellValidator is null || extraCellValidator(x)),
+				map, rot, vehicleDef, CellFinder.EdgeRoadChance_Always, out root))
+			{
+				root = CellFinderExtended.RandomClosewalkCellNear(root, map, vehicleDef, 5);
+				return true;
+			}
+			return false;
+
+			bool Validator(IntVec3 cell) => GenGridVehicles.Standable(cell, vehicleDef, map) && !cell.Fogged(map);
+		}
+
+		private static RoadPreference RoadPreferenceFor(Faction faction)
+		{
+			return faction.HostileTo(Faction.OfPlayer) ? RoadPreference.None : RoadPreference.Prioritize;
+		}
+
+		private static bool AllowsPreference(Map map, IntVec3 cell, RoadPreference roadPref)
+		{
+			switch (roadPref)
+			{
+				case RoadPreference.NoAvoidal:
+					Area_RoadAvoidal areaAvoid = map.areaManager.Get<Area_RoadAvoidal>();
+					return !areaAvoid[cell];
+				case RoadPreference.Prioritize:
+					Area_Road areaPrefer = map.areaManager.Get<Area_Road>();
+					return areaPrefer[cell];
+			}
+			return true;
+		}
+
+		private enum RoadPreference : int
+		{
+			Invalid,
+			None,
+			NoAvoidal,
+			Prioritize,
 		}
 	}
 }
