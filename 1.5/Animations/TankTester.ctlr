@@ -24,11 +24,6 @@
 							<toStateGuid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</toStateGuid>
 							<conditions />
 						</li>
-						<li>
-							<exitTicks>0</exitTicks>
-							<toStateGuid>24125168-d593-47e8-93fc-f38c4ad04298</toStateGuid>
-							<conditions />
-						</li>
 					</transitions>
 				</li>
 				<li>
@@ -42,9 +37,9 @@
 					<transitions />
 				</li>
 				<li>
-					<name>New State</name>
+					<name>Idle</name>
 					<guid>481d378c-41f9-4289-afa6-af54961bf743</guid>
-					<position>(-23, 15)</position>
+					<position>(-22, 1)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
 					<writeDefaults>True</writeDefaults>
@@ -52,19 +47,9 @@
 					<transitions />
 				</li>
 				<li>
-					<name>New State 0</name>
+					<name>Moving</name>
 					<guid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</guid>
-					<position>(-15, 5)</position>
-					<clip IsNull="TRUE" />
-					<speed>1</speed>
-					<writeDefaults>True</writeDefaults>
-					<stateType>None</stateType>
-					<transitions />
-				</li>
-				<li>
-					<name>New State 1</name>
-					<guid>24125168-d593-47e8-93fc-f38c4ad04298</guid>
-					<position>(-16, -5)</position>
+					<position>(1, 10)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
 					<writeDefaults>True</writeDefaults>

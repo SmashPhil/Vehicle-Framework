@@ -12,8 +12,8 @@ namespace Vehicles
 {
 	public class VehicleOrientationController : BaseTargeter
 	{
-		private const float DragThreshold = 0.5f;
-		private const float HoldTimeThreshold = 0.15f;
+		private const float DragThreshold = 1f;
+		private const float HoldTimeThreshold = 0.5f;
 
 		private IntVec3 cell;
 		private IntVec3 clickCell;

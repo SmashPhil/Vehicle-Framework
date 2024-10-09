@@ -222,10 +222,11 @@
     <Compile Include="Harmony\PatchCategories\Areas.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
-    <Compile Include="Harmony\UnitTesting\RaidTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\StartupActions\RaidTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_AerialVehicleWorldHandling.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_MapGrids.cs" />
-    <Compile Include="Harmony\UnitTesting\WorldTesting.cs" />
-    <Compile Include="Harmony\UnitTesting\UITesting.cs" />
+    <Compile Include="Harmony\UnitTesting\StartupActions\WorldTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\StartupActions\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
     <Compile Include="Misc\Attributes\DisableSettingConditionalAttribute.cs" />
     <Compile Include="Misc\DefModExtension\ReduceExplosionOnWater.cs" />
@@ -250,6 +251,7 @@
     <Compile Include="Misc\Interfaces\IMaterialCacheTarget.cs" />
     <Compile Include="Misc\Interfaces\ISustainerTarget.cs" />
     <Compile Include="Misc\Interfaces\IVehicleWorldObject.cs" />
+    <Compile Include="Pathing\Map\DeferredRegionGenerator.cs" />
     <Compile Include="Pathing\RegionGrid\ChunkSet.cs" />
     <Compile Include="Pathing\RegionGrid\ConcurrentListerThings.cs" />
     <Compile Include="Pathing\RegionGrid\GridOwners.cs" />
@@ -389,7 +391,7 @@
     <Compile Include="CustomFeatures\Misc\Motes\Mote_CannonPlume.cs" />
     <Compile Include="Gizmo\Command_VerbWorldTarget.cs" />
     <Compile Include="Harmony\PatchCategories\DefGenerators\PawnKindDefGenerator_Vehicles.cs" />
-    <Compile Include="Harmony\UnitTesting\PerformanceTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\StartupActions\PerformanceTesting.cs" />
     <Compile Include="Misc\DefModExtension\SpaceObjectDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\SpawnerPropertiesDefModExtension.cs" />
     <Compile Include="Misc\DefModExtension\VehicleDamageMultiplierDefModExtension.cs" />
@@ -515,7 +517,6 @@
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleLaunchHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTabHelper.cs" />
     <Compile Include="Utility\Helpers\AerialVehicle\AerialVehicleTraderHelper.cs" />
-    <Compile Include="Utility\Helpers\AsyncActions\AsyncLongOperationAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathFindAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncPathingAction.cs" />
     <Compile Include="Utility\Helpers\AsyncActions\AsyncRegionAction.cs" />
@@ -652,7 +653,7 @@
     <Compile Include="Pathing\RegionGrid\VehicleReachabilityUtility.cs" />
     <Compile Include="Pathing\RegionGrid\TouchPathEndModeUtilityVehicles.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleGridsUtility.cs" />
-    <Compile Include="Pathing\RegionGrid\VehicleMapping.cs" />
+    <Compile Include="Pathing\Map\VehicleMapping.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegion.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionAndRoomQuery.cs" />
     <Compile Include="Pathing\RegionGrid\VehicleRegionAndRoomUpdater.cs" />

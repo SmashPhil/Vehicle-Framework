@@ -111,7 +111,7 @@ namespace Vehicles
 					float num = refuelable.TargetFuelPercent;
 					float num2 = rect.x + num * rect.width - ArrowSize / 2;
 					float num3 = rect.y - ArrowSize;
-					GUI.DrawTexture(new Rect(num2, num3, ArrowSize, ArrowSize), UIElements.TargetLevelArrow);
+					GUI.DrawTexture(new Rect(num2, num3, ArrowSize, ArrowSize), UIData.TargetLevelArrow);
 
 					Text.Font = GameFont.Small;
 					Text.Anchor = TextAnchor.MiddleCenter;

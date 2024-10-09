@@ -3,6 +3,7 @@ using SmashTools.Performance;
 using System.Collections.Generic;
 using System.Threading;
 using Verse;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -14,17 +15,16 @@ namespace Vehicles
 		private const int CleanSquaresPerFrame = 16;
 
 		//Thread Safe - Only accessed from the same thread within the same method
-		private readonly HashSet<VehicleRegion> allRegionsYielded = new HashSet<VehicleRegion>();
+		private HashSet<VehicleRegion> allRegionsYielded;
 		
 		//Thread safe - Only used inside UpdateClean
 		private int curCleanIndex;
-		private readonly VehicleRegion[] regionGrid;
+		private VehicleRegion[] regionGrid;
 
-		public readonly ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
+		public ConcurrentSet<VehicleRoom> allRooms = new ConcurrentSet<VehicleRoom>();
 		
 		public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor) : base(mapping, createdFor)
 		{
-			regionGrid = new VehicleRegion[mapping.map.cellIndices.NumGridCells];
 		}
 
 		/// <summary>
@@ -92,6 +92,22 @@ namespace Vehicles
 					allRegionsYielded.Clear();
 				}
 			}
+		}
+
+		public void Release()
+		{
+			regionGrid = null;
+			allRegionsYielded = null;
+			allRooms = null;
+		}
+
+		public void Init()
+		{
+			// RegionGrid is large in size and could still be in-use if rebuild-all is called from debug menu.
+			// No need to reallocate the entire array if this is the case.
+			regionGrid ??= new VehicleRegion[mapping.map.cellIndices.NumGridCells];
+			allRegionsYielded = new HashSet<VehicleRegion>();
+			allRooms = new ConcurrentSet<VehicleRoom>();
 		}
 
 		/// <summary>

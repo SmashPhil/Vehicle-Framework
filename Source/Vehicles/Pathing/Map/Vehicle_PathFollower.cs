@@ -149,7 +149,7 @@ namespace Vehicles
 			}
 		}
 
-		public void StartPath(LocalTargetInfo dest, PathEndMode peMode)
+		public void StartPath(LocalTargetInfo dest, PathEndMode peMode, bool ignoreReachability = false)
 		{
 			if (!vehicle.Drafted)
 			{
@@ -175,7 +175,9 @@ namespace Vehicles
 				PatherFailed();
 				return;
 			}
-			if (!vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false)))
+			if (!ignoreReachability && !vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef]
+				.VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
+				TraverseParms.For(TraverseMode.ByPawn, Danger.Deadly, false)))
 			{
 				PatherFailed();
 				return;
@@ -272,7 +274,9 @@ namespace Vehicles
 		{
 			if (moving)
 			{
-				StartPath(destination, peMode);
+				// Paths resumed post-load can be assumed to already be reachable. RegionGrid at this point will
+				// be suspended anyways so it is not possible to do a reachability check.
+				StartPath(destination, peMode, ignoreReachability: true);
 			}
 		}
 

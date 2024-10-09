@@ -34,6 +34,7 @@
 
 	<ST_Layers>Layers</ST_Layers>
 	<ST_Parameters>Parameters</ST_Parameters>
+	<ST_Conditions>Conditions</ST_Conditions>
 	<ST_CreateState>Create State</ST_CreateState>
 	<ST_CreateSubState>Create Sub-State Machine</ST_CreateSubState>
 	<ST_MakeTransition>Make Transition</ST_MakeTransition>

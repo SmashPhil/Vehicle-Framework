@@ -43,6 +43,30 @@ namespace Vehicles
 		/// </summary>
 		public bool Enabled { get; internal set; }
 
+		public void Init()
+		{
+			Enabled = true;
+			mapping[createdFor].Suspended = false;
+			mapping[createdFor].VehicleRegionGrid.Init();
+		}
+
+		public void Release()
+		{
+			Initialized = false;
+			Enabled = false;
+			mapping[createdFor].Suspended = true;
+			mapping[createdFor].VehicleRegionGrid.Release();
+		}
+
+		/// <summary>
+		/// Should only be called for map generation so spawn events don't attempt to rebuild regions. 
+		/// </summary>
+		/// <remarks>There is no way to re-enable regions outside of calling RebuildAll, which does occur post map-generation.</remarks>
+		public void Disable()
+		{
+			Enabled = false;
+		}
+
 		/// <summary>
 		/// Rebuild all regions
 		/// </summary>

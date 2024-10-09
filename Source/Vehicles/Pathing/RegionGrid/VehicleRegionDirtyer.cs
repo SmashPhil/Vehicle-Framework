@@ -107,6 +107,8 @@ namespace Vehicles
 
 		public void Notify_ThingAffectingRegionsSpawned(CellRect occupiedRect)
 		{
+			if (mapping[createdFor].Suspended) return;
+
 			regionsToDirty.Clear();
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{
@@ -125,6 +127,8 @@ namespace Vehicles
 		
 		public void Notify_ThingAffectingRegionsDespawned(CellRect occupiedRect)
 		{
+			if (mapping[createdFor].Suspended) return;
+
 			regionsToDirty.Clear();
 			foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
 			{

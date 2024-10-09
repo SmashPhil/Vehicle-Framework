@@ -44,6 +44,7 @@ namespace Vehicles
 		};
 
 		public VehiclePawn vehicle;
+		public ThingOwner<VehiclePawn> innerContainer;
 
 		public AerialVehicleArrivalAction arrivalAction;
 
@@ -63,6 +64,11 @@ namespace Vehicles
 		private Material material;
 
 		protected List<Graphic_Rotator> rotatorGraphics = new List<Graphic_Rotator>();
+
+		public AerialVehicleInFlight()
+		{
+			innerContainer = new ThingOwner<VehiclePawn>(this, false, LookMode.Reference);
+		}
 
 		public override string Label => vehicle.Label;
 
@@ -743,21 +749,27 @@ namespace Vehicles
 		{
 			base.ExposeData();
 			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
-
-			Scribe_Deep.Look(ref flightPath, nameof(flightPath), new object[] { this });
+			
+			Scribe_Deep.Look(ref flightPath, nameof(flightPath), [this]);
 			Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
 			Scribe_Values.Look(ref transition, nameof(transition));
 			Scribe_Values.Look(ref position, nameof(position));
 
 			//Scribe_Values.Look(ref elevation, "elevation");
 			Scribe_Values.Look(ref recon, nameof(recon));
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				// No need to save container, vehicle is already saved. HoldingOwner is necessary for Vehicle's ParentHolder to
+				// point to the aerial vehicle for WorldPawnGC and misc. world map handling.
+				innerContainer.TryAdd(vehicle, canMergeWithExistingStacks: false);
+			}
 		}
 
 		public override void SpawnSetup()
 		{
 			base.SpawnSetup();
 
-			//Necessary check for post load, otherwise registry will be null until spawned on map
 			foreach (VehiclePawn vehicle in Vehicles)
 			{
 				vehicle.RegisterEvents();
@@ -765,17 +777,18 @@ namespace Vehicles
 
 			if (flightPath != null && !flightPath.Path.NullOrEmpty())
 			{
-				//Needs new list instance to avoid clearing before reset. This is only necessary for resetting with saved flight path due to flight being uninitialized from load.
+				//Needs new list instance to avoid clearing before reset.
+				//This is only necessary for resetting with saved flight path due to flight being uninitialized from load.
 				OrderFlyToTiles(flightPath.Path.ToList(), DrawPos, arrivalAction: arrivalAction); 
 			}
 		}
 
-		public void GetChildHolders(List<IThingHolder> outChildren)
+		void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
 		{
 			outChildren.AddRange(vehicle.handlers);
 		}
 
-		public ThingOwner GetDirectlyHeldThings()
+		ThingOwner IThingHolder.GetDirectlyHeldThings()
 		{
 			return vehicle.inventory.innerContainer;
 		}
@@ -787,6 +800,7 @@ namespace Vehicles
 			aerialVehicle.Tile = tile;
 			aerialVehicle.SetFaction(vehicle.Faction);
 			aerialVehicle.Initialize();
+			aerialVehicle.innerContainer.TryAdd(vehicle, canMergeWithExistingStacks: false);
 			Find.WorldObjects.Add(aerialVehicle);
 			return aerialVehicle;
 		}

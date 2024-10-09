@@ -222,7 +222,7 @@ namespace Vehicles
 			IntVec3 cell = map.Center;
 
 			materialTest.Start("Defs");
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				materialTest.Start(vehicleDef.defName);
 				{

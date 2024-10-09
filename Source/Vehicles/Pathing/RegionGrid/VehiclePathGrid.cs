@@ -137,7 +137,7 @@ namespace Vehicles
 			{
 				Debug.Message(debugString.ToStringSafe());
 			}
-			if (walkabilityChanged)
+			if (walkabilityChanged && !mapping[vehicleDef].Suspended)
 			{
 				mapping[vehicleDef].VehicleReachability.ClearCache();
 				mapping[vehicleDef].VehicleRegionDirtyer.Notify_WalkabilityChanged(cell);

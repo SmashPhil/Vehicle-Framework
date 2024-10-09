@@ -35,7 +35,7 @@ namespace Vehicles
 		private void GenerateConfigs()
 		{
 			configs = new PathConfig[DefDatabase<VehicleDef>.DefCount];
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				configs[vehicleDef.DefIndex] = new PathConfig(vehicleDef);
 			}
@@ -43,7 +43,7 @@ namespace Vehicles
 
 		private void SeparateIntoGroups(bool compress = true)
 		{
-			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefs)
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
 			{
 				if (VehicleHarmony.gridOwners.TryGetOwner(vehicleDef, out int ownerId) && compress)
 				{

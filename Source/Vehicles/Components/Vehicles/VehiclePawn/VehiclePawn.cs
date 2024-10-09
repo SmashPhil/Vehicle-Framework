@@ -29,18 +29,6 @@ namespace Vehicles
 		{
 		}
 
-		public new IThingHolder ParentHolder
-		{
-			get
-			{
-				if (this.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
-				{
-					return aerialVehicle;
-				}
-				return holdingOwner?.Owner;
-			}
-		}
-
 		public Pawn FindPawnWithBestStat(StatDef stat, Predicate<Pawn> pawnValidator = null)
 		{
 			Pawn pawn = null;
@@ -172,7 +160,7 @@ namespace Vehicles
 		{
 			this.RegisterEvents(); //Must register before comps call SpawnSetup to allow comps to access Registry
 			base.SpawnSetup(map, respawningAfterLoad);
-
+			
 			if (!UnityData.IsInMainThread)
 			{
 				LongEventHandler.ExecuteWhenFinished(delegate ()
@@ -236,6 +224,7 @@ namespace Vehicles
 
 			Drawer.Notify_Spawned();
 			InitializeHitbox();
+			Map.GetCachedMapComponent<VehicleMapping>().VehicleSpawned(this);
 			Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
 			//Map.GetCachedMapComponent<VehicleRegionUpdateCatalog>().Notify_VehicleSpawned(this);
 			Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleSpawned(this);

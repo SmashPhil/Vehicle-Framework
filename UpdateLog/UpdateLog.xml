@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1763</currentVersion>
+  <currentVersion>1.5.1768</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -18,9 +18,11 @@
 
 - Mods using vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting.
 
+- Vehicles entering maps would not take road areas into account.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 
+- Vehicle region generation only occurs for vehicles actively in use.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Added 1st iteration of raiders, locked behind a toggle in the mod settings. Note: This is an experimental feature, you may encounter bugs or horrible game balance. 
 &lt;b&gt;This feature is opt-in while it remains experimental.&lt;/b&gt; Vehicles that are not configured for raids, won't spawn in them. If you have no vehicles that can spawn in raids, then you won't get vehicle raids.

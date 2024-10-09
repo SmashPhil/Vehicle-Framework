@@ -172,21 +172,18 @@ namespace Vehicles
 				{
 					rot = vehicle.VehicleDef.defaultPlacingRot;
 				}
-				Debug.Message($"Verifying {vehicle}'s spawn position.");
 				VehiclePositionManager positionManager = map.GetCachedMapComponent<VehiclePositionManager>();
 				bool standable = true;
 				foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
 				{
 					if (!cell.InBounds(map) || !GenGridVehicles.Walkable(cell, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell))
 					{
-						Debug.Message($"Invalid spawn location for {vehicle}. Performing radial search for better location");
 						standable = false;
 						break;
 					}
 				}
 				if (standable)
 				{
-					Debug.Message($"Spawn position check passed. Spawning...");
 					return true; //If location is still valid, skip to spawning
 				}
 				Rot4 tmpRot = rot;
@@ -205,7 +202,6 @@ namespace Vehicles
 					Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
 					return false;
 				}
-				Debug.Message($"Changed spawn location to {newLoc}.");
 				loc = newLoc;
 			}
 			else if (newThing is Pawn pawn && !pawn.Dead)

@@ -554,7 +554,7 @@ namespace Vehicles
 			foreach (VehicleDef vehicleDef in VehicleHarmony.gridOwners.Owners)
 			{
 				VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
-				pathData.VehicleRegionAndRoomUpdater.Enabled = false;
+				pathData.VehicleRegionAndRoomUpdater.Disable();
 			}
 		}
 	}

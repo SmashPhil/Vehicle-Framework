@@ -54,7 +54,7 @@ namespace Vehicles
 		/// <summary>
 		/// Day of year at 0 longitude for recalculating pathGrids
 		/// </summary>
-		private static int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
+		private int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
 
 		/// <summary>
 		/// <paramref name="cost"/> is &gt; <see cref="ImpassableMovementDifficulty"/> or &lt; 0
