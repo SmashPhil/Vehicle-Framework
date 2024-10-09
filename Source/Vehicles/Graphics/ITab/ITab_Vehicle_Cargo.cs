@@ -72,6 +72,15 @@ namespace Vehicles
 				}
 			}
 			curY += StandardLineHeight;
+
+			Rect marketValueRect = new Rect(0f, curY, width, StandardLineHeight);
+			float marketValue = 0;
+			foreach (Thing thing in Inventory)
+			{
+				marketValue += thing.MarketValue * thing.stackCount;
+			}
+			Widgets.Label(marketValueRect, GenText.CapitalizeFirst(StatDefOf.MarketValue.label, StatDefOf.MarketValue) + ": " + marketValue.ToString("F0"));
+			curY += StandardLineHeight;
 		}
 
 		protected override bool InterfaceDrop(Thing thing)
