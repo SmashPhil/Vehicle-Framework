@@ -62,7 +62,7 @@ namespace Vehicles
 
 		ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
 
-		AnimationController IAnimator.Controller => animator?.controller;
+		AnimationManager IAnimator.Manager => animator;
 
 		string IAnimationObject.ObjectId => nameof(VehiclePawn);
 

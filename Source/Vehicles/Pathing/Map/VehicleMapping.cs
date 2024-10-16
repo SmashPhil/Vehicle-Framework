@@ -316,11 +316,9 @@ namespace Vehicles
 
 		public void VehicleSpawned(VehiclePawn vehicle)
 		{
-			if (deferredRegionGenerator != null)
-			{
-				deferredRegionGenerator?.GenerateRegionsFor(vehicle.VehicleDef, 
-					vehicle.Faction != null && vehicle.Faction.HostileTo(Faction.OfPlayer));
-			}
+			// Try to generate regions immediately for a vehicle being spawned and cut in line
+			// in front of any deferred region requests that may have just been queued.
+			deferredRegionGenerator?.GenerateRegionsFor(vehicle.VehicleDef, true);
 		}
 
 		public override void MapRemoved()

@@ -37,10 +37,12 @@ namespace Vehicles
 			}
 		}
 
-		[Conditional("LAZY_REGIONS")]
 		public void GenerateRegionsFor(VehicleDef vehicleDef, bool urgently, Action postGenerationAction = null)
 		{
-			RequestRegionSet(vehicleDef, urgently, postGenerationAction);
+			if (RequestRegionSet(vehicleDef, urgently, postGenerationAction) == Urgency.Urgent)
+			{
+				Debug.Message($"Skipped deferred generation for {vehicleDef}");
+			}
 		}
 
 		[Conditional("LAZY_REGIONS")]
@@ -78,7 +80,7 @@ namespace Vehicles
 			}
 		}
 
-		private void RequestRegionSet(VehicleDef vehicleDef, bool urgent, Action postGenerationAction = null)
+		private Urgency RequestRegionSet(VehicleDef vehicleDef, bool urgent, Action postGenerationAction = null)
 		{
 			VehicleDef ownerDef = VehicleHarmony.gridOwners.GetOwner(vehicleDef);
 			VehicleMapping.VehiclePathData pathData = mapping[ownerDef];
@@ -86,23 +88,19 @@ namespace Vehicles
 			if (!pathData.Suspended)
 			{
 				postGenerationAction?.Invoke();
-				return;
+				return Urgency.None;
 			}
 
-#if DEBUG
-			Messages.Message($"Building regions for {ownerDef}", MessageTypeDefOf.SilentInput, historical: false);
-#endif
 			// If multithreading is disabled, all rebuild requests are urgent
 			if (!urgent && VehicleMod.settings.debug.debugUseMultithreading)
 			{
 				var longOperation = AsyncPool<AsyncLongOperationAction>.Get();
 				longOperation.Set(GenerateRegions);
 				mapping.dedicatedThread.Queue(longOperation);
+				return Urgency.Deferred;
 			}
-			else
-			{
-				GenerateRegions();
-			}
+			GenerateRegions();
+			return Urgency.Urgent;
 
 			void GenerateRegions()
 			{
@@ -115,9 +113,6 @@ namespace Vehicles
 				{
 					CoroutineManager.QueueInvoke(postGenerationAction);
 				}
-#if DEBUG
-				Messages.Message($"Completed Region Rebuild", MessageTypeDefOf.SilentInput, historical: false);
-#endif
 			}
 		}
 
@@ -132,6 +127,13 @@ namespace Vehicles
 				Messages.Message($"Released Regions for {ownerDef}", MessageTypeDefOf.SilentInput, historical: false);
 #endif
 			}
+		}
+
+		public enum Urgency
+		{
+			None,
+			Urgent,
+			Deferred,
 		}
 	}
 }
