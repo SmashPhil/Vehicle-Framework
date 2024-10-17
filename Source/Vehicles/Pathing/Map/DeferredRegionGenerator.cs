@@ -95,7 +95,7 @@ namespace Vehicles
 			if (!urgent && VehicleMod.settings.debug.debugUseMultithreading)
 			{
 				var longOperation = AsyncPool<AsyncLongOperationAction>.Get();
-				longOperation.Set(GenerateRegions);
+				longOperation.Set(GenerateRegions, () => !mapping.map.Disposed);
 				mapping.dedicatedThread.Queue(longOperation);
 				return Urgency.Deferred;
 			}

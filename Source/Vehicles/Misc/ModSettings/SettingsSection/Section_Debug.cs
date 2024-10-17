@@ -263,10 +263,26 @@ namespace Vehicles
 				}
 
 #if DEBUG
-				if (listingStandard.ButtonText("Run Unit Tests"))
+				if (listingStandard.ButtonText("Unit Tests"))
 				{
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					UnitTestManager.RunAll();
+					List<Toggle> toggles = new List<Toggle>();
+					toggles.Add(new Toggle("All", () => false, (value) => { }, delegate (bool value)
+					{
+						UnitTestManager.RunAll();
+						Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
+					}));
+					foreach (UnitTest test in UnitTestManager.UnitTests.OrderBy(test => test.Name))
+					{
+						Toggle toggle = new Toggle(test.Name, () => false, (value) => { }, onToggle: delegate (bool value)
+						{
+							UnitTestManager.Run(test);
+							Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
+						});
+						toggles.Add(toggle);
+					}
+					Find.WindowStack.Add(new Dialog_RadioButtonMenu("Unit Tests", toggles));
+					
 				}
 				if (listingStandard.ButtonText("Output Material Cache"))
 				{

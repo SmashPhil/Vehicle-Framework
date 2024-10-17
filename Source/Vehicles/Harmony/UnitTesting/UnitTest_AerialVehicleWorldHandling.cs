@@ -18,7 +18,7 @@ namespace Vehicles.Testing
 
 		public override string Name => "AerialVehicle WorldHandling";
 
-		public override IEnumerable<Func<UTResult>> Execute()
+		public override IEnumerable<UTResult> Execute()
 		{
 			CameraJumper.TryShowWorld();
 			Map map = Find.CurrentMap;
@@ -31,7 +31,7 @@ namespace Vehicles.Testing
 
 			if (world == null || map == null || vehicleDef == null)
 			{
-				yield return () => UTResult.For("UnitTest Setup", false);
+				yield return UTResult.For("UnitTest Setup", false);
 				yield break;
 			}
 
@@ -66,64 +66,52 @@ namespace Vehicles.Testing
 					Find.WorldPawns.PassToWorld(pawn);
 				}
 			}
-			yield return delegate ()
-			{
-				bool result = vehicle.ParentHolder is AerialVehicleInFlight aerialWorldObject && aerialWorldObject == aerialVehicle;
-				return UTResult.For("Vehicle ParentHolder", result);
-			};
-			yield return delegate ()
-			{
-				bool result = vehicle.ParentHolder != null;
-				foreach (Pawn pawn in vehicle.AllPawnsAboard)
-				{
-					result &= pawn.GetVehicle() == vehicle;
-				}
-				return UTResult.For("Passenger ParentHolder", result);
-			};
-			yield return delegate ()
-			{
-				bool result = vehicle.ParentHolder != null;
-				foreach (Thing thing in vehicle.inventory.innerContainer)
-				{
-					if (thing is Pawn pawn)
-					{
-						result &= pawn.ParentHolder is Pawn_InventoryTracker inventoryTracker && inventoryTracker.pawn == vehicle;
-					}
-				}
-				return UTResult.For("Pet in trunk ParentHolder", result);
-			};
-			yield return delegate ()
-			{
-				Find.WorldPawns.gc.CancelGCPass();
-				_ = Find.WorldPawns.gc.PawnGCPass();
+			bool result = vehicle.ParentHolder is AerialVehicleInFlight aerialWorldObject && aerialWorldObject == aerialVehicle;
+			yield return UTResult.For("Vehicle ParentHolder", result);
 
-				string output = Find.WorldPawns.gc.PawnGCDebugResults();
-				if (vehicle.Destroyed || vehicle.Discarded)
+			result = vehicle.ParentHolder != null;
+			foreach (Pawn pawn in vehicle.AllPawnsAboard)
+			{
+				result &= pawn.GetVehicle() == vehicle;
+			}
+			yield return UTResult.For("Passenger ParentHolder", result);
+
+			result = vehicle.ParentHolder != null;
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (thing is Pawn pawn)
+				{
+					result &= pawn.ParentHolder is Pawn_InventoryTracker inventoryTracker && inventoryTracker.pawn == vehicle;
+				}
+			}
+			yield return UTResult.For("Pet in trunk ParentHolder", result);
+
+			Find.WorldPawns.gc.CancelGCPass();
+			_ = Find.WorldPawns.gc.PawnGCPass();
+
+			string output = Find.WorldPawns.gc.PawnGCDebugResults();
+			if (vehicle.Destroyed || vehicle.Discarded)
+			{
+				Find.WorldPawns.gc.LogGC();
+				yield return UTResult.For($"Vehicle WorldPawnGC", false);
+			}
+			foreach (Pawn pawn in vehicle.AllPawnsAboard)
+			{
+				if (pawn.Destroyed || pawn.Discarded)
 				{
 					Find.WorldPawns.gc.LogGC();
-					return UTResult.For($"Vehicle WorldPawnGC", false);
+					yield return UTResult.For($"Passenger WorldPawnGC", false);
 				}
-				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+			}
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (thing is Pawn pawn && (pawn.Destroyed || pawn.Discarded))
 				{
-					if (pawn.Destroyed || pawn.Discarded)
-					{
-						Find.WorldPawns.gc.LogGC();
-						return UTResult.For($"Passenger WorldPawnGC", false);
-					}
+					Find.WorldPawns.gc.LogGC();
+					yield return UTResult.For($"Pet in trunk WorldPawnGC", false);
 				}
-				foreach (Thing thing in vehicle.inventory.innerContainer)
-				{
-					if (thing is Pawn pawn && (pawn.Destroyed || pawn.Discarded))
-					{
-						Find.WorldPawns.gc.LogGC();
-						return UTResult.For($"Pet in trunk WorldPawnGC", false);
-					}
-				}
-				return UTResult.For("WorldPawnGC", true);
-			};
-
-			StashedVehicle stashedVehicle = (StashedVehicle)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.StashedVehicle);
-			stashedVehicle.Tile = map.Tile;
+			}
+			yield return UTResult.For("WorldPawnGC", true);
 		}
 	}
 }

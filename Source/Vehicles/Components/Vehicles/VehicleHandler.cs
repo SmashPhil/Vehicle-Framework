@@ -14,6 +14,9 @@ namespace Vehicles
 	/// </summary>
 	public class VehicleHandler : IExposable, ILoadReferenceable, IThingHolderPawnOverlayer
 	{
+		/// <summary>
+		/// innerContainer for role instance
+		/// </summary>
 		public ThingOwner<Pawn> handlers;
 
 		private string roleKey;

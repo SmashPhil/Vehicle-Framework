@@ -132,7 +132,7 @@ namespace Vehicles
 						handler ??= vehicle.NextAvailableHandler();
 						if (!vehicle.TryAddPawn(pawn, handler))
 						{
-							Trace(false, $"Unable to add {pawn} to {handler} during raid generation.");
+							Log.Error($"Unable to add {pawn} to {handler} during raid generation.");
 							outPawns.Add(pawn);
 						}
 					}
@@ -185,7 +185,7 @@ namespace Vehicles
 						VehicleHandler handler = vehicle.NextAvailableHandler(priorityHandlers: true);
 						if (!vehicle.TryAddPawn(pawn, handler))
 						{
-							Trace(false, $"Unable to add {pawn} to {handler} during raid generation.");
+							Log.Error($"Unable to add {pawn} to {handler} during raid generation.");
 							__result.Add(pawn);
 						}
 					}

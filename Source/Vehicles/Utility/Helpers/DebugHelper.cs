@@ -4,6 +4,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using System.Linq;
 
 namespace Vehicles
 {
@@ -14,6 +15,35 @@ namespace Vehicles
 
 		internal static List<WorldPath> debugLines = new List<WorldPath>();
 		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
+
+		/// <summary>
+		/// Indiscriminately destroys all entities and roofs from area.
+		/// </summary>
+		/// <remarks>If non-destroyables should not be destroyed, use <see cref="GenDebug.ClearArea(CellRect, Map)"/> instead.</remarks>
+		public static void DestroyArea(CellRect rect, Map map, TerrainDef replaceTerrain = null)
+		{
+			Thing.allowDestroyNonDestroyable = true;
+			rect.ClipInsideMap(map);
+			foreach (IntVec3 cell in rect)
+			{
+				map.roofGrid.SetRoof(cell, null);
+			}
+			foreach (IntVec3 cell in rect)
+			{
+				foreach (Thing thing in cell.GetThingList(map).ToList())
+				{
+					thing.Destroy();
+				}
+			}
+			if (replaceTerrain != null)
+			{
+				foreach (IntVec3 cell in rect)
+				{
+					map.terrainGrid.SetTerrain(cell, replaceTerrain);
+				}
+			}
+			Thing.allowDestroyNonDestroyable = false;
+		}
 
 		/// <summary>
 		/// Draw settlement debug lines that show original locations before settlement was pushed to the coastline

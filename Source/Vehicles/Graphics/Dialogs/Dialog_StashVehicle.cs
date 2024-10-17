@@ -307,26 +307,22 @@ namespace Vehicles
 
 		public override void DoWindowContents(Rect inRect)
 		{
-			GUIState.Push();
+			using (new TextBlock(GameFont.Medium, TextAnchor.MiddleCenter))
 			{
 				Rect titleRect = new Rect(0f, 0f, inRect.width, TitleRectHeight);
-				Text.Font = GameFont.Medium;
-				Text.Anchor = TextAnchor.MiddleCenter;
 				Widgets.Label(titleRect, "VF_DockToCaravan".Translate());
+			}
 
-				Text.Font = GameFont.Small;
-				Text.Anchor = TextAnchor.UpperLeft;
+			using (new TextBlock(GameFont.Small, TextAnchor.UpperLeft))
+			{
 				CaravanUIUtility.DrawCaravanInfo(new CaravanUIUtility.CaravanInfo(SourceMassUsage, SourceMassCapacity, cachedSourceMassCapacityExplanation, SourceTilesPerDay,
-					cachedSourceTilesPerDayExplanation, SourceDaysWorthOfFood, SourceForagedFoodPerDay, cachedSourceForagedFoodPerDayExplanation, SourceVisibility,
-					cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vehiclePather.Moving) ? null : new int?(TicksToArrive), -9999f,
-					new Rect(12f, TitleRectHeight, inRect.width - 24f, 40f), true, null, false);
+				cachedSourceTilesPerDayExplanation, SourceDaysWorthOfFood, SourceForagedFoodPerDay, cachedSourceForagedFoodPerDayExplanation, SourceVisibility,
+				cachedSourceVisibilityExplanation, -1f, -1f, null), null, caravan.Tile, (!caravan.vehiclePather.Moving) ? null : new int?(TicksToArrive), -9999f,
+				new Rect(12f, TitleRectHeight, inRect.width - 24f, 40f), true, null, false);
 
 				inRect.yMin += 119f;
 				Widgets.DrawMenuSection(inRect);
-				TabDrawer.DrawTabs(inRect, new List<TabRecord>() 
-				{ 
-					new TabRecord("ItemsTab".Translate(), null, true) 
-				}, 200f);
+				TabDrawer.DrawTabs(inRect, [new TabRecord("ItemsTab".Translate(), null, true)], 200f);
 				inRect = inRect.ContractedBy(17f);
 				Widgets.BeginGroup(inRect);
 				{
@@ -342,7 +338,6 @@ namespace Vehicles
 				}
 				Widgets.EndGroup();
 			}
-			GUIState.Pop();
 		}
 
 		private void AddToTransferables(Thing t)
@@ -389,63 +384,8 @@ namespace Vehicles
 
 		private bool TransferPawns()
 		{
-			StashedVehicle stashedVehicle = (StashedVehicle)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.StashedVehicle);
-			stashedVehicle.Tile = caravan.Tile;
-			
-			//Calculate days before removal from map
-			VehiclePawn largestVehicle = caravan.VehiclesListForReading.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);
-			float t = Ext_Math.ReverseInterpolate(largestVehicle.VehicleDef.Size.Magnitude, 1, 10);
-			float timeoutDays = 25 * Mathf.Lerp(1.2f, 0.8f, t); //20 to 30 days depending on size of vehicle
-			stashedVehicle.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(timeoutDays * 60000));
-
-			List<Pawn> vehicles = new List<Pawn>();
-			List<Pawn> pawns = new List<Pawn>();
-			foreach (Pawn pawn in caravan.PawnsListForReading)
-			{
-				if (pawn is VehiclePawn vehicle)
-				{
-					vehicle.RemoveAllPawns();
-					vehicles.Add(vehicle);
-				}
-				else
-				{
-					pawns.Add(pawn);
-				}
-			}
-			if (vehicles.NullOrEmpty())
-			{
-				return false; //Should never reach this case but you never know.. sometimes weird hijinks occur and if the vehicle caravan didn't automatically downgrade to a normal caravan, it's possible
-			}
-
-			Caravan newCaravan = CaravanMaker.MakeCaravan(Enumerable.Empty<Pawn>(), caravan.Faction, caravan.Tile, true);
-			newCaravan.pawns.TryAddRangeOrTransfer(pawns, canMergeWithExistingStacks: false);
-
-			//Transfer all contents
-			foreach (TransferableOneWay transferable in transferables)
-			{
-				TransferableUtility.TransferNoSplit(transferable.things, transferable.CountToTransfer, delegate(Thing thing, int numToTake)
-				{
-					Pawn ownerOf = CaravanInventoryUtility.GetOwnerOf(caravan, thing);
-					if (ownerOf is null)
-					{
-						Log.Error($"Error while stashing vehicle. {thing} has no owner.");
-					}
-					else
-					{
-						CaravanInventoryUtility.MoveInventoryToSomeoneElse(ownerOf, thing, pawns, vehicles, numToTake);
-					}
-				}, true, true);
-			}
-
-			//Transfer vehicles to stashed vehicle object
-			for (int i = vehicles.Count - 1; i >= 0; i--)
-			{
-				Pawn vehiclePawn = vehicles[i];
-				stashedVehicle.stash.TryAddOrTransfer(vehiclePawn, false);
-			}
-			Find.WorldObjects.Add(stashedVehicle);
-			caravan.Destroy();
-			return true;
+			StashedVehicle stashedVehicle = StashedVehicle.Create(caravan, out _, transferables);
+			return stashedVehicle != null;
 		}
 
 		private void CreateCaravanItemsWidget(List<TransferableOneWay> transferables, out TransferableOneWayWidget itemsTransfer, string thingCountTip, IgnorePawnsInventoryMode ignorePawnInventoryMass,

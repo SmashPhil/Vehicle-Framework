@@ -21,7 +21,7 @@ namespace Vehicles
 		
 		public void PatchMethods()
 		{
-			//TODO - Implement in 1.5 with more testing and drag-to-rotate
+			//TODO 1.6 - Implement with more testing
 			//	   - Needs another patch on RCellFinder.BestOrderedGotoDestNear so it recomputes best position for vehicle
 			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "CanTakeOrder"),
 			//	postfix: new HarmonyMethod(typeof(VehiclePathing),

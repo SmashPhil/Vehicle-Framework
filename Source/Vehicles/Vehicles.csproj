@@ -224,8 +224,14 @@
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\RaidTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_PathGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_CoverGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_GasGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_ThingGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_PositionManager.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_StashedVehicle.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_AerialVehicleWorldHandling.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_MapGrids.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_MapTest.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />
@@ -525,6 +531,7 @@
     <Compile Include="Utility\Helpers\Combat\CombatFormationHelper.cs" />
     <Compile Include="Utility\Helpers\Combat\CombatPositionFinder.cs" />
     <Compile Include="Utility\Helpers\Combat\CombatTargetFinder.cs" />
+    <Compile Include="Utility\Helpers\RoleHelper.cs" />
     <Compile Include="Utility\Helpers\TranslationHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanHelper.cs" />
     <Compile Include="Utility\Helpers\World\CaravanInfoHelper.cs" />

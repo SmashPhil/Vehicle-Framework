@@ -641,8 +641,8 @@ namespace Vehicles
 			{
 				autoSelect = true;
 			}
-
-			VehicleCaravan vehicleCaravan = CaravanHelper.MakeVehicleCaravan(Vehicles, vehicle.Faction, Tile, true);
+			innerContainer.Remove(vehicle);
+			VehicleCaravan vehicleCaravan = CaravanHelper.MakeVehicleCaravan([vehicle], vehicle.Faction, Tile, true);
 			if (!Destroyed)
 			{
 				Destroy();
@@ -800,7 +800,7 @@ namespace Vehicles
 			aerialVehicle.Tile = tile;
 			aerialVehicle.SetFaction(vehicle.Faction);
 			aerialVehicle.Initialize();
-			aerialVehicle.innerContainer.TryAdd(vehicle, canMergeWithExistingStacks: false);
+			aerialVehicle.innerContainer.TryAddOrTransfer(vehicle, canMergeWithExistingStacks: false);
 			Find.WorldObjects.Add(aerialVehicle);
 			return aerialVehicle;
 		}

@@ -6,6 +6,8 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
+using SmashTools;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -72,30 +74,35 @@ namespace Vehicles
 			}
 		}
 
-		public void Notify_CaravanArrived(Caravan caravan)
+		public VehicleCaravan Notify_CaravanArrived(Caravan caravan)
 		{
 			if (caravan is VehicleCaravan vehicleCaravan)
 			{
 				if (vehicleCaravan.AerialVehicle || Vehicles.Any(vehicle => !vehicle.VehicleDef.canCaravan))
 				{
 					Messages.Message($"Unable to retrieve vehicle, aerial vehicles can't merge with other vehicle caravans.", MessageTypeDefOf.RejectInput, historical: false);
-					return;
+					return null;
 				}
 			}
-			
-			List<Pawn> pawns = caravan.pawns.InnerListForReading.ToList(); //Copy list separately
+
+			// Use separate list, caravan must relinquish ownership of pawns in order to add them to a new caravan
+			List<Pawn> pawns = caravan.pawns.InnerListForReading.ToList();
 			caravan.RemoveAllPawns();
 
-			List<Thing> stash = this.stash.InnerListForReading.ToList();
-			this.stash.Clear();
-			for (int i = stash.Count - 1; i >= 0; i--)
+			List<VehiclePawn> vehicles = new List<VehiclePawn>();
+			foreach (Thing thing in stash.InnerListForReading.ToList())
 			{
-				if (stash[i] is Pawn pawn)
+				if (thing is VehiclePawn vehicle)
 				{
-					stash.RemoveAt(i);
-					pawns.Add(pawn);
+					stash.Remove(thing);
+					vehicles.Add(vehicle);
 				}
 			}
+			RoleHelper.Distribute(vehicles, pawns);
+			// Pawns that were distributed between vehicles will not be part of the formation, but are
+			// instead nested within the vehicle. Any remaining dismounted pawns + vehicles must be joined
+			pawns.AddRange(vehicles);
+
 			VehicleCaravan mergedCaravan = CaravanHelper.MakeVehicleCaravan(pawns, caravan.Faction, caravan.Tile, true);
 
 			for (int i = stash.Count - 1; i >= 0; i--)
@@ -104,7 +111,10 @@ namespace Vehicles
 			}
 
 			Destroy();
+
 			caravan.Destroy();
+
+			return mergedCaravan;
 		}
 
 		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Caravan caravan)
@@ -174,6 +184,80 @@ namespace Vehicles
 		public ThingOwner GetDirectlyHeldThings()
 		{
 			return stash;
+		}
+
+		public static StashedVehicle Create(VehicleCaravan vehicleCaravan, out Caravan caravan, List<TransferableOneWay> transferables = null)
+		{
+			caravan = null;
+			if (vehicleCaravan.VehiclesListForReading.NullOrEmpty())
+			{
+				Log.Error("No vehicles in vehicle caravan for stashed vehicle.");
+				return null;
+			}
+
+			StashedVehicle stashedVehicle = (StashedVehicle)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.StashedVehicle);
+			stashedVehicle.Tile = vehicleCaravan.Tile;
+
+			//Calculate days before removal from map
+			VehiclePawn largestVehicle = vehicleCaravan.VehiclesListForReading.MaxBy(vehicle => vehicle.VehicleDef.Size.Magnitude);
+			float t = Ext_Math.ReverseInterpolate(largestVehicle.VehicleDef.Size.Magnitude, 1, 10);
+			float timeoutDays = 25 * Mathf.Lerp(1.2f, 0.8f, t); //20 to 30 days depending on size of vehicle
+			stashedVehicle.GetComponent<TimeoutComp>().StartTimeout(Mathf.CeilToInt(timeoutDays * 60000));
+
+			List<Pawn> pawns = vehicleCaravan.PawnsListForReading.Where(pawn => pawn is not VehiclePawn).ToList();
+			List<Pawn> vehicles = new List<Pawn>();
+			List<Pawn> inventoryPawns = new List<Pawn>();
+
+			foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+			{
+				vehicles.Add(vehicle);
+				foreach (VehicleHandler handler in vehicle.handlers)
+				{
+					pawns.AddRange(handler.handlers);
+				}
+				foreach (Thing thing in vehicle.inventory.innerContainer)
+				{
+					if (thing is Pawn pawn)
+					{
+						inventoryPawns.Add(pawn);
+					}
+				}
+			}
+
+			caravan = CaravanMaker.MakeCaravan([], vehicleCaravan.Faction, vehicleCaravan.Tile, true);
+			caravan.pawns.TryAddRangeOrTransfer(pawns, canMergeWithExistingStacks: false);
+			caravan.pawns.TryAddRangeOrTransfer(inventoryPawns, canMergeWithExistingStacks: false);
+
+			if (!transferables.NullOrEmpty())
+			{
+				//Transfer all contents
+				foreach (TransferableOneWay transferable in transferables)
+				{
+					TransferableUtility.TransferNoSplit(transferable.things, transferable.CountToTransfer, delegate (Thing thing, int numToTake)
+					{
+						Pawn ownerOf = CaravanInventoryUtility.GetOwnerOf(vehicleCaravan, thing);
+						if (ownerOf is null)
+						{
+							Log.Error($"Error while stashing vehicle. {thing} has no owner.");
+						}
+						else
+						{
+							CaravanInventoryUtility.MoveInventoryToSomeoneElse(ownerOf, thing, pawns, vehicles, numToTake);
+						}
+					}, true, true);
+				}
+			}
+			
+			//Transfer vehicles to stashed vehicle object
+			for (int i = vehicles.Count - 1; i >= 0; i--)
+			{
+				Pawn vehiclePawn = vehicles[i];
+				stashedVehicle.stash.TryAddOrTransfer(vehiclePawn, false);
+			}
+			Find.WorldObjects.Add(stashedVehicle);
+			vehicleCaravan.RemoveAllPawns();
+			vehicleCaravan.Destroy();
+			return stashedVehicle;
 		}
 	}
 }

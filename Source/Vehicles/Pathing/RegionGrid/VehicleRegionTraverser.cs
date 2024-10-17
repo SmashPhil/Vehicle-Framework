@@ -109,7 +109,7 @@ namespace Vehicles
 			
 			if (workers.Value.Count == 0)
 			{
-				Trace(false, $"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
+				Log.Error($"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
 				return;
 			}
 			BFSWorker bfsWorker = workers.Value.Dequeue();

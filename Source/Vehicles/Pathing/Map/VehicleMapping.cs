@@ -323,6 +323,7 @@ namespace Vehicles
 
 		public override void MapRemoved()
 		{
+			// TODO - Will need cancellation tokens to abort ongoing operations
 			ReleaseThread();
 		}
 

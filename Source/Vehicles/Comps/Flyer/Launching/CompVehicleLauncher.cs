@@ -260,18 +260,30 @@ namespace Vehicles
 			return amount / speedPctPerTick;
 		}
 
-		public virtual void InitializeLaunchProtocols(bool regenerateProtocols)
+		public virtual void ResolveProtocolProperties()
 		{
-			if (regenerateProtocols)
-			{
-				launchProtocol = (LaunchProtocol)Activator.CreateInstance(Props.launchProtocol.GetType(), new object[] { Props.launchProtocol, Vehicle });
-			}
 			launchProtocol.ResolveProperties(Props.launchProtocol);
 		}
 
 		public override void PostLoad()
 		{
-			InitializeLaunchProtocols(false);
+			ResolveProtocolProperties();
+		}
+
+		public override void PostGeneration()
+		{
+			base.PostGeneration();
+			InitLaunchProtocol();
+		}
+
+		public void InitLaunchProtocol()
+		{
+			if (Props.launchProtocol == null)
+			{
+				Log.Error($"Vehicle has null launchProtocol.");
+				return;
+			}
+			launchProtocol ??= (LaunchProtocol)Activator.CreateInstance(Props.launchProtocol.GetType(), [Props.launchProtocol, Vehicle]);
 		}
 
 		public override void CompTick()
@@ -291,7 +303,6 @@ namespace Vehicles
 			{
 				fuelEfficiencyWorldModifier = 0;
 			}
-			InitializeLaunchProtocols(!respawningAfterLoad);
 		}
 
 		public override void PostExposeData()

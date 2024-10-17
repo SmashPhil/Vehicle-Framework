@@ -308,6 +308,8 @@ namespace Vehicles
 			}
 			if (rotationInt == value) return;
 
+			Rot4 oldRot = Rotation;
+
 			if (Spawned)
 			{
 				// Don't let near-edge turns go through if it would put the vehicle out of bounds.
@@ -327,7 +329,7 @@ namespace Vehicles
 				Map.coverGrid.Register(this);
 				Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
 
-				CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, value);
+				CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, oldRot).ExpandedBy(1);
 				CellRect newRect = this.OccupiedRectShifted(IntVec2.Zero, rotationInt);
 				foreach (IntVec3 cell in oldRect.Encapsulate(newRect))
 				{

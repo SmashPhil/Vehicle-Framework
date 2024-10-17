@@ -21,10 +21,7 @@ namespace Vehicles
 	[StaticConstructorOnStartup]
 	internal static class VehicleHarmony
 	{
-		private const int BuildMajor = 1;
-		private const int BuildMinor = 5;
-
-		private static readonly DateTime ProjectStartDate = new DateTime(2019, 12, 7);
+		// Project Start Date: DEC 7 2019
 
 		public const string VehiclesUniqueId = "SmashPhil.VehicleFramework";
 		public const string VehiclesLabel = "Vehicle Framework";
@@ -34,7 +31,7 @@ namespace Vehicles
 		internal static ModContentPack VehicleMCP;
 
 		private static string methodPatching = string.Empty;
-
+		
 		public static readonly GridOwners gridOwners = new GridOwners();
 
 		internal static List<UpdateLog> updates = new List<UpdateLog>();
@@ -102,6 +99,7 @@ namespace Vehicles
 
 #if DEBUG
 			UnitTestManager.onUnitTestStateChange += ForceSynchronousMaps;
+			UnitTestManager.onUnitTestStateChange += SuppressDebugLogging;
 #endif
 
 			if (DebugProperties.debug)
@@ -248,6 +246,11 @@ namespace Vehicles
 					mapping.InitThread(map);
 				}
 			}
+		}
+
+		private static void SuppressDebugLogging(bool value)
+		{
+			VehicleMod.settings.debug.debugLogging = false;
 		}
 	}
 }
