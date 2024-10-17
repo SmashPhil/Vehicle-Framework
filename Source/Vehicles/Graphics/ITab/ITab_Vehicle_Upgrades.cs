@@ -58,6 +58,8 @@ namespace Vehicles
 
 		public static readonly List<string> replaceNodes = new List<string>();
 
+		private VehiclePawn openedFor;
+
 		private UpgradeNode selectedNode;
 		private UpgradeNode highlightedNode;
 		private List<UpgradeTextEntry> textEntries = new List<UpgradeTextEntry>();
@@ -87,6 +89,7 @@ namespace Vehicles
 					ClearTurretRenderers(selectedNode);
 
 					selectedNode = value;
+					openedFor = Vehicle;
 
 					if (selectedNode != null)
 					{
@@ -128,11 +131,12 @@ namespace Vehicles
 			{
 				if (SelPawn is VehiclePawn vehicle && vehicle.CompUpgradeTree != null)
 				{
-					return SelPawn as VehiclePawn;
-				}
-				if (SelPawn is null)
-				{
-					return null;
+					if (vehicle != openedFor)
+					{
+						openedFor = vehicle;
+						SelectedNode = null;
+					}
+					return vehicle;
 				}
 				CloseTab();
 				return null;
