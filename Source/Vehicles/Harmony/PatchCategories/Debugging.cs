@@ -22,6 +22,12 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(DebugToolsSpawning), "SpawnPawn"),
 				postfix: new HarmonyMethod(typeof(Debugging),
 				nameof(DebugHideVehiclesFromPawnSpawner)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HealthUtility), nameof(HealthUtility.DamageUntilDowned)),
+				prefix: new HarmonyMethod(typeof(Debugging),
+				nameof(DebugDamagePawnsInVehicleUntilDowned)));
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(HealthUtility), nameof(HealthUtility.DamageUntilDead)),
+				prefix: new HarmonyMethod(typeof(Debugging),
+				nameof(DebugDamagePawnsInVehicleUntilDead)));
 
 			if (DebugProperties.debug)
 			{
@@ -117,6 +123,35 @@ namespace Vehicles
 					__result.RemoveAt(i);
 				}
 			}
+		}
+
+		private static bool DebugDamagePawnsInVehicleUntilDowned(Pawn p, bool allowBleedingWounds, DamageDef damage, 
+			ThingDef sourceDef, BodyPartGroupDef bodyGroupDef)
+		{
+			if (p is VehiclePawn vehicle)
+			{
+				Pawn pawn = vehicle.AllPawnsAboard.Where(pawn => !pawn.Downed).RandomElementWithFallback();
+				if (pawn is not null)
+				{
+					HealthUtility.DamageUntilDowned(pawn, allowBleedingWounds, damage, sourceDef, bodyGroupDef);
+				}
+				return false;
+			}
+			return true;
+		}
+
+		private static bool DebugDamagePawnsInVehicleUntilDead(Pawn p, DamageDef damage, ThingDef sourceDef, BodyPartGroupDef bodyGroupDef)
+		{
+			if (p is VehiclePawn vehicle)
+			{
+				Pawn pawn = vehicle.AllPawnsAboard.Where(pawn => !pawn.Dead).RandomElementWithFallback();
+				if (pawn is not null)
+				{
+					HealthUtility.DamageUntilDead(pawn, damage, sourceDef, bodyGroupDef);
+				}
+				return false;
+			}
+			return true;
 		}
 
 		/// <summary>

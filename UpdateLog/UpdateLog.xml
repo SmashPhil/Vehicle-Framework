@@ -21,6 +21,8 @@
 - Vehicles entering maps would not take road areas into account.
 
 - Upgrades could be transfered to other vehicles by selecting another vehicle in the menu right before confirming the upgrade.
+
+- Vehicles spawning into a map would reset their target fuel level.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 

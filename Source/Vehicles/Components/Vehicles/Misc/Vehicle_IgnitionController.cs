@@ -150,20 +150,20 @@ namespace Vehicles
 			if (!Drafted)
 			{
 				draftCommand.defaultLabel = vehicle.VehicleDef.draftLabel;
-			}
-			if (!vehicle.CanMove)
-			{
-				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
-				Drafted = false;
+				if (!vehicle.CanDraft(out string reason))
+				{
+					draftCommand.Disable(reason);
+				}
+				if (!vehicle.CanMove)
+				{
+					draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
+				}
 			}
 			if (vehicle.Deploying)
 			{
 				draftCommand.Disable("VF_VehicleUnableToMove".Translate(vehicle));
 			}
-			if (!vehicle.CanDraft(out string reason))
-			{
-				draftCommand.Disable(reason);
-			}
+			
 			if (!Drafted)
 			{
 				draftCommand.tutorTag = "Draft";
