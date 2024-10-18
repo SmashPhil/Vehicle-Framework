@@ -16,7 +16,10 @@ namespace Vehicles.Testing
 	{
 		public override TestType ExecuteOn => TestType.GameLoaded;
 
-		public abstract bool ShouldTest(VehicleDef vehicleDef);
+		public virtual bool ShouldTest(VehicleDef vehicleDef)
+		{
+			return true;
+		}
 
 		public virtual CellRect TestArea(VehicleDef vehicleDef, IntVec3 root)
 		{
@@ -42,12 +45,13 @@ namespace Vehicles.Testing
 
 					IntVec3 root = map.Center;
 					DebugHelper.DestroyArea(TestArea(vehicleDef, root), map, terrainDef);
-					
+
+					CameraJumper.TryJump(root, map, mode: CameraJumper.MovementMode.Cut);
 					yield return TestVehicle(vehicle, map, root);
 
 					if (!vehicle.Destroyed)
 					{
-						vehicle.Destroy();
+						vehicle.DestroyVehicleAndPawns();
 					}
 				}
 			}

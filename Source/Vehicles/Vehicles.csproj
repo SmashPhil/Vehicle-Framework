@@ -227,6 +227,7 @@
     <Compile Include="Harmony\UnitTesting\UnitTest_PathGrid.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_CoverGrid.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_GasGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_VehicleHandler.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_ThingGrid.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_PositionManager.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_StashedVehicle.cs" />

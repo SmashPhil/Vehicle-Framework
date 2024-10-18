@@ -317,22 +317,17 @@ namespace Vehicles
 
 					Command_Action disembark = new Command_Action();
 					disembark.icon = VehicleTex.Anchor;
-					disembark.defaultLabel = "VF_CommandDisembark".Translate(); //settlement != null ? "VF_CommandDockShip".Translate() : "VF_CommandDockShipDisembark".Translate();
-					disembark.defaultDesc = "VF_CommandDisembarkDesc".Translate(); //settlement != null ? "VF_CommandDockShipDesc".Translate(settlement) : "VF_CommandDockShipObjectDesc".Translate();
+					disembark.defaultLabel = "VF_CommandDisembark".Translate();
+					disembark.defaultDesc = "VF_CommandDisembarkDesc".Translate();
 					disembark.action = delegate ()
 					{
 						CaravanHelper.StashVehicles(this);
 					};
 
-					Settlement settlement = Find.WorldObjects.SettlementBaseAt(Tile);
-
+					// If tile is impassable, normal caravan won't be able to return
 					if (Find.World.Impassable(Tile))
 					{
 						disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
-					}
-					if (settlement != null)
-					{
-						disembark.Disable("CommandSettleFailAlreadyHaveBase".Translate());
 					}
 
 					yield return disembark;

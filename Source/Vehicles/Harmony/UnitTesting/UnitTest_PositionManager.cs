@@ -16,11 +16,6 @@ namespace Vehicles.Testing
 	{
 		public override string Name => "PositionManager";
 
-		public override bool ShouldTest(VehicleDef vehicleDef)
-		{
-			return true;
-		}
-
 		protected override UTResult TestVehicle(VehiclePawn vehicle, Map map, IntVec3 root)
 		{
 			int maxSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);

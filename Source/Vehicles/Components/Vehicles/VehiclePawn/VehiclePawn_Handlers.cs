@@ -30,6 +30,15 @@ namespace Vehicles
 
 		/* -------------------------------------- */
 
+		public IOrderedEnumerable<VehicleHandler> HandlersOrdered
+		{
+			get
+			{
+				return handlers.OrderBy(handler => handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Movement))
+							   .ThenBy(handler => handler.role.HandlingTypes.HasFlag(HandlingTypeFlags.Turret));
+			}
+		}
+
 		// TODO 1.6 - remove
 		[Obsolete("Will be removed in 1.6")]
 		public bool MovementHandlerAvailable
@@ -306,7 +315,7 @@ namespace Vehicles
 
 		public VehicleHandler NextAvailableHandler(HandlingTypeFlags? handlingTypeFlag = null, bool priorityHandlers = false)
 		{
-			foreach (VehicleHandler handler in handlers)
+			foreach (VehicleHandler handler in HandlersOrdered)
 			{
 				if (priorityHandlers && handler.role.HandlingTypes == HandlingTypeFlags.None) continue;
 				if (handlingTypeFlag != null && !handler.role.HandlingTypes.HasFlag(handlingTypeFlag)) continue;
@@ -357,6 +366,20 @@ namespace Vehicles
 						return false;
 					}
 					bills.Remove(bill);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public bool TryAddPawn(Pawn pawn)
+		{
+			if (handlers.NullOrEmpty()) return false;
+			
+			foreach (VehicleHandler handler in HandlersOrdered)
+			{
+				if (TryAddPawn(pawn, handler))
+				{
 					return true;
 				}
 			}
@@ -479,22 +502,20 @@ namespace Vehicles
 
 		public void DisembarkAll()
 		{
-			List<Pawn> pawnsToDisembark = new List<Pawn>(AllPawnsAboard);
-			if (!(pawnsToDisembark is null) && pawnsToDisembark.Count > 0)
+			if (this.GetVehicleCaravan() is VehicleCaravan caravan && !Spawned)
 			{
-				if (this.GetCaravan() != null && !Spawned)
+				List<VehicleHandler> handlerList = handlers;
+				for (int i = 0; i < handlerList.Count; i++)
 				{
-					List<VehicleHandler> handlerList = handlers;
-					for (int i = 0; i < handlerList.Count; i++)
-					{
-						VehicleHandler handler = handlerList[i];
-						handler.handlers.TryTransferAllToContainer(this.GetCaravan().pawns, false);
-					}
-					return;
+					VehicleHandler handler = handlerList[i];
+					handler.handlers.TryTransferAllToContainer(caravan.pawns, false);
 				}
-				foreach (Pawn pawn in pawnsToDisembark)
+			}
+			else
+			{
+				for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
 				{
-					DisembarkPawn(pawn);
+					DisembarkPawn(AllPawnsAboard[i]);
 				}
 			}
 		}

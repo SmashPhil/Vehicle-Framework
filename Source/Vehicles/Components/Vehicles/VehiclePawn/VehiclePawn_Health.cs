@@ -187,6 +187,31 @@ namespace Vehicles
 			base.Destroy(mode);
 		}
 
+		public virtual void DestroyPawns(DestroyMode mode = DestroyMode.Vanish)
+		{
+			for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = AllPawnsAboard[i];
+				AllPawnsAboard.RemoveAt(i);
+				pawn.Destroy(mode);
+			}
+			for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
+			{
+				Thing thing = inventory.innerContainer[i];
+				if (thing is Pawn pawn)
+				{
+					inventory.innerContainer.RemoveAt(i);
+					pawn.Destroy(mode);
+				}
+			}
+		}
+
+		public virtual void DestroyVehicleAndPawns(DestroyMode mode = DestroyMode.Vanish)
+		{
+			DestroyPawns(mode);
+			Destroy(mode);
+		}
+
 		public override void Kill(DamageInfo? dinfo, Hediff exactCulprit = null)
 		{
 			Kill(dinfo, spawnWreckage: false);

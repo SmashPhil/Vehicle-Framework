@@ -128,11 +128,9 @@ namespace Vehicles
 					{
 						Pawn pawn = raiderHumanlikes.Pop();
 						outPawns.Remove(pawn);
-						VehicleHandler handler = vehicle.NextAvailableHandler(priorityHandlers: true);
-						handler ??= vehicle.NextAvailableHandler();
-						if (!vehicle.TryAddPawn(pawn, handler))
+						if (!vehicle.TryAddPawn(pawn))
 						{
-							Log.Error($"Unable to add {pawn} to {handler} during raid generation.");
+							Log.Error($"Unable to add {pawn} to {vehicle} during raid generation.");
 							outPawns.Add(pawn);
 						}
 					}
@@ -182,10 +180,9 @@ namespace Vehicles
 					{
 						Pawn pawn = raiderHumanlikes.Pop();
 						__result.Remove(pawn);
-						VehicleHandler handler = vehicle.NextAvailableHandler(priorityHandlers: true);
-						if (!vehicle.TryAddPawn(pawn, handler))
+						if (!vehicle.TryAddPawn(pawn))
 						{
-							Log.Error($"Unable to add {pawn} to {handler} during raid generation.");
+							Log.Error($"Unable to add {pawn} to {vehicle} during raid generation.");
 							__result.Add(pawn);
 						}
 					}
