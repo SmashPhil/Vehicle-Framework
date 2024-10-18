@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1776</currentVersion>
+  <currentVersion>1.5.1777</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -23,6 +23,8 @@
 - Upgrades could be transfered to other vehicles by selecting another vehicle in the menu right before confirming the upgrade.
 
 - Vehicles spawning into a map would reset their target fuel level.
+
+- Pawns would not board a vehicle unless standing within distance to instant-board.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 

@@ -755,7 +755,9 @@ namespace Vehicles
 					{
 						if (target.Thing is Pawn pawn && pawn.IsColonistPlayerControlled && !pawn.Downed)
 						{
-							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
+							VehicleHandler handler = pawn.IsColonistPlayerControlled ? NextAvailableHandler() : 
+								handlers.FirstOrDefault(handler => handler.AreSlotsAvailableAndReservable && 
+									handler.role.HandlingTypes == HandlingTypeFlags.None);
 							PromptToBoardVehicle(pawn, handler);
 							return;
 						}
@@ -1051,7 +1053,7 @@ namespace Vehicles
 			}
 			foreach (VehicleHandler handler in handlers)
 			{
-				if (handler.AreSlotsAvailable)
+				if (handler.AreSlotsAvailableAndReservable)
 				{
 					VehicleReservationManager reservationManager = Map.GetCachedMapComponent<VehicleReservationManager>();
 					FloatMenuOption opt = new FloatMenuOption("VF_EnterVehicle".Translate(LabelShort, handler.role.label, (handler.role.Slots - (handler.handlers.Count +
@@ -1265,7 +1267,9 @@ namespace Vehicles
 						{
 							continue;
 						}
-						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : handlers.FirstOrDefault(handler => handler.AreSlotsAvailable && handler.role.HandlingTypes == HandlingTypeFlags.None);
+						VehicleHandler handler = p.IsColonistPlayerControlled ? NextAvailableHandler() : 
+							handlers.FirstOrDefault(handler => handler.AreSlotsAvailableAndReservable && 
+								handler.role.HandlingTypes == HandlingTypeFlags.None);
 						PromptToBoardVehicle(p, handler);
 					}
 				}, MenuOptionPriority.Default, null, null, 0f, null, null);

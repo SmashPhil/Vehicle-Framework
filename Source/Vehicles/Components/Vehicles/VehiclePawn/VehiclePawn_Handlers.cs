@@ -30,6 +30,8 @@ namespace Vehicles
 
 		/* -------------------------------------- */
 
+		// TODO 1.6 - remove
+		[Obsolete("Will be removed in 1.6")]
 		public bool MovementHandlerAvailable
 		{
 			get
@@ -309,7 +311,7 @@ namespace Vehicles
 				if (priorityHandlers && handler.role.HandlingTypes == HandlingTypeFlags.None) continue;
 				if (handlingTypeFlag != null && !handler.role.HandlingTypes.HasFlag(handlingTypeFlag)) continue;
 
-				if (handler.AreSlotsAvailable)
+				if (handler.AreSlotsAvailableAndReservable)
 				{
 					return handler;
 				}

@@ -27,7 +27,6 @@
 	<!-- Caravan -->
 	<VF_VehicleCaravanMentalBreakMovementRole>{0} is no longer able to operate their role for the vehicle caravan.</VF_VehicleCaravanMentalBreakMovementRole>
 	<VF_PawnBoardedFormingCaravan>{0} has boarded the {1} and is ready for departure.</VF_PawnBoardedFormingCaravan>
-	<VF_CantMoveDocked>Not enough pawns to set sail.</VF_CantMoveDocked>
 	<VF_CantAssignVehicle>Not enough pawns for {0}.</VF_CantAssignVehicle>
 	<VF_AssignFailure>Failed to assign seats. {0}</VF_AssignFailure>
 	<VF_PackingSpotNotFound>Packing Spot was not found for Vehicle caravan. It is recommended you place a Packing Spot from Misc.</VF_PackingSpotNotFound>

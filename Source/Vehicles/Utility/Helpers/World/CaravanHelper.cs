@@ -243,61 +243,6 @@ namespace Vehicles
 		}
 
 		/// <summary>
-		/// Directly board all pawns in caravan into Boats in caravan
-		/// </summary>
-		/// <param name="caravan"></param>
-		public static void BoardAllCaravanPawns(VehicleCaravan caravan)
-		{
-			if (!AbleToEmbark(caravan))
-			{
-				if (caravan.vehiclePather.Moving)
-				{
-					caravan.vehiclePather.StopDead();
-				}
-				Messages.Message("VF_CantMoveDocked".Translate(), MessageTypeDefOf.RejectInput, false);
-				return;
-			}
-
-			List<Pawn> sailors = caravan.PawnsListForReading.Where(p => !p.IsBoat()).ToList();
-			List<VehiclePawn> ships = caravan.PawnsListForReading.Where(p => p.IsBoat()).Cast<VehiclePawn>().ToList();
-			foreach(VehiclePawn ship in ships)
-			{ 
-				for (int j = 0; j < ship.PawnCountToOperate; j++)
-				{
-					if (sailors.Count <= 0)
-					{
-						return;
-					}
-					foreach (VehicleHandler handler in ship.handlers)
-					{
-						if (handler.AreSlotsAvailable)
-						{
-							ship.Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-							break;
-						}
-					}
-				}
-			}
-			if (sailors.Count > 0)
-			{
-				int x = 0;
-				while (sailors.Count > 0)
-				{
-					VehiclePawn ship = ships[x];
-					foreach (VehicleHandler handler in ship.handlers)
-					{
-						if (handler.AreSlotsAvailable)
-						{
-							ship.Notify_BoardedCaravan(sailors.Pop(), handler.handlers);
-							break;
-						}
-					}
-					x = (x + 2) > ships.Count ? 0 : ++x;
-				}
-			}
-		}
-
-		/// <summary>
 		/// Board all pawns automatically into assigned seats
 		/// </summary>
 		/// <param name="pawns"></param>

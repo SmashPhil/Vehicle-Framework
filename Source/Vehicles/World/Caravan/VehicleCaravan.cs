@@ -7,6 +7,7 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using SmashTools;
+using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -114,21 +115,6 @@ namespace Vehicles
 			}
 		}
 
-		public bool CanLaunch
-		{
-			get
-			{
-				foreach (VehiclePawn vehicle in vehicles)
-				{
-					if (vehicle.CompVehicleLauncher == null)
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-		}
-
 		public bool OutOfFuel
 		{
 			get
@@ -141,6 +127,14 @@ namespace Vehicles
 					}
 				}
 				return false;
+			}
+		}
+
+		public bool VehicleCantMove
+		{
+			get
+			{
+				return VehiclesListForReading.Any(vehicle => !vehicle.CanMoveFinal);
 			}
 		}
 
@@ -562,8 +556,26 @@ namespace Vehicles
 				}
 				stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
 			}
+			VehiclePawn vehicleIncapacitated = null;
+			string vehicleIncapReason = null;
 			foreach (VehiclePawn vehicle in VehiclesListForReading)
 			{
+				// We only care about the first, any incap. vehicle blocks the whole caravan from moving
+				// and checking roles + stats can be expensive if uncached.
+				if (vehicleIncapacitated == null)
+				{
+					if (!vehicle.CanMove)
+					{
+						vehicleIncapacitated = vehicle;
+						vehicleIncapReason = "VF_VehicleUnableToMove".Translate();
+					}
+					else if (!vehicle.CanMoveWithOperators)
+					{
+						vehicleIncapacitated = vehicle;
+						vehicleIncapReason = "VF_NotEnoughToOperate".Translate();
+					}
+				}
+				
 				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
 				{
 					vehicleComp.CompCaravanInspectString(stringBuilder);
@@ -607,7 +619,12 @@ namespace Vehicles
 				stringBuilder.AppendLine();
 				stringBuilder.Append("CaravanEstimatedTimeToDestination".Translate(estimatedDaysToArrive.ToString("0.#")));
 			}
-			if (AllOwnersDowned)
+			if (vehicleIncapacitated != null)
+			{
+				stringBuilder.AppendLine();
+				stringBuilder.Append(vehicleIncapReason);
+			}
+			else if (AllOwnersDowned)
 			{
 				stringBuilder.AppendLine();
 				stringBuilder.Append("AllCaravanMembersDowned".Translate());
