@@ -19,22 +19,21 @@
 - Mods using vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting.
 
 - Vehicles entering maps would not take road areas into account.
+
+- Upgrades could be transfered to other vehicles by selecting another vehicle in the menu right before confirming the upgrade.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 
-- Vehicle region generation only occurs for vehicles actively in use.
+- Vehicle regions will build in the background, significantly reducing impact to map generation times.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added 1st iteration of raiders, locked behind a toggle in the mod settings. Note: This is an experimental feature, you may encounter bugs or horrible game balance. 
-&lt;b&gt;This feature is opt-in while it remains experimental.&lt;/b&gt; Vehicles that are not configured for raids, won't spawn in them. If you have no vehicles that can spawn in raids, then you won't get vehicle raids.
-
 - Vehicles can be temporarily disabled by EMPs.
+
+- Vehicles can be 'stashed' on the world map, allowing your colonists to continue on foot and retrieve your vehicles at a later time.
 &lt;b&gt;Players&lt;/b&gt;
 - Vehicles consume 50% less fuel while idle
 
 - Added more entries to vehicle info cards including build costs, total health, turrets, etc.
 &lt;b&gt;Modders&lt;/b&gt;
-- Added NPC Properties for configuring vehicles in raids.
-
 - Added affectedByEMP bool to vehicle properties.
 
 - FireMode shotsPerBurst and ticksBetweenBursts are now IntRange, allowing for varied burst counts and varied timing between bursts to make machine gun fire less robotic.

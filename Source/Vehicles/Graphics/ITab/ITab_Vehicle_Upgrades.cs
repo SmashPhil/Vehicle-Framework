@@ -152,6 +152,12 @@ namespace Vehicles
 			scrollPosition = Vector2.zero;
 		}
 
+		protected override void CloseTab()
+		{
+			base.CloseTab();
+			openedFor = null;
+		}
+
 		private void RecacheTextEntries()
 		{
 			textEntries.Clear();

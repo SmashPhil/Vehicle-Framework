@@ -607,6 +607,8 @@ namespace Vehicles
 		public override void PostGeneration()
 		{
 			base.PostGeneration();
+			targetFuelLevel = FuelCapacity;
+			targetFuelPercent = 1;
 			if (Vehicle.Faction != Faction.OfPlayer)
 			{
 				Refuel(FuelCapacity * Rand.Range(0.45f, 0.85f));
@@ -616,11 +618,6 @@ namespace Vehicles
 		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
 			base.PostSpawnSetup(respawningAfterLoad);
-			if (!respawningAfterLoad)
-			{
-				targetFuelLevel = FuelCapacity;
-				targetFuelPercent = 1;
-			}
 
 			RevalidateConsumptionStatus();
 
