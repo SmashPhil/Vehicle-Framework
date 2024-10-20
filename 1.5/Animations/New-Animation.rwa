@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AnimationClip>
+	<frameCount>60</frameCount>
+	<properties>
+		<li>
+			<identifier>VehiclePawn</identifier>
+			<label>Rotation</label>
+			<name>rotation</name>
+			<type>Vehicles.VehiclePawn</type>
+			<single>
+				<objectPath />
+				<label>Rotation</label>
+				<name>rotation</name>
+				<type>Vehicles.VehiclePawn</type>
+				<animatorType>Vehicles.VehiclePawn</animatorType>
+				<propertyType>Float</propertyType>
+				<curve>
+					<points>
+						<li>(0,0,0,0,0.25,0.25)</li>
+						<li>(20,-1,0,0,0.25,0.25)</li>
+						<li>(60,3,0,0,0.25,0.25)</li>
+					</points>
+				</curve>
+			</single>
+		</li>
+	</properties>
+	<events />
+</AnimationClip>
