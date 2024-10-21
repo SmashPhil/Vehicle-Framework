@@ -316,7 +316,7 @@ namespace Vehicles
 					}
 
 					Command_Action disembark = new Command_Action();
-					disembark.icon = VehicleTex.Anchor;
+					disembark.icon = VehicleTex.StashVehicle;
 					disembark.defaultLabel = "VF_CommandDisembark".Translate();
 					disembark.defaultDesc = "VF_CommandDisembarkDesc".Translate();
 					disembark.action = delegate ()
@@ -329,7 +329,7 @@ namespace Vehicles
 					{
 						disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
 					}
-
+					
 					yield return disembark;
 				}
 				foreach (Gizmo gizmo2 in forage.GetGizmos())

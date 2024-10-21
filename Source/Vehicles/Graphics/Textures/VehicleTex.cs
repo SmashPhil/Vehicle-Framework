@@ -29,6 +29,8 @@ namespace Vehicles
 
 		public static readonly Texture2D Anchor = ContentFinder<Texture2D>.Get("UI/Gizmos/Anchor");
 
+		public static readonly Texture2D StashVehicle = ContentFinder<Texture2D>.Get("UI/Gizmos/StashVehicle");
+
 		public static readonly Texture2D Rename = ContentFinder<Texture2D>.Get("UI/Buttons/Rename");
 
 		public static readonly Texture2D Recolor = ContentFinder<Texture2D>.Get("UI/ColorTools/Paintbrush");
