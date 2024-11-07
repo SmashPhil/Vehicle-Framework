@@ -1137,8 +1137,12 @@ namespace Vehicles
 		public void SetRetexture(RetextureDef retextureDef)
 		{
 			SetRetextureInternal(this, retextureDef);
-		}
-
+        }
+        public RetextureDef GetRetexture()
+        {
+            return this.retextureDef;
+        }
+		
 		private static void SetRetextureInternal(VehiclePawn vehicle, RetextureDef retextureDef)
 		{
 			vehicle.retextureDef = retextureDef;
@@ -1170,9 +1174,9 @@ namespace Vehicles
 			CompVehicleTurrets?.turrets.ForEach(c => c.ResolveCannonGraphics(patternData, true));
 
 			patternToPaint = null;
-		}
+        }
 
-		public virtual float DoInspectPaneButtons(float x)
+        public virtual float DoInspectPaneButtons(float x)
 		{
 			Rect rect = new Rect(x, 0f, Extra.IconBarDim, Extra.IconBarDim);
 			float usedWidth = 0;
