@@ -1387,7 +1387,7 @@ namespace Vehicles
 		{
 			if (!NoGraphic)
 			{
-				VehicleGraphics.DrawTurret(this, drawPos, Rot8.North);
+				VehicleGraphics.DrawTurret(this, drawPos, rot);
 			}
 			DrawTargeter();
 			DrawAimPie();
