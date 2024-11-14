@@ -20,6 +20,11 @@
 	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
 	<VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
 	<VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
+
+	<VF_TransferToVehicle_Order>Transfer to vehicle</VF_TransferToVehicle_Order>
+	<VF_TransferToVehicle_Order_Desc>Transfer selected thing(s) to the target vehicle's cargo.</VF_TransferToVehicle_Order_Desc>
+	<VF_TransferToVehicle_Cancel>Cancel transfer</VF_TransferToVehicle_Cancel>
+	<VF_TransferToVehicle_Cancel_Desc>Cancel transfer of selected thing(s) to any vehicle's cargo.</VF_TransferToVehicle_Cancel_Desc>
 	
 	<!-- UI / Buttons -->
 	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
