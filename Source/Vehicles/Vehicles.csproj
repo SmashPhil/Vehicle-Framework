@@ -167,8 +167,6 @@
     <Compile Include="CustomFeatures\Upgrades\UpgradeTextEntry.cs" />
     <Compile Include="CustomFeatures\Upgrades\UpgradeTreeDef.cs" />
     <Compile Include="CustomFeatures\Areas\Area_Road.cs" />
-    <Compile Include="Gizmo\Command_TransferToVehicle_Cancel.cs" />
-    <Compile Include="Gizmo\Command_TransferToVehicle_Order.cs" />
     <Compile Include="Gizmo\Command_Turret.cs" />
     <Compile Include="Gizmo\Designators\Designator_AreaRoadExpand.cs" />
     <Compile Include="Gizmo\Designators\Designator_AreaRoadClear.cs" />
@@ -480,8 +478,6 @@
     <Compile Include="Graphics\Misc\FloatMenuTargeter.cs" />
     <Compile Include="Graphics\Textures\TexData.cs" />
     <Compile Include="Graphics\VehicleGhostUtility.cs" />
-    <Compile Include="Utility\Extensions\Ext_Thing.cs" />
-    <Compile Include="Utility\Extensions\Ext_TransferableOneWay.cs" />
     <Compile Include="Utility\Extensions\Ext_Caravan.cs" />
     <Compile Include="Utility\Extensions\Ext_ThingOwner.cs" />
     <Compile Include="Utility\Extensions\Ext_Toils.cs" />

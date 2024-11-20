@@ -34,9 +34,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(BuildCopyCommandUtility), nameof(BuildCopyCommandUtility.BuildCopyCommand)),
 				prefix: new HarmonyMethod(typeof(Gizmos),
 				nameof(VehicleMaterialOnCopyBuildGizmo)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.GetGizmos)), prefix: null,
-				postfix: new HarmonyMethod(typeof(Gizmos),
-				nameof(ThingTransferToVehicleGizmo)));
 
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_InfoCard), nameof(Dialog_InfoCard.DoWindowContents)),
 				prefix: new HarmonyMethod(typeof(Gizmos),
@@ -315,26 +312,6 @@ namespace Vehicles
 				return false;
 			}
 			return true;
-		}
-
-		public static IEnumerable<Gizmo> ThingTransferToVehicleGizmo(IEnumerable<Gizmo> __result, Thing __instance)
-		{
-			IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
-
-			while (enumerator.MoveNext())
-			{
-				yield return enumerator.Current;
-			}
-
-			if (__instance.CanBeTransferredToVehiclesCargo())
-			{
-				yield return Command_TransferToVehicle_Order.Instance;
-
-				if (__instance.IsOrderedToBeTransferredToAnyVehicle())
-				{
-					yield return Command_TransferToVehicle_Cancel.Instance;
-				}
-			}
 		}
 	}
 }
