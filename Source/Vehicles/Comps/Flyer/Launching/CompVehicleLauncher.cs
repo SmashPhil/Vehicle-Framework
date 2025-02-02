@@ -170,9 +170,13 @@ namespace Vehicles
 
 			if (SettingsCache.TryGetValue(Vehicle.VehicleDef, typeof(VehicleDef), nameof(VehicleDef.vehicleMovementPermissions), Vehicle.VehicleDef.vehicleMovementPermissions) > VehiclePermissions.NotAllowed)
 			{
-				if (!Vehicle.CanMoveFinal || Vehicle.Angle != 0)
+				if (!Vehicle.CanMoveFinal)
 				{
 					disableReason = "VF_CannotLaunchImmobile".Translate(Vehicle.LabelShort);
+				}
+				else if (Vehicle.Angle != 0)
+				{
+					disableReason = "VF_CannotLaunchInvalidDirection".Translate(Vehicle.LabelShort);
 				}
 			}
 			else
