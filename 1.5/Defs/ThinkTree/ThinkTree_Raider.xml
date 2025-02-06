@@ -39,9 +39,22 @@
 			<subNodes>
 				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
 					<subNodes>
-						<li Class="Vehicles.JobGiver_ExitMapBest">
-							<defaultLocomotion>Walk</defaultLocomotion>
-						</li>
+						<li Class="Vehicles.JobGiver_ExitMapBest" />
+						<!-- Idle rather than continue to humanlike nodes -->
+						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+					</subNodes>
+				</li>
+			</subNodes>
+		</thinkRoot>
+	</ThinkTreeDef>
+
+    <ThinkTreeDef>
+		<defName>Vehicle_ExitMapRandom</defName>
+		<thinkRoot Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
+					<subNodes>
+						<li Class="Vehicles.JobGiver_ExitMapRandom"/>
 						<!-- Idle rather than continue to humanlike nodes -->
 						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
 					</subNodes>

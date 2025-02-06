@@ -1,6 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AnimationController>
-	<parameters />
+	<guid>1c014b0f-5e5a-42a7-9fea-301e9a9624f3</guid>
+	<parameters>
+		<li Class="SmashTools.Animations.AnimationParameter">
+			<name>Moving</name>
+			<type>Bool</type>
+			<value>1</value>
+		</li>
+		<li Class="SmashTools.Animations.AnimationParameter">
+			<name>IgnitionOn</name>
+			<type>Bool</type>
+			<value>1</value>
+		</li>
+	</parameters>
 	<layers>
 		<li>
 			<name>Base Layer</name>
@@ -19,17 +31,12 @@
 							<toStateGuid>481d378c-41f9-4289-afa6-af54961bf743</toStateGuid>
 							<conditions />
 						</li>
-						<li>
-							<exitTicks>0</exitTicks>
-							<toStateGuid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</toStateGuid>
-							<conditions />
-						</li>
 					</transitions>
 				</li>
 				<li>
 					<name>Exit</name>
 					<guid>043ab0e3-a33e-464e-8ff3-493177a06256</guid>
-					<position>(32, 0)</position>
+					<position>(47, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
 					<writeDefaults>True</writeDefaults>
@@ -39,22 +46,99 @@
 				<li>
 					<name>Idle</name>
 					<guid>481d378c-41f9-4289-afa6-af54961bf743</guid>
-					<position>(-22, 1)</position>
+					<position>(-25, 1)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Default</stateType>
-					<transitions />
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</toStateGuid>
+							<conditions>
+								<li>
+									<parameter>Moving</parameter>
+									<comparison>LessThan</comparison>
+									<value>1</value>
+								</li>
+							</conditions>
+						</li>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>d08461b0-60a4-4e8f-9c3a-8d8d3d878b44</toStateGuid>
+							<conditions>
+								<li>
+									<parameter>IgnitionOn</parameter>
+									<comparison>LessThan</comparison>
+									<value>1</value>
+								</li>
+							</conditions>
+						</li>
+					</transitions>
 				</li>
 				<li>
 					<name>Moving</name>
 					<guid>bcb5254f-4b12-4d8e-b33c-4e561f837b34</guid>
-					<position>(1, 10)</position>
+					<position>(-2, 10)</position>
+					<clip>ec852a21-833e-47f6-9957-6aa784399ac4</clip>
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>091ad1ea-3449-486d-8542-f32212763151</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Spinning</name>
+					<guid>d08461b0-60a4-4e8f-9c3a-8d8d3d878b44</guid>
+					<position>(-2, 1)</position>
+					<clip>37f63e90-ce20-4c2a-8c17-7054b35adb6c</clip>
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>c1779a00-e0ca-46f2-9bca-7f25ce6766d7</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>SpinningFull</name>
+					<guid>c1779a00-e0ca-46f2-9bca-7f25ce6766d7</guid>
+					<position>(21, 1)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
-					<transitions />
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>043ab0e3-a33e-464e-8ff3-493177a06256</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Orbit</name>
+					<guid>091ad1ea-3449-486d-8542-f32212763151</guid>
+					<position>(21, 10)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>043ab0e3-a33e-464e-8ff3-493177a06256</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
 				</li>
 			</states>
 		</li>

@@ -44,31 +44,27 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			GUIState.Push();
-			{
 				EnsureSpecificNeedsTabForPawnValid();
 
-				Text.Font = GameFont.Small;
+				using TextBlock textFont = new(GameFont.Small);
 				Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
 				Rect viewRect = new Rect(0f, 0f, rect.width - 16f, scrollViewHeight);
 
 				float curY = 0f;
+				// Begin ScrollView
 				Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
-				{
-					VehicleTabHelper_Passenger.Start();
-					{
-						VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, Vehicle, ref specificNeedsTabForPawn);
-					}
-					VehicleTabHelper_Passenger.End();
-				}
+				VehicleTabHelper_Passenger.Start();
+
+				VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, Vehicle, ref specificNeedsTabForPawn);
+
+				VehicleTabHelper_Passenger.End();
 				Widgets.EndScrollView();
+				// End ScrollView
 
 				if (Event.current.type is EventType.Layout)
 				{
 					scrollViewHeight = curY + 30f;
 				}
-			}
-			GUIState.Pop();
 		}
 
 		protected override void UpdateSize()

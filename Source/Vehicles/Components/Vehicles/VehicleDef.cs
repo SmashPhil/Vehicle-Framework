@@ -16,7 +16,7 @@ namespace Vehicles
 	public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFields
 	{
 		[PostToSettings]
-		public VehicleEnabledFor enabled = VehicleEnabledFor.Everyone;
+		public VehicleEnabled.For enabled = VehicleEnabled.For.Everyone;
 
 		[PostToSettings(Label = "VF_Nameable", Translate = true, Tooltip = "VF_NameableTooltip", UISettingsType = UISettingsType.Checkbox)]
 		public bool nameable = true;

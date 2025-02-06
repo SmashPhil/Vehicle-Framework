@@ -12,15 +12,15 @@ namespace Vehicles
 {
 	public static class VehicleTabHelper_Passenger
 	{
-		public const float PawnRowHeight = 50;
-		public const float PawnRowPadding = 4;
-		public const float ThingIconSize = 27;
+		private const float PawnRowHeight = 50;
+		private const float PawnRowPadding = 4;
+		private const float ThingIconSize = 27;
 		public const float PawnExtraButtonSize = 24;
-		public const float LabelWidth = 100;
+		private const float LabelWidth = 100;
 
 		private static readonly List<Need> tmpNeeds = new List<Need>();
 
-		private static VehicleHandler editingPawnOverlayRenderer;
+		//private static VehicleHandler editingPawnOverlayRenderer;
 		private static Pawn draggedPawn;
 		private static IThingHolder transferToHolder;
 		private static Pawn hoveringOverPawn;
@@ -52,33 +52,29 @@ namespace Vehicles
 		/// <returns>Height used up for list</returns>
 		public static void DrawPassengersFor(ref float curY, Rect viewRect, Vector2 scrollPos, VehiclePawn vehicle, ref Pawn moreDetailsForPawn)
 		{
-			GUIState.Push();
+			for (int i = 0; i < vehicle.handlers.Count; i++)
 			{
-				for (int i = 0; i < vehicle.handlers.Count; i++)
-				{
-					VehicleHandler handler = vehicle.handlers[i];
-					List<Pawn> pawns = handler.handlers.InnerListForReading;
+				VehicleHandler handler = vehicle.handlers[i];
+				List<Pawn> pawns = handler.handlers.InnerListForReading;
 
-					overDropSpot |= ListPawns(ref curY, viewRect, scrollPos, handler, handler.role.label, pawns, ref moreDetailsForPawn);
-				}
-
-				//List out all prisoners, and animals
-				bool animalsSeparated = false;
-				foreach (Pawn pawn in vehicle.Passengers.Where(pawn => !pawn.IsColonist))
-				{
-					if (!animalsSeparated)
-					{
-						Widgets.ListSeparator(ref curY, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
-						animalsSeparated = true;
-					}
-					if (DoRow(curY, viewRect, scrollPos, pawn, ref moreDetailsForPawn, true))
-					{
-						hoveringOverPawn = pawn;
-					}
-					curY += PawnRowHeight;
-				}
+				overDropSpot |= ListPawns(ref curY, viewRect, scrollPos, handler, handler.role.label, pawns, ref moreDetailsForPawn);
 			}
-			GUIState.Pop();
+
+			//List out all prisoners, and animals
+			bool animalsSeparated = false;
+			foreach (Pawn pawn in vehicle.Passengers.Where(pawn => !pawn.IsColonist))
+			{
+				if (!animalsSeparated)
+				{
+					Widgets.ListSeparator(ref curY, viewRect.width, "CaravanPrisonersAndAnimals".Translate());
+					animalsSeparated = true;
+				}
+				if (DoRow(curY, viewRect, scrollPos, pawn, ref moreDetailsForPawn, true))
+				{
+					hoveringOverPawn = pawn;
+				}
+				curY += PawnRowHeight;
+			}
 		}
 
 		public static bool ListPawns(ref float curY, Rect viewRect, Vector2 scrollPos, IThingHolder holder, string label, List<Pawn> pawns, ref Pawn moreDetailsForPawn)
@@ -94,27 +90,27 @@ namespace Vehicles
 
 			Widgets.ListSeparator(ref curY, viewRect.width, label);
 
-			if (false && holder is VehicleHandler handler && handler?.role.PawnRenderer != null && Prefs.DevMode && DebugSettings.godMode) //TODO - implement runtime editing of pawn renderer positions for modders
-			{
-				Rect editPawnOverlayRect = new Rect(viewRect.width - 15, curY + 3, 15, 15);
-				TooltipHandler.TipRegionByKey(editPawnOverlayRect, "VF_EditPawnOverlayRendererTooltip");
-				Color baseColor = (editingPawnOverlayRenderer != handler) ? Color.white : Color.green;
-				Color mouseoverColor = (editingPawnOverlayRenderer != handler) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
-				if (Widgets.ButtonImage(editPawnOverlayRect, VehicleTex.Settings, baseColor, mouseoverColor))
-				{
-					if (editingPawnOverlayRenderer == null || editingPawnOverlayRenderer != handler)
-					{
-						SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
-						editingPawnOverlayRenderer = handler;
-					}
-					else
-					{
-						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
-						editingPawnOverlayRenderer = null;
-					}
-				}
-				GUIState.Reset();
-			}
+			// TODO - implement runtime editing of pawn renderer positions for modders
+			//if (holder is VehicleHandler handler && handler?.role.PawnRenderer != null && Prefs.DevMode && DebugSettings.godMode)
+			//{
+			//	Rect editPawnOverlayRect = new Rect(viewRect.width - 15, curY + 3, 15, 15);
+			//	TooltipHandler.TipRegionByKey(editPawnOverlayRect, "VF_EditPawnOverlayRendererTooltip");
+			//	Color baseColor = (editingPawnOverlayRenderer != handler) ? Color.white : Color.green;
+			//	Color mouseoverColor = (editingPawnOverlayRenderer != handler) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+			//	if (Widgets.ButtonImage(editPawnOverlayRect, VehicleTex.Settings, baseColor, mouseoverColor))
+			//	{
+			//		if (editingPawnOverlayRenderer == null || editingPawnOverlayRenderer != handler)
+			//		{
+			//			SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+			//			editingPawnOverlayRenderer = handler;
+			//		}
+			//		else
+			//		{
+			//			SoundDefOf.TabClose.PlayOneShotOnCamera(null);
+			//			editingPawnOverlayRenderer = null;
+			//		}
+			//	}
+			//}
 
 			foreach (Pawn pawn in pawns)
 			{
@@ -203,9 +199,8 @@ namespace Vehicles
 
 				if (pawn.Downed)
 				{
-					GUI.color = new Color(1f, 0f, 0f, 0.5f);
+					using TextBlock guiColor = new (new Color(1f, 0f, 0f, 0.5f));
 					Widgets.DrawLineHorizontal(0f, pawnRect.height / 2f, pawnRect.width);
-					GUIState.Reset();
 				}
 			}
 			Widgets.EndGroup();
@@ -215,28 +210,25 @@ namespace Vehicles
 
 		private static void OpenSpecificTabButton(Rect rowRect, Pawn pawn, ref Pawn moreDetailsForPawn)
 		{
-			GUIState.Push();
-			{
-				Color baseColor = (pawn != moreDetailsForPawn) ? Color.white : Color.green;
-				Color mouseoverColor = (pawn != moreDetailsForPawn) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
-				Rect rect = new Rect(rowRect.width - PawnExtraButtonSize, (rowRect.height - PawnExtraButtonSize) / 2f, PawnExtraButtonSize, PawnExtraButtonSize);
+			Color baseColor = (pawn != moreDetailsForPawn) ? Color.white : Color.green;
+			Color mouseoverColor = (pawn != moreDetailsForPawn) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+			Rect rect = new Rect(rowRect.width - PawnExtraButtonSize, (rowRect.height - PawnExtraButtonSize) / 2f, 
+			                     PawnExtraButtonSize, PawnExtraButtonSize);
 
-				if (Widgets.ButtonImage(rect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
+			if (Widgets.ButtonImage(rect, CaravanThingsTabUtility.SpecificTabButtonTex, baseColor, mouseoverColor))
+			{
+				if (pawn == moreDetailsForPawn)
 				{
-					if (pawn == moreDetailsForPawn)
-					{
-						moreDetailsForPawn = null;
-						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
-					}
-					else
-					{
-						moreDetailsForPawn = pawn;
-						SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
-					}
+					moreDetailsForPawn = null;
+					SoundDefOf.TabClose.PlayOneShotOnCamera();
 				}
-				TooltipHandler.TipRegion(rect, "OpenSpecificTabButtonTip".Translate());
+				else
+				{
+					moreDetailsForPawn = pawn;
+					SoundDefOf.TabOpen.PlayOneShotOnCamera();
+				}
 			}
-			GUIState.Pop();
+			TooltipHandler.TipRegion(rect, "OpenSpecificTabButtonTip".Translate());
 		}
 
 		public static void HandleDragEvent()

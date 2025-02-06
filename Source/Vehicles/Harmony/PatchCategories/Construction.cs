@@ -26,9 +26,6 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(GenSpawn), name: nameof(GenSpawn.Spawn), [typeof(Thing), typeof(IntVec3), typeof(Map), typeof(Rot4), typeof(WipeMode), typeof(bool), typeof(bool)]),
 				prefix: new HarmonyMethod(typeof(Construction),
 				nameof(RegisterThingSpawned)));
-			VehicleHarmony.Patch(original: AccessTools.PropertyGetter(typeof(DesignationCategoryDef), nameof(DesignationCategoryDef.ResolvedAllowedDesignators)),
-				postfix: new HarmonyMethod(typeof(Construction),
-				nameof(RemoveDisabledVehicles)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Designator_Deconstruct), nameof(Designator.CanDesignateThing)),
 				postfix: new HarmonyMethod(typeof(Construction),
 				nameof(AllowDeconstructVehicle)));
@@ -66,7 +63,7 @@ namespace Vehicles
 				vehicle.SetFaction(worker.Faction);
 				GenSpawn.Spawn(vehicle, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund, false);
 				worker.records.Increment(RecordDefOf.ThingsConstructed);
-				
+
 				if (!DebugSettings.godMode) //quick spawning for development
 				{
 					vehicle.Rename();
@@ -95,7 +92,7 @@ namespace Vehicles
 					return true;
 
 				Pawn vehicle;
-				if(building.vehicle != null)
+				if (building.vehicle != null)
 				{
 					vehicle = building.vehicle;
 					vehicle.health.Reset();
@@ -104,7 +101,7 @@ namespace Vehicles
 				{
 					vehicle = PawnGenerator.GeneratePawn(vehicleDef.thingToSpawn.kindDef);
 				}
-				
+
 				Map map = b.Map;
 				IntVec3 position = b.Position;
 				Rot4 rotation = b.Rotation;
@@ -114,7 +111,7 @@ namespace Vehicles
 				{
 					vehicleDef.soundBuilt.PlayOneShot(new TargetInfo(position, map, false));
 				}
-				if(vehicle.Faction != Faction.OfPlayer)
+				if (vehicle.Faction != Faction.OfPlayer)
 				{
 					vehicle.SetFaction(Faction.OfPlayer);
 				}
@@ -143,7 +140,7 @@ namespace Vehicles
 				if (!VehicleMod.settings.debug.debugSpawnVehicleBuildingGodMode && newThing.HitPoints == newThing.MaxHitPoints)
 				{
 					VehiclePawn vehiclePawn = VehicleSpawner.GenerateVehicle(def.thingToSpawn, newThing.Faction);
-					
+
 					if (def.soundBuilt != null)
 					{
 						def.soundBuilt.PlayOneShot(new TargetInfo(loc, map, false));
@@ -161,7 +158,7 @@ namespace Vehicles
 							vehicleComp.SpawnedInGodMode();
 						}
 					}
-					
+
 					__result = vehicleSpawned;
 					return false;
 				}
@@ -184,23 +181,41 @@ namespace Vehicles
 				}
 				if (standable)
 				{
+					Debug.Message($"Spawning {vehicle} at {loc} Rotation={rot}");
 					return true; //If location is still valid, skip to spawning
 				}
 				Rot4 tmpRot = rot;
 				if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 30, (IntVec3 cell) =>
-				{
-					foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, tmpRot))
 					{
-						if (!cell2.InBounds(map) || !GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
+						foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, tmpRot))
 						{
-							return false;
+							if (!cell2.InBounds(map) || !GenGridVehicles.Walkable(cell2, vehicle.VehicleDef, map) || positionManager.PositionClaimed(cell2))
+							{
+								return false;
+							}
 						}
-					}
-					return true;
-				}, out IntVec3 newLoc))
+						Debug.Message($"Adjusting {vehicle} to {cell} Rotation={tmpRot}");
+						return true;
+					}, out IntVec3 newLoc))
 				{
-					Log.Error($"Unable to find location to spawn {newThing.LabelShort} after 100 attempts. Aborting spawn.");
-					return false;
+					// Just get the vehicle spawned in, user will need to dev-mode teleport them once loaded.
+					// This is easier to handle than lost vehicles needing to be recovered from world pawns.
+					Log.Error($"Unable to find location to spawn {newThing.LabelShort}. Performing wider search.");
+					if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 100, (IntVec3 cell) =>
+						{
+							foreach (IntVec3 cell2 in vehicle.PawnOccupiedCells(cell, tmpRot))
+							{
+								if (!cell2.InBounds(map))
+								{
+									return false;
+								}
+							}
+							return true;
+						}, out newLoc))
+					{
+						Log.Error($"Unable to find location to spawn {newThing.LabelShort}. Aborting spawn.");
+						return false;
+					}
 				}
 				loc = newLoc;
 			}
@@ -235,32 +250,6 @@ namespace Vehicles
 				}
 			}
 			return true;
-		}
-
-		public static IEnumerable<Designator> RemoveDisabledVehicles(IEnumerable<Designator> __result)
-		{
-			foreach (Designator designator in __result)
-			{
-				if (designator is Designator_Build buildDesignator)
-				{
-					if (AccessTools.Field(typeof(Designator_Build), "entDef").GetValue(buildDesignator) is VehicleBuildDef buildDef && buildDef.thingToSpawn is VehicleDef vehicleDef)
-					{
-						VehicleEnabledFor enabled = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), nameof(VehicleDef.enabled), vehicleDef.enabled);
-						if (enabled == VehicleEnabledFor.None || enabled == VehicleEnabledFor.Raiders)
-						{
-							if (!VehicleMod.settings.main.hideDisabledVehicles)
-							{
-								designator.Disable("VF_GizmoDisabledTooltip".Translate());
-							}
-							else
-							{
-								continue;
-							}
-						}
-					}
-				}
-				yield return designator;
-			}
 		}
 
 		public static void AllowDeconstructVehicle(Designator_Deconstruct __instance, Thing t, ref AcceptanceReport __result)

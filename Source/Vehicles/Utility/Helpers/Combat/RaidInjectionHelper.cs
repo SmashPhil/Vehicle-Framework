@@ -38,7 +38,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (!vehicleDef.enabled.HasFlag(VehicleEnabledFor.Raiders))
+			if (!vehicleDef.enabled.HasFlag(VehicleEnabled.For.Raiders))
 			{
 				return false;
 			}

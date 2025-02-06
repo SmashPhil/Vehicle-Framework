@@ -147,6 +147,11 @@ namespace Vehicles
 			{
 				Scribe_TargetInfo.Look(ref destination, "destination");
 			}
+
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				vehicle.animator?.SetBool(PropertyIds.Moving, moving);
+			}
 		}
 
 		public void StartPath(LocalTargetInfo dest, PathEndMode peMode, bool ignoreReachability = false)
@@ -205,6 +210,7 @@ namespace Vehicles
 			}
 			curPath = null;
 			moving = true;
+			vehicle.animator?.SetBool(PropertyIds.Moving, moving);
 			vehicle.EventRegistry[VehicleEventDefOf.MoveStart].ExecuteEvents();
 		}
 
@@ -221,6 +227,7 @@ namespace Vehicles
 			}
 			curPath = null;
 			moving = false;
+			vehicle.animator?.SetBool(PropertyIds.Moving, moving);
 			nextCell = vehicle.Position;
 		}
 

@@ -65,8 +65,7 @@ namespace Vehicles
 
 		public override void DoWindowContents(Rect inRect)
 		{
-			GUIState.Push();
-			Text.Font = GameFont.Medium;
+			using TextBlock fontSize = new(GameFont.Medium);
 			
 			string curLabel = CurVehicleName.ToString().Replace(" '' ", " ");
 			Widgets.Label(new Rect(15f, 15f, 500f, 50f), curLabel);
@@ -89,7 +88,6 @@ namespace Vehicles
 				vehicle.Name = null;
 				Close();
 			}
-			GUIState.Pop();
 		}
 
 		private void AcceptName()

@@ -6,7 +6,6 @@ using Verse;
 using RimWorld;
 using SmashTools;
 using System.Text;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -26,8 +25,8 @@ namespace Vehicles
 			bluntArmor = DefDatabase<DamageArmorCategoryDef>.GetNamed("Blunt");
 			heatArmor = DefDatabase<DamageArmorCategoryDef>.GetNamed("Heat");
 
-			Assert(bluntArmor != null, "'Blunt' DamageArmorCategoryDef.defName spelled incorrectly.");
-			Assert(heatArmor != null, "'Heat' DamageArmorCategoryDef.defName spelled incorrectly.");
+			Assert.IsNotNull(bluntArmor, "'Blunt' DamageArmorCategoryDef.defName spelled incorrectly.");
+			Assert.IsNotNull(heatArmor, "'Heat' DamageArmorCategoryDef.defName spelled incorrectly.");
 		}
 
 		public static (int current, int max, string explanation) GetTotalHealth(this VehiclePawn vehicle)

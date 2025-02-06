@@ -34,6 +34,9 @@ namespace Vehicles
 			//harmony.Patch(original: AccessTools.Method(typeof(XmlInheritance), nameof(XmlInheritance.TryRegister)),
 			//	postfix: new HarmonyMethod(typeof(VehicleHarmonyOnMod),
 			//	nameof(TestDebug)));
+
+			ProjectSetup.onNewGame += GizmoHelper.ResetDesignatorStatuses;
+			ProjectSetup.onLoadGame += GizmoHelper.ResetDesignatorStatuses;
 		}
 
 		/// <summary>

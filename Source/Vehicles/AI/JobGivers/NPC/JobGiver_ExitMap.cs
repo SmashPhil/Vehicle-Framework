@@ -1,13 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
+﻿using RimWorld;
 using SmashTools;
 using Verse;
 using Verse.AI;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -36,22 +30,22 @@ namespace Vehicles
 		protected override Job TryGiveJob(Pawn pawn)
 		{
 			VehiclePawn vehicle = pawn as VehiclePawn;
-			Assert(vehicle != null, "Non-vehicle pawn assigned vehicle job.");
-			Assert(vehicle.Spawned, "Assigning job to despawned vehicle.");
+			Assert.IsNotNull(vehicle, "Non-vehicle pawn assigned to a vehicle job.");
+			Assert.IsTrue(vehicle.Spawned, "Assigning job to despawned vehicle.");
 
 			VehicleMapping mapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
 			VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
 			VehicleReachability reachability = pathData.VehicleReachability;
 			bool canReach = !reachability.CanReachMapEdge(vehicle.Position, TraverseParms.For(vehicle));
 			bool activeThreat = vehicle.Faction != null && GenHostility.AnyHostileActiveThreatTo(vehicle.Map, vehicle.Faction);
-
+			
 			if (!TryFindGoodExitDest(vehicle, out IntVec3 cell))
 			{
 				bool shouldDitch = !vehicle.CanMoveFinal || !canReach;
-				if (shouldDitch && forceDitchIfCantReachMapEdge && !(delayDitchIfActiveThreat && activeThreat))
-				{
-					vehicle.DisembarkAll();
-				}
+				//if (shouldDitch && forceDitchIfCantReachMapEdge && !(delayDitchIfActiveThreat && activeThreat))
+				//{
+				//	vehicle.DisembarkAll();
+				//}
 				return null;
 			}
 			if (vehicle.VehicleDef.npcProperties != null && vehicle.VehicleDef.npcProperties.reverseWhileFleeing)
@@ -59,6 +53,7 @@ namespace Vehicles
 				// TODO - add conditional reversal to keep frontal armor facing any active threats
 				//vehicle.Reverse = true;
 			}
+			
 			Job job = JobMaker.MakeJob(JobDefOf.Goto, cell);
 			job.exitMapOnArrival = true;
 			job.failIfCantJoinOrCreateCaravan = failIfCantJoinOrCreateCaravan;

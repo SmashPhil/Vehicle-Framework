@@ -43,8 +43,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
 	<VF_RoadBiomeCostPathingTooltip>Vehicle Caravans moving over roads on the world map are still affected by biome path costs.</VF_RoadBiomeCostPathingTooltip>
 	<VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>
 	<VF_MultiplePawnsPerJobTooltip>Allows vehicle related jobs to allow more than 1 pawn to reserve and work on it. Max allowed pawns determined by modders.</VF_MultiplePawnsPerJobTooltip>
-	<VF_HideDisabledVehicles>Hide Disabled Vehicles</VF_HideDisabledVehicles>
-	<VF_HideDisabledVehiclesTooltip>Disabled vehicles from the mod settings will be hidden in architect menu.</VF_HideDisabledVehiclesTooltip>
 	
 	<!-- Performance -->
 	<VF_PerformanceSettings>Performance</VF_PerformanceSettings>

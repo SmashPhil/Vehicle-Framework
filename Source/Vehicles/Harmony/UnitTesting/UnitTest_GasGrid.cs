@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
+﻿using System.Linq;
 using SmashTools;
 using SmashTools.Debugging;
 using UnityEngine;
 using Verse;
-using static SmashTools.Debug;
 
 namespace Vehicles.Testing
 {
@@ -36,7 +30,7 @@ namespace Vehicles.Testing
 			gasTester.Start();
 
 			gasGrid.Debug_FillAll();
-			Assert(testArea.All(gasGrid.AnyGasAt));
+			Assert.IsTrue(testArea.All(gasGrid.AnyGasAt));
 
 			// Spawn
 			GenSpawn.Spawn(vehicle, root, map);

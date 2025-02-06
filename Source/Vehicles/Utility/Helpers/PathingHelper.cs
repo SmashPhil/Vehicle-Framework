@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using System.Runtime.CompilerServices;
 using System.Linq;
 using HarmonyLib;
+using RimWorld;
+using RimWorld.Planet;
+using SmashTools;
+using SmashTools.Performance;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
-using RimWorld;
-using RimWorld.Planet;
-using UnityEngine;
-using SmashTools;
-using SmashTools.Performance;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {

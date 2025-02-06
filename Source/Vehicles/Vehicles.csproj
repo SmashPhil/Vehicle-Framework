@@ -102,6 +102,7 @@
     <Compile Include="AI\JobDrivers\JobDriver_GiveItemToVehicle.cs" />
     <Compile Include="AI\JobDrivers\JobDriver_WorkVehicle.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_ExitMap.cs" />
+    <Compile Include="AI\JobGivers\NPC\JobGiver_ExitMapRandom.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_ExitMapBest.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_GotoNearestHostile.cs" />
     <Compile Include="AI\JobGivers\NPC\JobGiver_ProtectVehicle.cs" />
@@ -224,6 +225,7 @@
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\RaidTesting.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTest_MapDeinit.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_PathGrid.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_CoverGrid.cs" />
     <Compile Include="Harmony\UnitTesting\UnitTest_GasGrid.cs" />

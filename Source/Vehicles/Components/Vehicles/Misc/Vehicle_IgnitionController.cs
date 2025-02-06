@@ -73,6 +73,7 @@ namespace Vehicles
 				}
 
 				drafted = value;
+				vehicle.animator?.SetBool(PropertyIds.IgnitionOn, drafted);
 
 				if (value)
 				{

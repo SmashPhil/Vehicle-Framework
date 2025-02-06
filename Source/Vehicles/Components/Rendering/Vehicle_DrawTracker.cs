@@ -53,10 +53,10 @@ namespace Vehicles
 			rTracker.ProcessPostTickVisuals(ticksPassed);
 		}
 
-		public void DrawAt(Vector3 loc)
+		public void DrawAt(Vector3 loc, float extraRotation)
 		{
 			vehicle.CalculateAngle(out bool northSouthRotation);
-			renderer.RenderPawnAt(loc, 0, northSouthRotation);
+			renderer.RenderPawnAt(loc, extraRotation, northSouthRotation);
 		}
 
 		public void Notify_Spawned()

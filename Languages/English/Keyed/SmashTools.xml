@@ -28,7 +28,8 @@
 	<ST_Injected>Injected</ST_Injected>
 	<ST_UnsupportedType>UnsupportedType</ST_UnsupportedType>
 	<ST_NoFunctionSelected>No Function Selected</ST_NoFunctionSelected>
-	
+	<ST_NoControllerParameters>No Controller Parameters</ST_NoControllerParameters>
+
 	<ST_DopesheetTab>Dopesheet</ST_DopesheetTab>
 	<ST_CurvesTab>Curves</ST_CurvesTab>
 
@@ -41,6 +42,8 @@
 	<ST_SetStateDefault>Set as Layer Default State</ST_SetStateDefault>
 	<ST_CreateBlendTree>Create new BlendTree in State</ST_CreateBlendTree>
 
+    <ST_Loop>Loop</ST_Loop>
+    <ST_CycleOffset>Cycle Offset</ST_CycleOffset>
 	<ST_MotionFile>Motion</ST_MotionFile>
 	<ST_MotionSpeed>Speed</ST_MotionSpeed>
 	<ST_MotionSpeedMultiplier>Multiplier</ST_MotionSpeedMultiplier>

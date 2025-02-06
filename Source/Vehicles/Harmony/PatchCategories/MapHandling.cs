@@ -24,7 +24,8 @@ namespace Vehicles
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(RiverMakerTranspiler)));
 			//Compiler generated method from GenStep_Terrain.GenerateRiverLookupTexture
-			MethodInfo delegateInfo = typeof(GenStep_Terrain).GetNestedTypes(AccessTools.all).SelectMany(AccessTools.GetDeclaredMethods).First(methodInfo => methodInfo.ReturnType == typeof(float) && methodInfo.GetParameters()[0].ParameterType == typeof(RiverDef));
+			MethodInfo delegateInfo = typeof(GenStep_Terrain).GetNestedTypes(AccessTools.all).SelectMany(AccessTools.GetDeclaredMethods)
+				.First(methodInfo => methodInfo.ReturnType == typeof(float) && methodInfo.GetParameters()[0].ParameterType == typeof(RiverDef));
 			VehicleHarmony.Patch(original: delegateInfo,
 				transpiler: new HarmonyMethod(typeof(MapHandling),
 				nameof(RiverLookupTextureTranspiler)));
@@ -231,7 +232,7 @@ namespace Vehicles
 
 		public static void DebugUpdateVehicleRegions()
 		{
-			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow)
+			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow && DebugHelper.AnyDebugSettings)
 			{
 				DebugHelper.DebugDrawVehicleRegion(Find.CurrentMap);
 			}
@@ -239,7 +240,7 @@ namespace Vehicles
 
 		public static void DebugOnGUIVehicleRegions()
 		{
-			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow)
+			if (Find.CurrentMap != null && !WorldRendererUtility.WorldRenderedNow && DebugHelper.AnyDebugSettings)
 			{
 				DebugHelper.DebugDrawVehiclePathCostsOverlay(Find.CurrentMap);
 			}

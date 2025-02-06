@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
+﻿using System.Collections.Generic;
 using RimWorld;
 using SmashTools;
+using Verse;
 
 namespace Vehicles
 {

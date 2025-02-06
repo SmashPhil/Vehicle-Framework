@@ -37,7 +37,7 @@ namespace Vehicles
 		[AnimationProperty(Name = "Position")]
 		private Vector3 position = Vector3.zero;
 
-		private AnimationManager animator;
+		public AnimationManager animator;
 		private Graphic_Vehicle graphic;
 
 		public PatternData patternToPaint;
@@ -116,7 +116,7 @@ namespace Vehicles
 				{
 					return 0f;
 				}
-				return angle + rotation;
+				return angle;
 			}
 			set
 			{
@@ -408,7 +408,7 @@ namespace Vehicles
 
 		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			Drawer.DrawAt(drawLoc);
+			Drawer.DrawAt(drawLoc, rotation);
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
 			{
 				handler.RenderPawns(FullRotation);
@@ -423,7 +423,7 @@ namespace Vehicles
 		{
 			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
 				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt_TEMP(drawLoc, rot, extraRotation, northSouthRotation);
+			Drawer.renderer.RenderPawnAt_TEMP(drawLoc, rot, extraRotation + rotation, northSouthRotation);
 
 			//TODO - consolidate rendering to new pawn node render system
 			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
@@ -432,7 +432,7 @@ namespace Vehicles
 			}
 			if (compDraw) //Temp fix till I get to cleaning up these 3 Draw methods
 			{
-				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation);
+				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation + rotation);
 			}
 			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
 		}
@@ -659,7 +659,7 @@ namespace Vehicles
 				}
 			}
 
-			if (DebugSettings.ShowDevGizmos && Spawned)
+			if (DebugSettings.ShowDevGizmos && Spawned && !pather.Moving)
 			{
 				yield return new Command_Action
 				{
@@ -669,6 +669,42 @@ namespace Vehicles
 						Reverse = !Reverse;
 					}
 				};
+				yield return new Command_Action
+				{
+					defaultLabel = "Teleport",
+					action = delegate ()
+					{
+						Find.Targeter.BeginTargeting(new TargetingParameters()
+						{
+							canTargetLocations = true,
+							canTargetPawns = false,
+							canTargetBuildings = false,
+						}, delegate (LocalTargetInfo target)
+						{
+							Position = target.Cell;
+							Notify_Teleported();
+						}, highlightAction: (target) =>
+						{
+							Color color = LandingTargeter.GhostDrawerColor(Validator(target.Cell) 
+								? LandingTargeter.PositionState.Valid : LandingTargeter.PositionState.Invalid);
+							GhostDrawer.DrawGhostThing(target.Cell, FullRotation, VehicleDef.buildDef, 
+								VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
+						}, (LocalTargetInfo target) => Validator(target.Cell));
+					}
+				};
+
+				bool Validator(IntVec3 cell)
+				{
+					VehiclePositionManager positionManager = Map.GetCachedMapComponent<VehiclePositionManager>();
+					foreach (IntVec3 cell2 in this.PawnOccupiedCells(cell, Rotation))
+					{
+						if (!cell2.InBounds(Map) || !GenGridVehicles.Walkable(cell2, VehicleDef, Map) || positionManager.PositionClaimed(cell2))
+						{
+							return false;
+						}
+					}
+					return true;
+				}
 			}
 
 			bool upgrading = CompUpgradeTree != null && CompUpgradeTree.Upgrading;

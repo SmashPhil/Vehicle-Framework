@@ -11,12 +11,9 @@ namespace Vehicles
 {
 	public static class VehicleGUI
 	{
-		private static readonly OverlayGUIRenderer overlayRenderer = new OverlayGUIRenderer();
-
 		public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef, PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = true)
 		{
 			//string drawStep = string.Empty;
-			GUIState.Push();
 			try
 			{
 				/* ----- Reused in VehicleGraphics ----- */
@@ -60,41 +57,35 @@ namespace Vehicles
 
 				if (colorGUI) GUI.color = pattern?.color ?? Color.white;
 
-				overlayRenderer.Clear();
+				OverlayRendering.Clear();
 
-				GUIState.Push();
+				//drawStep = "Attempting to retrieve turret overlays";
+				if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
 				{
-					//drawStep = "Attempting to retrieve turret overlays";
-					if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is CompProperties_VehicleTurrets props)
+					if (!withoutTurrets || Prefs.UIScale == 1)
 					{
-						if (!withoutTurrets || Prefs.UIScale == 1)
+						foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern))
 						{
-							foreach (RenderData turretRenderData in RetrieveAllTurretSettingsGUIProperties(rect, vehicleDef, rotDrawn, props.turrets.OrderBy(x => x.drawLayer), pattern))
-							{
-								overlayRenderer.Add(turretRenderData);
-							}
+							OverlayRendering.Add(turretRenderData);
 						}
 					}
-					//drawStep = "Retrieving graphic overlays";
-					foreach (RenderData turretRenderData in RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn))
-					{
-						overlayRenderer.Add(turretRenderData);
-					}
-
-					overlayRenderer.FinalizeForRendering();
-
-					//drawStep = "Rendering overlays with layer < 0";
-					overlayRenderer.RenderLayer(GUILayer.Lower);
-
-					//drawStep = "Rendering main texture";
-					VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
-
-					GUIState.Reset();
-
-					//drawStep = "Rendering overlays with layer >= 0";
-					overlayRenderer.RenderLayer(GUILayer.Upper);
 				}
-				GUIState.Pop();
+				//drawStep = "Retrieving graphic overlays";
+				foreach (RenderData turretRenderData in RetrieveAllOverlaySettingsGUIProperties(rect, vehicleDef, rotDrawn))
+				{
+					OverlayRendering.Add(turretRenderData);
+				}
+
+				OverlayRendering.FinalizeForRendering();
+
+				//drawStep = "Rendering overlays with layer < 0";
+				OverlayRendering.RenderLayer(GUILayer.Lower);
+
+				//drawStep = "Rendering main texture";
+				VehicleGraphics.DrawVehicleFitted(adjustedRect, angle, mainTex, material: null); //Null material will reroute to GUI methods
+
+				//drawStep = "Rendering overlays with layer >= 0";
+				OverlayRendering.RenderLayer(GUILayer.Upper);
 			}
 			catch (Exception ex)
 			{
@@ -102,8 +93,7 @@ namespace Vehicles
 			}
 			finally
 			{
-				GUIState.Pop();
-				overlayRenderer.Clear();
+				OverlayRendering.Clear();
 			}
 		}
 
@@ -208,174 +198,154 @@ namespace Vehicles
 			bool mouseOver = false;
 			bool clicked = false;
 
-			GUIState.Push();
+			VehicleDef vehicleDef = buildDef.thingToSpawn;
+			using TextBlock textFont = new(GameFont.Tiny, Color.white);
+
+			if (Mouse.IsOver(rect))
 			{
-				VehicleDef vehicleDef = buildDef.thingToSpawn;
-				Text.Font = GameFont.Tiny;
-				if (Mouse.IsOver(rect))
+				mouseOver = true;
+				if (!command.Disabled)
 				{
-					mouseOver = true;
-					if (!command.Disabled)
-					{
-						GUI.color = GenUI.MouseoverColor;
-					}
-				}
-
-				MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
-				if (parms.highLight)
-				{
-					Widgets.DrawStrongHighlight(rect.ExpandedBy(12f), null);
-				}
-
-				if (parms.lowLight)
-				{
-					GUI.color = Command.LowLightBgColor;
-				}
-				Material material = command.Disabled ? TexUI.GrayscaleGUI : null;
-				GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
-				GUI.color = Color.white;
-
-				Rect iconRect = rect.ContractedBy(1);
-				GUI.BeginGroup(iconRect);
-				{
-					iconRect = iconRect.AtZero();
-					
-					Rect buttonRect = iconRect;
-					PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
-					if (command.Disabled)
-					{
-						defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
-					}
-
-					if (!command.Disabled || parms.lowLight)
-					{
-						GUI.color = command.IconDrawColor;
-					}
-					else
-					{
-						GUI.color = command.IconDrawColor.SaturationChanged(0f);
-						defaultPatternData.color = vehicleDef.graphicData.color.SaturationChanged(0);
-						defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SaturationChanged(0);
-						defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SaturationChanged(0);
-					}
-					if (parms.lowLight)
-					{
-						GUI.color = GUI.color.ToTransparent(0.6f);
-						defaultPatternData.color = defaultPatternData.color.ToTransparent(0.6f);
-						defaultPatternData.colorTwo = defaultPatternData.colorTwo.ToTransparent(0.6f);
-						defaultPatternData.colorThree = defaultPatternData.colorThree.ToTransparent(0.6f);
-					}
-					DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
-					GUI.color = Color.white;
-
-					KeyCode keyCode = (command.hotKey == null) ? KeyCode.None : command.hotKey.MainKey;
-					if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
-					{
-						Vector2 vector = new Vector2(5f, 3f);
-						Widgets.Label(new Rect(iconRect.x + vector.x, iconRect.y + vector.y, iconRect.width - 10f, 18f), keyCode.ToStringReadable());
-						GizmoGridDrawer.drawnHotKeys.Add(keyCode);
-						if (command.hotKey.KeyDownEvent)
-						{
-							clicked = true;
-							Event.current.Use();
-						}
-					}
-					if (Widgets.ButtonInvisible(iconRect, true))
-					{
-						clicked = true;
-					}
-				}
-				GUI.EndGroup();
-
-				string topRightLabel = command.TopRightLabel;
-				if (!topRightLabel.NullOrEmpty())
-				{
-					Vector2 vector2 = Text.CalcSize(topRightLabel);
-					Rect position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
-					Rect rectBase = position;
-					position.x -= 2f;
-					position.width += 3f;
-
-					GUI.color = Color.white;
-					Text.Anchor = TextAnchor.UpperRight;
-					GUI.DrawTexture(position, TexUI.GrayTextBG);
-					Widgets.Label(rectBase, topRightLabel);
-					Text.Anchor = TextAnchor.UpperLeft;
-				}
-				string labelCap = buildDef.LabelCap;
-				if (!labelCap.NullOrEmpty())
-				{
-					float num = Text.CalcHeight(labelCap, rect.width);
-					Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
-					GUI.DrawTexture(rect2, TexUI.GrayTextBG);
-					GUI.color = Color.white;
-					Text.Anchor = TextAnchor.UpperCenter;
-					Widgets.Label(rect2, labelCap);
-					Text.Anchor = TextAnchor.UpperLeft;
-					GUI.color = Color.white;
-				}
-				GUI.color = Color.white;
-				if (Mouse.IsOver(rect))
-				{
-					TipSignal tip = command.Desc;
-					if (command.Disabled && !command.disabledReason.NullOrEmpty())
-					{
-						tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
-					}
-					TooltipHandler.TipRegion(rect, tip);
-				}
-				if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
-				{
-					UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
+					GUI.color = GenUI.MouseoverColor;
 				}
 			}
-			GUIState.Pop();
 
-			try
+			MouseoverSounds.DoRegion(rect, SoundDefOf.Mouseover_Command);
+			if (parms.highLight)
 			{
-				GUIState.Push();
-				Text.Font = GameFont.Small;
-				if (clicked)
+				Widgets.DrawStrongHighlight(rect.ExpandedBy(12f), null);
+			}
+
+			if (parms.lowLight)
+			{
+				GUI.color = Command.LowLightBgColor;
+			}
+			Material material = command.Disabled ? TexUI.GrayscaleGUI : null;
+			GenUI.DrawTextureWithMaterial(rect, command.BGTexture, material);
+			GUI.color = Color.white;
+
+			// Begin GUI Group
+			Rect iconRect = rect.ContractedBy(1);
+			GUI.BeginGroup(iconRect);
+			iconRect = iconRect.AtZero();
+			
+			Rect buttonRect = iconRect;
+			PatternData defaultPatternData = new PatternData(VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
+			if (command.Disabled)
+			{
+				defaultPatternData.color = vehicleDef.graphicData.color.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+				defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SubtractNoAlpha(0.1f, 0.1f, 0.1f);
+			}
+
+			if (!command.Disabled || parms.lowLight)
+			{
+				GUI.color = command.IconDrawColor;
+			}
+			else
+			{
+				GUI.color = command.IconDrawColor.SaturationChanged(0f);
+				defaultPatternData.color = vehicleDef.graphicData.color.SaturationChanged(0);
+				defaultPatternData.colorTwo = vehicleDef.graphicData.colorTwo.SaturationChanged(0);
+				defaultPatternData.colorThree = vehicleDef.graphicData.colorThree.SaturationChanged(0);
+			}
+			if (parms.lowLight)
+			{
+				GUI.color = GUI.color.ToTransparent(0.6f);
+				defaultPatternData.color = defaultPatternData.color.ToTransparent(0.6f);
+				defaultPatternData.colorTwo = defaultPatternData.colorTwo.ToTransparent(0.6f);
+				defaultPatternData.colorThree = defaultPatternData.colorThree.ToTransparent(0.6f);
+			}
+			DrawVehicleDefOnGUI(buttonRect, vehicleDef, defaultPatternData);
+			GUI.color = Color.white;
+
+			if (command.hotKey != null)
+			{
+				KeyCode keyCode = command.hotKey.MainKey;
+				if (keyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(keyCode))
 				{
-					if (command.Disabled)
+					Vector2 vector = new Vector2(5f, 3f);
+					Widgets.Label(new Rect(iconRect.x + vector.x, iconRect.y + vector.y, iconRect.width - 10f, 18f), keyCode.ToStringReadable());
+					GizmoGridDrawer.drawnHotKeys.Add(keyCode);
+					if (command.hotKey.KeyDownEvent)
 					{
-						if (!command.disabledReason.NullOrEmpty())
-						{
-							Messages.Message(command.disabledReason, MessageTypeDefOf.RejectInput, false);
-						}
-						return new GizmoResult(GizmoState.Mouseover, null);
+						clicked = true;
+						Event.current.Use();
 					}
-					GizmoResult result;
-					if (Event.current.button == 1)
+				}
+			}
+			if (Widgets.ButtonInvisible(iconRect, true))
+			{
+				clicked = true;
+			}
+			GUI.EndGroup();
+			// End GUI Group
+
+			string topRightLabel = command.TopRightLabel;
+			if (!topRightLabel.NullOrEmpty())
+			{
+				Vector2 vector2 = Text.CalcSize(topRightLabel);
+				Rect position = new Rect(rect.xMax - vector2.x - 2f, rect.y + 3f, vector2.x, vector2.y);
+				Rect rectBase = position;
+				position.x -= 2f;
+				position.width += 3f;
+
+				using TextBlock labelBlock = new(TextAnchor.UpperRight, Color.white);
+				GUI.DrawTexture(position, TexUI.GrayTextBG);
+				Widgets.Label(rectBase, topRightLabel);
+			}
+			string labelCap = buildDef.LabelCap;
+			if (!labelCap.NullOrEmpty())
+			{
+				float num = Text.CalcHeight(labelCap, rect.width);
+				Rect rect2 = new Rect(rect.x, rect.yMax - num + 12f, rect.width, num);
+				GUI.DrawTexture(rect2, TexUI.GrayTextBG);
+				using TextBlock labelBlock = new(TextAnchor.UpperCenter, Color.white);
+				Widgets.Label(rect2, labelCap);
+			}
+			GUI.color = Color.white;
+			if (Mouse.IsOver(rect))
+			{
+				TipSignal tip = command.Desc;
+				if (command.Disabled && !command.disabledReason.NullOrEmpty())
+				{
+					tip.text += "\n\n" + "DisabledCommand".Translate() + ": " + command.disabledReason;
+				}
+				TooltipHandler.TipRegion(rect, tip);
+			}
+			if (!command.HighlightTag.NullOrEmpty() && (Find.WindowStack.FloatMenu == null || !Find.WindowStack.FloatMenu.windowRect.Overlaps(rect)))
+			{
+				UIHighlighter.HighlightOpportunity(rect, command.HighlightTag);
+			}
+
+			Text.Font = GameFont.Small;
+			if (clicked)
+			{
+				if (command.Disabled)
+				{
+					if (!command.disabledReason.NullOrEmpty())
 					{
-						result = new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
+						Messages.Message(command.disabledReason, MessageTypeDefOf.RejectInput, false);
 					}
-					else
-					{
-						if (!TutorSystem.AllowAction(command.TutorTagSelect))
-						{
-							return new GizmoResult(GizmoState.Mouseover, null);
-						}
-						result = new GizmoResult(GizmoState.Interacted, Event.current);
-						TutorSystem.Notify_Event(command.TutorTagSelect);
-					}
-					return result;
+					return new GizmoResult(GizmoState.Mouseover, null);
+				}
+				GizmoResult result;
+				if (Event.current.button == 1)
+				{
+					result = new GizmoResult(GizmoState.OpenedFloatMenu, Event.current);
 				}
 				else
 				{
-					if (mouseOver)
+					if (!TutorSystem.AllowAction(command.TutorTagSelect))
 					{
 						return new GizmoResult(GizmoState.Mouseover, null);
 					}
-					return new GizmoResult(GizmoState.Clear, null);
+					result = new GizmoResult(GizmoState.Interacted, Event.current);
+					TutorSystem.Notify_Event(command.TutorTagSelect);
 				}
+				return result;
 			}
-			finally
-			{
-				GUIState.Pop();
-			}
+			return new GizmoResult(mouseOver ? GizmoState.Mouseover : GizmoState.Clear, null);
 		}
 
 		private enum GUILayer
@@ -417,12 +387,12 @@ namespace Vehicles
 			}
 		}
 
-		private class OverlayGUIRenderer
+		private static class OverlayRendering
 		{
-			private static readonly List<RenderData> renderDataLower = new List<RenderData>();
-			private static readonly List<RenderData> renderDataUpper = new List<RenderData>();
+			private static readonly List<RenderData> renderDataLower = [];
+			private static readonly List<RenderData> renderDataUpper = [];
 
-			public void Add(RenderData renderData)
+			public static void Add(RenderData renderData)
 			{
 				if (renderData.layer < 0)
 				{
@@ -434,19 +404,19 @@ namespace Vehicles
 				}
 			}
 
-			public void Clear()
+			public static void Clear()
 			{
 				renderDataLower.Clear();
 				renderDataUpper.Clear();
 			}
 
-			public void FinalizeForRendering()
+			public static void FinalizeForRendering()
 			{
 				renderDataLower.Sort();
 				renderDataUpper.Sort();
 			}
 
-			public void RenderLayer(GUILayer layer)
+			public static void RenderLayer(GUILayer layer)
 			{
 				switch (layer)
 				{
@@ -454,11 +424,8 @@ namespace Vehicles
 						{
 							foreach (RenderData renderData in renderDataLower)
 							{
-								GUI.color = renderData.color;
-								{
-									UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
-								}
-								GUIState.Reset();
+								using TextBlock guiColor = new(renderData.color);
+								UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
 							}
 						}
 						break;
@@ -466,14 +433,13 @@ namespace Vehicles
 						{
 							foreach (RenderData renderData in renderDataUpper)
 							{
-								GUI.color = renderData.color;
-								{
-									UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
-								}
-								GUIState.Reset();
+								using TextBlock guiColor = new(renderData.color);
+								UIElements.DrawTextureWithMaterialOnGUI(renderData.rect, renderData.mainTex, null, renderData.angle);
 							}
 						}
 						break;
+					default:
+						throw new NotImplementedException(nameof(GUILayer));
 				}
 			}
 		}

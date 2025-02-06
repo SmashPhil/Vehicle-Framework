@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using RimWorld;
+using SmashTools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using RimWorld;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -356,7 +355,7 @@ namespace Vehicles
 
 		private static bool TargetValidator(VehicleTurret turret, Map map, LocalTargetInfo target)
 		{
-			Assert(target.HasThing, $"non-Thing target passed to TargetValidator. Will always be false if any scan flags are set.");
+			Assert.IsTrue(target.HasThing, $"non-Thing target passed to TargetValidator. Will always be false if any scan flags are set.");
 			TargetScanFlags scanFlags = turret.turretDef.targetScanFlags;
 			if (scanFlags.HasFlag(TargetScanFlags.NeedThreat) && !LOSHasThreat(turret.vehicle, target.Thing))
 			{

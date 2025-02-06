@@ -12,7 +12,6 @@ using Verse.Sound;
 using Verse.AI;
 using Verse.AI.Group;
 using SmashTools;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -401,7 +400,7 @@ namespace Vehicles
 				}
 			}
 
-			Assert(handlers.Contains(handler));
+			Assert.IsTrue(handlers.Contains(handler));
 			bool result = true;
 			if (!handler.AreSlotsAvailable)
 			{

@@ -32,7 +32,7 @@ namespace Vehicles
 		internal DeferredRegionGenerator deferredRegionGenerator;
 
 		private int deferredRegionsCalculatedDayOfYear;
-		
+
 		public VehicleMapping(Map map) : base(map)
 		{
 		}
@@ -52,36 +52,18 @@ namespace Vehicles
 		/// <summary>
 		/// Check if <see cref="dedicatedThread"/> is initialized and running.
 		/// </summary>
-		public bool ThreadAlive
-		{
-			get
-			{
-				return dedicatedThread != null && dedicatedThread.thread.IsAlive;
-			}
-		}
+		public bool ThreadAlive => dedicatedThread != null && dedicatedThread.thread.IsAlive;
 
 		/// <summary>
 		/// Check if <see cref="dedicatedThread"/> is alive and not in long operation.
 		/// </summary>
 		/// <remarks>Verify this is true before queueing up a method, otherwise you may just be sending it to the void where it will never be executed ever.</remarks>
-		public bool ThreadAvailable
-		{
-			get
-			{
-				return ThreadAlive && !ThreadBusy;
-			}
-		}
+		public bool ThreadAvailable => ThreadAlive && !ThreadBusy;
 
 		/// <summary>
 		/// DedicatedThread is either processing a long operation in its queue or the queue has grown large enough to warrant waiting.
 		/// </summary>
-		public bool ThreadBusy
-		{
-			get
-			{
-				return dedicatedThread.InLongOperation || dedicatedThread.QueueCount > 10000;
-			}
-		}
+		public bool ThreadBusy => dedicatedThread.InLongOperation || dedicatedThread.QueueCount > 10000;
 
 		/// <summary>
 		/// Get <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
@@ -117,8 +99,8 @@ namespace Vehicles
 				// Don't automatically initialize thread while running unit tests. DedicatedThread will be 
 				// part of the testing and the state must remain consistent while transitioning between scenes.
 				// Regions and path grids will also need to remain synchronous during testing.
-				Debug.Message($"Skipping DedicatedThread. Running UnitTests.");
-				return;
+				//Log.Message($"Skipping DedicatedThread. Running UnitTests.");
+				//return;
 			}
 			if (!VehicleMod.settings.debug.debugUseMultithreading)
 			{
@@ -127,7 +109,7 @@ namespace Vehicles
 			}
 			if (map.info?.parent == null)
 			{
-				return; //MapParent won't have reference resolved when loading from save, GetDedicatedThread will be called a 2nd time on PostLoadInit
+				return; // MapParent won't have reference resolved when loading from save, GetDedicatedThread will be called a 2nd time on PostLoadInit
 			}
 			DedicatedThread thread = GetDedicatedThread(map);
 			thread.update += UpdateRegions;
@@ -141,17 +123,17 @@ namespace Vehicles
 			if (map.IsPlayerHome)
 			{
 				thread = ThreadManager.CreateNew();
-				Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})</color>");
+				Log.Message($"<color=orange>{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})</color>");
 				return thread;
 			}
-			if (map.IsTempIncidentMap)
+			if (map.IsPocketMap || map.IsTempIncidentMap)
 			{
 				thread = ThreadManager.GetShared(TempIncidentMapId);
-				Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
+				Log.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
 				return thread;
 			}
 			thread = ThreadManager.GetShared(EventMapId);
-			Debug.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
+			Log.Message($"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
 			return thread;
 		}
 

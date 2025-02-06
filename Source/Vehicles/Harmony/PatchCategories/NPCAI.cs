@@ -1,16 +1,13 @@
 ﻿#define ENABLE_RAIDERS
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
+using RimWorld;
+using SmashTools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
-using RimWorld;
-using RimWorld.Planet;
-using HarmonyLib;
-using SmashTools;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -193,12 +190,11 @@ namespace Vehicles
 
 		#region AI Behavior
 		
-
 		private static bool DisableVanillaJobForVehicle(Pawn pawn, ref Job __result)
 		{
 			if (pawn is VehiclePawn)
 			{
-				Assert(false, $"Vehicle should never even try to be assigned this job. Vehicle={pawn.LabelCap}");
+				Assert.Raise($"{pawn.LabelCap} assigned a humanlike pawn job.");
 				__result = null;
 				return false;
 			}

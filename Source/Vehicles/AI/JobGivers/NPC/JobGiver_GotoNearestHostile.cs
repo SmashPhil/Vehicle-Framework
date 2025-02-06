@@ -7,7 +7,7 @@ using UnityEngine;
 using RimWorld;
 using Verse;
 using Verse.AI;
-using static SmashTools.Debug;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -36,7 +36,7 @@ namespace Vehicles
 			VehiclePawn vehicle = pawn as VehiclePawn;
 
 			// Should never be in any think trees for non-vehicle pawns
-			Assert(vehicle != null);
+			Assert.IsNotNull(vehicle);
 
 			float minDist = float.MaxValue;
 			Thing target = null;

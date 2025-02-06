@@ -16,6 +16,7 @@ namespace Vehicles
 		private const float SmallIconSize = 24;
 
 		private static string drawStatusMessage = string.Empty;
+
 		public Dictionary<string, Dictionary<SaveableField, SavedField<object>>> fieldSettings = new Dictionary<string, Dictionary<SaveableField, SavedField<object>>>();
 		public Dictionary<string, Dictionary<SaveableField, object>> defaultValues = new Dictionary<string, Dictionary<SaveableField, object>>();
 
@@ -26,6 +27,8 @@ namespace Vehicles
 		/// <defName, maskName>
 		/// </summary>
 		public Dictionary<string, PatternData> defaultGraphics = new Dictionary<string, PatternData>();
+
+		private FieldInfo enabledField = AccessTools.Field(typeof(VehicleDef), nameof(VehicleDef.enabled));
 
 		private Dictionary<VehicleDef, Rot8> directionFacing = new Dictionary<VehicleDef, Rot8>();
 		private Rot8 currentVehicleFacing;
@@ -298,14 +301,14 @@ namespace Vehicles
 			}
 			var gameFont = Text.Font;
 			Text.Font = GameFont.Medium;
-			FieldInfo enabledField = AccessTools.Field(typeof(VehicleDef), nameof(VehicleDef.enabled));
+			;
 			SaveableField saveableField = new SaveableField(VehicleMod.selectedDef, enabledField);
-			VehicleEnabledFor enabledFor = VehicleEnabledFor.Everyone;
+			VehicleEnabled.For enabledFor = VehicleEnabled.For.Everyone;
 			if (fieldSettings[VehicleMod.selectedDef.defName].TryGetValue(saveableField, out var modifiedValue))
 			{
-				enabledFor = (VehicleEnabledFor)modifiedValue.EndValue;
+				enabledFor = (VehicleEnabled.For)modifiedValue.EndValue;
 			}
-			(string text, Color color) = EnabledStatus(enabledFor);
+			(string text, Color color) = VehicleEnabled.GetStatus(enabledFor);
 			Vector2 size = Text.CalcSize(text);
 			Rect enabledButtonRect = new Rect(rect.x, rect.y, size.x, size.y);
 			TooltipHandler.TipRegion(enabledButtonRect, "VF_EnableButtonTooltip".Translate());
@@ -313,28 +316,20 @@ namespace Vehicles
 			Color highlightedColor = new Color(color.r + 0.25f, color.g + 0.25f, color.b + 0.25f);
 			if (UIElements.ClickableLabel(enabledButtonRect, text, highlightedColor, color, GameFont.Medium, TextAnchor.MiddleLeft, new Color(color.r - 0.15f, color.g - 0.15f, color.b - 0.15f)))
 			{
-				List<VehicleEnabledFor> enabledForValues = Enum.GetValues(typeof(VehicleEnabledFor)).Cast<VehicleEnabledFor>().ToList();
-				enabledFor = enabledForValues.Next(enabledFor);
+				enabledFor = enabledFor.Next();
 				fieldSettings[VehicleMod.selectedDef.defName][saveableField] = new SavedField<object>(enabledFor);
-				if (enabledFor == (VehicleEnabledFor)enabledField.GetValue(VehicleMod.selectedDef))
+				if (enabledFor == (VehicleEnabled.For)enabledField.GetValue(VehicleMod.selectedDef))
 				{
 					fieldSettings[VehicleMod.selectedDef.defName].Remove(saveableField);
+				}
+				bool allowed = enabledFor == VehicleEnabled.For.Player || enabledFor == VehicleEnabled.For.Everyone;
+				if (Current.ProgramState == ProgramState.Playing)
+				{
+					Current.Game.Rules.SetAllowBuilding(VehicleMod.selectedDef.buildDef, allowed);
 				}
 				GizmoHelper.DesignatorsChanged(VehicleMod.selectedDef.designationCategory ?? structureDesignationDef);
 			}
 			Text.Font = gameFont;
-		}
-
-		private (string text, Color color) EnabledStatus(VehicleEnabledFor status)
-		{
-			return status switch
-			{
-				VehicleEnabledFor.Everyone => ("VF_VehicleEnabled".Translate(), Color.green),
-				VehicleEnabledFor.None => ("VF_VehicleDisabled".Translate(), Color.red),
-				VehicleEnabledFor.Player => ("VF_VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
-				VehicleEnabledFor.Raiders => ("VF_VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
-				_ => ("[Err] Uncaught Status", Color.red)
-			};
 		}
 	}
 }

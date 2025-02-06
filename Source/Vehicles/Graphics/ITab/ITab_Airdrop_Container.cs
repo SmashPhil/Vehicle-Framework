@@ -59,59 +59,59 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			GUIState.Push();
+			using var textBlock = new TextBlock(GameFont.Small);
+			Text.Font = GameFont.Small;
+			Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
+			Rect rect2 = rect.ContractedBy(10f);
+			Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
+
+			GUI.color = Color.white;
+			Rect outRect = new Rect(0f, 0f, position.width, position.height);
+			Rect viewRect = new Rect(0f, 0f, position.width - 16f, scrollViewHeight);
+
+			// Start Scrollview
+			Widgets.BeginGroup(position);
+			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
+
+			float curY = 0f;
+			DrawHeader(ref curY, viewRect.width);
+
+			if (IsVisible)
 			{
-				Text.Font = GameFont.Small;
-				Rect rect = new Rect(0f, TopPadding, size.x, size.y - TopPadding);
-				Rect rect2 = rect.ContractedBy(10f);
-				Rect position = new Rect(rect2.x, rect2.y, rect2.width, rect2.height);
-
-				GUI.color = Color.white;
-				Rect outRect = new Rect(0f, 0f, position.width, position.height);
-				Rect viewRect = new Rect(0f, 0f, position.width - 16f, scrollViewHeight);
-
-				Widgets.BeginGroup(position);
-				Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
+				Widgets.ListSeparator(ref curY, viewRect.width, InventoryLabelKey.Translate());
+				workingInvList.Clear();
+				workingInvList.AddRange(Inventory);
+				foreach (Thing t in workingInvList)
 				{
-					float curY = 0f;
-					DrawHeader(ref curY, viewRect.width);
-
-					if (IsVisible)
-					{
-						Widgets.ListSeparator(ref curY, viewRect.width, InventoryLabelKey.Translate());
-						workingInvList.Clear();
-						workingInvList.AddRange(Inventory);
-						foreach (Thing t in workingInvList)
-						{
-							DrawThingRow(ref curY, viewRect.width, t, null, true);
-						}
-						workingInvList.Clear();
-					}
-					if (IsVisible)
-					{
-						DrawAdditionalRows(ref curY, viewRect);
-					}
-
-					if (Event.current.type is EventType.Layout)
-					{
-						scrollViewHeight = curY + 30f;
-					}
+					DrawThingRow(ref curY, viewRect.width, t, null, true);
 				}
-				Widgets.EndScrollView();
-				Widgets.EndGroup();
+				workingInvList.Clear();
 			}
-			GUIState.Pop();
+			if (IsVisible)
+			{
+				DrawAdditionalRows(ref curY, viewRect);
+			}
+
+			if (Event.current.type is EventType.Layout)
+			{
+				scrollViewHeight = curY + 30f;
+			}
+
+			Widgets.EndScrollView();
+			Widgets.EndGroup();
+			// End Scrollview
 		}
 
 		protected virtual void DrawThingRow(ref float y, float width, Thing thing, int? transferStackCount = null, bool inventory = false, bool missingFromInventory = false)
 		{
-			GUIState.Push();
+			Rect rect = new Rect(0f, y, width, ThingIconSize);
+
+			using (new TextBlock(Color.white))
 			{
 				if (missingFromInventory)
 				{
 					GUI.color = MissingItemColor;
 				}
-				Rect rect = new Rect(0f, y, width, ThingIconSize);
 				Widgets.InfoCardButton(rect.width - 24f, y, thing);
 				rect.width -= 24f;
 
@@ -127,13 +127,14 @@ namespace Vehicles
 					rect.width -= 24f;
 				}
 
-				Rect rect2 = rect;
-				rect2.xMin = rect2.xMax - 60f;
-				CaravanThingsTabUtility.DrawMass(thing, rect2);
+				Rect massRect = rect;
+				massRect.xMin = massRect.xMax - 60f;
+				CaravanThingsTabUtility.DrawMass(thing, massRect);
 				rect.width -= 60f;
+			}
 
-				GUIState.Reset();
-
+			using (new TextBlock(Color.white))
+			{
 				if (Mouse.IsOver(rect))
 				{
 					GUI.color = HighlightColor;
@@ -172,13 +173,12 @@ namespace Vehicles
 					string text3 = text2;
 					text2 = string.Concat(new object[]
 					{
-					text3, "\n", thing.HitPoints, " / ", thing.MaxHitPoints
+				text3, "\n", thing.HitPoints, " / ", thing.MaxHitPoints
 					});
 				}
 				TooltipHandler.TipRegion(rect, text2);
 				y += ThingRowHeight;
 			}
-			GUIState.Pop();
 		}
 
 		protected virtual void DrawAdditionalRows(ref float y, Rect rect)

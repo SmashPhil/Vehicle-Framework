@@ -14,9 +14,7 @@ namespace Vehicles
 	{
 		protected override bool TryFindCombatPosition(VehiclePawn vehicle, out IntVec3 dest)
 		{
-			Thing enemyTarget = vehicle.mindState.enemyTarget;
-			float distance = vehicle.CompVehicleTurrets.MaxRange * vehicle.VehicleDef.npcProperties.targetPositionRadiusPercent;
-			return CombatPositionFinder.TryFindCastPosition(vehicle, enemyTarget, distance, false, out dest);
+			return CombatPositionFinder.TryFindCastPosition(CastPositionRequest.For(vehicle), out dest);
 		}
 
 		protected override void UpdateEnemyTarget(VehiclePawn vehicle)

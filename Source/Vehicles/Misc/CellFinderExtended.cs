@@ -6,7 +6,6 @@ using SmashTools;
 using SmashTools.Performance;
 using Verse;
 using Verse.AI;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -342,9 +341,63 @@ namespace Vehicles
 			return false;
 		}
 
+		public static bool TryFindRandomExitSpot(VehiclePawn vehicle, out IntVec3 dest, TraverseMode mode = TraverseMode.ByPawn)
+		{
+			Assert.IsTrue(vehicle.Spawned, "Trying to find exit spot for despawned vehicle.");
+
+			Map map = vehicle.Map;
+			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+			VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+
+			Danger maxDanger = Danger.Some;
+			IntVec3 cell;
+			for (int i = 0; i < 40; i++)
+			{
+				// Increase danger tolerance in hopes of finding any spot to exit
+				if (i > 15)
+				{
+					maxDanger = Danger.Deadly;
+				}
+				// NOTE - It's faster to just pull a random cell + random direction and then adjust to the edge,
+				// than it is to fetch a random cell from the list of edge cells. Needing padding won't change that
+				cell = CellFinder.RandomCell(map);
+				int dir = Rand.RangeInclusive(0, 3); // Just use int instead of casting back and forth from Rot4.Random
+				switch (dir)
+				{
+					case 0:
+						cell.x = 0;
+						break;
+					case 1:
+						cell.x = map.Size.x - 1;
+						break;
+					case 2:
+						cell.z = 0;
+						break;
+					case 3:
+						cell.z = map.Size.z - 1;
+						break;
+				}
+				cell = cell.PadForHitbox(map, vehicle.VehicleDef);
+				if (Validator(cell))
+				{
+					dest = cell;
+					return true;
+				}
+			}
+			dest = vehicle.Position;
+			return false;
+
+			bool Validator(IntVec3 cell)
+			{
+				IntVec3 paddedCell = cell.PadForHitbox(map, vehicle);
+				return pathData.VehicleReachability.CanReachVehicle(vehicle.Position, paddedCell,
+					PathEndMode.OnCell, mode, maxDanger);
+			}
+		}
+
 		public static bool TryFindBestExitSpot(VehiclePawn vehicle, out IntVec3 cell, TraverseMode mode = TraverseMode.ByPawn)
 		{
-			Assert(vehicle.Spawned, "Trying to find exit spot for despawned vehicle.");
+			Assert.IsTrue(vehicle.Spawned, "Trying to find exit spot for despawned vehicle.");
 
 			cell = IntVec3.Invalid;
 			Map map = vehicle.Map;

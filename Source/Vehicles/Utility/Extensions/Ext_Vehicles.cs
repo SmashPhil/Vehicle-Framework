@@ -2,18 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using RimWorld;
+using RimWorld.Planet;
+using SmashTools;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 using Verse.Sound;
-using RimWorld;
-using RimWorld.Planet;
-using SmashTools;
-using System.Reflection;
-using HarmonyLib;
-using static UnityEngine.Scripting.GarbageCollector;
-using Verse.Noise;
 
 namespace Vehicles
 {
@@ -30,7 +26,9 @@ namespace Vehicles
 			{
 				return true;
 			}
-			bool canRoofPunch = SettingsCache.TryGetValue(vehicleDef, typeof(CompProperties_VehicleLauncher), nameof(CompProperties_VehicleLauncher.canRoofPunch), compProperties.canRoofPunch);
+			bool canRoofPunch = SettingsCache.TryGetValue(vehicleDef, typeof(CompProperties_VehicleLauncher), 
+			                                              nameof(CompProperties_VehicleLauncher.canRoofPunch), 
+			                                              compProperties.canRoofPunch);
 			return IsRoofRestricted(cell, map, canRoofPunch);
 		}
 
@@ -41,11 +39,7 @@ namespace Vehicles
 				return IsRoofed(cell, map);
 			}
 			RoofDef roofDef = cell.GetRoof(map);
-			if (roofDef != null)
-			{
-				return roofDef.isThickRoof;
-			}
-			return false;
+			return roofDef != null && roofDef.isThickRoof;
 		}
 
 		/// <summary>

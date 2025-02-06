@@ -6,7 +6,6 @@ using Verse;
 using Verse.Sound;
 using RimWorld;
 using SmashTools;
-using static SmashTools.Utilities;
 
 namespace Vehicles
 {
@@ -556,7 +555,7 @@ namespace Vehicles
 			}
 		}
 
-		private ColorInt ApplyActionSwitch(ActionRef<ColorInt, string> action)
+		private ColorInt ApplyActionSwitch(Utilities.ActionRef<ColorInt, string> action)
 		{
 			switch(colorSelected)
 			{

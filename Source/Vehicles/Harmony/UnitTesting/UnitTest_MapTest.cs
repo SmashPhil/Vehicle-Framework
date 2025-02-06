@@ -1,14 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using RimWorld;
 using SmashTools;
 using SmashTools.Debugging;
 using UnityEngine;
 using Verse;
-using static SmashTools.Debug;
 
 namespace Vehicles.Testing
 {
@@ -31,8 +28,8 @@ namespace Vehicles.Testing
 		{
 			CameraJumper.TryHideWorld();
 			Map map = Find.CurrentMap;
-			Assert(map != null, "Map is null");
-			Assert(DefDatabase<VehicleDef>.AllDefsListForReading.Count > 0, "No vehicles to test with");
+			Assert.IsNotNull(map);
+			Assert.IsTrue(DefDatabase<VehicleDef>.AllDefsListForReading.Count > 0, "No vehicles to test with");
 
 			// Should always be at least 1 vehicle for unit tests to execute assuming debug vehicle is enabled
 			foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)

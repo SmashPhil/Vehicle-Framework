@@ -283,81 +283,76 @@ namespace Vehicles
 
 			scrollPositioner.ClearInterestRects();
 
-			GUIState.Push();
+			// Begin ScrollView
+			using TextBlock textFont = new(GameFont.Small);
+			Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
+			Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
+			float curY = 0f;
+			string categoryLabel = null;
+			mousedOverEntry = null;
+			foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
 			{
-				Text.Font = GameFont.Small;
-				Rect viewRect = new Rect(0f, 0f, outRect.width - 16f, listHeight);
-				Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect, true);
+				if (drawEntry.CategoryLabel != categoryLabel)
 				{
-					float curY = 0f;
-					string categoryLabel = null;
-					mousedOverEntry = null;
-					foreach (VehicleStatDrawEntry drawEntry in cachedDrawEntries)
-					{
-						if (drawEntry.CategoryLabel != categoryLabel)
-						{
-							Widgets.ListSeparator(ref curY, viewRect.width, drawEntry.CategoryLabel);
-							categoryLabel = drawEntry.CategoryLabel;
-						}
-						bool highlightLabel = false;
-						bool lowlightLabel = false;
-						bool selected = selectedEntry == drawEntry;
-						bool matched = false;
+					Widgets.ListSeparator(ref curY, viewRect.width, drawEntry.CategoryLabel);
+					categoryLabel = drawEntry.CategoryLabel;
+				}
+				bool highlightLabel = false;
+				bool lowlightLabel = false;
+				bool selected = selectedEntry == drawEntry;
+				bool matched = false;
 
-						GUI.color = Color.white;
-						if (infoCard.CommonSearchWidget.filter.Active)
-						{
-							if (Matching(drawEntry))
-							{
-								highlightLabel = true;
-								matched = true;
-							}
-							else
-							{
-								lowlightLabel = true;
-							}
-						}
-						Rect drawRect = new Rect(8f, curY, viewRect.width - 8, 30f);
-						curY += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
-						{
-							SelectEntry(drawEntry, true);
-						}, delegate
-						{
-							mousedOverEntry = drawEntry;
-						}, scrollPosition, outRect);
-						drawRect.yMax = curY;
-						if (selected || matched)
-						{
-							scrollPositioner.RegisterInterestRect(drawRect);
-						}
+				if (infoCard.CommonSearchWidget.filter.Active)
+				{
+					if (Matching(drawEntry))
+					{
+						highlightLabel = true;
+						matched = true;
 					}
-					listHeight = curY + 100f;
+					else
+					{
+						lowlightLabel = true;
+					}
+				}
+				Rect drawRect = new Rect(8f, curY, viewRect.width - 8, 30f);
+				curY += drawEntry.Draw(drawRect.x, drawRect.y, drawRect.width, selected, highlightLabel, lowlightLabel, delegate
+				{
+					SelectEntry(drawEntry, true);
+				}, delegate
+				{
+					mousedOverEntry = drawEntry;
+				}, scrollPosition, outRect);
+				drawRect.yMax = curY;
+				if (selected || matched)
+				{
+					scrollPositioner.RegisterInterestRect(drawRect);
+				}
+			}
+			listHeight = curY + 100f;
+			Widgets.EndScrollView();
+			// End ScrollView
+
+			scrollPositioner.ScrollVertically(ref scrollPosition, outRect.size);
+			outRect = panelRect.ContractedBy(10f);
+			VehicleStatDrawEntry descriptionStat = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
+			if (descriptionStat != null)
+			{
+				Rect rightPanelRect = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
+				string explanationText = descriptionStat.GetExplanationText(vehicleDef, vehicle);
+				float panelHeight = 0f;
+				Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rightPanelRect, true);
+				{
+					Rect descriptionRect = rightPanelRect;
+					descriptionRect.width -= 4f;
+					Widgets.Label(descriptionRect, explanationText);
+					float textHeight = Text.CalcHeight(explanationText, descriptionRect.width) + 10f;
+					panelHeight += textHeight;
+					panelHeight += DrawHyperlinks(descriptionRect, descriptionStat, textHeight);
 				}
 				Widgets.EndScrollView();
 
-				scrollPositioner.ScrollVertically(ref scrollPosition, outRect.size);
-				outRect = panelRect.ContractedBy(10f);
-				VehicleStatDrawEntry descriptionStat = selectedEntry ?? mousedOverEntry ?? cachedDrawEntries.FirstOrDefault();
-				if (descriptionStat != null)
-				{
-					Rect rightPanelRect = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
-					string explanationText = descriptionStat.GetExplanationText(vehicleDef, vehicle);
-					float panelHeight = 0f;
-					Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rightPanelRect, true);
-					{
-						Rect descriptionRect = rightPanelRect;
-						descriptionRect.width -= 4f;
-						Widgets.Label(descriptionRect, explanationText);
-						float textHeight = Text.CalcHeight(explanationText, descriptionRect.width) + 10f;
-						panelHeight += textHeight;
-						panelHeight += DrawHyperlinks(descriptionRect, descriptionStat, textHeight);
-					}
-					Widgets.EndScrollView();
-
-					rightPanelHeight = panelHeight;
-				}
+				rightPanelHeight = panelHeight;
 			}
-			GUIState.Pop();
 		}
 
 		private static float DrawHyperlinks(Rect rect, VehicleStatDrawEntry statDrawEntry, float textHeight)

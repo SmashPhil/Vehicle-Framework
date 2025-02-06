@@ -47,6 +47,8 @@ namespace Vehicles
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MainButtonWorker_ToggleWorld), nameof(MainButtonWorker_ToggleWorld.Activate)),
 				prefix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(ForcedTargetingDontToggleWorld)));
+
+			// TODO - REMOVE AFTER TESTING
 			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(Dialog_Trade), parameters: new Type[] { typeof(Pawn), typeof(ITrader), typeof(bool) }),
 				postfix: new HarmonyMethod(typeof(WorldHandling),
 				nameof(SetupPlayerAerialVehicleVariables)));

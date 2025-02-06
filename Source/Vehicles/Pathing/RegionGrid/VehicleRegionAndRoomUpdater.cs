@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using SmashTools;
 using SmashTools.Performance;
-using static SmashTools.Debug;
 using UnityEngine;
 using Verse;
 
@@ -131,7 +131,7 @@ namespace Vehicles
 				bool needsNew = region == null || !region.valid;
 
 				// Buffer should never hold a region which still has references in the region grid.
-				Assert(region == null || !region.Suspended, $"{region} has been pushed to buffer prematurely.");
+				Assert.IsTrue(region == null || !region.Suspended, $"{region} has been pushed to buffer prematurely.");
 
 				if (needsNew && pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell, out region))
 				{

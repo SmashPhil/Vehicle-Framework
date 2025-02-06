@@ -170,7 +170,7 @@ namespace Vehicles
 			{
 				region.extentsClose.maxZ = cell.z;
 			}
-			if (cell.x == 0 || cell.x == mapping.map.Size.x - 1 || cell.z == 0 || cell.z == mapping.map.Size.z - 1)
+			if (cell.x == createdFor.SizePadding || cell.x == mapping.map.Size.x - 1 - createdFor.SizePadding || cell.z == createdFor.SizePadding || cell.z == mapping.map.Size.z - 1 - createdFor.SizePadding)
 			{
 				region.touchesMapEdge = true;
 			}
@@ -207,7 +207,6 @@ namespace Vehicles
 		/// <param name="c"></param>
 		private void SweepInTwoDirectionsAndTryToCreateLink(VehicleRegion region, Rot4 potentialOtherRegionDir, IntVec3 cell)
 		{
-			ProfilerWatch.Start("Initial Checks");
 			if (!potentialOtherRegionDir.IsValid)
 			{
 				return;
@@ -230,7 +229,6 @@ namespace Vehicles
 			{
 				return;
 			}
-			ProfilerWatch.Stop();
 
 			Rot4 rotClockwise = potentialOtherRegionDir;
 			rotClockwise.Rotate(RotationDirection.Clockwise);
@@ -239,7 +237,6 @@ namespace Vehicles
 			int spanRight = 0;
 			int spanUp = 0;
 
-			ProfilerWatch.Start("Loops");
 			if (!expectedRegionType.IsOneCellRegion())
 			{
 				for (spanRight = 0; spanRight <= VehicleRegion.GridSize; spanRight++)
@@ -267,9 +264,7 @@ namespace Vehicles
 					}
 				}
 			}
-			ProfilerWatch.Stop();
 
-			ProfilerWatch.Start("Span");
 			int length = spanRight + spanUp + 1;
 			SpanDirection dir;
 			IntVec3 root;
@@ -296,16 +291,11 @@ namespace Vehicles
 				root = cell - rotClockwise.FacingCell * spanUp;
 			}
 			EdgeSpan span = new EdgeSpan(root, dir, length);
-			ProfilerWatch.Stop();
 
-			ProfilerWatch.Start("Initial Checks");
 			VehicleRegionLink regionLink = mapping[createdFor].VehicleRegionLinkDatabase.LinkFrom(span);
-			ProfilerWatch.Stop();
 
-			ProfilerWatch.Start("Register & And");
 			regionLink.Register(region);
 			region.AddLink(regionLink);
-			ProfilerWatch.Stop();
 		}
 
 		[Conditional("USE_BUFFER")]

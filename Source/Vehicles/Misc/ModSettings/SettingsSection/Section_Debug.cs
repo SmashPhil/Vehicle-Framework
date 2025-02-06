@@ -5,6 +5,7 @@ using LudeonTK;
 using RimWorld;
 using SmashTools;
 using SmashTools.Debugging;
+using SmashTools.Performance;
 using UnityEngine;
 using UpdateLogTool;
 using Verse;
@@ -116,7 +117,7 @@ namespace Vehicles
 			listingStandard.ColumnWidth = (devModeRect.width / DebugSectionColumns) - 4 * DebugSectionColumns;
 			listingStandard.Begin(devModeRect);
 			{
-				GUIState.Push();
+				using (new TextBlock(Color.white))
 				{
 					listingStandard.Header("VF_DevMode_Logging".Translate(), ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging, "VF_DevMode_DebugLoggingTooltip".Translate());
@@ -198,7 +199,6 @@ namespace Vehicles
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawVehiclePathingCosts".Translate(), ref debugDrawVehiclePathCosts, "VF_DevMode_DebugDrawVehiclePathingCostsTooltip".Translate());
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawPathfinderSearch".Translate(), ref debugDrawPathfinderSearch, "VF_DevMode_DebugDrawPathfinderSearchTooltip".Translate());
 				}
-				GUIState.Pop();
 			}
 			listingStandard.End();
 
@@ -269,10 +269,10 @@ namespace Vehicles
 					List<Toggle> toggles = new List<Toggle>();
 					toggles.Add(new Toggle("All", () => false, (value) => { }, delegate (bool value)
 					{
-						UnitTestManager.RunAll();
+						UnitTestManager.ExecuteUnitTests();
 						Find.WindowStack.WindowOfType<Dialog_RadioButtonMenu>()?.Close();
 					}));
-					foreach (UnitTest test in UnitTestManager.UnitTests.OrderBy(test => test.Name))
+					foreach (UnitTest test in UnitTestManager.AllUnitTests.OrderBy(test => test.Name))
 					{
 						Toggle toggle = new Toggle(test.Name, () => false, (value) => { }, onToggle: delegate (bool value)
 						{
@@ -282,7 +282,10 @@ namespace Vehicles
 						toggles.Add(toggle);
 					}
 					Find.WindowStack.Add(new Dialog_RadioButtonMenu("Unit Tests", toggles));
-					
+				}
+				if (listingStandard.ButtonText("Profiling"))
+				{
+					Find.WindowStack.Add(new Dialog_Profiler());
 				}
 				if (listingStandard.ButtonText("Output Material Cache"))
 				{

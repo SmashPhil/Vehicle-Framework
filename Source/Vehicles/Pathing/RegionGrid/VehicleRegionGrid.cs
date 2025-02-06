@@ -1,9 +1,7 @@
-﻿using SmashTools;
-using SmashTools.Performance;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
+using SmashTools;
 using Verse;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -229,18 +227,24 @@ namespace Vehicles
 			{
 				return;
 			}
+
+			foreach (VehicleRoom room in allRooms.Keys)
+			{
+				room.DebugDraw(debugRegionType);
+			}
+
 			if (DebugProperties.debug)
 			{
 				foreach (VehicleRegion debugRegion in AllRegions_NoRebuild_InvalidAllowed)
 				{
-					debugRegion.DebugDrawMouseover(debugRegionType);
+					debugRegion.DebugDraw(debugRegionType);
 				}
 			}
 			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(mapping.map))
 			{
-				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt(intVec);
-				regionAt_NoRebuild_InvalidAllowed?.DebugDrawMouseover(debugRegionType);
+				VehicleRegion regionAtNoRebuildInvalidAllowed = GetRegionAt(intVec);
+				regionAtNoRebuildInvalidAllowed?.DebugDraw(debugRegionType);
 			}
 		}
 
@@ -252,8 +256,8 @@ namespace Vehicles
 			IntVec3 intVec = UI.MouseCell();
 			if (intVec.InBounds(mapping.map))
 			{
-				VehicleRegion regionAt_NoRebuild_InvalidAllowed = GetRegionAt(intVec);
-				regionAt_NoRebuild_InvalidAllowed?.DebugOnGUIMouseover(debugRegionType);
+				VehicleRegion regionAtNoRebuildInvalidAllowed = GetRegionAt(intVec);
+				regionAtNoRebuildInvalidAllowed?.DebugOnGUIMouseover(debugRegionType);
 			}
 		}
 	}

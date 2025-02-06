@@ -51,10 +51,10 @@ namespace Vehicles
 						throw new NotSupportedException($"Cannot use Listing_Settings with settings set to {settings}");
 				};
 			}
-			catch (Exception ex)
+			catch
 			{
 				Log.Error($"Unable to retrieve field {field.name} for {def.defName}. Settings=\"{settings}\"");
-				throw ex;
+				throw;
 			}
 		}
 
@@ -150,12 +150,6 @@ namespace Vehicles
 			catch (Exception ex)
 			{
 				Log.Error($"Unable to convert to bool. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -175,10 +169,15 @@ namespace Vehicles
 				Rect rectRight = new Rect(rect.x + rect.width - rightLength, centerY, rightLength, Text.LineHeight);
 
 				bool mouseOver = Mouse.IsOver(rect);
+
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(rect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(rect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -224,12 +223,6 @@ namespace Vehicles
 			catch (Exception ex)
 			{
 				Log.Error($"Unable to convert to integer. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -251,8 +244,12 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(rect);
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(rect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(rect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -298,12 +295,6 @@ namespace Vehicles
 			catch (Exception ex)
 			{
 				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -334,8 +325,12 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -382,12 +377,6 @@ namespace Vehicles
 			catch(Exception ex)
 			{
 				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -417,8 +406,12 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -470,12 +463,6 @@ namespace Vehicles
 			catch(Exception ex)
 			{
 				Log.Error($"Unable to convert to float. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -516,8 +503,12 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -564,12 +555,6 @@ namespace Vehicles
 			catch(Exception ex)
 			{
 				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 
@@ -596,8 +581,12 @@ namespace Vehicles
 				bool mouseOver = Mouse.IsOver(fullRect);
 				if (disabled)
 				{
-					GUIState.Disable();
-					TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					using (new TextBlock(UIElements.InactiveColor))
+					{
+						GUI.enabled = false;
+						TooltipHandler.TipRegion(fullRect, disabledTooltip);
+					}
+					GUI.enabled = true;
 				}
 				else if (!tooltip.NullOrEmpty())
 				{
@@ -639,12 +628,6 @@ namespace Vehicles
 			catch(Exception ex)
 			{
 				Log.Error($"Unable to convert to int. Def=\"{def.defName}\" Field=\"{field.name}\" Exception={ex}");
-				return;
-			}
-			finally
-			{
-				GUIState.Reset();
-				GUIState.Enable();
 			}
 		}
 	}

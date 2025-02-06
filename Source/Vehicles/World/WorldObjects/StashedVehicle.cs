@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Verse;
 using RimWorld;
 using RimWorld.Planet;
-using UnityEngine;
 using SmashTools;
-using static SmashTools.Debug;
+using UnityEngine;
+using Verse;
 
 namespace Vehicles
 {

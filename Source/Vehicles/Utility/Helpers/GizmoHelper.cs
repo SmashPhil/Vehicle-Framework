@@ -5,6 +5,7 @@ using HarmonyLib;
 using Verse;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -57,6 +58,18 @@ namespace Vehicles
 		public static void DesignatorsChanged(DesignationCategoryDef designationCategoryDef)
 		{
 			AccessTools.Method(typeof(DesignationCategoryDef), "ResolveDesignators").Invoke(designationCategoryDef, new object[] { });
+		}
+
+		public static void ResetDesignatorStatuses()
+		{
+			Assert.IsTrue(Current.ProgramState == ProgramState.Playing);
+			foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+			{
+				VehicleEnabled.For enabled = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), 
+					nameof(VehicleDef.enabled), vehicleDef.enabled);
+				bool allowed = enabled == VehicleEnabled.For.Player || enabled == VehicleEnabled.For.Everyone;
+				Current.Game.Rules.SetAllowBuilding(vehicleDef.buildDef, allowed);
+			}
 		}
 	}
 }

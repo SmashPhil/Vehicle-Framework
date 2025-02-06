@@ -59,60 +59,51 @@ namespace Vehicles
 
 		protected override void FillTab()
 		{
-			GUIState.Push();
+			EnsureSpecificNeedsTabForPawnValid();
+
+			using TextBlock textFont = new(GameFont.Small);
+			Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
+			Rect viewRect = new Rect(0f, 0f, rect.width - 16f, scrollViewHeight);
+
+			float curY = 0;
+			// Begin ScrollView
+			Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
+			VehicleTabHelper_Passenger.Start();
+			foreach (VehiclePawn vehicle in VehicleObject.Vehicles)
 			{
-				EnsureSpecificNeedsTabForPawnValid();
-
-				Text.Font = GameFont.Small;
-				Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
-				Rect viewRect = new Rect(0f, 0f, rect.width - 16f, scrollViewHeight);
-
-				float curY = 0;
-				GUIState.Push();
-				Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
+				Color baseColor = (vehicle != moreDetailsForPawn) ? Color.white : Color.green;
+				Color mouseoverColor = (vehicle != moreDetailsForPawn) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
+				if (SectionLabel(viewRect, ref curY, vehicle.Label, baseColor, mouseoverColor, CaravanThingsTabUtility.SpecificTabButtonTex))
 				{
-					VehicleTabHelper_Passenger.Start();
+					if (vehicle == moreDetailsForPawn)
 					{
-						foreach (VehiclePawn vehicle in VehicleObject.Vehicles)
-						{
-							Color baseColor = (vehicle != moreDetailsForPawn) ? Color.white : Color.green;
-							Color mouseoverColor = (vehicle != moreDetailsForPawn) ? GenUI.MouseoverColor : new Color(0f, 0.5f, 0f);
-							if (SectionLabel(viewRect, ref curY, vehicle.Label, baseColor, mouseoverColor, CaravanThingsTabUtility.SpecificTabButtonTex))
-							{
-								if (vehicle == moreDetailsForPawn)
-								{
-									moreDetailsForPawn = null;
-									SoundDefOf.TabClose.PlayOneShotOnCamera(null);
-								}
-								else
-								{
-									moreDetailsForPawn = vehicle;
-									VehicleTabHelper_Health.Init();
-									SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
-								}
-							}
-							GUIState.Reset();
-
-							VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, vehicle, ref moreDetailsForPawn);
-						}
-
-						if (VehicleObject.CanDismount)
-						{
-							SectionLabel(viewRect, ref curY, "VF_Caravan_Dismounted".Translate());
-							VehicleTabHelper_Passenger.ListPawns(ref curY, viewRect, scrollPosition, VehicleObject, string.Empty, VehicleObject.DismountedPawns.ToList(), ref moreDetailsForPawn);
-						}
+						moreDetailsForPawn = null;
+						SoundDefOf.TabClose.PlayOneShotOnCamera(null);
 					}
-					VehicleTabHelper_Passenger.End();
+					else
+					{
+						moreDetailsForPawn = vehicle;
+						VehicleTabHelper_Health.Init();
+						SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+					}
 				}
-				Widgets.EndScrollView();
-				GUIState.Pop();
 
-				if (Event.current.type is EventType.Layout)
-				{
-					scrollViewHeight = curY + 30f;
-				}
+				VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, vehicle, ref moreDetailsForPawn);
 			}
-			GUIState.Pop();
+
+			if (VehicleObject.CanDismount)
+			{
+				SectionLabel(viewRect, ref curY, "VF_Caravan_Dismounted".Translate());
+				VehicleTabHelper_Passenger.ListPawns(ref curY, viewRect, scrollPosition, VehicleObject, string.Empty, VehicleObject.DismountedPawns.ToList(), ref moreDetailsForPawn);
+			}
+			VehicleTabHelper_Passenger.End();
+			Widgets.EndScrollView();
+			// End ScrollView
+
+			if (Event.current.type is EventType.Layout)
+			{
+				scrollViewHeight = curY + 30f;
+			}
 		}
 
 		protected override void ExtraOnGUI()
@@ -164,24 +155,22 @@ namespace Vehicles
 
 		private bool SectionLabel(Rect viewRect, ref float curY, string label, Color baseColor, Color mouseoverColor, Texture2D configureButton = null)
 		{
+			using TextBlock textAnchor = new(TextAnchor.UpperCenter);
+
 			bool clicked = false;
-			Text.Anchor = TextAnchor.UpperCenter;
+			Rect labelRect = new Rect(0, curY, viewRect.width, Text.CalcSize(label).y);
+			Widgets.Label(labelRect, label.Truncate(viewRect.width));
+
+			Rect buttonRect = new Rect(labelRect.width - VehicleTabHelper_Passenger.PawnExtraButtonSize, curY, VehicleTabHelper_Passenger.PawnExtraButtonSize, VehicleTabHelper_Passenger.PawnExtraButtonSize);
+			if (configureButton != null)
 			{
-				Rect labelRect = new Rect(0, curY, viewRect.width, Text.CalcSize(label).y);
-				Widgets.Label(labelRect, label.Truncate(viewRect.width));
-
-				Rect buttonRect = new Rect(labelRect.width - VehicleTabHelper_Passenger.PawnExtraButtonSize, curY, VehicleTabHelper_Passenger.PawnExtraButtonSize, VehicleTabHelper_Passenger.PawnExtraButtonSize);
-				if (configureButton != null)
+				if (Widgets.ButtonImageFitted(buttonRect, configureButton, baseColor, mouseoverColor))
 				{
-					if (Widgets.ButtonImageFitted(buttonRect, configureButton, baseColor, mouseoverColor))
-					{
-						clicked = true;
+					clicked = true;
 
-					}
-					curY += labelRect.height; //New line only if configure button shown
 				}
+				curY += labelRect.height; //New line only if configure button shown
 			}
-			GUIState.Reset();
 
 			return clicked;
 		}

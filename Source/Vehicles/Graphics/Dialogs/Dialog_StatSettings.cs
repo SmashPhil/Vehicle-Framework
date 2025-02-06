@@ -173,25 +173,21 @@ namespace Vehicles
 		private void RecacheHeight()
 		{
 			CachedHeight = 0;
-			GUIState.Push();
+			using TextBlock textFont = new(GameFont.Small);
+			//if (!vehicleDef.statBases.NullOrEmpty())
+			//{
+			//	//foreach (StatModifier _ in vehicleDef.statBases)
+			//	//{
+			//	//	CachedHeight += Text.LineHeight;
+			//	//}
+			//}
+			if (!vehicleDef.vehicleStats.NullOrEmpty())
 			{
-				Text.Font = GameFont.Small;
-				if (!vehicleDef.statBases.NullOrEmpty())
+				foreach (VehicleStatModifier _ in vehicleDef.vehicleStats)
 				{
-					//foreach (StatModifier _ in vehicleDef.statBases)
-					//{
-					//	CachedHeight += Text.LineHeight;
-					//}
-				}
-				if (!vehicleDef.vehicleStats.NullOrEmpty())
-				{
-					foreach (VehicleStatModifier _ in vehicleDef.vehicleStats)
-					{
-						CachedHeight += Text.LineHeight;
-					}
+					CachedHeight += Text.LineHeight;
 				}
 			}
-			GUIState.Pop();
 		}
 	}
 }

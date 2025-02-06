@@ -16,6 +16,8 @@ namespace Vehicles
 		internal static List<WorldPath> debugLines = new List<WorldPath>();
 		internal static List<Pair<int, int>> tiles = new List<Pair<int, int>>(); // Pair -> TileID : Cycle
 
+		public static bool AnyDebugSettings => Local.DebugType != DebugRegionType.None || World.DebugType != WorldPathingDebugType.None;
+
 		/// <summary>
 		/// Indiscriminately destroys all entities and roofs from area.
 		/// </summary>

@@ -120,6 +120,7 @@ namespace Vehicles
 
 		public static void DrawSetting(Listing_Settings lister, VehicleDef vehicleDef, FieldInfo field, UISettingsType settingsType, string label, string tooltip, string disabledTooltip, bool locked, bool translate)
 		{
+			using var textBlock = new TextBlock(GameFont.Small);
 			SaveableField saveable = new SaveableField(vehicleDef, field);
 			switch (settingsType)
 			{

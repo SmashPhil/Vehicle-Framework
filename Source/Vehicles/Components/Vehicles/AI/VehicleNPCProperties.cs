@@ -14,13 +14,19 @@ namespace Vehicles
 		/// If targets get within minimum distance, vehicle will chase them down and run them over.
 		/// </summary>
 		public bool runDownTargets = false;
-		public bool reverseWhileFleeing = true;
+		public bool reverseWhileFleeing = false;
 
 		/// <summary>
 		/// Preferred distance from target based on max range of turrets. If <see cref="stopToShoot"/> is false, vehicle will ignore this.
 		/// </summary>
-		public float targetPositionRadiusPercent = 0.85f;
+		public float targetPositionRadiusPercent = 0.8f;
+		/// <summary>
+		/// Minimum distance for vehicle to acquire a target
+		/// </summary>
 		public float targetAcquireRadius = 65f;
+		/// <summary>
+		/// Minimum distance a target must be for the vehicle to maintain
+		/// </summary>
 		public float targetKeepRadius = 65f;
 
 		/// <summary>

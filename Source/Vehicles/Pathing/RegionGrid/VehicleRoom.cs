@@ -52,7 +52,21 @@ namespace Vehicles
 		/// Room touches map edge
 		/// </summary>
 		public bool TouchesMapEdge => numRegionsTouchingMapEdge > 0;
-		
+
+		private IEnumerable<IntVec3> Cells
+		{
+			get
+			{
+				foreach (VehicleRegion region in Regions.Keys)
+				{
+					foreach (IntVec3 cell in region.Cells)
+					{
+						yield return cell;
+					}
+				}
+			}
+		}
+
 		/// <summary>
 		/// Create new room for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -114,6 +128,18 @@ namespace Vehicles
 				if (mapping != null)
 				{
 					mapping[vehicleDef].VehicleRegionGrid?.allRooms.Remove(this);
+				}
+			}
+		}
+
+		internal void DebugDraw(DebugRegionType debugRegionType)
+		{
+			if (debugRegionType.HasFlag(DebugRegionType.Rooms))
+			{
+				float color = Rand.ValueSeeded(GetHashCode());
+				foreach (IntVec3 cell in Cells)
+				{
+					CellRenderer.RenderCell(cell, color);
 				}
 			}
 		}

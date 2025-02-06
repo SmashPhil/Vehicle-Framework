@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using HarmonyLib;
 using RimWorld;
+using SmashTools;
+using UnityEngine;
 using Verse;
 using Verse.AI;
-using Verse.AI.Group;
-using UnityEngine;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -35,7 +29,7 @@ namespace Vehicles
 
 		protected virtual bool OnlyUseRanged => true;
 
-		// Position to post up for support by fire
+		// Position to post up, may start shooting before / after arriving.
 		protected abstract bool TryFindCombatPosition(VehiclePawn vehicle, out IntVec3 dest);
 
 		protected virtual float TargetAcquireRadius(VehiclePawn vehicle) => 56;
@@ -69,7 +63,7 @@ namespace Vehicles
 		protected override Job TryGiveJob(Pawn pawn)
 		{
 			VehiclePawn vehicle = pawn as VehiclePawn;
-			Assert(vehicle != null, "Trying to assign vehicle job to non-vehicle pawn.");
+			Assert.IsNotNull(vehicle, "Trying to assign vehicle job to non-vehicle pawn.");
 
 			UpdateEnemyTarget(vehicle);
 			if (vehicle.mindState.enemyTarget is not Thing enemyTarget)
@@ -107,7 +101,7 @@ namespace Vehicles
 		{
 			Thing enemyTarget = vehicle.mindState.enemyTarget;
 			float keepRadiusSqrd = Mathf.Pow(vehicle.VehicleDef.npcProperties.targetKeepRadius, 2);
-			if (!enemyTarget.Destroyed && Find.TickManager.TicksGame - vehicle.mindState.lastEngageTargetTick <= TicksSinceEngageToLoseTarget &&
+			if (!enemyTarget.Destroyed && enemyTarget.Spawned && Find.TickManager.TicksGame - vehicle.mindState.lastEngageTargetTick <= TicksSinceEngageToLoseTarget &&
 				vehicle.CanReachVehicle(enemyTarget, PathEndMode.Touch, Danger.Deadly, TraverseMode.ByPawn) && 
 				(vehicle.Position - enemyTarget.Position).LengthHorizontalSquared <= keepRadiusSqrd)
 			{

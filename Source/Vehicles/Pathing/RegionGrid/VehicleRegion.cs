@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Runtime.CompilerServices;
+using System.Threading;
+using SmashTools;
 using UnityEngine;
 using Verse;
-using RimWorld;
-using SmashTools;
-using System.Threading;
-using static SmashTools.Debug;
-using Verse.Noise;
 
 namespace Vehicles
 {
@@ -49,6 +43,7 @@ namespace Vehicles
 
 		public uint reachedIndex;
 		public int newRegionGroupIndex = -1;
+		public int mark;
 
 		private int precalculatedHashCode;
 		private int debugMakeTick = -1000;
@@ -461,7 +456,7 @@ namespace Vehicles
 		/// <summary>
 		/// Debug draw region when mouse is over
 		/// </summary>
-		public void DebugDrawMouseover(DebugRegionType debugRegionType)
+		public void DebugDraw(DebugRegionType debugRegionType)
 		{
 			Color color;
 			if (!valid)

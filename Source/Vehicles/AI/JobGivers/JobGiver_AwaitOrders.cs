@@ -1,6 +1,6 @@
 ﻿using Verse;
 using Verse.AI;
-using static SmashTools.Debug;
+using SmashTools;
 
 namespace Vehicles
 {
@@ -20,7 +20,7 @@ namespace Vehicles
 		protected override Job TryGiveJob(Pawn pawn)
 		{
 			VehiclePawn vehicle = pawn as VehiclePawn;
-			Assert(vehicle != null, "Trying to assign vehicle job to non-vehicle pawn.");
+			Assert.IsNotNull(vehicle, "Trying to assign vehicle job to non-vehicle pawn.");
 
 			if (vehicle.vehiclePather.Moving)
 			{

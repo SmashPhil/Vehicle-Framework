@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
-using SmashTools;
 using Verse;
-using static SmashTools.Debug;
 
 namespace Vehicles
 {
@@ -59,6 +56,16 @@ namespace Vehicles
 			}
 			BreadthFirstTraverse(regionA, entryCondition, regionProcessor, regionLookCount, traversableRegionTypes);
 			return found;
+		}
+
+		public static void MarkRegionsBFS(VehicleRegion root, VehicleRegionEntry entryCondition, 
+			int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
+		{
+			BreadthFirstTraverse(root, entryCondition, delegate (VehicleRegion region)
+			{
+				region.mark = inRadiusMark;
+				return false;
+			}, maxRegions: maxRegions, traversableRegionTypes: traversableRegionTypes);
 		}
 
 		/// <summary>

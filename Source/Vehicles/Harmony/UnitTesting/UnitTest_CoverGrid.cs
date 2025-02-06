@@ -1,14 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using RimWorld;
-using SmashTools;
+﻿using SmashTools;
 using SmashTools.Debugging;
 using UnityEngine;
 using Verse;
-using static SmashTools.Debug;
 
 namespace Vehicles.Testing
 {
@@ -19,21 +12,20 @@ namespace Vehicles.Testing
 		protected override UTResult TestVehicle(VehiclePawn vehicle, Map map, IntVec3 root)
 		{
 			int maxSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
-			UTResult result;
+			UTResult result = new();
 			IntVec3 reposition = root + new IntVec3(maxSize, 0, 0);
 			VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
 			VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
 
-			bool success;
 			CoverGrid coverGrid = map.coverGrid;
 			GenSpawn.Spawn(vehicle, root, map);
 			HitboxTester<Thing> coverTester = new(vehicle, map, root,
-				(IntVec3 cell) => coverGrid[cell],
-				(Thing thing) => thing == vehicle);
+				(cell) => coverGrid[cell],
+				(thing) => thing == vehicle);
 			coverTester.Start();
 
 			// Validate spawned vehicle shows up in cover grid
-			success = coverTester.Hitbox(true);
+			bool success = coverTester.Hitbox(true);
 			result.Add("Cover Grid (Spawn)", success);
 
 			// Validate position set moves vehicle in cover grid

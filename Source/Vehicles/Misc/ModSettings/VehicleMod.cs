@@ -310,117 +310,107 @@ namespace Vehicles
 			Rect scrollContainer = rect.ContractedBy(10);
 			scrollContainer.width /= 4;
 
-			GUIState.Push();
-			try
+			Widgets.DrawBoxSolid(scrollContainer, Color.grey);
+			Rect innerContainer = scrollContainer.ContractedBy(1);
+			Widgets.DrawBoxSolid(innerContainer, ListingExtension.MenuSectionBGFillColor);
+
+			Rect searchBoxRect = new Rect(innerContainer)
 			{
-				Widgets.DrawBoxSolid(scrollContainer, Color.grey);
-				Rect innerContainer = scrollContainer.ContractedBy(1);
-				Widgets.DrawBoxSolid(innerContainer, ListingExtension.MenuSectionBGFillColor);
-
-				Rect searchBoxRect = new Rect(innerContainer)
-				{
-					height = VehicleEntryHeight
-				};
-				Text.Font = GameFont.Small;
-				Widgets.Label(searchBoxRect, "VF_ListSearchText".Translate());
-				searchBoxRect.y += searchBoxRect.height;
-				string searchText = Widgets.TextField(searchBoxRect, vehicleFilter.Text);
-				if (searchText != vehicleFilter.Text)
-				{
-					vehicleFilter.Text = searchText;
-					RecacheVehicleFilter();
-				}
-
-				if (filteredVehicleDefs.NullOrEmpty() && VehicleDefs.NullOrEmpty())
-				{
-					// No need to render list if no vehicle mods active, and also calling get_VehicleDefs will trigger recache if mod settings page is opened directly to Vehicles tab
-					return scrollContainer;
-				}
-
-				GUIState.Reset();
-
-				if (selectedDef != null)
-				{
-					if (KeyBindingDefOf.MapDolly_Up.KeyDownEvent)
-					{
-						int index = filteredVehicleDefs.IndexOf(selectedDef) - 1;
-						if (index < 0)
-						{
-							index = filteredVehicleDefs.Count - 1;
-						}
-						SelectVehicle(filteredVehicleDefs[index]);
-					}
-					if (KeyBindingDefOf.MapDolly_Down.KeyDownEvent)
-					{
-						int index = filteredVehicleDefs.IndexOf(selectedDef) + 1;
-						if (index >= filteredVehicleDefs.Count)
-						{
-							index = 0;
-						}
-						SelectVehicle(filteredVehicleDefs[index]);
-					}
-				}
-
-				Rect scrollList = new Rect(innerContainer.ContractedBy(1))
-				{
-					y = searchBoxRect.yMax,
-				};
-				scrollList.height -= searchBoxRect.height * 2; //x2 for both label and input field
-				Rect scrollView = scrollList;
-				scrollView.width -= 16f;
-
-				float height = filteredVehicleDefs.Count * 20;
-				foreach (string header in headers)
-				{
-					height += Text.CalcHeight(header, scrollView.width);
-				}
-				scrollView.height = height;
-
-				Listing_SplitColumns listingStandard = new Listing_SplitColumns();
-				listingStandard.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, ref scrollView, 1);
-				{
-					string currentModTitle = string.Empty;
-					foreach (VehicleDef vehicle in filteredVehicleDefs)
-					{
-						try
-						{
-							if (currentModTitle != vehicle.modContentPack.Name)
-							{
-								currentModTitle = vehicle.modContentPack.Name;
-								listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-							}
-							bool validated = validator is null || validator(vehicle);
-							string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
-							if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
-							{
-								if (selectedDef == vehicle)
-								{
-									DeselectVehicle();
-								}
-								else
-								{
-									SelectVehicle(vehicle);
-								}
-							}
-						}
-						catch (Exception ex)
-						{
-							Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
-							selectedDef = null;
-							selectedPatterns.Clear();
-							selectedDefUpgradeComp = null;
-							selectedNode = null;
-							SetVehicleTex(null);
-							settingsDisabledFor.Add(vehicle.defName);
-						}
-					}
-				}
-				listingStandard.EndScrollView(ref scrollView);
-			}
-			finally
+				height = VehicleEntryHeight
+			};
+			using TextBlock textFont = new(GameFont.Small);
+			Widgets.Label(searchBoxRect, "VF_ListSearchText".Translate());
+			searchBoxRect.y += searchBoxRect.height;
+			string searchText = Widgets.TextField(searchBoxRect, vehicleFilter.Text);
+			if (searchText != vehicleFilter.Text)
 			{
-				GUIState.Pop();
+				vehicleFilter.Text = searchText;
+				RecacheVehicleFilter();
 			}
+
+			if (filteredVehicleDefs.NullOrEmpty() && VehicleDefs.NullOrEmpty())
+			{
+				// No need to render list if no vehicle mods active, and also calling get_VehicleDefs will trigger recache if mod settings page is opened directly to Vehicles tab
+				return scrollContainer;
+			}
+
+			if (selectedDef != null)
+			{
+				if (KeyBindingDefOf.MapDolly_Up.KeyDownEvent)
+				{
+					int index = filteredVehicleDefs.IndexOf(selectedDef) - 1;
+					if (index < 0)
+					{
+						index = filteredVehicleDefs.Count - 1;
+					}
+					SelectVehicle(filteredVehicleDefs[index]);
+				}
+				if (KeyBindingDefOf.MapDolly_Down.KeyDownEvent)
+				{
+					int index = filteredVehicleDefs.IndexOf(selectedDef) + 1;
+					if (index >= filteredVehicleDefs.Count)
+					{
+						index = 0;
+					}
+					SelectVehicle(filteredVehicleDefs[index]);
+				}
+			}
+
+			Rect scrollList = new Rect(innerContainer.ContractedBy(1))
+			{
+				y = searchBoxRect.yMax,
+			};
+			scrollList.height -= searchBoxRect.height * 2; //x2 for both label and input field
+			Rect scrollView = scrollList;
+			scrollView.width -= 16f;
+
+			float height = filteredVehicleDefs.Count * 20;
+			foreach (string header in headers)
+			{
+				height += Text.CalcHeight(header, scrollView.width);
+			}
+			scrollView.height = height;
+
+			// Begin ScrollView
+			Listing_SplitColumns listingStandard = new();
+			listingStandard.BeginScrollView(scrollList, ref vehicleDefsScrollPosition, ref scrollView, 1);
+			string currentModTitle = string.Empty;
+			foreach (VehicleDef vehicle in filteredVehicleDefs)
+			{
+				try
+				{
+					if (currentModTitle != vehicle.modContentPack.Name)
+					{
+						currentModTitle = vehicle.modContentPack.Name;
+						listingStandard.Header(currentModTitle, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+					}
+					bool validated = validator is null || validator(vehicle);
+					string tooltip = tooltipGetter != null ? tooltipGetter(validated) : string.Empty;
+					if (listingStandard.ListItemSelectable(vehicle.LabelCap, Color.yellow, selectedDef == vehicle, validated, tooltip))
+					{
+						if (selectedDef == vehicle)
+						{
+							DeselectVehicle();
+						}
+						else
+						{
+							SelectVehicle(vehicle);
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Log.Error($"Exception thrown while trying to select {vehicle.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
+					selectedDef = null;
+					selectedPatterns.Clear();
+					selectedDefUpgradeComp = null;
+					selectedNode = null;
+					SetVehicleTex(null);
+					settingsDisabledFor.Add(vehicle.defName);
+				}
+			}
+			listingStandard.EndScrollView(ref scrollView);
+			// End ScrollView
 			return scrollContainer;
 		}
 

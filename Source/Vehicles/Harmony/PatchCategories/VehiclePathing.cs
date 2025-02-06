@@ -17,8 +17,16 @@ namespace Vehicles
 {
 	internal class VehiclePathing : IPatchCategory
 	{
+		private static readonly Type jobDriverGotoDisplayClassType;
+
 		private static readonly HashSet<IntVec3> hitboxUpdateCells = new HashSet<IntVec3>();
 		
+		static VehiclePathing()
+		{
+			jobDriverGotoDisplayClassType = typeof(JobDriver_Goto).GetNestedTypes(AccessTools.all).FirstOrDefault();
+			Assert.IsNotNull(jobDriverGotoDisplayClassType);
+		}
+
 		public void PatchMethods()
 		{
 			//TODO 1.6 - Implement with more testing
@@ -27,12 +35,24 @@ namespace Vehicles
 			//	postfix: new HarmonyMethod(typeof(VehiclePathing),
 			//	nameof(VehiclesCanTakeOrders)));
 
+			// Compiler generated methods from JobDriver_Goto::<>c__DisplayClass1_0
+			var gotoMethods = jobDriverGotoDisplayClassType.GetDeclaredMethods();
+			// <MakeNewToils>b__0
+			MethodInfo makeToilsDelegate0 = gotoMethods[0];
+			Assert.IsTrue(makeToilsDelegate0.Name == "<MakeNewToils>b__0");
+			VehicleHarmony.Patch(original: makeToilsDelegate0,
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(GotoToilsFirstExit)));
+			// <MakeNewToils>b__6
+			MethodInfo makeToilsDelegate6 = gotoMethods[6];
+			Assert.IsTrue(makeToilsDelegate6.Name == "<MakeNewToils>b__6");
+			VehicleHarmony.Patch(original: makeToilsDelegate6,
+				postfix: new HarmonyMethod(typeof(VehiclePathing),
+				nameof(GotoToilsSecondExit)));
+			
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(FloatMenuMakerMap), "GotoLocationOption"),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(GotoLocationVehicles)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobDriver_Goto), "MakeNewToils"),
-				postfix: new HarmonyMethod(typeof(VehiclePathing),
-				nameof(GotoToilsPassthrough)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn_JobTracker), nameof(Pawn_JobTracker.IsCurrentJobPlayerInterruptible)),
 				prefix: new HarmonyMethod(typeof(VehiclePathing),
 				nameof(JobInterruptibleForVehicle)));
@@ -157,23 +177,31 @@ namespace Vehicles
 			return true;
 		}
 
-		private static IEnumerable<Toil> GotoToilsPassthrough(IEnumerable<Toil> __result, Job ___job, Pawn ___pawn)
+		private static void GotoToilsFirstExit(JobDriver_Goto __instance /* JobDriver_goto::<>c__DisplayClass1_0 */)
 		{
-			bool first = true;
-			foreach (Toil toil in __result)
+			TryExitMapForVehicle(__instance, false, true);
+		}
+
+		private static void GotoToilsSecondExit(JobDriver_Goto __instance  /* JobDriver_goto::<>c__DisplayClass1_0 */)
+		{
+			TryExitMapForVehicle(__instance, true, true);
+		}
+
+		private static void TryExitMapForVehicle(JobDriver_Goto __instance /* JobDriver_goto::<>c__DisplayClass1_0 */, 
+			bool onEdge, bool onExitCell)
+		{
+			// Sticking with compiler generated notation here for ease of debugging
+			JobDriver_Goto __this = Traverse.Create(__instance).Field("<>4__this").GetValue<JobDriver_Goto>();
+			if (__this.pawn is VehiclePawn vehicle && __this.job.exitMapOnArrival && vehicle.Spawned)
 			{
-				if (first)
+				Rot4 rot = CellRect.WholeMap(vehicle.Map).GetClosestEdge(vehicle.Position);
+				// Only need to check 1 cell per edge, if 1 is touching then all on that edge will be.
+				if (vehicle.PawnOccupiedCells(vehicle.Position, rot).Cardinals().Any(cell =>
+					(onEdge && cell.OnEdge(vehicle.Map)) || 
+					(onExitCell && vehicle.Map.exitMapGrid.IsExitCell(cell))))
 				{
-					first = false;
-					toil.AddPreTickAction(delegate ()
-					{
-						if (___pawn is VehiclePawn vehicle && ___job.exitMapOnArrival && vehicle.InhabitedCells(1).NotNullAndAny(cell => ___pawn.Map.exitMapGrid.IsExitCell(cell)))
-						{
-							PathingHelper.ExitMapForVehicle(vehicle, ___job);
-						}
-					});
+					PathingHelper.ExitMapForVehicle(vehicle, __this.job);
 				}
-				yield return toil;
 			}
 		}
 

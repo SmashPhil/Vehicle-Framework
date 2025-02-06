@@ -163,10 +163,7 @@ namespace Vehicles
 			
 			if (!UnityData.IsInMainThread)
 			{
-				LongEventHandler.ExecuteWhenFinished(delegate ()
-				{
-					graphicOverlay.Init();
-				});
+				LongEventHandler.ExecuteWhenFinished(graphicOverlay.Init);
 			}
 			else
 			{
@@ -256,6 +253,7 @@ namespace Vehicles
 			Scribe_Deep.Look(ref ignition, nameof(ignition), [this]);
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), [this]);
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
+			Scribe_Deep.Look(ref animator, nameof(animator));
 
 			Scribe_Values.Look(ref angle, nameof(angle));
 			Scribe_Values.Look(ref reverse, nameof(reverse));
@@ -287,6 +285,8 @@ namespace Vehicles
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
+				animator?.Init(this, VehicleDef.drawProperties?.controller);
+
 				this.EnsureUncachedCompList();
 				PostLoad();
 			}

@@ -36,18 +36,6 @@ namespace Vehicles
 			});
 		}
 
-		[StartupAction(Category = "Performance", Name = "Component Caching", GameState = GameState.Playing)]
-		private static void StartupAction_ProfileComponentCaching()
-		{
-			LongEventHandler.ExecuteWhenFinished(delegate ()
-			{
-				Messages.Message("Patching ComponentCaching for unit testing.", MessageTypeDefOf.NeutralEvent);
-
-				VehicleHarmony.Patch(AccessTools.Method(typeof(GameComponentUtility), nameof(GameComponentUtility.GameComponentUpdate)),
-					postfix: new HarmonyMethod(typeof(PerformanceTesting), nameof(ComponentCacheProfile)));
-			});
-		}
-
 		private static void PermanentWeatherTick()
 		{
 			if (permanentWeatherDef != null)
@@ -68,37 +56,6 @@ namespace Vehicles
 		private static void PermanentFreezing(ref float __result)
 		{
 			__result = -5;
-		}
-
-		private static void ComponentCacheProfile()
-		{
-			if (Find.CurrentMap is Map map)
-			{
-				Log.Clear();
-				ProfilerWatch.Start("Component Caching");
-				{
-					//GetComponent
-					ProfilerWatch.Start("Vanilla");
-					{
-						_ = map.GetComponent<VehicleMapping>();
-					}
-					ProfilerWatch.Stop();
-
-					//ComponentCache - inline
-					ProfilerWatch.Start("ComponentCache inlined");
-					{
-						_ = map.GetCachedMapComponent<VehicleMapping>();
-					}
-					ProfilerWatch.Stop();
-
-					ProfilerWatch.Start("MapComponentCache");
-					{
-						_ = MapComponentCache<VehicleMapping>.GetComponent(map);
-					}
-					ProfilerWatch.Stop();
-				}
-				ProfilerWatch.Stop();
-			}
 		}
 	}
 }

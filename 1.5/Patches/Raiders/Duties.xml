@@ -26,4 +26,24 @@
 			</thinkNode>
 		</value>
 	</Operation>
+
+    <Operation Class = "PatchOperationReplace">
+		<xpath>Defs/DutyDef[defName = "ExitMapRandom"]/thinkNode</xpath>
+		<value>
+			<thinkNode Class="ThinkNode_Priority">
+				<subNodes>
+					<li Class = "ThinkNode_Subtree">
+                        <!-- 
+                        Nearest exit spot works better for raiders, 
+                        not sure why they use random despite exiting nearest 
+                        -->
+						<treeDef>Vehicle_ExitMapBest</treeDef>
+					</li>
+					<li Class="JobGiver_ExitMapRandom">
+						<defaultLocomotion>Walk</defaultLocomotion>
+					</li>
+				</subNodes>
+			</thinkNode>
+		</value>
+	</Operation>
 </Patch>

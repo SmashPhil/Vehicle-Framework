@@ -23,7 +23,7 @@ namespace Vehicles
 		{
 			get
 			{
-				float multiplier = SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), VehicleDef.properties.pawnCollisionRecoilMultiplier); ;
+				float multiplier = SettingsCache.TryGetValue(VehicleDef, typeof(VehicleProperties), nameof(VehicleProperties.pawnCollisionRecoilMultiplier), VehicleDef.properties.pawnCollisionRecoilMultiplier);
 				multiplier = statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.PawnCollisionRecoilMultiplier, multiplier);
 				return multiplier;
 			}

@@ -211,13 +211,7 @@ namespace Vehicles
 			LocalTargetInfo localTargetInfo = CurrentTargetUnderMouse();
 			if (localTargetInfo.IsValid)
 			{
-				Color color = GetPosState(localTargetInfo, true) switch
-				{
-					PositionState.Invalid => Designator_Place.CannotPlaceColor,
-					PositionState.Obstructed => GhostOccupiedColor,
-					PositionState.Valid => Designator_Place.CanPlaceColor,
-					_ => Designator_Place.CanPlaceColor,
-				};
+				Color color = GhostDrawerColor(GetPosState(localTargetInfo, true));
 				color.a = (Mathf.PingPong(framesOpen, PingPongTickLength / 1.5f) / PingPongTickLength) + 0.25f;
 				GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation, vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
 			}
@@ -225,6 +219,17 @@ namespace Vehicles
 			{
 				ResetRestrictionCache();
 			}
+		}
+
+		public static Color GhostDrawerColor(PositionState state)
+		{
+			return state switch
+			{
+				PositionState.Invalid => Designator_Place.CannotPlaceColor,
+				PositionState.Obstructed => GhostOccupiedColor,
+				PositionState.Valid => Designator_Place.CanPlaceColor,
+				_ => Designator_Place.CanPlaceColor,
+			};
 		}
 
 		public void RecacheLandingPad(LocalTargetInfo target)

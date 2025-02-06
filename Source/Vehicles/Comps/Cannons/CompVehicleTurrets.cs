@@ -489,7 +489,8 @@ namespace Vehicles
 						DequeueTurret(turretData);
 						continue;
 					}
-					if (turretData.turret.TurretRestricted || turretData.turret.OnCooldown || (!turretData.turret.IsManned && !VehicleMod.settings.debug.debugShootAnyTurret))
+					if (turretData.turret.TurretRestricted || turretData.turret.OnCooldown || 
+						(!turretData.turret.IsManned && !VehicleMod.settings.debug.debugShootAnyTurret))
 					{
 						turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 						DequeueTurret(turretData);
@@ -690,6 +691,10 @@ namespace Vehicles
 			foreach (VehicleTurret turret in turrets)
 			{
 				turret.FillEvents_Def();
+				if (Vehicle.VehicleDef.npcProperties is VehicleNPCProperties npcProperties && npcProperties.stopToShoot)
+				{
+					turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
+				}
 			}
 		}
 

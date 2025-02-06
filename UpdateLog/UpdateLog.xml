@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1780</currentVersion>
+  <currentVersion>1.5.1886</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
@@ -37,6 +37,8 @@
 - Vehicles consume 50% less fuel while idle
 
 - Added more entries to vehicle info cards including build costs, total health, turrets, etc.
+
+- Added 'teleport' DevMode button to vehicles when godmode is enabled, moving the vehicle instantly to a targeted location.
 &lt;b&gt;Modders&lt;/b&gt;
 - Added affectedByEMP bool to vehicle properties.
 

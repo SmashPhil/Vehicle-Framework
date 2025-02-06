@@ -51,28 +51,14 @@ namespace Vehicles
 			//harmony.PatchAll(Assembly.GetExecutingAssembly());
 			//Harmony.DEBUG = true;
 
-			VehicleMCP = VehicleMod.settings.Mod.Content;
+			VehicleMCP = VehicleMod.mod.Content;
 			VehicleMMD = ModLister.GetActiveModWithIdentifier(VehiclesUniqueId, ignorePostfix: true);
 
 			Log.Message($"<color=orange>{LogLabel}</color> version {VehicleMMD.ModVersion}");
 
 			Harmony.PatchAll();
 
-			IEnumerable <Type> patchCategories = GenTypes.AllTypes.Where(t => t.GetInterfaces().Contains(typeof(IPatchCategory)));
-			foreach (Type patchCategory in patchCategories)
-			{
-				IPatchCategory patch = (IPatchCategory)Activator.CreateInstance(patchCategory, null);
-				try
-				{
-					patch.PatchMethods();
-				}
-				catch (Exception ex)
-				{
-					SmashLog.Error($"Failed to Patch <type>{patch.GetType().FullName}</type>. Method=\"{methodPatching}\"");
-					throw ex;
-				}
-			}
-			if (Prefs.DevMode) SmashLog.Message($"<color=orange>{LogLabel}</color> <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
+			RunAllPatches();
 
 			Utilities.InvokeWithLogging(ResolveAllReferences);
 			Utilities.InvokeWithLogging(PostDefDatabaseCalls);
@@ -98,7 +84,7 @@ namespace Vehicles
 			Utilities.InvokeWithLogging(RegisterVehicleAreas);
 
 #if DEBUG
-			UnitTestManager.onUnitTestStateChange += ForceSynchronousMaps;
+			//UnitTestManager.onUnitTestStateChange += ForceSynchronousMaps;
 			UnitTestManager.onUnitTestStateChange += SuppressDebugLogging;
 #endif
 
@@ -110,6 +96,35 @@ namespace Vehicles
 					//DebugHelper.Local.DebugType = DebugRegionType.Regions;
 				}
 			}
+		}
+
+		private static void RunAllPatches()
+		{
+			List<IPatchCategory> patchCategories = new List<IPatchCategory>();
+			foreach (Assembly assembly in VehicleMCP.assemblies.loadedAssemblies)
+			{
+				foreach (Type type in assembly.GetTypes())
+				{
+					if (type.HasInterface(typeof(IPatchCategory)))
+					{
+						IPatchCategory patch = (IPatchCategory)Activator.CreateInstance(type, null);
+						patchCategories.Add(patch);
+					}
+				}
+			}
+			foreach (IPatchCategory patch in patchCategories)
+			{
+				try
+				{
+					patch.PatchMethods();
+				}
+				catch
+				{
+					SmashLog.Error($"Failed to Patch <type>{patch.GetType().FullName}</type>. Method=\"{methodPatching}\"");
+					throw;
+				}
+			}
+			if (Prefs.DevMode) SmashLog.Message($"<color=orange>{LogLabel}</color> <success>{Harmony.GetPatchedMethods().Count()} patches successfully applied.</success>");
 		}
 		
 		public static void Patch(MethodBase original, HarmonyMethod prefix = null, HarmonyMethod postfix = null, HarmonyMethod transpiler = null, HarmonyMethod finalizer = null)
