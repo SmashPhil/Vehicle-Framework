@@ -1,3 +1,6 @@
 [submodule "SmashTools"]
 	path = SmashTools
 	url = https://github.com/SmashPhil/SmashTools
+[submodule "UpdateLog"]
+	path = UpdateLog
+	url = https://github.com/SmashPhil/UpdateLog
