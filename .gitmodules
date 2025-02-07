@@ -1,0 +1,3 @@
+[submodule "SmashTools"]
+	path = SmashTools
+	url = https://github.com/SmashPhil/SmashTools
