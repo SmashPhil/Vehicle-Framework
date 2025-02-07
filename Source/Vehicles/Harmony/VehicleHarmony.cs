@@ -1,20 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.IO;
-using System.Globalization;
-using System.Runtime.InteropServices;
-using UnityEngine;
 using HarmonyLib;
-using Verse;
-using Verse.AI;
 using RimWorld;
-using RimWorld.Planet;
 using SmashTools;
-using UpdateLogTool;
-using System.Diagnostics;
 using SmashTools.Debugging;
+using UpdateLogTool;
+using Verse;
 
 namespace Vehicles
 {
@@ -32,9 +26,9 @@ namespace Vehicles
 
 		private static string methodPatching = string.Empty;
 		
-		public static readonly GridOwners gridOwners = new GridOwners();
+		public static readonly GridOwners gridOwners = new();
 
-		internal static List<UpdateLog> updates = new List<UpdateLog>();
+		internal static List<UpdateLog> updates = [];
 		
 		internal static Harmony Harmony { get; private set; } = new Harmony(VehiclesUniqueId);
 

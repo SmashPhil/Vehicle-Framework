@@ -55,7 +55,7 @@ namespace Vehicles
 					nameof(InjectVehiclesIntoRaidPassthrough)));
 
 				// AI Behavior
-#if !RELEASE
+#if DEBUG
 
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobGiver_AIFightEnemy), "TryGiveJob"),
 					prefix: new HarmonyMethod(typeof(NPCAI),
@@ -148,7 +148,7 @@ namespace Vehicles
 					List<VehicleDef> availableDefs = DefDatabase<VehicleDef>.AllDefsListForReading.Where(vehicleDef => RaidInjectionHelper.ValidRaiderVehicle(vehicleDef, category, parms.raidArrivalMode, parms.faction, parms.points)).ToList();
 					if (vehicleCount > 0 && !availableDefs.NullOrEmpty())
 					{
-						__state = new List<VehicleDef>();
+						__state = [];
 						for (int i = 0; i < vehicleCount; i++)
 						{
 							VehicleDef vehicleDef = availableDefs.RandomElement();

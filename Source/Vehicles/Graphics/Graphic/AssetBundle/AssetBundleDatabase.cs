@@ -61,7 +61,7 @@ namespace Vehicles
 		{
 			if (!UnityData.IsInMainThread)
 			{
-				Log.Error("Attempting to load AssetBundles outside of MainThread.");
+				Trace.Raise("Attempting to load AssetBundles outside of MainThread.");
 				return;
 			}
 			if (Loaded) //Don't load on StaticConstructorOnStartup (only for suppressing warning)
@@ -70,7 +70,7 @@ namespace Vehicles
 			}
 			if (!VehicleMod.settings.debug.debugLoadAssetBundles)
 			{
-				Log.Warning($"{VehicleHarmony.LogLabel} Skipping asset bundle loading!");
+				Log.Warning($"{VehicleHarmony.LogLabel} Skipping asset bundle loading");
 				return;
 			}
 			if (bundleBuildVersions.TryGetValue(VersionControl.CurrentVersionStringWithoutBuild, out string currentVersion))

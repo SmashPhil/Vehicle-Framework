@@ -143,11 +143,12 @@ namespace Vehicles
 #if DEBUG
 					listingStandard.Header("Debugging Only", ListingExtension.BannerColor, fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
 
+#if RAIDERS
 					listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)", delegate (bool value)
 					{
 						return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
 					}, ref debugAllowRaiders, "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
-
+#endif
 					listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(), ref debugSpawnVehicleBuildingGodMode, "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
 
 					bool checkOn = debugUseMultithreading;
@@ -491,7 +492,8 @@ namespace Vehicles
 		{
 			string versionChecking = "Null";
 			VehicleHarmony.updates.Clear();
-			foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP).OrderByDescending(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
+			foreach (UpdateLog log in FileReader.ReadPreviousFiles(VehicleHarmony.VehicleMCP)
+				.OrderByDescending(log => Ext_Settings.CombineVersionString(log.UpdateData.currentVersion)))
 			{
 				VehicleHarmony.updates.Add(log);
 			}
@@ -508,7 +510,7 @@ namespace Vehicles
 					}
 					versions.Add(new DebugMenuOption(label, DebugMenuOptionMode.Action, delegate ()
 					{
-						Find.WindowStack.Add(new Dialog_NewUpdate(new HashSet<UpdateLog>() { update }));
+						Find.WindowStack.Add(new Dialog_NewUpdate([update]));
 					}));
 				}
 				Find.WindowStack.Add(new Dialog_DebugOptionListLister(versions));
