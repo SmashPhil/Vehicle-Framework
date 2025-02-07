@@ -6,7 +6,7 @@ using Verse.AI;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_PathGrid : UnitTest_MapTest
+	internal class UnitTestPathGrid : UnitTestMapTest
 	{
 		public override string Name => "PathGrid";
 

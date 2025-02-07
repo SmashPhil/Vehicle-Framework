@@ -11,7 +11,7 @@ namespace Vehicles
 	[HeaderTitle(Label = "VF_Properties", Translate = true)]
 	public class VehicleProperties
 	{
-#if !FISHING_DISABLED
+#if FISHING
 		[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
 		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
 #endif
@@ -26,7 +26,7 @@ namespace Vehicles
 		[SliderValues(MinValue = 0, MaxValue = 2, Increment = 0.05f, RoundDecimalPlaces = 2)]
 		public float pawnCollisionRecoilMultiplier = 0.5f;
 
-		public List<VehicleJobLimitations> vehicleJobLimitations = new List<VehicleJobLimitations>();
+		public List<VehicleJobLimitations> vehicleJobLimitations = [];
 
 		public bool diagonalRotation = true;
 		[PostToSettings(Label = "VF_ManhunterTargetsVehicle", Tooltip = "VF_ManhunterTargetsVehicleTooltip", Translate = true, UISettingsType = UISettingsType.Checkbox)]

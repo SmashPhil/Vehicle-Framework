@@ -1,6 +1,4 @@
-﻿#define ENABLE_RAIDERS
-
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using RimWorld;
@@ -13,8 +11,8 @@ namespace Vehicles
 {
 	internal class NPCAI : IPatchCategory
 	{
-		private static readonly LinearCurve raidersToReplaceCurve = new LinearCurve()
-		{
+		private static readonly LinearCurve raidersToReplaceCurve =
+		[
 			new CurvePoint(1, 0),
 			new CurvePoint(5, 0),
 			new CurvePoint(8, 1),
@@ -23,15 +21,15 @@ namespace Vehicles
 			new CurvePoint(40, 5),
 			new CurvePoint(100, 10),
 			new CurvePoint(150, 20),
-		};
+		];
 
-		private static readonly HashSet<PawnsArrivalModeDef> vehicleArrivalModes = new HashSet<PawnsArrivalModeDef>();
+		private static readonly HashSet<PawnsArrivalModeDef> vehicleArrivalModes = [];
 
-		private static readonly List<VehicleDef> availableVehicleDefs = new List<VehicleDef>();
+		private static readonly List<VehicleDef> availableVehicleDefs = [];
 
 		public void PatchMethods()
 		{
-#if (UNSTABLE || DEBUG) && ENABLE_RAIDERS
+#if (UNSTABLE || DEBUG) && RAIDERS
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
 				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
@@ -70,15 +68,11 @@ namespace Vehicles
 		private static void InjectVehiclesIntoPawnKindGroupPrepare(PawnGroupMakerParms parms, PawnGroupMaker groupMaker)
 		{
 			Debug.Message($"Attempting generation for raid. Faction={parms.faction?.def.LabelCap ?? "Null"}");
-			if (parms.faction == null)
-			{
-				return;
-			}
-			var raiderModExtension = parms.faction.def.GetModExtension<VehicleRaiderDefModExtension>();
-			if (raiderModExtension == null)
-			{
-				return;
-			}
+			Assert.IsNotNull(parms.faction);
+			
+			VehicleRaiderDefModExtension raiderModExtension = parms.faction?.def.GetModExtension<VehicleRaiderDefModExtension>();
+			if (raiderModExtension == null) return;
+
 			HashSet<PawnsArrivalModeDef> allowedArrivalModes = raiderModExtension.arrivalModes ?? vehicleArrivalModes;
 			
 			if (!availableVehicleDefs.NullOrEmpty())
@@ -93,7 +87,8 @@ namespace Vehicles
 				int vehicleCount = 1;// Mathf.FloorToInt(raidersToReplaceCurve.Evaluate(parms.pawnCount));
 				VehicleCategory category = RaidInjectionHelper.GetResolvedCategory(parms);
 				List<VehicleDef> availableDefs = DefDatabase<VehicleDef>.AllDefsListForReading
-					.Where(vehicleDef => RaidInjectionHelper.ValidRaiderVehicle(vehicleDef, category, null, parms.faction, vehicleBudget)).ToList();
+					.Where(vehicleDef => RaidInjectionHelper.ValidRaiderVehicle(vehicleDef, category, null, 
+						       parms.faction, vehicleBudget)).ToList();
 				Debug.Message($"[PREFIX] Vehicle Budget: {vehicleBudget} AvailableDefs: {availableDefs.Count}");
 				if (vehicleCount > 0 && !availableDefs.NullOrEmpty()) 
 				{

@@ -6,7 +6,7 @@ using Verse;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_ThingGrid : UnitTest_MapTest
+	internal class UnitTestThingGrid : UnitTestMapTest
 	{
 		public override string Name => "ThingGrid";
 

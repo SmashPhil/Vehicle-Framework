@@ -9,7 +9,7 @@ using Verse;
 
 namespace Vehicles.Testing
 {
-	internal abstract class UnitTest_MapTest : UnitTest
+	internal abstract class UnitTestMapTest : UnitTest
 	{
 		public override TestType ExecuteOn => TestType.GameLoaded;
 

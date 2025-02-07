@@ -8,7 +8,7 @@ using Verse;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_AerialVehicleWorldHandling : UnitTest
+	internal class UnitTestAerialVehicleWorldHandling : UnitTest
 	{
 		public override TestType ExecuteOn => TestType.GameLoaded;
 

@@ -121,42 +121,29 @@ namespace Vehicles
 					SmashLog.Error($"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No map.");
 					return;
 				}
-				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p => p is VehiclePawn vehicle);
+				VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(pawn =>
+					pawn is VehiclePawn vehicle && vehicle.animator != null);
 				if (vehicle is null)
 				{
-					VehicleDef vehicleDef = GetVehicleDefAnimator();
+					VehicleDef vehicleDef = DefDatabase<VehicleDef>.AllDefsListForReading.FirstOrDefault(def => def.drawProperties?.controller != null);
 					if (vehicleDef is null)
 					{
 						SmashLog.Error($"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No vehicle defs to use as test case.");
 						return;
 					}
 					vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
-					if (!CellFinderExtended.TryFindRandomCenterCell(map, (IntVec3 cell) => !MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, cell, Rot4.North), out IntVec3 cell))
+					if (!CellFinderExtended.TryFindRandomCenterCell(map, (cell) => 
+					!MapHelper.NonStandableOrVehicleBlocked(vehicle, Current.Game.CurrentMap, 
+							                                                     cell, Rot4.North), out IntVec3 spawnCell))
 					{
-						cell = CellFinder.RandomCell(map);
+						spawnCell = CellFinder.RandomCell(map);
 					}
-					GenSpawn.Spawn(vehicle, cell, map);
+					GenSpawn.Spawn(vehicle, spawnCell, map);
 				}
 				CameraJumper.TryJump(vehicle);
 				Find.Selector.Select(vehicle);
-				vehicle.OpenInAnimator_New();
+				vehicle.OpenInAnimatorTemp();
 			});
-
-			VehicleDef GetVehicleDefAnimator()
-			{
-				List<VehicleDef> vehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading.ToList();
-				foreach (VehicleDef vehicleDef in vehicleDefs)
-				{
-					foreach (CompProperties compProperties in vehicleDef.comps)
-					{
-						if (compProperties.compClass.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).Any(fieldInfo => fieldInfo.HasAttribute<GraphEditableAttribute>()))
-						{
-							return vehicleDef;
-						}
-					}
-				}
-				return null;
-			}
 		}
 
 		[StartupAction(Category = "UI", Name = "Vehicle Area Manager", GameState = GameState.Playing)]

@@ -340,16 +340,16 @@ namespace Vehicles
 				Rect rightPanelRect = new Rect(0f, 0f, outRect.width - 16f, rightPanelHeight);
 				string explanationText = descriptionStat.GetExplanationText(vehicleDef, vehicle);
 				float panelHeight = 0f;
-				Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rightPanelRect, true);
-				{
-					Rect descriptionRect = rightPanelRect;
-					descriptionRect.width -= 4f;
-					Widgets.Label(descriptionRect, explanationText);
-					float textHeight = Text.CalcHeight(explanationText, descriptionRect.width) + 10f;
-					panelHeight += textHeight;
-					panelHeight += DrawHyperlinks(descriptionRect, descriptionStat, textHeight);
-				}
+				// Begin ScrollView
+				Widgets.BeginScrollView(outRect, ref scrollPositionRightPanel, rightPanelRect);
+				Rect descriptionRect = rightPanelRect;
+				descriptionRect.width -= 4f;
+				Widgets.Label(descriptionRect, explanationText);
+				float textHeight = Text.CalcHeight(explanationText, descriptionRect.width) + 10f;
+				panelHeight += textHeight;
+				panelHeight += DrawHyperlinks(descriptionRect, descriptionStat, textHeight);
 				Widgets.EndScrollView();
+				// End ScrollView
 
 				rightPanelHeight = panelHeight;
 			}

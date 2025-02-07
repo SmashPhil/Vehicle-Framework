@@ -20,35 +20,39 @@ namespace Vehicles
 		public static Command_Action AerialVehicleTradeCommand(this AerialVehicleInFlight aerialVehicle, Faction faction = null, TraderKindDef trader = null)
 		{
 			Pawn bestNegotiator = WorldHelper.FindBestNegotiator(aerialVehicle.vehicle, faction, trader);
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "CommandTrade".Translate();
-			command_Action.defaultDesc = "CommandTradeDesc".Translate();
-			command_Action.icon = VehicleTex.TradeCommandTex;
-			command_Action.action = delegate()
+			Command_Action commandAction = new()
 			{
-				Settlement settlement = Find.WorldObjects.SettlementAt(aerialVehicle.Tile);
-				if (settlement != null && settlement.CanTradeNow)
+				defaultLabel = "CommandTrade".Translate(),
+				defaultDesc = "CommandTradeDesc".Translate(),
+				icon = VehicleTex.TradeCommandTex,
+				action = delegate ()
 				{
-					Find.WindowStack.Add(new Dialog_Trade(bestNegotiator, settlement, false));
-					PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(), "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), LetterDefOf.NeutralEvent, false, true);
+					if (Find.WorldObjects.SettlementAt(aerialVehicle.Tile) is { CanTradeNow: true } settlement)
+					{
+						Find.WindowStack.Add(new Dialog_Trade(bestNegotiator, settlement));
+						PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(), 
+							"LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural), 
+							LetterDefOf.NeutralEvent);
+					}
 				}
 			};
 			if (bestNegotiator is null)
 			{
-				if (trader != null && trader.permitRequiredForTrading != null && !aerialVehicle.vehicle.AllPawnsAboard.Any((Pawn p) => p.royalty != null && p.royalty.HasPermit(trader.permitRequiredForTrading, faction)))
+				if (trader != null && trader.permitRequiredForTrading != null && !aerialVehicle.vehicle.AllPawnsAboard.Any(
+				     (pawn) => pawn.royalty != null && pawn.royalty.HasPermit(trader.permitRequiredForTrading, faction)))
 				{
-					command_Action.Disable("CommandTradeFailNeedPermit".Translate(trader.permitRequiredForTrading.LabelCap));
+					commandAction.Disable("CommandTradeFailNeedPermit".Translate(trader.permitRequiredForTrading.LabelCap));
 				}
 				else
 				{
-					command_Action.Disable("CommandTradeFailNoNegotiator".Translate());
+					commandAction.Disable("CommandTradeFailNoNegotiator".Translate());
 				}
 			}
 			if (bestNegotiator != null && bestNegotiator.skills.GetSkill(SkillDefOf.Social).TotallyDisabled)
 			{
-				command_Action.Disable("CommandTradeFailSocialDisabled".Translate());
+				commandAction.Disable("CommandTradeFailSocialDisabled".Translate());
 			}
-			return command_Action;
+			return commandAction;
 		}
 
 		/// <summary>
@@ -57,7 +61,7 @@ namespace Vehicles
 		/// <param name="designationCategoryDef"></param>
 		public static void DesignatorsChanged(DesignationCategoryDef designationCategoryDef)
 		{
-			AccessTools.Method(typeof(DesignationCategoryDef), "ResolveDesignators").Invoke(designationCategoryDef, new object[] { });
+			AccessTools.Method(typeof(DesignationCategoryDef), "ResolveDesignators").Invoke(designationCategoryDef, []);
 		}
 
 		public static void ResetDesignatorStatuses()
@@ -67,7 +71,7 @@ namespace Vehicles
 			{
 				VehicleEnabled.For enabled = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleDef), 
 					nameof(VehicleDef.enabled), vehicleDef.enabled);
-				bool allowed = enabled == VehicleEnabled.For.Player || enabled == VehicleEnabled.For.Everyone;
+				bool allowed = enabled is VehicleEnabled.For.Player or VehicleEnabled.For.Everyone;
 				Current.Game.Rules.SetAllowBuilding(vehicleDef.buildDef, allowed);
 			}
 		}

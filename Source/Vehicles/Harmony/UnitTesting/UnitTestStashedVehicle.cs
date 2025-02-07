@@ -8,7 +8,7 @@ using Verse;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_StashedVehicle : UnitTest
+	internal class UnitTestStashedVehicle : UnitTest
 	{
 		public override TestType ExecuteOn => TestType.GameLoaded;
 

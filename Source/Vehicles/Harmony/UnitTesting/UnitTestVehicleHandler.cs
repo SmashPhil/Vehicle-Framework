@@ -5,7 +5,7 @@ using Verse;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_VehicleHandler : UnitTest_MapTest
+	internal class UnitTestVehicleHandler : UnitTestMapTest
 	{
 		public override string Name => "VehicleHandler";
 

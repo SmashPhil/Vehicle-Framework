@@ -22,7 +22,7 @@
     <DebugType>portable</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;DISABLE_WEIGHTS;RAIDERS;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
@@ -32,7 +32,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>RELEASE;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>RELEASE;DISABLE_WEIGHTS;</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
@@ -41,7 +41,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
     <OutputPath>..\..\1.5\Assemblies\</OutputPath>
-    <DefineConstants>TRACE;UNSTABLE;FISHING_DISABLED;DISABLE_WEIGHTS</DefineConstants>
+    <DefineConstants>TRACE;UNSTABLE;DISABLE_WEIGHTS;RAIDERS</DefineConstants>
     <Optimize>true</Optimize>
     <NoWarn>CS0649</NoWarn>
     <DebugType>pdbonly</DebugType>
@@ -227,16 +227,16 @@
     <Compile Include="Harmony\PatchCategories\DefGenerators\ThingDefGenerator_Buildables.cs" />
     <Compile Include="Harmony\PatchCategories\NPCAI.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\RaidTesting.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_MapDeinit.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_PathGrid.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_CoverGrid.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_GasGrid.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_VehicleHandler.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_ThingGrid.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_PositionManager.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_StashedVehicle.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_AerialVehicleWorldHandling.cs" />
-    <Compile Include="Harmony\UnitTesting\UnitTest_MapTest.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestMapDeinit.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestPathGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestCoverGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestGasGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestVehicleHandler.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestThingGrid.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestPositionManager.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestStashedVehicle.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestAerialVehicleWorldHandling.cs" />
+    <Compile Include="Harmony\UnitTesting\UnitTestMapTest.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\WorldTesting.cs" />
     <Compile Include="Harmony\UnitTesting\StartupActions\UITesting.cs" />
     <Compile Include="Misc\Attributes\ActionOnSettingsInputAttribute.cs" />

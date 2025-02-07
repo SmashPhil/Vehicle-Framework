@@ -1253,7 +1253,7 @@ namespace Vehicles
 							options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
 						}
 #if DEBUG
-						options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimator_New));
+						options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInAnimatorTemp));
 #endif
 						if (!options.NullOrEmpty())
 						{
@@ -1276,10 +1276,10 @@ namespace Vehicles
 			Find.WindowStack.Add(dialog_GraphEditor);
 		}
 
-		public void OpenInAnimator_New()
+		public void OpenInAnimatorTemp()
 		{
-			Dialog_AnimationEditor dialog_GraphEditor = new Dialog_AnimationEditor(this);
-			Find.WindowStack.Add(dialog_GraphEditor);
+			Dialog_AnimationEditor dialogGraphEditor = new(this);
+			Find.WindowStack.Add(dialogGraphEditor);
 		}
 
 		public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)

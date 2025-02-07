@@ -10,7 +10,7 @@ namespace Vehicles
 {
 	public class Section_Main : SettingsSection
 	{
-		public const int MainSectionColumns = 3;
+		private const int MainSectionColumns = 3;
 
 		/* Map/World Generation */
 		public float beachMultiplier = 0f;
@@ -225,7 +225,7 @@ namespace Vehicles
 
 				listingStandard.NewColumn();
 
-#if !FISHING_DISABLED
+#if FISHING
 				string fishingHeader = "VF_Fishing".Translate();
 				if (!FishingCompatibility.Active)
 				{

@@ -12,7 +12,7 @@ using Verse.Profile;
 
 namespace Vehicles.Testing
 {
-	internal class UnitTest_MapDeinit : UnitTest
+	internal class UnitTestMapDeinit : UnitTest
 	{
 		public override TestType ExecuteOn => TestType.GameLoaded;
 
