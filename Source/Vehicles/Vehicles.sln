@@ -9,9 +9,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Vehicles", "Vehicles.csproj
 		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools", "..\..\..\..\..\..\..\..\SmashTools\SmashTools\SmashTools\SmashTools.csproj", "{B6B2FD58-D7EC-482A-927D-EBB012A468A8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UpdateLog", "..\..\..\UpdateLog\Source\UpdateLog\UpdateLog\UpdateLog.csproj", "{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools", "..\..\SmashTools\SmashTools\SmashTools\SmashTools.csproj", "{B6B2FD58-D7EC-482A-927D-EBB012A468A8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,18 +26,18 @@ Global
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
-		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{04DF45B1-9D4D-40A6-A51D-3DCB146A53C8}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Unstable|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8}.Unstable|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
