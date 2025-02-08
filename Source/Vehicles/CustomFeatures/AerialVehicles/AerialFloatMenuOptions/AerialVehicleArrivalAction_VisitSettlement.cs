@@ -11,10 +11,12 @@ namespace Vehicles
 	{
 		public Settlement settlement;
 
-        public AerialVehicleArrivalAction_VisitSettlement()
+		public AerialVehicleArrivalAction_VisitSettlement()
 		{
 		}
-		public AerialVehicleArrivalAction_VisitSettlement(VehiclePawn vehicle, Settlement settlement) : base(vehicle)
+
+		public AerialVehicleArrivalAction_VisitSettlement(VehiclePawn vehicle, Settlement settlement) 
+																											: base(vehicle)
 		{
 			this.settlement = settlement;
 		}
@@ -50,8 +52,8 @@ namespace Vehicles
 
 		public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(VehiclePawn vehicle, Settlement settlement)
 		{
-			return VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanVisit(vehicle, settlement), 
-				() => new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement), 
+			return VehicleArrivalActionUtility.GetFloatMenuOptions(() => CanVisit(vehicle, settlement),
+				() => new AerialVehicleArrivalAction_VisitSettlement(vehicle, settlement),
 				"VisitSettlement".Translate(settlement.Label), vehicle, settlement.Tile, null);
 		}
 	}

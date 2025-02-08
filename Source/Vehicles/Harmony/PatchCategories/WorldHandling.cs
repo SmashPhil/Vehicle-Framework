@@ -49,12 +49,12 @@ namespace Vehicles
 				nameof(ForcedTargetingDontToggleWorld)));
 
 			// TODO - REMOVE AFTER TESTING
-			VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(Dialog_Trade), parameters: new Type[] { typeof(Pawn), typeof(ITrader), typeof(bool) }),
-				postfix: new HarmonyMethod(typeof(WorldHandling),
-				nameof(SetupPlayerAerialVehicleVariables)));
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_Trade), nameof(Dialog_Trade.DoWindowContents)),
-				prefix: new HarmonyMethod(typeof(WorldHandling),
-				nameof(DrawAerialVehicleInfo)));
+			//VehicleHarmony.Patch(original: AccessTools.Constructor(typeof(Dialog_Trade), parameters: new Type[] { typeof(Pawn), typeof(ITrader), typeof(bool) }),
+			//	postfix: new HarmonyMethod(typeof(WorldHandling),
+			//	nameof(SetupPlayerAerialVehicleVariables)));
+			//VehicleHarmony.Patch(original: AccessTools.Method(typeof(Dialog_Trade), nameof(Dialog_Trade.DoWindowContents)),
+			//	prefix: new HarmonyMethod(typeof(WorldHandling),
+			//	nameof(DrawAerialVehicleInfo)));
 
 			/* World Targeter Event Handling */
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldTargeter), nameof(WorldTargeter.TargeterUpdate)),

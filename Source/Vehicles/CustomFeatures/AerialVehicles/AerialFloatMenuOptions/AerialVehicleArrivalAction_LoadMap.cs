@@ -18,7 +18,9 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_LoadMap(VehiclePawn vehicle, LaunchProtocol launchProtocol, int tile, AerialVehicleArrivalModeDef arrivalModeDef) : base(vehicle)
+		public AerialVehicleArrivalAction_LoadMap(VehiclePawn vehicle, LaunchProtocol launchProtocol, 
+																							int tile, AerialVehicleArrivalModeDef arrivalModeDef) 
+																							: base(vehicle)
 		{
 			this.tile = tile;
 			this.launchProtocol = launchProtocol;
@@ -27,8 +29,9 @@ namespace Vehicles
 
 		public override bool DestroyOnArrival => true;
 
-		public override bool Arrived(int tile)
+		public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
 		{
+			base.Arrived(aerialVehicle, tile);
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
 				MapParent mapParent = Find.WorldObjects.MapParentAt(tile);
@@ -58,7 +61,6 @@ namespace Vehicles
 				ExecuteEvents();
 				arrivalModeDef.Worker.VehicleArrived(vehicle, launchProtocol, map);
 			}, "GeneratingMap", false, null, true);
-			return true;
 		}
 
 		[Obsolete("Use new overload instead. Will be removed in 1.6")]

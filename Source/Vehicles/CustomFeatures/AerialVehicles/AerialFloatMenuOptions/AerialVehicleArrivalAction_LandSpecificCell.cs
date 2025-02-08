@@ -14,7 +14,9 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_LandSpecificCell(VehiclePawn vehicle, MapParent mapParent, int tile, IntVec3 landingCell, Rot4 landingRot) : base(vehicle, mapParent, tile)
+		public AerialVehicleArrivalAction_LandSpecificCell(VehiclePawn vehicle, MapParent mapParent, 
+																											 int tile, IntVec3 landingCell, Rot4 landingRot) 
+																											 : base(vehicle, mapParent, tile)
 		{
 			this.tile = tile;
 			this.mapParent = mapParent;
@@ -29,19 +31,17 @@ namespace Vehicles
 			return WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
 		}
 
-		public override bool Arrived(int tile)
+		public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
 		{
-			if (!base.Arrived(tile))
-			{
-				return false;
-			}
 			if (!CanArriveInMap)
 			{
-				return false;
+				Trace.Raise($"Unable to land {vehicle} at destination. Map no longer exists, spawning as caravan nearby...");
+				aerialVehicle.SwitchToCaravan();
+				return;
 			}
+			base.Arrived(aerialVehicle, tile);
 			SpawnSkyfaller();
 			ExecuteEvents();
-			return true;
 		}
 
 		protected virtual void SpawnSkyfaller()

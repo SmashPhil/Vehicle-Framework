@@ -14,7 +14,9 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_CrashSpecificCell(VehiclePawn vehicle, MapParent mapParent, int tile, IntVec3 landingCell, Rot4 landingRot) : base(vehicle, mapParent, tile, landingCell, landingRot)
+		public AerialVehicleArrivalAction_CrashSpecificCell(VehiclePawn vehicle, MapParent mapParent, 
+																												int tile, IntVec3 landingCell, Rot4 landingRot) 
+																												: base(vehicle, mapParent, tile, landingCell, landingRot)
 		{
 		}
 

@@ -15,7 +15,9 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_AttackSettlement(VehiclePawn vehicle, LaunchProtocol launchProtocol, int tile, AerialVehicleArrivalModeDef arrivalModeDef) : base(vehicle, launchProtocol, tile, arrivalModeDef)
+		public AerialVehicleArrivalAction_AttackSettlement(VehiclePawn vehicle, LaunchProtocol launchProtocol, 
+																											 int tile, AerialVehicleArrivalModeDef arrivalModeDef) 
+																											 : base(vehicle, launchProtocol, tile, arrivalModeDef)
 		{
 			settlement = Find.World.worldObjects.SettlementAt(tile);
 		}

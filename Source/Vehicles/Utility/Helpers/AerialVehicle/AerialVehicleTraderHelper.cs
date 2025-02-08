@@ -31,12 +31,11 @@ namespace Vehicles
 			aerialVehicle = negotiatorsAerialVehicle;
 			if (aerialVehicle != null)
 			{
-				playerCaravanAllPawnsAndItems = new List<Thing>();
-				foreach (Pawn pawn in aerialVehicle.vehicle.AllPawnsAboard)
-				{
-					playerCaravanAllPawnsAndItems.Add(pawn);
-				}
-				playerCaravanAllPawnsAndItems.AddRange(aerialVehicle.vehicle.inventory.innerContainer);
+				playerCaravanAllPawnsAndItems =
+				[
+					.. aerialVehicle.vehicle.AllPawnsAboard,
+					.. aerialVehicle.vehicle.inventory.innerContainer,
+				];
 			}
 		}
 

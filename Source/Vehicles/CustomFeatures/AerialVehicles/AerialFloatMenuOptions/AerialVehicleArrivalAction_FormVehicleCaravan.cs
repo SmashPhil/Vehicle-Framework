@@ -6,7 +6,7 @@ namespace Vehicles
 {
 	public class AerialVehicleArrivalAction_FormVehicleCaravan : AerialVehicleArrivalAction
 	{
-		public  AerialVehicleArrivalAction_FormVehicleCaravan()
+		public AerialVehicleArrivalAction_FormVehicleCaravan()
 		{
 		}
 		public AerialVehicleArrivalAction_FormVehicleCaravan(VehiclePawn vehicle) : base(vehicle)
@@ -18,9 +18,10 @@ namespace Vehicles
 			return !Find.World.Impassable(destinationTile);
 		}
 
-		public override bool Arrived(int tile)
+		public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
 		{
-			return true;
+			// SwitchToCaravan handles destroying aerial vehicle object
+			aerialVehicle.SwitchToCaravan();
 		}
 
 		public static bool CanFormCaravanAt(VehiclePawn vehicle, int tile)

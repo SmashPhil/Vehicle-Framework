@@ -253,7 +253,7 @@ namespace Vehicles
 			Scribe_Deep.Look(ref ignition, nameof(ignition), [this]);
 			Scribe_Deep.Look(ref statHandler, nameof(statHandler), [this]);
 			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
-			Scribe_Deep.Look(ref animator, nameof(animator));
+			Scribe_Deep.Look(ref animator, nameof(animator), [this, VehicleDef.drawProperties.controller]);
 
 			Scribe_Values.Look(ref angle, nameof(angle));
 			Scribe_Values.Look(ref reverse, nameof(reverse));

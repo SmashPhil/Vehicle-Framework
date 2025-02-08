@@ -265,9 +265,11 @@ namespace Vehicles
 						alsoClickIfOtherInGroupClicked = false,
 						action = delegate ()
 						{
-							LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) => AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile, 
+							LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) => 
+								AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile, 
 								true, VehicleTex.TargeterMouseAttachment, closeWorldTabWhenFinished: false, onUpdate: null,
-								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => 
+								vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
 						}
 					};
 					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
@@ -561,7 +563,7 @@ namespace Vehicles
 					if (!vehicle.CanMove)
 					{
 						vehicleIncapacitated = vehicle;
-						vehicleIncapReason = "VF_VehicleUnableToMove".Translate();
+						vehicleIncapReason = "VF_VehicleUnableToMove".Translate(vehicle);
 					}
 					else if (!vehicle.CanMoveWithOperators)
 					{
@@ -570,9 +572,12 @@ namespace Vehicles
 					}
 				}
 				
-				foreach (VehicleComp vehicleComp in vehicle.AllComps.Where(comp => comp is VehicleComp))
+				foreach (ThingComp comp in vehicle.AllComps)
 				{
-					vehicleComp.CompCaravanInspectString(stringBuilder);
+					if (comp is VehicleComp vehicleComp)
+					{
+						vehicleComp.CompCaravanInspectString(stringBuilder);
+					}
 				}
 			}
 			if (mentalState > 0 || downed > 0)

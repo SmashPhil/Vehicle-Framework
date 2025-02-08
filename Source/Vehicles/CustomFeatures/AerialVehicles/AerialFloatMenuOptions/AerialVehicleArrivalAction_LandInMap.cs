@@ -17,18 +17,14 @@ namespace Vehicles
 		{
 		}
 
-		public AerialVehicleArrivalAction_LandInMap(VehiclePawn vehicle, MapParent mapParent, int tile) : base(vehicle)
+		public AerialVehicleArrivalAction_LandInMap(VehiclePawn vehicle, 
+																								MapParent mapParent, int tile) : base(vehicle)
 		{
 			this.tile = tile;
 			this.mapParent = mapParent;
 		}
 
 		public override bool DestroyOnArrival => true;
-
-		public override bool Arrived(int tile)
-		{
-			return true;
-		}
 
 		protected virtual void ExecuteEvents()
 		{
@@ -38,8 +34,8 @@ namespace Vehicles
 		public override void ExposeData()
 		{
 			base.ExposeData();
-			Scribe_Values.Look(ref tile, "tile");
-			Scribe_References.Look(ref mapParent, "mapParent");
+			Scribe_Values.Look(ref tile, nameof(tile));
+			Scribe_References.Look(ref mapParent, nameof(mapParent));
 		}
 	}
 }

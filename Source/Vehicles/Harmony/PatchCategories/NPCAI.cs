@@ -9,7 +9,7 @@ using Verse.AI;
 
 namespace Vehicles
 {
-	internal class NPCAI : IPatchCategory
+	internal class NpcAi : IPatchCategory
 	{
 		private static readonly LinearCurve raidersToReplaceCurve =
 		[
@@ -29,7 +29,7 @@ namespace Vehicles
 
 		public void PatchMethods()
 		{
-#if (UNSTABLE || DEBUG) && RAIDERS
+#if RAIDERS
 			if (VehicleMod.settings.debug.debugAllowRaiders)
 			{
 				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
@@ -37,28 +37,28 @@ namespace Vehicles
 				vehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkInDistributed);
 
 				//VehicleHarmony.Patch(original: AccessTools.Method(typeof(LordJob_AssaultColony), nameof(LordJob_AssaultColony.CreateGraph)),
-				//	new HarmonyMethod(typeof(NPCAI),
+				//	new HarmonyMethod(typeof(NpcAi),
 				//	nameof()));
 
 				// Generation
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(PawnGroupKindWorker_Normal), nameof(PawnGroupKindWorker_Normal.GeneratePawns),
 						parameters: [typeof(PawnGroupMakerParms), typeof(PawnGroupMaker), typeof(List<Pawn>), typeof(bool)]),
-					prefix: new HarmonyMethod(typeof(NPCAI),
+					prefix: new HarmonyMethod(typeof(NpcAi),
 					nameof(InjectVehiclesIntoPawnKindGroupPrepare)),
-					postfix: new HarmonyMethod(typeof(NPCAI),
+					postfix: new HarmonyMethod(typeof(NpcAi),
 					nameof(InjectVehiclesIntoPawnKindGroupPassthrough)));
 
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(RaidStrategyWorker), nameof(RaidStrategyWorker.SpawnThreats)),
-					prefix: new HarmonyMethod(typeof(NPCAI),
+					prefix: new HarmonyMethod(typeof(NpcAi),
 					nameof(InjectVehiclesIntoRaidPrepare)),
-					postfix: new HarmonyMethod(typeof(NPCAI),
+					postfix: new HarmonyMethod(typeof(NpcAi),
 					nameof(InjectVehiclesIntoRaidPassthrough)));
 
 				// AI Behavior
 #if DEBUG
 
 				VehicleHarmony.Patch(original: AccessTools.Method(typeof(JobGiver_AIFightEnemy), "TryGiveJob"),
-					prefix: new HarmonyMethod(typeof(NPCAI),
+					prefix: new HarmonyMethod(typeof(NpcAi),
 					nameof(DisableVanillaJobForVehicle)));
 #endif
 			}

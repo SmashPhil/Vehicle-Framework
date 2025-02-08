@@ -35,6 +35,15 @@ namespace Vehicles
 				aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
 				vehicleCaravan.RemovePawn(vehicle);
 
+				while (vehicleCaravan.pawns.Count > 0)
+				{
+					Pawn pawn = vehicleCaravan.PawnsListForReading[0];
+					if (!vehicle.TryAddPawn(pawn))
+					{
+						break;
+					}
+				}
+				
 				if (vehicleCaravan.PawnsListForReading.NullOrEmpty() && !vehicleCaravan.Destroyed)
 				{
 					vehicleCaravan.Destroy();

@@ -33,11 +33,17 @@ namespace Vehicles
 
 		public virtual bool ShouldUseLongEvent(int tile) => false;
 
-		public abstract bool Arrived(int tile); //CompVehicleLauncher.inFlight = false
+		public virtual void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+		{
+			if (DestroyOnArrival)
+			{
+				aerialVehicle.Destroy();
+			}
+		}
 
 		public virtual void ExposeData()
 		{
-			Scribe_References.Look(ref vehicle, "vehicle", true);
+			Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 		}
 	}
 }

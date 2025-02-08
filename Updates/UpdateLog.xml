@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.5.1888</currentVersion>
+  <currentVersion>1.5.1889</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->

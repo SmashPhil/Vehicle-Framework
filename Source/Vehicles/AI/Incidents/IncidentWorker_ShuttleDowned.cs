@@ -52,7 +52,7 @@ namespace Vehicles
 					return false;
 				}
 				AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new AerialVehicleArrivalAction_CrashSpecificCell(aerialVehicle.vehicle, crashSite.Parent, crashSite.Tile, crashingCell, Rot4.East);
-				arrivalAction.Arrived(crashSite.Tile);
+				arrivalAction.Arrived(aerialVehicle, crashSite.Tile);
 				aerialVehicle.Destroy();
 				string settlementLabel = culprit?.Label ?? string.Empty;
 				if (ticksTillArrival > 0)

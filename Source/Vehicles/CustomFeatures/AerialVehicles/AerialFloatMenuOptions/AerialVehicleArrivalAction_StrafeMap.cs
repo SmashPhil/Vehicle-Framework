@@ -30,8 +30,9 @@ namespace Vehicles
 		}
 		
 		//NOTE - Needs Unfogger called if map is generated
-		public override bool Arrived(int tile)
+		public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
 		{
+			// TODO - add base call so aerial vehicle is destroyed before long event is queued.
 			LongEventHandler.QueueLongEvent(delegate ()
 			{
 				Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null); //MAP INDEX BUG
@@ -54,9 +55,8 @@ namespace Vehicles
 					skyfaller.aerialVehicle = aerialVehicle;
 					Thing thing = GenSpawn.Spawn(skyfaller, start, parent.Map, Rot8.North); //REDO - Other rotations?
 				}, null, null, null, true);
-				aerialVehicle.Destroy();
+				aerialVehicle.Destroy(); // TODO - This is redundant, should not be needed for skyfaller or targeting. Let base destroy
 			}, "GeneratingMap", false, null, true);
-			return true;
 		}
 
 		public override void ExposeData()

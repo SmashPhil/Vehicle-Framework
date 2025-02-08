@@ -12,10 +12,10 @@ namespace Vehicles
 	{
 		public const float RotationRate = 0.35f;
 
-		private static Dictionary<AerialVehicleInFlight, HashSet<AirDefense>> searchingDefenses = new Dictionary<AerialVehicleInFlight, HashSet<AirDefense>>();
-		private static HashSet<AirDefense> defensesToDraw = new HashSet<AirDefense>();
+		private static Dictionary<AerialVehicleInFlight, List<AirDefense>> searchingDefenses = [];
+		private static HashSet<AirDefense> defensesToDraw = [];
 
-		public static Dictionary<WorldObject, AirDefense> airDefenseCache = new Dictionary<WorldObject, AirDefense>();
+		public static Dictionary<WorldObject, AirDefense> airDefenseCache = [];
 
 		private static List<WorldObject> saveableWorldObjects;
 		private static List<AirDefense> saveableAirDefenses;
@@ -81,13 +81,14 @@ namespace Vehicles
 
 		public override void FinalizeInit()
 		{
-			searchingDefenses ??= new Dictionary<AerialVehicleInFlight, HashSet<AirDefense>>();
-			airDefenseCache ??= new Dictionary<WorldObject, AirDefense>();
+			// back compat for saves that might have serialized these as null
+			searchingDefenses ??= [];
+			airDefenseCache ??= [];
 		}
 
-		public static void RegisterAerialVehicle(AerialVehicleInFlight aerialVehicle, HashSet<AirDefense> newDefenses)
+		public static void RegisterAerialVehicle(AerialVehicleInFlight aerialVehicle, List<AirDefense> newDefenses)
 		{
-			HashSet<AirDefense> oldDefenses = new HashSet<AirDefense>();
+			List<AirDefense> oldDefenses = [];
 			if (searchingDefenses.TryGetValue(aerialVehicle, out var defenses))
 			{
 				oldDefenses.AddRange(defenses);
@@ -125,9 +126,11 @@ namespace Vehicles
 				}
 			}
 		}
-
-		public static IEnumerable<AirDefense> CheckNearbyObjects(AerialVehicleInFlight aerialVehicle, float speedPctPerTick)
+		
+		// TODO - needs refactoring for better performance
+		public static List<AirDefense> GetNearbyObjects(AerialVehicleInFlight aerialVehicle, float speedPctPerTick)
 		{
+			List<AirDefense> airDefenses = [];
 			float halfTicksPerTileTraveled = Ext_Math.RoundTo(speedPctPerTick * 100, 0.001f);
 			Vector3 start = aerialVehicle.DrawPos;
 			for (int i = 0; i < aerialVehicle.flightPath.Path.Count; i++)
@@ -143,12 +146,13 @@ namespace Vehicles
 						float distance = Ext_Math.SphericalDistance(partition, defenseCache.Key.DrawPos);
 						if (distance < defenseCache.Value.MaxDistance)
 						{
-							yield return defenseCache.Value;
+							airDefenses.Add(defenseCache.Value);
 						}
 					}
 				}
 				start = destinationPos;
 			}
+			return airDefenses;
 		}
 
 		public override void ExposeData()
