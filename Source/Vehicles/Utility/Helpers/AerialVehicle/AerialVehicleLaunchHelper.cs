@@ -33,21 +33,23 @@ namespace Vehicles
 					fromTile = vehicleCaravan.Tile;
 				}
 				aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
-				vehicleCaravan.RemovePawn(vehicle);
-
-				while (vehicleCaravan.pawns.Count > 0)
+				
+				// Pawns not boarded will be transfered to the converted vanilla Caravan
+				// and left behind. Board as many pawns as possible, a pop-up should have
+				// confirmed user intent already.
+				for (int i = vehicleCaravan.pawns.Count - 1; i >= 0; i--)
 				{
-					Pawn pawn = vehicleCaravan.PawnsListForReading[0];
-					if (!vehicle.TryAddPawn(pawn))
+					Pawn pawn = vehicleCaravan.pawns.InnerListForReading[i];
+					if (pawn.IsInVehicle()) continue;
+
+					if (vehicle.TryAddPawn(pawn))
 					{
-						break;
+						vehicleCaravan.RemovePawn(pawn);
 					}
 				}
-				
-				if (vehicleCaravan.PawnsListForReading.NullOrEmpty() && !vehicleCaravan.Destroyed)
-				{
-					vehicleCaravan.Destroy();
-				}
+				// Removing vehicle will convert back to a vanilla Caravan and
+				// destroy this instance.
+				vehicleCaravan.RemovePawn(vehicle);
 				
 				if (autoSelect)
 				{

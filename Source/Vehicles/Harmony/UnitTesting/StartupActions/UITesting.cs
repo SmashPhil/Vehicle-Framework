@@ -126,6 +126,7 @@ namespace Vehicles
 				if (vehicle is null)
 				{
 					VehicleDef vehicleDef = DefDatabase<VehicleDef>.AllDefsListForReading.FirstOrDefault(def => def.drawProperties?.controller != null);
+					vehicleDef ??= DefDatabase<VehicleDef>.AllDefsListForReading.FirstOrDefault(); // Use any vehicle just to get the animator open
 					if (vehicleDef is null)
 					{
 						SmashLog.Error($"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No vehicle defs to use as test case.");

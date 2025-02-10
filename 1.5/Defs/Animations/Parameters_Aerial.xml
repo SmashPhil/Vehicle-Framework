@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsTakingOff</defName>
+        <label>Is TakingOff</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsLanding</defName>
+        <label>Is Landing</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsLoitering</defName>
+        <label>Is Loitering</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+</Defs>
