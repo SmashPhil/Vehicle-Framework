@@ -132,7 +132,7 @@
 	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
 	<VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
 	
-	<!-- HeaderTitles -->
+	<!-- Header Titles -->
 	<VF_Cargo>Cargo</VF_Cargo>
 	<VF_Properties>Properties</VF_Properties>
 	<VF_LauncherProperties>Launch Properties</VF_LauncherProperties>

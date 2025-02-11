@@ -265,11 +265,24 @@ namespace Vehicles
 						alsoClickIfOtherInGroupClicked = false,
 						action = delegate ()
 						{
-							LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) => 
-								AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile, 
+							void LaunchAction() => LaunchTargeter.BeginTargeting(vehicle, (GlobalTargetInfo target, float fuelCost) =>
+								AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile,
 								true, VehicleTex.TargeterMouseAttachment, closeWorldTabWhenFinished: false, onUpdate: null,
-								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) => 
+								extraLabelGetter: (GlobalTargetInfo target, List<FlightNode> path, float fuelCost) =>
 								vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile, path, fuelCost));
+
+							int pawnCount = PawnsListForReading.Count;
+							if (pawnCount > vehicle.TotalSeats)
+							{
+								Find.WindowStack.Add(new Dialog_Confirm(
+									"VF_PawnsLeftBehindConfirm".Translate(),
+									"VF_PawnsLeftBehindConfirmDesc".Translate(), 
+									LaunchAction));
+							}
+							else
+							{
+								LaunchAction();
+							}
 						}
 					};
 					if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
@@ -288,7 +301,7 @@ namespace Vehicles
 						icon = TexCommand.PauseCaravan,
 						hotKey = KeyBindingDefOf.Misc1,
 						isActive = () => vehiclePather.Paused,
-						toggleAction = delegate()
+						toggleAction = delegate ()
 						{
 							if (!vehiclePather.Moving)
 							{
@@ -330,7 +343,7 @@ namespace Vehicles
 					{
 						disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
 					}
-					
+
 					yield return disembark;
 				}
 				foreach (Gizmo gizmo2 in forage.GetGizmos())
@@ -442,7 +455,7 @@ namespace Vehicles
 			float average = 1;
 			if (pawnCount > 0)
 			{
-				average = total /pawnCount;
+				average = total / pawnCount;
 			}
 			ConstructionAverage = average;
 
@@ -476,7 +489,7 @@ namespace Vehicles
 				}
 			}
 		}
-		
+
 		public override string GetInspectString()
 		{
 			StringBuilder stringBuilder = new StringBuilder();
@@ -571,7 +584,7 @@ namespace Vehicles
 						vehicleIncapReason = "VF_NotEnoughToOperate".Translate();
 					}
 				}
-				
+
 				foreach (ThingComp comp in vehicle.AllComps)
 				{
 					if (comp is VehicleComp vehicleComp)
@@ -762,7 +775,7 @@ namespace Vehicles
 			base.SpawnSetup();
 			RecacheVehicles();
 			vehicleTweener.ResetTweenedPosToRoot();
-			
+
 			//Necessary check for post load, otherwise registry will be null until spawned on map
 			foreach (VehiclePawn vehicle in vehicles)
 			{
