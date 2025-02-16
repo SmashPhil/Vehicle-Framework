@@ -12,6 +12,7 @@
 					<position>(-48, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Entry</stateType>
 					<transitions>
@@ -28,6 +29,7 @@
 					<position>(32, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Exit</stateType>
 					<transitions />
@@ -38,6 +40,7 @@
 					<position>(-26, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Default</stateType>
 					<transitions>
@@ -54,6 +57,7 @@
 					<position>(-10, 7)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions>
@@ -75,6 +79,7 @@
 					<position>(11, 7)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions />
@@ -85,6 +90,7 @@
 					<position>(-48, -9)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions>
@@ -101,6 +107,7 @@
 					<position>(11, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions />
@@ -111,6 +118,7 @@
 					<position>(-26, -9)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions>
@@ -132,6 +140,7 @@
 					<position>(-48, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Entry</stateType>
 					<transitions>
@@ -148,6 +157,7 @@
 					<position>(32, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Exit</stateType>
 					<transitions />
@@ -158,6 +168,7 @@
 					<position>(-26, 0)</position>
 					<clip IsNull="TRUE" />
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>Default</stateType>
 					<transitions>
@@ -177,25 +188,10 @@
 				<li>
 					<name>Spin Up</name>
 					<guid>79292a05-51f2-4ff8-a021-f03fee167ed4</guid>
-					<position>(-26, 8)</position>
-					<clip IsNull="TRUE" />
+					<position>(-4, 6)</position>
+					<clip>a284c1f0-1d72-4d5e-a992-c5edef46fff8</clip>
 					<speed>1</speed>
-					<writeDefaults>True</writeDefaults>
-					<stateType>None</stateType>
-					<transitions>
-						<li>
-							<exitTicks>0</exitTicks>
-							<toStateGuid>0e3b4ccc-a180-4df7-ac46-6d8ec482d77e</toStateGuid>
-							<conditions />
-						</li>
-					</transitions>
-				</li>
-				<li>
-					<name>Ready for Takeoff</name>
-					<guid>0e3b4ccc-a180-4df7-ac46-6d8ec482d77e</guid>
-					<position>(-4, 8)</position>
-					<clip IsNull="TRUE" />
-					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions>
@@ -215,9 +211,10 @@
 				<li>
 					<name>Spin Down</name>
 					<guid>79eacdf4-fa65-4105-840b-a8cf5f27bfbd</guid>
-					<position>(-4, 0)</position>
-					<clip IsNull="TRUE" />
+					<position>(-4, -7)</position>
+					<clip>ffcb4eb2-be9f-4e09-8ef8-6cdeaa6d1dd1</clip>
 					<speed>1</speed>
+					<loop>False</loop>
 					<writeDefaults>True</writeDefaults>
 					<stateType>None</stateType>
 					<transitions>

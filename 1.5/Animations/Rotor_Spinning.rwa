@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <AnimationClip>
-	<frameCount>1900</frameCount>
+	<frameCount>60</frameCount>
 	<cycleOffset>0</cycleOffset>
-	<guid>a284c1f0-1d72-4d5e-a992-c5edef46fff8</guid>
+	<guid>e0b82d66-8fff-43be-a9ed-2c9852363011</guid>
 	<properties>
 		<li>
 			<identifier>RotorBack</identifier>
@@ -19,8 +19,8 @@
 					<propertyType>Float</propertyType>
 					<curve>
 						<points>
-							<li>(0,0,0,0,0.333,0.333)</li>
-							<li>(1900,-59,0,0,0.333,0.333)</li>
+							<li>(0,-59,0,0,0.333,0.333)</li>
+							<li>(60,-59,0,0,0.333,0.333)</li>
 						</points>
 					</curve>
 				</li>
@@ -53,8 +53,8 @@
 					<propertyType>Float</propertyType>
 					<curve>
 						<points>
-							<li>(0,0,0,0,0.333,0.333)</li>
-							<li>(1900,59,0,0,0.333,0.333)</li>
+							<li>(0,59,0,0,0.333,0.333)</li>
+							<li>(60,59,0,0,0.333,0.333)</li>
 						</points>
 					</curve>
 				</li>
@@ -73,10 +73,5 @@
 			</hierarchyPath>
 		</li>
 	</properties>
-	<events>
-		<li>
-			<frame>1900</frame>
-			<method>SmashTools.AnimationEvents.SetBool(NULL,VF_ReadyForTakeoff,True)</method>
-		</li>
-	</events>
+	<events />
 </AnimationClip>

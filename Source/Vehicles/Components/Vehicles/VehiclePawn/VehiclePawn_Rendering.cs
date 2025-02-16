@@ -1045,34 +1045,18 @@ namespace Vehicles
 				};
 				if (animator != null)
 				{
-					yield return new Command_Action()
+					if (CompVehicleLauncher != null)
 					{
-						defaultLabel = "Loiter",
-						action = delegate ()
-						{
-
-						}
-					};
-					yield return new Command_Action()
-					{
-						defaultLabel = "Toggle State",
-						action = delegate ()
-						{
-							List<FloatMenuOption> options = [];
-							foreach (AnimationParameterDef paramDef in DefDatabase<AnimationParameterDef>.AllDefsListForReading)
-							{
-								if (paramDef.type == AnimationParameter.ParamType.Bool || paramDef.type == AnimationParameter.ParamType.Trigger)
-								{
-									bool value = animator.GetBool(paramDef);
-									options.Add(new FloatMenuOption($"{paramDef.LabelCap} ({value.ToStringYesNo()})", delegate ()
-									{
-										animator.SetBool(paramDef, !value);
-									}));
-								}
-							}
-							if (!options.NullOrEmpty()) Find.WindowStack.Add(new FloatMenu(options));
-						}
-					};
+            yield return new Command_Action()
+            {
+              defaultLabel = "Toggle Loitering",
+              action = delegate ()
+              {
+                CompVehicleLauncher.loiter = !CompVehicleLauncher.loiter;
+								animator.SetBool(PropertyIds.Loiter, CompVehicleLauncher.loiter);
+              }
+            };
+          }
         }
 			}
 		}

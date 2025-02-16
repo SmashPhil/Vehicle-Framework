@@ -82,6 +82,7 @@ namespace Vehicles
 		{
 			if (Spawned)
 			{
+				animator?.SetBool(PropertyIds.Disabled, CanMove);
 				Map.GetCachedMapComponent<ListerVehiclesRepairable>().Notify_VehicleTookDamage(this);
 			}
 		}

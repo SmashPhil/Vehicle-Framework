@@ -39,6 +39,8 @@ namespace Vehicles
 
 		private DeploymentTimer timer;
 
+		public bool loiter = false;
+
 		public bool inFlight = false;
 
 		public virtual bool AnyFlightControl { get; private set; }
@@ -316,6 +318,7 @@ namespace Vehicles
 			Scribe_Values.Look(ref landingAltitudeModifier, nameof(landingAltitudeModifier));
 
 			Scribe_Values.Look(ref inFlight, nameof(inFlight));
+			Scribe_Values.Look(ref loiter, nameof(loiter));
 			Scribe_Values.Look(ref timer, nameof(timer));
 		}
 

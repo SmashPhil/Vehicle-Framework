@@ -18,4 +18,16 @@
         <label>Is Loitering</label>
         <type>Bool</type>
     </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_ReadyForTakeoff</defName>
+        <label>Ready to Takeoff</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_ReadyForLanding</defName>
+        <label>Ready to Landing</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
 </Defs>
