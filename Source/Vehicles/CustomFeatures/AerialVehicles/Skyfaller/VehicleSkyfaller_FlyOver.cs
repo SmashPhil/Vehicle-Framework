@@ -101,7 +101,8 @@ namespace Vehicles
 			{
 				drawLoc.z += def.skyfaller.zPositionCurve.Evaluate(TimeInAnimation);
 			}
-			vehicle.DrawAt(drawLoc, Rotation, num + Rotation.AsInt * 90, flip);
+			TransformData transform = new TransformData(drawLoc, Rotation, num + Rotation.AsInt * 90);
+			vehicle.DrawAt(transform);
 			//DrawDropSpotShadow(); //Add tracing shadow;
 		}
 

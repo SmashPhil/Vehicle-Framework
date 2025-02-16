@@ -57,7 +57,7 @@
 	<!-- Designators -->
 	<VF_RoadZoneExpand>Road area</VF_RoadZoneExpand>
 	<VF_RoadZoneExpandDesc>Create an area where vehicles will prioritize or avoid moving through.
-	
+
 'Prioritize' areas applied on the edge of the map will designate where vehicle caravans should enter from.</VF_RoadZoneExpandDesc>
 	<VF_RoadZoneClear>Clear road area</VF_RoadZoneClear>
 	<VF_RoadZoneClearDesc>Removes road zone. Vehicles will no longer have modified movement over the area.</VF_RoadZoneClearDesc>

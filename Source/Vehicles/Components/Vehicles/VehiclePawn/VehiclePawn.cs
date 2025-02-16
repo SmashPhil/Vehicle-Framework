@@ -9,11 +9,8 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using Verse.Sound;
-using Verse.AI;
-using Verse.AI.Group;
 using SmashTools;
 using SmashTools.Animations;
-using System.Reflection;
 
 namespace Vehicles
 {
@@ -151,8 +148,8 @@ namespace Vehicles
 		protected virtual void RegenerateUnsavedComponents()
 		{
 			vehicleAI = new VehicleAI(this);
-			vDrawer = new Vehicle_DrawTracker(this);
-			graphicOverlay = new VehicleGraphicOverlay(this);
+			vDrawer = new VehicleDrawTracker(this);
+			overlayRenderer = new GraphicOverlayRenderer(this);
 			sustainers ??= new VehicleSustainers(this);
 		}
 
@@ -163,11 +160,11 @@ namespace Vehicles
 			
 			if (!UnityData.IsInMainThread)
 			{
-				LongEventHandler.ExecuteWhenFinished(graphicOverlay.Init);
+				LongEventHandler.ExecuteWhenFinished(overlayRenderer.Init);
 			}
 			else
 			{
-				graphicOverlay.Init();
+				overlayRenderer.Init();
 			}
 			if (VehicleDef.drawProperties.controller != null)
 			{
@@ -285,8 +282,6 @@ namespace Vehicles
 
 			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				animator?.Init(this, VehicleDef.drawProperties?.controller);
-
 				this.EnsureUncachedCompList();
 				PostLoad();
 			}

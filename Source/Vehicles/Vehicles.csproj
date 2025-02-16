@@ -299,7 +299,7 @@
     <Compile Include="Components\Rendering\Overlays\GraphicDataOverlay.cs" />
     <Compile Include="Components\Rendering\Overlays\GraphicOverlay.cs" />
     <Compile Include="Components\Rendering\Overlays\PawnOverlayRenderer.cs" />
-    <Compile Include="Components\Rendering\Overlays\VehicleGraphicOverlay.cs" />
+    <Compile Include="Components\Rendering\Overlays\GraphicOverlayRenderer.cs" />
     <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart_WeightUsage.cs" />
     <Compile Include="Components\Vehicles\Health\VehicleStatModifier.cs" />
     <Compile Include="Components\Vehicles\Health\StatParts\VehicleStatPart.cs" />
@@ -637,8 +637,8 @@
     <Compile Include="Turrets\Components\FireMode.cs" />
     <Compile Include="World\Caravan\VehicleCaravan_PathFollower.cs" />
     <Compile Include="World\Caravan\VehicleCaravan_Tweener.cs" />
-    <Compile Include="Components\Rendering\Vehicle_DrawTracker.cs" />
-    <Compile Include="Pathing\Map\Vehicle_PathFollower.cs" />
+    <Compile Include="Components\Rendering\VehicleDrawTracker.cs" />
+    <Compile Include="Components\Vehicles\Vehicle_PathFollower.cs" />
     <Compile Include="Comps\Cannons\CompVehicleTurrets.cs" />
     <Compile Include="Comps\FueledTravel\CompFueledTravel.cs" />
     <Compile Include="Comps\Cannons\CompProperties_VehicleTurrets.cs" />

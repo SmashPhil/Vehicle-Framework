@@ -6,17 +6,17 @@ using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public class Vehicle_DrawTracker
+	public class VehicleDrawTracker
 	{
 		private VehiclePawn vehicle;
 
 		public VehicleTweener tweener;
-		public VehicleRenderer renderer;
+		private VehicleRenderer renderer;
 		public PawnUIOverlay ui; //reimplement for better control over vehicle overlays (names should show despite animal Prefs set to none, traders inside should transfer question mark, etc.)
 		public VehicleTrackMaker trackMaker; //reimplement for vehicle specific "footprints"
 		public Vehicle_RecoilTracker rTracker;
 
-		public Vehicle_DrawTracker(VehiclePawn vehicle)
+		public VehicleDrawTracker(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			tweener = new VehicleTweener(vehicle);
@@ -53,10 +53,13 @@ namespace Vehicles
 			rTracker.ProcessPostTickVisuals(ticksPassed);
 		}
 
+		public void Draw(ref readonly TransformData transform) => renderer.RenderVehicle(in transform);
+
+		// TODO - remove in 1.6
 		public void DrawAt(Vector3 loc, float extraRotation)
 		{
-			vehicle.CalculateAngle(out bool northSouthRotation);
-			renderer.RenderPawnAt(loc, extraRotation, northSouthRotation);
+			TransformData transform = new(loc, vehicle.FullRotation, extraRotation);
+			renderer.RenderVehicle(in transform);
 		}
 
 		public void Notify_Spawned()

@@ -2,21 +2,34 @@
 using Verse;
 using RimWorld;
 using SmashTools;
+using SmashTools.Animations;
+using System.Linq;
 
 namespace Vehicles
 {
-	public class GraphicOverlay : IMaterialCacheTarget
+	public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget
 	{
 		[TweakField]
 		public GraphicDataOverlay data;
 
-		private readonly VehicleDef vehicleDef;
 		private readonly VehiclePawn vehicle;
+    // Specific to vehicle instance
+    private readonly GraphicOverlayRenderer renderer;
 
+    // Vehicle may be null, but overlays should always originate from a VehicleDef
+    private readonly VehicleDef vehicleDef;
+		
 		private Graphic graphic;
 		private Graphic_DynamicShadow graphicShadow;
 
-		public GraphicOverlay(GraphicDataOverlay graphicDataOverlay, VehicleDef vehicleDef)
+		[AnimationProperty(Name = "Position")]
+		private Vector3 position;
+		[AnimationProperty(Name = "Rotation")]
+		private float rotation;
+    [AnimationProperty(Name = "Propeller Acceleration")]
+    private float acceleration;
+
+    public GraphicOverlay(GraphicDataOverlay graphicDataOverlay, VehicleDef vehicleDef)
 		{
 			data = graphicDataOverlay;
 			this.vehicleDef = vehicleDef;
@@ -27,6 +40,7 @@ namespace Vehicles
 			data = graphicDataOverlay;
 			this.vehicle = vehicle;
 			this.vehicleDef = vehicle.VehicleDef;
+			this.renderer = vehicle.overlayRenderer;
 
 			this.vehicle.AddEvent(VehicleEventDefOf.Destroyed, OnDestroy);
 
@@ -47,6 +61,8 @@ namespace Vehicles
 
 		public string Name => $"{vehicleDef.Name}_{data.graphicData.texPath}";
 
+		string IAnimationObject.ObjectId => data.identifier ?? nameof(GraphicOverlay);
+
 		public Graphic_DynamicShadow ShadowGraphic => graphicShadow;
 
 		public Graphic Graphic
@@ -57,14 +73,17 @@ namespace Vehicles
 				{
 					if (vehicle != null && vehicle.Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
 					{
-						Log.Error($"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+						Log.Error($@"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. 
+This may result in a memory leak.");
 						RGBMaterialPool.Release(this);
 					}
-					PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
+					PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics
+						.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
 					GraphicDataRGB graphicData = new GraphicDataRGB();
 					graphicData.CopyFrom(data.graphicData);
 					
-					if (graphicData.graphicClass.SameOrSubclass(typeof(Graphic_RGB)) && graphicData.shaderType.Shader.SupportsRGBMaskTex())
+					if (graphicData.graphicClass.SameOrSubclass(typeof(Graphic_RGB)) && graphicData.shaderType.Shader
+						.SupportsRGBMaskTex())
 					{
 						graphicData.color = patternData.color;
 						graphicData.colorTwo = patternData.colorTwo;
@@ -88,11 +107,49 @@ namespace Vehicles
 			}
 		}
 
+		public void Draw(ref readonly TransformData transform)
+		{
+			Vector3 position = this.position + transform.position;
+			float rotation = this.rotation + transform.rotation + data.rotation;
+			
+			if (data.component != null)
+			{
+				// TODO - Move to queue based system where overlays get pulled from a render pool
+				float healthPercent = vehicle.statHandler.GetComponentHealthPercent(data.component.key);
+				if (!data.component.comparison.Compare(healthPercent, data.component.healthPercent))
+				{
+					return; //Skip rendering if health percent is below set amount for rendering
+				}
+			}
+			if (!data.graphicData.AboveBody)
+			{
+				position.y -= (VehicleRenderer.YOffset_Body + VehicleRenderer.SubInterval);
+			}
+			if (renderer != null && Graphic is Graphic_Rotator rotator)
+			{
+				if (acceleration != 0)
+				{
+          renderer.rotationRegistry[rotator.RegistryKey] += acceleration;
+        }
+				rotation = renderer.rotationRegistry[rotator.RegistryKey].ClampAndWrap(0, 359);
+      }
+			if (Graphic is Graphic_RGB graphicRGB)
+			{
+				graphicRGB.DrawWorker(position, transform.orientation, null, null, rotation);
+			}
+			else
+			{
+				Graphic.DrawWorker(position, transform.orientation, null, null, rotation);
+			}
+			ShadowGraphic?.DrawWorker(position, transform.orientation, null, null, rotation);
+		}
+
 		public void Notify_ColorChanged()
 		{
 			if (data.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
-				PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
+				PatternData patternData = vehicle?.patternData ?? VehicleMod.settings.vehicles.defaultGraphics
+					.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
 				RGBMaterialPool.SetProperties(this, patternData);
 				graphic = null;
 			}
@@ -114,14 +171,17 @@ namespace Vehicles
 			graphicDataOverlay.graphicData.shaderType ??= ShaderTypeDefOf.Cutout;
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
-				graphicDataOverlay.graphicData.shaderType = graphicDataOverlay.graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicDataOverlay.graphicData.shaderType;
+				graphicDataOverlay.graphicData.shaderType = graphicDataOverlay.graphicData.shaderType.Shader
+					.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : 
+					graphicDataOverlay.graphicData.shaderType;
 			}
 			if (graphicDataOverlay.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
 				RGBMaterialPool.CacheMaterialsFor(graphicOverlay);
 				graphicDataOverlay.graphicData.Init(graphicOverlay);
 				PatternData patternData = vehicle.patternData;
-				RGBMaterialPool.SetProperties(graphicOverlay, patternData, (graphicOverlay.Graphic as Graphic_RGB).TexAt, (graphicOverlay.Graphic as Graphic_RGB).MaskAt);
+				RGBMaterialPool.SetProperties(graphicOverlay, patternData, (graphicOverlay.Graphic as Graphic_RGB)
+					.TexAt, (graphicOverlay.Graphic as Graphic_RGB).MaskAt);
 			}
 			else
 			{
@@ -136,14 +196,17 @@ namespace Vehicles
 			graphicDataOverlay.graphicData.shaderType ??= ShaderTypeDefOf.Cutout;
 			if (!VehicleMod.settings.main.useCustomShaders)
 			{
-				graphicDataOverlay.graphicData.shaderType = graphicDataOverlay.graphicData.shaderType.Shader.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicDataOverlay.graphicData.shaderType;
+				graphicDataOverlay.graphicData.shaderType = graphicDataOverlay.graphicData.shaderType.Shader
+					.SupportsRGBMaskTex(ignoreSettings: true) ? ShaderTypeDefOf.CutoutComplex : graphicDataOverlay.graphicData.shaderType;
 			}
 			if (graphicDataOverlay.graphicData.shaderType.Shader.SupportsRGBMaskTex())
 			{
 				RGBMaterialPool.CacheMaterialsFor(graphicOverlay);
 				graphicDataOverlay.graphicData.Init(graphicOverlay);
-				PatternData patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, new PatternData(vehicleDef.graphicData));
-				RGBMaterialPool.SetProperties(graphicOverlay, patternData, (graphicOverlay.Graphic as Graphic_RGB).TexAt, (graphicOverlay.Graphic as Graphic_RGB).MaskAt);
+				PatternData patternData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, 
+					new PatternData(vehicleDef.graphicData));
+				RGBMaterialPool.SetProperties(graphicOverlay, patternData, (graphicOverlay.Graphic as Graphic_RGB).TexAt, 
+					(graphicOverlay.Graphic as Graphic_RGB).MaskAt);
 			}
 			else
 			{

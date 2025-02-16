@@ -1,0 +1,234 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AnimationController>
+	<guid>382f2f50-a0c3-4538-aa5f-7acef78673a2</guid>
+	<parameters />
+	<layers>
+		<li>
+			<name>Base Layer</name>
+			<states>
+				<li>
+					<name>Entry</name>
+					<guid>e030a232-efed-4858-8c6b-f8f5d05b0701</guid>
+					<position>(-48, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Entry</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>1c760b6d-152f-434a-aa57-a8a0b34b936f</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Exit</name>
+					<guid>e58ffb80-ed18-47df-8790-5018f5ac19d1</guid>
+					<position>(32, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Exit</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>Idle</name>
+					<guid>1c760b6d-152f-434a-aa57-a8a0b34b936f</guid>
+					<position>(-26, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Default</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>6f5cec07-f650-4121-bc2a-f3b3f0d05b49</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Taking Off</name>
+					<guid>6f5cec07-f650-4121-bc2a-f3b3f0d05b49</guid>
+					<position>(-10, 7)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>540d25b0-724b-4d40-af27-9cc807a61dce</toStateGuid>
+							<conditions />
+						</li>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>d9b702af-49af-4211-9dd6-96fadf28be76</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Leave Map</name>
+					<guid>540d25b0-724b-4d40-af27-9cc807a61dce</guid>
+					<position>(11, 7)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>Enter Map</name>
+					<guid>60812f4d-556b-420c-a362-615415d06dc2</guid>
+					<position>(-48, -9)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>573a85ff-0836-4072-bf41-92f7efca3710</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Loiter</name>
+					<guid>d9b702af-49af-4211-9dd6-96fadf28be76</guid>
+					<position>(11, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>Landing</name>
+					<guid>573a85ff-0836-4072-bf41-92f7efca3710</guid>
+					<position>(-26, -9)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>1c760b6d-152f-434a-aa57-a8a0b34b936f</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+			</states>
+		</li>
+		<li>
+			<name>Rotors</name>
+			<states>
+				<li>
+					<name>Entry</name>
+					<guid>10856476-ce75-4296-9cbc-fbac3f0261c9</guid>
+					<position>(-48, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Entry</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>3d22b760-7d0d-4f0c-bc28-14915797e6c4</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Exit</name>
+					<guid>0ddd9d25-ca7f-4130-be37-09b8344c8a6f</guid>
+					<position>(32, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Exit</stateType>
+					<transitions />
+				</li>
+				<li>
+					<name>Idle</name>
+					<guid>3d22b760-7d0d-4f0c-bc28-14915797e6c4</guid>
+					<position>(-26, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>Default</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>79292a05-51f2-4ff8-a021-f03fee167ed4</toStateGuid>
+							<conditions>
+								<li>
+									<def>VF_VehicleIsIgnitionOn</def>
+									<comparison>Equal</comparison>
+									<value>1</value>
+								</li>
+							</conditions>
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Spin Up</name>
+					<guid>79292a05-51f2-4ff8-a021-f03fee167ed4</guid>
+					<position>(-26, 8)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>0e3b4ccc-a180-4df7-ac46-6d8ec482d77e</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Ready for Takeoff</name>
+					<guid>0e3b4ccc-a180-4df7-ac46-6d8ec482d77e</guid>
+					<position>(-4, 8)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>79eacdf4-fa65-4105-840b-a8cf5f27bfbd</toStateGuid>
+							<conditions>
+								<li>
+									<def>VF_VehicleIsIgnitionOn</def>
+									<comparison>Equal</comparison>
+									<value>0</value>
+								</li>
+							</conditions>
+						</li>
+					</transitions>
+				</li>
+				<li>
+					<name>Spin Down</name>
+					<guid>79eacdf4-fa65-4105-840b-a8cf5f27bfbd</guid>
+					<position>(-4, 0)</position>
+					<clip IsNull="TRUE" />
+					<speed>1</speed>
+					<writeDefaults>True</writeDefaults>
+					<stateType>None</stateType>
+					<transitions>
+						<li>
+							<exitTicks>0</exitTicks>
+							<toStateGuid>3d22b760-7d0d-4f0c-bc28-14915797e6c4</toStateGuid>
+							<conditions />
+						</li>
+					</transitions>
+				</li>
+			</states>
+		</li>
+	</layers>
+</AnimationController>

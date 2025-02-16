@@ -71,7 +71,7 @@ namespace Vehicles
 				TickMotes();
 			}
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
+			vehicle.overlayRenderer.rotationRegistry.UpdateRegistry(rotationRate);
 		}
 
 		protected override void TickTakeoff()
@@ -86,7 +86,7 @@ namespace Vehicles
 				TickMotes();
 			}
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
+			vehicle.overlayRenderer.rotationRegistry.UpdateRegistry(rotationRate);
 		}
 
 		protected override void TickEvents()
@@ -110,7 +110,7 @@ namespace Vehicles
 			ticksPassed = base.AnimationEditorTick_Landing(ticksPassed);
 			ticksPassedPropeller = ticksPassed.Take(LandingProperties_Propeller.maxTicksPropeller, out int remaining);
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
+			vehicle.overlayRenderer.rotationRegistry.UpdateRegistry(rotationRate);
 			return remaining;
 		}
 
@@ -118,7 +118,7 @@ namespace Vehicles
 		{
 			ticksPassedPropeller = ticksPassed.Take(LaunchProperties_Propeller.maxTicksPropeller, out int remaining);
 			float rotationRate = RotationRate(TimeInAnimationPropeller);
-			vehicle.graphicOverlay.rotationRegistry.UpdateRegistry(rotationRate);
+			vehicle.overlayRenderer.rotationRegistry.UpdateRegistry(rotationRate);
 			return base.AnimationEditorTick_Takeoff(remaining);
 		}
 
@@ -212,7 +212,7 @@ namespace Vehicles
 			effectsToThrowPropeller = 0;
 			if (launchType == LaunchType.Landing)
 			{
-				vehicle.graphicOverlay.rotationRegistry.Reset();
+				vehicle.overlayRenderer.rotationRegistry.Reset();
 			}
 		}
 

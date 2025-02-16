@@ -10,6 +10,6 @@ namespace Vehicles
 	{
 		public const string Key = "Propeller";
 
-		public override string RegistryKey => Key;
+		public override int RegistryKey { get; } = Key.GetHashCode();
 	}
 }

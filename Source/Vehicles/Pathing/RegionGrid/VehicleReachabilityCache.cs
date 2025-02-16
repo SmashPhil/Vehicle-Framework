@@ -115,7 +115,7 @@ namespace Vehicles
 		/// <summary>
 		/// Cached result data for reachability between two <see cref="VehicleRegion"/>
 		/// </summary>
-		private readonly struct CachedEntry : IEquatable<CachedEntry>
+		private readonly record struct CachedEntry
 		{
 			public readonly int from;
 			public readonly int to;
@@ -135,26 +135,6 @@ namespace Vehicles
 					this.to = from;
 				}
 				this.traverseParms = traverseParms;
-			}
-
-			public static bool operator ==(CachedEntry lhs, CachedEntry rhs)
-			{
-				return lhs.Equals(rhs);
-			}
-
-			public static bool operator !=(CachedEntry lhs, CachedEntry rhs)
-			{
-				return !lhs.Equals(rhs);
-			}
-
-			public override readonly bool Equals(object obj)
-			{
-				return obj is CachedEntry entry && Equals(entry);
-			}
-
-			public readonly bool Equals(CachedEntry other)
-			{
-				return from == other.from && to == other.to && traverseParms == other.traverseParms;
 			}
 
 			public override readonly int GetHashCode()

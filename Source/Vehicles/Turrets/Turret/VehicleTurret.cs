@@ -1380,6 +1380,7 @@ namespace Vehicles
 			}
 		}
 
+		// TODO - switch to TransformData
 		public virtual void DrawAt(Vector3 drawPos, Rot8 rot)
 		{
 			if (!NoGraphic)

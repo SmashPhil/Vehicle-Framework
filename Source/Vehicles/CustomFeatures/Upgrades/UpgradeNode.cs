@@ -101,7 +101,7 @@ namespace Vehicles
 				foreach (GraphicDataOverlay graphicDataOverlay in graphicOverlays)
 				{
 					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
-					vehicle.graphicOverlay.AddOverlay(key, graphicOverlay);
+					vehicle.overlayRenderer.AddOverlay(key, graphicOverlay);
 				}
 			}
 			if (VehicleMod.settings.main.overrideDrawColors)
@@ -131,7 +131,7 @@ namespace Vehicles
 
 		public void RemoveOverlays(VehiclePawn vehicle)
 		{
-			vehicle.graphicOverlay.RemoveOverlays(key);
+			vehicle.overlayRenderer.RemoveOverlays(key);
 		}
 
 		public override bool Equals(object obj)

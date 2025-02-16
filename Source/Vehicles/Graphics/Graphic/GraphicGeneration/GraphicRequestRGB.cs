@@ -23,7 +23,9 @@ namespace Vehicles
 		public int renderQueue;
 		public List<ShaderParameter> shaderParameters;
 
-		public GraphicRequestRGB(IMaterialCacheTarget target, Type graphicClass, string path, Shader shader, Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, Vector2 displacement, GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
+		public GraphicRequestRGB(IMaterialCacheTarget target, Type graphicClass, string path, Shader shader, 
+			Vector2 drawSize, Color color, Color colorTwo, Color colorThree, float tiles, Vector2 displacement, 
+			GraphicDataRGB graphicData, int renderQueue, List<ShaderParameter> shaderParameters)
 		{
 			this.target = target;
 			this.graphicClass = graphicClass;
@@ -40,7 +42,9 @@ namespace Vehicles
 			this.shaderParameters = (shaderParameters.NullOrEmpty() ? null : shaderParameters);
 		}
 
-		public string Summary => $"Target: {target}\nType: {graphicClass}\nPath: {path}\nShader: {shader}\nDrawSize: {drawSize}\nColors: {color}|{colorTwo}|{colorThree}\nGraphicData: {graphicData}\nRenderQueue: {renderQueue}\nParams Count: {shaderParameters?.Count.ToString() ?? "Null"}";
+		public string Summary => $"Target: {target}\nType: {graphicClass}\nPath: {path}\nShader: {shader}\n" +
+			$"DrawSize: {drawSize}\nColors: {color}|{colorTwo}|{colorThree}\nGraphicData: {graphicData}\n" +
+			$"RenderQueue: {renderQueue}\nParams Count: {shaderParameters?.Count.ToString() ?? "Null"}";
 
 		public override int GetHashCode()
 		{
@@ -73,7 +77,8 @@ namespace Vehicles
 
 		public static implicit operator GraphicRequest(GraphicRequestRGB req)
 		{
-			return new GraphicRequest(req.graphicClass, req.path, req.shader, req.drawSize, req.color, req.colorTwo, req.graphicData, req.renderQueue, req.shaderParameters, null);
+			return new GraphicRequest(req.graphicClass, req.path, req.shader, req.drawSize, req.color, req.colorTwo, 
+				req.graphicData, req.renderQueue, req.shaderParameters, null);
 		}
 	}
 }

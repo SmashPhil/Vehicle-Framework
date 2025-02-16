@@ -276,7 +276,7 @@ namespace Vehicles
 							{
 								Find.WindowStack.Add(new Dialog_Confirm(
 									"VF_PawnsLeftBehindConfirm".Translate(),
-									"VF_PawnsLeftBehindConfirmDesc".Translate(), 
+									"VF_PawnsLeftBehindConfirmDesc".Translate(),
 									LaunchAction));
 							}
 							else

@@ -22,9 +22,10 @@ namespace Vehicles
 	public partial class VehiclePawn
 	{
 		[Unsaved]
-		private Vehicle_DrawTracker vDrawer;
+		private VehicleDrawTracker vDrawer;
 		[Unsaved]
-		public VehicleGraphicOverlay graphicOverlay;
+		[AnimationProperty]
+		public GraphicOverlayRenderer overlayRenderer;
 
 		public PatternData patternData;
 		private RetextureDef retextureDef;
@@ -32,11 +33,11 @@ namespace Vehicles
 		private float angle = 0f; /* -45 is left, 45 is right : relative to Rot4 direction*/
 		private bool reverse = false;
 
-		[AnimationProperty(Name = "Rotation")]
-		private float rotation = 0;
 		[AnimationProperty(Name = "Position")]
 		private Vector3 position = Vector3.zero;
-
+		[AnimationProperty(Name = "Rotation")]
+		private float rotation = 0;
+		
 		public AnimationManager animator;
 		private Graphic_Vehicle graphic;
 
@@ -48,13 +49,16 @@ namespace Vehicles
 
 		private List<VehicleHandler> HandlersWithPawnRenderer { get; set; }
 
+		public bool NorthSouthRotation => VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
+				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
+
 		public bool CanPaintNow => patternToPaint != null;
 
 		public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef), nameof(VehicleDef.nameable), VehicleDef.nameable);
 
 		public override Vector3 DrawPos => Drawer.DrawPos + position;
 
-		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, this.CalculateAngle(out _));
+		public (Vector3 drawPos, float rotation) DrawData => (DrawPos, Angle);
 
 		public ThingWithComps Thing => this;
 
@@ -65,24 +69,6 @@ namespace Vehicles
 		AnimationManager IAnimator.Manager => animator;
 
 		string IAnimationObject.ObjectId => nameof(VehiclePawn);
-
-		IEnumerable<IAnimationObject> IAnimator.ExtraAnimators
-		{
-			get
-			{
-				foreach (ThingComp thingComp in AllComps)
-				{
-					if (thingComp is VehicleComp vehicleComp)
-					{
-						yield return vehicleComp;
-					}
-				}
-				//foreach (GraphicOverlay graphicOverlay in graphicOverlay.Overlays)
-				//{ 					
-				//	yield return graphicOverlay;
-				//}
-			}
-		}
 
 		public bool CrashLanded
 		{
@@ -175,14 +161,11 @@ namespace Vehicles
 			}
 		}
 
-		public new Vehicle_DrawTracker Drawer
+		public new VehicleDrawTracker Drawer
 		{
 			get
 			{
-				if (vDrawer is null)
-				{
-					vDrawer = new Vehicle_DrawTracker(this);
-				}
+				vDrawer ??= new VehicleDrawTracker(this);
 				return vDrawer;
 			}
 		}
@@ -191,10 +174,7 @@ namespace Vehicles
 		{
 			get
 			{
-				if (graphic is null)
-				{
-					graphic = GenerateGraphic();
-				}
+				graphic ??= GenerateGraphic();
 				return graphic;
 			}
 		}
@@ -394,49 +374,52 @@ namespace Vehicles
 			}
 		}
 
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+		{
+			DrawAt(new TransformData(drawLoc, FullRotation, rotation));
+		}
+
 		public virtual void Draw()
 		{
 			if (this.AnimationLocked()) return;
 
 			if (VehicleDef.drawerType == DrawerType.RealtimeOnly)
 			{
-				Vector3 drawPos = DrawPos;
-				DrawAt(drawPos, FullRotation, 0, compDraw: false);
+				TransformData transform = new(DrawPos, FullRotation, 0);
+				DrawAt(in transform, compDraw: false);
 			}
 			Comps_PostDraw();
 		}
 
-		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-		{
-			Drawer.DrawAt(drawLoc, rotation);
-			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
-			{
-				handler.RenderPawns(FullRotation);
-			}
-			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
-		}
-
 		/// <summary>
-		/// Draw vehicle while unspawned
+		/// Draw vehicle regardless of spawn status
 		/// </summary>
+		[Obsolete]
 		public virtual void DrawAt(Vector3 drawLoc, Rot8 rot, float extraRotation, bool flip = false, bool compDraw = true)
 		{
-			bool northSouthRotation = VehicleGraphic.EastDiagonalRotated && (FullRotation == Rot8.NorthEast || FullRotation == Rot8.SouthEast) ||
-				(VehicleGraphic.WestDiagonalRotated && (FullRotation == Rot8.NorthWest || FullRotation == Rot8.SouthWest));
-			Drawer.renderer.RenderPawnAt_TEMP(drawLoc, rot, extraRotation + rotation, northSouthRotation);
-
-			//TODO - consolidate rendering to new pawn node render system
-			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
-			{
-				handler.RenderPawns(rot);
-			}
-			if (compDraw) //Temp fix till I get to cleaning up these 3 Draw methods
-			{
-				Comps_PostDrawUnspawned(drawLoc, rot, extraRotation + rotation);
-			}
-			statHandler.DrawHitbox(HighlightedComponent); //Must be rendered with the vehicle or the field edges will not render quickly enough
+			DrawAt(new TransformData(drawLoc, rot, extraRotation), compDraw: compDraw);
 		}
 
+		public virtual void DrawAt(in TransformData transform, bool compDraw = true)
+		{
+			Drawer.Draw(in transform);
+
+			foreach (VehicleHandler handler in HandlersWithPawnRenderer)
+			{
+				handler.RenderPawns(transform.orientation);
+			}
+			if (compDraw) // TODO - Temp fix till I get to cleaning up these 3 Draw methods
+			{
+				Comps_PostDrawUnspawned(in transform);
+			}
+			if (HighlightedComponent != null)
+			{
+				// Must be rendered with the vehicle or the field edges will not render quickly enough
+				statHandler.DrawHitbox(HighlightedComponent);
+			}
+		}
+
+		[Obsolete]
 		public virtual void Comps_PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
 		{
 			if (AllComps != null)
@@ -446,6 +429,20 @@ namespace Vehicles
 					if (thingComp is VehicleComp vehicleComp)
 					{
 						vehicleComp.PostDrawUnspawned(drawLoc, rot, rotation);
+					}
+				}
+			}
+		}
+
+		public virtual void Comps_PostDrawUnspawned(ref readonly TransformData transform)
+		{
+			if (AllComps != null)
+			{
+				foreach (ThingComp thingComp in AllComps)
+				{
+					if (thingComp is VehicleComp vehicleComp)
+					{
+						vehicleComp.PostDrawUnspawned(in transform);
 					}
 				}
 			}
@@ -483,8 +480,7 @@ namespace Vehicles
 		public override void Notify_ColorChanged()
 		{
 			ResetGraphicCache();
-			Drawer.renderer.graphics.ResolveAllGraphics();
-			graphicOverlay.Notify_ColorChanged();
+			overlayRenderer.Notify_ColorChanged();
 			base.Notify_ColorChanged();
 		}
 
@@ -1047,6 +1043,37 @@ namespace Vehicles
 						}
 					}
 				};
+				if (animator != null)
+				{
+					yield return new Command_Action()
+					{
+						defaultLabel = "Loiter",
+						action = delegate ()
+						{
+
+						}
+					};
+					yield return new Command_Action()
+					{
+						defaultLabel = "Toggle State",
+						action = delegate ()
+						{
+							List<FloatMenuOption> options = [];
+							foreach (AnimationParameterDef paramDef in DefDatabase<AnimationParameterDef>.AllDefsListForReading)
+							{
+								if (paramDef.type == AnimationParameter.ParamType.Bool || paramDef.type == AnimationParameter.ParamType.Trigger)
+								{
+									bool value = animator.GetBool(paramDef);
+									options.Add(new FloatMenuOption($"{paramDef.LabelCap} ({value.ToStringYesNo()})", delegate ()
+									{
+										animator.SetBool(paramDef, !value);
+									}));
+								}
+							}
+							if (!options.NullOrEmpty()) Find.WindowStack.Add(new FloatMenu(options));
+						}
+					};
+        }
 			}
 		}
 

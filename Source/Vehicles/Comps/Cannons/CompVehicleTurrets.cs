@@ -248,11 +248,11 @@ namespace Vehicles
 			}
 		}
 
-		public override void PostDrawUnspawned(Vector3 drawPos, Rot8 rot, float rotation)
+		public override void PostDrawUnspawned(ref readonly TransformData transform)
 		{
 			for (int i = 0; i < turrets.Count; i++)
 			{
-				turrets[i].DrawAt(drawPos, rot);
+				turrets[i].DrawAt(transform.position, transform.orientation);
 			}
 		}
 

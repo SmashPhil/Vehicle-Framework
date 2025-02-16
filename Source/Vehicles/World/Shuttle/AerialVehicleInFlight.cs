@@ -178,7 +178,7 @@ namespace Vehicles
 		public virtual void Initialize()
 		{
 			position = base.DrawPos;
-			rotatorGraphics = vehicle.graphicOverlay.AllOverlays.Where(g => g.Graphic is Graphic_Rotator)
+			rotatorGraphics = vehicle.overlayRenderer.AllOverlaysListForReading.Where(g => g.Graphic is Graphic_Rotator)
 				.Select(g => g.Graphic).Cast<Graphic_Rotator>().ToList();
 		}
 
@@ -225,13 +225,13 @@ namespace Vehicles
 
 		protected virtual void RenderGraphicOverlays(Vector3 normalized, Vector3 direction, Vector3 size)
 		{
-			foreach (GraphicOverlay graphicOverlay in vehicle.graphicOverlay.AllOverlays)
+			foreach (GraphicOverlay graphicOverlay in vehicle.overlayRenderer.AllOverlaysListForReading)
 			{
 				Material material = graphicOverlay.Graphic.MatAt(FullRotation);
 				float quatRotation = 90;
 				if (graphicOverlay.Graphic is Graphic_Rotator rotator)
 				{
-					quatRotation += vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey];
+					quatRotation += vehicle.overlayRenderer.rotationRegistry[rotator.RegistryKey];
 				}
 				Quaternion quat = Quaternion.LookRotation(direction, normalized) * Quaternion.Euler(0, quatRotation, 0);
 				Matrix4x4 matrix = default;
@@ -554,7 +554,7 @@ namespace Vehicles
 			foreach (Graphic_Rotator rotator in rotatorGraphics)
 			{
 				//hardcoded to 59° per tick to still allow room for eye to capture rotation
-				vehicle.graphicOverlay.rotationRegistry[rotator.RegistryKey] += PropellerTakeoff.MaxRotationStep;
+				vehicle.overlayRenderer.rotationRegistry[rotator.RegistryKey] += PropellerTakeoff.MaxRotationStep;
 			}
 		}
 

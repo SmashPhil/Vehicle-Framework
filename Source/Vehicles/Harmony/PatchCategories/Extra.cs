@@ -25,7 +25,7 @@ namespace Vehicles
 				prefix: new HarmonyMethod(typeof(Extra),
 				nameof(GetVehicleHandlerIThingHolders)));
 
-			VehicleHarmony.Patch(original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
+			VehicleHarmony.Patch(original: AccessTools.Method(typeof(RimWorld.Selector), "HandleMapClicks"),
 				prefix: new HarmonyMethod(typeof(Extra),
 				nameof(MultiSelectFloatMenu)));
 			VehicleHarmony.Patch(original: AccessTools.Method(typeof(MentalState_Manhunter), nameof(MentalState_Manhunter.ForceHostileTo), new Type[] { typeof(Thing) }), prefix: null,

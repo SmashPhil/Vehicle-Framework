@@ -2,25 +2,27 @@
 
 namespace Vehicles
 {
-	public class GraphicDataOverlay
-	{
-		[TweakField]
-		public GraphicDataRGB graphicData;
-		[TweakField(SettingsType = UISettingsType.SliderFloat)]
-		[SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
-		public float rotation = 0;
+  public class GraphicDataOverlay
+  {
+    public string identifier = null;
 
-		public bool dynamicShadows;
+    [TweakField]
+    public GraphicDataRGB graphicData;
+    [TweakField(SettingsType = UISettingsType.SliderFloat)]
+    [SliderValues(MinValue = 0, MaxValue = 360, RoundDecimalPlaces = 0, Increment = 1)]
+    public float rotation = 0;
 
-		public ComponentRendering component;
+    public bool dynamicShadows;
 
-		public bool renderUI = true;
+    public ComponentRendering component;
 
-		public class ComponentRendering
-		{
-			public string key;
-			public float healthPercent;
-			public ComparisonType comparison = ComparisonType.GreaterThan;
-		}
-	}
+    public bool renderUI = true;
+
+    public class ComponentRendering
+    {
+      public string key;
+      public float healthPercent;
+      public ComparisonType comparison = ComparisonType.GreaterThan;
+    }
+  }
 }

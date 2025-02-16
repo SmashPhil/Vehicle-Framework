@@ -10,7 +10,7 @@ using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public class VehicleComp : ThingComp, IAnimationObject
+	public class VehicleComp : ThingComp
 	{
 		public VehiclePawn Vehicle => parent as VehiclePawn;
 
@@ -20,8 +20,6 @@ namespace Vehicles
 		public virtual bool TickByRequest => false;
 
 		public virtual IEnumerable<AnimationDriver> Animations { get; }
-
-		string IAnimationObject.ObjectId => GetType().Name;
 
 		public virtual IEnumerable<Gizmo> CompCaravanGizmos()
 		{
@@ -45,7 +43,12 @@ namespace Vehicles
 		{
 		}
 
+		[Obsolete]
 		public virtual void PostDrawUnspawned(Vector3 drawLoc, Rot8 rot, float rotation)
+		{
+		}
+
+		public virtual void PostDrawUnspawned(ref readonly TransformData transform)
 		{
 		}
 

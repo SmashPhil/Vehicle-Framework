@@ -10,7 +10,7 @@ namespace Vehicles
 	{
 		public const string Key = "ReversePropeller";
 
-		public override string RegistryKey => Key;
+		public override int RegistryKey { get; } = Key.GetHashCode();
 
 		public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
 		{

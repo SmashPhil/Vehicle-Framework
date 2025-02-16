@@ -116,6 +116,7 @@ namespace Vehicles
 				Drawer.tweener.ResetTweenedPosToRoot();
 			}
 			vehiclePather.Notify_Teleported();
+			this.CalculateAngle();
 			if (endCurrentJob && jobs != null && jobs.curJob != null)
 			{
 				jobs.EndCurrentJob(JobCondition.InterruptForced);

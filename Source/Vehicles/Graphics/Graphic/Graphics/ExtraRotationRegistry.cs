@@ -11,29 +11,29 @@ namespace Vehicles
 	/// </summary>
 	public class ExtraRotationRegistry
 	{
-		private readonly Dictionary<string, float> innerLookup = new Dictionary<string, float>();
-		private readonly VehicleGraphicOverlay vehicleGraphicOverlay;
+		private readonly Dictionary<int, float> innerLookup = new Dictionary<int, float>();
+		private readonly GraphicOverlayRenderer vehicleGraphicOverlay;
 
-		public ExtraRotationRegistry(VehicleGraphicOverlay vehicleGraphicOverlay)
+		public ExtraRotationRegistry(GraphicOverlayRenderer vehicleGraphicOverlay)
 		{
 			this.vehicleGraphicOverlay = vehicleGraphicOverlay;
 		}
 
-		public float this[string key]
+		public float this[int key]
 		{
 			get
 			{
-				return innerLookup.TryGetValue(key.ToUpperInvariant(), 0);
+				return innerLookup.TryGetValue(key, 0);
 			}
 			set
 			{
-				innerLookup[key.ToUpperInvariant()] = value;
+				innerLookup[key] = value;
 			}
 		}
 
 		public void UpdateRegistry(float addRotation)
 		{
-			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlays)
+			foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlaysListForReading)
 			{
 				if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 				{
@@ -44,9 +44,9 @@ namespace Vehicles
 
 		public void Reset()
 		{
-			if (!vehicleGraphicOverlay.AllOverlays.NullOrEmpty())
+			if (!vehicleGraphicOverlay.AllOverlaysListForReading.NullOrEmpty())
 			{
-				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlays)
+				foreach (GraphicOverlay graphicOverlay in vehicleGraphicOverlay.AllOverlaysListForReading)
 				{
 					if (graphicOverlay.Graphic is Graphic_Rotator graphicRotator)
 					{

@@ -4,21 +4,23 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
+using SmashTools.Animations;
 
 namespace Vehicles
 {
-	public class VehicleGraphicOverlay //TODO 1.6 - Choose better name to indicate this is a component of VehiclePawn
+	public sealed class GraphicOverlayRenderer
 	{
 		public readonly VehiclePawn vehicle;
 
 		public readonly ExtraRotationRegistry rotationRegistry;
 
-		private List<GraphicOverlay> overlays = new List<GraphicOverlay>();
-		private List<GraphicOverlay> extraOverlays = new List<GraphicOverlay>();
+		[AnimationProperty(Name = "Overlays")]
+		private readonly List<GraphicOverlay> overlays = [];
+		private readonly List<GraphicOverlay> extraOverlays = [];
 
-		private Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = new Dictionary<string, List<GraphicOverlay>>();
+		private readonly Dictionary<string, List<GraphicOverlay>> extraOverlayLookup = [];
 		
-		public VehicleGraphicOverlay(VehiclePawn vehicle)
+		public GraphicOverlayRenderer(VehiclePawn vehicle)
 		{
 			this.vehicle = vehicle;
 			rotationRegistry = new ExtraRotationRegistry(this);
@@ -26,37 +28,18 @@ namespace Vehicles
 
 		public List<GraphicOverlay> Overlays => overlays;
 
-		public IEnumerable<GraphicOverlay> AllOverlays
-		{
-			get
-			{
-				if (!overlays.NullOrEmpty())
-				{
-					foreach (GraphicOverlay graphicOverlay in overlays)
-					{
-						yield return graphicOverlay;
-					}
-				}
-				if (!extraOverlays.NullOrEmpty())
-				{
-					foreach (GraphicOverlay graphicOverlay in extraOverlays)
-					{
-						yield return graphicOverlay;
-					}
-				}
-			}
-		}
+		public List<GraphicOverlay> AllOverlaysListForReading { get; private set; } = [];
 
 		public void Init()
 		{
 			if (!vehicle.VehicleDef.drawProperties.overlays.NullOrEmpty())
 			{
-				overlays = new List<GraphicOverlay>();
-
+				overlays.Clear();
 				foreach (GraphicDataOverlay graphicDataOverlay in vehicle.VehicleDef.drawProperties.graphicOverlays)
 				{
 					GraphicOverlay graphicOverlay = GraphicOverlay.Create(graphicDataOverlay, vehicle);
 					overlays.Add(graphicOverlay);
+					AllOverlaysListForReading.Add(graphicOverlay);
 				}
 			}
 		}
@@ -65,6 +48,7 @@ namespace Vehicles
 		{
 			extraOverlayLookup.AddOrInsert(key, graphicOverlay);
 			extraOverlays.Add(graphicOverlay);
+			AllOverlaysListForReading.Add(graphicOverlay);
 		}
 
 		public void RemoveOverlays(string key)
@@ -74,16 +58,26 @@ namespace Vehicles
 				foreach (GraphicOverlay graphicOverlay in extraOverlayLookup[key])
 				{
 					extraOverlays.Remove(graphicOverlay);
+					AllOverlaysListForReading.Remove(graphicOverlay);
 					graphicOverlay.OnDestroy();
 				}
 				extraOverlayLookup.Remove(key);
 			}
 		}
 
-		public virtual void RenderGraphicOverlays(Vector3 drawPos, float extraRotation, Rot8 rot)
+		public void DrawOverlays(ref readonly TransformData transformData)
+		{
+			for (int i = 0; i <  AllOverlaysListForReading.Count; i++)
+			{
+				GraphicOverlay graphicOverlay = AllOverlaysListForReading[i];
+				graphicOverlay.Draw(in transformData);
+			}
+		}
+
+		public void RenderGraphicOverlays(Vector3 drawPos, float extraRotation, Rot8 rot)
 		{
 			float extraAngle;
-			foreach (GraphicOverlay graphicOverlay in AllOverlays)
+			foreach (GraphicOverlay graphicOverlay in AllOverlaysListForReading)
 			{
 				float overlayAngle = rot.AsRotationAngle;
 				extraAngle = graphicOverlay.data.rotation + extraRotation;
@@ -156,7 +150,7 @@ namespace Vehicles
 
 		public void Notify_ColorChanged()
 		{
-			foreach (GraphicOverlay graphicOverlay in AllOverlays)
+			foreach (GraphicOverlay graphicOverlay in AllOverlaysListForReading)
 			{
 				graphicOverlay.Notify_ColorChanged();
 			}

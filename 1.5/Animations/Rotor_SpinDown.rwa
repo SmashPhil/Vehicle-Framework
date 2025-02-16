@@ -1,0 +1,80 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AnimationClip>
+	<frameCount>1901</frameCount>
+	<loop>False</loop>
+	<cycleOffset>0</cycleOffset>
+	<guid>ffcb4eb2-be9f-4e09-8ef8-6cdeaa6d1dd1</guid>
+	<properties>
+		<li>
+			<identifier>RotorBack</identifier>
+			<label>Propeller Acceleration</label>
+			<name>acceleration</name>
+			<type>Vehicles.GraphicOverlay</type>
+			<properties>
+				<li>
+					<objectPath IsNull="TRUE" />
+					<label>Propeller Acceleration</label>
+					<name>acceleration</name>
+					<type>Vehicles.GraphicOverlay</type>
+					<animatorType>Vehicles.GraphicOverlay</animatorType>
+					<propertyType>Float</propertyType>
+					<curve>
+						<points>
+							<li>(0,-59,0,0,0.333,0.333)</li>
+							<li>(1900,0,0,0,0.333,0.333)</li>
+							<li>(1901,0,0,0,0.333,0.333)</li>
+						</points>
+					</curve>
+				</li>
+			</properties>
+			<hierarchyPath>
+				<li>
+					<type>Vehicles.VehiclePawn</type>
+					<name>overlayRenderer</name>
+					<index>-1</index>
+				</li>
+				<li>
+					<type>Vehicles.GraphicOverlayRenderer</type>
+					<name>overlays</name>
+					<index>1</index>
+				</li>
+			</hierarchyPath>
+		</li>
+		<li>
+			<identifier>RotorFront</identifier>
+			<label>Propeller Acceleration</label>
+			<name>acceleration</name>
+			<type>Vehicles.GraphicOverlay</type>
+			<properties>
+				<li>
+					<objectPath IsNull="TRUE" />
+					<label>Propeller Acceleration</label>
+					<name>acceleration</name>
+					<type>Vehicles.GraphicOverlay</type>
+					<animatorType>Vehicles.GraphicOverlay</animatorType>
+					<propertyType>Float</propertyType>
+					<curve>
+						<points>
+							<li>(0,59,0,0,0.333,0.333)</li>
+							<li>(1900,0,0,0,0.333,0.333)</li>
+							<li>(1901,0,0,0,0.333,0.333)</li>
+						</points>
+					</curve>
+				</li>
+			</properties>
+			<hierarchyPath>
+				<li>
+					<type>Vehicles.VehiclePawn</type>
+					<name>overlayRenderer</name>
+					<index>-1</index>
+				</li>
+				<li>
+					<type>Vehicles.GraphicOverlayRenderer</type>
+					<name>overlays</name>
+					<index>0</index>
+				</li>
+			</hierarchyPath>
+		</li>
+	</properties>
+	<events />
+</AnimationClip>

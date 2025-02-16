@@ -14,6 +14,7 @@ using SmashTools.Performance;
 
 namespace Vehicles
 {
+	// TODO 1.6 - Rename, must follow name convention
 	public class Vehicle_PathFollower : IExposable
 	{
 		public const int MaxMoveTicks = 450;
@@ -432,6 +433,7 @@ namespace Vehicles
 
 			lastCell = vehicle.Position;
 			vehicle.Position = nextCell;
+			vehicle.CalculateAngle();
 
 			hitboxUpdateCells.Clear();
 			hitboxUpdateCells.AddRange(hitboxBeforeMoving);
@@ -460,6 +462,7 @@ namespace Vehicles
 			{
 				vehicle.BeachShip();
 				vehicle.Position = nextCell;
+				vehicle.CalculateAngle();
 				PatherFailed();
 				return;
 			}

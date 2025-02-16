@@ -13,7 +13,7 @@ namespace Vehicles
 	/// FireMode selection option for VehicleTurret
 	/// </summary>
 	/// <remarks>XML Notation: (shotsPerBurst, ticksBetweenShots, ticksBetweenBursts, label, texPath)</remarks>
-	public class FireMode : IEquatable<FireMode>
+	public record class FireMode
 	{
 		public string label;
 		public string texPath;
@@ -40,7 +40,7 @@ namespace Vehicles
 					if (!string.IsNullOrEmpty(texPath))
 					{
 						icon = ContentFinder<Texture2D>.Get(texPath);
-						if(icon is null)
+						if (icon is null)
 						{
 							icon = BaseContent.BadTex;
 						}
@@ -74,23 +74,10 @@ namespace Vehicles
 			}
 		}
 
-		public static bool operator ==(FireMode fm1, FireMode fm2) => fm1.Equals(fm2);
-
-		public static bool operator !=(FireMode fm1, FireMode fm2) => !fm1.Equals(fm2);
-
-		public override bool Equals(object obj)
-		{
-			return obj is FireMode fireMode && Equals(fireMode);
-		}
-
-		public bool Equals(FireMode fireMode2)
-		{
-			return fireMode2.ticksBetweenBursts == ticksBetweenBursts && fireMode2.shotsPerBurst == shotsPerBurst && fireMode2.burstsTillWarmup == burstsTillWarmup && fireMode2.ticksBetweenShots == ticksBetweenShots;
-		}
-
 		public override int GetHashCode()
 		{
-			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts.GetHashCode()), shotsPerBurst.GetHashCode()), burstsTillWarmup), ticksBetweenShots);
+			return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(0, ticksBetweenBursts.GetHashCode()), 
+				shotsPerBurst.GetHashCode()), burstsTillWarmup), ticksBetweenShots);
 		}
 	}
 }

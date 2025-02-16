@@ -12,8 +12,8 @@ namespace Vehicles
 	{
 		public const string MaskSuffix = "m";
 
-		private static readonly string[] pathExtensions = new string[8] {"_north", "_east", "_south", "_west",
-																	     "_northEast","_southEast","_southWest","_northWest" };
+		private static readonly string[] pathExtensions = ["_north", "_east", "_south", "_west",
+																	     "_northEast","_southEast","_southWest","_northWest" ];
 		protected bool westFlipped;
 		protected bool eastFlipped;
 		protected bool eastRotated;
@@ -28,7 +28,7 @@ namespace Vehicles
 		public Vector2 displacement = Vector2.zero;
 
 		/// <summary>
-		/// Needs to be initialized and filled in <see cref="Init(GraphicRequestRGB, bool)"/> before mask data is generated
+		/// Needs to be initialized and filled in <see cref="Init(GraphicRequestRGB)"/> before mask data is generated
 		/// </summary>
 		protected Texture2D[] textures;
 		protected Texture2D[] masks;
@@ -43,13 +43,13 @@ namespace Vehicles
 
 		public override bool EastFlipped => eastFlipped;
 
-		public virtual bool EastRotated => eastRotated;
+		public bool EastRotated => eastRotated;
 
-		public virtual bool SouthRotated => southRotated;
+		public bool SouthRotated => southRotated;
 
-		public virtual bool EastDiagonalRotated => eastDiagonalRotated;
+		public bool EastDiagonalRotated => eastDiagonalRotated;
 
-		public virtual bool WestDiagonalRotated => westDiagonalRotated;
+		public bool WestDiagonalRotated => westDiagonalRotated;
 
 		public bool DiagonalRotated => EastDiagonalRotated || WestDiagonalRotated;
 
@@ -193,7 +193,7 @@ namespace Vehicles
 			}
 			for (int i = 0; i < masks.Length; i++)
 			{
-				MaterialRequest matReq2 = new MaterialRequest()
+				MaterialRequest matReq2 = new()
 				{
 					mainTex = textures[i],
 					maskTex = masks[i],
