@@ -63,7 +63,7 @@ namespace Vehicles
 		/// <param name="dest"></param>
 		private static bool ShouldNotEnterCell(VehicleDef vehicleDef, Map map, IntVec3 dest)
 		{
-			if (map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(dest) > 30)
+			if (map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(dest) > 30)
 			{
 				return true;
 			}

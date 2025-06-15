@@ -21,7 +21,7 @@ internal static class DebugActions
       SoundDefOf.Click.PlayOneShotOnCamera();
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
         foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
         {
           mapping[vehicleDef].VehicleReachability.ClearCache();
@@ -69,7 +69,7 @@ internal static class DebugActions
         }
         else
         {
-          VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+          VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
           foreach (IntVec3 cell in map.AllCells)
           {
             int cost = mapping[vehicleDef].VehiclePathGrid.PerceivedPathCostAt(cell);
@@ -88,9 +88,9 @@ internal static class DebugActions
       SoundDefOf.Click.PlayOneShotOnCamera();
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
-        mapping.RegenerateGrids(VehicleMapping.GridSelection.All,
-          VehicleMapping.GridDeferment.Forced);
+        VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
+        mapping.RegenerateGrids(VehiclePathingSystem.GridSelection.All,
+          VehiclePathingSystem.GridDeferment.Forced);
       }
     }, "Regenerating Regions", true, null);
   }

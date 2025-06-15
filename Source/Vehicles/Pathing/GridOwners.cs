@@ -24,7 +24,7 @@ public static class GridOwners
     {
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
         mapping.GridOwners.Init();
         mapping.ConstructComponents();
       }
@@ -42,7 +42,7 @@ public static class GridOwners
     sb.Clear();
     foreach (Map map in Find.Maps)
     {
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       sb.AppendLine($"  Id: {map.uniqueID}");
       OutputForGrid(mapping.GridOwners, sb);
     }

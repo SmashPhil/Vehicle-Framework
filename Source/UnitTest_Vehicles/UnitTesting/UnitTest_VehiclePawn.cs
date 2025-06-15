@@ -6,7 +6,7 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(VehicleTestCategories.VehiclePawn)]
+[TestCategory(TestCategoryNames.VehiclePawn)]
 internal sealed class UnitTest_VehiclePawn
 {
   [Test]

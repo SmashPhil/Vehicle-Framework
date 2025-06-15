@@ -24,9 +24,8 @@ public sealed class VehicleRegion : IPoolable
 
   private VehicleRoom room;
 
-  private sbyte mapIndex = -1;
   private Map map;
-  private VehicleMapping mapping;
+  private VehiclePathingSystem mapping;
   private VehicleRegionMaker regionMaker;
   private VehicleRegionGrid regionGrid;
 
@@ -107,14 +106,11 @@ public sealed class VehicleRegion : IPoolable
       map = value;
       if (map == null)
       {
-        mapIndex = -1;
         mapping = null;
         regionMaker = null;
         return;
       }
-
-      mapIndex = (sbyte)map.Index;
-      mapping = map.GetCachedMapComponent<VehicleMapping>();
+      mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       regionMaker = mapping[vehicleDef].VehicleRegionMaker;
       regionGrid = mapping[vehicleDef].VehicleRegionGrid;
     }
@@ -239,7 +235,7 @@ public sealed class VehicleRegion : IPoolable
     get
     {
       CellIndices cellIndices = Map.cellIndices;
-      VehicleRegion[] directGrid = Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef]
+      VehicleRegion[] directGrid = Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef]
        .VehicleRegionGrid.DirectGrid;
       for (int i = 0; i < 1000; i++)
       {
@@ -262,7 +258,7 @@ public sealed class VehicleRegion : IPoolable
     get
     {
       CellIndices cellIndices = Map.cellIndices;
-      VehicleRegion[] directGrid = Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef]
+      VehicleRegion[] directGrid = Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef]
        .VehicleRegionGrid.DirectGrid;
       foreach (IntVec3 intVec in extentsClose)
       {
@@ -360,7 +356,7 @@ public sealed class VehicleRegion : IPoolable
   /// <summary>
   /// <paramref name="traverseParms"/> allows this region
   /// </summary>
-  public bool Allows(TraverseParms traverseParms, bool isDestination)
+  public bool Allows(TraverseParms traverseParms)
   {
     return traverseParms.mode switch
     {
@@ -369,29 +365,6 @@ public sealed class VehicleRegion : IPoolable
       TraverseMode.PassAllDestroyablePlayerOwnedThings => true,
       _                                                => type.Passable()
     };
-  }
-
-  /// <summary>
-  /// Decrement map index when other map has been removed
-  /// </summary>
-  public void DecrementMapIndex()
-  {
-    if (mapIndex <= 0)
-    {
-      Log.Warning(
-        $"Tried to decrement map index for vehicle region {Id} but mapIndex={mapIndex}");
-      return;
-    }
-
-    mapIndex = (sbyte)(mapIndex - 1);
-  }
-
-  /// <summary>
-  /// Clean up data after map has been removed
-  /// </summary>
-  public void Notify_MyMapRemoved()
-  {
-    mapIndex = -1;
   }
 
   /// <summary>
@@ -501,7 +474,7 @@ public sealed class VehicleRegion : IPoolable
           if (new Rect(0f, 0f, UI.screenWidth, UI.screenHeight).Overlaps(rect))
           {
             Widgets.Label(rect,
-              Map.GetCachedMapComponent<VehicleMapping>()[DebugHelper.Local.VehicleDef]
+              Map.GetCachedMapComponent<VehiclePathingSystem>()[DebugHelper.Local.VehicleDef]
                .VehiclePathGrid.PerceivedPathCostAt(intVec).ToString());
           }
         }

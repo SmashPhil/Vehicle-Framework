@@ -11,7 +11,7 @@ using Verse;
 
 namespace Vehicles
 {
-  public partial class VehiclePawn : Pawn, IInspectable,
+  public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
                                      IAnimationTarget, IAnimator, ITransformable,
                                      IEventManager<VehicleEventDef>, IMaterialCacheTarget
   {
@@ -319,7 +319,7 @@ namespace Vehicles
 
       DrawTracker.Notify_Spawned();
       InitializeHitbox();
-      Map.GetCachedMapComponent<VehicleMapping>().RequestGridsFor(this);
+      Map.GetCachedMapComponent<VehiclePathingSystem>().RequestGridsFor(this);
       ReclaimPosition();
       Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
       ResetRenderStatus();

@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace Vehicles
+namespace Vehicles;
+
+[Flags]
+public enum FuelConsumptionCondition
 {
-	[Flags]
-	public enum FuelConsumptionCondition
-	{
-		Moving = 1 << 0, 
-		Drafted = 1 << 1,
-		Flying = 1 << 2,
-		Always = 1 << 3
-	};
-}
+  Drafted = 1 << 0,
+  Moving = 1 << 1,
+  Flying = 1 << 2,
+  Always = 1 << 3
+};

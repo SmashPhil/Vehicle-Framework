@@ -15,7 +15,7 @@ internal sealed class UnitTest_MapDeinit
     Assert.IsNotNull(Current.Game);
     Assert.IsNotNull(Find.CurrentMap);
 
-    VehicleMapping mapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
     Assert.IsNotNull(mapping);
 
     // Create a few threads to validate that cleanup occurs
@@ -27,7 +27,7 @@ internal sealed class UnitTest_MapDeinit
     Expect.IsFalse(ThreadManager.AllThreadsTerminated, "Threads created.");
 
     // Validate all threads terminate and Thread::Join wait handles don't time out.
-    ThreadManager.ReleaseThreadsAndClearCache();
+    ThreadManager.ReleaseThreads();
     Expect.IsTrue(ThreadManager.AllThreadsTerminated, "Threads terminated.");
   }
 }

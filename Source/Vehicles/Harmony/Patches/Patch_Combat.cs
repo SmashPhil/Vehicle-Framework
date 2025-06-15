@@ -246,7 +246,8 @@ internal class Patch_Combat : IPatchCategory
 
   private static bool AffectVehicleInCell(Explosion __instance, IntVec3 c)
   {
-    if (__instance.Map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(c) is { } vehicle)
+    if (__instance.Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(c) is
+      { } vehicle)
     {
       // If cell is not on edge of vehicle, block explosion
       return vehicle.OccupiedRect().EdgeCells.Contains(c);

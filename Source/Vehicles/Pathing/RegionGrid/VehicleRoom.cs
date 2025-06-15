@@ -104,7 +104,7 @@ namespace Vehicles
 			}
 			if (Regions.Count == 1)
 			{
-				Map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionGrid.allRooms.Add(this);
+				Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehicleRegionGrid.allRooms.Add(this);
 			}
 		}
 
@@ -126,7 +126,7 @@ namespace Vehicles
 			}
 			if (Regions.Count == 0)
 			{
-				VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(Map);
+				VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(Map);
 				if (mapping != null)
 				{
 					mapping[vehicleDef].VehicleRegionGrid?.allRooms.Remove(this);

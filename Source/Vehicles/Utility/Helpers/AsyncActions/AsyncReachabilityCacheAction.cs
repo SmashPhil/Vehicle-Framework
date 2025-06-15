@@ -10,12 +10,12 @@ namespace Vehicles
 {
   public class AsyncReachabilityCacheAction : AsyncAction
   {
-    private VehicleMapping mapping;
+    private VehiclePathingSystem mapping;
     private List<VehicleDef> vehicleDefs;
 
     public override bool IsValid => mapping?.map?.Index > -1;
 
-    public void Set(VehicleMapping mapping, List<VehicleDef> vehicleDefs)
+    public void Set(VehiclePathingSystem mapping, List<VehicleDef> vehicleDefs)
     {
       this.mapping = mapping;
       this.vehicleDefs = vehicleDefs;

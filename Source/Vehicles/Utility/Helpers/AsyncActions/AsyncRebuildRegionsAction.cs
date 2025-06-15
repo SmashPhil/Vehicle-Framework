@@ -1,5 +1,5 @@
 ﻿using SmashTools.Performance;
-using VehiclePathData = Vehicles.VehicleMapping.VehiclePathData;
+using VehiclePathData = Vehicles.VehiclePathingSystem.VehiclePathData;
 
 namespace Vehicles
 {

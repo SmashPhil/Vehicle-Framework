@@ -27,7 +27,6 @@ internal class UnitTest_CellRectUtils
     Expect.AreEqual(cardinals.Count, 1, "Cardinals (1,1) Count");
     Expect.AreEqual(position, cardinals[0], "Cardinals (1,1) Single");
 
-    Assert.IsTrue(false);
     // 1x2 to 1xN
     for (int z = 2; z <= MaxSize; z++)
     {

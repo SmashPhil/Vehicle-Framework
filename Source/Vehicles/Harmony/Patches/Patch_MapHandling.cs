@@ -36,10 +36,6 @@ namespace Vehicles
         postfix: new HarmonyMethod(typeof(Patch_MapHandling),
           nameof(AnyVehicleBlockingMapRemoval)));
       VehicleHarmony.Patch(
-        original: AccessTools.Method(typeof(MapDeiniter), "NotifyEverythingWhichUsesMapReference"),
-        postfix: new HarmonyMethod(typeof(Patch_MapHandling),
-          nameof(NotifyEverythingWhichUsesMapReferencePost)));
-      VehicleHarmony.Patch(
         original: AccessTools.Method(typeof(GasGrid), nameof(GasGrid.GasCanMoveTo)),
         postfix: new HarmonyMethod(typeof(Patch_MapHandling),
           nameof(GasCanMoveThroughVehicle)));
@@ -104,86 +100,50 @@ namespace Vehicles
     /// <summary>
     /// Ensure map is not removed with vehicles that contain pawns or maps currenty being targeted for landing.
     /// </summary>
-    public static void AnyVehicleBlockingMapRemoval(MapPawns __instance, ref bool __result,
-      Map ___map)
+    public static void AnyVehicleBlockingMapRemoval(ref bool __result, Map ___map)
     {
       if (__result is false)
       {
-        if (LandingTargeter.Instance.IsTargeting && Current.Game.CurrentMap == ___map)
+        if (LandingTargeter.Instance.IsTargeting && Current.Game.CurrentMap == ___map ||
+          MapHelper.AnyVehicleSkyfallersBlockingMap(___map) ||
+          MapHelper.AnyAerialVehiclesInRecon(___map))
         {
           __result = true;
           return;
         }
 
-        if (MapHelper.AnyVehicleSkyfallersBlockingMap(___map))
+        foreach (VehiclePawn vehicle in ___map.GetDetachedMapComponent<VehiclePositionManager>()
+         .AllClaimants)
         {
-          __result = true;
-          return;
-        }
-
-        if (MapHelper.AnyAerialVehiclesInRecon(___map))
-        {
-          __result = true;
-          return;
-        }
-
-        foreach (Pawn pawn in __instance.AllPawnsSpawned)
-        {
-          if (pawn is VehiclePawn vehicle && vehicle.AllPawnsAboard.NotNullAndAny())
+          if (vehicle.MovementPermissions == VehiclePermissions.Autonomous)
           {
-            foreach (Pawn sailor in vehicle.AllPawnsAboard)
+            __result = true;
+            return;
+          }
+
+          foreach (Pawn passenger in vehicle.AllPawnsAboard)
+          {
+            if (PawnKeepsMapOpen(passenger))
             {
-              if (!sailor.Downed && sailor.IsColonist)
-              {
-                __result = true;
-                return;
-              }
-
-              if (sailor.relations?.relativeInvolvedInRescueQuest != null)
-              {
-                __result = true;
-                return;
-              }
-
-              if (sailor.Faction == Faction.OfPlayer || sailor.HostFaction == Faction.OfPlayer)
-              {
-                if (sailor is { CurJob.exitMapOnArrival: true })
-                {
-                  __result = true;
-                  return;
-                }
-              }
-              //Caravan to join for?
+              __result = true;
+              return;
             }
           }
         }
       }
-    }
+      return;
 
-    public static void NotifyEverythingWhichUsesMapReferencePost(Map map)
-    {
-      List<Map> maps = Find.Maps;
-      int mapIndex = maps.IndexOf(map);
-      for (int i = mapIndex; i < maps.Count; i++)
+      static bool PawnKeepsMapOpen(Pawn pawn)
       {
-        Map searchMap = maps[i];
-        VehicleMapping mapping = searchMap.GetCachedMapComponent<VehicleMapping>();
-        foreach (VehicleDef owner in mapping.GridOwners.AllOwners)
-        {
-          VehicleMapping.VehiclePathData pathData = mapping[owner];
-          foreach (VehicleRegion region in pathData.VehicleRegionGrid
-           .AllRegionsNoRebuildInvalidAllowed)
-          {
-            if (i == mapIndex)
-            {
-              region.Notify_MyMapRemoved();
-            }
-            else
-            {
-              region.DecrementMapIndex();
-            }
-          }
-        }
+        if (pawn is { Downed: false, IsColonist: true })
+          return true;
+        if (pawn.relations is { relativeInvolvedInRescueQuest: not null })
+          return true;
+        if (pawn.Faction == Faction.OfPlayer || pawn.HostFaction == Faction.OfPlayer)
+          return true;
+        if (pawn is { CurJob.exitMapOnArrival: true })
+          return true;
+        return false;
       }
     }
 
@@ -192,7 +152,7 @@ namespace Vehicles
       if (__result)
       {
         VehiclePawn vehicle =
-          ___map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
+          ___map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
         __result = vehicle == null || vehicle.VehicleDef.Fillage != FillCategory.Full;
       }
     }

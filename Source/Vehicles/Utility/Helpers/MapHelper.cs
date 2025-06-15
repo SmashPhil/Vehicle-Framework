@@ -32,7 +32,7 @@ public static class MapHelper
         return false;
       if (vehicleDef != null)
       {
-        VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
         return mapping[vehicleDef].VehicleReachability
          .CanReachMapEdge(cellToCheck, TraverseParms.For(TraverseMode.NoPassClosedDoors));
       }

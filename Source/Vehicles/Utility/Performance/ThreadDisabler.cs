@@ -25,7 +25,7 @@ namespace Vehicles
 
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
         if (mapping.ThreadAlive)
         {
           threadStates[map] = !mapping.dedicatedThread.IsSuspended;
@@ -41,7 +41,7 @@ namespace Vehicles
 
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
         if (mapping.ThreadAlive && threadStates.TryGetValue(map, out bool wasActive))
         {
           mapping.dedicatedThread.IsSuspended = !wasActive;

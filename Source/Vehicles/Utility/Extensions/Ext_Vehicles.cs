@@ -574,10 +574,11 @@ namespace Vehicles
     /// </summary>
     public static bool DrivableFast(this VehiclePawn vehicle, int index)
     {
-      VehiclePawn claimedBy = vehicle.Map.GetCachedMapComponent<VehiclePositionManager>()
+      VehiclePawn claimedBy = vehicle.Map.GetDetachedMapComponent<VehiclePositionManager>()
        .ClaimedBy(vehicle.Map.cellIndices.IndexToCell(index));
       bool passable = (claimedBy is null || claimedBy == vehicle) &&
-        vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehiclePathGrid
+        vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
+         .VehiclePathGrid
          .WalkableFast(index);
       return passable;
     }

@@ -25,7 +25,7 @@ namespace Vehicles
     private static readonly List<int> tmpPathableNeighborIndices = new List<int>();
     private static readonly Dictionary<int, float> tmpDistances = new Dictionary<int, float>();
 
-    private readonly VehicleMapping mapping;
+    private readonly VehiclePathingSystem mapping;
     private readonly VehicleDef vehicleDef;
 
     private AvoidGrid avoidGrid;
@@ -57,7 +57,7 @@ namespace Vehicles
     private readonly List<Pair<VehicleRegionLink, int>> preciseRegionLinkDistances =
       new List<Pair<VehicleRegionLink, int>>();
 
-    public VehicleRegionCostCalculator(VehicleMapping mapping, VehicleDef vehicleDef)
+    public VehicleRegionCostCalculator(VehiclePathingSystem mapping, VehicleDef vehicleDef)
     {
       this.mapping = mapping;
       this.vehicleDef = vehicleDef;
@@ -97,7 +97,7 @@ namespace Vehicles
         using ListSnapshot<VehicleRegionLink> links = region.Links;
         foreach (VehicleRegionLink regionLink in links)
         {
-          if (!regionLink.GetOtherRegion(region).Allows(traverseParms, false))
+          if (!regionLink.GetOtherRegion(region).Allows(traverseParms))
             continue;
 
           int num = RegionLinkDistance(destinationCell, regionLink, minPathCost);
@@ -430,7 +430,7 @@ namespace Vehicles
       using ListSnapshot<VehicleRegionLink> links = region.Links;
       foreach (VehicleRegionLink regionLink in links)
       {
-        if (regionLink.GetOtherRegion(region).Allows(traverseParms, false))
+        if (regionLink.GetOtherRegion(region).Allows(traverseParms))
         {
           if (!tmpDistances.TryGetValue(
             mapping.map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))

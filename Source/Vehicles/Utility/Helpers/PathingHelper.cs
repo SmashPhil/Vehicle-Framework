@@ -255,7 +255,7 @@ namespace Vehicles
       if (regionEffectors.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs) &&
         !vehicleDefs.NullOrEmpty())
       {
-        VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+        VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
         if (mapping.ThreadAvailable)
         {
           CellRect occupiedRect = thing.OccupiedRect();
@@ -281,7 +281,7 @@ namespace Vehicles
     /// <summary>
     /// Thread safe event for triggering dirtyer events
     /// </summary>
-    internal static void ThingInRegionSpawned(CellRect occupiedRect, VehicleMapping mapping,
+    internal static void ThingInRegionSpawned(CellRect occupiedRect, VehiclePathingSystem mapping,
       List<VehicleDef> vehicleDefs)
     {
       foreach (VehicleDef vehicleDef in vehicleDefs)
@@ -295,7 +295,7 @@ namespace Vehicles
       }
     }
 
-    internal static void ThingInRegionDespawned(CellRect occupiedRect, VehicleMapping mapping,
+    internal static void ThingInRegionDespawned(CellRect occupiedRect, VehiclePathingSystem mapping,
       List<VehicleDef> vehicleDefs)
     {
       foreach (VehicleDef vehicleDef in vehicleDefs)
@@ -315,7 +315,7 @@ namespace Vehicles
       if (regionEffectors.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs) &&
         !vehicleDefs.NullOrEmpty())
       {
-        VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+        VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
         if (mapping.ThreadAvailable)
         {
           AsyncReachabilityCacheAction asyncAction = AsyncPool<AsyncReachabilityCacheAction>.Get();
@@ -329,7 +329,7 @@ namespace Vehicles
       }
     }
 
-    private static void ThingInRegionOrientationChanged(VehicleMapping mapping,
+    private static void ThingInRegionOrientationChanged(VehiclePathingSystem mapping,
       List<VehicleDef> vehicleDefs)
     {
       foreach (VehicleDef vehicleDef in vehicleDefs)
@@ -345,7 +345,7 @@ namespace Vehicles
     {
       LongEventHandler.ExecuteWhenFinished(delegate()
       {
-        VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+        VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
         if (mapping.GridOwners.AnyOwners)
         {
           RecalculateAllPerceivedPathCosts(mapping);
@@ -353,7 +353,7 @@ namespace Vehicles
       });
     }
 
-    private static void RecalculateAllPerceivedPathCosts(VehicleMapping mapping)
+    private static void RecalculateAllPerceivedPathCosts(VehiclePathingSystem mapping)
     {
       foreach (IntVec3 cell in mapping.map.AllCells)
       {
@@ -372,7 +372,7 @@ namespace Vehicles
     /// <param name="map"></param>
     public static void RecalculatePerceivedPathCostAt(IntVec3 cell, Map map)
     {
-      VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(map);
+      VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
       Assert.IsNotNull(mapping);
 
       if (!mapping.GridOwners.AnyOwners)
@@ -390,11 +390,12 @@ namespace Vehicles
       }
     }
 
-    internal static void RecalculatePerceivedPathCostAtFor(VehicleMapping mapping, IntVec3 cell)
+    internal static void RecalculatePerceivedPathCostAtFor(VehiclePathingSystem mapping,
+      IntVec3 cell)
     {
       foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
       {
-        VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+        VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
         if (!pathData.VehiclePathGrid.Enabled) continue;
 
         pathData.VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
@@ -408,8 +409,8 @@ namespace Vehicles
     /// <param name="cell"></param>
     public static bool VehicleImpassableInCell(Map map, IntVec3 cell)
     {
-      return map.GetCachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is VehiclePawn
-        vehicle && vehicle.VehicleDef.passability == Traversability.Impassable;
+      return map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is { } vehicle &&
+        vehicle.VehicleDef.passability == Traversability.Impassable;
     }
 
     /// <see cref="VehicleImpassableInCell(Map, IntVec3)"/>

@@ -177,7 +177,7 @@ public class VehiclePathFollower : IExposable
     }
 
     if (!ignoreReachability &&
-      !vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef]
+      !vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
        .VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode,
           TraverseParms.For(TraverseMode.ByPawn)))
     {
@@ -577,7 +577,7 @@ public class VehiclePathFollower : IExposable
   public static float CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
   {
     float tickCost = MoveTicksAt(vehicle, from, to);
-    tickCost += vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef]
+    tickCost += vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
      .VehiclePathGrid.PerceivedPathCostAt(to);
     // At minimum should take ~7.5 seconds per cell, any slower vehicle should be disabled
     tickCost = Mathf.Min(tickCost, MaxMoveTicks);
@@ -597,7 +597,7 @@ public class VehiclePathFollower : IExposable
   private VehiclePath FindPath(CancellationToken token)
   {
     lastPathedTargetPosition = destination.Cell;
-    VehiclePath pawnPath = vehicle.Map.GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef]
+    VehiclePath pawnPath = vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
      .VehiclePathFinder
      .FindPath(vehicle.Position, destination, vehicle, token, peMode: peMode);
     return pawnPath;

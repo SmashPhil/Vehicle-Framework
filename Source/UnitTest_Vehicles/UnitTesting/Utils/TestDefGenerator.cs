@@ -23,6 +23,7 @@ internal static class TestDefGenerator
     VehicleBuildDef buildDef = new()
     {
       defName = $"{defName}_Blueprint",
+      label = $"{defName}_Blueprint_LABEL",
       modContentPack = VehicleHarmony.VehicleMCP,
       thingClass = typeof(VehicleBuilding),
       terrainAffordanceNeeded = TerrainAffordanceDefOf.Heavy,

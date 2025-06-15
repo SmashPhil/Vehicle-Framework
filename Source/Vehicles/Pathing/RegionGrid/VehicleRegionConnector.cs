@@ -25,7 +25,7 @@ public class VehicleRegionConnector : VehicleGridManager
 
   private readonly ConcurrentDictionary<VehicleRegion, ConnectorGroup> connectors = [];
 
-  public VehicleRegionConnector(VehicleMapping mapping, VehicleDef createdFor) : base(mapping,
+  public VehicleRegionConnector(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
     createdFor)
   {
     const float PoolSize = 0.5f; // Create pool for 50% of average region connector count
@@ -134,7 +134,7 @@ public class VehicleRegionConnector : VehicleGridManager
   {
     Map map = Find.CurrentMap;
     Assert.IsNotNull(map);
-    VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     Assert.IsNotNull(mapping);
 
     VehicleDef vehicleDef =

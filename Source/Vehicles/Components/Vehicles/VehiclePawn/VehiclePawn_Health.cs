@@ -31,7 +31,7 @@ namespace Vehicles
     public VehiclePermissions MovementPermissions { get; private set; }
 
     public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f &&
-      MovementPermissions > VehiclePermissions.NotAllowed &&
+      MovementPermissions > VehiclePermissions.Immobile &&
       movementStatus == VehicleMovementStatus.Online;
 
     public bool CanMoveFinal =>
@@ -68,7 +68,7 @@ namespace Vehicles
     {
       if (Mathf.Approximately(VehicleDef.GetStatValueAbstract(VehicleStatDefOf.MoveSpeed), 0))
       {
-        MovementPermissions = VehiclePermissions.NotAllowed;
+        MovementPermissions = VehiclePermissions.Immobile;
         return;
       }
 
@@ -80,7 +80,7 @@ namespace Vehicles
           return;
         }
       }
-      MovementPermissions = VehiclePermissions.NoDriverNeeded;
+      MovementPermissions = VehiclePermissions.Autonomous;
     }
 
     public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
@@ -172,7 +172,7 @@ namespace Vehicles
     public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
     {
       vehiclePather.StopDead();
-      Map.GetCachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
+      Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
       VehicleReservationManager reservationManager =
         Map.GetCachedMapComponent<VehicleReservationManager>();
       reservationManager.ClearReservedFor(this);

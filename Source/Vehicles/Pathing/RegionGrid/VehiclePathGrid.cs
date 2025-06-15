@@ -17,7 +17,7 @@ namespace Vehicles
 
     public int[] innerArray;
 
-    public VehiclePathGrid(VehicleMapping mapping, VehicleDef vehicleDef) : base(mapping,
+    public VehiclePathGrid(VehiclePathingSystem mapping, VehicleDef vehicleDef) : base(mapping,
       vehicleDef)
     {
       innerArray = new int[mapping.map.cellIndices.NumGridCells];

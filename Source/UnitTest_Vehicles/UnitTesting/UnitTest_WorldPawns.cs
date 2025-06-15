@@ -9,7 +9,7 @@ namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
 [TestDescription("Vehicle is handled correctly with world pawn list.")]
-[TestCategory(VehicleTestCategories.WorldPawnGC)]
+[TestCategory(TestCategoryNames.WorldPawnGC)]
 internal sealed class UnitTest_WorldPawns
 {
   [Test]

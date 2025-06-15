@@ -8,13 +8,19 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(VehicleTestCategories.WorldPawnGC)]
-internal sealed class UnitTest_StashedVehicle : UnitTest_VehicleTest
+[TestCategory(TestCategoryNames.WorldPawnGC)]
+internal sealed class UnitTest_StashedVehicle
 {
+  [TearDown, ExecutionPriority(Priority.BelowNormal)]
+  private void DestroyAllVehicles()
+  {
+    TestUtils.EmptyWorldAndMapOfVehicles();
+  }
+
   private static VehiclePawn GetTransientVehicleWithPawns(out Pawn colonist, out Pawn animal)
   {
     VehicleDef vehicleDef =
-      TestDefGenerator.CreateTransientVehicleDef("VehicleDef_StashedVehicle");
+      TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_STASH_{Rand.Int}");
     vehicleDef.properties.roles =
     [
       new VehicleRole

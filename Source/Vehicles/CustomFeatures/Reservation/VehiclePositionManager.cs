@@ -1,63 +1,67 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using Verse;
-using Verse.AI;
 using SmashTools;
-using System.Collections.Concurrent;
+using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Reservation manager for positions of vehicle, reserves entire hitbox of vehicle
+/// </summary>
+/// <remarks>Only ever read / written to from MainThread</remarks>
+public class VehiclePositionManager : DetachedMapComponent
 {
-	/// <summary>
-	/// Reservation manager for positions of vehicle, reserves entire hitbox of vehicle
-	/// </summary>
-	/// <remarks>Only ever read / written to from MainThread</remarks>
-	public class VehiclePositionManager : DetachedMapComponent
-	{
-		private readonly ConcurrentDictionary<IntVec3, VehiclePawn> occupiedCells = new ConcurrentDictionary<IntVec3, VehiclePawn>();
-		private readonly ConcurrentDictionary<VehiclePawn, CellRect> occupiedRect = new ConcurrentDictionary<VehiclePawn, CellRect>();
+  private readonly ConcurrentDictionary<IntVec3, VehiclePawn> occupiedCells = [];
+  private readonly ConcurrentDictionary<VehiclePawn, CellRect> occupiedRects = [];
 
-		public VehiclePositionManager(Map map) : base(map)
-		{
-			occupiedCells = new ConcurrentDictionary<IntVec3, VehiclePawn>();
-			occupiedRect = new ConcurrentDictionary<VehiclePawn, CellRect>();
-		}
+  public VehiclePositionManager(Map map) : base(map)
+  {
+  }
 
-		public List<VehiclePawn> AllClaimants => occupiedRect.Keys.ToList();
+  public IEnumerable<VehiclePawn> AllClaimants => occupiedRects.Keys;
 
-		public bool PositionClaimed(IntVec3 cell) => ClaimedBy(cell) != null;
+  public bool PositionClaimed(IntVec3 cell)
+  {
+    return ClaimedBy(cell) != null;
+  }
 
-		public VehiclePawn ClaimedBy(IntVec3 cell) => occupiedCells.TryGetValue(cell, null);
+  public VehiclePawn ClaimedBy(IntVec3 cell)
+  {
+    return occupiedCells.TryGetValue(cell);
+  }
 
-		public CellRect ClaimedBy(VehiclePawn vehicle) => occupiedRect.TryGetValue(vehicle, default);
+  public CellRect ClaimedBy(VehiclePawn vehicle)
+  {
+    return occupiedRects.TryGetValue(vehicle);
+  }
 
-		public void ClaimPosition(VehiclePawn vehicle)
-		{
-			ReleaseClaimed(vehicle);
-			CellRect occupiedRect = vehicle.VehicleRect();
-			this.occupiedRect[vehicle] = occupiedRect;
-			foreach (IntVec3 cell in occupiedRect)
-			{
-				occupiedCells[cell] = vehicle;
-			}
+  public void ClaimPosition(VehiclePawn vehicle)
+  {
+    ReleaseClaimed(vehicle);
+    CellRect occupiedRect = vehicle.VehicleRect();
+    occupiedRects[vehicle] = occupiedRect;
+    foreach (IntVec3 cell in occupiedRect)
+    {
+      occupiedCells[cell] = vehicle;
+    }
 
-			vehicle.RecalculateFollowerCell();
-			if (ClaimedBy(vehicle.FollowerCell) is VehiclePawn blockedVehicle)
-			{
-				blockedVehicle.RecalculateFollowerCell();
-			}
-		}
+    vehicle.RecalculateFollowerCell();
+    if (ClaimedBy(vehicle.FollowerCell) is { } blockedVehicle)
+    {
+      blockedVehicle.RecalculateFollowerCell();
+    }
+  }
 
-		public bool ReleaseClaimed(VehiclePawn vehicle)
-		{
-			if (occupiedRect.TryGetValue(vehicle, out CellRect rect))
-			{
-				foreach (IntVec3 cell in rect)
-				{
-					occupiedCells.TryRemove(cell, out _);
-				}
-			}
-			return occupiedRect.TryRemove(vehicle, out _);
-		}
-	}
+  public void ReleaseClaimed(VehiclePawn vehicle)
+  {
+    if (occupiedRects.TryGetValue(vehicle, out CellRect rect))
+    {
+      foreach (IntVec3 cell in rect)
+      {
+        occupiedCells.TryRemove(cell, out _);
+      }
+    }
+    occupiedRects.TryRemove(vehicle, out _);
+  }
 }

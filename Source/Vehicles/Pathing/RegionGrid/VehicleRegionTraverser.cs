@@ -49,7 +49,7 @@ namespace Vehicles
       {
         return true;
       }
-      bool entryCondition(VehicleRegion from, VehicleRegion to) => to.Allows(traverseParams, false);
+      bool entryCondition(VehicleRegion from, VehicleRegion to) => to.Allows(traverseParams);
       bool found = false;
 
       bool regionProcessor(VehicleRegion region)

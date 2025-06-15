@@ -65,16 +65,16 @@ internal class Benchmark_AllRegions
 
   private readonly struct RegionContext
   {
-    public readonly VehicleMapping mapping;
+    public readonly VehiclePathingSystem mapping;
     public readonly VehicleRegionGrid regionGrid;
     public readonly HashSet<VehicleRegion> allRegions = [];
     public readonly ConcurrentSet<VehicleRegion> allRegionsConcurrent = [];
 
     public RegionContext()
     {
-      this.mapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+      this.mapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
       VehicleDef vehicleDef = mapping.GridOwners.AllOwners.FirstOrDefault(def =>
-        !Find.CurrentMap.GetCachedMapComponent<VehicleMapping>()[def].Suspended);
+        !Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>()[def].Suspended);
       this.regionGrid = mapping[vehicleDef].VehicleRegionGrid;
     }
   }

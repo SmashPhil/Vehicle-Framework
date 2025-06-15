@@ -7,9 +7,9 @@ namespace Vehicles;
 
 public class MapGridOwners : GridOwnerList<MapGridOwners.PathConfig>
 {
-  private readonly VehicleMapping mapping;
+  private readonly VehiclePathingSystem mapping;
 
-  public MapGridOwners(VehicleMapping mapping)
+  public MapGridOwners(VehiclePathingSystem mapping)
   {
     this.mapping = mapping;
   }

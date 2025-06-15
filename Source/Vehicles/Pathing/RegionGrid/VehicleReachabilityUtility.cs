@@ -24,7 +24,7 @@ namespace Vehicles
 			{
 				return true;
 			}
-			return vehicle.Spawned && MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
+			return vehicle.Spawned && MapComponentCache<VehiclePathingSystem>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode, 
 				TraverseParms.For(vehicle, maxDanger, mode));
 		}
 
@@ -42,7 +42,7 @@ namespace Vehicles
 			{
 				return true;
 			}
-			return vehicle.Spawned && MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachVehicleNonLocal(vehicle.Position, dest, peMode, 
+			return vehicle.Spawned && MapComponentCache<VehiclePathingSystem>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachVehicleNonLocal(vehicle.Position, dest, peMode, 
 				TraverseParms.For(vehicle, maxDanger, mode));
 		}
 
@@ -52,7 +52,7 @@ namespace Vehicles
 		/// <param name="vehicle"></param>
 		public static bool CanReachVehicleMapEdge(this VehiclePawn vehicle)
 		{
-			return vehicle.Spawned && MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachMapEdge(vehicle.Position, 
+			return vehicle.Spawned && MapComponentCache<VehiclePathingSystem>.GetComponent(vehicle.Map)[vehicle.VehicleDef].VehicleReachability.CanReachMapEdge(vehicle.Position, 
 				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn));
 		}
 
@@ -65,7 +65,7 @@ namespace Vehicles
 			List<Map> maps = Find.Maps;
 			for (int i = 0; i < maps.Count; i++)
 			{
-				maps[i].GetCachedMapComponent<VehicleMapping>()[vehicle.VehicleDef].VehicleReachability.ClearCacheFor(vehicle);
+				maps[i].GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef].VehicleReachability.ClearCacheFor(vehicle);
 			}
 		}
 	}

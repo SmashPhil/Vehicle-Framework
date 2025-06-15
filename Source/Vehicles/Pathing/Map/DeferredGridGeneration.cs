@@ -14,13 +14,13 @@ public class DeferredGridGeneration
 {
   private const int DaysUnusedForRemoval = 3;
 
-  private readonly VehicleMapping mapping;
+  private readonly VehiclePathingSystem mapping;
 
   private readonly GridCounter pathGridCounter = new();
 
   private bool PassDisabled { get; set; }
 
-  public DeferredGridGeneration(VehicleMapping mapping)
+  public DeferredGridGeneration(VehiclePathingSystem mapping)
   {
     this.mapping = mapping;
   }
@@ -174,7 +174,7 @@ public class DeferredGridGeneration
 
     foreach (VehicleDef vehicleDef in mapping.GridOwners.AllOwners)
     {
-      VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
       if (!pathData.VehiclePathGrid.Enabled && !mapping.GridOwners.TryForfeitOwnership(vehicleDef))
       {
         ReleaseRegionGrid(vehicleDef);
@@ -205,7 +205,7 @@ public class DeferredGridGeneration
 
   private void GeneratePathGridFor(VehicleDef vehicleDef)
   {
-    VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+    VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
 
     if (pathData.VehiclePathGrid.Enabled)
       return;
@@ -221,14 +221,14 @@ public class DeferredGridGeneration
     if (!mapping[vehicleDef].Suspended)
       return;
 
-    VehicleMapping.VehiclePathData pathData = mapping[ownerDef];
+    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
     pathData.VehicleRegionAndRoomUpdater.Init();
     pathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
   }
 
   private void ReleasePathGrid(VehicleDef ownerDef)
   {
-    VehicleMapping.VehiclePathData pathData = mapping[ownerDef];
+    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
     if (!pathData.VehiclePathGrid.Enabled)
       return;
 
@@ -242,7 +242,7 @@ public class DeferredGridGeneration
 
   private void ReleaseRegionGrid(VehicleDef ownerDef)
   {
-    VehicleMapping.VehiclePathData pathData = mapping[ownerDef];
+    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
     if (pathData.Suspended)
       return;
 
@@ -272,7 +272,7 @@ public class DeferredGridGeneration
   {
     foreach (Map map in Find.Maps)
     {
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       mapping.deferredGridGeneration.DoPass();
     }
   }

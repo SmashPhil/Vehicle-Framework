@@ -5,7 +5,9 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
 
@@ -25,6 +27,9 @@ namespace Vehicles
       //    nameof(WorldPawns.RemoveAndDiscardPawnViaGC)),
       //  prefix: new HarmonyMethod(typeof(Patch_WorldHandling),
       //    nameof(DoNotRemoveVehicleObjects)));
+      VehicleHarmony.Patch(
+        original: AccessTools.Method(typeof(GameEnder), nameof(GameEnder.CheckOrUpdateGameOver)),
+        postfix: new HarmonyMethod(typeof(Patch_WorldHandling), nameof(GameEnderWithVehicles)));
       VehicleHarmony.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), "AddToCache"),
         postfix: new HarmonyMethod(typeof(Patch_WorldHandling),
           nameof(AddVehicleObjectToCache)));
@@ -165,6 +170,44 @@ namespace Vehicles
         }
       }
       return true;
+    }
+
+    private static void GameEnderWithVehicles(GameEnder __instance, ref int ___ticksToGameOver)
+    {
+      if (__instance.gameEnding)
+      {
+        foreach (Map map in Find.Maps)
+        {
+          VehiclePositionManager positionManager =
+            map.GetDetachedMapComponent<VehiclePositionManager>();
+          Assert.IsNotNull(positionManager);
+          foreach (VehiclePawn vehicle in positionManager.AllClaimants)
+          {
+            foreach (Pawn pawn in vehicle.AllPawnsAboard)
+            {
+              if (pawn.IsFreeColonist)
+              {
+                __instance.gameEnding = false;
+                ___ticksToGameOver = -1;
+                return;
+              }
+            }
+          }
+        }
+        foreach (AerialVehicleInFlight aerialVehicle in Find.World
+         .GetComponent<VehicleWorldObjectsHolder>().AerialVehicles)
+        {
+          foreach (Pawn pawn in aerialVehicle.vehicle.AllPawnsAboard)
+          {
+            if (pawn.IsFreeColonist)
+            {
+              __instance.gameEnding = false;
+              ___ticksToGameOver = -1;
+              return;
+            }
+          }
+        }
+      }
     }
 
     public static void AddVehicleObjectToCache(WorldObject o)

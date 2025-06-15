@@ -15,7 +15,7 @@ namespace Vehicles
 		/// <param name="cell"></param>
 		/// <param name="map"></param>
 		/// <param name="vehicleDef"></param>
-		public static RegionType GetExpectedRegionType(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
+		public static RegionType GetExpectedRegionType(IntVec3 cell, VehiclePathingSystem mapping, VehicleDef vehicleDef)
 		{
 			if (!cell.InBounds(mapping.map))
 			{
@@ -33,7 +33,7 @@ namespace Vehicles
 		}
 
 		//TODO - Account for non-uniform combinations (eg. Y shape)
-		private static bool VerifyCardinalCellSpace(IntVec3 cell, VehicleMapping mapping, VehicleDef vehicleDef)
+		private static bool VerifyCardinalCellSpace(IntVec3 cell, VehiclePathingSystem mapping, VehicleDef vehicleDef)
 		{
 			if (vehicleDef.Size.x % 2 == 0 || vehicleDef.Size.z % 2 == 0)
 			{

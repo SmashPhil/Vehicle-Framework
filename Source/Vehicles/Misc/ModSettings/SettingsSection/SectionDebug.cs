@@ -280,7 +280,7 @@ public class SectionDebug : SettingsSection
             return null;
           }
 
-          VehicleMapping vehicleMapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+          VehiclePathingSystem vehicleMapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
           return vehicleMapping.dedicatedThread;
         }));
       }
@@ -320,7 +320,7 @@ public class SectionDebug : SettingsSection
     {
       foreach (Map map in Find.Maps)
       {
-        VehicleMapping mapComp = map.GetCachedMapComponent<VehicleMapping>();
+        VehiclePathingSystem mapComp = map.GetCachedMapComponent<VehiclePathingSystem>();
         if (debugUseMultithreading)
         {
           mapComp.InitThread();

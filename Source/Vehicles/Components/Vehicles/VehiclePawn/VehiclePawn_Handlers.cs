@@ -59,9 +59,9 @@ public partial class VehiclePawn
     {
       switch (MovementPermissions)
       {
-        case VehiclePermissions.NoDriverNeeded:
+        case VehiclePermissions.Autonomous:
           return true;
-        case VehiclePermissions.NotAllowed:
+        case VehiclePermissions.Immobile:
           return false;
         case VehiclePermissions.DriverNeeded:
         {

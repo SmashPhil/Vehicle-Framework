@@ -16,6 +16,7 @@
         <Deterministic>true</Deterministic>
         <LangVersion>preview</LangVersion>
         <OutDir>..\..\1.6\Assemblies\</OutDir>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

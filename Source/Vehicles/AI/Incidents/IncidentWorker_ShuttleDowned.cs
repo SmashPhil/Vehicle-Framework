@@ -105,7 +105,7 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
 
       return aerialVehicle.vehicle.PawnOccupiedCells(cell, Rot4.East).All(hitboxCell =>
         hitboxCell.Walkable(aerialVehicle.vehicle.VehicleDef,
-          crashSite.GetCachedMapComponent<VehicleMapping>()) &&
+          crashSite.GetCachedMapComponent<VehiclePathingSystem>()) &&
         !Ext_Vehicles.IsRoofed(hitboxCell, crashSite));
     }
   }

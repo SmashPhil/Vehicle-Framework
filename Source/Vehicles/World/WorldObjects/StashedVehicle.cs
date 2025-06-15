@@ -12,14 +12,15 @@ namespace Vehicles;
 
 public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 {
-  public ThingOwner<Thing> stash = [];
+  private ThingOwner<Thing> stash = [];
 
   private static readonly StringBuilder inspectStringBuilder = new();
   private static readonly Dictionary<VehicleDef, int> vehicleCounts = [];
 
   private Material cachedMaterial;
 
-  public List<VehiclePawn> Vehicles { get; private set; }
+  public IEnumerable<VehiclePawn> Vehicles => stash.InnerListForReading
+   .Where(thing => thing is VehiclePawn).Cast<VehiclePawn>();
 
   public override Material Material
   {
@@ -85,9 +86,9 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
     {
       mergedCaravan.AddPawnOrItem(stash[i], true);
     }
+    stash.Clear();
 
     Destroy();
-
     caravan.Destroy();
 
     return mergedCaravan;
@@ -128,16 +129,12 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
     return inspectStringBuilder.ToString();
   }
 
-  private void RecacheVehicles()
+  public override void Destroy()
   {
-    Vehicles = stash.InnerListForReading.Where(thing => thing is VehiclePawn).Cast<VehiclePawn>()
-     .ToList();
-  }
-
-  public override void SpawnSetup()
-  {
-    base.SpawnSetup();
-    RecacheVehicles();
+    base.Destroy();
+    stash.ClearAndDestroyContentsOrPassToWorld();
+    foreach (VehiclePawn vehicle in Vehicles)
+      Find.WorldPawns.RemoveAndDiscardPawnViaGC(vehicle);
   }
 
   public override void ExposeData()

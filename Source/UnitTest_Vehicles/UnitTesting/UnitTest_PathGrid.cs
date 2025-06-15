@@ -20,8 +20,8 @@ internal sealed class UnitTest_PathGrid : UnitTest_MapTest
       int maxSize = Mathf.Max(vehicle.VehicleDef.Size.x, vehicle.VehicleDef.Size.z);
 
       IntVec3 reposition = root + new IntVec3(maxSize, 0, 0);
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
       TerrainDef terrainDef = map.terrainGrid.TerrainAt(root);
 
       VehiclePathGrid pathGrid = pathData.VehiclePathGrid;

@@ -10,8 +10,8 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(VehicleTestCategories.WorldPawnGC)]
-internal sealed class UnitTest_AerialVehicle : UnitTest_VehicleTest
+[TestCategory(TestCategoryNames.WorldPawnGC)]
+internal sealed class UnitTest_AerialVehicle
 {
   private readonly List<AerialVehicleInFlight> aerialVehicles = [];
 
@@ -130,22 +130,10 @@ internal sealed class UnitTest_AerialVehicle : UnitTest_VehicleTest
     }
   }
 
-  [TearDown, ExecutionPriority(Priority.Last)]
+  [TearDown, ExecutionPriority(Priority.BelowNormal)]
   private void RemoveAllVehicleWorldPawns()
   {
-    foreach (AerialVehicleInFlight aerialVehicle in aerialVehicles)
-    {
-      Expect.IsFalse(VehicleWorldObjectsHolder.Instance.AerialVehicles.Contains(aerialVehicle));
-    }
+    TestUtils.EmptyWorldAndMapOfVehicles();
     aerialVehicles.Clear();
-
-    foreach (Pawn pawn in Find.World.worldPawns.AllPawnsAlive)
-    {
-      if (pawn is VehiclePawn vehicle)
-      {
-        Find.WorldPawns.RemoveAndDiscardPawnViaGC(vehicle);
-        Expect.IsFalse(Find.WorldPawns.Contains(vehicle));
-      }
-    }
   }
 }

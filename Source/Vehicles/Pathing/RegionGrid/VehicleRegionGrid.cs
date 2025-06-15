@@ -25,7 +25,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
 
   private VehicleRegionAndRoomUpdater regionUpdater;
 
-  public VehicleRegionGrid(VehicleMapping mapping, VehicleDef createdFor) : base(mapping,
+  public VehicleRegionGrid(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
     createdFor)
   {
   }

@@ -20,7 +20,7 @@ internal sealed class UnitTest_PositionManager : UnitTest_MapTest
       IntVec3 reposition = root + new IntVec3(maxSize, 0, 0);
 
       VehiclePositionManager positionManager =
-        map.GetCachedMapComponent<VehiclePositionManager>();
+        map.GetDetachedMapComponent<VehiclePositionManager>();
       GenSpawn.Spawn(vehicle, root, map);
       HitboxTester<VehiclePawn> positionTester = new(vehicle, root,
         positionManager.ClaimedBy,

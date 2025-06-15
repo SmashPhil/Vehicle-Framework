@@ -51,7 +51,7 @@ namespace Vehicles
       {
         return null;
       }
-      VehicleMapping mapping = MapComponentCache<VehicleMapping>.GetComponent(vehicle.Map);
+      VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(vehicle.Map);
       using (VehiclePath vehiclePath = mapping[vehicleDef].VehiclePathFinder.FindPath(
         vehicle.Position, cell,
         TraverseParms.For(vehicle, mode: TraverseMode.PassAllDestroyableThings),

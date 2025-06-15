@@ -571,7 +571,7 @@ public partial class VehiclePawn
       yield break;
     }
 
-    if (MovementPermissions > VehiclePermissions.NotAllowed)
+    if (!MovementPermissions.HasFlag(VehiclePermissions.Immobile))
     {
       foreach (Gizmo gizmo in ignition.GetGizmos())
       {
@@ -615,7 +615,7 @@ public partial class VehiclePawn
       bool Validator(IntVec3 cell)
       {
         VehiclePositionManager positionManager =
-          Map.GetCachedMapComponent<VehiclePositionManager>();
+          Map.GetDetachedMapComponent<VehiclePositionManager>();
         foreach (IntVec3 cell2 in this.PawnOccupiedCells(cell, Rotation))
         {
           if (!cell2.InBounds(Map) || !GenGridVehicles.Walkable(cell2, VehicleDef, Map) ||

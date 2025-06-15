@@ -15,7 +15,7 @@ internal sealed class UnitTest_SpawnPlacement : UnitTest_MapTest
   private void PlacementDrift()
   {
     DeferredGridGeneration gridGen =
-      map.GetCachedMapComponent<VehicleMapping>().deferredGridGeneration;
+      map.GetCachedMapComponent<VehiclePathingSystem>().deferredGridGeneration;
     Assert.IsNotNull(gridGen);
     using DeferredGridGeneration.PassDisabler pd = new(gridGen);
 

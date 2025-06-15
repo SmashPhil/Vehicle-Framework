@@ -19,7 +19,7 @@ namespace Vehicles
     // or directly called from PathingHelper (w/ multithreading disabled)
     private readonly HashSet<VehicleRegion> regionsToDirty = [];
 
-    public VehicleRegionDirtyer(VehicleMapping mapping, VehicleDef createdFor) : base(mapping,
+    public VehicleRegionDirtyer(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
       createdFor)
     {
     }

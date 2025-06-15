@@ -164,7 +164,7 @@ namespace Vehicles
           return PlaceVehicle(vehicle, map, ref rot, ref loc, respawningAfterLoad);
         case Pawn { Dead: false } pawn:
           TryAdjustPawn(pawn, map, ref loc);
-          break;
+        break;
       }
       return true;
 
@@ -207,7 +207,7 @@ namespace Vehicles
         }
 
         VehiclePositionManager positionManager =
-          map.GetCachedMapComponent<VehiclePositionManager>();
+          map.GetDetachedMapComponent<VehiclePositionManager>();
         bool standable = true;
         foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
         {
@@ -277,7 +277,7 @@ namespace Vehicles
         try
         {
           VehiclePositionManager positionManager =
-            map.GetCachedMapComponent<VehiclePositionManager>();
+            map.GetDetachedMapComponent<VehiclePositionManager>();
           if (positionManager.PositionClaimed(loc))
           {
             VehiclePawn inPlaceVehicle = positionManager.ClaimedBy(loc);
@@ -322,13 +322,13 @@ namespace Vehicles
               cell.x -= 1;
             if (vehicle.VehicleDef.Size.z % 2 == 0)
               cell.z -= 1;
-            break;
+          break;
           case 3:
             if (vehicle.VehicleDef.Size.x % 2 == 0)
               cell.z += 1;
             if (vehicle.VehicleDef.Size.z % 2 == 0)
               cell.x -= 1;
-            break;
+          break;
         }
       }
     }

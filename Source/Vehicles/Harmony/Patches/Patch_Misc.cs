@@ -15,9 +15,6 @@ internal class Patch_Misc : IPatchCategory
       original: AccessTools.Method(typeof(MapPawns), "PlayerEjectablePodHolder"),
       prefix: new HarmonyMethod(typeof(Patch_Misc),
         nameof(PlayerEjectableVehicles)));
-    VehicleHarmony.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.GetChildHolders)),
-      prefix: new HarmonyMethod(typeof(Patch_Misc),
-        nameof(GetVehicleHandlerIThingHolders)));
 
     VehicleHarmony.Patch(
       original: AccessTools.Method(typeof(Selector), "HandleMapClicks"),
@@ -60,15 +57,6 @@ internal class Patch_Misc : IPatchCategory
       return false;
     }
     return true;
-  }
-
-  private static void GetVehicleHandlerIThingHolders(Pawn __instance,
-    List<IThingHolder> outChildren)
-  {
-    if (__instance is VehiclePawn vehicle && !vehicle.handlers.NullOrEmpty())
-    {
-      outChildren.AddRange(vehicle.handlers);
-    }
   }
 
   private static bool MultiSelectFloatMenu(List<object> ___selected)

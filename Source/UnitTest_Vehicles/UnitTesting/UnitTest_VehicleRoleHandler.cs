@@ -1,4 +1,5 @@
-﻿using DevTools.UnitTesting;
+﻿using System.Linq;
+using DevTools.UnitTesting;
 using RimWorld;
 using SmashTools;
 using UnityEngine.Assertions;
@@ -8,6 +9,7 @@ using DescriptionAttribute = DevTools.UnitTesting.TestDescriptionAttribute;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
+[TestCategory(TestCategoryNames.TickBehavior)]
 [Description("VehicleRoleHandler behavior and all logic surrounding board and disembark.")]
 internal sealed class UnitTest_VehicleRoleHandler : UnitTest_MapTest
 {
@@ -25,7 +27,6 @@ internal sealed class UnitTest_VehicleRoleHandler : UnitTest_MapTest
 
       GenSpawn.Spawn(vehicle, root, map);
       Assert.IsTrue(vehicle.Spawned);
-      Expect.AreEqual(vehicle.Position, root, "Position not shifted");
 
       // Colonists can board
       int total = vehicle.SeatsAvailable;
@@ -61,6 +62,34 @@ internal sealed class UnitTest_VehicleRoleHandler : UnitTest_MapTest
         Assert.AreEqual(mechanoid.Faction, Faction.OfPlayer);
         Expect.IsTrue(vehicle.TryAddPawn(mechanoid), "Boarded mech");
       }
+    }
+  }
+
+  [Test]
+  private void RoleTicking()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1
+    });
+
+    group.Spawn();
+
+    // Vehicle parent
+    {
+      using TickObserver<VehiclePawn> observer = new(group.vehicle);
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    // Internal roles
+    {
+      Pawn pawn = group.pawns.First();
+      Assert.IsFalse(pawn.Spawned);
+      Assert.IsTrue(pawn.IsInVehicle());
+      using TickObserver<Pawn> observer = new(pawn);
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
     }
   }
 }

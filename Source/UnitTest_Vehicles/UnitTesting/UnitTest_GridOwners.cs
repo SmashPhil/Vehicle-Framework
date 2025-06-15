@@ -12,7 +12,7 @@ internal sealed class UnitTest_GridOwners : UnitTest_MapTest
 {
   protected override bool ShouldTest(VehicleDef vehicleDef)
   {
-    VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     if (mapping.GridOwners.IsOwner(vehicleDef) && !mapping.GridOwners.GetPiggies(vehicleDef).Any())
     {
       // Single owner def, there's no point testing ownership since
@@ -25,9 +25,9 @@ internal sealed class UnitTest_GridOwners : UnitTest_MapTest
   [TearDown]
   private void RegenerateAllGrids()
   {
-    VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     mapping.deferredGridGeneration.DoPassExpectClear();
-    mapping.RegenerateGrids(deferment: VehicleMapping.GridDeferment.Forced);
+    mapping.RegenerateGrids(deferment: VehiclePathingSystem.GridDeferment.Forced);
   }
 
   [Test]
@@ -39,8 +39,8 @@ internal sealed class UnitTest_GridOwners : UnitTest_MapTest
 
       VehicleDef vehicleDef = vehicle.VehicleDef;
 
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
 
       mapping.deferredGridGeneration.DoPass();
       Assert.IsTrue(pathData.Suspended);
@@ -65,7 +65,7 @@ internal sealed class UnitTest_GridOwners : UnitTest_MapTest
       VehicleDef piggyDef = mapping.GridOwners.GetPiggies(vehicleDef).FirstOrDefault();
       Assert.IsNotNull(piggyDef);
       Assert.IsFalse(ReferenceEquals(piggyDef, vehicleDef));
-      VehicleMapping.VehiclePathData piggyPathData = mapping[piggyDef];
+      VehiclePathingSystem.VehiclePathData piggyPathData = mapping[piggyDef];
       Assert.IsTrue(piggyPathData.ReachabilityData == pathData.ReachabilityData);
 
       mapping.RequestGridsFor(piggyDef, DeferredGridGeneration.Urgency.Urgent);

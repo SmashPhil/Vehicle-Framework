@@ -49,7 +49,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
 
       Assert.IsNotNull(testDef);
 
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       VehicleRegionGrid regionGrid = mapping[vehicleDef].VehicleRegionGrid;
       VehicleRegionMaker regionMaker = mapping[vehicleDef].VehicleRegionMaker;
       Assert.IsFalse(mapping.ThreadAvailable);

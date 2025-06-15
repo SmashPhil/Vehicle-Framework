@@ -359,8 +359,8 @@ namespace Vehicles
     private static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest,
       PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
     {
-      if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is VehiclePawn) &&
-        traverseParams.pawn?.Map.GetCachedMapComponent<VehiclePositionManager>()
+      if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is not null) &&
+        traverseParams.pawn?.Map.GetDetachedMapComponent<VehiclePositionManager>()
          .ClaimedBy(dest.Cell) is VehiclePawn vehicle &&
         vehicle.VehicleDef.passability != Traversability.Standable)
       {
@@ -553,7 +553,7 @@ namespace Vehicles
     {
       if (!map.TileInfo.WaterCovered)
       {
-        map.GetCachedMapComponent<VehicleMapping>().DisableAllRegionUpdaters();
+        map.GetCachedMapComponent<VehiclePathingSystem>().DisableAllRegionUpdaters();
       }
     }
 

@@ -41,6 +41,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
   //  UISettingsType = UISettingsType.SliderEnum)]
   //[ActionOnSettingsInput(typeof(VehicleHarmony),
   //  nameof(GridOwners.RecacheMoveableVehicleDefs))]
+  [Unsaved]
   [LoadAlias("vehicleMovementPermissions")]
   private VehiclePermissions movementPermissions = VehiclePermissions.DriverNeeded;
   #pragma warning restore CS0414

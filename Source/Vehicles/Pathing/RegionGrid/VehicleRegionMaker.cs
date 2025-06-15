@@ -33,7 +33,7 @@ public class VehicleRegionMaker : VehicleGridManager
 
   private int nextId = 1;
 
-  public VehicleRegionMaker(VehicleMapping mapping, VehicleDef createdFor) : base(mapping,
+  public VehicleRegionMaker(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
     createdFor)
   {
     const float PoolSize = 0.5f; // Create pool for 50% of average regions / links count
@@ -387,7 +387,7 @@ public class VehicleRegionMaker : VehicleGridManager
             DebugHelper.Local.DebugType = DebugRegionType.Regions | DebugRegionType.Links;
 
             IntVec3 cell = UI.MouseCell();
-            map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehicleRegionDirtyer
+            map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehicleRegionDirtyer
              .NotifyWalkabilityChanged(cell);
           }
         });

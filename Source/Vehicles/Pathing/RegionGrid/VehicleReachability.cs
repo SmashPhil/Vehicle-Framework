@@ -29,7 +29,7 @@ namespace Vehicles
     private readonly VehiclePathGrid pathGrid;
     private readonly VehicleRegionGrid regionGrid;
 
-    public VehicleReachability(VehicleMapping mapping, VehicleDef createdFor,
+    public VehicleReachability(VehiclePathingSystem mapping, VehicleDef createdFor,
       VehiclePathGrid pathGrid, VehicleRegionGrid regionGrid) : base(mapping, createdFor)
     {
       chunkSearch = new AStar(this, mapping, createdFor);
@@ -217,7 +217,7 @@ namespace Vehicles
         if (peMode == PathEndMode.OnCell)
         {
           VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(dest.Cell, mapping, createdFor);
-          if (region != null && region.Allows(traverseParms, true))
+          if (region != null && region.Allows(traverseParms))
           {
             destRegions.Add(region);
           }
@@ -256,7 +256,7 @@ namespace Vehicles
             case BoolUnknown.False:
               return false;
             case BoolUnknown.Unknown:
-              break;
+            break;
             default:
               throw new NotImplementedException(nameof(BoolUnknown));
           }
@@ -371,7 +371,7 @@ namespace Vehicles
       bool RegionReachable(VehicleRegion linkedRegion)
       {
         if (linkedRegion != null && linkedRegion.reachedIndex != reachedIndex &&
-          linkedRegion.type.Passable() && linkedRegion.Allows(traverseParms, false))
+          linkedRegion.type.Passable() && linkedRegion.Allows(traverseParms))
         {
           if (destRegions.Contains(linkedRegion))
           {
@@ -583,7 +583,7 @@ namespace Vehicles
       }
 
       VehicleRegion region = regionGrid.DirectGrid[num];
-      return region is null || region.Allows(traverseParms, false);
+      return region is null || region.Allows(traverseParms);
     }
 
     /// <summary>
@@ -703,7 +703,7 @@ namespace Vehicles
         return true;
       }
 
-      bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms, false);
+      bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms);
       bool foundReg = false;
 
       bool regionProcessor(VehicleRegion r)
@@ -762,13 +762,13 @@ namespace Vehicles
       }
 
       VehicleRegion region =
-        VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor, RegionType.Set_Passable);
+        VehicleRegionAndRoomQuery.RegionAt(cell, mapping, createdFor);
       if (region == null)
       {
         return false;
       }
 
-      bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms, false);
+      bool entryCondition(VehicleRegion from, VehicleRegion r) => r.Allows(traverseParms);
       bool foundReg = false;
 
       bool regionProcessor(VehicleRegion r)
@@ -812,10 +812,10 @@ namespace Vehicles
       private readonly Dictionary<IntVec3, Node> nodes = new Dictionary<IntVec3, Node>();
 
       private readonly VehicleReachability vehicleReachability;
-      private readonly VehicleMapping mapping;
+      private readonly VehiclePathingSystem mapping;
       private readonly VehicleDef vehicleDef;
 
-      public AStar(VehicleReachability vehicleReachability, VehicleMapping mapping,
+      public AStar(VehicleReachability vehicleReachability, VehiclePathingSystem mapping,
         VehicleDef vehicleDef)
       {
         this.vehicleReachability = vehicleReachability;
@@ -1020,7 +1020,7 @@ namespace Vehicles
 
         destinationRegion = VehicleRegionAndRoomQuery.RegionAt(dest.Cell, mapping,
           vehicleReachability.createdFor, RegionType.Set_Passable);
-        if (startingRegion == null || !destinationRegion.Allows(traverseParms, true))
+        if (startingRegion == null || !destinationRegion.Allows(traverseParms))
         {
           Log.Error(
             $"Unable to fetch valid starting region that allows traverseParms={traverseParms} at {start}.");
@@ -1120,8 +1120,10 @@ namespace Vehicles
         public bool Passable => regionA != null && regionA.type.Passable() && regionB != null &&
           regionB.type.Passable();
 
-        public bool Allows(TraverseParms traverseParms) => regionA.Allows(traverseParms, false) &&
-          regionB.Allows(traverseParms, false);
+        public bool Allows(TraverseParms traverseParms)
+        {
+          return regionA.Allows(traverseParms) && regionB.Allows(traverseParms);
+        }
 
         public override string ToString()
         {

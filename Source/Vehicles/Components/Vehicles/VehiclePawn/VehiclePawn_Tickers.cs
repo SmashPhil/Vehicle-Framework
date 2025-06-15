@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
-using LudeonTK;
 using RimWorld;
-using UnityEngine;
 using Verse;
 
 namespace Vehicles;
@@ -18,6 +16,9 @@ public partial class VehiclePawn
   public override bool Suspended => false;
 
   public int AttachedExplosives => explosives.Count;
+
+  // Pawn has null held things
+  bool IThingHolderTickable.ShouldTickContents => false;
 
   public void AddTimedExplosion(TimedExplosion exploder)
   {
@@ -116,7 +117,7 @@ public partial class VehiclePawn
     sustainers.Tick();
     if (Spawned)
     {
-      animator?.AnimationTick();
+      //animator?.AnimationTick();
       vehiclePather.PatherTick();
       stances.StanceTrackerTick();
       if (Drafted || CompVehicleTurrets is { Deploying: true })

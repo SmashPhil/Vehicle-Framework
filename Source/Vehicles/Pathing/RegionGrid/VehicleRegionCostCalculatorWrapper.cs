@@ -11,7 +11,7 @@ namespace Vehicles
   /// </summary>
   public class VehicleRegionCostCalculatorWrapper
   {
-    private readonly VehicleMapping mapping;
+    private readonly VehiclePathingSystem mapping;
     private readonly VehicleDef vehicleDef;
     private IntVec3 endCell;
 
@@ -29,7 +29,7 @@ namespace Vehicles
     private int cachedSecondBestLinkCost;
     private bool cachedRegionIsDestination;
 
-    public VehicleRegionCostCalculatorWrapper(VehicleMapping mapping, VehicleDef vehicleDef)
+    public VehicleRegionCostCalculatorWrapper(VehiclePathingSystem mapping, VehicleDef vehicleDef)
     {
       this.mapping = mapping;
       this.vehicleDef = vehicleDef;
@@ -62,7 +62,7 @@ namespace Vehicles
       if (end.Width == 1 && end.Height == 1)
       {
         VehicleRegion region =
-          VehicleRegionAndRoomQuery.RegionAt(endCell, mapping, vehicleDef, RegionType.Set_Passable);
+          VehicleRegionAndRoomQuery.RegionAt(endCell, mapping, vehicleDef);
         if (region != null)
         {
           destRegions.Add(region);
@@ -75,11 +75,10 @@ namespace Vehicles
           if (intVec.InBounds(mapping.map) &&
             !disallowedCorners.Contains(mapping.map.cellIndices.CellToIndex(intVec)))
           {
-            VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef,
-              RegionType.Set_Passable);
+            VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef);
             if (region2 != null)
             {
-              if (region2.Allows(traverseParms, true))
+              if (region2.Allows(traverseParms))
               {
                 destRegions.Add(region2);
               }

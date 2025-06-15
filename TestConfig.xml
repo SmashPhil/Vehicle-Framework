@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Config>
-
-  <retryOnFailure>true</retryOnFailure>
-  <stopOnFailure>true</stopOnFailure>
-
-  <log>
-    <verboseLogging>true</verboseLogging>
-  </log>
+  <map>
+    <size>50</size>
+  </map>
 </Config>

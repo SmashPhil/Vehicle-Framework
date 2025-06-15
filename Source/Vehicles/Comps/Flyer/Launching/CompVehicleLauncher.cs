@@ -196,7 +196,7 @@ namespace Vehicles
         }
       }
 
-      if (Vehicle.MovementPermissions > VehiclePermissions.NotAllowed)
+      if (!Vehicle.MovementPermissions.HasFlag(VehiclePermissions.Immobile))
       {
         if (!Vehicle.CanMoveFinal)
         {

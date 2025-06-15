@@ -22,9 +22,9 @@ internal sealed class UnitTest_DeferredGeneration : UnitTest_MapTest
   [TearDown]
   private void RegenerateAllGrids()
   {
-    VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     mapping.deferredGridGeneration.DoPassExpectClear();
-    mapping.RegenerateGrids(deferment: VehicleMapping.GridDeferment.Forced);
+    mapping.RegenerateGrids(deferment: VehiclePathingSystem.GridDeferment.Forced);
   }
 
   [Test]
@@ -36,8 +36,8 @@ internal sealed class UnitTest_DeferredGeneration : UnitTest_MapTest
 
       VehicleDef vehicleDef = vehicle.VehicleDef;
 
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
 
       Assert.IsNotNull(mapping.deferredGridGeneration);
       if (!mapping.ThreadAlive)

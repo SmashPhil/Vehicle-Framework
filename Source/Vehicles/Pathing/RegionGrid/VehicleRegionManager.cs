@@ -2,10 +2,10 @@
 
 public abstract class VehicleGridManager
 {
-  protected readonly VehicleMapping mapping;
+  protected readonly VehiclePathingSystem mapping;
   protected internal VehicleDef createdFor;
 
-  protected VehicleGridManager(VehicleMapping mapping, VehicleDef createdFor)
+  protected VehicleGridManager(VehiclePathingSystem mapping, VehicleDef createdFor)
   {
     this.mapping = mapping;
     this.createdFor = createdFor;

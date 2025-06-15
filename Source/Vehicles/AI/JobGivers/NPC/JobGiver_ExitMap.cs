@@ -34,8 +34,8 @@ namespace Vehicles
       Assert.IsNotNull(vehicle, "Non-vehicle pawn assigned to a vehicle job.");
       Assert.IsTrue(vehicle.Spawned, "Assigning job to despawned vehicle.");
 
-      VehicleMapping mapping = vehicle.Map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+      VehiclePathingSystem mapping = vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
       VehicleReachability reachability = pathData.VehicleReachability;
       bool canReach = !reachability.CanReachMapEdge(vehicle.Position, TraverseParms.For(vehicle));
       bool activeThreat = vehicle.Faction != null &&

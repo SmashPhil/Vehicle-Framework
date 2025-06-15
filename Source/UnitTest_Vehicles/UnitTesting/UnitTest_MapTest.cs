@@ -10,7 +10,7 @@ using Verse;
 
 namespace Vehicles.UnitTesting;
 
-internal abstract class UnitTest_MapTest : UnitTest_VehicleTest
+internal abstract class UnitTest_MapTest
 {
   private ThreadDisabler threadDisabler;
 
@@ -31,6 +31,19 @@ internal abstract class UnitTest_MapTest : UnitTest_VehicleTest
     return CellRect.CenteredOn(root, maxSize).ExpandedBy(5);
   }
 
+  [TearDown, ExecutionPriority(Priority.Last)]
+  protected void EnableDedicatedThreads()
+  {
+    threadDisabler.Dispose();
+    threadDisabler = null;
+  }
+
+  [TearDown, ExecutionPriority(Priority.BelowNormal)]
+  private void DestroyAllVehicles()
+  {
+    TestUtils.EmptyWorldAndMapOfVehicles();
+  }
+
   [SetUp]
   protected void GenerateVehicles()
   {
@@ -44,7 +57,7 @@ internal abstract class UnitTest_MapTest : UnitTest_VehicleTest
     // when validating grids.
     threadDisabler = new ThreadDisabler();
 
-    VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     vehicles.Clear();
     foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
     {
@@ -60,13 +73,6 @@ internal abstract class UnitTest_MapTest : UnitTest_VehicleTest
       VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction);
       vehicles.Add(vehicle);
     }
-  }
-
-  [TearDown, ExecutionPriority(Priority.Last)]
-  protected void EnableDedicatedThreads()
-  {
-    threadDisabler.Dispose();
-    threadDisabler = null;
   }
 
   protected readonly struct VehicleTestCase : IDisposable

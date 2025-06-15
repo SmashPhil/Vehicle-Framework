@@ -107,7 +107,7 @@ namespace Vehicles
     /// <remarks>Shorthand for <see cref="VehiclePositionManager.ClaimPosition(VehiclePawn)"/></remarks>
     public void ReclaimPosition()
     {
-      Map.GetCachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
+      Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
     }
 
     public new void Notify_Teleported(bool endCurrentJob = true, bool resetTweenedPos = true)

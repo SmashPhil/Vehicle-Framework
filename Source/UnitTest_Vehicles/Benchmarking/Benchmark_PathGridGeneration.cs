@@ -17,12 +17,12 @@ internal class Benchmark_PathGridGeneration
   [Benchmark]
   private static void PathGridGen_Parallel(ref PathGridContext context)
   {
-    VehicleMapping mapping = context.mapping;
+    VehiclePathingSystem mapping = context.mapping;
     // delegate will add a little bit of overhead from but this is how the original method
     // is written so it's accurate.
     Parallel.ForEach(context.vehicleDefs, delegate(VehicleDef vehicleDef)
     {
-      VehicleMapping.VehiclePathData vehiclePathData = mapping[vehicleDef];
+      VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDef];
       vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
     });
   }
@@ -30,7 +30,7 @@ internal class Benchmark_PathGridGeneration
   [Benchmark]
   private static void PathGridGen_Partitioned(ref PathGridContext context)
   {
-    VehicleMapping mapping = context.mapping;
+    VehiclePathingSystem mapping = context.mapping;
     List<VehicleDef> vehicleDefs = context.vehicleDefs;
     // delegate will add a little bit of overhead from but this is how the original method
     // is written so it's accurate.
@@ -38,7 +38,7 @@ internal class Benchmark_PathGridGeneration
     {
       for (int i = range.Item1; i < range.Item2; i++)
       {
-        VehicleMapping.VehiclePathData vehiclePathData = mapping[vehicleDefs[i]];
+        VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDefs[i]];
         vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
       }
     });
@@ -47,23 +47,23 @@ internal class Benchmark_PathGridGeneration
   [Benchmark]
   private static void PathGridGen_Sequential(ref PathGridContext context)
   {
-    VehicleMapping mapping = context.mapping;
+    VehiclePathingSystem mapping = context.mapping;
 
     foreach (VehicleDef vehicleDef in context.vehicleDefs)
     {
-      VehicleMapping.VehiclePathData vehiclePathData = mapping[vehicleDef];
+      VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDef];
       vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
     }
   }
 
   private readonly struct PathGridContext
   {
-    public readonly VehicleMapping mapping;
+    public readonly VehiclePathingSystem mapping;
     public readonly List<VehicleDef> vehicleDefs;
 
     public PathGridContext()
     {
-      this.mapping = Find.CurrentMap.GetCachedMapComponent<VehicleMapping>();
+      this.mapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
       this.vehicleDefs =
         DefDatabase<VehicleDef>.AllDefsListForReading.Take(VehicleTestCount).ToList();
     }

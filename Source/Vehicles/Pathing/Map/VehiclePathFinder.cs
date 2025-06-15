@@ -86,7 +86,7 @@ public class VehiclePathFinder : VehicleGridManager
     new CurvePoint(100000f, 500f),
   ];
 
-  public VehiclePathFinder(VehicleMapping mapping, VehicleDef vehicleDef) : base(mapping,
+  public VehiclePathFinder(VehiclePathingSystem mapping, VehicleDef vehicleDef) : base(mapping,
     vehicleDef)
   {
     roadGrid = mapping.map.areaManager.Get<Area_Road>();
@@ -534,7 +534,7 @@ public class VehiclePathFinder : VehicleGridManager
   /// </summary>
   public static bool BlocksDiagonalMovement(Map map, VehicleDef vehicleDef, int index)
   {
-    return map.GetCachedMapComponent<VehicleMapping>()[vehicleDef].VehiclePathGrid
+    return map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehiclePathGrid
      .WalkableFast(index) || map.edificeGrid[index] is Building_Door;
   }
 
@@ -559,7 +559,8 @@ public class VehiclePathFinder : VehicleGridManager
   /// <summary>
   /// Flash cell on map
   /// </summary>
-  private static void DebugFlash(VehicleMapping mapping, IntVec3 cell, float colorPct, string label)
+  private static void DebugFlash(VehiclePathingSystem mapping, IntVec3 cell, float colorPct,
+    string label)
   {
     if (cell.InBounds(mapping.map))
     {
@@ -655,7 +656,7 @@ public class VehiclePathFinder : VehicleGridManager
   {
     public readonly List<(IntVec3, float)> postCalculatedCells = [];
 
-    private VehicleMapping mapping;
+    private VehiclePathingSystem mapping;
 
     public PriorityQueue<CostNode, float> openList;
     public VehiclePathFinderNodeFast[] calcGrid;
@@ -667,7 +668,7 @@ public class VehiclePathFinder : VehicleGridManager
 
     // Need to ensure data is initialized, and ObjectPool only accepts default constructor
     // objects so it was either this or another ObjectPool implementation locally defined.
-    public void Init(VehicleMapping mapping)
+    public void Init(VehiclePathingSystem mapping)
     {
       if (this.mapping is null)
       {

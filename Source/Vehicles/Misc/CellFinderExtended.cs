@@ -185,7 +185,7 @@ namespace Vehicles
       workingRegions.Clear();
       float radSquared = radius * radius;
       VehicleRegionTraverser.BreadthFirstTraverse(root, map, vehicleDef,
-        (VehicleRegion from, VehicleRegion to) => to.Allows(traverseParms, true)
+        (VehicleRegion from, VehicleRegion to) => to.Allows(traverseParms)
           && (radius > 1000f || to.extentsClose.ClosestDistSquaredTo(root) <= radSquared)
           && (regionValidator == null || regionValidator(to)),
         delegate(VehicleRegion region)
@@ -402,8 +402,8 @@ namespace Vehicles
       Assert.IsTrue(vehicle.Spawned, "Trying to find exit spot for despawned vehicle.");
 
       Map map = vehicle.Map;
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
 
       Danger maxDanger = Danger.Some;
       IntVec3 cell;
@@ -424,16 +424,16 @@ namespace Vehicles
         {
           case 0:
             cell.x = 0;
-            break;
+          break;
           case 1:
             cell.x = map.Size.x - 1;
-            break;
+          break;
           case 2:
             cell.z = 0;
-            break;
+          break;
           case 3:
             cell.z = map.Size.z - 1;
-            break;
+          break;
         }
 
         cell = cell.PadForHitbox(map, vehicle.VehicleDef);
@@ -462,8 +462,8 @@ namespace Vehicles
 
       cell = IntVec3.Invalid;
       Map map = vehicle.Map;
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
-      VehicleMapping.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
       if (!pathData.VehicleReachability.CanReachMapEdge(vehicle.Position,
         TraverseParms.For(vehicle)))
       {

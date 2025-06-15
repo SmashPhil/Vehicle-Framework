@@ -21,9 +21,9 @@ internal sealed class UnitTest_TerrainGrid : UnitTest_MapTest
       using VehicleTestCase vtc = new(vehicle, this);
 
       VehicleDef vehicleDef = vehicle.VehicleDef;
-      VehicleMapping mapping = map.GetCachedMapComponent<VehicleMapping>();
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       VehicleRegionGrid regionGrid = mapping[vehicleDef].VehicleRegionGrid;
-      VehicleMapping.VehiclePathData pathData = mapping[vehicleDef];
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
 
       CellRect testArea = TestArea(vehicleDef);
       CellRect terrainArea = testArea.ContractedBy(vehicleDef.SizePadding);

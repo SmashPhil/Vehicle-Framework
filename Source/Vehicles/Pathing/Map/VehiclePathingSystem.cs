@@ -13,7 +13,7 @@ namespace Vehicles;
 /// MapComponent container for all pathing related sub-components for vehicles
 /// </summary>
 [StaticConstructorOnStartup]
-public sealed class VehicleMapping : MapComponent
+public sealed class VehiclePathingSystem : MapComponent
 {
   private const int EventMapId = 0;
 
@@ -30,7 +30,7 @@ public sealed class VehicleMapping : MapComponent
 
   private int defGridCalculatedDayOfYear;
 
-  public VehicleMapping(Map map) : base(map)
+  public VehiclePathingSystem(Map map) : base(map)
   {
     GridOwners = new MapGridOwners(this);
     GridOwners.OnOwnershipTransfer += SwapRegionManagerOwners;
@@ -111,14 +111,12 @@ public sealed class VehicleMapping : MapComponent
     if (map.IsPlayerHome)
     {
       thread = ThreadManager.CreateNew();
-      Log.Message(
-        $"<color=orange>{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})</color>");
+      Debug.Message($"{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})");
       return thread;
     }
 
     thread = ThreadManager.GetShared(EventMapId);
-    Log.Message(
-      $"<color=orange>{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})</color>");
+    Debug.Message($"{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})");
     return thread;
   }
 
@@ -294,7 +292,7 @@ public sealed class VehicleMapping : MapComponent
   {
     if (dedicatedThread == null || dedicatedThread.Terminated) return;
 
-    Log.Message($"<color=orange>Releasing thread {dedicatedThread.id}.</color>");
+    Debug.Message($"Releasing thread {dedicatedThread.id}.");
     ThreadManager.ReleaseAndJoin(dedicatedThread);
     dedicatedThread = null;
   }
@@ -375,7 +373,7 @@ public sealed class VehicleMapping : MapComponent
   {
     if (!Find.TickManager.Paused)
     {
-      var manager = map.GetCachedMapComponent<VehiclePositionManager>();
+      VehiclePositionManager manager = map.GetDetachedMapComponent<VehiclePositionManager>();
       foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
       {
         if (!manager.PositionClaimed(cell)) continue;
@@ -548,7 +546,7 @@ public sealed class VehicleMapping : MapComponent
     public readonly VehicleRegionDirtyer regionDirtyer;
     public readonly VehicleReachability reachability;
 
-    public VehicleReachabilitySettings(VehicleMapping vehicleMapping, VehicleDef vehicleDef,
+    public VehicleReachabilitySettings(VehiclePathingSystem vehicleMapping, VehicleDef vehicleDef,
       VehiclePathData pathData)
     {
       regionGrid = new VehicleRegionGrid(vehicleMapping, vehicleDef);
