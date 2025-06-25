@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
-using RimWorld;
+﻿using RimWorld;
 using SmashTools;
 using UnityEngine;
+using Verse;
 
 namespace Vehicles
 {
@@ -27,7 +24,7 @@ namespace Vehicles
     public bool fullVehiclePathing = true;
     public bool smoothVehiclePaths = true;
 
-    public bool vehiclePathingBiomesCostOnRoads = true;
+    public bool ignoreBiomeCostOnRoads = true;
     public bool multiplePawnsPerJob = true;
 
     /* Graphics */
@@ -82,7 +79,7 @@ namespace Vehicles
       fullVehiclePathing = true;
       smoothVehiclePaths = true;
 
-      vehiclePathingBiomesCostOnRoads = true;
+      ignoreBiomeCostOnRoads = true;
       multiplePawnsPerJob = true;
 
       meleeDamageMultiplier = 1;
@@ -137,8 +134,8 @@ namespace Vehicles
       Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
       Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
 
-      Scribe_Values.Look(ref vehiclePathingBiomesCostOnRoads,
-        nameof(vehiclePathingBiomesCostOnRoads), defaultValue: true);
+      Scribe_Values.Look(ref ignoreBiomeCostOnRoads,
+        nameof(ignoreBiomeCostOnRoads), defaultValue: true);
       Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
 
       Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
@@ -211,13 +208,13 @@ namespace Vehicles
           GameFont.Small, TextAnchor.MiddleCenter);
         listingStandard.Gap(4);
         listingStandard.CheckboxLabeledWithMessage("VF_ModifiableSettings".Translate(),
-          delegate(bool value)
+          delegate
           {
             return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
           }, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 
         listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),
-          delegate(bool value)
+          delegate
           {
             return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
           }, ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
@@ -230,10 +227,10 @@ namespace Vehicles
           ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 
         listingStandard.CheckboxLabeledWithMessage("VF_RoadBiomeCostPathing".Translate(),
-          delegate(bool value)
+          delegate
           {
             return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-          }, ref vehiclePathingBiomesCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
+          }, ref ignoreBiomeCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
 
         listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(),
           ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());

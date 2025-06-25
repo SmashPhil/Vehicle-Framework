@@ -66,7 +66,7 @@ public static class CaravanHelper
   /// <summary>
   /// <see cref="CaravanExitMapUtility.BestExitTileToGoTo"/> but implemented for vehicle pathfinding.
   /// </summary>
-  public static int BestExitTileToGoTo(List<VehicleDef> vehicleDefs, int destinationTile,
+  public static int BestExitTileToGoTo(List<VehicleDef> vehicleDefs, PlanetTile destinationTile,
     Map from)
   {
     int exitTile = -1;
@@ -74,7 +74,7 @@ public static class CaravanHelper
      .FindPath(from.Tile, destinationTile, vehicleDefs);
     if (worldPath.Found && worldPath.NodesLeftCount >= 2)
     {
-      exitTile = worldPath.NodesReversed[worldPath.NodesReversed.Count - 2];
+      exitTile = worldPath.NodesReversed[^2];
     }
     if (exitTile == -1)
     {

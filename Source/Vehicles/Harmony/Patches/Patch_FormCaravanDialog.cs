@@ -11,9 +11,9 @@ using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Vehicles.Rendering;
 using Vehicles.World;
 using Verse;
+using Verse.Sound;
 
 namespace Vehicles;
 
@@ -33,8 +33,20 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     [PawnsTabLabelKey, ItemsTabLabelKey, TravelSuppliesTabLabelKey];
 
   public static readonly MethodInfo Notify_TransferablesChanged;
+  private static readonly MethodInfo SelectApproximateBestTravelSupplies;
   private static readonly Type FormCaravanTabEnumType;
   private static readonly Type SplitCaravanTabEnumType;
+
+  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, PlanetTile> startingTileFieldRef;
+
+  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, PlanetTile>
+    destinationTileFieldRef;
+
+  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, bool>
+    ticksToArriveDirtyFieldRef;
+
+  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, bool>
+    daysWorthOfFoodDirty;
 
   private static readonly List<Pawn> tmpPawns = [];
 
@@ -47,7 +59,13 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     SplitCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_SplitCaravan+Tab", "RimWorld");
     Notify_TransferablesChanged =
       AccessTools.Method(typeof(Dialog_FormCaravan), "Notify_TransferablesChanged");
-    Assert.IsNotNull(Notify_TransferablesChanged);
+    SelectApproximateBestTravelSupplies =
+      AccessTools.Method(typeof(Dialog_FormCaravan), "SelectApproximateBestTravelSupplies");
+
+    startingTileFieldRef =
+      AccessTools.FieldRefAccess<PlanetTile>(typeof(Dialog_FormCaravan), "startingTile");
+    destinationTileFieldRef =
+      AccessTools.FieldRefAccess<PlanetTile>(typeof(Dialog_FormCaravan), "destinationTile");
   }
 
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
@@ -94,11 +112,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(FormCaravanTabsTranspiler)));
     HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(Dialog_FormCaravan),
-        nameof(Dialog_FormCaravan.Notify_ChoseRoute)),
-      postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
-        nameof(BestExitTileForVehicles)));
-    HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"),
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(StartRoutePlanningForVehiclesTranspiler)));
@@ -127,8 +140,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 
   private static bool ApproxTilesForVehicleTransferables(ref float __result,
     List<TransferableOneWay> transferables, float massUsage, float massCapacity,
-    PlanetTile tile, PlanetTile nextTile, bool isShuttle,
-    StringBuilder explanation = null)
+    PlanetTile tile, PlanetTile nextTile, StringBuilder explanation = null)
   {
     if (transferables.Exists(transferable =>
       transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 }))
@@ -165,8 +177,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   {
     List<CodeInstruction> instructionList = instructions.ToList();
 
-    // Patch_FormCaravanDialog::CreateTabListPostOpen(this, tabsList);
-    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+    // Patch_FormCaravanDialog::CreateTabListPostOpen(tabsList);
     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
     yield return new CodeInstruction(opcode: OpCodes.Ldfld,
       AccessTools.Field(typeof(Dialog_FormCaravan), "tabsList"));
@@ -198,8 +209,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
   }
 
-  private static void CreateTabListPostOpen(Dialog_FormCaravan __instance,
-    List<TabRecord> ___tabsList)
+  private static void CreateTabListPostOpen(List<TabRecord> ___tabsList)
   {
     Assert.IsTrue(___tabsList.NullOrEmpty());
     selectedTab = TabVehicles;
@@ -214,8 +224,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
   }
 
-  private static void ClearTabListPostClose(Dialog_FormCaravan __instance,
-    List<TabRecord> ___tabsList)
+  private static void ClearTabListPostClose(List<TabRecord> ___tabsList)
   {
     ___tabsList.Clear();
     selectedTab = TabVehicles;
@@ -244,7 +253,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   }
 
   private static IEnumerable<CodeInstruction> FormCaravanTabsTranspiler(
-    IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+    IEnumerable<CodeInstruction> instructions)
   {
     // ReSharper disable ExtractCommonBranchingCode
     List<CodeInstruction> instructionList = [.. instructions];
@@ -272,6 +281,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         else
         {
           tabClearing = false;
+          // ReSharper disable once RedundantAssignment
           instruction = instructionList[++i]; // Ldsfld: Dialog_FormCaravan::tabsList
           instruction = instructionList[++i]; // Callvirt: List`1<TabRecord>::Clear
           // ref inRect
@@ -292,8 +302,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         instruction = instructionList[++i]; // Ldfld: Dialog_FormCaravan::tab
         // transferablesRect
         yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 3);
-        // Dialog_FormCaravan::tabsList
-        yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: tabListField);
         // out bool anythingChanged
         yield return new CodeInstruction(opcode: OpCodes.Ldloca_S, operand: 4);
         // this->pawnsTransfer
@@ -308,7 +316,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
         yield return new CodeInstruction(opcode: OpCodes.Ldfld,
           operand: AccessTools.Field(typeof(Dialog_FormCaravan), "travelSuppliesTransfer"));
-        // DrawActiveTab(this, inRect, tabsList, out anythingChanged);
+        // DrawActiveTab
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(DrawActiveTab)));
       }
@@ -333,7 +341,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   }
 
   private static void DrawActiveTab(Dialog_FormCaravan __instance, Rect transferablesRect,
-    List<TabRecord> tabsList, out bool anythingChanged, TransferableOneWayWidget pawnsTransfer,
+    out bool anythingChanged, TransferableOneWayWidget pawnsTransfer,
     TransferableOneWayWidget itemsTransfer, TransferableOneWayWidget travelSuppliesTransfer)
   {
     anythingChanged = false;
@@ -351,6 +359,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         __instance.DrawAutoSelectCheckbox(transferablesRect, ref anythingChanged);
       break;
       case TabVehicles: // Vehicles Tab
+        // TODO 1.6 - check if `anythingChanged` is usable in TransferableVehicleWidget
         vehiclesTransfer.OnGUI(transferablesRect /*, out anythingChanged*/);
       break;
       default:
@@ -361,12 +370,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
   }
 
-  private static void BestExitTileForVehicles(Dialog_FormCaravan __instance,
-    ref PlanetTile ___destinationTile)
-  {
-    // TODO
-  }
-
   private static IEnumerable<CodeInstruction> StartRoutePlanningForVehiclesTranspiler(
     IEnumerable<CodeInstruction> instructions)
   {
@@ -374,6 +377,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     MethodInfo startPlanningMethod =
       AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.Start),
         parameters: [typeof(Dialog_FormCaravan)]);
+    FieldInfo mapField = AccessTools.Field(typeof(Dialog_FormCaravan), "map");
+    FieldInfo autoSelectTravelSuppliesField =
+      AccessTools.Field(typeof(Dialog_FormCaravan), "autoSelectTravelSupplies");
     for (int i = 0; i < instructionList.Count; i++)
     {
       CodeInstruction instruction = instructionList[i];
@@ -382,6 +388,14 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       {
         // Callvirt WorldRoutePlanner::Start(Dialog_FormCaravan)
         instruction = instructionList[++i];
+        // ON STACK - WorldRoutePlanner instance, Dialog_FormCaravan instance
+        // this.map
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: mapField);
+        // this.autoSelectTravelSupplies
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+          operand: autoSelectTravelSuppliesField);
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
             nameof(WorldRoutePannerReroute)));
@@ -390,9 +404,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
   }
 
-  // NOTE - easier to pass in the world route planner since it's already on the stack
+  // NOTE - It's easier to pass in the world route planner since it's already on the stack
   private static void WorldRoutePannerReroute(WorldRoutePlanner routePlanner,
-    Dialog_FormCaravan formCaravan)
+    Dialog_FormCaravan formCaravan, Map map, bool autoSelectTravelSupplies)
   {
     if (formCaravan.transferables.Exists(transferable =>
       transferable is { CountToTransfer: > 0, AnyThing: VehiclePawn }))
@@ -407,11 +421,30 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       {
         Find.WindowStack.Add(formCaravan);
         formCaravan.Notify_NoLongerChoosingRoute();
-      }, formCaravan.Notify_ChoseRoute);
+      }, ChoseVehicleRoute);
     }
     else
     {
       routePlanner.Start(formCaravan);
+    }
+    return;
+
+    void ChoseVehicleRoute(PlanetTile tile)
+    {
+      destinationTileFieldRef.Invoke(formCaravan) = tile;
+      List<VehicleDef> vehicleDefs = TransferableUtility
+       .GetPawnsFromTransferables(formCaravan.transferables)
+       .UniqueVehicleDefsInList();
+      startingTileFieldRef.Invoke(formCaravan) =
+        CaravanHelper.BestExitTileToGoTo(vehicleDefs, tile, map);
+      ticksToArriveDirtyFieldRef.Invoke(formCaravan) = true;
+      daysWorthOfFoodDirty.Invoke(formCaravan) = true;
+
+      formCaravan.soundAppear.PlayOneShotOnCamera();
+      if (autoSelectTravelSupplies)
+      {
+        SelectApproximateBestTravelSupplies.Invoke(formCaravan, null);
+      }
     }
   }
 

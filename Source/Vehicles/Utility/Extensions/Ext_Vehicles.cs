@@ -20,6 +20,8 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
 {
+  private static readonly HashSet<VehicleDef> uniqueVehicleDefs = [];
+
   // NOTE - Separated method hook for SOS2 to patch. This is intentionally redundant.
   [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
   public static bool IsRoofed(IntVec3 cell, Map map)
@@ -461,18 +463,29 @@ public static class Ext_Vehicles
   /// Get all unique Vehicles in <paramref name="vehicles"/>
   /// </summary>
   [MustUseReturnValue]
-  public static List<VehicleDef> UniqueVehicleDefsInList(this IEnumerable<VehiclePawn> vehicles)
+  public static List<VehicleDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
   {
-    return vehicles.Select(v => v.VehicleDef).Distinct().ToList();
+    Assert.IsTrue(uniqueVehicleDefs.Count == 0);
+    foreach (VehiclePawn vehicle in vehicles)
+    {
+      uniqueVehicleDefs.Add(vehicle.VehicleDef);
+    }
+    return uniqueVehicleDefs.ToList();
   }
 
   /// <summary>
   /// Get all unique Vehicles in <paramref name="pawns"/>
   /// </summary>
   [MustUseReturnValue]
-  public static List<VehicleDef> UniqueVehicleDefsInList(this IEnumerable<Pawn> pawns)
+  public static List<VehicleDef> UniqueVehicleDefsInList(this List<Pawn> pawns)
   {
-    return pawns.Where(pawn => pawn is VehiclePawn).Cast<VehiclePawn>().UniqueVehicleDefsInList();
+    Assert.IsTrue(uniqueVehicleDefs.Count == 0);
+    foreach (Pawn pawn in pawns)
+    {
+      if (pawn is VehiclePawn vehicle)
+        uniqueVehicleDefs.Add(vehicle.VehicleDef);
+    }
+    return uniqueVehicleDefs.ToList();
   }
 
   /// <summary>

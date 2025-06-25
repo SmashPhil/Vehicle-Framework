@@ -28,6 +28,11 @@ internal class Patch_VehiclePathing : IPatchCategory
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(MultiselectVehicleGotoBlocked)));
     HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(FloatMenuOptionProvider),
+        nameof(FloatMenuOptionProvider.Applies)),
+      prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
+        nameof(DontVanillaDraftMoveVehicles)));
+    HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Selector), "HandleMultiselectGoto"),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(MultiselectGotoDraggingBlocked)));
@@ -107,6 +112,19 @@ internal class Patch_VehiclePathing : IPatchCategory
   {
     if (pawn is VehiclePawn)
     {
+      __result = false;
+      return false;
+    }
+    return true;
+  }
+
+  private static bool DontVanillaDraftMoveVehicles(ref bool __result,
+    FloatMenuOptionProvider __instance, FloatMenuContext context)
+  {
+    if (__instance is not FloatMenuOptionProvider_Vehicle && !context.IsMultiselect &&
+      context.FirstSelectedPawn is VehiclePawn)
+    {
+      // DraftedMove is handled by FloatMenuOptionProvider_OrderVehicle for vehicles
       __result = false;
       return false;
     }

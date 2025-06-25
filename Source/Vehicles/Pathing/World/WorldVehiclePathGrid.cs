@@ -321,13 +321,10 @@ public class WorldVehiclePathGrid : WorldComponent
       vehicleDef.properties.customHillinessCosts.TryGetValue(surfaceTile.hilliness,
         HillinessMovementDifficultyOffset(surfaceTile.hilliness));
 
-    if (!VehicleMod.settings.main.vehiclePathingBiomesCostOnRoads)
+    if (biomeCost < ImpassableMovementDifficulty &&
+      VehicleMod.settings.main.ignoreBiomeCostOnRoads && !surfaceTile.Roads.NullOrEmpty())
     {
-      if (!surfaceTile.Roads.NullOrEmpty())
-      {
-        biomeCost = 1;
-        hillinessCost = 0;
-      }
+      biomeCost = 1;
     }
 
     if (biomeCost >= ImpassableMovementDifficulty ||

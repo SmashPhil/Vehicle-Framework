@@ -443,12 +443,11 @@ public class Dialog_FormVehicleCaravan : Window
     this.destinationTile = destinationTile;
 
     List<VehicleDef> vehicleDefs = TransferableUtility.GetPawnsFromTransferables(transferables)
-     .Where(pawn => pawn is VehiclePawn).Select(pawn => (pawn as VehiclePawn).VehicleDef)
-     .ToList();
+     .UniqueVehicleDefsInList();
     startingTile = CaravanHelper.BestExitTileToGoTo(vehicleDefs, destinationTile, map);
     ticksToArriveDirty = true;
     daysWorthOfFoodDirty = true;
-    soundAppear.PlayOneShotOnCamera(null);
+    soundAppear.PlayOneShotOnCamera();
   }
 
   private void AddToTransferables(Thing t, bool setToTransferMax = false)
