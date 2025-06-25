@@ -4,11 +4,10 @@ using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Rendering;
 using Verse;
-using Transform = SmashTools.Rendering.Transform;
 
 namespace Vehicles;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[PublicAPI]
 public class Graphic_Rgb : Graphic
 {
   public const string MaskSuffix = "m";

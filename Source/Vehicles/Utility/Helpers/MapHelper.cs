@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using RimWorld.Planet;
 using SmashTools;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;
@@ -95,7 +96,7 @@ public static class MapHelper
     Rot4 rot)
   {
     return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot),
-      map) || vehicle.LocationRestrictedBySize(cell, rot, map);
+      map) || vehicle.LocationRestrictedBySize(map, cell, rot);
   }
 
   /// <summary>

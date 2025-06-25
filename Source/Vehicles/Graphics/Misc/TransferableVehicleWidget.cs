@@ -8,11 +8,12 @@ using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Rendering;
 using Verse;
 using Verse.Sound;
 using TransferableOneWay = RimWorld.TransferableOneWay;
 
-namespace Vehicles.Rendering;
+namespace Vehicles.World;
 
 [StaticConstructorOnStartup]
 public sealed class TransferableVehicleWidget
@@ -213,7 +214,6 @@ public sealed class TransferableVehicleWidget
   private void DrawCard(Rect rect, Section section, TransferableOneWay transferable)
   {
     const float Margin = 15;
-    const float LinePadding = 2;
     const float CheckboxSize = 24;
 
     VehiclePawn vehicle = transferable.AnyThing as VehiclePawn;
@@ -237,12 +237,27 @@ public sealed class TransferableVehicleWidget
       SoundDefOf.Click.PlayOneShotOnCamera();
       if (checkOn)
       {
-        Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferable));
+        if (vehicle != null)
+          Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferable));
+        else
+          transferable.ForceTo(transferable.GetMaximumToTransfer());
       }
       else
       {
         transferable.ForceTo(0);
-        CaravanHelper.assignedSeats.RemoveAssignments(vehicle);
+        if (vehicle != null)
+        {
+          foreach (AssignedSeat seat in CaravanHelper.assignedSeats.GetAssignments(vehicle))
+          {
+            TransferableOneWay pawnTransferable =
+              pawns.FirstOrDefault(trnsf => trnsf.AnyThing == seat.pawn);
+            if (pawnTransferable != null && !pawnTransferable.AnyThing.InVehicle())
+              pawnTransferable.ForceTo(0);
+          }
+          CaravanHelper.assignedSeats.RemoveAssignments(vehicle);
+          Patch_FormCaravanDialog.Notify_TransferablesChanged.Invoke(
+            CaravanHelper.CurrentDialogFormCaravan, null);
+        }
       }
     }
 
@@ -272,6 +287,16 @@ public sealed class TransferableVehicleWidget
 
     Rect infoRect = (rect with { yMin = iconRect.yMax }).ContractedBy(Margin, 0);
     infoRect.yMin += 10;
+    DrawVehicleInfo(infoRect, transferable);
+  }
+
+  private static void DrawVehicleInfo(Rect infoRect, TransferableOneWay transferable)
+  {
+    const float LinePadding = 2;
+
+    VehiclePawn vehicle = transferable.AnyThing as VehiclePawn;
+    VehicleDef vehicleDef = transferable.ThingDef as VehicleDef;
+    Assert.IsNotNull(vehicleDef);
 
     Rect lineRect = infoRect with { height = Text.LineHeight };
     DrawMoveSpeed(lineRect, transferable);
@@ -308,7 +333,6 @@ public sealed class TransferableVehicleWidget
     {
       DrawIcon(ref rect, VehicleTex.DraftVehicle, vehicle.PawnCountToOperate.ToString());
       DrawIcon(ref rect, pawnIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
-      //DrawIcon(ref rect, VehicleTex.DraftVehicle, vehicle.PawnCountToOperate.ToString());
     }
     else
     {
@@ -353,7 +377,7 @@ public sealed class TransferableVehicleWidget
     if (moveSpeed > 0)
     {
       // Conversion for tiles per day
-      moveSpeed /= 60;
+      moveSpeed /= 60; // normalize
       int ticksPerTile = VehicleCaravanTicksPerMoveUtility.TicksFromMoveSpeed(moveSpeed);
       tilesPerDay = GenDate.TicksPerDay / (float)ticksPerTile;
     }

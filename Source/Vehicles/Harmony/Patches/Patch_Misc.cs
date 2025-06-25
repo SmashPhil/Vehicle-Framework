@@ -115,7 +115,7 @@ internal class Patch_Misc : IPatchCategory
 
   private static void MoveOnDeath(Pawn __instance)
   {
-    if (__instance.IsInVehicle())
+    if (__instance.InVehicle())
     {
       VehiclePawn vehicle = __instance.GetVehicle();
       vehicle.AddOrTransfer(__instance);

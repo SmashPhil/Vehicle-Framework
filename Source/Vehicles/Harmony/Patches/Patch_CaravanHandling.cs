@@ -10,6 +10,7 @@ using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
+using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 using OpCodes = System.Reflection.Emit.OpCodes;
@@ -26,6 +27,11 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
+    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(CaravanVisibilityCalculator),
+        nameof(CaravanVisibilityCalculator.Visibility),
+        parameters: [typeof(List<Pawn>), typeof(bool), typeof(StringBuilder)]),
+      transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
+        nameof(VehicleVisibilityInCaravanTranspiler)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(MassUtility), nameof(MassUtility.Capacity)),
       prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
@@ -125,12 +131,6 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(ForagedFoodPerDayCalculator.GetBaseForagedNutritionPerDay)),
       prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(GetBaseForagedNutritionPerDayInVehicle)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(TilesPerDayCalculator),
-        nameof(TilesPerDayCalculator.ApproxTilesPerDay),
-        [typeof(Caravan), typeof(StringBuilder)]),
-      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
-        nameof(ApproxTilesForVehicles)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Caravan), nameof(Caravan.ContainsPawn)),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
@@ -262,6 +262,38 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(NoTradingUndocked)));
   }
 
+  private static IEnumerable<CodeInstruction> VehicleVisibilityInCaravanTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    MethodInfo bodySizeProperty = AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.BodySize));
+    List<CodeInstruction> instructionList = instructions.ToList();
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+
+      if (instruction.Calls(bodySizeProperty))
+      {
+        // List`1<Pawn>::get_Item
+        instruction = instructionList[++i];
+        // Call vehicle helper instead
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_CaravanHandling),
+            nameof(VehicleVisibilityWeight)));
+      }
+      yield return instruction;
+    }
+  }
+
+  private static float VehicleVisibilityWeight(Pawn pawn)
+  {
+    const float MaxVisibilityWeight = 12 / CaravanVisibilityCalculator.NotMovingFactor;
+
+    if (pawn is VehiclePawn vehicle)
+      return Mathf.Clamp(vehicle.VehicleDef.properties.visibilityWeight, 0, MaxVisibilityWeight);
+    // Pawns in vehicles don't contribute additional visibility factors
+    return pawn.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn) ? 0 : pawn.BodySize;
+  }
+
   /// <summary>
   /// Carry capacity with Vehicles when using MassCalculator
   /// </summary>
@@ -342,7 +374,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   private static float PawnMassUsageInVehicle(float massUsage, Pawn pawn)
   {
-    if (pawn.IsInVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
+    if (pawn.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
       return 0;
     return massUsage;
   }
@@ -352,13 +384,13 @@ internal class Patch_CaravanHandling : IPatchCategory
     if (__result)
     {
       // Already ignored from gear and inventory calculation, shouldn't subtract again for negative mass usage.
-      __result = !pawn.IsInVehicle() && !CaravanHelper.assignedSeats.IsAssigned(pawn);
+      __result = !pawn.InVehicle() && !CaravanHelper.assignedSeats.IsAssigned(pawn);
     }
   }
 
   private static float PawnCapacityInVehicle(Pawn pawn, StringBuilder explanation)
   {
-    if (pawn.IsInVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
+    if (pawn.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
     {
       return 0; //pawns in vehicles or assigned to vehicle don't contribute to capacity
     }
@@ -768,21 +800,10 @@ internal class Patch_CaravanHandling : IPatchCategory
     ref float __result)
   {
     skip = false;
-    if (p.IsInVehicle() || CaravanHelper.assignedSeats.IsAssigned(p))
+    if (p.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(p))
     {
       skip = true;
       __result = 0;
-      return false;
-    }
-    return true;
-  }
-
-  public static bool ApproxTilesForVehicles(Caravan caravan, ref float __result,
-    StringBuilder explanation = null)
-  {
-    if (caravan is VehicleCaravan vehicleCaravan)
-    {
-      __result = VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(vehicleCaravan, explanation);
       return false;
     }
     return true;
@@ -1036,15 +1057,7 @@ internal class Patch_CaravanHandling : IPatchCategory
             return true;
           }
         }
-
-        if (pawn.Spawned)
-        {
-          aerial.vehicle.TryAddPawn(pawn, handler);
-        }
-        else if (!pawn.IsInVehicle())
-        {
-          aerial.vehicle.Notify_BoardedCaravan(pawn, handler.thingOwner);
-        }
+        aerial.vehicle.TryAddPawn(pawn, handler);
         return false;
       }
       if (aerial.vehicle.AddOrTransfer(thing) <= 0)

@@ -506,7 +506,7 @@ public class VehiclePathFollower : IExposable
 
     //Check ahead and stop prematurely if vehicle won't fit at final destination
     if (shouldStopClipping && curPath.NodesLeft < LookAheadStartingIndex &&
-      vehicle.LocationRestrictedBySize(nextCell, vehicle.FullRotation))
+      vehicle.LocationRestrictedBySize(vehicle.Map, nextCell, vehicle.FullRotation))
     {
       PatherFailed();
       return;
@@ -597,9 +597,10 @@ public class VehiclePathFollower : IExposable
   private VehiclePath FindPath(CancellationToken token)
   {
     lastPathedTargetPosition = destination.Cell;
-    VehiclePath pawnPath = vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
-     .VehiclePathFinder
-     .FindPath(vehicle.Position, destination, vehicle, token, peMode: peMode);
+    VehiclePath pawnPath =
+      vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
+       .VehiclePathFinder
+       .FindPath(vehicle.Position, destination, vehicle, token, peMode: peMode);
     return pawnPath;
   }
 

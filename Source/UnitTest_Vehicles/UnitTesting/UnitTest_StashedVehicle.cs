@@ -3,6 +3,7 @@ using DevTools.UnitTesting;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles.UnitTesting;
@@ -20,7 +21,7 @@ internal sealed class UnitTest_StashedVehicle
   private static VehiclePawn GetTransientVehicleWithPawns(out Pawn colonist, out Pawn animal)
   {
     VehicleDef vehicleDef =
-      TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_STASH_{Rand.Int}");
+      TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_STASH_{Rand.Int}", null);
     vehicleDef.properties.roles =
     [
       new VehicleRole
@@ -61,7 +62,7 @@ internal sealed class UnitTest_StashedVehicle
   {
     Map map = Find.CurrentMap;
     Assert.IsNotNull(map);
-    World world = Find.World;
+    RimWorld.Planet.World world = Find.World;
     Assert.IsNotNull(world);
 
     VehiclePawn vehicle = GetTransientVehicleWithPawns(out Pawn colonist, out Pawn animal);
@@ -96,7 +97,7 @@ internal sealed class UnitTest_StashedVehicle
   {
     Map map = Find.CurrentMap;
     Assert.IsNotNull(map);
-    World world = Find.World;
+    RimWorld.Planet.World world = Find.World;
     Assert.IsNotNull(world);
 
     VehiclePawn vehicle = GetTransientVehicleWithPawns(out _, out _);

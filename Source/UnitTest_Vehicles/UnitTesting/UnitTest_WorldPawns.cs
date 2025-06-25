@@ -3,6 +3,7 @@ using DevTools.UnitTesting;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles.UnitTesting;
@@ -73,7 +74,7 @@ internal sealed class UnitTest_WorldPawns
     {
       Expect.IsFalse(pawn.Spawned);
       Expect.IsFalse(pawn.Destroyed);
-      Expect.IsTrue(pawn.IsInVehicle());
+      Expect.IsTrue(pawn.InVehicle());
       Expect.IsFalse(pawn.IsWorldPawn());
     }
     group.vehicle.DeSpawn();
@@ -84,7 +85,7 @@ internal sealed class UnitTest_WorldPawns
       Expect.IsFalse(pawn.Spawned);
       Expect.IsFalse(pawn.Destroyed);
       Expect.IsFalse(pawn.Discarded);
-      Expect.IsTrue(pawn.IsInVehicle());
+      Expect.IsTrue(pawn.InVehicle());
       Expect.IsFalse(pawn.IsWorldPawn());
     }
 
@@ -127,7 +128,7 @@ internal sealed class UnitTest_WorldPawns
     Expect.IsFalse(survivor.Destroyed);
     Expect.IsTrue(Find.WorldPawns.Contains(survivor));
     Expect.IsTrue(survivor.InVehicleCaravan());
-    Expect.IsFalse(survivor.IsInVehicle());
+    Expect.IsFalse(survivor.InVehicle());
 
     caravan.Destroy();
     Expect.IsTrue(group.vehicle.Destroyed);
@@ -139,7 +140,7 @@ internal sealed class UnitTest_WorldPawns
       Expect.IsFalse(pawn.Discarded);
       Expect.IsFalse(pawn.Destroyed);
       Expect.IsTrue(Find.WorldPawns.Contains(pawn));
-      Expect.IsFalse(pawn.IsInVehicle());
+      Expect.IsFalse(pawn.InVehicle());
     }
   }
 
@@ -164,7 +165,7 @@ internal sealed class UnitTest_WorldPawns
   private static VehicleGroup CreateTransientGroup()
   {
     VehicleDef vehicleDef =
-      TestDefGenerator.CreateTransientVehicleDef("VehicleDef_ForDestruction");
+      TestDefGenerator.CreateTransientVehicleDef("VehicleDef_ForDestruction", null);
     vehicleDef.vehicleStats =
     [
       new VehicleStatModifier

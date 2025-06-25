@@ -7,6 +7,7 @@ using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using Vehicles.Rendering;
+using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 using Verse.Sound;
@@ -29,11 +30,12 @@ internal class Patch_Gizmos : IPatchCategory
       prefix: null,
       postfix: new HarmonyMethod(typeof(Patch_Gizmos),
         nameof(AddVehicleCaravanGizmoPassthrough)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(FormCaravanComp), nameof(FormCaravanComp.GetGizmos)),
-      prefix: null,
-      postfix: new HarmonyMethod(typeof(Patch_Gizmos),
-        nameof(AddVehicleGizmosPassthrough)));
+    // TODO 1.6 - Remove
+    //HarmonyPatcher.Patch(
+    //  original: AccessTools.Method(typeof(FormCaravanComp), nameof(FormCaravanComp.GetGizmos)),
+    //  prefix: null,
+    //  postfix: new HarmonyMethod(typeof(Patch_Gizmos),
+    //    nameof(AddVehicleGizmosPassthrough)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanFormingUtility),
         nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
@@ -154,7 +156,7 @@ internal class Patch_Gizmos : IPatchCategory
           }
         };
       }
-      else if (mapParent.Map.mapPawns.AllPawnsSpawned.HasVehicle())
+      else if (mapParent.Map.mapPawns.AllPawnsSpawned.Any(pawn => pawn is VehiclePawn))
       {
         Command_Action command_Action = new Command_Action
         {

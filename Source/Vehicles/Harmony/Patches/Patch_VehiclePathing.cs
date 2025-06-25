@@ -23,12 +23,6 @@ internal class Patch_VehiclePathing : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
-    // TODO 1.6 Beta / Release - Check if this is still necessary. Devs said they would make this virtual
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(FloatMenuOptionProvider),
-        nameof(FloatMenuOptionProvider.SelectedPawnValid)),
-      postfix: new HarmonyMethod(typeof(Patch_VehiclePathing),
-        nameof(VehiclesNotValidForNormalCommands)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(FloatMenuOptionProvider_DraftedMove), "PawnCanGoto"),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
@@ -107,20 +101,6 @@ internal class Patch_VehiclePathing : IPatchCategory
         nameof(GenStep_RocksNearEdge.Generate)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(DisableRegionUpdatingRockGen)));
-  }
-
-  private static void VehiclesNotValidForNormalCommands(ref bool __result,
-    FloatMenuOptionProvider __instance,
-    Pawn pawn, FloatMenuContext context)
-  {
-    if (__result && pawn is VehiclePawn vehicle)
-    {
-      __result = false;
-      if (__instance is FloatMenuOptionProvider_Vehicle vehicleProvider)
-      {
-        __result = vehicleProvider.SelectedPawnValid(vehicle, context);
-      }
-    }
   }
 
   private static bool MultiselectVehicleGotoBlocked(Pawn pawn, ref AcceptanceReport __result)

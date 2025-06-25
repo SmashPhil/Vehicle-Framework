@@ -1,8 +1,10 @@
-﻿using RimWorld;
+﻿using JetBrains.Annotations;
+using RimWorld;
 using Verse;
 
 namespace Vehicles;
 
+[PublicAPI]
 public abstract class FloatMenuOptionProvider_Vehicle : FloatMenuOptionProvider
 {
   protected override bool Drafted => true;
@@ -15,8 +17,7 @@ public abstract class FloatMenuOptionProvider_Vehicle : FloatMenuOptionProvider
 
   protected override bool IgnoreFogged => false;
 
-  // TODO 1.6 - devs said they would make this virtual
-  public new bool SelectedPawnValid(Pawn pawn, FloatMenuContext context)
+  public override bool SelectedPawnValid(Pawn pawn, FloatMenuContext context)
   {
     return pawn is VehiclePawn vehicle && SelectedVehicleValid(vehicle, context);
   }

@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 [PublicAPI]
 [StaticConstructorOnStartup]
@@ -23,7 +23,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
   private static readonly Dictionary<ThingDef, Material> materials = [];
 
   public VehicleCaravan_PathFollower vehiclePather;
-  public VehicleCaravan_Tweener vehicleTweener;
+  public VehicleCaravanTweener vehicleTweener;
 
   private VehiclePawn leadVehicle;
   private bool initialized;
@@ -39,7 +39,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
   public VehicleCaravan()
   {
     vehiclePather = new VehicleCaravan_PathFollower(this);
-    vehicleTweener = new VehicleCaravan_Tweener(this);
+    vehicleTweener = new VehicleCaravanTweener(this);
   }
 
   public float ConstructionAverage { get; private set; }
@@ -68,7 +68,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
     {
       foreach (Pawn pawn in PawnsListForReading)
       {
-        if (!(pawn is VehiclePawn) && !pawn.IsInVehicle())
+        if (!(pawn is VehiclePawn) && !pawn.InVehicle())
         {
           yield return pawn;
         }
@@ -119,9 +119,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
       foreach (VehiclePawn vehicle in vehicles)
       {
         if (vehicle.CompFueledTravel is { Fuel: <= 0 })
-        {
           return true;
-        }
       }
       return false;
     }
@@ -132,17 +130,19 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
     get { return VehiclesListForReading.Any(vehicle => !vehicle.CanMoveFinal); }
   }
 
+  // TODO - just patch Caravan
   public new int TicksPerMove
   {
     get { return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this); }
   }
 
+  // TODO - just patch Caravan
   public new string TicksPerMoveExplanation
   {
     get
     {
       StringBuilder stringBuilder = new();
-      VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, stringBuilder);
+      _ = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, stringBuilder);
       return stringBuilder.ToString();
     }
   }

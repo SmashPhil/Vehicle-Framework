@@ -9,7 +9,7 @@ using SmashTools.Performance;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 public class IncidentWorker_ShuttleDowned : IncidentWorker
 {

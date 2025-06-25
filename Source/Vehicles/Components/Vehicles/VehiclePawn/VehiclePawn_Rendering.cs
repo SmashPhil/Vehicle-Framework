@@ -8,6 +8,7 @@ using SmashTools;
 using SmashTools.Animations;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Compatibility;
 using Vehicles.Rendering;
 using Verse;
 using Verse.AI;

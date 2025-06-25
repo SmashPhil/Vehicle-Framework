@@ -7,6 +7,7 @@ using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 
@@ -315,11 +316,8 @@ public partial class VehiclePawn
     foreach (VehicleRoleHandler handler in handlers)
     {
       if (TryAddPawn(pawn, handler))
-      {
         return true;
-      }
     }
-
     return false;
   }
 
@@ -340,51 +338,23 @@ public partial class VehiclePawn
     }
 
     Assert.IsTrue(handlers.Contains(handler));
-    bool result = true;
     if (!handler.AreSlotsAvailable)
-    {
       return false;
-    }
 
     if (pawn.Spawned)
-    {
       pawn.DeSpawn(DestroyMode.WillReplace);
-    }
 
+    bool result = true;
     if (!handler.thingOwner.TryAddOrTransfer(pawn, canMergeWithExistingStacks: false) &&
       pawn.holdingOwner != null)
     {
       //If can't add to handler and currently has other owner, transfer
       result = pawn.holdingOwner.TryTransferToContainer(pawn, handler.thingOwner);
     }
-
     reservationManager?.ReleaseAllClaimedBy(pawn);
     if (result)
-    {
       EventRegistry?[VehicleEventDefOf.PawnEntered].ExecuteEvents();
-    }
-
     return result;
-  }
-
-  public void Notify_BoardedCaravan(Pawn pawnToBoard, ThingOwner handler)
-  {
-    if (!pawnToBoard.IsWorldPawn())
-    {
-      Log.Warning("Tried boarding Caravan with non-worldpawn");
-      return;
-    }
-
-    if (pawnToBoard.holdingOwner != null)
-    {
-      pawnToBoard.holdingOwner.TryTransferToContainer(pawnToBoard, handler);
-    }
-    else
-    {
-      handler.TryAdd(pawnToBoard);
-    }
-
-    EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
   }
 
   public void RemovePawn(Pawn pawn)

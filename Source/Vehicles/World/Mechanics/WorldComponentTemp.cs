@@ -5,22 +5,21 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 
-namespace Vehicles
+namespace Vehicles;
+
+public abstract class WorldComponentTemp
 {
-	public abstract class WorldComponentTemp
-	{
-		public WorldComponentTemp(World world)
-		{
-		}
+  public WorldComponentTemp(RimWorld.Planet.World world)
+  {
+  }
 
-		public abstract void WorldComponentUpdate();
+  public abstract void WorldComponentUpdate();
 
-		public abstract void WorldComponentTick();
+  public abstract void WorldComponentTick();
 
-		public abstract void FinalizeInit();
+  public abstract void FinalizeInit();
 
-		public virtual void ExposeData()
-		{
-		}
-	}
+  public virtual void ExposeData()
+  {
+  }
 }

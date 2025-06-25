@@ -8,6 +8,7 @@ using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using Vehicles.Rendering;
+using Vehicles.World;
 using Verse;
 using OpCodes = System.Reflection.Emit.OpCodes;
 
@@ -296,7 +297,7 @@ internal class Patch_Rendering : IPatchCategory
 
   private static void DisableCachingPawnOverlays(Pawn ___pawn, ref bool disableCache)
   {
-    if (___pawn.IsInVehicle())
+    if (___pawn.InVehicle())
     {
       disableCache = true;
     }

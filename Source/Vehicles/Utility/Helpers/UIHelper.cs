@@ -8,6 +8,7 @@ using Verse.Sound;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using Vehicles.World;
 
 namespace Vehicles.Rendering;
 
@@ -18,7 +19,6 @@ public static class UIHelper
   /// <summary>
   /// Create new Widget for VehicleCaravan with <paramref name="transferables"/>
   /// </summary>
-  [Obsolete]
   public static void CreateVehicleCaravanTransferableWidgets(List<TransferableOneWay> transferables,
     out TransferableOneWayWidget pawnsTransfer, out TransferableVehicleWidget vehiclesTransfer,
     out TransferableOneWayWidget itemsTransfer, string thingCountTip,

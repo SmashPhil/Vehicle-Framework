@@ -1,23 +1,20 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using RimWorld.Planet;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
+[PublicAPI]
 public class VehicleWorldObjectsHolder : WorldComponent
 {
-  private static List<AerialVehicleInFlight> aerialVehicles = new List<AerialVehicleInFlight>();
+  private static List<AerialVehicleInFlight> aerialVehicles = [];
+  private static List<VehicleCaravan> vehicleCaravans = [];
+  private static List<StashedVehicle> stashedVehicles = [];
 
-  private static List<VehicleCaravan> vehicleCaravans = new List<VehicleCaravan>();
-
-  private static List<StashedVehicle> stashedVehicles = new List<StashedVehicle>();
-
-  public VehicleWorldObjectsHolder(World world) : base(world)
+  public VehicleWorldObjectsHolder(RimWorld.Planet.World world) : base(world)
   {
-    aerialVehicles ??= new List<AerialVehicleInFlight>();
-    vehicleCaravans ??= new List<VehicleCaravan>();
-    stashedVehicles ??= new List<StashedVehicle>();
     aerialVehicles.RemoveAll(a => a is null);
     vehicleCaravans.RemoveAll(c => c is null);
     stashedVehicles.RemoveAll(b => b is null);
@@ -68,7 +65,7 @@ public class VehicleWorldObjectsHolder : WorldComponent
     {
       stashedVehicles.Add(dockedBoat);
     }
-    return; //air defenses disabled for now
+    // air defenses disabled for now
     //if (obj is Settlement) //TODO - Add check for what settlements can implement air defenses
     //{
     //	foreach (AntiAircraftDef antiAircraft in DefDatabase<AntiAircraftDef>.AllDefsListForReading)

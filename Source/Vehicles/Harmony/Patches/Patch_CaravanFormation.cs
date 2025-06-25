@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
+using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 

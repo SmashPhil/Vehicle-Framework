@@ -5,6 +5,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles.UnitTesting;
@@ -18,7 +19,7 @@ internal sealed class UnitTest_AerialVehicle
   [SetUp]
   private void GenerateVehicles()
   {
-    World world = Find.World;
+    RimWorld.Planet.World world = Find.World;
     Assert.IsNotNull(world);
     Map map = Find.CurrentMap;
     Assert.IsNotNull(map);

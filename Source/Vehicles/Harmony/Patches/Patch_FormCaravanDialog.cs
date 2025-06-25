@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -11,6 +12,7 @@ using SmashTools.Patching;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Rendering;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;
@@ -30,16 +32,22 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   private static readonly string[] tabKeys =
     [PawnsTabLabelKey, ItemsTabLabelKey, TravelSuppliesTabLabelKey];
 
-  private static readonly Type formCaravanTabEnumType;
-  private static readonly Type splitCaravanTabEnumType;
+  public static readonly MethodInfo Notify_TransferablesChanged;
+  private static readonly Type FormCaravanTabEnumType;
+  private static readonly Type SplitCaravanTabEnumType;
+
+  private static readonly List<Pawn> tmpPawns = [];
 
   private static TransferableVehicleWidget vehiclesTransfer;
   private static int selectedTab;
 
   static Patch_FormCaravanDialog()
   {
-    formCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_FormCaravan+Tab", "RimWorld");
-    splitCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_SplitCaravan+Tab", "RimWorld");
+    FormCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_FormCaravan+Tab", "RimWorld");
+    SplitCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_SplitCaravan+Tab", "RimWorld");
+    Notify_TransferablesChanged =
+      AccessTools.Method(typeof(Dialog_FormCaravan), "Notify_TransferablesChanged");
+    Assert.IsNotNull(Notify_TransferablesChanged);
   }
 
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
@@ -51,8 +59,26 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         "DoCountAdjustInterfaceInternal"),
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(CanAdjustPawnTransferable)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(TilesPerDayCalculator),
+        nameof(TilesPerDayCalculator.ApproxTilesPerDay),
+        [typeof(Caravan), typeof(StringBuilder)]),
+      prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(ApproxTilesForVehicles)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(TilesPerDayCalculator),
+        nameof(TilesPerDayCalculator.ApproxTilesPerDay),
+        [
+          typeof(List<TransferableOneWay>), typeof(float), typeof(float), typeof(PlanetTile),
+          typeof(PlanetTile), typeof(bool), typeof(StringBuilder)
+        ]),
+      prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(ApproxTilesForVehicleTransferables)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(CaravanUIUtility), "CreateCaravanTransferableWidgets"),
+      postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(CreateTransferableVehicleWidget)));
 
-#if MERGED_CARAVAN_FORMATION
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Dialog_FormCaravan), nameof(Dialog_FormCaravan.PostOpen)),
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
@@ -63,10 +89,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(ClearTabListPostClose)));
     HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(CaravanUIUtility), "CreateCaravanTransferableWidgets"),
-      postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
-        nameof(CreateTransferableVehicleWidget)));
-    HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Dialog_FormCaravan),
         nameof(Dialog_FormCaravan.DoWindowContents)),
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
@@ -76,24 +98,66 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         nameof(Dialog_FormCaravan.Notify_ChoseRoute)),
       postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(BestExitTileForVehicles)));
-
-    //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.Start),
-    //    parameters: [typeof(Dialog_FormCaravan)]),
-    //  prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
-    //    nameof(StartRoutePlanningForVehicles)));
-
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"),
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(StartRoutePlanningForVehiclesTranspiler)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Dialog_FormCaravan), "TryReformCaravan"),
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(ConfirmLeaveVehiclesOnReform)));
-#endif
   }
 
   private static void CanAdjustPawnTransferable(Transferable trad, ref bool readOnly)
   {
     if (trad.AnyThing is Pawn pawn)
-      readOnly = CaravanHelper.assignedSeats.IsAssigned(pawn) || pawn.IsInVehicle();
+      readOnly = CaravanHelper.assignedSeats.IsAssigned(pawn) || pawn.InVehicle();
+  }
+
+  private static bool ApproxTilesForVehicles(ref float __result, Caravan caravan,
+    StringBuilder explanation = null)
+  {
+    if (caravan is VehicleCaravan vehicleCaravan)
+    {
+      __result = VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(vehicleCaravan, explanation);
+      return false;
+    }
+    return true;
+  }
+
+  private static bool ApproxTilesForVehicleTransferables(ref float __result,
+    List<TransferableOneWay> transferables, float massUsage, float massCapacity,
+    PlanetTile tile, PlanetTile nextTile, bool isShuttle,
+    StringBuilder explanation = null)
+  {
+    if (transferables.Exists(transferable =>
+      transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 }))
+    {
+      Assert.IsTrue(tmpPawns.Count == 0);
+      foreach (TransferableOneWay transferable in transferables)
+      {
+        if (transferable.AnyThing is Pawn pawn && transferable.CountToTransfer > 0 &&
+          (pawn is VehiclePawn || !CaravanHelper.assignedSeats.IsAssigned(pawn)))
+          tmpPawns.Add(pawn);
+      }
+      Assert.IsTrue(tmpPawns.Count > 0);
+      try
+      {
+        // Ugly but this is how RimWorld is set up so the patch should just match the flow
+        StringBuilder stringBuilder = explanation != null ? new StringBuilder() : null;
+        int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(tmpPawns, massUsage,
+          massCapacity, explanation: stringBuilder);
+        __result =
+          TilesPerDayCalculator.ApproxTilesPerDay(ticks, tile, nextTile, explanation: explanation,
+            caravanTicksPerMoveExplanation: stringBuilder?.ToString());
+      }
+      finally
+      {
+        tmpPawns.Clear();
+      }
+      return false;
+    }
+    return true;
   }
 
   private static IEnumerable<CodeInstruction> FormCaravanPostOpenTranspiler(
@@ -142,7 +206,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     ___tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
       delegate { selectedTab = TabVehicles; },
       () => selectedTab == TabVehicles));
-    foreach (int value in Enum.GetValues(formCaravanTabEnumType))
+    foreach (int value in Enum.GetValues(FormCaravanTabEnumType))
     {
       string translationKey = !tabKeys.OutOfBounds(value) ? tabKeys[value] : "Missing Label";
       ___tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
@@ -303,16 +367,52 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     // TODO
   }
 
-  private static bool StartRoutePlanningForVehicles(WorldRoutePlanner __instance,
-    Dialog_FormCaravan formCaravanDialog, ref bool ___active)
+  private static IEnumerable<CodeInstruction> StartRoutePlanningForVehiclesTranspiler(
+    IEnumerable<CodeInstruction> instructions)
   {
-    //List<TransferableOneWay> vehicles =
-    //  formCaravanDialog.transferables.Where(transf => transf.AnyThing is VehiclePawn);
-    //if (___active)
-    //{
-    //  __instance.Stop();
-    //}
-    return true;
+    List<CodeInstruction> instructionList = instructions.ToList();
+    MethodInfo startPlanningMethod =
+      AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.Start),
+        parameters: [typeof(Dialog_FormCaravan)]);
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+
+      if (instruction.Calls(startPlanningMethod))
+      {
+        // Callvirt WorldRoutePlanner::Start(Dialog_FormCaravan)
+        instruction = instructionList[++i];
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
+            nameof(WorldRoutePannerReroute)));
+      }
+      yield return instruction;
+    }
+  }
+
+  // NOTE - easier to pass in the world route planner since it's already on the stack
+  private static void WorldRoutePannerReroute(WorldRoutePlanner routePlanner,
+    Dialog_FormCaravan formCaravan)
+  {
+    if (formCaravan.transferables.Exists(transferable =>
+      transferable is { CountToTransfer: > 0, AnyThing: VehiclePawn }))
+    {
+      Find.WindowStack.TryRemove(formCaravan, doCloseSound: false);
+      VehicleCaravanInfo caravanInfo = new(formCaravan.transferables, formCaravan.MassUsage,
+        formCaravan.MassCapacity, formCaravan.CurrentTile)
+      {
+        caravaning = true,
+      };
+      Find.World.GetComponent<VehicleRoutePlanner>().Start(caravanInfo, delegate
+      {
+        Find.WindowStack.Add(formCaravan);
+        formCaravan.Notify_NoLongerChoosingRoute();
+      }, formCaravan.Notify_ChoseRoute);
+    }
+    else
+    {
+      routePlanner.Start(formCaravan);
+    }
   }
 
   /// <summary>

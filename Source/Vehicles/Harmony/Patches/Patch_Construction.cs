@@ -80,8 +80,9 @@ internal class Patch_Construction : IPatchCategory
       GenSpawn.Spawn(vehicle, __instance.Position, map, __instance.Rotation, WipeMode.FullRefund);
       worker.records.Increment(RecordDefOf.ThingsConstructed);
 
-      if (!DebugSettings.godMode) //quick spawning for development
+      if (!DebugSettings.godMode)
       {
+        // Quick spawning for development
         vehicle.Rename();
       }
       else
@@ -93,9 +94,9 @@ internal class Patch_Construction : IPatchCategory
         }
       }
 
-      //Quality?
-      //Art?
-      //Tale RecordTale LongConstructionProject?
+      // TODO - Quality?
+      // TODO -  Art?
+      // TODO -  Tale RecordTale LongConstructionProject?
       return false;
     }
 

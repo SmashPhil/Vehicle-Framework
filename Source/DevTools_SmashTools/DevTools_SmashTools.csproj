@@ -69,7 +69,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.3.3" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
         <Reference Include="Assembly-CSharp">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>
@@ -83,6 +83,7 @@
         </Reference>
         <Reference Include="SmashTools">
           <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
+          <Private>False</Private>
         </Reference>
         <Reference Include="System">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\System.dll</HintPath>

@@ -9,7 +9,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 public class Dialog_AssignSeats : Window
 {
@@ -413,7 +413,8 @@ public class Dialog_AssignSeats : Window
       int transferCount = Assignments.Count > 0 ? vehicleTransferable.GetMaximumToTransfer() : 0;
       vehicleTransferable.AdjustTo(transferCount);
       Dialog_FormVehicleCaravan.MarkDirty();
-      // TODO - Mark Dialog_FormCaravan dirty
+      Patch_FormCaravanDialog.Notify_TransferablesChanged.Invoke(
+        CaravanHelper.CurrentDialogFormCaravan, null);
     }
     catch (Exception ex)
     {

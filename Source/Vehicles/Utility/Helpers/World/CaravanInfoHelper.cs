@@ -22,7 +22,7 @@ namespace Vehicles
       {
         if (thingCounts[i].Count > 0)
         {
-          if (thingCounts[i].Thing is Pawn pawn && !pawn.IsInVehicle() &&
+          if (thingCounts[i].Thing is Pawn pawn && !pawn.InVehicle() &&
             !CaravanHelper.assignedSeats.IsAssigned(pawn))
           {
             capacity += MassUtility.Capacity(pawn, explanation) * thingCounts[i].Count;

@@ -1,70 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Verse;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
+using Verse;
 
-namespace Vehicles
+namespace Vehicles.World;
+
+[PublicAPI]
+public class CaravanArrivalAction_StashedVehicle : CaravanArrivalAction
 {
-  public class CaravanArrivalAction_StashedVehicle : CaravanArrivalAction
+  private StashedVehicle stashedVehicle;
+
+  public CaravanArrivalAction_StashedVehicle()
   {
-    private StashedVehicle stashedVehicle;
+  }
 
-    public CaravanArrivalAction_StashedVehicle()
+  public CaravanArrivalAction_StashedVehicle(StashedVehicle stashedVehicle)
+  {
+    this.stashedVehicle = stashedVehicle;
+  }
+
+  public override string Label => "VF_CommandUndockShip".Translate(stashedVehicle.Label);
+
+  public override string ReportString => "CaravanVisiting".Translate(stashedVehicle.Label);
+
+  public override FloatMenuAcceptanceReport StillValid(Caravan caravan,
+    PlanetTile destinationTile)
+  {
+    FloatMenuAcceptanceReport floatMenuAcceptanceReport =
+      base.StillValid(caravan, destinationTile);
+    if (!floatMenuAcceptanceReport)
     {
+      return floatMenuAcceptanceReport;
     }
-
-    public CaravanArrivalAction_StashedVehicle(StashedVehicle stashedVehicle)
+    if (stashedVehicle != null && stashedVehicle.Tile != destinationTile)
     {
-      this.stashedVehicle = stashedVehicle;
+      return false;
     }
+    return CanVisit(caravan, stashedVehicle);
+  }
 
-    public override string Label => "VF_CommandUndockShip".Translate(stashedVehicle.Label);
+  public override void Arrived(Caravan caravan)
+  {
+    stashedVehicle.Notify_CaravanArrived(caravan);
+  }
 
-    public override string ReportString => "CaravanVisiting".Translate(stashedVehicle.Label);
+  public override void ExposeData()
+  {
+    base.ExposeData();
+    Scribe_References.Look(ref stashedVehicle, "stashedVehicle");
+  }
 
-    public override FloatMenuAcceptanceReport StillValid(Caravan caravan,
-      PlanetTile destinationTile)
-    {
-      FloatMenuAcceptanceReport floatMenuAcceptanceReport =
-        base.StillValid(caravan, destinationTile);
-      if (!floatMenuAcceptanceReport)
-      {
-        return floatMenuAcceptanceReport;
-      }
-      if (stashedVehicle != null && stashedVehicle.Tile != destinationTile)
-      {
-        return false;
-      }
-      return CanVisit(caravan, stashedVehicle);
-    }
+  public static FloatMenuAcceptanceReport CanVisit(Caravan caravan, StashedVehicle stashedVehicle)
+  {
+    return stashedVehicle is { Spawned: true };
+  }
 
-    public override void Arrived(Caravan caravan)
-    {
-      stashedVehicle.Notify_CaravanArrived(caravan);
-    }
-
-    public override void ExposeData()
-    {
-      base.ExposeData();
-      Scribe_References.Look(ref stashedVehicle, "stashedVehicle", false);
-    }
-
-    public static FloatMenuAcceptanceReport CanVisit(Caravan caravan, StashedVehicle stashedVehicle)
-    {
-      return stashedVehicle != null && stashedVehicle.Spawned;
-    }
-
-    public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(Caravan caravan,
-      StashedVehicle stashedVehicle)
-    {
-      return CaravanArrivalActionUtility.GetFloatMenuOptions(
-        () => CanVisit(caravan, stashedVehicle),
-        () => new CaravanArrivalAction_StashedVehicle(stashedVehicle),
-        "VF_CommandUndockShip".Translate(stashedVehicle.Label), caravan, stashedVehicle.Tile,
-        stashedVehicle);
-    }
+  public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(Caravan caravan,
+    StashedVehicle stashedVehicle)
+  {
+    return CaravanArrivalActionUtility.GetFloatMenuOptions(
+      () => CanVisit(caravan, stashedVehicle),
+      () => new CaravanArrivalAction_StashedVehicle(stashedVehicle),
+      "VF_CommandUndockShip".Translate(stashedVehicle.Label), caravan, stashedVehicle.Tile,
+      stashedVehicle);
   }
 }

@@ -1,33 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
-using System.Globalization;
-using Verse;
 using RimWorld;
-using SmashTools;
+using Verse;
 
-namespace Vehicles
+namespace Vehicles.Compatibility;
+
+internal static class FishingCompatibility
 {
-	internal static class FishingCompatibility
-	{
-		private static List<ThingDef> tmpFishes = new List<ThingDef>();
+  private static readonly List<ThingDef> tmpFishes = [];
 
-		public static bool Active { get; private set; }
+  public static bool Active { get; private set; }
 
-		internal static void EnableFishing()
-		{
-			Active = true;
+  internal static void EnableFishing()
+  {
+    Active = true;
 
-			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading.Where(thingDef => thingDef.ingestible != null))
-			{
-				tmpFishes.Add(thingDef);
-			}
-		}
+    foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefsListForReading.Where(thingDef =>
+      thingDef.ingestible != null))
+    {
+      tmpFishes.Add(thingDef);
+    }
+  }
 
-		internal static ThingDef FetchViableFish(BiomeDef biomeDef, TerrainDef terrainDef)
-		{
-			return tmpFishes.RandomElement();
-		}
-	}
+  internal static ThingDef FetchViableFish(BiomeDef biomeDef, TerrainDef terrainDef)
+  {
+    return tmpFishes.RandomElement();
+  }
 }

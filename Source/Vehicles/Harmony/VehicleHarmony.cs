@@ -34,7 +34,7 @@ public static class VehicleHarmony
   {
     Assert.IsTrue(UnityData.IsInMainThread);
 
-    Log.Message($"{LogLabel} v{VehicleMod.metaData.ModVersion}");
+    Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion}");
 
     List<ConditionalPatch.Result> compatPatches = ConditionalPatches.GetPatches(VehiclesUniqueId);
     if (!compatPatches.NullOrEmpty())

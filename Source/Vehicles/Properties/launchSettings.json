@@ -16,7 +16,7 @@
     "UnitTest": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe",
-      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test",
+      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test --where \"class == UnitTest_VehicleRoleHandler\"",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "UnitTest"
       }

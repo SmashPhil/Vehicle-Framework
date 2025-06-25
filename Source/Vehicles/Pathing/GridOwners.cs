@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LudeonTK;
 using SmashTools;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;

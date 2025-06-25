@@ -4,7 +4,7 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public class AerialVehicleArrivalAction_LoadMap : AerialVehicleArrivalAction

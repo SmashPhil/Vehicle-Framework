@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
+﻿using RimWorld;
 
-namespace Vehicles
+namespace Vehicles.World;
+
+[DefOf]
+public static class AntiAircraftDefOf
 {
-	[DefOf]
-	public static class AntiAircraftDefOf
-	{
-		static AntiAircraftDefOf()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(AntiAircraftDefOf));
-		}
+  static AntiAircraftDefOf()
+  {
+    DefOfHelper.EnsureInitializedInCtor(typeof(AntiAircraftDefOf));
+  }
 
-		public static AntiAircraftDef FlakProjectile;
-	}
+  public static AntiAircraftDef FlakProjectile;
 }

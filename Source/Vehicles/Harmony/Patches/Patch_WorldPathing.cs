@@ -2,6 +2,7 @@
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools.Patching;
+using Vehicles.World;
 using Verse;
 using Verse.Sound;
 
@@ -20,17 +21,6 @@ internal class Patch_WorldPathing : IPatchCategory
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Caravan_PathFollower), "StartPath"),
       prefix: new HarmonyMethod(typeof(Patch_WorldPathing),
         nameof(StartVehicleCaravanPath)));
-
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(WorldRoutePlanner),
-        nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
-      prefix: new HarmonyMethod(typeof(Patch_WorldPathing),
-        nameof(VehicleRoutePlannerUpdateHook)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(WorldRoutePlanner),
-        nameof(WorldRoutePlanner.WorldRoutePlannerOnGUI)),
-      prefix: new HarmonyMethod(typeof(Patch_WorldPathing),
-        nameof(VehicleRoutePlannerOnGUIHook)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(WorldRoutePlanner),
         nameof(WorldRoutePlanner.DoRoutePlannerButton)),
@@ -44,7 +34,7 @@ internal class Patch_WorldPathing : IPatchCategory
   /// </summary>
   /// <param name="c"></param>
   /// <param name="tile"></param>
-  public static bool AutoOrderVehicleCaravanPathing(Caravan c, PlanetTile tile)
+  private static bool AutoOrderVehicleCaravanPathing(Caravan c, PlanetTile tile)
   {
     if (c is VehicleCaravan vehicleCaravan)
     {
@@ -84,7 +74,7 @@ internal class Patch_WorldPathing : IPatchCategory
   /// <param name="___caravan"></param>
   /// <param name="repathImmediately"></param>
   /// <param name="resetPauseStatus"></param>
-  public static bool StartVehicleCaravanPath(PlanetTile destTile,
+  private static bool StartVehicleCaravanPath(PlanetTile destTile,
     CaravanArrivalAction arrivalAction,
     Caravan ___caravan, bool repathImmediately = false, bool resetPauseStatus = true)
   {
@@ -97,20 +87,8 @@ internal class Patch_WorldPathing : IPatchCategory
     return true;
   }
 
-  /* --------------- VehicleRoutePlanner Hook --------------- */
-  public static void VehicleRoutePlannerUpdateHook()
+  private static void VehicleRoutePlannerButton(ref float curBaseY)
   {
-    VehicleRoutePlanner.Instance?.WorldRoutePlannerUpdate();
+    Find.World.GetComponent<VehicleRoutePlanner>()?.DoRoutePlannerButton(ref curBaseY);
   }
-
-  public static void VehicleRoutePlannerOnGUIHook()
-  {
-    VehicleRoutePlanner.Instance?.WorldRoutePlannerOnGUI();
-  }
-
-  public static void VehicleRoutePlannerButton(ref float curBaseY)
-  {
-    VehicleRoutePlanner.Instance?.DoRoutePlannerButton(ref curBaseY);
-  }
-  /* ------------------------------------------------------- */
 }

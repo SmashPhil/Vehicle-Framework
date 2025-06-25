@@ -1,95 +1,99 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 using System.Reflection;
-using UnityEngine;
 using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
+using UnityEngine;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles.World;
+
+public static class AerialVehicleTraderHelper
 {
-	public static class AerialVehicleTraderHelper
-	{
-		private static AerialVehicleInFlight aerialVehicle;
+  private static AerialVehicleInFlight aerialVehicle;
 
-		private static readonly List<TransferableUIUtility.ExtraInfo> tmpInfo = new List<TransferableUIUtility.ExtraInfo>();
+  private static readonly List<TransferableUIUtility.ExtraInfo> tmpInfo =
+    new List<TransferableUIUtility.ExtraInfo>();
 
-		private static readonly MethodInfo massUsagePropertyInfo = AccessTools.PropertyGetter(typeof(Dialog_Trade), "MassUsage");
+  private static readonly MethodInfo massUsagePropertyInfo =
+    AccessTools.PropertyGetter(typeof(Dialog_Trade), "MassUsage");
 
-		private static readonly List<Pair<float, Color>> MassColor = new List<Pair<float, Color>>
-		{
-			new Pair<float, Color>(0.37f, Color.green),
-			new Pair<float, Color>(0.82f, Color.yellow),
-			new Pair<float, Color>(1f, new Color(1f, 0.6f, 0f))
-		};
+  private static readonly List<Pair<float, Color>> MassColor = new List<Pair<float, Color>>
+  {
+    new Pair<float, Color>(0.37f, Color.green),
+    new Pair<float, Color>(0.82f, Color.yellow),
+    new Pair<float, Color>(1f, new Color(1f, 0.6f, 0f))
+  };
 
-		public static void SetupAerialVehicleTrade(ref List<Thing> playerCaravanAllPawnsAndItems)
-		{
-			AerialVehicleInFlight negotiatorsAerialVehicle = TradeSession.playerNegotiator?.GetAerialVehicle();
-			aerialVehicle = negotiatorsAerialVehicle;
-			if (aerialVehicle != null)
-			{
-				playerCaravanAllPawnsAndItems =
-				[
-					.. aerialVehicle.vehicle.AllPawnsAboard,
-					.. aerialVehicle.vehicle.inventory.innerContainer,
-				];
-			}
-		}
+  public static void SetupAerialVehicleTrade(ref List<Thing> playerCaravanAllPawnsAndItems)
+  {
+    AerialVehicleInFlight negotiatorsAerialVehicle =
+      TradeSession.playerNegotiator?.GetAerialVehicle();
+    aerialVehicle = negotiatorsAerialVehicle;
+    if (aerialVehicle != null)
+    {
+      playerCaravanAllPawnsAndItems =
+      [
+        .. aerialVehicle.vehicle.AllPawnsAboard,
+        .. aerialVehicle.vehicle.inventory.innerContainer,
+      ];
+    }
+  }
 
-		public static float DrawAerialVehicleInfo(Dialog_Trade tradeDialog, Rect rect, bool lerpMassColor = true)
-		{
-			if (aerialVehicle != null)
-			{
-				tmpInfo.Clear();
-				{
-					//Mass Usage
-					float massCapacity = aerialVehicle.vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
-					float massUsage = (float)massUsagePropertyInfo.Invoke(tradeDialog, new object[] { });
-					TaggedString massUsageReadout = $"{massUsage.ToStringEnsureThreshold(massCapacity, 0)} / {massCapacity:F0} {"kg".Translate()}";
-					string massTip = GetMassTip(massUsage, massCapacity);
-					tmpInfo.Add(new TransferableUIUtility.ExtraInfo("Mass".Translate(), massUsageReadout, GetMassColor(massUsage, massCapacity, lerpMassColor: lerpMassColor), massTip));
+  public static float DrawAerialVehicleInfo(Dialog_Trade tradeDialog, Rect rect,
+    bool lerpMassColor = true)
+  {
+    if (aerialVehicle != null)
+    {
+      tmpInfo.Clear();
+      {
+        //Mass Usage
+        float massCapacity = aerialVehicle.vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+        float massUsage = (float)massUsagePropertyInfo.Invoke(tradeDialog, new object[] { });
+        TaggedString massUsageReadout =
+          $"{massUsage.ToStringEnsureThreshold(massCapacity, 0)} / {massCapacity:F0} {"kg".Translate()}";
+        string massTip = GetMassTip(massUsage, massCapacity);
+        tmpInfo.Add(new TransferableUIUtility.ExtraInfo("Mass".Translate(), massUsageReadout,
+          GetMassColor(massUsage, massCapacity, lerpMassColor: lerpMassColor), massTip));
 
-					//Flight Speed
-					tmpInfo.Add(new TransferableUIUtility.ExtraInfo(VehicleStatDefOf.FlightSpeed.LabelCap, GetSpeedLabel(), Color.white, string.Empty));
+        //Flight Speed
+        tmpInfo.Add(new TransferableUIUtility.ExtraInfo(VehicleStatDefOf.FlightSpeed.LabelCap,
+          GetSpeedLabel(), Color.white, string.Empty));
 
-					TransferableUIUtility.DrawExtraInfo(tmpInfo, rect);
-				}
-				tmpInfo.Clear();
+        TransferableUIUtility.DrawExtraInfo(tmpInfo, rect);
+      }
+      tmpInfo.Clear();
 
-				return 52;
-			}
-			return 0;
-		}
+      return 52;
+    }
+    return 0;
+  }
 
-		private static string GetMassTip(float massUsage, float massCapacity)
-		{
-			TaggedString taggedString = $"{"MassCarriedSimple".Translate()}: {massUsage.ToStringEnsureThreshold(massCapacity, 2)} {"kg".Translate()} \n {"MassCapacity".Translate()}: {massCapacity.ToString("F2")} {"kg".Translate()}";
-			return taggedString;
-		}
+  private static string GetMassTip(float massUsage, float massCapacity)
+  {
+    TaggedString taggedString =
+      $"{"MassCarriedSimple".Translate()}: {massUsage.ToStringEnsureThreshold(massCapacity, 2)} {"kg".Translate()} \n {"MassCapacity".Translate()}: {massCapacity.ToString("F2")} {"kg".Translate()}";
+    return taggedString;
+  }
 
-		private static string GetSpeedLabel()
-		{
-			return VehicleStatDefOf.FlightSpeed.Worker.StatValueFormatted(aerialVehicle.vehicle);
-		}
+  private static string GetSpeedLabel()
+  {
+    return VehicleStatDefOf.FlightSpeed.Worker.StatValueFormatted(aerialVehicle.vehicle);
+  }
 
-		private static Color GetMassColor(float massUsage, float massCapacity, bool lerpMassColor)
-		{
-			if (massCapacity == 0f)
-			{
-				return Color.white;
-			}
-			if (massUsage > massCapacity)
-			{
-				return Color.red;
-			}
-			if (lerpMassColor)
-			{
-				return GenUI.LerpColor(MassColor, massUsage / massCapacity);
-			}
-			return Color.white;
-		}
-	}
+  private static Color GetMassColor(float massUsage, float massCapacity, bool lerpMassColor)
+  {
+    if (massCapacity == 0f)
+    {
+      return Color.white;
+    }
+    if (massUsage > massCapacity)
+    {
+      return Color.red;
+    }
+    if (lerpMassColor)
+    {
+      return GenUI.LerpColor(MassColor, massUsage / massCapacity);
+    }
+    return Color.white;
+  }
 }

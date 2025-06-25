@@ -5,7 +5,7 @@ using SmashTools;
 using UnityEngine;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
 {

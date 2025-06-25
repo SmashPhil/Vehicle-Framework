@@ -75,19 +75,19 @@ namespace Vehicles
       if (field.TryGetAttribute(out DisableSettingConditionalAttribute disableSetting))
       {
         if (!disableSetting.MayRequire.NullOrEmpty() &&
-          !ModsConfig.IsActive(disableSetting.MayRequire))
+          !Ext_Mods.HasActiveMod(disableSetting.MayRequire))
         {
           disabledTooltip =
             "VF_DisabledSingleModDependencyTooltip".Translate(disableSetting.MayRequire);
         }
         else if (!disableSetting.MayRequireAny.NullOrEmpty() &&
-          !disableSetting.MayRequireAny.Any(packageId => ModsConfig.IsActive(packageId)))
+          !disableSetting.MayRequireAny.Any(Ext_Mods.HasActiveMod))
         {
           disabledTooltip = "VF_DisabledSingleModDependencyTooltip".Translate(Environment.NewLine +
             string.Join(Environment.NewLine, disableSetting.MayRequireAny));
         }
         else if (!disableSetting.MayRequireAll.NullOrEmpty() &&
-          !disableSetting.MayRequireAll.All(packageId => ModsConfig.IsActive(packageId)))
+          !disableSetting.MayRequireAll.All(Ext_Mods.HasActiveMod))
         {
           disabledTooltip = "VF_DisabledMultipleModsDependencyTooltip".Translate(
             Environment.NewLine + string.Join(Environment.NewLine, disableSetting.MayRequireAll));

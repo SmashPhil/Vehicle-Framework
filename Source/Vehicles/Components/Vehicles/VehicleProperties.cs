@@ -47,6 +47,8 @@ public class VehicleProperties
     DisableReason = "VF_VehicleCannotStun")]
   public bool canAdaptToEMP;
 
+  public float visibilityWeight = 1;
+
   /// <summary>
   /// Player-facing only, allowing players to disable emp stuns for a vehicle without having to modify components via patches.
   /// Only enabled if any component within the vehicle has an emp severity > None.

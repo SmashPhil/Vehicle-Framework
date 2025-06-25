@@ -114,6 +114,13 @@ public static class VehicleTex
 
 #endregion
 
+#region WorldMap
+
+  public static readonly Texture2D RoutePlanner =
+    ContentFinder<Texture2D>.Get("UI/Gizmos/VehicleRoutePlanner");
+
+#endregion
+
   public static readonly Dictionary<VehicleDef, Texture2D> CachedTextureIcons = [];
   public static readonly Dictionary<VehicleDef, string> CachedTextureIconPaths = [];
   private static readonly Dictionary<(VehicleDef, Rot4), Texture2D> CachedVehicleTextures = [];

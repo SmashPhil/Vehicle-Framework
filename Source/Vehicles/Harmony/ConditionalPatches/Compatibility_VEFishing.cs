@@ -1,17 +1,14 @@
-﻿using System;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Verse;
-using SmashTools;
 
-namespace Vehicles
+namespace Vehicles.Compatibility;
+
+internal class Compatibility_VEFishing : ConditionalVehiclePatch
 {
-	internal class Compatibility_VEFishing : ConditionalVehiclePatch
-	{
-		public override void PatchAll(ModMetaData mod, Harmony harmony)
-		{
-			//FishingCompatibility.EnableFishing();
-		}
+  public override void PatchAll(ModMetaData mod, Harmony harmony)
+  {
+    //FishingCompatibility.EnableFishing();
+  }
 
-		public override string PackageId => CompatibilityPackageIds.VE_Fishing;
-	}
+  public override string PackageId => CompatibilityPackageIds.VE_Fishing;
 }

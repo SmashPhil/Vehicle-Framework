@@ -1,16 +1,13 @@
-﻿using System;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Verse;
-using SmashTools;
 
-namespace Vehicles
+namespace Vehicles.Compatibility;
+
+internal class Compatibility_SOS2 : ConditionalVehiclePatch
 {
-	internal class Compatibility_SOS2 : ConditionalVehiclePatch
-	{
-		public override string PackageId => CompatibilityPackageIds.SOS2;
+  public override string PackageId => CompatibilityPackageIds.SOS2;
 
-		public override void PatchAll(ModMetaData mod, Harmony harmony)
-		{
-		}
-	}
+  public override void PatchAll(ModMetaData mod, Harmony harmony)
+  {
+  }
 }

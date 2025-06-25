@@ -16,7 +16,7 @@
 		<defName>StashedVehicle</defName>
 		<label>Stashed Vehicle</label>
 		<description>Stashed vehicles.</description>
-		<worldObjectClass>Vehicles.StashedVehicle</worldObjectClass>
+		<worldObjectClass>Vehicles.World.StashedVehicle</worldObjectClass>
 		<expandingIcon>true</expandingIcon>
 		<expandingIconPriority>60</expandingIconPriority>
 		<expandMore>true</expandMore>
@@ -31,7 +31,7 @@
 		<defName>VehicleCaravan</defName>
 		<label>Vehicle Caravan</label>
 		<description>A group of traveling people with vehicles.</description>
-		<worldObjectClass>Vehicles.VehicleCaravan</worldObjectClass>
+		<worldObjectClass>Vehicles.World.VehicleCaravan</worldObjectClass>
 		<texture>UI/DefaultVehicleIcon</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
 		<expandingIcon>true</expandingIcon>
@@ -45,7 +45,7 @@
 		</IncidentTargetTags>
 		
 		<inspectorTabs>
-			<li>Vehicles.WITab_Vehicle_Manifest</li> <!-- Similar to WITab_Caravan_Needs but contains drag & drop and entries of vehicle roles -->
+			<li>Vehicles.World.WITab_Vehicle_Manifest</li> <!-- Similar to WITab_Caravan_Needs but contains drag & drop and entries of vehicle roles -->
 			<li>WITab_Caravan_Health</li>
 			<li>WITab_Caravan_Gear</li>
 			<li>WITab_Caravan_Social</li>
@@ -68,7 +68,7 @@
 		<defName>AerialVehicle</defName>
 		<label>Aerial Vehicle</label>
 		<description>An aerial vehicle capable of flight on the world map.</description>
-		<worldObjectClass>Vehicles.AerialVehicleInFlight</worldObjectClass>
+		<worldObjectClass>Vehicles.World.AerialVehicleInFlight</worldObjectClass>
 		<texture>UI/Icons/DefaultVehicleIcon</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
 		<expandingIcon>true</expandingIcon>
@@ -81,10 +81,10 @@
 		</IncidentTargetTags>
 		
 		<inspectorTabs>
-			<li>Vehicles.WITab_Vehicle_Manifest</li>
-			<li>Vehicles.WITab_AerialVehicle_Health</li>
+			<li>Vehicles.World.WITab_Vehicle_Manifest</li>
+			<li>Vehicles.World.WITab_AerialVehicle_Health</li>
 			<!-- <li>WITab_Caravan_Social</li> -->
-			<li>Vehicles.WITab_AerialVehicle_Items</li>
+			<li>Vehicles.World.WITab_AerialVehicle_Items</li>
 		</inspectorTabs>
 	</WorldObjectDef>
 	
@@ -92,7 +92,7 @@
 		<defName>CrashedShipSite</defName>
 		<label>Crash Site</label>
 		<description>A recently downed aerial vehicle with possible survivors.</description>
-		<worldObjectClass>Vehicles.CrashSite</worldObjectClass>
+		<worldObjectClass>Vehicles.World.CrashSite</worldObjectClass>
 		<texture>World/WorldObjects/Ambush</texture>
 		<expandingIcon>true</expandingIcon>
 		<expandingIconTexture>UI/Icons/WorldObject_CrashSite</expandingIconTexture>
@@ -104,8 +104,8 @@
 	<Vehicles.AntiAircraftDef>
 		<defName>FlakProjectile</defName>
 		<label>Flak Projectile</label>
-		<worldObjectClass>Vehicles.Flak</worldObjectClass>
-		<antiAircraftWorker>Vehicles.FlakWorker</antiAircraftWorker>
+		<worldObjectClass>Vehicles.World.Flak</worldObjectClass>
+		<antiAircraftWorker>Vehicles.World.FlakWorker</antiAircraftWorker>
 		<texture>Things/Projectile/ShellHighExplosive</texture>
 		<useDynamicDrawer>true</useDynamicDrawer>
 		<expandingIcon>true</expandingIcon>

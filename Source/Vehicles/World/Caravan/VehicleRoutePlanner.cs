@@ -1,15 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using UnityEngine;
-using Verse;
-using Verse.Sound;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UnityEngine;
+using Verse;
+using Verse.Sound;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
+[PublicAPI]
 [StaticConstructorOnStartup]
 public class VehicleRoutePlanner : WorldComponent
 {
@@ -18,183 +21,135 @@ public class VehicleRoutePlanner : WorldComponent
   private const float RouteButtonDimension = 57f;
   private const int MaxCount = 25;
 
-  private static readonly Texture2D ButtonTex =
-    ContentFinder<Texture2D>.Get("UI/Gizmos/VehicleRoutePlanner", true);
-
   private static readonly Texture2D MouseAttachment =
-    ContentFinder<Texture2D>.Get("UI/Overlays/WaypointMouseAttachment", true);
+    ContentFinder<Texture2D>.Get("UI/Overlays/WaypointMouseAttachment");
 
-  private static readonly Vector2 BottomWindowSize = new Vector2(500f, 95f);
-  private static readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
+  private static readonly Vector2 BottomWindowSize = new(500f, 95f);
+  private static readonly Vector2 BottomButtonSize = new(160f, 40f);
 
-  private Dialog_FormVehicleCaravan currentFormCaravanDialog;
 
-  public List<VehicleDef> vehicleDefs = new List<VehicleDef>();
-  private VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? caravanInfoFromFormCaravanDialog;
-  private List<WorldPath> paths = new List<WorldPath>();
-  private List<int> cachedTicksToWaypoint = new List<int>();
-  public List<RoutePlannerWaypoint> waypoints = new List<RoutePlannerWaypoint>();
+  private Action onFinishCallback;
+  private Action<PlanetTile> onChooseRouteCallback;
+
+  private List<VehicleDef> vehicleDefs = [];
+  private VehicleCaravanInfo caravanInfo;
+
+  private readonly List<WorldPath> paths = [];
+  private readonly List<int> cachedTicksToWaypoint = [];
+  private readonly List<RoutePlannerWaypoint> waypoints = [];
 
   private bool cantRemoveFirstWaypoint;
 
-  public VehicleRoutePlanner(World world) : base(world)
+  public VehicleRoutePlanner(RimWorld.Planet.World world) : base(world)
   {
     this.world = world;
-    vehicleDefs = new List<VehicleDef>();
-    Instance = this;
   }
 
-  public static VehicleRoutePlanner Instance { get; private set; }
-
-  public bool Active { get; set; }
-
-  public bool FormingCaravan
-  {
-    get { return Active && currentFormCaravanDialog != null; }
-  }
+  public bool IsActive { get; private set; }
 
   private bool ShouldStop
   {
     get
     {
-      return !Active || !WorldRendererUtility.WorldRendered ||
-        (Current.ProgramState == ProgramState.Playing &&
-          Find.TickManager.CurTimeSpeed != TimeSpeed.Paused && !Prefs.DevMode);
+      return !IsActive || !WorldRendererUtility.WorldSelected ||
+        Current.ProgramState == ProgramState.Playing &&
+        Find.TickManager.CurTimeSpeed != TimeSpeed.Paused;
     }
   }
 
   private int CaravanTicksPerMove
   {
-    get
-    {
-      VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? caravanInfo = CaravanInfo;
-      if (caravanInfo != null &&
-        caravanInfo.Value.pawns.NotNullAndAny(pawn => pawn is VehiclePawn))
-      {
-        return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo.Value, null);
-      }
-      return 3464;
-    }
-  }
-
-  private VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo? CaravanInfo
-  {
-    get
-    {
-      if (currentFormCaravanDialog != null)
-      {
-        return caravanInfoFromFormCaravanDialog.Value;
-      }
-      Caravan caravanAtTheFirstWaypoint = CaravanAtTheFirstWaypoint;
-      if (caravanAtTheFirstWaypoint != null)
-      {
-        return new VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo(
-          caravanAtTheFirstWaypoint);
-      }
-      return null;
-    }
+    get { return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo); }
   }
 
   private Caravan CaravanAtTheFirstWaypoint
   {
     get
     {
-      if (!waypoints.NotNullAndAny())
-      {
-        return null;
-      }
-      return Find.WorldObjects.PlayerControlledCaravanAt(waypoints[0].Tile);
+      return waypoints.Count > 0 ?
+        Find.WorldObjects.PlayerControlledCaravanAt(waypoints[0].Tile) :
+        null;
     }
   }
 
-  public void Start()
+  public void StartWithSelector()
   {
-    if (Active)
-    {
+    if (IsActive)
       Stop();
-    }
     Find.WindowStack.Add(new Dialog_VehicleSelector());
   }
 
-  public void Start(Dialog_FormVehicleCaravan formCaravanDialog)
+  // NOTE - Dependency injection is not an option here, Dialog_FormCaravan is the primary user of the
+  // route planner and it lacks abstraction. Opted for the callbacks as opposed to multiple specialized
+  // overloads + fields, it's much cleaner this way.
+  public void Start([NotNull] VehicleCaravanInfo caravanInfo,
+    Action onFinishCallback, Action<PlanetTile> onChooseRouteCallback)
   {
-    if (Active)
-    {
+    if (IsActive)
       Stop();
-    }
-    currentFormCaravanDialog = formCaravanDialog;
-    caravanInfoFromFormCaravanDialog =
-      new VehicleCaravanTicksPerMoveUtility.VehicleCaravanInfo(formCaravanDialog);
-    formCaravanDialog.choosingRoute = true;
-    Find.WindowStack.TryRemove(formCaravanDialog, true);
-    vehicleDefs = caravanInfoFromFormCaravanDialog.Value.pawns.UniqueVehicleDefsInList();
-    InitiateRoutePlanner();
-    TryAddWaypoint(formCaravanDialog.CurrentTile, true);
-    cantRemoveFirstWaypoint = true;
-  }
 
-  public void InitiateRoutePlanner()
-  {
-    Instance.Active = true;
+    if (onFinishCallback != null)
+      this.onFinishCallback += onFinishCallback;
+    if (onChooseRouteCallback != null)
+      this.onChooseRouteCallback += onChooseRouteCallback;
+
+    this.caravanInfo = caravanInfo;
+    vehicleDefs = caravanInfo.pawns.UniqueVehicleDefsInList();
+
+    IsActive = true;
     if (Current.ProgramState == ProgramState.Playing)
     {
+      AmbientSoundManager.EnsureWorldAmbientSoundCreated();
       Find.World.renderer.wantedMode = WorldRenderMode.Planet;
       Find.TickManager.Pause();
+    }
+
+    if (caravanInfo.tile.Valid)
+    {
+      TryAddWaypoint(caravanInfo.tile);
+      cantRemoveFirstWaypoint = true;
     }
   }
 
   public void Stop()
   {
-    Active = false;
-    for (int i = 0; i < waypoints.Count; i++)
+    IsActive = false;
+    foreach (RoutePlannerWaypoint waypoint in waypoints)
     {
-      waypoints[i].Destroy();
+      waypoint.Destroy();
     }
     waypoints.Clear();
     cachedTicksToWaypoint.Clear();
     vehicleDefs.Clear();
-    if (currentFormCaravanDialog != null)
-    {
-      currentFormCaravanDialog.Notify_NoLongerChoosingRoute();
-    }
-    caravanInfoFromFormCaravanDialog = null;
-    currentFormCaravanDialog = null;
     cantRemoveFirstWaypoint = false;
+    onFinishCallback?.Invoke();
+    onFinishCallback = null;
+    onChooseRouteCallback = null;
     ReleasePaths();
   }
 
-  public void WorldRoutePlannerUpdate()
+  public override void WorldComponentUpdate()
   {
-    if (Active && ShouldStop)
-    {
+    if (IsActive && ShouldStop)
       Stop();
-    }
-    if (!Active)
-    {
+    if (!IsActive)
       return;
-    }
-    for (int i = 0; i < paths.Count; i++)
+
+    foreach (WorldPath path in paths)
     {
-      paths[i].DrawPath(null);
+      path.DrawPath(null);
     }
   }
 
-  public void WorldRoutePlannerOnGUI()
+  public override void WorldComponentOnGUI()
   {
-    if (!Active)
-    {
+    if (!IsActive)
       return;
-    }
+
     if (KeyBindingDefOf.Cancel.KeyDownEvent)
     {
-      if (currentFormCaravanDialog != null)
-      {
-        Find.WindowStack.Add(currentFormCaravanDialog);
-      }
-      else
-      {
-        SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
-      }
+      if (!caravanInfo.caravaning)
+        SoundDefOf.Tick_Low.PlayOneShotOnCamera();
       Stop();
       Event.current.Use();
       return;
@@ -203,8 +158,8 @@ public class VehicleRoutePlanner : WorldComponent
     if (Event.current.type == EventType.MouseDown && Event.current.button == 1)
     {
       int tile =
-        Find.WorldSelector.SelectableObjectsUnderMouse().FirstOrDefault() is VehicleCaravan
-          caravan ?
+        Find.WorldSelector.SelectableObjectsUnderMouse()
+         .FirstOrDefault() is VehicleCaravan caravan ?
           caravan.Tile :
           GenWorld.MouseTile(true);
       if (tile >= 0)
@@ -212,40 +167,39 @@ public class VehicleRoutePlanner : WorldComponent
         RoutePlannerWaypoint waypoint = MostRecentWaypointAt(tile);
         if (waypoint != null)
         {
-          if (waypoint == waypoints[waypoints.Count - 1])
+          if (waypoint == waypoints[^1])
           {
-            TryRemoveWaypoint(waypoint, true);
+            TryRemoveWaypoint(waypoint);
           }
           else
           {
-            List<FloatMenuOption> list = new List<FloatMenuOption>();
-            list.Add(new FloatMenuOption("AddWaypoint".Translate(),
-              delegate() { TryAddWaypoint(tile, true); }, MenuOptionPriority.Default, null, null,
-              0f, null, null));
-            list.Add(new FloatMenuOption("RemoveWaypoint".Translate(),
-              delegate() { TryRemoveWaypoint(waypoint, true); }, MenuOptionPriority.Default, null,
-              null, 0f, null, null));
+            List<FloatMenuOption> list =
+            [
+              new("AddWaypoint".Translate(),
+                delegate { TryAddWaypoint(tile); }),
+              new("RemoveWaypoint".Translate(),
+                delegate { TryRemoveWaypoint(waypoint); }),
+            ];
             Find.WindowStack.Add(new FloatMenu(list));
           }
         }
         else
         {
-          TryAddWaypoint(tile, true);
+          TryAddWaypoint(tile);
         }
         Event.current.Use();
       }
     }
     DoRouteDetailsBox();
     if (DoChooseRouteButton())
-    {
       return;
-    }
+
     DoTileTooltips();
   }
 
   private void DoRouteDetailsBox()
   {
-    Rect rect = new Rect((UI.screenWidth - BottomWindowSize.x) / 2f,
+    Rect rect = new((UI.screenWidth - BottomWindowSize.x) / 2f,
       UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin, BottomWindowSize.x,
       BottomWindowSize.y);
     if (Current.ProgramState == ProgramState.Entry)
@@ -254,73 +208,67 @@ public class VehicleRoutePlanner : WorldComponent
     }
     Find.WindowStack.ImmediateWindow(1373514241, rect, WindowLayer.Dialog, delegate
     {
-      if (Active)
+      const float TopPadding = 6;
+      const float RowHeight = 25;
+
+      if (!IsActive)
+        return;
+
+      using TextBlock textBlock = new(GameFont.Small, TextAnchor.UpperCenter, Color.white);
+
+      float lineHeight = Text.LineHeight;
+      float curY = TopPadding;
+      if (waypoints.Count >= 2)
       {
-        GUI.color = Color.white;
-        Text.Anchor = TextAnchor.UpperCenter;
-        Text.Font = GameFont.Small;
-        float num = 6f;
-        if (waypoints.Count >= 2)
-        {
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerEstTimeToFinalDest".Translate(GetTicksToWaypoint(waypoints.Count - 1)
-             .ToStringTicksToDays("0.#")));
-        }
-        else if (cantRemoveFirstWaypoint)
-        {
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerAddOneOrMoreWaypoints".Translate());
-        }
-        else
-        {
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerAddTwoOrMoreWaypoints".Translate());
-        }
-        num += 20f;
-        if (currentFormCaravanDialog == null && CaravanAtTheFirstWaypoint != null)
-        {
-          GUI.color = Color.gray;
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerUsingTicksPerMoveOfCaravan".Translate(CaravanAtTheFirstWaypoint
-             .LabelCap));
-        }
-        num += 20f;
-        GUI.color = Color.gray;
-        Widgets.Label(new Rect(0f, num, rect.width, 25f),
-          "RoutePlannerPressRMBToAddAndRemoveWaypoints".Translate());
-        num += 20f;
-        if (currentFormCaravanDialog != null)
-        {
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerPressEscapeToReturnToCaravanFormationDialog".Translate());
-        }
-        else
-        {
-          Widgets.Label(new Rect(0f, num, rect.width, 25f),
-            "RoutePlannerPressEscapeToExit".Translate());
-        }
-        num += 20f;
-        GUI.color = Color.white;
-        Text.Anchor = TextAnchor.UpperLeft;
+        Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+          "RoutePlannerEstTimeToFinalDest".Translate(cachedTicksToWaypoint[^1]
+           .ToStringTicksToDays("0.#")));
       }
+      else if (cantRemoveFirstWaypoint)
+      {
+        Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+          "RoutePlannerAddOneOrMoreWaypoints".Translate());
+      }
+      else
+      {
+        Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+          "RoutePlannerAddTwoOrMoreWaypoints".Translate());
+      }
+      curY += lineHeight;
+
+      if (!caravanInfo.caravaning && CaravanAtTheFirstWaypoint != null)
+      {
+        GUI.color = Color.gray;
+        Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+          "RoutePlannerUsingTicksPerMoveOfCaravan".Translate(CaravanAtTheFirstWaypoint
+           .LabelCap));
+      }
+      curY += lineHeight;
+
+      GUI.color = Color.gray;
+      Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+        "RoutePlannerPressRMBToAddAndRemoveWaypoints".Translate());
+      curY += lineHeight;
+
+      Widgets.Label(new Rect(0f, curY, rect.width, RowHeight),
+        caravanInfo.caravaning ?
+          "RoutePlannerPressEscapeToReturnToCaravanFormationDialog".Translate() :
+          "RoutePlannerPressEscapeToExit".Translate());
     });
   }
 
   private bool DoChooseRouteButton()
   {
-    if (currentFormCaravanDialog == null || waypoints.Count < 2)
-    {
+    if (!caravanInfo.caravaning || waypoints.Count < 2)
       return false;
-    }
-    if (Widgets.ButtonText(new Rect((Verse.UI.screenWidth - BottomButtonSize.x) / 2f,
-        Verse.UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin - 10f -
-        BottomButtonSize.y,
-        BottomButtonSize.x, BottomButtonSize.y), "ChooseRouteButton".Translate(), true, true,
-      true))
+
+    if (Widgets.ButtonText(new Rect((UI.screenWidth - BottomButtonSize.x) / 2f,
+        UI.screenHeight - BottomWindowSize.y - BottomWindowBotMargin - 10f -
+        BottomButtonSize.y, BottomButtonSize.x, BottomButtonSize.y),
+      "ChooseRouteButton".Translate()))
     {
-      Find.WindowStack.Add(currentFormCaravanDialog);
-      currentFormCaravanDialog.Notify_ChoseRoute(waypoints[1].Tile);
-      SoundDefOf.Click.PlayOneShotOnCamera(null);
+      onChooseRouteCallback?.Invoke(waypoints.Count >= 2 ? waypoints[1].Tile : PlanetTile.Invalid);
+      SoundDefOf.Click.PlayOneShotOnCamera();
       Stop();
       return true;
     }
@@ -348,12 +296,12 @@ public class VehicleRoutePlanner : WorldComponent
         vector.x += 20f;
         vector.y += 20f;
         Vector2 mouseAttachedWindowPos = GenUI.GetMouseAttachedWindowPos(vector.x, vector.y);
-        Rect rect = new Rect(mouseAttachedWindowPos, vector);
+        Rect rect = new(mouseAttachedWindowPos, vector);
         Find.WindowStack.ImmediateWindow(1859615246, rect, WindowLayer.Super, delegate
         {
           Text.Font = GameFont.Small;
           Widgets.Label(rect.AtZero().ContractedBy(10f), str);
-        }, true, false, 1f);
+        });
         return;
       }
     }
@@ -369,7 +317,7 @@ public class VehicleRoutePlanner : WorldComponent
     }
     else if (pathIndex < paths.Count - 1 && paths[pathIndex + 1].NodesReversed.Count >= 2)
     {
-      tileStep = paths[pathIndex + 1].NodesReversed[paths[pathIndex + 1].NodesReversed.Count - 2];
+      tileStep = paths[pathIndex + 1].NodesReversed[^2];
     }
     else
     {
@@ -396,8 +344,7 @@ public class VehicleRoutePlanner : WorldComponent
       stringBuilder.AppendLine();
       StringBuilder stringBuilder2 = new();
       float num5 =
-        WorldPathGrid.CalculatedMovementDifficultyAt(tileStep, false, new int?(ticksAbs),
-          stringBuilder2);
+        WorldPathGrid.CalculatedMovementDifficultyAt(tileStep, false, ticksAbs, stringBuilder2);
       float roadMovementDifficultyMultiplier =
         Find.WorldGrid.GetRoadMovementDifficultyMultiplier(tile, tileStep, stringBuilder2);
       stringBuilder.Append("TileMovementDifficulty".Translate() + ":\n" +
@@ -411,31 +358,27 @@ public class VehicleRoutePlanner : WorldComponent
 
   public void DoRoutePlannerButton(ref float curBaseY)
   {
-    Rect rect = new Rect(Verse.UI.screenWidth - 10f - RouteButtonDimension,
+    Rect rect = new(UI.screenWidth - 10f - RouteButtonDimension,
       curBaseY - 10f - RouteButtonDimension, RouteButtonDimension, RouteButtonDimension);
-    if (Widgets.ButtonImage(rect, ButtonTex, Color.white, new Color(0.8f, 0.8f, 0.8f), true))
+    if (Widgets.ButtonImage(rect, VehicleTex.RoutePlanner, Color.white,
+      new Color(0.8f, 0.8f, 0.8f)))
     {
-      if (Active)
+      if (IsActive)
       {
         Stop();
-        SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
+        SoundDefOf.Tick_Low.PlayOneShotOnCamera();
       }
       else
       {
-        Start();
-        SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+        StartWithSelector();
+        SoundDefOf.Tick_High.PlayOneShotOnCamera();
       }
     }
     TooltipHandler.TipRegion(rect, "VF_RoutePlannerButtonTip".Translate());
     curBaseY -= RouteButtonDimension + 20f;
   }
 
-  public int GetTicksToWaypoint(int index)
-  {
-    return cachedTicksToWaypoint[index];
-  }
-
-  private void TryAddWaypoint(int tile, bool playSound = true)
+  private void TryAddWaypoint(PlanetTile tile, bool playSound = true)
   {
     if (vehicleDefs.NotNullAndAny(v => !WorldVehiclePathGrid.Instance.Passable(tile, v)))
     {
@@ -445,7 +388,7 @@ public class VehicleRoutePlanner : WorldComponent
     }
     if (waypoints.NotNullAndAny() && !vehicleDefs.All(vehicle =>
       WorldVehiclePathGrid.Instance.reachability.CanReach(vehicle,
-        waypoints[waypoints.Count - 1].Tile, tile)))
+        waypoints[^1].Tile, tile)))
     {
       Messages.Message("MessageCantAddWaypointBecauseUnreachable".Translate(),
         MessageTypeDefOf.RejectInput, false);
@@ -466,11 +409,11 @@ public class VehicleRoutePlanner : WorldComponent
     RecreatePaths();
     if (playSound)
     {
-      SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+      SoundDefOf.Tick_High.PlayOneShotOnCamera();
     }
   }
 
-  public void TryRemoveWaypoint(RoutePlannerWaypoint point, bool playSound = true)
+  private void TryRemoveWaypoint(RoutePlannerWaypoint point, bool playSound = true)
   {
     if (cantRemoveFirstWaypoint && waypoints.NotNullAndAny() && point == waypoints[0])
     {
@@ -491,15 +434,15 @@ public class VehicleRoutePlanner : WorldComponent
     RecreatePaths();
     if (playSound)
     {
-      SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
+      SoundDefOf.Tick_Low.PlayOneShotOnCamera();
     }
   }
 
   private void ReleasePaths()
   {
-    for (int i = 0; i < paths.Count; i++)
+    foreach (WorldPath path in paths)
     {
-      paths[i].ReleaseToPool();
+      path.ReleaseToPool();
     }
     paths.Clear();
   }
@@ -510,15 +453,8 @@ public class VehicleRoutePlanner : WorldComponent
 
     for (int i = 1; i < waypoints.Count; i++)
     {
-      List<string> explanations = new List<string>();
       paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile,
         vehicleDefs));
-      if (VehicleMod.settings.debug.debugLogging)
-      {
-        Log.Message($"------ RoutePlanner ------");
-        explanations.ForEach(expl => Log.Message(expl));
-        Log.Message($"--------------------------");
-      }
     }
     cachedTicksToWaypoint.Clear();
     int num = 0;

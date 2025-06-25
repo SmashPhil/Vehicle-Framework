@@ -69,8 +69,12 @@ public class VehicleGroup : IDisposable
   {
     foreach (Pawn pawn in pawns)
     {
-      if (!pawn.IsInVehicle())
+      if (!pawn.InVehicle())
+      {
+        if (pawn.GetVehicleCaravan() is { } caravan)
+          caravan.RemovePawn(pawn);
         Assert.IsTrue(vehicle.TryAddPawn(pawn));
+      }
     }
   }
 
@@ -94,7 +98,8 @@ public class VehicleGroup : IDisposable
     {
       if (vehicle.InVehicleCaravan())
         Assert.IsTrue(pawn.InVehicleCaravan());
-      Assert.IsTrue(pawn.Spawned);
+      else
+        Assert.IsTrue(pawn.Spawned);
     }
   }
 
@@ -103,7 +108,7 @@ public class VehicleGroup : IDisposable
     foreach (Pawn pawn in pawns)
     {
       vehicle.RemovePawn(pawn);
-      Assert.IsFalse(pawn.IsInVehicle());
+      Assert.IsFalse(pawn.InVehicle());
       pawn.Destroy();
       Assert.IsTrue(pawn.Destroyed);
     }
@@ -114,8 +119,7 @@ public class VehicleGroup : IDisposable
   public static VehicleGroup CreateBasicVehicleGroup(MockSettings settings)
   {
     VehicleDef vehicleDef =
-      TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}",
-        settings.debugLabel);
+      TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
 
     if (!settings.statModifiers.NullOrEmpty())
     {
@@ -179,7 +183,8 @@ public class VehicleGroup : IDisposable
     VehicleGroup group = new(vehicle);
     for (int i = 0; i < settings.drivers + settings.passengers; i++)
     {
-      Pawn colonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+      Pawn colonist = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
+        Faction.OfPlayer, fixedBiologicalAge: 30));
       Assert.IsNotNull(colonist);
       Assert.AreEqual(colonist.Faction, Faction.OfPlayer);
       group.pawns.Add(colonist);
@@ -203,6 +208,8 @@ public class VehicleGroup : IDisposable
     public uint drivers;
     public uint passengers;
     public uint animals;
+
+    public VehicleProperties properties;
 
     public Faction faction = Faction.OfPlayer;
 

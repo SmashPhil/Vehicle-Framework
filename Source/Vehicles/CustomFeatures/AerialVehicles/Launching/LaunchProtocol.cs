@@ -9,6 +9,8 @@ using RimWorld.Planet;
 using LudeonTK;
 using SmashTools;
 using SmashTools.Rendering;
+using Vehicles.Compatibility;
+using Vehicles.World;
 
 namespace Vehicles
 {

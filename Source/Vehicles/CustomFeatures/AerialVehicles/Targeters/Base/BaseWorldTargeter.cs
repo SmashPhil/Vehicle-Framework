@@ -7,59 +7,58 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
-namespace Vehicles
+namespace Vehicles.World;
+
+[MustImplement("BeginTargeting")]
+public abstract class BaseWorldTargeter
 {
-	[MustImplement("BeginTargeting")]
-	public abstract class BaseWorldTargeter
-	{
-		protected int origin = -1;
-		protected Vector3 originOnMap;
-		protected Action actionWhenFinished;
-		protected Action onUpdate;
-		protected Texture2D mouseAttachment;
-		protected bool canTargetTiles;
-		public bool closeWorldTabWhenFinished;
+  protected int origin = -1;
+  protected Vector3 originOnMap;
+  protected Action actionWhenFinished;
+  protected Action onUpdate;
+  protected Texture2D mouseAttachment;
+  protected bool canTargetTiles;
+  public bool closeWorldTabWhenFinished;
 
-		public abstract bool IsTargeting { get; }
+  public abstract bool IsTargeting { get; }
 
-		public abstract void StopTargeting();
+  public abstract void StopTargeting();
 
-		public abstract void ProcessInputEvents();
+  public abstract void ProcessInputEvents();
 
-		public abstract void TargeterOnGUI();
+  public abstract void TargeterOnGUI();
 
-		public abstract void TargeterUpdate();
+  public abstract void TargeterUpdate();
 
-		public virtual void OnStart()
-		{
-			Targeters.PushTargeter(this);
-		}
+  public virtual void OnStart()
+  {
+    Targeters.PushTargeter(this);
+  }
 
-		protected virtual GlobalTargetInfo CurrentTargetUnderMouse()
-		{
-			if (!IsTargeting)
-			{
-				return GlobalTargetInfo.Invalid;
-			}
-			List<WorldObject> list = GenWorldUI.WorldObjectsUnderMouse(Verse.UI.MousePositionOnUI);
-			if (list.Any())
-			{
-				return list[0];
-			}
-			if (!canTargetTiles)
-			{
-				return GlobalTargetInfo.Invalid;
-			}
-			int num = GenWorld.MouseTile(false);
-			if (num >= 0)
-			{
-				return new GlobalTargetInfo(num);
-			}
-			return GlobalTargetInfo.Invalid;
-		}
+  protected virtual GlobalTargetInfo CurrentTargetUnderMouse()
+  {
+    if (!IsTargeting)
+    {
+      return GlobalTargetInfo.Invalid;
+    }
+    List<WorldObject> list = GenWorldUI.WorldObjectsUnderMouse(Verse.UI.MousePositionOnUI);
+    if (list.Any())
+    {
+      return list[0];
+    }
+    if (!canTargetTiles)
+    {
+      return GlobalTargetInfo.Invalid;
+    }
+    int num = GenWorld.MouseTile();
+    if (num >= 0)
+    {
+      return new GlobalTargetInfo(num);
+    }
+    return GlobalTargetInfo.Invalid;
+  }
 
-		public virtual void PostInit()
-		{
-		}
-	}
+  public virtual void PostInit()
+  {
+  }
 }

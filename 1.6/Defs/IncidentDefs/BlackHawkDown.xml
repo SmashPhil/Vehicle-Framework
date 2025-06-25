@@ -4,7 +4,7 @@
 	<IncidentDef>
 		<defName>ShuttleCrashed</defName>
 		<label>Shuttle Downed</label>
-		<workerClass>Vehicles.IncidentWorker_ShuttleDowned</workerClass>
+		<workerClass>Vehicles.World.IncidentWorker_ShuttleDowned</workerClass>
 		<letterDef>ThreatBig</letterDef>
 		<category>ThreatBig</category>
 		

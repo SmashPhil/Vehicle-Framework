@@ -1,19 +1,13 @@
-﻿using System;
-using System.Reflection;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Verse;
-using SmashTools;
-using UnityEngine;
-using RimWorld;
 
-namespace Vehicles
+namespace Vehicles.Compatibility;
+
+internal class Compatibility_MapPreview : ConditionalVehiclePatch
 {
-	internal class Compatibility_MapPreview : ConditionalVehiclePatch
-	{
-		public override string PackageId => CompatibilityPackageIds.MapPreview;
+  public override string PackageId => CompatibilityPackageIds.MapPreview;
 
-		public override void PatchAll(ModMetaData mod, Harmony harmony)
-		{
-		}
-	}
+  public override void PatchAll(ModMetaData mod, Harmony harmony)
+  {
+  }
 }

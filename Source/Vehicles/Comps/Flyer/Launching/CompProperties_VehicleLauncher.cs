@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using SmashTools;
+using Vehicles.Compatibility;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;

@@ -8,6 +8,7 @@ using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 using Verse.Sound;
 

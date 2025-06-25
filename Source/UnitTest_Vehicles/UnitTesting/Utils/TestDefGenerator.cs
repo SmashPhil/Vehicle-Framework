@@ -1,8 +1,10 @@
 ﻿using System.Reflection;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
+using static Vehicles.UnitTesting.VehicleGroup;
 
 namespace Vehicles;
 
@@ -17,13 +19,14 @@ internal static class TestDefGenerator
     fleshField = AccessTools.Field(typeof(RaceProperties), "fleshType");
   }
 
-  public static VehicleDef CreateTransientVehicleDef(string defName, string label = null)
+  public static VehicleDef CreateTransientVehicleDef(string defName,
+    [CanBeNull] MockSettings settings)
   {
     Assert.IsNotNull(fleshField);
     VehicleBuildDef buildDef = new()
     {
       defName = $"{defName}_Blueprint",
-      label = $"{label ?? defName} Blueprint",
+      label = $"{settings?.debugLabel ?? defName} Blueprint",
       modContentPack = VehicleMod.content,
       thingClass = typeof(VehicleBuilding),
       terrainAffordanceNeeded = TerrainAffordanceDefOf.Heavy,
@@ -41,14 +44,14 @@ internal static class TestDefGenerator
     VehicleDef def = new()
     {
       defName = defName,
-      label = label ?? $"{defName}_LABEL",
+      label = settings?.debugLabel ?? $"{defName}_LABEL",
       modContentPack = VehicleMod.content,
       thingClass = typeof(VehiclePawn),
       category = ThingCategory.Pawn,
       tickerType = TickerType.Normal,
       selectable = true,
       useHitPoints = false,
-      properties = new VehicleProperties(),
+      properties = settings?.properties ?? new VehicleProperties(),
 
       graphicData = new GraphicDataRGB
       {

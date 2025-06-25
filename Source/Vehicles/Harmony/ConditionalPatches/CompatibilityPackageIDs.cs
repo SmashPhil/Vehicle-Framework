@@ -1,4 +1,4 @@
-﻿namespace Vehicles;
+﻿namespace Vehicles.Compatibility;
 
 public static class CompatibilityPackageIds
 {

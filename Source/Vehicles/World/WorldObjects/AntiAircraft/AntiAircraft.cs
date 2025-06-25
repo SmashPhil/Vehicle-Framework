@@ -4,138 +4,137 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 
-namespace Vehicles
+namespace Vehicles.World;
+
+public abstract class AntiAircraft : DynamicDrawnWorldObject
 {
-  public abstract class AntiAircraft : DynamicDrawnWorldObject
+  protected float transition;
+  protected float speedPctPerTick;
+
+  protected Vector3 directionFacing;
+  protected Vector3 destination;
+  protected Vector3 source;
+
+  protected AerialVehicleInFlight target;
+  protected WorldObject firedFrom;
+
+  protected Graphic explosionGraphic;
+
+  protected int explosionFrame = 0;
+
+  public virtual Vector3 Destination => destination;
+
+  public override Vector3 DrawPos => Vector3.Slerp(source, destination, transition);
+
+  public AntiAircraftDef AADef => def as AntiAircraftDef;
+
+  public Graphic ExplosionGraphic
   {
-    protected float transition;
-    protected float speedPctPerTick;
-
-    protected Vector3 directionFacing;
-    protected Vector3 destination;
-    protected Vector3 source;
-
-    protected AerialVehicleInFlight target;
-    protected WorldObject firedFrom;
-
-    protected Graphic explosionGraphic;
-
-    protected int explosionFrame = 0;
-
-    public virtual Vector3 Destination => destination;
-
-    public override Vector3 DrawPos => Vector3.Slerp(source, destination, transition);
-
-    public AntiAircraftDef AADef => def as AntiAircraftDef;
-
-    public Graphic ExplosionGraphic
+    get
     {
-      get
+      if (explosionGraphic is null)
       {
-        if (explosionGraphic is null)
-        {
-          explosionGraphic = AADef.explosionGraphic?.Graphic;
-        }
-        return explosionGraphic;
+        explosionGraphic = AADef.explosionGraphic?.Graphic;
       }
+      return explosionGraphic;
     }
+  }
 
-    public abstract void Initialize(WorldObject firedFrom, AerialVehicleInFlight target,
-      Vector3 source);
+  public abstract void Initialize(WorldObject firedFrom, AerialVehicleInFlight target,
+    Vector3 source);
 
-    public override void Draw()
+  public override void Draw()
+  {
+    if (!this.HiddenBehindTerrainNow())
     {
-      if (!this.HiddenBehindTerrainNow())
+      float averageTileSize = Find.WorldGrid.AverageTileSize;
+      float transitionPct = ExpandableWorldObjectsUtility.TransitionPct(this);
+      float drawPct = 1 + (transitionPct * Find.WorldCameraDriver.AltitudePercent *
+        AerialVehicleInFlight.ExpandingResize);
+
+      bool exploding = (explosionFrame >= 0 && ExplosionGraphic != null);
+      float drawSizeMultipler = exploding ?
+        Mathf.Max(AADef.explosionGraphic.drawSize.x, AADef.explosionGraphic.drawSize.y) :
+        AADef.drawSizeMultiplier;
+
+      Vector3 normalized = DrawPos.normalized;
+      Quaternion quat =
+        Quaternion.LookRotation(Vector3.Cross(normalized, directionFacing), normalized) *
+        Quaternion.Euler(0f, 90f, 0f);
+      Vector3 s = new Vector3(averageTileSize * 0.7f * drawPct * drawSizeMultipler, 5f,
+        averageTileSize * 0.7f * drawPct * drawSizeMultipler);
+      Matrix4x4 matrix = default;
+      matrix.SetTRS(DrawPos + normalized, quat, s);
+      int layer = WorldCameraManager.WorldLayer;
+
+      if (exploding)
       {
-        float averageTileSize = Find.WorldGrid.AverageTileSize;
-        float transitionPct = ExpandableWorldObjectsUtility.TransitionPct(this);
-        float drawPct = 1 + (transitionPct * Find.WorldCameraDriver.AltitudePercent *
-          AerialVehicleInFlight.ExpandingResize);
-
-        bool exploding = (explosionFrame >= 0 && ExplosionGraphic != null);
-        float drawSizeMultipler = exploding ?
-          Mathf.Max(AADef.explosionGraphic.drawSize.x, AADef.explosionGraphic.drawSize.y) :
-          AADef.drawSizeMultiplier;
-
-        Vector3 normalized = DrawPos.normalized;
-        Quaternion quat =
-          Quaternion.LookRotation(Vector3.Cross(normalized, directionFacing), normalized) *
-          Quaternion.Euler(0f, 90f, 0f);
-        Vector3 s = new Vector3(averageTileSize * 0.7f * drawPct * drawSizeMultipler, 5f,
-          averageTileSize * 0.7f * drawPct * drawSizeMultipler);
-        Matrix4x4 matrix = default;
-        matrix.SetTRS(DrawPos + normalized, quat, s);
-        int layer = WorldCameraManager.WorldLayer;
-
-        if (exploding)
+        if (explosionGraphic is Graphic_Animate animate)
         {
-          if (explosionGraphic is Graphic_Animate animate)
-          {
-            Graphics.DrawMesh(MeshPool.plane10, matrix, animate.MatAt(Rot4.North, explosionFrame),
-              layer);
-          }
-          else
-          {
-            Graphics.DrawMesh(MeshPool.plane10, matrix, explosionGraphic.MatAt(Rot4.North), layer);
-          }
+          Graphics.DrawMesh(MeshPool.plane10, matrix, animate.MatAt(Rot4.North, explosionFrame),
+            layer);
         }
         else
         {
-          Graphics.DrawMesh(MeshPool.plane10, matrix, Material, layer);
+          Graphics.DrawMesh(MeshPool.plane10, matrix, explosionGraphic.MatAt(Rot4.North), layer);
         }
       }
-    }
-
-    protected override void Tick()
-    {
-      base.Tick();
-      transition += speedPctPerTick;
-      if (transition >= 1)
+      else
       {
-        if (explosionFrame < 0 && ExplosionGraphic != null)
-        {
-          explosionFrame = AADef.framesForExplosion;
-        }
-        else
-        {
-          explosionFrame--;
-          if (explosionFrame < 0)
-          {
-            Destroy();
-          }
-        }
+        Graphics.DrawMesh(MeshPool.plane10, matrix, Material, layer);
       }
     }
+  }
 
-    public override void Destroy()
+  protected override void Tick()
+  {
+    base.Tick();
+    transition += speedPctPerTick;
+    if (transition >= 1)
     {
-      if (Rand.Chance(AADef.accuracy) && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
+      if (explosionFrame < 0 && ExplosionGraphic != null)
       {
-        IntVec3 randomHit = target.vehicle.OccupiedRect().RandomCell;
-        target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit.ToIntVec2);
+        explosionFrame = AADef.framesForExplosion;
       }
-      base.Destroy();
+      else
+      {
+        explosionFrame--;
+        if (explosionFrame < 0)
+        {
+          Destroy();
+        }
+      }
     }
+  }
 
-    protected virtual void InitializeFacing()
+  public override void Destroy()
+  {
+    if (Rand.Chance(AADef.accuracy) && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
     {
-      directionFacing = (DrawPos - destination).normalized;
+      IntVec3 randomHit = target.vehicle.OccupiedRect().RandomCell;
+      target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit.ToIntVec2);
     }
+    base.Destroy();
+  }
 
-    public override void ExposeData()
-    {
-      base.ExposeData();
-      Scribe_Values.Look(ref transition, "transition");
-      Scribe_Values.Look(ref speedPctPerTick, "speedPctPerTick");
+  protected virtual void InitializeFacing()
+  {
+    directionFacing = (DrawPos - destination).normalized;
+  }
 
-      Scribe_Values.Look(ref directionFacing, "directionFacing");
-      Scribe_Values.Look(ref destination, "destination");
-      Scribe_Values.Look(ref source, "source");
+  public override void ExposeData()
+  {
+    base.ExposeData();
+    Scribe_Values.Look(ref transition, "transition");
+    Scribe_Values.Look(ref speedPctPerTick, "speedPctPerTick");
 
-      Scribe_References.Look(ref target, "target");
-      Scribe_References.Look(ref firedFrom, "firedFrom");
+    Scribe_Values.Look(ref directionFacing, "directionFacing");
+    Scribe_Values.Look(ref destination, "destination");
+    Scribe_Values.Look(ref source, "source");
 
-      Scribe_Values.Look(ref explosionFrame, "explosionFrame");
-    }
+    Scribe_References.Look(ref target, "target");
+    Scribe_References.Look(ref firedFrom, "firedFrom");
+
+    Scribe_Values.Look(ref explosionFrame, "explosionFrame");
   }
 }

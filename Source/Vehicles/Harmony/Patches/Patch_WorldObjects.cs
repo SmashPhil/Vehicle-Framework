@@ -2,6 +2,7 @@
 using RimWorld.Planet;
 using SmashTools.Patching;
 using UnityEngine;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;

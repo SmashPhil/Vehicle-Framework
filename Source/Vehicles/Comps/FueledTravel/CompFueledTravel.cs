@@ -9,14 +9,14 @@ using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Vehicles.Rendering;
+using Vehicles.World;
 using Verse;
 using Verse.AI;
 
 namespace Vehicles;
 
+[PublicAPI, StaticConstructorOnStartup]
 [HeaderTitle(Label = nameof(CompFueledTravel))]
-[UsedImplicitly]
-[StaticConstructorOnStartup]
 public class CompFueledTravel : VehicleComp, IRefundable
 {
   private const float FuelPerLeak = 1;
@@ -27,9 +27,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
   private const float EfficiencyIdleMultiplier = 0.5f;
   private const float CellOffsetIntVec3ToVector3 = 0.5f;
   private const float TicksToCharge = 120;
-
-  // Same as TransferableOneWayWidget::DrawNutritionEatenPerDay
-  private static readonly Color fuelPerDayColor = new(1f, 0.5f, 0f);
 
   private static readonly Texture2D electricPowerTex =
     ContentFinder<Texture2D>.Get("UI/Overlays/NeedsPower");
@@ -329,7 +326,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
     {
       Widgets.Label(labelRect, Props.GizmoLabel);
     }
-    using (new TextBlock(TextAnchor.MiddleRight /*, fuelPerDayColor*/))
+    using (new TextBlock(TextAnchor.MiddleRight))
     {
       string fuelPerDayText = "VF_PerDay".Translate();
       float width = Text.CalcSize(fuelPerDayText).x;
@@ -451,14 +448,13 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
-  [UsedImplicitly]
   protected void ChangeStoredEnergy(float extra)
   {
     if (changeStoredEnergy == null && connectedPower.PowerNet != null)
     {
       changeStoredEnergy =
         AccessTools.MethodDelegate<Action<float>>(powerNetMethod, connectedPower.PowerNet,
-          virtualCall: false);
+          virtualCall: false, delegateArgs: [typeof(float)]);
     }
     changeStoredEnergy?.Invoke(extra);
   }

@@ -5,8 +5,8 @@ using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Algorithms;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
-using WorldRegionGrid = Vehicles.WorldVehicleReachability.WorldRegionGrid;
 
 namespace Vehicles.UnitTesting;
 
@@ -21,7 +21,8 @@ internal sealed class UnitTest_WorldReachability
     {
       using Test.Group group = new(vehicleDef.defName);
 
-      WorldRegionGrid regionGrid = pathGrid.reachability.GetRegionGrid(vehicleDef);
+      WorldVehicleReachability.WorldRegionGrid regionGrid =
+        pathGrid.reachability.GetRegionGrid(vehicleDef);
       bool allValid = true;
       for (int tile = 0; tile < Find.WorldGrid.TilesCount; tile++)
       {
@@ -45,7 +46,8 @@ internal sealed class UnitTest_WorldReachability
     {
       using Test.Group group = new(vehicleDef.defName);
 
-      WorldRegionGrid regionGrid = pathGrid.reachability.GetRegionGrid(vehicleDef);
+      WorldVehicleReachability.WorldRegionGrid regionGrid =
+        pathGrid.reachability.GetRegionGrid(vehicleDef);
 
       Dictionary<int, List<int>> regions = [];
       for (int tile = 0; tile < Find.WorldGrid.TilesCount; tile++)

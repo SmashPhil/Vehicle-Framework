@@ -1,12 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.6.2024</currentVersion>
+  <currentVersion>1.6.2026</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>GameInit</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+Welcome to the 1.6 Beta! There are too many changes to list out so I'm only going to list out the big ones.
 
+If you are a modder, visit the &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) for a list of all changes you'll need to look out for.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Graphic Overlays with patterns not rendering properly for blueprint placement.
 
@@ -28,7 +30,12 @@
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 
-- Vehicle regions will build in the background, significantly reducing impact to map generation times.
+- Vehicle regions are now pooled and 'lazy', only generating if you have a vehicle that needs the grid.
+
+- Vehicle regions are also generated parallel to the main thread, significantly reducing map generation time.
+
+- Vehicle rendering now utilizes Unity Jobs, a similar implementation to the pawn render tree from 1.5
+
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Vehicles can be temporarily disabled by EMPs.
 

@@ -1,9 +1,8 @@
 ﻿using SmashTools.Patching;
 
-namespace Vehicles
+namespace Vehicles.Compatibility;
+
+public abstract class ConditionalVehiclePatch : ConditionalPatch
 {
-  public abstract class ConditionalVehiclePatch : ConditionalPatch
-  {
-    public override string SourceId => VehicleHarmony.VehiclesUniqueId;
-  }
+  public override string SourceId => VehicleHarmony.VehiclesUniqueId;
 }

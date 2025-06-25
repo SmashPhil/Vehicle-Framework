@@ -68,7 +68,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.3.3" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
         <Reference Include="Assembly-CSharp">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>

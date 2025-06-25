@@ -13,7 +13,7 @@ internal sealed class UnitTest_VehiclePawn
   private void Destroy()
   {
     VehicleDef vehicleDef =
-      TestDefGenerator.CreateTransientVehicleDef("VehicleDef_ForDestruction");
+      TestDefGenerator.CreateTransientVehicleDef("VehicleDef_ForDestruction", null);
     Assert.IsNotNull(vehicleDef);
 
     vehicleDef.properties.roles =
@@ -32,7 +32,7 @@ internal sealed class UnitTest_VehiclePawn
     Pawn colonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
     Assert.IsNotNull(colonist);
     Assert.IsTrue(vehicle.TryAddPawn(colonist));
-    Assert.IsTrue(colonist.IsInVehicle());
+    Assert.IsTrue(colonist.InVehicle());
     Assert.IsTrue(vehicle.AllPawnsAboard.Contains(colonist));
 
     TestUtils.ForceSpawn(vehicle);

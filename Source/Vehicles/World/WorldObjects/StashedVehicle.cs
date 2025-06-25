@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles;
+namespace Vehicles.World;
 
 public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 {

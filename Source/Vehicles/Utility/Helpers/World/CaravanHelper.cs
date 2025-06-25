@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using UnityEngine;
 using HarmonyLib;
 using JetBrains.Annotations;
-using Verse;
-using Verse.AI;
-using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UnityEngine;
+using UnityEngine.Assertions;
+using Vehicles.World;
+using Verse;
+using Verse.AI;
+using Verse.AI.Group;
 
 namespace Vehicles;
 
@@ -23,6 +23,16 @@ public static class CaravanHelper
   public static VehicleAssignment assignedSeats = new();
 
   private static int pawnsBeingAdded;
+
+  public static Dialog_FormCaravan CurrentDialogFormCaravan
+  {
+    get
+    {
+      bool result = Find.WindowStack.TryGetWindow(out Dialog_FormCaravan formCaravan);
+      Assert.IsTrue(result);
+      return formCaravan;
+    }
+  }
 
   /// <summary>
   /// VehicleCaravan is able to be created and embark given list of pawns
@@ -128,7 +138,7 @@ public static class CaravanHelper
     availableExitTiles.Clear();
     {
       int currentTileID = map.Tile;
-      World world = Find.World;
+      RimWorld.Planet.World world = Find.World;
       WorldGrid grid = world.grid;
       grid.GetTileNeighbors(currentTileID, neighborTiles);
       VehicleDef largestVehicle = vehicleDefs.MaxBy(vehicleDef => vehicleDef.Size.z);
@@ -252,11 +262,7 @@ public static class CaravanHelper
   {
     foreach (AssignedSeat seat in assignedSeats.AllAssignments.Values)
     {
-      Pawn pawn = seat.pawn;
-      if (pawn.Spawned)
-        seat.Vehicle.TryAddPawn(pawn, seat.handler);
-      else if (!pawn.IsInVehicle())
-        seat.Vehicle.Notify_BoardedCaravan(pawn, seat.handler.thingOwner);
+      seat.Vehicle.TryAddPawn(seat.pawn, seat.handler);
     }
     assignedSeats.Clear();
   }

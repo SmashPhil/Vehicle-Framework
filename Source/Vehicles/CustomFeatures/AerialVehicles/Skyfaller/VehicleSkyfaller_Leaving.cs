@@ -5,114 +5,114 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 using UnityEngine;
+using Vehicles.World;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class VehicleSkyfaller_Leaving : VehicleSkyfaller
 {
-  public class VehicleSkyfaller_Leaving : VehicleSkyfaller
+  public AerialVehicleArrivalAction arrivalAction;
+
+  public List<FlightNode> flightPath;
+
+  public bool orderRecon;
+
+  public bool createWorldObject = true;
+
+  private int delayLaunchingTicks;
+
+  protected override void DrawAt(Vector3 drawLoc, bool flip = false)
   {
-    public AerialVehicleArrivalAction arrivalAction;
+    (launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
+    //DrawDropSpotShadow();
+  }
 
-    public List<FlightNode> flightPath;
-
-    public bool orderRecon;
-
-    public bool createWorldObject = true;
-
-    private int delayLaunchingTicks;
-
-    protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+  protected override void Tick()
+  {
+    delayLaunchingTicks--;
+    if (delayLaunchingTicks <= 0)
     {
-      (launchProtocolDrawPos, _) = vehicle.CompVehicleLauncher.launchProtocol.Draw(RootPos, 0);
-      //DrawDropSpotShadow();
-    }
-
-    protected override void Tick()
-    {
-      delayLaunchingTicks--;
-      if (delayLaunchingTicks <= 0)
+      base.Tick();
+      if (vehicle.CompVehicleLauncher.launchProtocol.FinishedAnimation(this))
       {
-        base.Tick();
-        if (vehicle.CompVehicleLauncher.launchProtocol.FinishedAnimation(this))
-        {
-          LeaveMap();
-        }
+        LeaveMap();
       }
     }
+  }
 
-    protected override void LeaveMap()
+  protected override void LeaveMap()
+  {
+    vehicle.CompVehicleLauncher.launchProtocol.Release();
+    if (!createWorldObject)
     {
-      vehicle.CompVehicleLauncher.launchProtocol.Release();
-      if (!createWorldObject)
+      base.LeaveMap();
+      return;
+    }
+    if (flightPath.Any(node => node.tile < 0))
+    {
+      Log.Error(
+        "AerialVehicle left the map but has a flight path Tile that is invalid. Removing node from path.");
+      flightPath.RemoveAll(node => node.tile < 0);
+      if (flightPath.NullOrEmpty())
       {
-        base.LeaveMap();
+        //REDO - Handle better here
         return;
       }
-      if (flightPath.Any(node => node.tile < 0))
-      {
-        Log.Error(
-          "AerialVehicle left the map but has a flight path Tile that is invalid. Removing node from path.");
-        flightPath.RemoveAll(node => node.tile < 0);
-        if (flightPath.NullOrEmpty())
-        {
-          //REDO - Handle better here
-          return;
-        }
-      }
-      if (vehicle.Faction.IsPlayer)
-      {
-        Messages.Message("VF_AerialVehicleLeft".Translate(vehicle.LabelShort),
-          MessageTypeDefOf.PositiveEvent);
-      }
-      if (createWorldObject)
-      {
-        AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
-        aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath),
-          WorldHelper.GetTilePos(Map.Tile), arrivalAction);
-        if (orderRecon)
-        {
-          aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
-        }
-
-        Find.WorldPawns.PassToWorld(vehicle);
-        foreach (Pawn pawn in vehicle.AllPawnsAboard)
-        {
-          if (!pawn.IsWorldPawn())
-          {
-            Find.WorldPawns.PassToWorld(pawn);
-          }
-        }
-        foreach (Thing thing in vehicle.inventory.innerContainer)
-        {
-          if (thing is Pawn pawn && !pawn.IsWorldPawn())
-          {
-            Find.WorldPawns.PassToWorld(pawn);
-          }
-        }
-      }
-      vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
-      base.LeaveMap();
     }
-
-    public override void SpawnSetup(Map map, bool respawningAfterLoad)
+    if (vehicle.Faction.IsPlayer)
     {
-      base.SpawnSetup(map, respawningAfterLoad);
-      if (!respawningAfterLoad)
+      Messages.Message("VF_AerialVehicleLeft".Translate(vehicle.LabelShort),
+        MessageTypeDefOf.PositiveEvent);
+    }
+    if (createWorldObject)
+    {
+      AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
+      aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath),
+        WorldHelper.GetTilePos(Map.Tile), arrivalAction);
+      if (orderRecon)
       {
-        vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
-        vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
-        delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties
-         .delayByTicks;
+        aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
+      }
+
+      Find.WorldPawns.PassToWorld(vehicle);
+      foreach (Pawn pawn in vehicle.AllPawnsAboard)
+      {
+        if (!pawn.IsWorldPawn())
+        {
+          Find.WorldPawns.PassToWorld(pawn);
+        }
+      }
+      foreach (Thing thing in vehicle.inventory.innerContainer)
+      {
+        if (thing is Pawn pawn && !pawn.IsWorldPawn())
+        {
+          Find.WorldPawns.PassToWorld(pawn);
+        }
       }
     }
+    vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
+    base.LeaveMap();
+  }
 
-    public override void ExposeData()
+  public override void SpawnSetup(Map map, bool respawningAfterLoad)
+  {
+    base.SpawnSetup(map, respawningAfterLoad);
+    if (!respawningAfterLoad)
     {
-      base.ExposeData();
-      Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
-      Scribe_Collections.Look(ref flightPath, "flightPath");
-      Scribe_Values.Look(ref orderRecon, "orderRecon");
-      Scribe_Values.Look(ref createWorldObject, "createWorldObject", true, false);
-      Scribe_Values.Look(ref delayLaunchingTicks, "delayLaunchingTicks");
+      vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
+      vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Takeoff);
+      delayLaunchingTicks = vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties
+       .delayByTicks;
     }
+  }
+
+  public override void ExposeData()
+  {
+    base.ExposeData();
+    Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
+    Scribe_Collections.Look(ref flightPath, "flightPath");
+    Scribe_Values.Look(ref orderRecon, "orderRecon");
+    Scribe_Values.Look(ref createWorldObject, "createWorldObject", true, false);
+    Scribe_Values.Look(ref delayLaunchingTicks, "delayLaunchingTicks");
   }
 }

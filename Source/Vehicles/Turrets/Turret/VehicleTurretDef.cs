@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using UnityEngine;
+using Vehicles.Compatibility;
 using Verse;
 using Verse.AI;
 
@@ -260,8 +261,7 @@ public class VehicleTurretDef : Def, ITweakFields
       "VF_RotationSpeedValue".Translate(Mathf.RoundToInt(rotationSpeed * 60));
     // rotationSpeed in infoCard is deg/sec (x60 of rotationSpeed) so it's more human readable.
     yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_RotationSpeed".Translate(),
-      rotationSpeedReadout,
-      "VF_RotationSpeedTooltip".Translate(), 3000);
+      rotationSpeedReadout, "VF_RotationSpeedTooltip".Translate(), 3000);
 
     StringBuilder fireModeExplanation = new();
     // FireModes

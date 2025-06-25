@@ -5,6 +5,7 @@ using HarmonyLib;
 using RimWorld;
 using SmashTools;
 using UnityEngine.Assertions;
+using Vehicles.World;
 using Verse;
 using Priority = DevTools.UnitTesting.Priority;
 

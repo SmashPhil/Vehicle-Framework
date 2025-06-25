@@ -108,11 +108,4 @@ public record FireMode
       _ => accuracyLong
     };
   }
-
-  public override int GetHashCode()
-  {
-    return Gen.HashCombineInt(Gen.HashCombineInt(Gen.HashCombineInt(
-      Gen.HashCombineInt(0, ticksBetweenBursts.GetHashCode()),
-      shotsPerBurst.GetHashCode()), burstsTillWarmup), ticksBetweenShots);
-  }
 }

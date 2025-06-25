@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using HarmonyLib;
 using LudeonTK;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
+using Vehicles.World;
 using Verse;
 
 namespace Vehicles;
@@ -35,7 +37,7 @@ internal class Patch_Debug : IPatchCategory
     {
       HarmonyPatcher.Patch(
         original: AccessTools.Method(typeof(WorldRoutePlanner),
-          nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)), prefix: null,
+          nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
         postfix: new HarmonyMethod(typeof(Patch_Debug),
           nameof(DebugSettlementPaths)));
       HarmonyPatcher.Patch(
@@ -45,8 +47,9 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(StaticConstructorOnStartupUtility),
-    //    nameof(StaticConstructorOnStartupUtility.ReportProbablyMissingAttributes)),
+    //  original: AccessTools.Method(typeof(CaravanVisibilityCalculator),
+    //    nameof(CaravanVisibilityCalculator.Visibility),
+    //    parameters: [typeof(float), typeof(bool), typeof(StringBuilder)]),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
@@ -68,10 +71,11 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix()
+  private static void TestPrefix(float bodySizeSum)
   {
     try
     {
+      Log.Message($"BodySizeSum: {bodySizeSum}");
     }
     catch (Exception ex)
     {

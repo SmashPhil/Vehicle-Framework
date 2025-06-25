@@ -8,6 +8,7 @@ using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Compatibility;
 using Vehicles.Rendering;
 using Verse;
 using static Vehicles.VehicleUpgrade;
@@ -567,9 +568,9 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
     if (CompPropsVehicleLauncher != null)
     {
-      if (ModsConfig.IsActive(CompatibilityPackageIds.SOS2) ||
-        ModsConfig.IsActive(CompatibilityPackageIds.RimNauts) ||
-        ModsConfig.IsActive(CompatibilityPackageIds.Universum))
+      if (Ext_Mods.HasActiveMod(CompatibilityPackageIds.SOS2) ||
+        Ext_Mods.HasActiveMod(CompatibilityPackageIds.RimNauts) ||
+        Ext_Mods.HasActiveMod(CompatibilityPackageIds.Universum))
       {
         bool spaceFlight = vehicle?.CompVehicleLauncher.SpaceFlight ??
           CompPropsVehicleLauncher.spaceFlight;

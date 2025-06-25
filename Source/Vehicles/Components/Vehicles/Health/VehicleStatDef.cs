@@ -99,7 +99,7 @@ namespace Vehicles
       {
         for (int i = 0; i < showIfModsLoaded.Count; i++)
         {
-          if (!ModsConfig.IsActive(showIfModsLoaded[i]))
+          if (!Ext_Mods.HasActiveMod(showIfModsLoaded[i]))
           {
             return false;
           }

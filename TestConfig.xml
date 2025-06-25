@@ -5,6 +5,14 @@
     <verboseLogging>false</verboseLogging>
   </log>
 
+  <preTestActions>
+    <li>Vehicles.ModSettingsDisabler.Disable</li>
+  </preTestActions>
+
+  <postTestActions>
+    <li>Vehicles.ModSettingsDisabler.Restore</li>
+  </postTestActions>
+
   <map>
     <size>50</size>
   </map>

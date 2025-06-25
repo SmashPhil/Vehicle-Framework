@@ -40,7 +40,7 @@
         <DebugSymbols>true</DebugSymbols>
         <DebugType>portable</DebugType>
         <Optimize>false</Optimize>
-        <DefineConstants>TRACE;DEBUG;RAIDERS;BATCH_RENDERING;UNITY_ASSERTIONS;DEV_TOOLS;MERGED_CARAVAN_FORMATION;</DefineConstants>
+        <DefineConstants>TRACE;DEBUG;RAIDERS;BATCH_RENDERING;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
         <NoWarn>CS0649</NoWarn>
@@ -82,7 +82,7 @@
     <!-- Dependencies -->
     <ItemGroup>
         <!-- Nuget -->
-        <PackageReference Include="Lib.Harmony" Version="2.3.3" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
 
         <!--Local -->
         <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
