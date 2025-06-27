@@ -1,6 +1,8 @@
 ﻿using System;
 using DevTools.UnitTesting;
+using UnityEngine;
 using Verse;
+using Object = UnityEngine.Object;
 
 // ReSharper disable all
 namespace SmashTools.UnitTesting;

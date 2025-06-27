@@ -714,14 +714,14 @@ public class Dialog_FormVehicleCaravan : Window
       }
       Messages.Message(
         "CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()),
-        new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.CautionInput, false);
+        new GlobalTargetInfo(intVec, map), MessageTypeDefOf.CautionInput, false);
       return false;
     }
     if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
     {
       Messages.Message(
         "CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()),
-        new GlobalTargetInfo(intVec, map, false), MessageTypeDefOf.RejectInput, false);
+        new GlobalTargetInfo(intVec, map), MessageTypeDefOf.RejectInput, false);
       return false;
     }
     VehicleCaravanFormingUtility.StartFormingCaravan(
@@ -952,13 +952,12 @@ public class Dialog_FormVehicleCaravan : Window
 
   private bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, out IntVec3 spot)
   {
-    bool result;
     CaravanExitMapUtility.GetExitMapEdges(Find.WorldGrid, CurrentTile, startingTile,
       out Rot4 primary, out Rot4 secondary);
-    result = (primary != Rot4.Invalid &&
-        TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot)) ||
-      (secondary != Rot4.Invalid &&
-        TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot)) ||
+    bool result = primary != Rot4.Invalid &&
+      TryFindExitSpot(pawns, reachableForEveryColonist, primary, out spot) ||
+      secondary != Rot4.Invalid &&
+      TryFindExitSpot(pawns, reachableForEveryColonist, secondary, out spot) ||
       TryFindExitSpot(pawns, reachableForEveryColonist,
         primary.Rotated(RotationDirection.Clockwise), out spot) ||
       TryFindExitSpot(pawns, reachableForEveryColonist,

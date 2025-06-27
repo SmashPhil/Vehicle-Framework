@@ -255,8 +255,7 @@ public sealed class TransferableVehicleWidget
               pawnTransferable.ForceTo(0);
           }
           CaravanHelper.assignedSeats.RemoveAssignments(vehicle);
-          Patch_FormCaravanDialog.Notify_TransferablesChanged.Invoke(
-            CaravanHelper.CurrentDialogFormCaravan, null);
+          CaravanFormation.formation.NotifyTransferablesChanged();
         }
       }
     }

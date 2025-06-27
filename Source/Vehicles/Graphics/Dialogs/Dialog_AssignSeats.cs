@@ -413,8 +413,7 @@ public class Dialog_AssignSeats : Window
       int transferCount = Assignments.Count > 0 ? vehicleTransferable.GetMaximumToTransfer() : 0;
       vehicleTransferable.AdjustTo(transferCount);
       Dialog_FormVehicleCaravan.MarkDirty();
-      Patch_FormCaravanDialog.Notify_TransferablesChanged.Invoke(
-        CaravanHelper.CurrentDialogFormCaravan, null);
+      CaravanFormation.formation.NotifyTransferablesChanged();
     }
     catch (Exception ex)
     {

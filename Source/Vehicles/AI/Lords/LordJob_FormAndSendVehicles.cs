@@ -8,6 +8,7 @@ using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.World;
 
 namespace Vehicles
 {

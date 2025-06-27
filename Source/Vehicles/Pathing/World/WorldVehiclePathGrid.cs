@@ -21,7 +21,7 @@ public class WorldVehiclePathGrid : WorldComponent
 
   private static readonly Func<Hilliness, float> HillinessMovementDifficultyOffset;
 
-  public event Action<VehicleDef> onPathGridRecalculated;
+  public event Action<VehicleDef> OnPathGridRecalculated;
 
   /// <summary>
   /// Store entire pathGrid for each <see cref="VehicleDef"/>
@@ -240,7 +240,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// Recalculate all path costs for all VehicleDefs
   /// </summary>
   /// <param name="ticksAbs"></param>
-  internal void RecalculateAllPerceivedPathCosts(int? ticksAbs = null)
+  private void RecalculateAllPerceivedPathCosts(int? ticksAbs = null)
   {
     allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 
@@ -251,7 +251,7 @@ public class WorldVehiclePathGrid : WorldComponent
       {
         RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
       }
-      onPathGridRecalculated?.Invoke(vehicleDef);
+      OnPathGridRecalculated?.Invoke(vehicleDef);
     }
 
     // Only needs to be done once and not for every grid owner

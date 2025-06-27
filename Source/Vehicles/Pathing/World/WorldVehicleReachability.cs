@@ -25,7 +25,7 @@ public class WorldVehicleReachability
     this.pathGrid = pathGrid;
     regionGrids = new WorldRegionGrid[DefDatabase<VehicleDef>.DefCount];
     InitReachabilityGrid();
-    pathGrid.onPathGridRecalculated += RegenerateRegionsFor;
+    pathGrid.OnPathGridRecalculated += RegenerateRegionsFor;
   }
 
   public WorldRegionGrid GetRegionGrid(VehicleDef vehicleDef)

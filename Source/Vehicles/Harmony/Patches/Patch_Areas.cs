@@ -21,12 +21,20 @@ internal class Patch_Areas : IPatchCategory
         nameof(BackfillVehicleAreas)));
   }
 
+  /// <summary>
+  /// Create and add road areas to <see cref="AreaManager"/> while map is initializing.
+  /// </summary>
+  /// <remarks>This only applies to new maps.</remarks>
   private static void AddVehicleAreas(AreaManager __instance)
   {
     __instance.map.EnsureAreaInitialized<Area_Road>();
     __instance.map.EnsureAreaInitialized<Area_RoadAvoidal>();
   }
 
+  /// <summary>
+  /// Add road areas to <see cref="AreaManager"/> if they are missing.
+  /// </summary>
+  /// <remarks>This only applies to loaded maps for back compatibility.</remarks>
   private static void BackfillVehicleAreas(Map __instance)
   {
     __instance.EnsureAreaInitialized<Area_Road>();
