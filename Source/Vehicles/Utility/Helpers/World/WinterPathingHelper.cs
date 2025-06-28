@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text;
 using RimWorld;
+using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
@@ -8,9 +9,9 @@ namespace Vehicles.World;
 
 public static class WinterPathingHelper
 {
-  public const float MaxTempForWinterOffset = 5f;
+  private const float MaxTempForWinterOffset = 5f;
 
-  public static float GetWinterPercent(int tile, int? ticksAbs = null)
+  public static float GetWinterPercent(PlanetTile tile, int? ticksAbs = null)
   {
     Vector2 vector = Find.WorldGrid.LongLatOf(tile);
     int ticks = ticksAbs ?? GenTicks.TicksAbs;
@@ -22,8 +23,8 @@ public static class WinterPathingHelper
     return totalWinter;
   }
 
-  public static float GetCurrentWinterMovementDifficultyOffset(List<VehiclePawn> vehicles, int tile,
-    StringBuilder explanation = null)
+  public static float GetCurrentWinterMovementDifficultyOffset(List<VehiclePawn> vehicles,
+    PlanetTile tile, StringBuilder explanation = null)
   {
     float winter = WorldVehiclePathGrid.Instance.WinterPercentAt(tile);
     if (winter > 0.01f)
@@ -32,7 +33,7 @@ public static class WinterPathingHelper
       float finalCost = winter * winterSpeedMultiplier;
       if (explanation != null)
       {
-        WinterExplanation(explanation, winter, winterSpeedMultiplier, finalCost);
+        WinterExplanation(explanation, winter);
       }
       return finalCost;
     }
@@ -49,18 +50,33 @@ public static class WinterPathingHelper
       float finalCost = winter * winterCost;
       if (explanation != null)
       {
-        WinterExplanation(explanation, winter, winterCost, finalCost);
+        WinterExplanation(explanation, winter);
       }
       return finalCost;
     }
     return 0f;
   }
 
-  private static void WinterExplanation(StringBuilder explanation, float winter, float winterCost,
-    float finalCost)
+  private static void WinterExplanation(StringBuilder explanation, float finalCost)
   {
     explanation.AppendLine();
     explanation.Append($"{"Winter".Translate()}: {finalCost.ToStringWithSign("0.#")}");
+  }
+
+  public static float GetCurrentWinterMovementDifficultyFor(VehicleDef vehicleDef, PlanetTile tile,
+    StringBuilder explanation = null)
+  {
+    float winter = WorldVehiclePathGrid.Instance.WinterPercentAt(tile);
+    if (winter > 0.01f)
+    {
+      float winterSpeedMultiplier = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties),
+        nameof(VehicleProperties.winterCost), vehicleDef.properties.winterCost);
+      float finalCost = winter * winterSpeedMultiplier;
+      if (explanation != null)
+        WinterExplanation(explanation, winter);
+      return finalCost;
+    }
+    return 0;
   }
 
   private static float HighestWinterOffset(List<VehicleDef> vehicleDefs)
@@ -71,9 +87,7 @@ public static class WinterPathingHelper
       float vehicleDefWinterCost = SettingsCache.TryGetValue(vehicleDef, typeof(VehicleProperties),
         nameof(VehicleProperties.winterCost), vehicleDef.properties.winterCost);
       if (vehicleDefWinterCost > winterCost)
-      {
         winterCost = vehicleDefWinterCost;
-      }
     }
     return winterCost;
   }

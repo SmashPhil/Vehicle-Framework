@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using SmashTools;
 using Unity.Collections;
 using UnityEngine;
 using Verse;
@@ -18,7 +17,7 @@ public class WorldVehiclePathfinder : WorldComponent
   private const int SearchLimit = 500000;
   private const int HeuristicTickCost = 1200;
 
-  private static readonly SimpleCurve heuristicWeights =
+  private static readonly SimpleCurve HeuristicWeights =
   [
     new CurvePoint(30f, 1f),
     new CurvePoint(40f, 1.3f),
@@ -72,7 +71,7 @@ public class WorldVehiclePathfinder : WorldComponent
       cost = vehicleDefs.NullOrEmpty() ?
         -1 :
         vehicleDefs.Max(vehicleDef =>
-          WorldVehiclePathGrid.Instance.movementDifficulty[vehicleDef.DefIndex][tile]);
+          WorldVehiclePathGrid.Instance.pathGrids[vehicleDef.DefIndex][tile]);
       tileCache[tileFeatureLookup.IndexFor(tile)] = cost;
     }
     return cost;
@@ -184,9 +183,7 @@ public class WorldVehiclePathfinder : WorldComponent
               {
                 bool allPassable = vehicleDefs.All(vehicleDef =>
                   WorldVehiclePathGrid.Instance.Passable(neighbor, vehicleDef));
-                if (
-                  allPassable /*|| (coastalTravel && (neighbor == startTile || neighbor == destTile))*/
-                )
+                if (allPassable)
                 {
                   float highestTerrainCost = TileTypeCost(neighbor, vehicleDefs);
                   if (coastalTravel)
@@ -200,9 +197,6 @@ public class WorldVehiclePathfinder : WorldComponent
                   float roadMultiplier =
                     RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile,
                       neighbor);
-                  float winterMultiplier =
-                    WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs,
-                      tile);
                   int totalPathCost = (int)(ticksPerMove * highestTerrainCost * roadMultiplier) +
                     calcGrid[tile].knownCost;
                   ushort status = calcGrid[neighbor].status;
@@ -302,16 +296,16 @@ public class WorldVehiclePathfinder : WorldComponent
   /// </summary>
   /// <param name="startTile"></param>
   /// <param name="destTile"></param>
-  private int CalculateHeuristicStrength(int startTile, int destTile)
+  private static int CalculateHeuristicStrength(int startTile, int destTile)
   {
     float x = Find.WorldGrid.ApproxDistanceInTiles(startTile, destTile);
-    return Mathf.RoundToInt(heuristicWeights.Evaluate(x));
+    return Mathf.RoundToInt(HeuristicWeights.Evaluate(x));
   }
 
   /// <summary>
   /// Cost node for world tiles
   /// </summary>
-  private struct CostNode
+  private readonly struct CostNode
   {
     public CostNode(int tile, int cost)
     {
@@ -319,8 +313,8 @@ public class WorldVehiclePathfinder : WorldComponent
       this.cost = cost;
     }
 
-    public int tile;
-    public int cost;
+    public readonly int tile;
+    public readonly int cost;
   }
 
   /// <summary>
@@ -358,17 +352,17 @@ public class WorldVehiclePathfinder : WorldComponent
 
   private class TileFeatureLookup
   {
-    private readonly List<BiomeDef> biomeDefs = new List<BiomeDef>();
-    private readonly List<RiverDef> riverDefs = new List<RiverDef>();
-    private readonly List<RoadDef> roadDefs = new List<RoadDef>();
-    private readonly List<Hilliness> hills = new List<Hilliness>();
+    private readonly List<BiomeDef> biomeDefs = [];
+    private readonly List<RiverDef> riverDefs = [];
+    private readonly List<RoadDef> roadDefs = [];
+    private readonly List<Hilliness> hills = [];
 
     public TileFeatureLookup(WorldGrid worldGrid)
     {
       WorldGrid = worldGrid;
     }
 
-    private WorldGrid WorldGrid { get; set; }
+    private WorldGrid WorldGrid { get; }
 
     public void RegisterAllFeatureTypes()
     {
@@ -380,16 +374,28 @@ public class WorldVehiclePathfinder : WorldComponent
 
     public int TileCacheSize => biomeDefs.Count * riverDefs.Count * roadDefs.Count * hills.Count;
 
-    private int IndexFor(BiomeDef biomeDef) => biomeDefs.IndexOf(biomeDef) + 1;
+    private int IndexFor(BiomeDef biomeDef)
+    {
+      return biomeDefs.IndexOf(biomeDef) + 1;
+    }
 
-    private int IndexFor(RiverDef riverDef) => riverDefs.IndexOf(riverDef) + 1;
+    private int IndexFor(RiverDef riverDef)
+    {
+      return riverDefs.IndexOf(riverDef) + 1;
+    }
 
-    //REDO - Will need implementation for TileTo -> TileFrom calculation
-    private int IndexFor(RoadDef roadDef) => 0; // roadDefs.IndexOf(roadDef) + 1;
+    // TODO - Needs implementation for TileTo -> TileFrom calculation
+    private int IndexFor(RoadDef roadDef)
+    {
+      return roadDefs.IndexOf(roadDef) + 1;
+    }
 
-    private int IndexFor(Hilliness hilliness) => hills.IndexOf(hilliness) + 1;
+    private int IndexFor(Hilliness hilliness)
+    {
+      return hills.IndexOf(hilliness) + 1;
+    }
 
-    public int IndexFor(int tileId)
+    public int IndexFor(PlanetTile tileId)
     {
       Tile tile = WorldGrid[tileId];
       if (tile is not SurfaceTile surfaceTile)

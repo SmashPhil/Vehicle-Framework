@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
 using HarmonyLib;
+using JetBrains.Annotations;
 using LudeonTK;
 using RimWorld;
 using RimWorld.Planet;
@@ -15,6 +16,7 @@ namespace Vehicles.World;
 /// <summary>
 /// WorldGrid for vehicles
 /// </summary>
+[PublicAPI]
 public class WorldVehiclePathGrid : WorldComponent
 {
   public const float ImpassableMovementDifficulty = 1000f;
@@ -26,7 +28,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <summary>
   /// Store entire pathGrid for each <see cref="VehicleDef"/>
   /// </summary>
-  public PathGrid[] movementDifficulty;
+  public readonly PathGrid[] pathGrids;
 
   public readonly WorldVehicleReachability reachability;
 
@@ -50,7 +52,7 @@ public class WorldVehiclePathGrid : WorldComponent
   public WorldVehiclePathGrid(RimWorld.Planet.World world) : base(world)
   {
     this.world = world;
-    movementDifficulty = new PathGrid[DefDatabase<VehicleDef>.DefCount];
+    pathGrids = new PathGrid[DefDatabase<VehicleDef>.DefCount];
     winter = new float[Find.WorldGrid.TilesCount];
     ResetPathGrid();
     Initialized = false;
@@ -77,7 +79,7 @@ public class WorldVehiclePathGrid : WorldComponent
     // TODO - implement piggybacking for path grids
     foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
     {
-      movementDifficulty[vehicleDef.DefIndex] =
+      pathGrids[vehicleDef.DefIndex] =
         new PathGrid(vehicleDef, Find.WorldGrid.TilesCount);
     }
   }
@@ -114,13 +116,13 @@ public class WorldVehiclePathGrid : WorldComponent
         List<PlanetTile> neighbors = [];
         Find.WorldGrid.GetTileNeighbors(tile, neighbors);
 
-        float cost = movementDifficulty[DebugHelper.World.VehicleDef.DefIndex][tile];
+        float cost = pathGrids[DebugHelper.World.VehicleDef.DefIndex][tile];
         Find.World.debugDrawer.FlashTile(tile, colorPct: cost * 10 / ImpassableMovementDifficulty,
           text: cost.ToString(), duration: 15);
         foreach (int neighborTile in neighbors)
         {
           Find.World.debugDrawer.FlashTile(neighborTile,
-            text: movementDifficulty[DebugHelper.World.VehicleDef.DefIndex][neighborTile]
+            text: pathGrids[DebugHelper.World.VehicleDef.DefIndex][neighborTile]
              .ToString(), duration: 30);
         }
       }
@@ -172,7 +174,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <param name="vehicleDef"></param>
   public bool Passable(PlanetTile tile, VehicleDef vehicleDef)
   {
-    return Find.WorldGrid.InBounds(tile) && movementDifficulty[vehicleDef.DefIndex][tile] <
+    return Find.WorldGrid.InBounds(tile) && pathGrids[vehicleDef.DefIndex][tile] <
       ImpassableMovementDifficulty;
   }
 
@@ -183,7 +185,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <param name="vehicleDef"></param>
   public bool PassableFast(PlanetTile tile, VehicleDef vehicleDef)
   {
-    return movementDifficulty[vehicleDef.DefIndex][tile] < ImpassableMovementDifficulty;
+    return pathGrids[vehicleDef.DefIndex][tile] < ImpassableMovementDifficulty;
   }
 
   /// <summary>
@@ -193,7 +195,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <param name="vehicleDef"></param>
   public float PerceivedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef)
   {
-    return movementDifficulty[vehicleDef.DefIndex][tile];
+    return pathGrids[vehicleDef.DefIndex][tile];
   }
 
   public float WinterPercentAt(PlanetTile tile)
@@ -211,7 +213,7 @@ public class WorldVehiclePathGrid : WorldComponent
     {
       return;
     }
-    movementDifficulty[vehicleDef.DefIndex][tile] =
+    pathGrids[vehicleDef.DefIndex][tile] =
       CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs);
   }
 
@@ -288,14 +290,14 @@ public class WorldVehiclePathGrid : WorldComponent
       SurfaceTile.RiverLink riverLink = WorldHelper.BiggestRiverOnTile(rivers);
       if (riverLink.river != null &&
         vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river,
-          out float riverCost) && riverCost != ImpassableMovementDifficulty)
+          out float riverCost) && !Mathf.Approximately(riverCost, ImpassableMovementDifficulty))
       {
         explanation?.Append($"{riverLink.river.LabelCap}: {riverCost.ToStringWithSign("0.#")}");
         return riverCost;
       }
     }
 
-    float defaultBiomeCost = 1;
+    float defaultBiomeCost;
     if (vehicleDef.properties.defaultBiomesImpassable)
     {
       defaultBiomeCost = ImpassableMovementDifficulty;
@@ -344,8 +346,9 @@ public class WorldVehiclePathGrid : WorldComponent
       explanation.Append(surfaceTile.hilliness.GetLabelCap() + ": " +
         hillinessCost.ToStringWithSign("0.#"));
     }
-
-    // + GetCurrentWinterMovementDifficultyOffset(tile, vehicleDef, new int?(ticksAbs ?? GenTicks.TicksAbs), explanation);
+    totalCost +=
+      WinterPathingHelper.GetCurrentWinterMovementDifficultyFor(vehicleDef, tile,
+        explanation: explanation);
     return totalCost;
   }
 
@@ -372,9 +375,10 @@ public class WorldVehiclePathGrid : WorldComponent
     Instance.RunTaskRecalculateAllPathCosts();
   }
 
+  [PublicAPI]
   public class PathGrid
   {
-    public readonly VehicleDef owner;
+    private VehicleDef owner;
     private readonly float[] costs;
 
     public float this[int index]
@@ -388,6 +392,10 @@ public class WorldVehiclePathGrid : WorldComponent
       this.owner = owner;
       costs = new float[size];
     }
+
+    public bool Enabled { get; internal set; }
+
+    public VehicleDef Owner => owner;
   }
 
   private readonly struct GridInitializerState : IDisposable

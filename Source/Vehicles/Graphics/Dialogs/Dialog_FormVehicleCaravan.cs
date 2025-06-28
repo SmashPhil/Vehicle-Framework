@@ -14,6 +14,7 @@ using Vehicles.Rendering;
 
 namespace Vehicles.World;
 
+// TODO - remove when CaravanFormation patches are finalized
 public class Dialog_FormVehicleCaravan : Window
 {
   private const float TitleRectHeight = 35f;
@@ -34,8 +35,8 @@ public class Dialog_FormVehicleCaravan : Window
   private TransferableOneWayWidget itemsTransfer;
   private Tab tab;
   private float lastMassFlashTime = -9999f;
-  private int startingTile = -1;
-  private int destinationTile = -1;
+  private PlanetTile startingTile = -1;
+  private PlanetTile destinationTile = -1;
   private bool massUsageDirty = true;
   private float cachedMassUsage;
   private bool massCapacityDirty = true;
@@ -724,12 +725,8 @@ public class Dialog_FormVehicleCaravan : Window
         new GlobalTargetInfo(intVec, map), MessageTypeDefOf.RejectInput, false);
       return false;
     }
-    VehicleCaravanFormingUtility.StartFormingCaravan(
-      pawnsFromTransferables.Where(pawn => !pawn.Downed).ToList(),
-      pawnsFromTransferables.Where(pawn => pawn.Downed).ToList(),
-      Faction.OfPlayer, transferables, meetingPoint, intVec, startingTile, destinationTile);
-    Messages.Message("CaravanFormationProcessStarted".Translate(), pawnsFromTransferables[0],
-      MessageTypeDefOf.PositiveEvent, false);
+    VehicleCaravanFormingUtility.StartFormingCaravan(transferables, meetingPoint, intVec,
+      startingTile, destinationTile);
     return true;
   }
 

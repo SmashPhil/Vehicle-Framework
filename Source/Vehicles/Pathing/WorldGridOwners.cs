@@ -11,8 +11,10 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
 {
   protected override bool CanTransferOwnershipTo(VehicleDef vehicleDef)
   {
-    throw new NotSupportedException(
-      "Trying to transfer ownership of world grid.");
+    //WorldVehiclePathGrid.PathGrid pathGrid =
+    //  WorldVehiclePathGrid.Instance.pathGrids[vehicleDef.DefIndex];
+    //return pathGrid.Enabled;
+    throw new NotSupportedException();
   }
 
   // Accessed from Init, already locked for the duration of owner generation

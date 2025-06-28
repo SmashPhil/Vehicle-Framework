@@ -7,79 +7,111 @@ using Verse.AI.Group;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UnityEngine.Assertions;
 
 namespace Vehicles.World;
 
 public static class VehicleCaravanFormingUtility
 {
-  public static void StartFormingCaravan([NotNull] List<Pawn> pawns,
-    [NotNull] List<Pawn> downedPawns, [NotNull] Faction faction,
-    [NotNull] List<TransferableOneWay> transferables, IntVec3 meetingPoint, IntVec3 exitSpot,
-    PlanetTile startingTile, PlanetTile destinationTile)
+  public static void StartFormingCaravan([NotNull] List<TransferableOneWay> transferables,
+    in IntVec3 meetingPoint, in IntVec3 exitSpot, in PlanetTile startingTile,
+    in PlanetTile destinationTile)
   {
-    if (!startingTile.Valid)
+    // Copy into lists, transferables will be cleared from dialog soon
+    List<VehiclePawn> vehicles = [];
+    List<Pawn> pawns = [];
+    List<TransferableOneWay> transferableThings = [];
+    for (int i = transferables.Count - 1; i >= 0; i--)
     {
-      Log.Error("Can't start forming caravan because startingTile is invalid.");
-      return;
-    }
-    if (pawns.Count == 0)
-    {
-      Log.Error("Can't start forming caravan with 0 pawns.");
-      return;
-    }
-    if (pawns.Count(pawn => pawn is VehiclePawn) == 0)
-    {
-      Log.Error("Can't start forming vehicle caravan without any vehicles");
-      return;
-    }
+      TransferableOneWay transferable = transferables[i];
+      if (transferable.CountToTransfer == 0)
+        continue;
 
-    List<TransferableOneWay> list = transferables;
-    list.RemoveAll((TransferableOneWay x) =>
-      x.CountToTransfer <= 0 || !x.HasAnyThing || x.AnyThing is Pawn);
-
-    foreach (Pawn p in pawns)
-    {
-      Lord lord = p.GetLord();
-      if (lord != null)
+      switch (transferable.AnyThing)
       {
-        lord.Notify_PawnLost(p, PawnLostCondition.ForcedToJoinOtherLord);
+        case VehiclePawn vehicle:
+          vehicles.Add(vehicle);
+        break;
+        case Pawn pawn:
+          pawns.Add(pawn);
+        break;
+        default:
+          transferableThings.Add(transferable);
+        break;
       }
     }
+    // Vehicles are pawns, so this catches both cases
+    Assert.IsFalse(transferableThings.Exists(transferable =>
+      transferable is { AnyThing: Pawn, CountToTransfer: > 0 }));
+    StartFormingCaravan(vehicles, pawns, transferableThings, meetingPoint, exitSpot, startingTile,
+      destinationTile);
+  }
 
-    List<VehiclePawn> vehicles = pawns.Where(p => p is VehiclePawn).Cast<VehiclePawn>().ToList();
-    List<Pawn> capablePawns = pawns
-     .Where(x => !(x is VehiclePawn) && x.IsColonist && !x.Downed && !x.Dead).ToList();
-    List<Pawn> prisoners = pawns
-     .Where(x => !(x is VehiclePawn) && !x.IsColonist && !x.RaceProps.Animal).ToList();
+  public static void StartFormingCaravan(
+    [NotNull] List<VehiclePawn> vehicles, [NotNull] List<Pawn> pawns,
+    [NotNull] List<TransferableOneWay> transferables,
+    in IntVec3 meetingPoint, in IntVec3 exitSpot,
+    in PlanetTile startingTile, in PlanetTile destinationTile)
+  {
+    // All transferables are prefiltered for caravan
+    Assert.IsFalse(transferables.Exists(transferable =>
+      transferable is { AnyThing: Pawn, CountToTransfer: > 0 }));
 
-    bool waterTravel = false;
-    if (pawns.NotNullAndAny(x =>
-      x is VehiclePawn vehicle && vehicle.IsBoat() &&
-      (vehicle.movementStatus is VehicleMovementStatus.Online)))
+    if (!startingTile.Valid)
+    {
+      Trace.Fail($"Can't start forming caravan because startingTile ({startingTile}) is invalid.");
+      return;
+    }
+    if (vehicles.Count == 0)
+    {
+      Trace.Fail("Can't start forming caravan with 0 vehicles.");
+      return;
+    }
+
+    foreach (VehiclePawn vehicle in vehicles)
+      vehicle.GetLord()?.Notify_PawnLost(vehicle, PawnLostCondition.ForcedToJoinOtherLord);
+    foreach (Pawn pawn in pawns)
+      pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ForcedToJoinOtherLord);
+
+#if DEBUG || UNSTABLE
+    if (vehicles.Exists(Ext_Vehicles.IsBoat))
     {
       int seats = 0;
       foreach (VehiclePawn vehicle in vehicles)
       {
         seats += vehicle.SeatsAvailable;
       }
-      if ((pawns.Where(p => !p.IsBoat()).ToList().Count + downedPawns.Count) > seats)
+      if (pawns.Count > seats)
       {
-        Log.Error(
-          $"Can't start forming caravan with vehicles(s) selected and not enough seats to house all pawns. Seats: {seats} Pawns boarding: {pawns.Where(x => !(x is VehiclePawn)).ToList().Count + downedPawns.Count}");
+        Trace.Fail("Can't start forming caravan, not enough room for pawns.");
         return;
       }
-      waterTravel = true;
+    }
+#endif
+
+    LordJob_FormAndSendVehicles lordJob = new(vehicles, pawns, transferables,
+      meetingPoint, exitSpot, startingTile, destinationTile);
+    LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, vehicles.Concat(pawns));
+
+    // Disembark pawns, they will immediately join the vehicle's lord job and begin packing the caravan
+    foreach (VehiclePawn vehicle in vehicles)
+    {
+      vehicle.DisembarkAll();
     }
 
-    LordJob_FormAndSendVehicles lordJob = new LordJob_FormAndSendVehicles(list, vehicles,
-      capablePawns, downedPawns, prisoners, meetingPoint, exitSpot, startingTile, destinationTile,
-      waterTravel);
-    LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, pawns);
-    vehicles.ForEach(v => v.DisembarkAll());
-
-    foreach (Pawn pawn in pawns.Where(pawn => pawn.Spawned && !(pawn is VehiclePawn)))
+    foreach (Pawn pawn in pawns)
     {
-      pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true);
+      pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+    }
+
+    LookTargets lookTarget = pawns.FirstOrDefault() ?? vehicles.FirstOrDefault();
+    Assert.IsNotNull(lookTarget);
+    Messages.Message("CaravanFormationProcessStarted".Translate(), lookTarget,
+      MessageTypeDefOf.PositiveEvent, false);
+    if (ModsConfig.BiotechActive && pawns.Exists(pawn => pawn.RaceProps.IsMechanoid))
+    {
+      LessonAutoActivator.TeachOpportunity(ConceptDefOf.MechsInCaravans,
+        OpportunityType.GoodToKnow);
     }
   }
 

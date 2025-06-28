@@ -166,12 +166,9 @@ public static class CaravanFormation
           new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.RejectInput, false);
         return false;
       }
-      VehicleCaravanFormingUtility.StartFormingCaravan(
-        formation.pawns.Where(pawn => !pawn.Downed).ToList(),
-        formation.pawns.Where(pawn => pawn.Downed).ToList(),
-        Faction.OfPlayer, formation.Dialog.transferables, meetingPoint, intVec,
-        formation.StartingTile,
-        formation.DestinationTile);
+      formation.RecacheTransferables();
+      VehicleCaravanFormingUtility.StartFormingCaravan(formation.Dialog.transferables,
+        meetingPoint, intVec, formation.StartingTile, formation.DestinationTile);
       Messages.Message("CaravanFormationProcessStarted".Translate(), formation.pawns[0],
         MessageTypeDefOf.PositiveEvent, false);
       return true;
@@ -515,6 +512,8 @@ public class FormationInfo
   private static readonly MethodInfo Notify_TransferablesChangedMethod;
   private static readonly MethodInfo SelectApproximateBestTravelSuppliesMethod;
 
+  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, bool>
+    ChoosingRouteFieldRef;
 
   private static readonly AccessTools.FieldRef<Dialog_FormCaravan, bool>
     ReformFieldRef;
@@ -572,6 +571,8 @@ public class FormationInfo
     SelectApproximateBestTravelSuppliesMethod =
       AccessTools.Method(typeof(Dialog_FormCaravan), "SelectApproximateBestTravelSupplies");
 
+    ChoosingRouteFieldRef =
+      AccessTools.FieldRefAccess<bool>(typeof(Dialog_FormCaravan), "choosingRoute");
     ReformFieldRef = AccessTools.FieldRefAccess<bool>(typeof(Dialog_FormCaravan), "reform");
     StartingTileFieldRef =
       AccessTools.FieldRefAccess<PlanetTile>(typeof(Dialog_FormCaravan), "startingTile");
@@ -615,12 +616,19 @@ public class FormationInfo
         SelectApproximateBestTravelSuppliesMethod);
   }
 
-  public VehiclePawn LeadVehicle => leadVehicle;
   public Dialog_FormCaravan Dialog => formCaravan;
 
   public Map Map => map;
 
+  public VehiclePawn LeadVehicle => leadVehicle;
+
   public bool Reform => ReformFieldRef.Invoke(formCaravan);
+
+  public bool ChoosingRoute
+  {
+    get { return ChoosingRouteFieldRef.Invoke(formCaravan); }
+    set { ChoosingRouteFieldRef.Invoke(formCaravan) = value; }
+  }
 
   public PlanetTile StartingTile
   {

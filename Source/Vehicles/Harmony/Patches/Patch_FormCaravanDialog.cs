@@ -193,14 +193,21 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   {
     List<CodeInstruction> instructionList = instructions.ToList();
 
-    // Patch_FormCaravanDialog::CreateTabListPostOpen(tabsList);
+    // this
     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+    // this.map
     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
     yield return new CodeInstruction(opcode: OpCodes.Ldfld,
       operand: AccessTools.Field(typeof(Dialog_FormCaravan), "map"));
+    // this.tabsList
     yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
     yield return new CodeInstruction(opcode: OpCodes.Ldfld,
       AccessTools.Field(typeof(Dialog_FormCaravan), "tabsList"));
+    // this.thisWindowInstanceEverOpened
+    yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+    yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+      operand: AccessTools.Field(typeof(Dialog_FormCaravan), "thisWindowInstanceEverOpened"));
+    // Patch_FormCaravanDialog::CreateTabListPostOpen(this, map, tabsList, thisWindowInstanceEverOpened);
     yield return new CodeInstruction(opcode: OpCodes.Call,
       operand: AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(CreateTabListPostOpen)));
 
@@ -218,8 +225,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
           // Call Find::get_WorldRoutePlanner
           // Ldarg.0
           // CallVirt WorldRoutePlanner::Start(Dialog_FormCaravan)
-
-          // Jumps to ret
           i += 3;
           Assert.IsFalse(instructionList.OutOfBounds(i));
           instruction = instructionList[i];
@@ -230,33 +235,38 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   }
 
   private static void CreateTabListPostOpen(Dialog_FormCaravan formCaravan, Map map,
-    List<TabRecord> tabsList)
+    List<TabRecord> tabsList, bool thisWindowInstanceEverOpened)
   {
-    Assert.IsNull(CaravanFormation.formation);
-    Assert.IsTrue(tabsList.NullOrEmpty());
-    CaravanFormation.formation = new FormationInfo(formCaravan, map);
-    selectedTab = TabVehicles;
-    tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
-      delegate { selectedTab = TabVehicles; },
-      () => selectedTab == TabVehicles));
-    foreach (int value in Enum.GetValues(FormCaravanTabEnumType))
+    if (!thisWindowInstanceEverOpened)
     {
-      string translationKey = !TabKeys.OutOfBounds(value) ? TabKeys[value] : "Missing Label";
-      tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
-        () => selectedTab == value));
+      Assert.IsNull(CaravanFormation.formation);
+      Assert.IsTrue(tabsList.NullOrEmpty());
+      CaravanFormation.formation = new FormationInfo(formCaravan, map);
+      selectedTab = TabVehicles;
+      tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
+        delegate { selectedTab = TabVehicles; },
+        () => selectedTab == TabVehicles));
+      foreach (int value in Enum.GetValues(FormCaravanTabEnumType))
+      {
+        string translationKey = !TabKeys.OutOfBounds(value) ? TabKeys[value] : "Missing Label";
+        tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
+          () => selectedTab == value));
+      }
     }
   }
 
   /// <summary>
   /// Clear static fields for dialog on close
   /// </summary>
-  /// <param name="___tabsList"></param>
-  private static void ClearTabListPostClose(List<TabRecord> ___tabsList)
+  private static void ClearTabListPostClose(List<TabRecord> ___tabsList, bool ___choosingRoute)
   {
-    CaravanFormation.formation = null;
-    ___tabsList.Clear();
-    selectedTab = TabVehicles;
-    CaravanHelper.assignedSeats.Clear();
+    if (!___choosingRoute)
+    {
+      CaravanFormation.formation = null;
+      ___tabsList.Clear();
+      selectedTab = TabVehicles;
+      CaravanHelper.assignedSeats.Clear();
+    }
   }
 
   /// <summary>
@@ -424,6 +434,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     if (formCaravan.transferables.Exists(transferable =>
       transferable is { CountToTransfer: > 0, AnyThing: VehiclePawn }))
     {
+      CaravanFormation.formation.ChoosingRoute = true;
       Find.WindowStack.TryRemove(formCaravan, doCloseSound: false);
       VehicleCaravanInfo caravanInfo = new(formCaravan.transferables, formCaravan.MassUsage,
         formCaravan.MassCapacity, formCaravan.CurrentTile)

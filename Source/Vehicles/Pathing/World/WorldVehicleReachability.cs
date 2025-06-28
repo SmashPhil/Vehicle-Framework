@@ -30,12 +30,15 @@ public class WorldVehicleReachability
 
   public WorldRegionGrid GetRegionGrid(VehicleDef vehicleDef)
   {
-    return regionGrids[vehicleDef.DefIndex];
+    // TODO VF-48: Implement lazy generation for region grids
+    VehicleDef ownerDef = GridOwners.World.GetOwner(vehicleDef);
+    return regionGrids[ownerDef.DefIndex];
   }
 
   public int GetRegionId(VehicleDef vehicleDef, int tile)
   {
-    return regionGrids[vehicleDef.DefIndex].GetRegionId(tile);
+    VehicleDef ownerDef = GridOwners.World.GetOwner(vehicleDef);
+    return regionGrids[ownerDef.DefIndex].GetRegionId(tile);
   }
 
   /// <summary>
@@ -43,17 +46,17 @@ public class WorldVehicleReachability
   /// </summary>
   private void InitReachabilityGrid()
   {
-    foreach (VehicleDef vehicleDef in GridOwners.World.AllOwners)
+    foreach (VehicleDef ownerDef in GridOwners.World.AllOwners)
     {
-      regionGrids[vehicleDef.DefIndex] = new WorldRegionGrid(pathGrid, vehicleDef);
+      regionGrids[ownerDef.DefIndex] = new WorldRegionGrid(pathGrid, ownerDef);
     }
   }
 
   private void RegenerateAllRegions()
   {
-    foreach (VehicleDef vehicleDef in GridOwners.World.AllOwners)
+    foreach (VehicleDef ownerDef in GridOwners.World.AllOwners)
     {
-      RegenerateRegionsFor(vehicleDef);
+      RegenerateRegionsFor(ownerDef);
     }
   }
 
@@ -88,8 +91,8 @@ public class WorldVehicleReachability
       Log.Error("Trying to reach tile that is out of bounds of the world grid.");
       return false;
     }
-
-    return regionGrids[vehicleDef.DefIndex].CanReach(startTile, destTile);
+    VehicleDef ownerDef = GridOwners.World.GetOwner(vehicleDef);
+    return regionGrids[ownerDef.DefIndex].CanReach(startTile, destTile);
   }
 
   [DebugAction(VehicleHarmony.VehiclesLabel, name = "Regen WorldReachability",

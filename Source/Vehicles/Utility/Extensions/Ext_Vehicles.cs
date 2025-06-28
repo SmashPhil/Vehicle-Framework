@@ -20,7 +20,7 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
 {
-  private static readonly HashSet<VehicleDef> uniqueVehicleDefs = [];
+  private static readonly HashSet<VehicleDef> UniqueVehicleDefs = [];
 
   // NOTE - Separated method hook for SOS2 to patch. This is intentionally redundant.
   [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -465,12 +465,20 @@ public static class Ext_Vehicles
   [MustUseReturnValue]
   public static List<VehicleDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
   {
-    Assert.IsTrue(uniqueVehicleDefs.Count == 0);
-    foreach (VehiclePawn vehicle in vehicles)
+    try
     {
-      uniqueVehicleDefs.Add(vehicle.VehicleDef);
+      Assert.IsTrue(UniqueVehicleDefs.Count == 0);
+      foreach (VehiclePawn vehicle in vehicles)
+      {
+        UniqueVehicleDefs.Add(vehicle.VehicleDef);
+      }
+      List<VehicleDef> vehicleDefs = UniqueVehicleDefs.ToList();
+      return vehicleDefs;
     }
-    return uniqueVehicleDefs.ToList();
+    finally
+    {
+      UniqueVehicleDefs.Clear();
+    }
   }
 
   /// <summary>
@@ -479,13 +487,21 @@ public static class Ext_Vehicles
   [MustUseReturnValue]
   public static List<VehicleDef> UniqueVehicleDefsInList(this List<Pawn> pawns)
   {
-    Assert.IsTrue(uniqueVehicleDefs.Count == 0);
-    foreach (Pawn pawn in pawns)
+    try
     {
-      if (pawn is VehiclePawn vehicle)
-        uniqueVehicleDefs.Add(vehicle.VehicleDef);
+      Assert.IsTrue(UniqueVehicleDefs.Count == 0);
+      foreach (Pawn pawn in pawns)
+      {
+        if (pawn is VehiclePawn vehicle)
+          UniqueVehicleDefs.Add(vehicle.VehicleDef);
+      }
+      List<VehicleDef> vehicleDefs = UniqueVehicleDefs.ToList();
+      return vehicleDefs;
     }
-    return uniqueVehicleDefs.ToList();
+    finally
+    {
+      UniqueVehicleDefs.Clear();
+    }
   }
 
   /// <summary>
