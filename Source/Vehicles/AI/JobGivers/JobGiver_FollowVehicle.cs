@@ -1,59 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using RimWorld;
 using Verse;
 using Verse.AI;
-using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class JobGiver_FollowVehicle : JobGiver_AIFollowPawn
 {
-  public class JobGiver_FollowVehicle : JobGiver_AIFollowPawn
+  protected override int FollowJobExpireInterval => 100;
+
+  protected override Pawn GetFollowee(Pawn pawn)
   {
-    protected override int FollowJobExpireInterval => 100;
+    return (Pawn)pawn.mindState.duty.focus.Thing;
+  }
 
-    protected override Pawn GetFollowee(Pawn pawn)
+  protected override float GetRadius(Pawn pawn)
+  {
+    return pawn.mindState.duty.radius;
+  }
+
+  protected override Job TryGiveJob(Pawn pawn)
+  {
+    VehiclePawn vehicle = GetFollowee(pawn) as VehiclePawn;
+    if (vehicle == null)
     {
-      return (Pawn)pawn.mindState.duty.focus.Thing;
+      Log.Error($"{GetType()} has null followee vehicle. pawn=\"{pawn.ToStringSafe()}\"");
+      return null;
     }
 
-    protected override float GetRadius(Pawn pawn)
+    if (!vehicle.Spawned)
     {
-      return pawn.mindState.duty.radius;
+      return null;
     }
 
-    protected override Job TryGiveJob(Pawn pawn)
+    if (!pawn.CanReach(vehicle.FollowerCell, PathEndMode.OnCell, Danger.Deadly))
     {
-      VehiclePawn vehicle = GetFollowee(pawn) as VehiclePawn;
-      if (vehicle == null)
-      {
-        Log.Error($"{GetType()} has null followee vehicle. pawn=\"{pawn.ToStringSafe()}\"");
-        return null;
-      }
-
-      if (!vehicle.Spawned)
-      {
-        return null;
-      }
-
+      vehicle.RecalculateFollowerCell(); //Try after updating follower cell
       if (!pawn.CanReach(vehicle.FollowerCell, PathEndMode.OnCell, Danger.Deadly))
       {
-        vehicle.RecalculateFollowerCell(); //Try after updating follower cell
-        if (!pawn.CanReach(vehicle.FollowerCell, PathEndMode.OnCell, Danger.Deadly))
-        {
-          return null;
-        }
+        return null;
       }
-
-      float radius = GetRadius(pawn);
-      //if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, vehicle, radius))
-      //{
-      //	return null;
-      //}
-      Job job = JobMaker.MakeJob(JobDefOf_Vehicles.FollowVehicle, vehicle);
-      job.expiryInterval = FollowJobExpireInterval;
-      job.checkOverrideOnExpire = true;
-      job.followRadius = radius;
-      return job;
     }
+
+    float radius = GetRadius(pawn);
+    //if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, vehicle, radius))
+    //{
+    //	return null;
+    //}
+    Job job = JobMaker.MakeJob(JobDefOf_Vehicles.FollowVehicle, vehicle);
+    job.expiryInterval = FollowJobExpireInterval;
+    job.checkOverrideOnExpire = true;
+    job.followRadius = radius;
+    return job;
   }
 }

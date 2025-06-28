@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -22,16 +21,14 @@ namespace Vehicles
     public int AverageSkillOfCapablePawns(SkillDef skill)
     {
       if (AllCapablePawns.Count == 0)
-      {
         return 0;
-      }
 
       int value = 0;
-      foreach (Pawn p in AllCapablePawns)
+      foreach (Pawn pawn in AllCapablePawns)
       {
-        value += p.skills.GetSkill(skill).Level;
+        if (pawn.skills.GetSkill(skill) is { } record)
+          value += record.Level;
       }
-
       value /= AllCapablePawns.Count;
       return value;
     }

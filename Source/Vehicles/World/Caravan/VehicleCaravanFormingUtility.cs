@@ -11,6 +11,7 @@ using UnityEngine.Assertions;
 
 namespace Vehicles.World;
 
+[PublicAPI]
 public static class VehicleCaravanFormingUtility
 {
   public static void StartFormingCaravan([NotNull] List<TransferableOneWay> transferables,
@@ -122,19 +123,17 @@ public static class VehicleCaravanFormingUtility
     bool forcedToJoinOtherLord = condition == PawnLostCondition.ForcedToJoinOtherLord;
     string text = "";
     string textShip = "";
-    List<VehiclePawn> vehicles =
-      lord.ownedPawns.Where(x => x is VehiclePawn).Cast<VehiclePawn>().ToList();
     foreach (Pawn lordPawn in lord.ownedPawns)
     {
-      if (lordPawn is VehiclePawn vehicle)
+      if (lordPawn is not VehiclePawn vehicle)
+        continue;
+
+      if (vehicle.AllPawnsAboard.Contains(pawn))
       {
-        if (vehicle.AllPawnsAboard.Contains(pawn))
-        {
-          textShip = "VF_PawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort)
-           .CapitalizeFirst();
-          forcedToJoinOtherLord = true;
-          break;
-        }
+        textShip = "VF_PawnBoardedFormingCaravan".Translate(pawn, vehicle.LabelShort)
+         .CapitalizeFirst();
+        forcedToJoinOtherLord = true;
+        break;
       }
     }
     if (!forcedToJoinOtherLord)
@@ -169,13 +168,12 @@ public static class VehicleCaravanFormingUtility
       pawn.inventory.UnloadEverything = true;
       if (lord.ownedPawns.Contains(pawn))
       {
-        lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByPlayerAction, null);
+        lord.Notify_PawnLost(pawn, PawnLostCondition.ForcedByPlayerAction);
         stillInLord = false;
       }
-      LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanVehicle =
-        lord.LordJob as LordJob_FormAndSendVehicles;
-      if (lordJob_FormAndSendCaravanVehicle != null &&
-        lordJob_FormAndSendCaravanVehicle.downedPawns.Contains(pawn))
+
+      if (lord.LordJob is LordJob_FormAndSendVehicles lordJobCaravanFormation &&
+        lordJobCaravanFormation.downedPawns.Contains(pawn))
       {
         if (!removeFromDowned)
         {
@@ -183,7 +181,7 @@ public static class VehicleCaravanFormingUtility
         }
         else
         {
-          lordJob_FormAndSendCaravanVehicle.downedPawns.Remove(pawn);
+          lordJobCaravanFormation.downedPawns.Remove(pawn);
         }
       }
     }
@@ -192,30 +190,7 @@ public static class VehicleCaravanFormingUtility
       MessageTypeDef msg = forcedToJoinOtherLord ?
         MessageTypeDefOf.SilentInput :
         MessageTypeDefOf.NegativeEvent;
-      Messages.Message(text, pawn, msg, true);
+      Messages.Message(text, pawn, msg);
     }
-  }
-
-  public static Lord GetVehicleAndSendCaravanLord(Pawn p)
-  {
-    if (CaravanHelper.IsFormingCaravanShipHelper(p))
-    {
-      return p.GetLord();
-    }
-    if (p.Spawned)
-    {
-      List<Lord> lords = p.Map.lordManager.lords;
-      foreach (Lord lord in lords)
-      {
-        LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanShip =
-          lord.LordJob as LordJob_FormAndSendVehicles;
-        if (!(lordJob_FormAndSendCaravanShip is null) &&
-          lordJob_FormAndSendCaravanShip.downedPawns.Contains(p))
-        {
-          return lord;
-        }
-      }
-    }
-    return null;
   }
 }

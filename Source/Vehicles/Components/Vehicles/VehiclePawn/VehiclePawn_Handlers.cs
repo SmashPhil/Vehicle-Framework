@@ -332,7 +332,7 @@ public partial class VehiclePawn
       if (!reservationManager.ReservedBy<VehicleRoleHandler, VehicleHandlerReservation>(this, pawn,
           handler) && !handler.AreSlotsAvailable)
       {
-        //If pawn attempts to board vehicle role which is already full, stop immediately
+        // If pawn attempts to board vehicle role which is already full, stop immediately
         return false;
       }
     }
@@ -342,7 +342,7 @@ public partial class VehiclePawn
       return false;
 
     if (pawn.Spawned)
-      pawn.DeSpawn(DestroyMode.WillReplace);
+      pawn.DeSpawn();
 
     bool result = true;
     if (!handler.thingOwner.TryAddOrTransfer(pawn, canMergeWithExistingStacks: false) &&
@@ -491,7 +491,7 @@ public partial class VehiclePawn
 
     List<Need> allNeeds = pawn.needs.AllNeeds;
     VehicleRoleHandler handler = pawn.ParentHolder as VehicleRoleHandler;
-    int tile;
+    PlanetTile tile;
     VehicleCaravan vehicleCaravan = pawn.GetVehicleCaravan();
     if (vehicleCaravan != null)
     {
@@ -508,7 +508,7 @@ public partial class VehiclePawn
     else
     {
       Log.Error(
-        $"Trying to satisfy pawn needs but pawn is not part of VehicleCaravan, vehicle crew, or spawned.");
+        "Trying to satisfy pawn needs but pawn is not part of VehicleCaravan, vehicle crew, or spawned.");
       return;
     }
 

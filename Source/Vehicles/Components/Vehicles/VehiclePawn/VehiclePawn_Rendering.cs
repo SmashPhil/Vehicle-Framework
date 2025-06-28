@@ -760,7 +760,7 @@ public partial class VehiclePawn
         defaultDesc = "CommandCancelFormingCaravanDesc".Translate(),
         icon = TexCommand.ClearPrioritizedWork,
         activateSound = SoundDefOf.Tick_Low,
-        action = delegate() { CaravanFormingUtility.StopFormingCaravan(formCaravanLordJob.lord); },
+        action = delegate { CaravanFormingUtility.StopFormingCaravan(formCaravanLordJob.lord); },
         hotKey = KeyBindingDefOf.Designator_Cancel
       };
       yield return cancelCaravan;

@@ -101,7 +101,7 @@ public class WorldVehiclePathfinder : WorldComponent
   /// <summary>
   /// Find path from <paramref name="startTile"/> to <paramref name="destTile"/> for <paramref name="vehicleDefs"/>
   /// </summary>
-  public WorldPath FindPath(int startTile, int destTile, List<VehicleDef> vehicleDefs,
+  public WorldPath FindPath(PlanetTile startTile, PlanetTile destTile, List<VehicleDef> vehicleDefs,
     int ticksPerMove = VehicleCaravanTicksPerMoveUtility.DefaultTicksPerMove,
     Func<float, bool> terminator = null)
   {

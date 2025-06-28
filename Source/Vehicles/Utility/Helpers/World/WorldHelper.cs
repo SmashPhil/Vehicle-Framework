@@ -258,7 +258,7 @@ public static class WorldHelper
     }
 
     List<int> neighbors = [];
-    return Ext_World.BFS(tile, neighbors, VehicleMod.CoastRadius,
+    return Ext_World.Bfs(tile, neighbors, VehicleMod.CoastRadius,
       result: delegate(int currentTile, int currentRadius)
       {
         if (Find.World.CoastDirectionAt(currentTile).IsValid)

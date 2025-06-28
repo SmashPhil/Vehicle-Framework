@@ -156,7 +156,7 @@ public static class Ext_Vehicles
     }
   }
 
-  public static void CleanupVehicleHandlers(this LordJob lordJob)
+  public static void RemoveBoardedPawnsFromLord(this LordJob lordJob, PawnLostCondition condition)
   {
     foreach (Pawn pawn in lordJob.lord.ownedPawns)
     {
@@ -165,8 +165,7 @@ public static class Ext_Vehicles
 
       foreach (Pawn innerPawn in vehicle.AllPawnsAboard)
       {
-        if (innerPawn.mindState != null)
-          innerPawn.mindState.duty = null;
+        innerPawn.GetLord()?.Notify_PawnLost(pawn, condition);
 
         lordJob.Map.attackTargetsCache.UpdateTarget(innerPawn);
         if (lordJob.EndPawnJobOnCleanup(innerPawn) && innerPawn.Spawned &&

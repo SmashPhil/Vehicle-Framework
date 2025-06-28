@@ -4,6 +4,7 @@ using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Verse;
+using Verse.AI.Group;
 
 namespace Vehicles;
 
@@ -14,6 +15,15 @@ public partial class VehiclePawn
   public bool showAllItemsOnMap;
 
   public IntVec3 FollowerCell { get; protected set; }
+
+  // TODO 1.6 - check if devs make this virtual
+  public void ExitMapTemp(bool allowedToJoinOrCreateCaravan, Rot4 exitDir)
+  {
+    foreach (Pawn pawn in AllPawnsAboard)
+    {
+      pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ExitedMap);
+    }
+  }
 
   public int AddOrTransfer(Thing thing)
   {

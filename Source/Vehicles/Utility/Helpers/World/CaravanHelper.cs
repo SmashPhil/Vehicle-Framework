@@ -15,24 +15,15 @@ using Verse.AI.Group;
 
 namespace Vehicles;
 
+[PublicAPI]
 public static class CaravanHelper
 {
-  private static readonly List<int> availableExitTiles = [];
-  private static readonly List<PlanetTile> neighborTiles = [];
+  private static readonly HashSet<PlanetTile> AvailableExitTiles = [];
+  private static readonly List<PlanetTile> NeighborTiles = [];
 
   public static VehicleAssignment assignedSeats = new();
 
   private static int pawnsBeingAdded;
-
-  public static Dialog_FormCaravan CurrentDialogFormCaravan
-  {
-    get
-    {
-      bool result = Find.WindowStack.TryGetWindow(out Dialog_FormCaravan formCaravan);
-      Assert.IsTrue(result);
-      return formCaravan;
-    }
-  }
 
   /// <summary>
   /// VehicleCaravan is able to be created and embark given list of pawns
@@ -66,24 +57,24 @@ public static class CaravanHelper
   /// <summary>
   /// <see cref="CaravanExitMapUtility.BestExitTileToGoTo"/> but implemented for vehicle pathfinding.
   /// </summary>
-  public static int BestExitTileToGoTo(List<VehicleDef> vehicleDefs, PlanetTile destinationTile,
+  public static PlanetTile BestExitTileToGoTo(List<VehicleDef> vehicleDefs,
+    PlanetTile destinationTile,
     Map from)
   {
-    int exitTile = -1;
+    PlanetTile exitTile = -1;
     using WorldPath worldPath = Find.World.GetComponent<WorldVehiclePathfinder>()
      .FindPath(from.Tile, destinationTile, vehicleDefs);
     if (worldPath.Found && worldPath.NodesLeftCount >= 2)
     {
       exitTile = worldPath.NodesReversed[^2];
     }
-    if (exitTile == -1)
-    {
+    if (!exitTile.Valid)
       return RandomBestExitTileFrom(vehicleDefs, from);
-    }
+
     float shortestDistance = 0;
-    int nearestExitTile = -1;
-    List<int> validExitTiles = AvailableExitTilesAt(vehicleDefs, from);
-    foreach (int validTile in validExitTiles)
+    PlanetTile nearestExitTile = PlanetTile.Invalid;
+    List<PlanetTile> validExitTiles = AvailableExitTilesAt(vehicleDefs, from);
+    foreach (PlanetTile validTile in validExitTiles)
     {
       if (validTile == exitTile)
         return validTile;
@@ -91,7 +82,7 @@ public static class CaravanHelper
       float distanceBetween =
         (Find.WorldGrid.GetTileCenter(validTile) - Find.WorldGrid.GetTileCenter(exitTile))
        .MagnitudeHorizontalSquared();
-      if (nearestExitTile == -1 || distanceBetween < shortestDistance)
+      if (!nearestExitTile.Valid || distanceBetween < shortestDistance)
       {
         nearestExitTile = validTile;
         shortestDistance = distanceBetween;
@@ -100,13 +91,13 @@ public static class CaravanHelper
     return nearestExitTile;
   }
 
-  public static int RandomBestExitTileFrom(List<VehicleDef> vehicleDefs, Map map)
+  public static PlanetTile RandomBestExitTileFrom(List<VehicleDef> vehicleDefs, Map map)
   {
     Tile tile = map.TileInfo;
-    List<int> options = AvailableExitTilesAt(vehicleDefs, map);
+    List<PlanetTile> options = AvailableExitTilesAt(vehicleDefs, map);
 
     if (options.NullOrEmpty())
-      return -1;
+      return PlanetTile.Invalid;
 
     if (tile is not SurfaceTile surfaceTile)
       return options.RandomElement();
@@ -129,44 +120,62 @@ public static class CaravanHelper
     return roads
      .Where(roadLink =>
         options.Contains(roadLink.neighbor) && roadLink.road == roads[bestRoadIndex].road)
-     .RandomElement()
-     .neighbor;
+     .RandomElement().neighbor;
   }
 
-  public static List<int> AvailableExitTilesAt(List<VehicleDef> vehicleDefs, Map map)
+  public static List<PlanetTile> AvailableExitTilesAt(List<VehicleDef> vehicleDefs, Map map)
   {
-    availableExitTiles.Clear();
+    Assert.IsTrue(AvailableExitTiles.Count == 0);
+    Assert.IsTrue(NeighborTiles.Count == 0);
+    try
     {
-      int currentTileID = map.Tile;
+      PlanetTile currentTileID = map.Tile;
       RimWorld.Planet.World world = Find.World;
       WorldGrid grid = world.grid;
-      grid.GetTileNeighbors(currentTileID, neighborTiles);
+      grid.GetTileNeighbors(currentTileID, NeighborTiles);
       VehicleDef largestVehicle = vehicleDefs.MaxBy(vehicleDef => vehicleDef.Size.z);
-      for (int i = 0; i < neighborTiles.Count; i++)
+      foreach (PlanetTile tile in NeighborTiles)
       {
-        int tile = neighborTiles[i];
-        if (vehicleDefs.All(vehicleDef =>
-          Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
+        if (vehicleDefs.Exists(vehicleDef =>
+          !Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
+          continue;
+
+        CaravanExitMapUtility.GetExitMapEdges(grid, currentTileID, tile, out Rot4 primary,
+          out Rot4 secondary);
+
+        if (primary == Rot4.Invalid || !CellFinderExtended.TryFindRandomEdgeCellWith(
+          CellValidator, map, primary, largestVehicle, CellFinder.EdgeRoadChance_Ignore,
+          out _))
         {
-          CaravanExitMapUtility.GetExitMapEdges(grid, currentTileID, tile, out var primary,
-            out var secondary);
-          if ((primary != Rot4.Invalid && CellFinderExtended.TryFindRandomEdgeCellWith(
-                (IntVec3 cell) => vehicleDefs.All(vehicleDef =>
-                  GenGridVehicles.Walkable(cell, vehicleDef, map) && !cell.Fogged(map)), map,
-                primary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out IntVec3 result) ||
-              (secondary != Rot4.Invalid && CellFinderExtended.TryFindRandomEdgeCellWith(
-                (IntVec3 cell) => vehicleDefs.All(vehicleDef =>
-                  GenGridVehicles.Walkable(cell, vehicleDef, map) && !cell.Fogged(map)), map,
-                secondary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out result))) &&
-            !availableExitTiles.Contains(tile))
+          if (secondary == Rot4.Invalid || !CellFinderExtended.TryFindRandomEdgeCellWith(
+            CellValidator, map,
+            secondary, largestVehicle, CellFinder.EdgeRoadChance_Ignore, out _))
           {
-            availableExitTiles.Add(tile);
+            continue;
           }
         }
+        AvailableExitTiles.Add(tile);
+        continue;
+
+        bool CellValidator(IntVec3 cell)
+        {
+          foreach (VehicleDef vehicleDef in vehicleDefs)
+          {
+            if (!cell.Walkable(vehicleDef, map) || cell.Fogged(map))
+              return false;
+          }
+          return true;
+        }
       }
-      availableExitTiles.SortBy((int x) => grid.GetHeadingFromTo(currentTileID, x));
+      List<PlanetTile> exitTiles = AvailableExitTiles.ToList();
+      exitTiles.SortBy(tile => grid.GetHeadingFromTo(currentTileID, tile));
+      return exitTiles;
     }
-    return availableExitTiles;
+    finally
+    {
+      AvailableExitTiles.Clear();
+      NeighborTiles.Clear();
+    }
   }
 
   /// <summary>
@@ -184,7 +193,7 @@ public static class CaravanHelper
         num += vehicle.TotalSeats;
       }
     }
-    return pawns.Where(x => !(x is VehiclePawn)).Count() <= num;
+    return pawns.Count(pawn => pawn is not VehiclePawn) <= num;
   }
 
   /// <summary>
@@ -202,7 +211,7 @@ public static class CaravanHelper
         num += vehicle.PawnCountToOperate;
       }
     }
-    return pawns.Where(x => !(x is VehiclePawn)).Count() >= num;
+    return pawns.Count(pawn => pawn is not VehiclePawn) >= num;
   }
 
   public static IEnumerable<Pawn> AllSendablePawnsInVehicles(Map map,
@@ -210,9 +219,11 @@ public static class CaravanHelper
     bool allowEvenIfPrisonerNotSecure = false,
     bool allowCapturableDownedPawns = false, bool allowLodgers = false)
   {
-    foreach (VehiclePawn vehicle in map.mapPawns.AllPawnsSpawned.Where(pawn =>
-      pawn is VehiclePawn && pawn.Faction == Faction.OfPlayer))
+    foreach (Pawn mapPawn in map.mapPawns.AllPawnsSpawned)
     {
+      if (mapPawn is not VehiclePawn vehicle || vehicle.Faction != Faction.OfPlayer)
+        continue;
+
       foreach (Pawn pawn in vehicle.AllPawnsAboard)
       {
         bool allowDowned = allowEvenIfDowned || !pawn.Downed;
@@ -246,11 +257,12 @@ public static class CaravanHelper
 
   public static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
   {
-    if (caravans.NotNullAndAny(caravan => caravan is VehicleCaravan vehicleCaravan))
+    Assert.IsNotNull(caravans);
+    if (caravans.Exists(caravanOpt => caravanOpt is VehicleCaravan))
     {
-      //Prioritize vehicle caravans for merging into
-      caravan = caravans.Where(caravan => caravan is VehicleCaravan vehicleCaravan)
-       .MaxBy(caravan => caravan.PawnsListForReading.Count);
+      // Prioritize vehicle caravans for merging into
+      caravan = caravans.MaxBy(caravanOpt =>
+        caravanOpt is VehicleCaravan vehicleCaravan ? vehicleCaravan.PawnsListForReading.Count : 0);
     }
     return caravan;
   }
@@ -271,12 +283,11 @@ public static class CaravanHelper
   /// Pawns <paramref name="pawns"/> are able to travel on the world map given their current Vehicle usage
   /// </summary>
   /// <param name="pawns"></param>
-  public static bool CanStartCaravan(List<Pawn> pawns)
+  public static bool CanStartCaravan([NotNull] List<Pawn> pawns)
   {
     int seats = 0;
     int pawnCount = 0;
     int prereq = 0;
-    bool hasBoats = pawns.NotNullAndAny(p => p.IsBoat()); //Ships or No Ships
 
     foreach (Pawn p in pawns)
     {
@@ -292,8 +303,8 @@ public static class CaravanHelper
       }
     }
 
-    bool notEnoughSeats =
-      hasBoats ? pawnCount > seats : false; //Not Enough Room, must board all pawns
+    //Not Enough Room, must board all pawns
+    bool notEnoughSeats = pawns.Exists(pawn => pawn.IsBoat()) && pawnCount > seats;
     bool prereqNotMet = pawnCount < prereq;
     if (notEnoughSeats)
     {
@@ -311,12 +322,9 @@ public static class CaravanHelper
   /// <summary>
   /// Pawn is currently forming VehicleCaravan
   /// </summary>
-  /// <param name="p"></param>
-  /// <returns></returns>
   public static bool IsFormingCaravanShipHelper(Pawn pawn)
   {
-    Lord lord = pawn.GetLord();
-    return !(lord is null) && lord.LordJob is LordJob_FormAndSendVehicles;
+    return pawn.GetLord() is { LordJob: LordJob_FormAndSendVehicles };
   }
 
   /// <summary>
@@ -342,20 +350,18 @@ public static class CaravanHelper
       directionTile = exitFromTile;
     }
 
-    List<Pawn> pawnList = pawns.ToList();
+    List<Pawn> pawnList = [];
 
     Map map = null;
-    foreach (Pawn pawn in pawnList)
+    foreach (Pawn pawn in pawns)
     {
+      if (!pawn.InVehicle())
+        pawnList.Add(pawn);
       AddVehicleCaravanExitTaleIfShould(pawn);
-      map = pawn.MapHeld;
-      if (map != null)
-      {
-        break;
-      }
+      map ??= pawn.MapHeld;
     }
     VehicleCaravan caravan = MakeVehicleCaravan(pawnList, faction, exitFromTile, false);
-    Rot4 exitDir = (map != null) ?
+    Rot4 exitDir = map != null ?
       Find.WorldGrid.GetRotFromTo(exitFromTile, directionTile) :
       Rot4.Invalid;
     foreach (Pawn pawn in pawnList)
@@ -376,20 +382,21 @@ public static class CaravanHelper
     }
     if (!caravan.vehiclePather.Moving && caravan.Tile != directionTile)
     {
-      caravan.vehiclePather.StartPath(directionTile, null, true, true);
+      caravan.vehiclePather.StartPath(directionTile, arrivalAction: null, repathImmediately: true);
       caravan.vehiclePather.nextTileCostLeft /= 2f;
       caravan.vehicleTweener.ResetTweenedPosToRoot();
     }
-    if (destinationTile != -1)
+    if (destinationTile.Valid)
     {
       List<FloatMenuOption> list = FloatMenuMakerWorld.ChoicesAtFor(destinationTile, caravan);
-      if (list.NotNullAndAny((FloatMenuOption x) => !x.Disabled))
+      if (list.NotNullAndAny(floatOpt => !floatOpt.Disabled))
       {
-        list.First((FloatMenuOption x) => !x.Disabled).action();
+        list.First(floatOpt => !floatOpt.Disabled).action();
       }
       else
       {
-        caravan.vehiclePather.StartPath(destinationTile, null, true, true);
+        caravan.vehiclePather.StartPath(destinationTile, arrivalAction: null,
+          repathImmediately: true);
       }
     }
     if (sendMessage)
@@ -401,7 +408,7 @@ public static class CaravanHelper
         taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " +
           caravan.vehiclePather.ArrivalAction.Label + ".";
       }
-      Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, true);
+      Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion);
     }
     return caravan;
   }
@@ -410,13 +417,13 @@ public static class CaravanHelper
   {
     bool canExit = Find.World.GetComponent<WorldVehiclePathGrid>()
      .Passable(tile, vehicle.VehicleDef);
-    if (!canExit && vehicle.GetCachedComp<CompVehicleLauncher>() is CompVehicleLauncher)
+    if (!canExit && vehicle.GetCachedComp<CompVehicleLauncher>() is not null)
     {
       AerialVehicleInFlight.Create(vehicle, tile);
       if (vehicle.Spawned)
       {
         vehicle.jobs.StopAll();
-        vehicle.DeSpawn(DestroyMode.Vanish);
+        vehicle.DeSpawn();
       }
       return true;
     }
@@ -426,8 +433,6 @@ public static class CaravanHelper
   /// <summary>
   /// Find random starting tile for VehicleCaravan
   /// </summary>
-  /// <param name="tileID"></param>
-  /// <param name="exitDir"></param>
   public static PlanetTile FindRandomStartingTileBasedOnExitDir(VehiclePawn vehicle, int tileID,
     Rot4 exitDir)
   {
@@ -473,15 +478,11 @@ public static class CaravanHelper
   /// <summary>
   /// Create VehicleCaravan on World Map
   /// </summary>
-  /// <param name="pawns"></param>
-  /// <param name="faction"></param>
-  /// <param name="startingTile"></param>
-  /// <param name="addToWorldPawnsIfNotAlready"></param>
   [MustUseReturnValue]
   public static VehicleCaravan MakeVehicleCaravan(IEnumerable<Pawn> pawns, Faction faction,
-    int startingTile, bool addToWorldPawnsIfNotAlready)
+    PlanetTile startingTile, bool addToWorldPawnsIfNotAlready)
   {
-    if (startingTile < 0 && addToWorldPawnsIfNotAlready)
+    if (!startingTile.Valid && addToWorldPawnsIfNotAlready)
     {
       Log.Warning(
         "Tried to create a caravan but chose not to spawn a caravan but pass pawns to world. This can cause bugs because pawns can be discarded.");
@@ -490,18 +491,17 @@ public static class CaravanHelper
 
     VehicleCaravan caravan =
       (VehicleCaravan)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.VehicleCaravan);
-    if (startingTile >= 0)
+    if (startingTile.Valid)
     {
       caravan.Tile = startingTile;
     }
     caravan.SetFaction(faction);
-    if (startingTile >= 0)
+    if (startingTile.Valid)
     {
       Find.WorldObjects.Add(caravan);
     }
-    for (int i = 0; i < pawnsList.Count; i++)
+    foreach (Pawn pawn in pawnsList)
     {
-      Pawn pawn = pawnsList[i];
       if (pawn.Dead)
       {
         Log.Warning("Tried to form a caravan with a dead pawn " + pawn);
@@ -531,9 +531,7 @@ public static class CaravanHelper
     List<VehiclePawn> vehicles = pawns
      .Where(x => x.Faction == Faction.OfPlayer && x is VehiclePawn).Cast<VehiclePawn>().ToList();
     if (vehicles.NullOrEmpty())
-    {
       return pawns.Where(x => x.Faction == Faction.OfPlayer && x.RaceProps.Humanlike).ToList();
-    }
     return vehicles.RandomElement().AllCapablePawns;
   }
 
@@ -544,16 +542,15 @@ public static class CaravanHelper
   public static float CapacityLeft(LordJob_FormAndSendVehicles lordJob)
   {
     float num = CollectionsMassCalculator.MassUsageTransferables(lordJob.transferables,
-      IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-    List<ThingCount> tmpCaravanPawns = new List<ThingCount>();
-    for (int i = 0; i < lordJob.lord.ownedPawns.Count; i++)
+      IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload);
+    List<ThingCount> tmpCaravanPawns = [];
+    foreach (Pawn pawn in lordJob.lord.ownedPawns)
     {
-      Pawn pawn = lordJob.lord.ownedPawns[i];
       tmpCaravanPawns.Add(new ThingCount(pawn, pawn.stackCount));
     }
     num += CollectionsMassCalculator.MassUsage(tmpCaravanPawns,
-      IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload, false, false);
-    float num2 = CaravanInfoHelper.Capacity(tmpCaravanPawns, null);
+      IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload);
+    float num2 = CaravanInfoHelper.Capacity(tmpCaravanPawns);
     tmpCaravanPawns.Clear();
     return num2 - num;
   }
@@ -562,15 +559,12 @@ public static class CaravanHelper
   /// Pawns and vehicles available for carrying cargo
   /// </summary>
   /// <param name="pawn"></param>
-  public static IEnumerable<Pawn> UsableCandidatesForCargo(Pawn pawn)
+  private static IEnumerable<Pawn> UsableCandidatesForCargo(Pawn pawn)
   {
-    IEnumerable<Pawn> candidates = (!pawn.IsFormingCaravan()) ?
+    IEnumerable<Pawn> candidates = !pawn.IsFormingCaravan() ?
       pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction) :
       pawn.GetLord().ownedPawns;
-    candidates = from x in candidates
-                 where x is VehiclePawn
-                 select x;
-    return candidates;
+    return candidates.Where(candidate => candidate is VehiclePawn);
   }
 
   /// <summary>
@@ -584,7 +578,7 @@ public static class CaravanHelper
     foreach (Pawn p in UsableCandidatesForCargo(pawn))
     {
       if (p is VehiclePawn && p != pawn &&
-        pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly, false))
+        pawn.CanReach(p, PathEndMode.Touch, Danger.Deadly))
       {
         float num2 = MassUtility.FreeSpace(p);
         if (carrierPawn is null || num2 > num)
@@ -622,7 +616,7 @@ public static class CaravanHelper
     if (!TradeSession.Active)
     {
       Log.Warning(
-        $"Improper use of CanFitInVehicle which should only operate during TradeSessions.");
+        "Improper use of CanFitInVehicle which should only operate during TradeSessions.");
       return true;
     }
     return aerialVehicle.vehicle.SeatsAvailable - pawnsBeingAdded > 0;
@@ -638,62 +632,61 @@ public static class CaravanHelper
   public static void DoItemsListForVehicle(Rect inRect, ref float curY,
     ref List<Thing> tmpSingleThing, ITab_Pawn_FormingCaravan instance)
   {
-    LordJob_FormAndSendVehicles lordJob_FormAndSendCaravanVehicle =
+    LordJob_FormAndSendVehicles lordJobFormAndSendCaravanVehicle =
       (LordJob_FormAndSendVehicles)(Find.Selector.SingleSelectedThing as Pawn).GetLord().LordJob;
-    Rect position = new Rect(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
+    Rect position = new(0f, curY, (inRect.width - 10f) / 2f, inRect.height);
     float a = 0f;
     Widgets.BeginGroup(position);
     Widgets.ListSeparator(ref a, position.width, "ItemsToLoad".Translate());
-    bool flag = false;
-    foreach (TransferableOneWay transferableOneWay in lordJob_FormAndSendCaravanVehicle
+    bool transferingA = false;
+    foreach (TransferableOneWay transferableOneWay in lordJobFormAndSendCaravanVehicle
      .transferables)
     {
       if (transferableOneWay.CountToTransfer > 0 && transferableOneWay.HasAnyThing)
       {
-        flag = true;
+        transferingA = true;
         MethodInfo doThingRow =
           AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan), name: "DoThingRow");
-        object[] args = new object[]
-        {
+        object[] args =
+        [
           transferableOneWay.ThingDef, transferableOneWay.CountToTransfer,
           transferableOneWay.things, position.width, a
-        };
+        ];
         doThingRow.Invoke(instance, args);
         a = (float)args[4];
       }
     }
-    if (!flag)
+    if (!transferingA)
     {
-      Widgets.NoneLabel(ref a, position.width, null);
+      Widgets.NoneLabel(ref a, position.width);
     }
     Widgets.EndGroup();
-    Rect position2 = new Rect((inRect.width + 10f) / 2f, curY, (inRect.width - 10f) / 2f,
+    Rect position2 = new((inRect.width + 10f) / 2f, curY, (inRect.width - 10f) / 2f,
       inRect.height);
     float b = 0f;
     Widgets.BeginGroup(position2);
     Widgets.ListSeparator(ref b, position2.width, "LoadedItems".Translate());
-    bool flag2 = false;
-    foreach (Pawn pawn in lordJob_FormAndSendCaravanVehicle.lord.ownedPawns)
+    bool transferingB = false;
+    foreach (Pawn pawn in lordJobFormAndSendCaravanVehicle.lord.ownedPawns)
     {
       if (!pawn.inventory.UnloadEverything)
       {
         foreach (Thing thing in pawn.inventory.innerContainer)
         {
-          flag2 = true;
+          transferingB = true;
           tmpSingleThing.Clear();
           tmpSingleThing.Add(thing);
           MethodInfo doThingRow = AccessTools.Method(type: typeof(ITab_Pawn_FormingCaravan),
             name: "DoThingRow");
-          object[] args = new object[]
-            { thing.def, thing.stackCount, tmpSingleThing, position2.width, b };
+          object[] args = [thing.def, thing.stackCount, tmpSingleThing, position2.width, b];
           doThingRow.Invoke(instance, args);
           b = (float)args[4];
         }
       }
     }
-    if (!flag2)
+    if (!transferingB)
     {
-      Widgets.NoneLabel(ref b, position.width, null);
+      Widgets.NoneLabel(ref b, position.width);
     }
     Widgets.EndGroup();
     curY += Mathf.Max(a, b);
@@ -717,7 +710,7 @@ public static class CaravanHelper
         TaleRecorder.RecordTale(TaleDefOf.CaravanFormed, author);
         return;
       }
-      if (GenHostility.AnyHostileActiveThreatToPlayer(author.Map, false))
+      if (GenHostility.AnyHostileActiveThreatToPlayer(author.Map))
       {
         TaleRecorder.RecordTale(TaleDefOf.CaravanFled, author);
       }
@@ -753,10 +746,8 @@ public static class CaravanHelper
     PlanetTile tile = pawn.Map.Tile;
     Find.WorldGrid.GetTileNeighbors(tile, neighbors);
     neighbors.Add(tile);
-    List<Caravan> caravans = Find.WorldObjects.Caravans;
-    for (int i = 0; i < caravans.Count; i++)
+    foreach (Caravan caravan in Find.WorldObjects.Caravans)
     {
-      Caravan caravan = caravans[i];
       if (neighbors.Contains(caravan.Tile) && caravan.autoJoinable)
       {
         if (pawn is VehiclePawn vehicle2 && caravan is VehicleCaravan vehicleCaravan)

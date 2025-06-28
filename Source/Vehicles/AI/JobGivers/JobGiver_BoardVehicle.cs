@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using RimWorld;
+﻿using RimWorld;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -15,10 +15,11 @@ public class JobGiver_BoardVehicle : ThinkNode_JobGiver
     if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
       return null;
 
-    if (pawn.GetLord().LordJob is LordJob_FormAndSendVehicles)
+    if (pawn.GetLord().LordJob is LordJob_FormAndSendVehicles lordJob)
     {
-      AssignedSeat assignedSeat =
-        ((LordJob_FormAndSendVehicles)pawn.GetLord().LordJob).GetVehicleAssigned(pawn);
+      AssignedSeat assignedSeat = lordJob.GetVehicleAssigned(pawn);
+      if (assignedSeat?.Vehicle is null)
+        return null;
 
       if (assignedSeat.handler is null)
       {

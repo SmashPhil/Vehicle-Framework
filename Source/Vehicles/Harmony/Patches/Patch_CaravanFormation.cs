@@ -15,6 +15,12 @@ internal class Patch_CaravanFormation : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
+    // TODO 1.6 - 
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Pawn),
+        nameof(Pawn.ExitMap)),
+      prefix: new HarmonyMethod(typeof(Patch_CaravanFormation),
+        nameof(VehicleExitMap)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanFormingUtility),
         nameof(CaravanFormingUtility.IsFormingCaravan)),
@@ -48,10 +54,22 @@ internal class Patch_CaravanFormation : IPatchCategory
   }
 
   /// <summary>
+  /// Exiting map with <see cref="VehiclePawn"/>
+  /// </summary>
+  private static bool VehicleExitMap(Pawn __instance, bool allowedToJoinOrCreateCaravan,
+    Rot4 exitDir)
+  {
+    if (__instance is VehiclePawn vehicle)
+    {
+      vehicle.ExitMapTemp(allowedToJoinOrCreateCaravan, exitDir);
+      return false;
+    }
+    return true;
+  }
+
+  /// <summary>
   /// Forming Caravan extension method based on Vehicle LordJob
   /// </summary>
-  /// <param name="p"></param>
-  /// <param name="__result"></param>
   private static bool IsFormingCaravanVehicle(Pawn p, ref bool __result)
   {
     Lord lord = p.GetLord();
@@ -75,8 +93,6 @@ internal class Patch_CaravanFormation : IPatchCategory
   /// <summary>
   /// Find Vehicle (Not pack animal) with usable free space for caravan packing
   /// </summary>
-  /// <param name="pawn"></param>
-  /// <param name="__result"></param>
   private static bool UsableVehicleWithMostFreeSpace(Pawn pawn, ref Pawn __result)
   {
     if (CaravanHelper.IsFormingCaravanShipHelper(pawn) ||

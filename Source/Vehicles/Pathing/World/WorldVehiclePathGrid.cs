@@ -130,7 +130,7 @@ public class WorldVehiclePathGrid : WorldComponent
       {
         PlanetTile tile = Find.WorldSelector.SelectedTile;
         List<int> neighbors = [];
-        Ext_World.BFS(tile, neighbors, radius: 10);
+        Ext_World.Bfs(tile, neighbors, radius: 10);
 
         Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, text: IdStringAt(tile), 15);
         foreach (int neighbor in neighbors)
@@ -152,7 +152,7 @@ public class WorldVehiclePathGrid : WorldComponent
       {
         PlanetTile tile = Find.WorldSelector.SelectedTile;
         List<int> neighbors = [];
-        Ext_World.BFS(tile, neighbors, radius: 10);
+        Ext_World.Bfs(tile, neighbors, radius: 10);
 
         float winterPct = WinterPercentAt(tile);
         Find.World.debugDrawer.FlashTile(tile, colorPct: winterPct,

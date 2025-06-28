@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -10,14 +11,13 @@ using Verse.AI.Group;
 
 namespace Vehicles;
 
-public sealed class LordJob_FormAndSendVehicles : LordJob
+public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan
 {
-  public const float CustomWakeThreshold = 0.5f;
+  private static readonly AccessTools.FieldRef<LordJob_FormAndSendCaravan, bool>
+    CaravanSentFieldRef;
 
   private static (LordToil toil, string memo) prevState;
 
-  public List<TransferableOneWay> transferables = [];
-  public List<Pawn> downedPawns = [];
   public List<Pawn> prisoners = [];
   public List<VehiclePawn> vehicles = [];
   public List<Pawn> pawns = [];
@@ -28,7 +28,6 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
   private IntVec3 exitPoint;
   private PlanetTile startingTile;
   private PlanetTile destinationTile;
-  private bool caravanSent;
   private LordToil gatherAnimals;
   private LordToil gatherAnimalsPause;
   private LordToil gatherItems;
@@ -48,6 +47,12 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
   private List<Pawn> tmpPawnAssignments = [];
   private List<AssignedSeat> tmpVehicleHandlerAssignments = [];
 
+  static LordJob_FormAndSendVehicles()
+  {
+    CaravanSentFieldRef =
+      AccessTools.FieldRefAccess<bool>(typeof(LordJob_FormAndSendCaravan), "caravanSent");
+  }
+
   /// <summary>
   /// Strictly for Xml Deserialization which requires a public default constructor.
   /// </summary>
@@ -62,6 +67,7 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
   {
     this.vehicles = vehicles;
     this.transferables = transferables;
+    downedPawns = [];
     foreach (Pawn pawn in pawns)
     {
       if (pawn.Downed)
@@ -87,6 +93,12 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
     vehicleAssigned =
       new Dictionary<Pawn, AssignedSeat>(CaravanHelper.assignedSeats.AllAssignments);
+  }
+
+  public bool CaravanSent
+  {
+    get { return CaravanSentFieldRef.Invoke(this); }
+    set { CaravanSentFieldRef.Invoke(this) = value; }
   }
 
   private (LordToil source, LordToil pause) GatherAnimals => (gatherAnimals, gatherAnimalsPause);
@@ -119,63 +131,6 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
     get { return false; }
   }
 
-  public string Status
-  {
-    get
-    {
-      LordToil curLordToil = lord.CurLordToil;
-      if (curLordToil == gatherAnimals)
-      {
-        return "FormingCaravanStatus_GatheringAnimals".Translate();
-      }
-      if (curLordToil == gatherAnimalsPause)
-      {
-        return "FormingCaravanStatus_GatherAnimals_Pause".Translate();
-      }
-      if (curLordToil == gatherItems)
-      {
-        return "FormingCaravanStatus_GatheringItems".Translate();
-      }
-      if (curLordToil == gatherItemsPause)
-      {
-        return "FormingCaravanStatus_GatheringItems_Pause".Translate();
-      }
-      if (curLordToil == gatherDownedPawns)
-      {
-        return "FormingCaravanStatus_GatheringDownedPawns".Translate();
-      }
-      if (curLordToil == gatherDownedPawnsPause)
-      {
-        return "FormingCaravanStatus_GatheringDownedPawns_Pause".Translate();
-      }
-      if (curLordToil == tieAnimals)
-      {
-        return "VF_FormingCaravanStatus_RopingAnimals".Translate();
-      }
-      if (curLordToil == tieAnimalsPause)
-      {
-        return "VF_FormingCaravanStatus_RopingAnimals_Pause".Translate();
-      }
-      if (curLordToil == boardVehicle)
-      {
-        return "VF_FormingCaravanStatus_BoardVehicles".Translate();
-      }
-      if (curLordToil == boardVehiclePause)
-      {
-        return "VF_FormingCaravanStatus_BoardVehicles_Pause".Translate();
-      }
-      if (curLordToil == leave)
-      {
-        return "VF_FormingCaravanStatus_Leaving_Vehicles".Translate();
-      }
-      if (curLordToil == leavePause)
-      {
-        return "VF_FormingCaravanStatus_Leaving_Vehicles_Pause".Translate();
-      }
-      return "FormingCaravanStatus_Waiting".Translate();
-    }
-  }
-
   public void ForceCaravanLeave()
   {
     lord.GotoToil(Board.source);
@@ -203,35 +158,20 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
   private void AssignRemainingPawns()
   {
-    if (RequireAllSeated)
-    {
-      foreach (Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
-      {
-        foreach (VehiclePawn vehicle in vehicles)
-        {
-          if (vehicle.SeatsAvailable <= 0)
-            continue;
+    if (!RequireAllSeated)
+      return;
 
-          vehicleAssigned.Add(pawn,
-            new AssignedSeat(pawn, vehicle.GetAnyAvailableHandler()));
-        }
-      }
-    }
-    else
+    foreach (Pawn pawn in pawns)
     {
-      // Cycle through and distribute seating
-      // TODO - should be reworked for optimal capacity in each vehicle
-      int nextVehicleIndex = 0;
-      foreach (Pawn pawn in pawns.Where(p => !vehicleAssigned.ContainsKey(p)))
+      if (vehicleAssigned.ContainsKey(pawn))
+        continue;
+
+      foreach (VehiclePawn vehicle in vehicles)
       {
-        VehiclePawn nextAvailableVehicle = vehicles[nextVehicleIndex];
-        Assert.IsNotNull(nextAvailableVehicle);
-        VehicleRoleHandler handler = nextAvailableVehicle.GetAnyAvailableHandler();
-        if (handler != null)
-          vehicleAssigned.Add(pawn, new AssignedSeat(pawn, handler));
-        nextVehicleIndex++;
-        if (nextVehicleIndex >= vehicles.Count)
-          nextVehicleIndex = 0;
+        if (vehicle.SeatsAvailable <= 0)
+          continue;
+
+        vehicleAssigned[pawn] = new AssignedSeat(pawn, vehicle.GetAnyAvailableHandler());
       }
     }
   }
@@ -322,7 +262,6 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
   public override void Notify_PawnLost(Pawn pawn, PawnLostCondition condition)
   {
-    base.Notify_PawnLost(pawn, condition);
     if (pawn is VehiclePawn vehicle)
     {
       VehicleReachabilityUtility.ClearCacheFor(vehicle);
@@ -331,9 +270,10 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
     {
       ReachabilityUtility.ClearCacheFor(pawn);
     }
-    if (!caravanSent)
+    if (!CaravanSent)
     {
-      if (condition == PawnLostCondition.Incapped && pawn.Downed)
+      if (condition == PawnLostCondition.Incapped ||
+        condition == PawnLostCondition.Killed && pawn.Downed)
       {
         downedPawns.Add(pawn);
       }
@@ -350,7 +290,6 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
   public override void LordJobTick()
   {
-    base.LordJobTick();
     if (VehicleMod.settings.debug.debugDrawLordMeetingPoint &&
       Find.TickManager.TicksGame % 10 == 0)
     {
@@ -390,7 +329,7 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
   private void SendCaravan()
   {
-    caravanSent = true;
+    CaravanSent = true;
     CaravanHelper.ExitMapAndCreateVehicleCaravan(lord.ownedPawns.Concat(downedPawns.Where(pawn =>
         JobGiver_PrepareCaravan_GatherDownedPawns.IsDownedPawnNearExitPoint(pawn, exitPoint))),
       lord.faction, Map.Tile, startingTile, destinationTile);
@@ -398,7 +337,7 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
 
   public override StateGraph CreateGraph()
   {
-    StateGraph stateGraph = new StateGraph();
+    StateGraph stateGraph = new();
 
     ResolveSeatingAssignments();
 
@@ -439,12 +378,6 @@ public sealed class LordJob_FormAndSendVehicles : LordJob
     stateGraph.AddTransition(leaveTransition);
 
     return stateGraph;
-  }
-
-  public override void Cleanup()
-  {
-    base.Cleanup();
-    this.CleanupVehicleHandlers();
   }
 
   public void AddToStateGraph(StateGraph stateGraph, (LordToil source, LordToil pause) toil,
