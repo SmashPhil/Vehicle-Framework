@@ -7,6 +7,7 @@ using RimWorld;
 using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Vehicles.World;
 using Verse;
@@ -57,7 +58,7 @@ internal class Patch_Rendering : IPatchCategory
         nameof(DrawIconsVehicles)));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"),
       transpiler: new HarmonyMethod(typeof(Patch_Rendering),
-        nameof(CheckRecacheAerialVehicleEntriesTranspiler)));
+        nameof(CheckRecacheVehicleEntriesTranspiler)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
       prefix: new HarmonyMethod(typeof(Patch_Rendering),
@@ -145,19 +146,44 @@ internal class Patch_Rendering : IPatchCategory
     vector.x += num;
   }
 
-  public static IEnumerable<CodeInstruction> CheckRecacheAerialVehicleEntriesTranspiler(
-    IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
+  public static IEnumerable<CodeInstruction> CheckRecacheVehicleEntriesTranspiler(
+    IEnumerable<CodeInstruction> instructions)
   {
     List<CodeInstruction> instructionList = instructions.ToList();
 
     MethodInfo clearCachedEntriesMethod =
       AccessTools.Method(typeof(List<int>), nameof(List<int>.Clear));
+    MethodInfo freeColonistsGetter =
+      AccessTools.PropertyGetter(typeof(MapPawns), nameof(MapPawns.FreeColonists));
     for (int i = 0; i < instructionList.Count; i++)
     {
       CodeInstruction instruction = instructionList[i];
 
-      if (instruction.Calls(clearCachedEntriesMethod))
+      if (instruction.Calls(freeColonistsGetter))
       {
+        // ReSharper disable once RedundantAssignment
+        yield return instruction; // callvirt MapPawns::get_FreeColonists
+        instruction = instructionList[++i]; // callvirt List`<Pawn>::AddRange
+        // ldsfld ColonistBar::tmpPawns
+        yield return instruction;
+        instruction = instructionList[++i];
+
+        // ColonistBar.tmpMaps[i]
+        yield return new CodeInstruction(opcode: OpCodes.Ldsfld,
+          operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
+        yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
+        yield return new CodeInstruction(opcode: OpCodes.Callvirt,
+          operand: AccessTools.PropertyGetter(typeof(List<Map>), "Item"));
+        // ColonistBar.tmpPawns
+        yield return new CodeInstruction(opcode: OpCodes.Ldsfld,
+          operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
+        // Patch_Rendering::RecacheLocalVehicleEntries(map, tmpPawns)
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_Rendering), nameof(RecacheLocalVehicleEntries)));
+      }
+      else if (instruction.Calls(clearCachedEntriesMethod))
+      {
+        // TODO
         yield return instruction; //CALLVIRT : List<int32>.Clear
         instruction = instructionList[++i];
 
@@ -171,6 +197,18 @@ internal class Patch_Rendering : IPatchCategory
       }
 
       yield return instruction;
+    }
+  }
+
+  private static void RecacheLocalVehicleEntries(Map map, List<Pawn> tmpPawns)
+  {
+    foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+    {
+      if (pawn.Faction != Faction.OfPlayer)
+        continue;
+
+      if (pawn is VehiclePawn { AllPawnsAboard.Count: > 0 } vehicle)
+        tmpPawns.AddRange(vehicle.AllPawnsAboard);
     }
   }
 
