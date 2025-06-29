@@ -433,7 +433,12 @@ public partial class VehiclePawn
     {
       foreach (VehicleRoleHandler handler in handlers)
       {
-        handler.thingOwner.TryTransferAllToContainer(caravan.pawns, false);
+        for (int i = handler.thingOwner.Count; --i >= 0;)
+        {
+          handler.thingOwner.TryTransferToContainer(handler.thingOwner[i], caravan.pawns,
+            canMergeWithExistingStacks: false);
+          EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+        }
       }
     }
     else if (Spawned)
@@ -455,8 +460,10 @@ public partial class VehiclePawn
       Log.Warning("Disembarking from vehicle when it is not spawned or in a caravan.");
       foreach (VehicleRoleHandler handler in handlers)
       {
-        foreach (Pawn pawn in handler.thingOwner)
+        for (int i = handler.thingOwner.Count; --i >= 0;)
         {
+          Pawn pawn = handler.thingOwner[i];
+          TryRemovePawn(pawn, handler);
           Find.WorldPawns.PassToWorld(pawn);
         }
       }

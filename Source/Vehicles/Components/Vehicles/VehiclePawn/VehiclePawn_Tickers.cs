@@ -42,10 +42,10 @@ public partial class VehiclePawn
     {
       vehicleAI?.AITick();
     }
-
+    inventory.innerContainer.DoTick();
     if (AllPawnsAboard.Count > 0)
     {
-      TrySatisfyPawnNeeds();
+      //TrySatisfyPawnNeeds();
     }
   }
 
@@ -111,10 +111,11 @@ public partial class VehiclePawn
   protected virtual void BaseTickOptimized()
   {
     if (Find.TickManager.TicksGame % 250 == 0)
-    {
       TickRare();
-    }
+
     sustainers.Tick();
+    TickHandlers();
+
     if (Spawned)
     {
       //animator?.AnimationTick();
@@ -125,7 +126,6 @@ public partial class VehiclePawn
         jobs.JobTrackerTick();
       }
 
-      TickHandlers();
       TickExplosives();
       if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
       {
@@ -140,17 +140,9 @@ public partial class VehiclePawn
         }
       }
     }
-    //equipment?.EquipmentTrackerTick();
 
-    //caller?.CallTrackerTick();
-    //skills?.SkillsTick();
     //abilities?.AbilitiesTick();
-    inventory?.InventoryTrackerTick();
-    //relations?.RelationsTrackerTick();
-
-    if (ModsConfig.RoyaltyActive)
-    {
-      //royalty?.RoyaltyTrackerTick();
-    }
+    inventory.InventoryTrackerTick();
+    //inventory.innerContainer.DoTick();
   }
 }

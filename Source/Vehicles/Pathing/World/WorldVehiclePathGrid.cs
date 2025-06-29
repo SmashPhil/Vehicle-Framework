@@ -289,8 +289,8 @@ public class WorldVehiclePathGrid : WorldComponent
     {
       SurfaceTile.RiverLink riverLink = WorldHelper.BiggestRiverOnTile(rivers);
       if (riverLink.river != null &&
-        vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river,
-          out float riverCost) && !Mathf.Approximately(riverCost, ImpassableMovementDifficulty))
+        vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river, out float riverCost)
+        && !Mathf.Approximately(riverCost, ImpassableMovementDifficulty))
       {
         explanation?.Append($"{riverLink.river.LabelCap}: {riverCost.ToStringWithSign("0.#")}");
         return riverCost;
@@ -323,12 +323,6 @@ public class WorldVehiclePathGrid : WorldComponent
       vehicleDef.properties.customHillinessCosts.TryGetValue(surfaceTile.hilliness,
         HillinessMovementDifficultyOffset(surfaceTile.hilliness));
 
-    if (biomeCost < ImpassableMovementDifficulty &&
-      VehicleMod.settings.main.ignoreBiomeCostOnRoads && !surfaceTile.Roads.NullOrEmpty())
-    {
-      biomeCost = 1;
-    }
-
     if (biomeCost >= ImpassableMovementDifficulty ||
       hillinessCost >= ImpassableMovementDifficulty)
     {
@@ -336,11 +330,18 @@ public class WorldVehiclePathGrid : WorldComponent
       return ImpassableMovementDifficulty;
     }
 
+    if (biomeCost < ImpassableMovementDifficulty &&
+      VehicleMod.settings.main.ignoreBiomeCostOnRoads && !surfaceTile.Roads.NullOrEmpty())
+    {
+      biomeCost = 1;
+      hillinessCost = 0;
+    }
+
     explanation?.Append(surfaceTile.PrimaryBiome.LabelCap + ": " +
       biomeCost.ToStringWithSign("0.#"));
 
     float totalCost = biomeCost + hillinessCost;
-    if (explanation != null && hillinessCost != 0f)
+    if (explanation != null && !Mathf.Approximately(hillinessCost, 0))
     {
       explanation.AppendLine();
       explanation.Append(surfaceTile.hilliness.GetLabelCap() + ": " +

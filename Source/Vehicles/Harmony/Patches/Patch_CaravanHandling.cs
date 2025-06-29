@@ -20,8 +20,7 @@ namespace Vehicles;
 
 internal class Patch_CaravanHandling : IPatchCategory
 {
-  private static readonly List<Pawn> tmpCaravanPawns = [];
-  private static readonly List<Thing> tmpAerialVehicleThingsWillToBuy = [];
+  private static readonly List<Thing> TmpAerialVehicleThingsWillToBuy = [];
 
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
 
@@ -231,16 +230,11 @@ internal class Patch_CaravanHandling : IPatchCategory
       transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(GiveSoldThingToVehicleTranspiler)));
 
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(Caravan_NeedsTracker),
-        nameof(Caravan_NeedsTracker.TrySatisfyPawnsNeeds)),
-      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
-        nameof(TrySatisfyVehicleCaravanNeeds)));
     // TODO 1.6 - recheck if this is needed
-    //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)),
-    //  prefix: new HarmonyMethod(typeof(CaravanHandling),
-    //    nameof(GetParentCaravan)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)),
+      postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+        nameof(GetParentCaravan)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.RandomOwner)),
       prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
@@ -519,13 +513,13 @@ internal class Patch_CaravanHandling : IPatchCategory
         AccessTools.Method(typeof(ITab_Pawn_FormingCaravan), "DoPeopleAndAnimalsEntry");
 
       float y = curY;
-      object[] m1args =
+      object[] m1Args =
       [
         inRect, Faction.OfPlayer.def.pawnsPlural.CapitalizeFirst(), pawnsCountLabel, curY, null
       ];
-      doPeopleAndAnimalsEntry.Invoke(__instance, m1args);
-      curY = (float)m1args[3];
-      float num8 = (float)m1args[4];
+      doPeopleAndAnimalsEntry.Invoke(__instance, m1Args);
+      curY = (float)m1Args[3];
+      float num8 = (float)m1Args[4];
 
       float yShip = curY;
       object[] mSargs =
@@ -535,18 +529,18 @@ internal class Patch_CaravanHandling : IPatchCategory
       float numS = (float)mSargs[4];
 
       float y2 = curY;
-      object[] m2args =
+      object[] m2Args =
         [inRect, "CaravanPrisoners".Translate().ToStringSafe(), pawnsCountLabel2, curY, null];
-      doPeopleAndAnimalsEntry.Invoke(__instance, m2args);
-      curY = (float)m2args[3];
-      float num9 = (float)m2args[4];
+      doPeopleAndAnimalsEntry.Invoke(__instance, m2Args);
+      curY = (float)m2Args[3];
+      float num9 = (float)m2Args[4];
 
       float y3 = curY;
-      object[] m3args =
+      object[] m3Args =
         [inRect, "CaravanAnimals".Translate().ToStringSafe(), pawnsCountLabel3, curY, null];
-      doPeopleAndAnimalsEntry.Invoke(__instance, m3args);
-      curY = (float)m3args[3];
-      float num10 = (float)m3args[4];
+      doPeopleAndAnimalsEntry.Invoke(__instance, m3Args);
+      curY = (float)m3Args[3];
+      float num10 = (float)m3Args[4];
 
       float width = Mathf.Max(num8, numS, num9, num10) + 2f;
 
@@ -852,20 +846,20 @@ internal class Patch_CaravanHandling : IPatchCategory
     AerialVehicleInFlight aerialVehicle = playerNegotiator.GetAerialVehicle();
     if (aerialVehicle != null)
     {
-      tmpAerialVehicleThingsWillToBuy.Clear();
+      TmpAerialVehicleThingsWillToBuy.Clear();
       foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
       {
-        tmpAerialVehicleThingsWillToBuy.Add(thing);
+        TmpAerialVehicleThingsWillToBuy.Add(thing);
       }
       List<Pawn> pawns = aerialVehicle.vehicle.AllPawnsAboard;
       foreach (Pawn pawn in pawns)
       {
         if (!CaravanUtility.IsOwner(pawn, aerialVehicle.Faction))
         {
-          tmpAerialVehicleThingsWillToBuy.Add(pawn);
+          TmpAerialVehicleThingsWillToBuy.Add(pawn);
         }
       }
-      __result = tmpAerialVehicleThingsWillToBuy;
+      __result = TmpAerialVehicleThingsWillToBuy;
       return false;
     }
     return true;
@@ -1094,15 +1088,12 @@ internal class Patch_CaravanHandling : IPatchCategory
     }
   }
 
-  public static bool GetParentCaravan(Thing thing, ref Caravan __result)
+  public static void GetParentCaravan(Thing thing, ref Caravan __result)
   {
-    if (thing is Pawn && thing.ParentHolder is VehicleRoleHandler handler &&
-      handler.vehicle.GetCaravan() is VehicleCaravan caravan)
+    if (__result == null && thing is Pawn pawn)
     {
-      __result = caravan;
-      return false;
+      __result = pawn.GetVehicleCaravan();
     }
-    return true;
   }
 
   public static bool RandomVehicleOwner(Caravan caravan, ref Pawn __result)
@@ -1148,16 +1139,6 @@ internal class Patch_CaravanHandling : IPatchCategory
         }
       }
     }
-  }
-
-  private static bool TrySatisfyVehicleCaravanNeeds(Caravan_NeedsTracker __instance)
-  {
-    if (__instance.caravan is VehicleCaravan vehicleCaravan)
-    {
-      vehicleCaravan.TrySatisfyPawnsNeeds();
-      return false;
-    }
-    return true;
   }
 
   private static void NoTradingUndocked(Caravan caravan, ref FloatMenuAcceptanceReport __result)

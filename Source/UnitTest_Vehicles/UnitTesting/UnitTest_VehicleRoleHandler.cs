@@ -161,9 +161,59 @@ internal sealed class UnitTest_VehicleRoleHandler
     }
   }
 
-  [Test] // TODO
+  [Test]
   private void RoleTickingCaravan()
   {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 2,
+      passengers = 2,
+      animals = 2
+    });
+    group.BoardAll();
+
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
+    Assert.IsTrue(vehicleCaravan.PawnsListForReading.ContainsAllOf(group.pawns));
+
+    using (TickObserver<VehiclePawn> observer = new(group.vehicle))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    Pawn pawn = group.vehicle.AllPawnsAboard.FirstOrDefault();
+    Assert.IsNotNull(pawn);
+    Assert.IsTrue(pawn.InVehicle());
+    using (TickObserver<Pawn> observer = new(pawn))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    Pawn dismountedPawn = group.DisembarkOne();
+    Assert.IsNotNull(dismountedPawn);
+    Assert.IsFalse(dismountedPawn.InVehicle());
+    using (TickObserver<Pawn> observer = new(dismountedPawn))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    ThingWithComps food = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.MealSimple);
+    food.stackCount = 1;
+    group.vehicle.inventory.TryAddAndUnforbid(food);
+    Assert.AreEqual(food.ParentHolder, group.vehicle.inventory);
+    using (TickObserver<ThingWithComps> observer = new(food))
+    {
+      using ScopedValueRollback<TickerType> rb = new(ref food.def.tickerType);
+      food.def.tickerType = TickerType.Normal;
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    vehicleCaravan.RemoveAllPawns();
   }
 
   [Test] // TODO

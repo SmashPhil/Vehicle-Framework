@@ -11,12 +11,29 @@ namespace Vehicles.UnitTesting;
 [TestDescription("VehicleCaravan mechanics on the world map.")]
 internal sealed class UnitTest_VehicleCaravan
 {
-  private VehicleGroup group;
-
-  [SetUp]
-  private void CreateVehicleGroup()
+  [Test]
+  private void GetCaravan()
   {
-    group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1
+    });
+    Assert.AreEqual(group.pawns.Count, 1);
+
+    group.BoardAll();
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    Assert.AreEqual(vehicleCaravan, group.vehicle.GetVehicleCaravan());
+    Assert.AreEqual(vehicleCaravan, group.pawns[0].GetVehicleCaravan());
+    Expect.AreEqual(vehicleCaravan, group.vehicle.GetCaravan());
+    Assert.AreEqual(vehicleCaravan, group.pawns[0].GetCaravan());
+  }
+
+  [Test]
+  private void Visibility()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
       drivers = 1,
@@ -27,11 +44,7 @@ internal sealed class UnitTest_VehicleCaravan
       }
     });
     Assert.AreEqual(group.pawns.Count, 6);
-  }
 
-  [Test]
-  private void Visibility()
-  {
     // Base game caravans should behave as expected
     Caravan caravan = CaravanMaker.MakeCaravan(group.pawns, Faction.OfPlayer, 1, true);
     float visibility = CaravanVisibilityCalculator.Visibility(caravan);
@@ -91,5 +104,16 @@ internal sealed class UnitTest_VehicleCaravan
     Expect.AreApproximatelyEqual(visibility, 1.12f);
 
     vehicleCaravan.RemoveAllPawns();
+  }
+
+  [Test]
+  private void NeedsTracker()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1
+    });
   }
 }

@@ -112,6 +112,7 @@ public class VehicleGroup : IDisposable
       pawn.Destroy();
       Assert.IsTrue(pawn.Destroyed);
     }
+    Assert.IsTrue(vehicle.AllPawnsAboard.Count == 0);
     vehicle.Destroy();
     Assert.IsTrue(vehicle.Destroyed);
   }
