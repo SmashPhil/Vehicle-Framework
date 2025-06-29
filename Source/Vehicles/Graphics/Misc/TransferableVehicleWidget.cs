@@ -254,6 +254,14 @@ public sealed class TransferableVehicleWidget
             if (pawnTransferable != null && !pawnTransferable.AnyThing.InVehicle())
               pawnTransferable.ForceTo(0);
           }
+          // Update all onboard pawns set as readonly transferables
+          foreach (Pawn pawn in vehicle.AllPawnsAboard)
+          {
+            TransferableOneWay pawnTransferable =
+              pawns.FirstOrDefault(trnsf => trnsf.AnyThing == pawn);
+            Assert.IsNotNull(pawnTransferable);
+            pawnTransferable.ForceTo(0);
+          }
           CaravanHelper.assignedSeats.RemoveAssignments(vehicle);
           CaravanFormation.formation.NotifyTransferablesChanged();
         }

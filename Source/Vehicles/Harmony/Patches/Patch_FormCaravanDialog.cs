@@ -75,6 +75,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       original: AccessTools.Method(typeof(CaravanUIUtility), "CreateCaravanTransferableWidgets"),
       postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(CreateTransferableVehicleWidget)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(CaravanFormingUtility),
+        nameof(CaravanFormingUtility.AllSendablePawns)),
+      postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(AllSendablePawnsInVehicles)));
 
     // Form Caravan
     HarmonyPatcher.Patch(
@@ -182,6 +187,21 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
     vehiclesTransfer =
       new TransferableVehicleWidget("VF_Vehicles".Translate(), vehicles, pawns, tile: tile);
+  }
+
+  /// <summary>
+  /// Append passengers to 'sendable pawns' list in form caravan dialog.
+  /// </summary>
+  private static List<Pawn> AllSendablePawnsInVehicles(List<Pawn> __result, Map map)
+  {
+    VehiclePositionManager positionManager = map.GetDetachedMapComponent<VehiclePositionManager>();
+    Assert.IsNotNull(positionManager);
+    foreach (VehiclePawn vehicle in positionManager.AllClaimants)
+    {
+      if (vehicle.AllPawnsAboard.Count > 0)
+        __result.AddRange(vehicle.AllPawnsAboard);
+    }
+    return __result;
   }
 
   /// <summary>
