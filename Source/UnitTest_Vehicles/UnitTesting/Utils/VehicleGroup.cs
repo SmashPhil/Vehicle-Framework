@@ -109,11 +109,13 @@ public class VehicleGroup : IDisposable
     {
       vehicle.RemovePawn(pawn);
       Assert.IsFalse(pawn.InVehicle());
-      pawn.Destroy();
+      if (!pawn.Destroyed)
+        pawn.Destroy();
       Assert.IsTrue(pawn.Destroyed);
     }
     Assert.IsTrue(vehicle.AllPawnsAboard.Count == 0);
-    vehicle.Destroy();
+    if (!vehicle.Destroyed)
+      vehicle.Destroy();
     Assert.IsTrue(vehicle.Destroyed);
   }
 

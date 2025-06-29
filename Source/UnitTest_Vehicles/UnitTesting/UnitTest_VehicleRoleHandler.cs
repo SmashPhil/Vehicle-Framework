@@ -162,6 +162,26 @@ internal sealed class UnitTest_VehicleRoleHandler
   }
 
   [Test]
+  private void VariableTickRate()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1
+    });
+
+    group.Spawn();
+
+    // Vehicle VTR's with no pawns onboard
+    group.DisembarkAll();
+    group.vehicle.ignition.Drafted = false;
+    Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == 0);
+    Assert.IsFalse(group.vehicle.Drafted);
+    Expect.AreEqual(group.vehicle.UpdateRateTicks, VehiclePawn.MaxTickInterval);
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.UpdateRateTicks, GenTicks.GetCameraUpdateRate(group.vehicle));
+  }
+
+  [Test]
   private void RoleTickingCaravan()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings

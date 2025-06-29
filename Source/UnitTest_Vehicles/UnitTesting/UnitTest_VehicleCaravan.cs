@@ -28,6 +28,8 @@ internal sealed class UnitTest_VehicleCaravan
     Assert.AreEqual(vehicleCaravan, group.pawns[0].GetVehicleCaravan());
     Expect.AreEqual(vehicleCaravan, group.vehicle.GetCaravan());
     Assert.AreEqual(vehicleCaravan, group.pawns[0].GetCaravan());
+
+    vehicleCaravan.RemoveAllPawns();
   }
 
   [Test]
@@ -49,9 +51,8 @@ internal sealed class UnitTest_VehicleCaravan
     Caravan caravan = CaravanMaker.MakeCaravan(group.pawns, Faction.OfPlayer, 1, true);
     float visibility = CaravanVisibilityCalculator.Visibility(caravan);
     // weight = 6
-    Assert.AreApproximatelyEqual(caravan.Visibility,
-      1 * CaravanVisibilityCalculator.NotMovingFactor);
-    Assert.AreApproximatelyEqual(visibility, 1 * CaravanVisibilityCalculator.NotMovingFactor);
+    Assert.AreApproximatelyEqual(caravan.Visibility, CaravanVisibilityCalculator.NotMovingFactor);
+    Assert.AreApproximatelyEqual(visibility, CaravanVisibilityCalculator.NotMovingFactor);
 
     caravan.RemoveAllPawns();
     caravan.Destroy();

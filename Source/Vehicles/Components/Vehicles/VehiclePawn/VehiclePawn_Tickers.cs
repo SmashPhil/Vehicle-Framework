@@ -1,11 +1,14 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 
 namespace Vehicles;
 
 public partial class VehiclePawn
 {
+  public const int MaxTickInterval = GenTicks.TickRareInterval;
+
   [Unsaved]
   public VehicleSustainers sustainers;
 
@@ -19,6 +22,18 @@ public partial class VehiclePawn
 
   // Pawn has null held things
   bool IThingHolderTickable.ShouldTickContents => false;
+
+  protected override int MaxTickIntervalRate => MaxTickInterval;
+
+  public override int UpdateRateTicks
+  {
+    get
+    {
+      if (AllPawnsAboard.Count == 0 && compTickers.Count == 0)
+        return MaxTickInterval;
+      return base.UpdateRateTicks;
+    }
+  }
 
   public void AddTimedExplosion(TimedExplosion exploder)
   {
@@ -106,11 +121,27 @@ public partial class VehiclePawn
   {
     ageTracker.AgeTickInterval(delta);
     records.RecordsTickInterval(delta);
+    if (!this.IsWorldPawn())
+      jobs.JobTrackerTickInterval(delta);
+
+    // TODO
+    //if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
+    //{
+    //  if (AllPawnsAboard.Count == 0)
+    //  {
+    //    currentlyFishing = false;
+    //  }
+    //  else
+    //  {
+    //    IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
+    //    MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
+    //  }
+    //}
   }
 
   protected virtual void BaseTickOptimized()
   {
-    if (Find.TickManager.TicksGame % 250 == 0)
+    if (this.IsHashIntervalTick(GenTicks.TickRareInterval))
       TickRare();
 
     sustainers.Tick();
@@ -125,24 +156,10 @@ public partial class VehiclePawn
       {
         jobs.JobTrackerTick();
       }
-
       TickExplosives();
-      if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
-      {
-        if (AllPawnsAboard.Count == 0)
-        {
-          currentlyFishing = false;
-        }
-        else
-        {
-          IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
-          MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
-        }
-      }
     }
 
     //abilities?.AbilitiesTick();
     inventory.InventoryTrackerTick();
-    //inventory.innerContainer.DoTick();
   }
 }

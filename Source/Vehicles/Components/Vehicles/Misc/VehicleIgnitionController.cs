@@ -12,6 +12,8 @@ namespace Vehicles
     private bool drafted;
     private VehiclePawn vehicle;
 
+    private Command_Toggle draftCommand;
+
     public VehicleIgnitionController(VehiclePawn vehicle)
     {
       this.vehicle = vehicle;
@@ -22,11 +24,8 @@ namespace Vehicles
       get { return drafted; }
       set
       {
-        //Don't trigger events if already set to this draft status
         if (value == Drafted)
-        {
           return;
-        }
 
         if (value)
         {
@@ -126,7 +125,7 @@ namespace Vehicles
     /// </summary>
     public IEnumerable<Gizmo> GetGizmos()
     {
-      Command draftCommand = new Command_Toggle
+      draftCommand ??= new Command_Toggle
       {
         hotKey = KeyBindingDefOf.Command_ColonistDraft,
         isActive = () => Drafted,
@@ -140,13 +139,15 @@ namespace Vehicles
           {
             Drafted = !Drafted;
           }
-        },
-        defaultLabel = DraftGizmoLabel,
-        defaultDesc = DraftGizmoDescription,
-        icon = (Drafted && vehicle.vehiclePather.Moving) ?
-          VehicleTex.HaltVehicle :
-          VehicleTex.DraftVehicle
+        }
       };
+
+      draftCommand.defaultLabel = DraftGizmoLabel;
+      draftCommand.defaultDesc = DraftGizmoDescription;
+      draftCommand.icon = Drafted && vehicle.vehiclePather.Moving ?
+        VehicleTex.HaltVehicle :
+        VehicleTex.DraftVehicle;
+
       if (!Drafted)
       {
         draftCommand.defaultLabel = vehicle.VehicleDef.draftLabel;

@@ -40,8 +40,6 @@ internal sealed class UnitTest_VehiclePermissions
     manualVehicle.Dispose();
     autonomousVehicle.Dispose();
     immobileVehicle.Dispose();
-
-    TestUtils.EmptyWorldAndMapOfVehicles();
   }
 
   [Test] // Driver Required

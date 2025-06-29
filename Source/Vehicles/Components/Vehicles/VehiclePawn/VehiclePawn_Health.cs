@@ -1,25 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Text;
-using UnityEngine;
-using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
-using Verse;
-using Verse.Sound;
-using Verse.AI;
-using Verse.AI.Group;
 using SmashTools;
+using UnityEngine;
 using UnityEngine.Assertions;
-using Vehicles.World;
+using Verse;
+using Verse.AI.Group;
+using Verse.Sound;
 
 namespace Vehicles;
 
 public partial class VehiclePawn
 {
-  public bool beached = false;
+  public bool beached;
 
   [TweakField]
   public VehicleStatHandler statHandler;
@@ -118,7 +112,7 @@ public partial class VehiclePawn
     result = new DamageWorker.DamageResult();
     if (this.OccupiedRect().Contains(position))
     {
-      IntVec2 hitCell = new IntVec2(position.x - Position.x, position.z - Position.z);
+      IntVec2 hitCell = new(position.x - Position.x, position.z - Position.z);
       result = TakeDamage(dinfo, hitCell);
       return true;
     }
@@ -182,6 +176,16 @@ public partial class VehiclePawn
     cargoToLoad.Clear();
     Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleDespawned(this);
     EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
+
+    if (!cachedComps.NullOrEmpty())
+    {
+      for (int i = 0; i < cachedComps.Count; i++)
+      {
+        if (cachedComps[i] is VehicleComp vehicleComp)
+          vehicleComp.OnDeSpawn();
+      }
+    }
+
     base.DeSpawn(mode);
     SoundCleanup();
   }
@@ -260,22 +264,16 @@ public partial class VehiclePawn
     Rot4 rotation = Rotation;
 
     Map map = Map;
-    Map mapHeld = MapHeld;
     bool spawned = Spawned;
-    bool worldPawn = this.IsWorldPawn();
-    VehicleCaravan caravan = this.GetCaravan() as VehicleCaravan;
     ThingDef vehicleDef = VehicleDef.buildDef;
 
     if (Current.ProgramState == ProgramState.Playing)
     {
-      Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died, null);
+      Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died);
     }
-    if (dinfo != null && dinfo.Value.Instigator != null)
+    if (dinfo is { Instigator: Pawn instigator })
     {
-      if (dinfo.Value.Instigator is Pawn pawn)
-      {
-        RecordsUtility.Notify_PawnKilled(this, pawn);
-      }
+      RecordsUtility.Notify_PawnKilled(this, instigator);
     }
 
     if (this.GetLord() != null)
@@ -284,14 +282,15 @@ public partial class VehiclePawn
     }
     if (spawned)
     {
-      DropAndForbidEverything(false);
-      if (destroyMode == DestroyMode.Deconstruct)
+      DropAndForbidEverything();
+      switch (destroyMode)
       {
-        SoundDefOf.Building_Deconstructed.PlayOneShot(new TargetInfo(Position, map, false));
-      }
-      else if (destroyMode == DestroyMode.KillFinalize)
-      {
-        DoDestroyEffects(map);
+        case DestroyMode.Deconstruct:
+          SoundDefOf.Building_Deconstructed.PlayOneShot(new TargetInfo(Position, map));
+        break;
+        case DestroyMode.KillFinalize:
+          DoDestroyEffects(map);
+        break;
       }
     }
 
@@ -306,7 +305,7 @@ public partial class VehiclePawn
       if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep ||
         map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
       {
-        StringBuilder downWithShipString = new StringBuilder();
+        StringBuilder downWithShipString = new();
         bool pawnsLostAtSea = false;
         foreach (Pawn pawn in AllPawnsAboard)
         {
@@ -314,7 +313,6 @@ public partial class VehiclePawn
           {
             pawnsLostAtSea = true;
             downWithShipString.AppendLine(pawn.LabelCap);
-            //pawn.Destroy(DestroyMode.Vanish);
           }
           else
           {
@@ -325,7 +323,7 @@ public partial class VehiclePawn
           "VF_BoatSunkDesc".Translate(LabelShort) :
           "VF_BoatSunkWithPawnsDesc".Translate(LabelShort, downWithShipString.ToString());
         Find.LetterStack.ReceiveLetter("VF_BoatSunk".Translate(), desc, LetterDefOf.NegativeEvent,
-          new TargetInfo(Position, map, false), null, null);
+          new TargetInfo(Position, map));
         Destroy(DestroyMode.KillFinalize);
         return;
       }
@@ -335,56 +333,27 @@ public partial class VehiclePawn
       }
 
       if (spawnWreckage)
-      {
         GenSpawn.Spawn(wreckage, position, map, rotation, WipeMode.FullRefund);
-      }
     }
-    return;
   }
 
   public virtual void Notify_DamageImpact(VehicleComponent.DamageResult damageResult)
   {
     if (Spawned)
     {
-      EffecterDef effecterDef = null;
-      switch (damageResult.penetration)
+      EffecterDef effecterDef = damageResult.penetration switch
       {
-        case VehicleComponent.Penetration.Deflected:
-        {
-          if (damageResult.damageInfo.Def == DamageDefOf.Bullet)
-          {
-            effecterDef = VehicleDef.BodyType.deflectionEffectBullet;
-          }
-          else
-          {
-            effecterDef = VehicleDef.BodyType.deflectionEffect;
-          }
-        }
-        break;
-        case VehicleComponent.Penetration.Diminished:
-        {
-          effecterDef = VehicleDef.BodyType.diminishedEffect;
-        }
-        break;
-        case VehicleComponent.Penetration.NonPenetrated:
-        {
-          effecterDef = VehicleDef.BodyType.nonPenetrationEffect;
-        }
-        break;
-        ///Penetration and unhandled cases default to <see cref="FleshTypeDef.damageEffecter"/>
-        case VehicleComponent.Penetration.Penetrated:
-        {
-          effecterDef = VehicleDef.BodyType.damageEffecter;
-        }
-        break;
-        case VehicleComponent.Penetration.Electrified:
-        {
-          effecterDef = VehicleDef.BodyType.electrifiedEffect;
-        }
-        break;
-        default:
-          throw new NotImplementedException("Unhandled Penetration result.");
-      }
+        VehicleComponent.Penetration.NonPenetrated => VehicleDef.BodyType.nonPenetrationEffect,
+        VehicleComponent.Penetration.Deflected =>
+          damageResult.damageInfo.Def == DamageDefOf.Bullet ?
+            VehicleDef.BodyType.deflectionEffectBullet :
+            VehicleDef.BodyType.deflectionEffect,
+        VehicleComponent.Penetration.Diminished => VehicleDef.BodyType.diminishedEffect,
+        VehicleComponent.Penetration.Penetrated => VehicleDef.BodyType.damageEffecter,
+        VehicleComponent.Penetration.Electrified => VehicleDef.BodyType.electrifiedEffect,
+        _ => throw new NotImplementedException("Unhandled Penetration result.")
+      };
+
       if (effecterDef != null && (health.deflectionEffecter == null ||
         health.deflectionEffecter.def != effecterDef))
       {
@@ -397,7 +366,7 @@ public partial class VehiclePawn
       }
       IntVec2 effectCell =
         damageResult.cell.RotatedBy(Rotation, VehicleDef.Size, reverseRotate: true);
-      IntVec3 onMapCell = new IntVec3(Position.x + effectCell.x, 0, Position.z + effectCell.z);
+      IntVec3 onMapCell = new(Position.x + effectCell.x, 0, Position.z + effectCell.z);
       health.deflectionEffecter?.Trigger(new TargetInfo(onMapCell, Map),
         damageResult.damageInfo.Instigator ?? new TargetInfo(onMapCell, Map));
       this.PlayImpactSound(damageResult);
@@ -408,16 +377,14 @@ public partial class VehiclePawn
   {
     if (VehicleDef.buildDef.building.destroyEffecter != null)
     {
-      Effecter effecter = VehicleDef.buildDef.building.destroyEffecter.Spawn(Position, map, 1f);
+      Effecter effecter = VehicleDef.buildDef.building.destroyEffecter.Spawn(Position, map);
       effecter.Trigger(new TargetInfo(Position, map), TargetInfo.Invalid);
       effecter.Cleanup();
       return;
     }
-    SoundDef destroySound = GetDestroySound();
-    if (destroySound != null)
-    {
-      destroySound.PlayOneShot(new TargetInfo(Position, map));
-    }
+
+    GetDestroySound()?.PlayOneShot(new TargetInfo(Position, map));
+
     foreach (IntVec3 intVec in this.OccupiedRect())
     {
       int num = VehicleDef.buildDef.building.isNaturalRock ? 1 : Rand.RangeInclusive(3, 5);

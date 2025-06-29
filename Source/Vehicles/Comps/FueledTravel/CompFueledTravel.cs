@@ -28,10 +28,10 @@ public class CompFueledTravel : VehicleComp, IRefundable
   private const float CellOffsetIntVec3ToVector3 = 0.5f;
   private const float TicksToCharge = 120;
 
-  private static readonly Texture2D electricPowerTex =
+  private static readonly Texture2D ElectricPowerTex =
     ContentFinder<Texture2D>.Get("UI/Overlays/NeedsPower");
 
-  private static readonly MethodInfo powerNetMethod;
+  private static readonly MethodInfo PowerNetMethod;
 
   public bool allowAutoRefuel = true;
   private float fuel;
@@ -51,7 +51,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   static CompFueledTravel()
   {
-    powerNetMethod = AccessTools.Method(typeof(PowerNet), "ChangeStoredEnergy");
+    PowerNetMethod = AccessTools.Method(typeof(PowerNet), "ChangeStoredEnergy");
   }
 
   public CompFueledTravel()
@@ -337,7 +337,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
       fuelIconRect.x = fuelSuffixRect.x - fuelIconRect.width;
       if (Props.ElectricPowered)
       {
-        GUI.DrawTexture(fuelIconRect, electricPowerTex);
+        GUI.DrawTexture(fuelIconRect, ElectricPowerTex);
       }
       else
       {
@@ -453,7 +453,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
     if (changeStoredEnergy == null && connectedPower.PowerNet != null)
     {
       changeStoredEnergy =
-        AccessTools.MethodDelegate<Action<float>>(powerNetMethod, connectedPower.PowerNet,
+        AccessTools.MethodDelegate<Action<float>>(PowerNetMethod, connectedPower.PowerNet,
           virtualCall: false, delegateArgs: [typeof(float)]);
     }
     changeStoredEnergy?.Invoke(extra);
@@ -552,7 +552,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
        .RemoveLister(Vehicle, ReservationType.Refuel);
     }
 
-    if (Props.ambientHeat != 0)
+    if (!Mathf.Approximately(Props.ambientHeat, 0))
     {
       GenTemperature.PushHeat(Vehicle, Props.ambientHeat);
     }
@@ -563,7 +563,11 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
-  [UsedImplicitly]
+  public override void OnDeSpawn()
+  {
+    DisconnectPower();
+  }
+
   public bool TryConnectPower()
   {
     if (!Props.ElectricPowered)
@@ -583,7 +587,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
     return false;
   }
 
-  [UsedImplicitly]
   public void DisconnectPower()
   {
     connectedPower = null;
@@ -593,6 +596,9 @@ public class CompFueledTravel : VehicleComp, IRefundable
   // TODO - Remove when animation system is finalized
   protected virtual void DrawMotes()
   {
+    if (Props.motesGenerated.NullOrEmpty())
+      return;
+
     foreach (OffsetMote offset in Props.motesGenerated)
     {
       for (int i = 0; i < offset.NumTimesSpawned; i++)

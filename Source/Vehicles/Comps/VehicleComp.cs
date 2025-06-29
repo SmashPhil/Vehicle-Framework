@@ -44,6 +44,10 @@ public class VehicleComp : ThingComp
   {
   }
 
+  public virtual void OnDeSpawn()
+  {
+  }
+
   public virtual void OnDestroy()
   {
   }
