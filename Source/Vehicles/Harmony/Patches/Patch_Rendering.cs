@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
@@ -26,27 +25,16 @@ internal class Patch_Rendering : IPatchCategory
   public const float InfoColumnWidth = 170f;
   public const float WindowPadding = 12f;
   public const float ColumnPadding = 12f;
-  public const float LineHeight = 24f;
-  public const float ThingIconSize = 22f;
-  public const float WindowWidth = 336f;
+  private const float LineHeight = 24f;
+  private const float ThingIconSize = 22f;
+  private const float WindowWidth = 336f;
 
-  private static readonly List<AerialVehicleInFlight> tmpAerialVehicles = [];
-
-  private static readonly List<Pawn> tmpPawns = [];
-
-  public static MethodInfo TrueCenter_Thing { get; private set; }
-
-  public static MethodInfo TrueCenter_Baseline { get; private set; }
+  private static readonly List<Pawn> TmpPawns = [];
 
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
 
   void IPatchCategory.PatchMethods()
   {
-    TrueCenter_Thing = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter),
-      parameters: [typeof(Thing)]);
-    TrueCenter_Baseline = AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter),
-      parameters: [typeof(IntVec3), typeof(Rot4), typeof(IntVec2), typeof(float)]);
-
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Pawn_RotationTracker),
         nameof(Pawn_RotationTracker.UpdateRotation)),
@@ -75,7 +63,8 @@ internal class Patch_Rendering : IPatchCategory
       original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
       postfix: new HarmonyMethod(typeof(Patch_Rendering),
         nameof(DrawGhostVehicle)));
-    HarmonyPatcher.Patch(original: TrueCenter_Thing,
+    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter),
+        parameters: [typeof(Thing)]),
       prefix: new HarmonyMethod(typeof(Patch_Rendering),
         nameof(TrueCenterVehicle)));
     HarmonyPatcher.Patch(
@@ -215,24 +204,27 @@ internal class Patch_Rendering : IPatchCategory
   private static void RecacheAerialVehicleEntries(List<ColonistBar.Entry> cachedEntries,
     ref int group)
   {
-    tmpAerialVehicles.Clear();
-    tmpAerialVehicles.AddRange(VehicleWorldObjectsHolder.Instance.AerialVehicles);
-    tmpAerialVehicles.SortBy(aerialVehicle => aerialVehicle.ID);
-    foreach (AerialVehicleInFlight aerialVehicle in tmpAerialVehicles)
+    foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
+     .AerialVehicles)
     {
-      if (aerialVehicle.IsPlayerControlled)
+      if (!aerialVehicle.IsPlayerControlled)
+        continue;
+
+      try
       {
-        tmpPawns.Clear();
-        tmpPawns.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
-        PlayerPawnsDisplayOrderUtility.Sort(tmpPawns);
-        foreach (Pawn pawn in tmpPawns)
+        Assert.IsTrue(TmpPawns.Count == 0);
+        TmpPawns.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
+        PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
+        foreach (Pawn pawn in TmpPawns)
         {
           if (pawn.IsColonist)
-          {
             cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
-          }
         }
         group++;
+      }
+      finally
+      {
+        TmpPawns.Clear();
       }
     }
   }
@@ -240,23 +232,17 @@ internal class Patch_Rendering : IPatchCategory
   /// <summary>
   /// Draw diagonal and shifted brackets for Boats
   /// </summary>
-  /// <param name="obj"></param>
   public static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
   {
-    var vehicle = obj as VehiclePawn;
-    var building = obj as VehicleBuilding;
-    if (vehicle != null || building?.vehicle != null)
+    VehiclePawn vehicle = obj as VehiclePawn ?? (obj as VehicleBuilding)?.vehicle;
+    if (vehicle != null)
     {
-      if (vehicle is null)
-      {
-        vehicle = building.vehicle;
-      }
       Vector3[] brackets = new Vector3[4];
       float angle = vehicle.Angle;
 
       Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle,
-        vehicle.DrawPos, vehicle.RotatedSize.ToVector2(), SelectionDrawer.SelectTimes,
-        Vector2.one, angle, 1f);
+        vehicle.DrawPos, vehicle.RotatedSize.ToVector2(), SelectionDrawer.SelectTimes, Vector2.one,
+        angle);
 
       int num = Mathf.CeilToInt(angle);
       for (int i = 0; i < 4; i++)
@@ -274,14 +260,13 @@ internal class Patch_Rendering : IPatchCategory
   /// <summary>
   /// Divert render call to instead render full vehicle in UI
   /// </summary>
-  /// <param name="thing"></param>
   public static bool CellInspectorDrawVehicle(Thing thing, ref int ___numLines)
   {
     if (thing is VehiclePawn vehicle)
     {
       float num = ___numLines * LineHeight;
       List<object> selectedObjects = Find.Selector.SelectedObjects;
-      Rect rect = new Rect(LineHeight / 2, num + LineHeight / 2, WindowWidth - LineHeight,
+      Rect rect = new(LineHeight / 2, num + LineHeight / 2, WindowWidth - LineHeight,
         LineHeight);
       if (selectedObjects.Contains(thing))
       {

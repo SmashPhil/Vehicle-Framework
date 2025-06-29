@@ -19,14 +19,6 @@ public class VehicleCaravanInfo(
 
   public bool caravaning;
 
-  //massUsage = pawns.Sum(MassUtility.GearAndInventoryMass);
-  //massCapacity = pawns.Sum(pawn =>
-  //  pawn is VehiclePawn vehicle ?
-  //    vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) :
-  //    pawn.InVehicle() ?
-  //      0 :
-  //      MassUtility.Capacity(pawn));
-
   public VehicleCaravanInfo(List<TransferableOneWay> transferables, float massUsage,
     float massCapacity, PlanetTile tile) : this(
     TransferableUtility.GetPawnsFromTransferables(transferables), massUsage, massCapacity, tile)
