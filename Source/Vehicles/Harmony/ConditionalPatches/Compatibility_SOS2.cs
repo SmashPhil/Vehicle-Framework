@@ -3,9 +3,9 @@ using Verse;
 
 namespace Vehicles.Compatibility;
 
-internal class Compatibility_SOS2 : ConditionalVehiclePatch
+internal class Compatibility_SoS2 : ConditionalVehiclePatch
 {
-  public override string PackageId => CompatibilityPackageIds.SOS2;
+  public override string PackageId => ModPackageIds.SoS2;
 
   public override void PatchAll(ModMetaData mod, Harmony harmony)
   {

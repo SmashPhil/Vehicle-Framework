@@ -9,7 +9,13 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(TestCategoryNames.WorldPawnGC)]
+[TestCategory(
+  TestCategoryNames.WorldObject,
+  TestCategoryNames.WorldPawnGC,
+  TestCategoryNames.Caravaning
+)]
+[TestDescription(
+  "VehicleCaravan mechanics for stashing and recovering a vehicle on the world map.")]
 internal sealed class UnitTest_StashedVehicle
 {
   [TearDown, ExecutionPriority(Priority.BelowNormal)]

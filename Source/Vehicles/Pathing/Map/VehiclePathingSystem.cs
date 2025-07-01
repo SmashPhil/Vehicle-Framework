@@ -4,6 +4,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Performance;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
@@ -15,7 +16,7 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public sealed class VehiclePathingSystem : MapComponent
 {
-  private const int EventMapId = 0;
+  private const int EventMapThreadId = 25;
 
   private const GridSelection DefaultGrids = GridSelection.All;
   private const GridDeferment DefaultDeferment = GridDeferment.Lazy;
@@ -45,7 +46,11 @@ public sealed class VehiclePathingSystem : MapComponent
   /// <summary>
   /// <see cref="dedicatedThread"/> is initialized and running.
   /// </summary>
-  public bool ThreadAlive => dedicatedThread != null && dedicatedThread.thread.IsAlive;
+  public bool ThreadAlive => dedicatedThread is
+  {
+    State: not DedicatedThread.ThreadState.Uninitialized
+    and not DedicatedThread.ThreadState.Terminated
+  };
 
   /// <summary>
   /// <see cref="dedicatedThread"/> is alive, not suspended, and not in a long operation.
@@ -111,12 +116,13 @@ public sealed class VehiclePathingSystem : MapComponent
     if (map.IsPlayerHome)
     {
       thread = ThreadManager.CreateNew();
-      Debug.Message($"{VehicleHarmony.LogLabel} Creating thread (id={thread?.id})");
+      Debug.Message($"Creating thread (id={thread?.id})");
       return thread;
     }
 
-    thread = ThreadManager.GetShared(EventMapId);
-    Debug.Message($"{VehicleHarmony.LogLabel} Fetching thread from pool (id={thread?.id})");
+    thread = ThreadManager.GetOrCreateShared(EventMapThreadId);
+    Debug.Message(
+      $"Fetching thread with shared ownership (id={thread?.id})");
     return thread;
   }
 
@@ -126,6 +132,8 @@ public sealed class VehiclePathingSystem : MapComponent
   public override void FinalizeInit()
   {
     base.FinalizeInit();
+    if (!ThreadAlive)
+      InitThread();
     RegenerateGrids();
   }
 
@@ -136,11 +144,6 @@ public sealed class VehiclePathingSystem : MapComponent
     GridDeferment deferment = DefaultDeferment)
   {
     using LongEventText text = new();
-
-    if (!ThreadAlive)
-    {
-      InitThread();
-    }
 
     // Unit tests need all grids generated before execution. Dedicated thread would also be
     // getting suspended sporadically during unit testing so using deferred grid generation would
@@ -167,7 +170,6 @@ public sealed class VehiclePathingSystem : MapComponent
 
       break;
       case GridDeferment.Forced:
-        Debug.Message("Forcing grid generation.");
         GeneratePathGrids();
         GenerateRegionsParallel();
       break;
@@ -290,9 +292,10 @@ public sealed class VehiclePathingSystem : MapComponent
 
   internal void ReleaseThread()
   {
-    if (dedicatedThread == null || dedicatedThread.Terminated) return;
+    if (dedicatedThread == null || dedicatedThread.IsTerminated)
+      return;
 
-    Debug.Message($"Releasing thread {dedicatedThread.id}.");
+    Debug.Message($"Releasing thread (id={dedicatedThread.id})");
     ThreadManager.ReleaseAndJoin(dedicatedThread);
     dedicatedThread = null;
   }

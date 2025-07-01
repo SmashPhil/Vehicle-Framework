@@ -227,7 +227,6 @@ internal class Patch_Construction : IPatchCategory
       {
         if (!respawningAfterLoad)
           FinalizePosition(vehicle, rot, ref loc);
-        Debug.Message($"Spawning {vehicle} at {loc} Rotation={rot}");
         return true; // If location is still valid, skip to spawning
       }
 
@@ -243,8 +242,6 @@ internal class Patch_Construction : IPatchCategory
               return false;
             }
           }
-
-          Debug.Message($"Adjusting {vehicle} to {cell} Rotation={lambdaRot}");
           return true;
         }, out IntVec3 newLoc))
       {

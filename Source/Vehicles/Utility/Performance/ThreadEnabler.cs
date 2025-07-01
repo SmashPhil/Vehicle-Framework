@@ -5,47 +5,46 @@ using SmashTools.Performance;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// RAII pattern for suspending dedicated thread activity on VehicleMapping components.
+/// This does not stop or abort the threads, it only flags the thread as being unavailable
+/// so that further actions are executed synchronously rather than getting enqueued to
+/// the dedicated thread.
+/// </summary>
+public class ThreadEnabler : IDisposable
 {
-  /// <summary>
-  /// RAII pattern for suspending dedicated thread activity on VehicleMapping components.
-  /// This does not stop or abort the threads, it only flags the thread as being unavailable
-  /// so that further actions are executed synchronously rather than getting enqueued to
-  /// the dedicated thread.
-  /// </summary>
-  public readonly struct ThreadEnabler : IDisposable
+  // True = thread was active before disabling
+  private readonly Dictionary<Map, bool> threadStates = [];
+
+  public ThreadEnabler()
   {
-    // True = thread was active before disabling
-    private readonly Dictionary<Map, bool> threadStates = [];
+    // Need to enable from main thread, Find.Maps is not thread safe
+    Assert.IsTrue(ThreadManager.InMainOrEventThread);
 
-    public ThreadEnabler()
+    foreach (Map map in Find.Maps)
     {
-      // Need to enable from main thread, Find.Maps is not thread safe
-      Assert.IsTrue(ThreadManager.InMainOrEventThread);
-
-      foreach (Map map in Find.Maps)
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      if (mapping.ThreadAlive)
       {
-        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-        if (mapping.ThreadAlive)
-        {
-          threadStates[map] = !mapping.dedicatedThread.IsSuspended;
-          mapping.dedicatedThread.IsSuspended = false;
-        }
+        threadStates[map] = !mapping.dedicatedThread.IsSuspended;
+        mapping.dedicatedThread.Unsuspend();
       }
     }
+  }
 
-    void IDisposable.Dispose()
+  public void Dispose()
+  {
+    // Need to dispose from main thread, Find.Maps is not thread safe
+    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+
+    foreach (Map map in Find.Maps)
     {
-      // Need to dispose from main thread, Find.Maps is not thread safe
-      Assert.IsTrue(ThreadManager.InMainOrEventThread);
-
-      foreach (Map map in Find.Maps)
+      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+      if (mapping.ThreadAlive && threadStates.TryGetValue(map, out bool wasActive) && wasActive)
       {
-        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-        if (mapping.ThreadAlive && threadStates.TryGetValue(map, out bool wasActive))
-        {
-          mapping.dedicatedThread.IsSuspended = !wasActive;
-        }
+        mapping.dedicatedThread.Suspend();
       }
     }
   }

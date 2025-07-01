@@ -5,7 +5,7 @@ namespace Vehicles.Compatibility;
 
 internal class Compatibility_GeologicalLandforms : ConditionalVehiclePatch
 {
-  public override string PackageId => CompatibilityPackageIds.GeologicalLandforms;
+  public override string PackageId => ModPackageIds.GeologicalLandforms;
 
   public override void PatchAll(ModMetaData mod, Harmony harmony)
   {

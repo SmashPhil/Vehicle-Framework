@@ -35,7 +35,7 @@ internal class Benchmark_Contains
     public ContainsContext()
     {
       const int Seed = 231456;
-      const int MaxSize = 10;
+      const int MaxSize = 25;
 
       using RandBlock randBlock = new(Seed);
       intList = new List<int>(MaxSize);

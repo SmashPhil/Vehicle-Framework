@@ -201,27 +201,27 @@ internal sealed class UnitTest_GameEnder
 
   private readonly struct GameEnderBlock : IDisposable
   {
-    private static readonly FieldInfo ticksToGameOverField;
+    private static readonly FieldInfo TicksToGameOverField;
 
     private readonly GameEnder gameEnder;
 
     static GameEnderBlock()
     {
-      ticksToGameOverField = AccessTools.Field(typeof(GameEnder), "ticksToGameOver");
-      Assert.IsNotNull(ticksToGameOverField);
+      TicksToGameOverField = AccessTools.Field(typeof(GameEnder), "ticksToGameOver");
+      Assert.IsNotNull(TicksToGameOverField);
     }
 
     public GameEnderBlock(GameEnder gameEnder)
     {
       this.gameEnder = gameEnder;
       gameEnder.gameEnding = false;
-      ticksToGameOverField.SetValue(gameEnder, 0);
+      TicksToGameOverField.SetValue(gameEnder, 0);
     }
 
     void IDisposable.Dispose()
     {
       gameEnder.gameEnding = false;
-      ticksToGameOverField.SetValue(gameEnder, 0);
+      TicksToGameOverField.SetValue(gameEnder, 0);
     }
   }
 }

@@ -11,7 +11,12 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(TestCategoryNames.WorldPawnGC)]
+[TestCategory(
+  TestCategoryNames.TickBehavior,
+  TestCategoryNames.WorldObject,
+  TestCategoryNames.WorldPawnGC,
+  TestCategoryNames.Caravaning
+)]
 internal sealed class UnitTest_AerialVehicle
 {
   private readonly List<AerialVehicleInFlight> aerialVehicles = [];

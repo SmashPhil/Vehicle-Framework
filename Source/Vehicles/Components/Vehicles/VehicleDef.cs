@@ -568,9 +568,10 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
     if (CompPropsVehicleLauncher != null)
     {
-      if (Ext_Mods.HasActiveMod(CompatibilityPackageIds.SOS2) ||
-        Ext_Mods.HasActiveMod(CompatibilityPackageIds.RimNauts) ||
-        Ext_Mods.HasActiveMod(CompatibilityPackageIds.Universum))
+      if (ModsConfig.OdysseyActive ||
+        Ext_Mods.HasActiveMod(ModPackageIds.SoS2) ||
+        Ext_Mods.HasActiveMod(ModPackageIds.RimNauts) ||
+        Ext_Mods.HasActiveMod(ModPackageIds.Universum))
       {
         bool spaceFlight = vehicle?.CompVehicleLauncher.SpaceFlight ??
           CompPropsVehicleLauncher.spaceFlight;

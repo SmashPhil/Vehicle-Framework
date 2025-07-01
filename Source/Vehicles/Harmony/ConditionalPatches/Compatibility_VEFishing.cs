@@ -10,5 +10,5 @@ internal class Compatibility_VEFishing : ConditionalVehiclePatch
     //FishingCompatibility.EnableFishing();
   }
 
-  public override string PackageId => CompatibilityPackageIds.VE_Fishing;
+  public override string PackageId => ModPackageIds.VanillaExpandedFishing;
 }

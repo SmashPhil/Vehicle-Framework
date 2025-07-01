@@ -9,8 +9,8 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestDescription("Vehicle is handled correctly with world pawn list.")]
 [TestCategory(TestCategoryNames.WorldPawnGC)]
+[TestDescription("Vehicle is handled correctly with world pawn list.")]
 internal sealed class UnitTest_WorldPawns
 {
   [Test]

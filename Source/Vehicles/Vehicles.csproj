@@ -9,7 +9,7 @@
         <CurrentDate>$([System.DateTime]::Now.ToString(yyyy/MM/dd HH:mm:ss))</CurrentDate>
 
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Configurations>Debug;Release;Unstable;UnitTest;Benchmark;</Configurations>
+        <Configurations>Debug;Release;Unstable</Configurations>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
         <OutputType>Library</OutputType>
@@ -63,26 +63,13 @@
         <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
-        <DefineConstants>TRACE;UNSTABLE;</DefineConstants>
-        <Optimize>false</Optimize>
-        <NoWarn>CS0649</NoWarn>
-        <DebugType>portable</DebugType>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
-        <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-        <Optimize>true</Optimize>
-        <NoWarn>CS0649</NoWarn>
-        <DebugType>portable</DebugType>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
-
     <!-- Dependencies -->
     <ItemGroup>
         <!-- Nuget -->
-        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.3.6">
+            <IncludeAssets>compile; build</IncludeAssets>
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
 
         <!--Local -->
         <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">

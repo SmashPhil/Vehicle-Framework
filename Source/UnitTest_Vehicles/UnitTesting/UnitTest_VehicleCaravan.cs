@@ -7,7 +7,12 @@ using Vehicles.World;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(TestCategoryNames.WorldPawnGC, TestCategoryNames.WorldObject)]
+[TestCategory(
+  TestCategoryNames.TickBehavior,
+  TestCategoryNames.WorldObject,
+  TestCategoryNames.WorldPawnGC,
+  TestCategoryNames.Caravaning
+)]
 [TestDescription("VehicleCaravan mechanics on the world map.")]
 internal sealed class UnitTest_VehicleCaravan
 {
@@ -107,14 +112,43 @@ internal sealed class UnitTest_VehicleCaravan
     vehicleCaravan.RemoveAllPawns();
   }
 
-  [Test]
-  private void NeedsTracker()
+  [Test, Disabled] // TODO
+  private void Moving()
   {
-    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
-      drivers = 1,
-      passengers = 1
+      drivers = 1
+    });
+  }
+
+  [Test, Disabled] // TODO
+  private void MovingNow()
+  {
+    VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1
+    });
+  }
+
+  [Test, Disabled] // TODO
+  private void ShouldRest()
+  {
+    VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1
+    });
+  }
+
+  [Test, Disabled] // TODO
+  private void PawnsListForReading()
+  {
+    VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1
     });
   }
 }

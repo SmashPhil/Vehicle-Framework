@@ -6,7 +6,7 @@ namespace Vehicles.Compatibility;
 
 internal class Compatibility_RealRuins : ConditionalVehiclePatch
 {
-  public override string PackageId => CompatibilityPackageIds.RealRuins;
+  public override string PackageId => ModPackageIds.RealRuins;
 
   public override void PatchAll(ModMetaData mod, Harmony harmony)
   {

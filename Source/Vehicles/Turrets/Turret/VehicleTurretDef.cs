@@ -431,7 +431,7 @@ public class VehicleTurretDef : Def, ITweakFields
     }
     if (ammunition != null)
     {
-      if (!Ext_Mods.HasActiveMod(CompatibilityPackageIds.CombatExtended) && !genericAmmo &&
+      if (!Ext_Mods.HasActiveMod(ModPackageIds.CombatExtended) && !genericAmmo &&
         !ammunition.AllowedThingDefs.Any(c =>
           c.projectile != null || c.projectileWhenLoaded != null))
       {

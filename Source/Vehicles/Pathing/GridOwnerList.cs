@@ -101,8 +101,6 @@ public abstract class GridOwnerList<T> where T : IPathConfig
   public bool TryForfeitOwnership(VehicleDef ownerDef)
   {
     Assert.IsTrue(IsOwner(ownerDef));
-    Debug.Message($"{ownerDef} forfeiting ownership.");
-
     foreach (VehicleDef piggyDef in GetPiggies(ownerDef))
     {
       if (CanTransferOwnershipTo(piggyDef))
@@ -119,8 +117,6 @@ public abstract class GridOwnerList<T> where T : IPathConfig
     VehicleDef ownerDef = GetOwner(vehicleDef);
     if (vehicleDef == ownerDef)
       return; // Already has ownership
-
-    Debug.Message($"Transferring ownership from {ownerDef} to {vehicleDef}");
 
     // Point all piggies of the previous owner over to this new owner
     foreach (VehicleDef piggyDef in GetPiggies(ownerDef))

@@ -36,6 +36,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       int padding = vehicleDef.SizePadding;
 
       CellRect testArea = TestArea(vehicleDef);
+      IntVec3 center = testArea.CenterCell;
 
       ThingDef testDef = ThingDefOf.Wall;
       if (!PathingHelper.IsRegionEffector(vehicleDef, testDef))
@@ -46,12 +47,14 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
           def is not VehicleBuildDef &&
           PathingHelper.regionEffectors[def].Contains(vehicleDef));
       }
-
+      Assert.IsTrue(VehiclePathGrid.ThingCostOf(vehicleDef, testDef) >=
+        VehiclePathGrid.ImpassableCost);
       Assert.IsNotNull(testDef);
 
       VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
       VehicleRegionGrid regionGrid = mapping[vehicleDef].VehicleRegionGrid;
       VehicleRegionMaker regionMaker = mapping[vehicleDef].VehicleRegionMaker;
+      VehicleRegionDirtyer regionDirtyer = mapping[vehicleDef].VehicleRegionDirtyer;
       Assert.IsFalse(mapping.ThreadAvailable);
 
       // Clear area region generation. The chunk should be completely empty, meaning
@@ -75,7 +78,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       using ObjectCountWatcher<VehicleRegionLink> ocwLinks = new();
 
       // Full chunk filled with impassable entities leaves no invalid regions afterward
-      SpawnThing(testArea);
+      FillArea(testArea);
       Expect.AreEqual(RegionsInArea(regionGrid, testArea), 0, "Set Impassable");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
       Expect.IsTrue(mapping[vehicleDef].VehiclePathGrid.Enabled, "PathGrid Enabled");
@@ -89,10 +92,10 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
 
       // 1 Block
       ClearArea();
-      VehicleRegion region = regionGrid.GetValidRegionAt(root);
+      VehicleRegion region = regionGrid.GetValidRegionAt(center);
       Assert.IsNotNull(region);
-      CellRect singleCell = CellRect.SingleCell(root);
-      SpawnThing(singleCell);
+      CellRect singleCell = CellRect.SingleCell(center);
+      FillArea(singleCell);
       if (vehicleDef.SizePadding == 0)
       {
         // If there's no padding, then test valid edge cells instead
@@ -101,15 +104,16 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       }
       else
       {
-        CellRect paddedArea = CellRect.CenteredOn(root, vehicleDef.SizePadding);
+        CellRect paddedArea = CellRect.CenteredOn(center, vehicleDef.SizePadding);
         Expect.IsTrue(ValidateArea(regionGrid, paddedArea, false), "Padding Applied");
       }
-
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
+      Expect.IsFalse(regionDirtyer.AnyDirty);
 
       // Region Reused
       ClearArea();
-      Expect.ReferencesAreEqual(region, regionGrid.GetValidRegionAt(root), "Region Recycled");
+      Expect.IsTrue(regionDirtyer.AnyDirty);
+      Expect.ReferencesAreEqual(region, regionGrid.GetValidRegionAt(center), "Region Recycled");
       Expect.IsTrue(ValidateLinks(regionGrid, testArea), "RegionLinks Generated");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
 
@@ -124,7 +128,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
         DebugHelper.DestroyArea(testArea, map);
       }
 
-      void SpawnThing(CellRect cellRect)
+      void FillArea(CellRect cellRect)
       {
         ThingDef stuffDef = testDef.MadeFromStuff ? GenStuff.DefaultStuffFor(testDef) : null;
         ClearArea();
@@ -132,6 +136,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
         {
           GenSpawn.Spawn(ThingMaker.MakeThing(testDef, stuffDef), cell, map);
         }
+        Assert.IsTrue(regionDirtyer.AnyDirty);
       }
 
       bool ValidRegionAt(IntVec3 cell)
@@ -159,7 +164,8 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
     foreach (IntVec3 cell in cellRect.EdgeCells)
     {
       VehicleRegion validRegion = regionGrid.GetValidRegionAt(cell);
-      if (validRegion is null) continue;
+      if (validRegion is null)
+        continue;
 
       // i = 0 would start at center, we want 4 cardinal neighbors
       for (int i = 1; i <= 4; i++)
@@ -174,7 +180,9 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
         VehicleRegionLink neighborLink = neighbor.Links.items.FirstOrDefault(link =>
           link.LinksRegions(validRegion, neighbor));
 
-        if (regionLink is null || neighborLink is null || regionLink != neighborLink)
+        if (regionLink is null || neighborLink is null)
+          return false;
+        if (regionLink != neighborLink)
           return false;
       }
     }
@@ -186,7 +194,8 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
     foreach (IntVec3 cell in cellRect)
     {
       VehicleRegion validRegion = regionGrid.GetValidRegionAt(cell);
-      if (validRegion is not null != expected) return false;
+      if (validRegion is not null != expected)
+        return false;
     }
     return true;
   }

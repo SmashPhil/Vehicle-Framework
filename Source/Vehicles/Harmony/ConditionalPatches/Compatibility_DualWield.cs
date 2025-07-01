@@ -13,7 +13,7 @@ internal class Compatibility_DualWield : ConditionalVehiclePatch
         nameof(NoRotationCallForVehicles)));
   }
 
-  public override string PackageId => CompatibilityPackageIds.DualWield;
+  public override string PackageId => ModPackageIds.DualWield;
 
   /// <summary>
   /// Suppress DualWield errors for vehicles. Should not be applied regardless, disabling the vehicle

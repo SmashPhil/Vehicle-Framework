@@ -5,14 +5,13 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
-using DescriptionAttribute = DevTools.UnitTesting.TestDescriptionAttribute;
 
 namespace Vehicles.UnitTesting;
 
 // Validation of vehicle functionality needs to occur before
 [UnitTest(TestType.Playing), ExecutionPriority(Priority.AboveNormal)]
 [TestCategory(TestCategoryNames.TickBehavior)]
-[Description("VehicleRoleHandler behavior and all logic surrounding board and disembark.")]
+[TestDescription("VehicleRoleHandler behavior and all logic surrounding board and disembark.")]
 internal sealed class UnitTest_VehicleRoleHandler
 {
   [Test]

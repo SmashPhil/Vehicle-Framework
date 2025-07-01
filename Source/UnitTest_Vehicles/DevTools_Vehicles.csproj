@@ -4,7 +4,7 @@
         <Authors>Smash Phil</Authors>
 
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Configurations>Debug;Release;Unstable;UnitTest;Benchmark;</Configurations>
+        <Configurations>Debug;Release;Unstable</Configurations>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
         <OutputType>Library</OutputType>
@@ -29,6 +29,7 @@
         <LangVersion>preview</LangVersion>
         <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
+
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
@@ -39,6 +40,7 @@
         <LangVersion>preview</LangVersion>
         <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
+
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
         <OutputPath>..\..\1.6\Assemblies\</OutputPath>
         <Optimize>true</Optimize>
@@ -48,27 +50,13 @@
         <ErrorReport>prompt</ErrorReport>
         <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'UnitTest|AnyCPU'">
-        <OutputPath>..\..\1.6\Assemblies\</OutputPath>
-        <DebugSymbols>true</DebugSymbols>
-        <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
-        <NoWarn>CS0649</NoWarn>
-        <DebugType>portable</DebugType>
-        <LangVersion>preview</LangVersion>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Benchmark|AnyCPU'">
-        <OutputPath>..\..\1.6\Assemblies\</OutputPath>
-        <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-        <Optimize>true</Optimize>
-        <NoWarn>CS0649</NoWarn>
-        <DebugType>portable</DebugType>
-        <LangVersion>preview</LangVersion>
-        <ErrorReport>prompt</ErrorReport>
-    </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.3.6" ExcludeAssets="runtime" />
+        <PackageReference Include="Lib.Harmony" Version="2.3.6">
+            <IncludeAssets>compile; build</IncludeAssets>
+            <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+
         <Reference Include="Assembly-CSharp">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>

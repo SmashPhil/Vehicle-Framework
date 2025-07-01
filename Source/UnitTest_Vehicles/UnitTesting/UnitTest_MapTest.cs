@@ -31,19 +31,6 @@ internal abstract class UnitTest_MapTest
     return CellRect.CenteredOn(root, maxSize).ExpandedBy(5);
   }
 
-  [TearDown, ExecutionPriority(Priority.Last)]
-  protected void EnableDedicatedThreads()
-  {
-    threadDisabler.Dispose();
-    threadDisabler = null;
-  }
-
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void DestroyAllVehicles()
-  {
-    TestUtils.EmptyWorldAndMapOfVehicles();
-  }
-
   [SetUp]
   protected void GenerateVehicles()
   {
@@ -58,6 +45,9 @@ internal abstract class UnitTest_MapTest
     threadDisabler = new ThreadDisabler();
 
     VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+    Assert.IsTrue(mapping.ThreadAlive);
+    Assert.IsFalse(mapping.ThreadAvailable);
+
     vehicles.Clear();
     foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
     {
@@ -73,6 +63,19 @@ internal abstract class UnitTest_MapTest
       VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction);
       vehicles.Add(vehicle);
     }
+  }
+
+  [TearDown, ExecutionPriority(Priority.Last)]
+  protected void EnableDedicatedThreads()
+  {
+    threadDisabler.Dispose();
+    threadDisabler = null;
+  }
+
+  [TearDown, ExecutionPriority(Priority.BelowNormal)]
+  private void DestroyAllVehicles()
+  {
+    TestUtils.EmptyWorldAndMapOfVehicles();
   }
 
   protected readonly struct VehicleTestCase : IDisposable

@@ -68,9 +68,9 @@ public sealed class VehicleRegion : IPoolable
   /// </summary>
   public bool InPool { get; set; }
 
-  // Only used for seed generation, doesn't matter if list count is stale at time of
-  // reading. No need for a lock here since List<T>::_size does not access the
-  // internal array.
+  // NOTE - Only used for seed generation, doesn't matter if list count is stale at time of
+  // reading. No need for a lock here since List<T>::_size does not access the internal array.
+  // ReSharper disable once InconsistentlySynchronizedField
   public int LinksCount => links.Count;
 
   /// <summary>
@@ -509,37 +509,37 @@ public sealed class VehicleRegion : IPoolable
   /// <summary>
   /// Hashcode
   /// </summary>
-  public override int GetHashCode()
-  {
-    return precalculatedHashCode;
-  }
+  //public override int GetHashCode()
+  //{
+  //  return precalculatedHashCode;
+  //}
 
-  /// <summary>
-  /// Equate regions by id
-  /// </summary>
-  /// <param name="obj"></param>
-  public override bool Equals(object obj)
-  {
-    return obj is VehicleRegion region && Equals(region);
-  }
+  ///// <summary>
+  ///// Equate regions by id
+  ///// </summary>
+  ///// <param name="obj"></param>
+  //public override bool Equals(object obj)
+  //{
+  //  return obj is VehicleRegion region && Equals(region);
+  //}
 
-  private bool Equals(VehicleRegion region)
-  {
-    return region?.Id == Id;
-  }
+  //private bool Equals(VehicleRegion region)
+  //{
+  //  return region?.Id == Id;
+  //}
 
-  public static bool operator ==(VehicleRegion lhs, VehicleRegion rhs)
-  {
-    if (lhs is null)
-    {
-      return rhs is null;
-    }
+  //public static bool operator ==(VehicleRegion lhs, VehicleRegion rhs)
+  //{
+  //  if (lhs is null)
+  //  {
+  //    return rhs is null;
+  //  }
 
-    return lhs.Equals(rhs);
-  }
+  //  return lhs.Equals(rhs);
+  //}
 
-  public static bool operator !=(VehicleRegion lhs, VehicleRegion rhs)
-  {
-    return !(lhs == rhs);
-  }
+  //public static bool operator !=(VehicleRegion lhs, VehicleRegion rhs)
+  //{
+  //  return !(lhs == rhs);
+  //}
 }

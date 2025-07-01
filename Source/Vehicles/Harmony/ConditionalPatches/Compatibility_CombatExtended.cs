@@ -15,7 +15,7 @@ internal class Compatibility_CombatExtended : ConditionalVehiclePatch
         nameof(DontOverrideVehicleCapacity)));
   }
 
-  public override string PackageId => CompatibilityPackageIds.CombatExtended;
+  public override string PackageId => ModPackageIds.CombatExtended;
 
   /// <summary>
   /// Suppress DualWield errors for vehicles. Should not be applied regardless, disabling the vehicle

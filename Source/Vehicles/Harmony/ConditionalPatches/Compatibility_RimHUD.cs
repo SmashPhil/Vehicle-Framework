@@ -7,7 +7,7 @@ namespace Vehicles.Compatibility;
 
 internal class Compatibility_RimHUD : ConditionalVehiclePatch
 {
-  public override string PackageId => CompatibilityPackageIds.RimHUD;
+  public override string PackageId => ModPackageIds.RimHUD;
 
   public override void PatchAll(ModMetaData mod, Harmony harmony)
   {

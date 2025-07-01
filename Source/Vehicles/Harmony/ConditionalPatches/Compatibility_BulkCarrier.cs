@@ -14,7 +14,7 @@ internal class Compatibility_BulkCarrier : ConditionalVehiclePatch
         nameof(NoBulkCapacityForVehicles)));
   }
 
-  public override string PackageId => CompatibilityPackageIds.BulkCarrier;
+  public override string PackageId => ModPackageIds.BulkCarrier;
 
   /// <summary>
   /// Disable BulkCarrier destructive prefix for vehicles

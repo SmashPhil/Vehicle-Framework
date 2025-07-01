@@ -29,8 +29,9 @@ internal class PawnAnchorer : IDisposable
   {
     if (pawn.Destroyed || pawn.Discarded)
       pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, faction: Faction.OfPlayer);
-    Assert.IsTrue(CellFinder.TryFindRandomSpawnCellForPawnNear(Find.CurrentMap.Center,
-      Find.CurrentMap, out IntVec3 spawnCell));
+    IntVec3 spawnCell = IntVec3.Zero;
+    Map map = Find.CurrentMap;
+    DebugHelper.DestroyCell(spawnCell, map, TerrainDefOf.Concrete);
     GenSpawn.Spawn(pawn, spawnCell, Find.CurrentMap);
     Assert.IsTrue(pawn.Spawned);
   }

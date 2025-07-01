@@ -11,7 +11,7 @@ internal static class StartupConfig
   // some reason it isn't a mod setting, but rather a tweak value that has to be toggled off after
   // every startup! Just disable it permanently for debug builds, I'd rather not deal with this.
 #if DEBUG
-  private static readonly StackTraceCacheDisabler stcDisabler = new();
+  private static readonly StackTraceCacheDisabler StcDisabler = new();
 #endif
 
   static StartupConfig()

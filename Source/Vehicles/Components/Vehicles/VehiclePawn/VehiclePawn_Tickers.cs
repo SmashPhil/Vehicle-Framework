@@ -57,11 +57,6 @@ public partial class VehiclePawn
     {
       vehicleAI?.AITick();
     }
-    inventory.innerContainer.DoTick();
-    if (AllPawnsAboard.Count > 0)
-    {
-      //TrySatisfyPawnNeeds();
-    }
   }
 
   public bool RequestTickStart<T>(T comp) where T : ThingComp
@@ -160,6 +155,7 @@ public partial class VehiclePawn
     }
 
     //abilities?.AbilitiesTick();
+    inventory.innerContainer.DoTick();
     inventory.InventoryTrackerTick();
   }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using HarmonyLib;
 using SmashTools;
 using SmashTools.Performance;
 using Verse;
@@ -24,7 +23,7 @@ public class VehicleRegionLink : IPoolable
   public IntVec3 portal;
 
   // RegionLink color weights
-  private static readonly LinearPool<SimpleColor> colorWeights = new()
+  private static readonly LinearPool<SimpleColor> ColorWeights = new()
   {
     range = new FloatRange(0, WeightColorCeiling),
     items =
@@ -111,8 +110,9 @@ public class VehicleRegionLink : IPoolable
 
   public bool LinksRegions(VehicleRegion regionA, VehicleRegion regionB)
   {
-    return (this.regionA == regionA && this.regionB == regionB) ||
-      (this.regionA == regionB && this.regionB == regionA);
+    if (this.regionA == regionA && this.regionB == regionB)
+      return true;
+    return this.regionA == regionB && this.regionB == regionA;
   }
 
   /// <summary>
@@ -166,7 +166,7 @@ public class VehicleRegionLink : IPoolable
 
   public static SimpleColor WeightColor(float weight)
   {
-    return colorWeights.Evaluate(weight);
+    return ColorWeights.Evaluate(weight);
   }
 
   private static IntVec3 SpanEnd(in EdgeSpan edgeSpan)

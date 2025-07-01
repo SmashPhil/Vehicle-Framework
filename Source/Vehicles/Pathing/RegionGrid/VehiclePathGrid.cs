@@ -201,45 +201,20 @@ namespace Vehicles
         try
         {
           List<Thing> thingList = thingGrid.ThingsListAt(cell);
-          stringBuilder?.AppendLine($"Starting ThingList check.");
+          stringBuilder?.AppendLine("Starting ThingList check.");
           if (!thingList.NullOrEmpty())
           {
-            int thingCost = 0;
+            int maxCost = 0;
             foreach (Thing thing in thingList)
             {
-              int thingPathCost = 0;
-              if (thing is null || !thing.Spawned || thing.Destroyed ||
-                thing is VehiclePawn vehicle)
-              {
+              if (thing is null || !thing.Spawned || thing.Destroyed || thing is VehiclePawn)
                 continue;
-              }
-              else if (vehicleDef.properties.customThingCosts.TryGetValue(thing.def,
-                out thingPathCost))
-              {
-                if (thingPathCost >= ImpassableCost)
-                {
-                  stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
-                  return ImpassableCost;
-                }
-              }
-              else if (thing.ImpassableForVehicles())
-              {
-                stringBuilder?.AppendLine($"thingDef is impassable: {thingPathCost}");
-                return ImpassableCost;
-              }
-              else
-              {
-                thingPathCost = thing.def.pathCost;
-              }
-
-              stringBuilder?.AppendLine($"thingPathCost: {thingPathCost}");
-              if (thingPathCost > thingCost)
-              {
-                thingCost = thingPathCost;
-              }
+              int thingCost = ThingCostOf(vehicleDef, thing.def, stringBuilder);
+              stringBuilder?.AppendLine($"thingPathCost: {thingCost}");
+              if (thingCost > maxCost)
+                maxCost = thingCost;
             }
-
-            pathCost += thingCost;
+            pathCost += maxCost;
           }
         }
         finally
@@ -271,6 +246,30 @@ namespace Vehicles
       }
 
       return pathCost;
+    }
+
+    public static int ThingCostOf(VehicleDef vehicleDef, ThingDef thingDef,
+      StringBuilder stringBuilder = null)
+    {
+      if (vehicleDef.properties.customThingCosts.TryGetValue(thingDef,
+        out int thingPathCost))
+      {
+        if (thingPathCost >= ImpassableCost)
+        {
+          stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+          return ImpassableCost;
+        }
+      }
+      else if (thingDef.ImpassableForVehicles())
+      {
+        stringBuilder?.AppendLine($"thingDef is impassable: {thingPathCost}");
+        return ImpassableCost;
+      }
+      else
+      {
+        thingPathCost = thingDef.pathCost;
+      }
+      return thingPathCost;
     }
 
     public static bool PassableTerrainCost(VehicleDef vehicleDef, TerrainDef terrainDef,

@@ -7,99 +7,131 @@ using UnityEngine.Assertions;
 using Verse;
 using TestType = DevTools.UnitTesting.TestType;
 
+// ReSharper disable AccessToDisposedClosure
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-internal sealed class UnitTest_DeferredGeneration : UnitTest_MapTest
+internal sealed class UnitTest_DeferredGeneration
 {
   private const double MaxWaitTime = 10000; // ms
 
-  protected override bool ShouldTest(VehicleDef vehicleDef)
+  private VehicleGroup group;
+  private VehiclePathingSystem mapping;
+  private VehiclePathingSystem.VehiclePathData pathData;
+  private ManualResetEventSlim resetEvent;
+
+  // We're specifically testing thread enqueueing with deferred grid generation, we need the
+  // dedicated thread unsuspended but blocked in order to test
+  private ThreadEnabler threadEnabler;
+
+  [SetUp, ExecutionPriority(Priority.Last)]
+  private void EnableThread()
   {
-    return PathingHelper.ShouldCreateRegions(vehicleDef);
+    Assert.IsNull(threadEnabler);
+    threadEnabler = new ThreadEnabler();
+  }
+
+  [SetUp]
+  private void JumpMap()
+  {
+    Assert.IsNotNull(Find.CurrentMap);
+    VehicleDef vehicleDef = DefDatabase<VehicleDef>.AllDefsListForReading
+     .FirstOrDefault(PathingHelper.ShouldCreateRegions);
+    group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      vehicleDef = vehicleDef,
+      drivers = 1
+    });
+
+    resetEvent = new ManualResetEventSlim(false);
+    mapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
+    pathData = mapping[group.vehicle.VehicleDef];
+
+    Assert.IsNotNull(mapping.deferredGridGeneration);
+    if (!mapping.ThreadAlive)
+      Test.Skip("Thread not available.");
   }
 
   [TearDown]
   private void RegenerateAllGrids()
   {
-    VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+    group.Dispose();
+
     mapping.deferredGridGeneration.DoPassExpectClear();
     mapping.RegenerateGrids(deferment: VehiclePathingSystem.GridDeferment.Forced);
+
+    resetEvent.Dispose();
+    resetEvent = null;
+    mapping = null;
+    pathData = null;
+  }
+
+  [TearDown, ExecutionPriority(Priority.Last)]
+  private void DisableThread()
+  {
+    threadEnabler.Dispose();
+    threadEnabler = null;
   }
 
   [Test]
-  private void TestVehicle()
+  private void PlayerDeferred()
   {
-    foreach (VehiclePawn vehicle in vehicles)
-    {
-      using VehicleTestCase vtc = new(vehicle, this);
+    Assert.AreEqual(mapping.dedicatedThread.State, DedicatedThread.ThreadState.Running);
 
-      VehicleDef vehicleDef = vehicle.VehicleDef;
+    mapping.deferredGridGeneration.DoPassExpectClear();
+    Assert.IsTrue(pathData.Suspended);
 
-      VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
+    group.Spawn();
 
-      Assert.IsNotNull(mapping.deferredGridGeneration);
-      if (!mapping.ThreadAlive)
-      {
-        Test.Skip("Thread not available.");
-        return;
-      }
+    // Faction.OfPlayer
+    Expect.IsTrue(group.vehicle.Spawned, "Spawned");
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
+      DeferredGridGeneration.Urgency.Deferred, "Player Deferred");
 
-      mapping.deferredGridGeneration.DoPassExpectClear();
-      Assert.IsTrue(pathData.Suspended);
+    // We need to wait for the dedicated thread to finish generating vehicle's grids so we can
+    // validate that every grid is initialized.
+    AsyncLongOperationAction longOp = AsyncPool<AsyncLongOperationAction>.Get();
+    longOp.OnInvoke += () => NotifyReadyToContinue(resetEvent);
+    mapping.dedicatedThread.Enqueue(longOp);
+    Assert.IsTrue(resetEvent.Wait(TimeSpan.FromMilliseconds(MaxWaitTime)));
 
-      // We're specifically testing thread enqueueing with deferred grid generation, we need the 
-      // dedicated thread available in order to test this. Will return to suspended after test
-      // since we're running this as a UnitTestMapTest.
-      using ThreadEnabler te = new();
-      using ManualResetEventSlim mres = new(false);
+    Expect.IsTrue(pathData.VehiclePathGrid.Enabled, "Player PathGrid Generated");
+    Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Player Regions Generated");
+    Expect.IsFalse(pathData.Suspended, "Player PathData Suspended");
 
-      GenSpawn.Spawn(vehicle, root, map);
-      // Faction.OfPlayer
-      Expect.IsTrue(vehicle.Spawned, "Spawned");
-      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(vehicle),
-        DeferredGridGeneration.Urgency.Deferred, "Player Deferred");
+    group.vehicle.DeSpawn();
+    Assert.IsFalse(group.vehicle.Spawned);
+  }
 
-      // We need to wait for the dedicated thread to finish generating vehicle's grids so we can
-      // validate that every grid is initialized.
-      AsyncLongOperationAction longOp = AsyncPool<AsyncLongOperationAction>.Get();
-      longOp.OnInvoke += () => NotifyReadyToContinue(mres);
-      mapping.dedicatedThread.Enqueue(longOp);
-      Assert.IsTrue(mres.Wait(TimeSpan.FromMilliseconds(MaxWaitTime)));
+  [Test]
+  private void NpcImmediate()
+  {
+    mapping.deferredGridGeneration.DoPassExpectClear();
+    Assert.IsTrue(pathData.Suspended);
+    Assert.AreEqual(mapping.dedicatedThread.State, DedicatedThread.ThreadState.Running);
 
-      Expect.IsTrue(pathData.VehiclePathGrid.Enabled, "Player PathGrid Generated");
-      Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Player Regions Generated");
-      Expect.IsFalse(pathData.Suspended, "Player PathData Suspended");
+    // Block dedicated thread without flagging as suspended so we can still validate that grid
+    // generation is not being sent to the thread for async processing. There are extra checks
+    // in place that prevent enqueueing actions to a suspended DedicatedThread so this is the
+    // only way we can both allow it and pause the DedicatedThread from processing any actions.
+    resetEvent.Reset();
+    AsyncLongOperationAction blockingOp = AsyncPool<AsyncLongOperationAction>.Get();
+    blockingOp.OnInvoke += () => WaitForSignal(resetEvent);
+    mapping.dedicatedThread.Enqueue(blockingOp);
 
-      vehicle.DeSpawn();
-      Assert.IsFalse(vehicle.Spawned);
-      mapping.deferredGridGeneration.DoPassExpectClear();
-      Assert.IsTrue(pathData.Suspended);
+    Assert.IsNotNull(Find.World.factionManager.OfAncientsHostile);
+    group.vehicle.SetFactionDirect(Find.World.factionManager.OfAncientsHostile);
+    group.Spawn();
+    Expect.IsTrue(group.vehicle.Spawned, "Enemy Spawned");
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
+      DeferredGridGeneration.Urgency.Urgent, "Enemy Spawn Urgent");
 
-      // Block dedicated thread without flagging as suspended so we can still validate that grid
-      // generation is not being sent to the thread for async processing. There are extra checks
-      // in place that prevent enqueueing actions to a suspended DedicatedThread so this is the
-      // only way we can both allow it and pause the DedicatedThread from processing any actions.
-      mres.Reset();
-      AsyncLongOperationAction blockingOp = AsyncPool<AsyncLongOperationAction>.Get();
-      blockingOp.OnInvoke += () => WaitForSignal(mres);
-      mapping.dedicatedThread.Enqueue(blockingOp);
+    Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Enemy Regions Generated");
+    Expect.IsTrue(pathData.VehiclePathGrid.Enabled, "Enemy PathGrid Generated");
+    Expect.IsFalse(pathData.Suspended, "Enemy PathData Suspended");
 
-      Assert.IsNotNull(Find.World.factionManager.OfAncientsHostile);
-      vehicle.SetFactionDirect(Find.World.factionManager.OfAncientsHostile);
-      GenSpawn.Spawn(vehicle, root, map);
-      Expect.IsTrue(vehicle.Spawned, "Enemy Spawned");
-      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(vehicle),
-        DeferredGridGeneration.Urgency.Urgent, "Enemy Spawn Urgent");
-
-      Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Enemy Regions Generated");
-      Expect.IsTrue(pathData.VehiclePathGrid.Enabled, "Enemy PathGrid Generated");
-      Expect.IsFalse(pathData.Suspended, "Enemy PathData Suspended");
-
-      // Unblock dedicated thread
-      mres.Set();
-    }
+    // Unblock dedicated thread
+    resetEvent.Set();
   }
 
   private static void WaitForSignal(ManualResetEventSlim mre)

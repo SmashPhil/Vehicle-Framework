@@ -3,102 +3,105 @@ using RimWorld;
 using SmashTools;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Grid related method helpers
+/// </summary>
+public static class GenGridVehicles
 {
-	/// <summary>
-	/// Grid related method helpers
-	/// </summary>
-	public static class GenGridVehicles
-	{
-		/// <summary>
-		/// <paramref name="cell"/> is able to be traversed by <paramref name="vehicleDef"/>
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="vehicleDef"></param>
-		/// <param name="map"></param>
-		public static bool Walkable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
-		{
-			if (map == null)
-			{
-				return false;
-			}
-			return MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicleDef].VehiclePathGrid.Walkable(cell);
-		}
+  /// <summary>
+  /// <paramref name="cell"/> is able to be traversed by <paramref name="vehicleDef"/>
+  /// </summary>
+  /// <param name="cell"></param>
+  /// <param name="vehicleDef"></param>
+  /// <param name="map"></param>
+  public static bool Walkable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
+  {
+    if (map == null)
+    {
+      return false;
+    }
+    return MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicleDef].VehiclePathGrid
+     .Walkable(cell);
+  }
 
-		public static bool Walkable(this IntVec3 cell, VehicleDef vehicleDef, VehiclePathingSystem mapping)
-		{
-			return mapping[vehicleDef].VehiclePathGrid.Walkable(cell);
-		}
+  public static bool Walkable(this IntVec3 cell, VehicleDef vehicleDef,
+    VehiclePathingSystem mapping)
+  {
+    return mapping[vehicleDef].VehiclePathGrid.Walkable(cell);
+  }
 
-		/// <summary>
-		/// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="pawn"></param>
-		/// <param name="map"></param>
-		/// <returns></returns>
-		public static bool StandableUnknown(this IntVec3 cell, Pawn pawn, Map map)
-		{
-			if (pawn is VehiclePawn vehicle)
-			{
-				return Standable(cell, vehicle, map);
-			}
-			return GenGrid.Standable(cell, map);
-		}
+  /// <summary>
+  /// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
+  /// </summary>
+  /// <param name="cell"></param>
+  /// <param name="pawn"></param>
+  /// <param name="map"></param>
+  /// <returns></returns>
+  public static bool StandableUnknown(this IntVec3 cell, Pawn pawn, Map map)
+  {
+    if (pawn is VehiclePawn vehicle)
+    {
+      return Standable(cell, vehicle, map);
+    }
+    return cell.Standable(map);
+  }
 
-		/// <summary>
-		/// <paramref name="cell"/> is able to be stood on for <paramref name="vehicle"/>
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="vehicle"></param>
-		/// <param name="map"></param>
-		public static bool Standable(this IntVec3 cell, VehiclePawn vehicle, Map map)
-		{
-			if (!MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicle.VehicleDef].VehiclePathGrid.Walkable(cell))
-			{
-				return false;
-			}
-			List<Thing> list = map.thingGrid.ThingsListAt(cell);
-			foreach (Thing thing in list)
-			{
-				if (thing != vehicle && thing.def.passability != Traversability.Standable)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
+  /// <summary>
+  /// <paramref name="cell"/> is able to be stood on for <paramref name="vehicle"/>
+  /// </summary>
+  /// <param name="cell"></param>
+  /// <param name="vehicle"></param>
+  /// <param name="map"></param>
+  public static bool Standable(this IntVec3 cell, VehiclePawn vehicle, Map map)
+  {
+    if (!MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicle.VehicleDef]
+     .VehiclePathGrid.Walkable(cell))
+    {
+      return false;
+    }
+    List<Thing> list = map.thingGrid.ThingsListAt(cell);
+    foreach (Thing thing in list)
+    {
+      if (thing != vehicle && thing.def.passability != Traversability.Standable)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 
-		/// <summary>
-		/// <paramref name="cell"/> is able to be stood on for <paramref name="vehicleDef"/>
-		/// </summary>
-		/// <param name="cell"></param>
-		/// <param name="vehicleDef"></param>
-		/// <param name="map"></param>
-		public static bool Standable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
-		{
-			if (!MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicleDef].VehiclePathGrid.Walkable(cell))
-			{
-				return false;
-			}
-			List<Thing> list = map.thingGrid.ThingsListAt(cell);
-			foreach (Thing t in list)
-			{
-				if (t.def.passability != Traversability.Standable)
-				{
-					return false;
-				}
-			}
-			return true;
-		}
+  /// <summary>
+  /// <paramref name="cell"/> is able to be stood on for <paramref name="vehicleDef"/>
+  /// </summary>
+  /// <param name="cell"></param>
+  /// <param name="vehicleDef"></param>
+  /// <param name="map"></param>
+  public static bool Standable(this IntVec3 cell, VehicleDef vehicleDef, Map map)
+  {
+    if (!MapComponentCache<VehiclePathingSystem>.GetComponent(map)[vehicleDef].VehiclePathGrid
+     .Walkable(cell))
+    {
+      return false;
+    }
+    List<Thing> list = map.thingGrid.ThingsListAt(cell);
+    foreach (Thing t in list)
+    {
+      if (t.def.passability != Traversability.Standable)
+      {
+        return false;
+      }
+    }
+    return true;
+  }
 
-		/// <summary>
-		/// Impassability check which also handles temporary or additional vehicle mechanics that ignore vanilla fields.
-		/// </summary>
-		/// <param name="thing"></param>
-		public static bool ImpassableForVehicles(this Thing thing)
-		{
-			return thing.def.passability == Traversability.Impassable || thing.def.IsFence || thing is Building_Door;
-		}
-	}
+  /// <summary>
+  /// Impassability check which also handles temporary or additional vehicle mechanics that ignore vanilla fields.
+  /// </summary>
+  public static bool ImpassableForVehicles(this ThingDef thingDef)
+  {
+    return thingDef.passability == Traversability.Impassable || thingDef.IsFence ||
+      thingDef.thingClass.SameOrSubclass(typeof(Building_Door));
+  }
 }

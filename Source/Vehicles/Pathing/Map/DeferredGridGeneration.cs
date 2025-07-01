@@ -96,7 +96,6 @@ public class DeferredGridGeneration
         longOperation.ReturnToPool();
       return;
     }
-    Debug.Message($"Skipped deferred grid generation for {vehicleDef}");
     GeneratePathGridFor(vehicleDef);
     GenerateRegionGridFor(vehicleDef);
   }
@@ -130,11 +129,10 @@ public class DeferredGridGeneration
   {
     DoPass();
     Assert.IsTrue(
-      DefDatabase<VehicleDef>.AllDefsListForReading.All(
-        def => !mapping[def].VehiclePathGrid.Enabled));
+      DefDatabase<VehicleDef>.AllDefsListForReading.All(def =>
+        !mapping[def].VehiclePathGrid.Enabled));
     Assert.IsTrue(
-      DefDatabase<VehicleDef>.AllDefsListForReading.All(
-        def => mapping[def].Suspended));
+      DefDatabase<VehicleDef>.AllDefsListForReading.All(def => mapping[def].Suspended));
   }
 
   internal void DoIncrementalPass()
@@ -298,9 +296,7 @@ public class DeferredGridGeneration
     public void IncrementUnused(VehicleDef vehicleDef)
     {
       Assert.IsFalse(activelyUsed.Contains(vehicleDef));
-      if (!countdownToRemoval.ContainsKey(vehicleDef))
-        countdownToRemoval.Add(vehicleDef, 0);
-
+      countdownToRemoval.TryAdd(vehicleDef, 0);
       countdownToRemoval[vehicleDef]++;
     }
 

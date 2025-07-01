@@ -35,28 +35,29 @@ namespace Vehicles
         rect.ClipInsideMap(map);
         foreach (IntVec3 cell in rect)
         {
-          map.roofGrid.SetRoof(cell, null);
-        }
-
-        foreach (IntVec3 cell in rect)
-        {
-          foreach (Thing thing in cell.GetThingList(map).ToList())
-          {
-            thing.Destroy();
-          }
-        }
-
-        if (replaceTerrain != null)
-        {
-          foreach (IntVec3 cell in rect)
-          {
-            map.terrainGrid.SetTerrain(cell, replaceTerrain);
-          }
+          DestroyCell(cell, map, replaceTerrain: replaceTerrain);
         }
       }
       finally
       {
         Thing.allowDestroyNonDestroyable = false;
+      }
+    }
+
+    /// <summary>
+    /// Indiscriminately destroys all entities and roofs from a cell.
+    /// </summary>
+    /// <remarks>If non-destroyables should not be destroyed, use <see cref="GenDebug.ClearArea(CellRect, Map)"/> instead.</remarks>
+    public static void DestroyCell(IntVec3 cell, Map map, TerrainDef replaceTerrain = null)
+    {
+      map.roofGrid.SetRoof(cell, null);
+      foreach (Thing thing in cell.GetThingList(map).ToList())
+      {
+        thing.Destroy();
+      }
+      if (replaceTerrain != null)
+      {
+        map.terrainGrid.SetTerrain(cell, replaceTerrain);
       }
     }
 

@@ -653,22 +653,6 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
     gotoMote.RenderMote();
   }
 
-  public void TrySatisfyPawnsNeeds()
-  {
-    for (int i = pawns.Count - 1; i >= 0; i--)
-    {
-      Pawn pawn = pawns[i];
-      if (pawn is VehiclePawn vehicle)
-      {
-        vehicle.TrySatisfyPawnNeeds();
-      }
-      else
-      {
-        VehiclePawn.TrySatisfyPawnNeeds(pawn);
-      }
-    }
-  }
-
   protected override void Tick()
   {
     base.Tick();

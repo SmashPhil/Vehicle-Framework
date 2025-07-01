@@ -12,7 +12,7 @@ namespace Vehicles.Compatibility;
 
 internal class Compatibility_RailsOfTheRim : ConditionalVehiclePatch
 {
-  public override string PackageId => CompatibilityPackageIds.RailsOfTheRim;
+  public override string PackageId => ModPackageIds.RailsOfTheRim;
 
   public override void PatchAll(ModMetaData mod, Harmony harmony)
   {

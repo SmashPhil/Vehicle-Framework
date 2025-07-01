@@ -119,11 +119,10 @@ public class VehicleGroup : IDisposable
     Assert.IsTrue(vehicle.Destroyed);
   }
 
-  public static VehicleGroup CreateBasicVehicleGroup(MockSettings settings)
+  private static VehicleDef CreateVehicleDef(MockSettings settings)
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
-
     if (!settings.statModifiers.NullOrEmpty())
     {
       vehicleDef.vehicleStats = [.. settings.statModifiers];
@@ -180,6 +179,12 @@ public class VehicleGroup : IDisposable
         vehicleDef.comps.Add(compProps);
       }
     }
+    return vehicleDef;
+  }
+
+  public static VehicleGroup CreateBasicVehicleGroup(MockSettings settings)
+  {
+    VehicleDef vehicleDef = settings.vehicleDef ?? CreateVehicleDef(settings);
 
     // VehicleDef needs to be complete by this point for PostGeneration events
     VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, settings.faction);
@@ -204,6 +209,7 @@ public class VehicleGroup : IDisposable
 
   public class MockSettings
   {
+    public VehicleDef vehicleDef;
     public string debugLabel;
 
     // Reverse mapping permissions to def restrictions for easy configuration

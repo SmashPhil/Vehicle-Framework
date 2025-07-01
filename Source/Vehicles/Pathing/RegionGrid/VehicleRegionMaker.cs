@@ -9,7 +9,6 @@ using SmashTools.Algorithms;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
-using Dijkstra = SmashTools.Algorithms.Dijkstra<int>;
 
 namespace Vehicles;
 

@@ -66,8 +66,8 @@ public class CompProperties_VehicleLauncher : VehicleCompProperties
     UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
   [DisableSettingConditional(MayRequireAny =
   [
-    CompatibilityPackageIds.SOS2, CompatibilityPackageIds.RimNauts,
-    CompatibilityPackageIds.Universum, CompatibilityPackageIds.Odyssey
+    ModPackageIds.SoS2, ModPackageIds.RimNauts,
+    ModPackageIds.Universum, ModPackageIds.Odyssey
   ])]
   public bool spaceFlight = false;
 
