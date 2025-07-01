@@ -31,8 +31,8 @@ internal abstract class UnitTest_MapTest
     return CellRect.CenteredOn(root, maxSize).ExpandedBy(5);
   }
 
-  [SetUp]
-  protected void GenerateVehicles()
+  [SetUp, ExecutionPriority(Priority.First)]
+  protected void DisableThreads()
   {
     map = Find.CurrentMap;
     Assert.IsNotNull(map);
@@ -43,7 +43,11 @@ internal abstract class UnitTest_MapTest
     // All map-based tests should be run synchronously, otherwise we would have race conditions
     // when validating grids.
     threadDisabler = new ThreadDisabler();
+  }
 
+  [SetUp, ExecutionPriority(Priority.AboveNormal)]
+  protected void GenerateVehicles()
+  {
     VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     Assert.IsTrue(mapping.ThreadAlive);
     Assert.IsFalse(mapping.ThreadAvailable);
@@ -66,14 +70,16 @@ internal abstract class UnitTest_MapTest
   }
 
   [TearDown, ExecutionPriority(Priority.Last)]
-  protected void EnableDedicatedThreads()
+  protected void EnableThreads()
   {
     threadDisabler.Dispose();
     threadDisabler = null;
+    map = null;
+    vehicles.Clear();
   }
 
   [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void DestroyAllVehicles()
+  protected void DestroyAllVehicles()
   {
     TestUtils.EmptyWorldAndMapOfVehicles();
   }

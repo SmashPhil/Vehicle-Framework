@@ -141,7 +141,7 @@ namespace Vehicles
           }
         }
       };
-
+      draftCommand.Disabled = false;
       draftCommand.defaultLabel = DraftGizmoLabel;
       draftCommand.defaultDesc = DraftGizmoDescription;
       draftCommand.icon = Drafted && vehicle.vehiclePather.Moving ?

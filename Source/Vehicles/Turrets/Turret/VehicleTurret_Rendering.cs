@@ -46,28 +46,28 @@ public partial class VehicleTurret
 
   // Cache all root draw pos on spawn
   [Unsaved]
-  private Vector3 rootDrawPos_North;
+  private Vector3 rootDrawPosNorth;
 
   [Unsaved]
-  private Vector3 rootDrawPos_East;
+  private Vector3 rootDrawPosEast;
 
   [Unsaved]
-  private Vector3 rootDrawPos_South;
+  private Vector3 rootDrawPosSouth;
 
   [Unsaved]
-  private Vector3 rootDrawPos_West;
+  private Vector3 rootDrawPosWest;
 
   [Unsaved]
-  private Vector3 rootDrawPos_NorthEast;
+  private Vector3 rootDrawPosNorthEast;
 
   [Unsaved]
-  private Vector3 rootDrawPos_SouthEast;
+  private Vector3 rootDrawPosSouthEast;
 
   [Unsaved]
-  private Vector3 rootDrawPos_SouthWest;
+  private Vector3 rootDrawPosSouthWest;
 
   [Unsaved]
-  private Vector3 rootDrawPos_NorthWest;
+  private Vector3 rootDrawPosNorthWest;
 
   [Unsaved]
   public Texture2D currentFireIcon;
@@ -560,10 +560,12 @@ public partial class VehicleTurret
 
   IEnumerable<RenderData> IBlitTarget.GetRenderData(Rect rect, BlitRequest request)
   {
+    VehicleDef graphicDef = vehicleDef ?? request.vehicleDef;
+    Assert.IsNotNull(graphicDef);
     if (!NoGraphic)
     {
       Rect turretRect =
-        VehicleGraphics.TurretRect(rect, vehicleDef, this, request.rot);
+        VehicleGraphics.TurretRect(rect, graphicDef, this, request.rot);
       bool canMask = Graphic.Shader.SupportsMaskTex() || Graphic.Shader.SupportsRGBMaskTex();
       Material material = canMask ? Material : null;
       if (canMask && def.matchParentColor)
@@ -578,7 +580,7 @@ public partial class VehicleTurret
     {
       foreach (TurretDrawData turretDrawData in TurretGraphics)
       {
-        Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, this, request.rot);
+        Rect turretRect = VehicleGraphics.TurretRect(rect, graphicDef, this, request.rot);
         Graphic_Turret graphic = turretDrawData.graphic;
         bool canMask = graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex();
         Material material = canMask ? graphic.MatAtFull(Rot8.North) : null;
@@ -859,14 +861,14 @@ public partial class VehicleTurret
   {
     if (GraphicData != null)
     {
-      rootDrawPos_North = RootOffset(this, Rot8.North);
-      rootDrawPos_East = RootOffset(this, Rot8.East);
-      rootDrawPos_South = RootOffset(this, Rot8.South);
-      rootDrawPos_West = RootOffset(this, Rot8.West);
-      rootDrawPos_NorthEast = RootOffset(this, Rot8.NorthEast);
-      rootDrawPos_SouthEast = RootOffset(this, Rot8.SouthEast);
-      rootDrawPos_SouthWest = RootOffset(this, Rot8.SouthWest);
-      rootDrawPos_NorthWest = RootOffset(this, Rot8.NorthWest);
+      rootDrawPosNorth = RootOffset(this, Rot8.North);
+      rootDrawPosEast = RootOffset(this, Rot8.East);
+      rootDrawPosSouth = RootOffset(this, Rot8.South);
+      rootDrawPosWest = RootOffset(this, Rot8.West);
+      rootDrawPosNorthEast = RootOffset(this, Rot8.NorthEast);
+      rootDrawPosSouthEast = RootOffset(this, Rot8.SouthEast);
+      rootDrawPosSouthWest = RootOffset(this, Rot8.SouthWest);
+      rootDrawPosNorthWest = RootOffset(this, Rot8.NorthWest);
     }
     return;
 
@@ -884,21 +886,21 @@ public partial class VehicleTurret
     return rot.AsInt switch
     {
       // North
-      0 => rootDrawPos_North,
+      0 => rootDrawPosNorth,
       // East
-      1 => rootDrawPos_East,
+      1 => rootDrawPosEast,
       // South
-      2 => rootDrawPos_South,
+      2 => rootDrawPosSouth,
       // West
-      3 => rootDrawPos_West,
+      3 => rootDrawPosWest,
       // NorthEast
-      4 => rootDrawPos_NorthEast,
+      4 => rootDrawPosNorthEast,
       // SouthEast
-      5 => rootDrawPos_SouthEast,
+      5 => rootDrawPosSouthEast,
       // SouthWest
-      6 => rootDrawPos_SouthWest,
+      6 => rootDrawPosSouthWest,
       // NorthWest
-      7 => rootDrawPos_NorthWest,
+      7 => rootDrawPosNorthWest,
       _ => throw new NotImplementedException("Invalid Rot8")
     };
   }

@@ -6,6 +6,7 @@ using RimWorld;
 using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Verse.AI;
@@ -24,7 +25,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   public const float MaxHeatCapacity = 100;
   public const int DefaultMaxRange = 9999;
 
-  private static readonly List<IntVec3> projectileDestCells = [];
+  private static readonly List<IntVec3> ProjectileDestCells = [];
+  private static readonly List<(Thing, int)> ThingsToTakeReloading = [];
 
   /* --- Parsed --- */
 
@@ -121,8 +123,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
   [Unsaved]
   public Turret_RecoilTracker[] recoilTrackers;
-
-  private static readonly List<(Thing, int)> thingsToTakeReloading = [];
 
   /// <summary>
   /// Init from CompProperties
@@ -1115,43 +1115,41 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
         int countToTake = Mathf.CeilToInt(countToRefill * def.chargePerAmmoCount);
         int countRefilled = 0;
 
-        thingsToTakeReloading.Clear();
+        Assert.IsTrue(ThingsToTakeReloading.Count == 0);
+        using ScopedListRollback<(Thing, int)> slr = new(ThingsToTakeReloading);
+        //Deterine which items (and how much) to take
+        foreach (Thing thing in vehicle.inventory.innerContainer)
         {
-          //Deterine which items (and how much) to take
-          foreach (Thing thing in vehicle.inventory.innerContainer)
+          if (thing.def == storedAmmo.def)
           {
-            if (thing.def == storedAmmo.def)
-            {
-              int availableCount = thing.stackCount -
-                thing.stackCount % Mathf.CeilToInt(def.chargePerAmmoCount);
-              int takingFromThing = Mathf.Min(countToTake, availableCount);
-              thingsToTakeReloading.Add((thing, takingFromThing));
-              countToTake -= takingFromThing;
-              if (countToTake <= 0) break;
-            }
-          }
-
-          //Quick check to make sure to not even bother removing items from inventory if there is not enough to reload 1 shot minimum
-          if (thingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
-          {
-            return false;
-          }
-
-          //Take items from inventory without going over the amount required
-          for (int i = thingsToTakeReloading.Count - 1; i >= 0; i--)
-          {
-            if (thingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
-            {
-              break;
-            }
-
-            (Thing thing, int count) = thingsToTakeReloading[i];
-            countRefilled += count;
-            vehicle.TakeFromInventory(thing, count);
-            thingsToTakeReloading.RemoveAt(i);
+            int availableCount = thing.stackCount -
+              thing.stackCount % Mathf.CeilToInt(def.chargePerAmmoCount);
+            int takingFromThing = Mathf.Min(countToTake, availableCount);
+            ThingsToTakeReloading.Add((thing, takingFromThing));
+            countToTake -= takingFromThing;
+            if (countToTake <= 0) break;
           }
         }
-        thingsToTakeReloading.Clear();
+
+        //Quick check to make sure to not even bother removing items from inventory if there is not enough to reload 1 shot minimum
+        if (ThingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
+        {
+          return false;
+        }
+
+        //Take items from inventory without going over the amount required
+        for (int i = ThingsToTakeReloading.Count - 1; i >= 0; i--)
+        {
+          if (ThingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
+          {
+            break;
+          }
+
+          (Thing thing, int count) = ThingsToTakeReloading[i];
+          countRefilled += count;
+          vehicle.TakeFromInventory(thing, count);
+          ThingsToTakeReloading.RemoveAt(i);
+        }
 
         if (countRefilled % def.chargePerAmmoCount != 0)
         {

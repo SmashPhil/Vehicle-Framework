@@ -8,6 +8,10 @@ namespace Vehicles.Rendering;
 [UsedImplicitly(ImplicitUseTargetFlags.Members)]
 public struct BlitRequest
 {
+  // Required for drawing graphics tied to vehicle defs that aren't necessarily defined in their
+  // own defs (eg. VehicleTurrets and the upgrade tree)
+  public readonly VehicleDef vehicleDef;
+
   public Rot8 rot;
   public PatternData patternData;
   public List<IBlitTarget> blitTargets = [];
@@ -25,11 +29,13 @@ public struct BlitRequest
     VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName,
       fallback: vehicleDef.graphicData))
   {
+    this.vehicleDef = vehicleDef;
   }
 
   public BlitRequest(VehiclePawn vehicle) : this(vehicle.VehicleDef.drawProperties.displayRotation,
     vehicle.patternData)
   {
+    this.vehicleDef = vehicle.VehicleDef;
   }
 
   public static BlitRequest For(VehiclePawn vehicle)

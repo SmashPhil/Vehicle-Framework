@@ -5,10 +5,6 @@
       "commandLineArgs": "-experimental-xml-loader -disable-compute-shaders",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe"
     },
-    "Unstable": {
-      "commandName": "Executable",
-      "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe"
-    },
     "Release": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe"
@@ -16,14 +12,10 @@
     "UnitTest": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe",
-      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test --where \"class == UnitTest_DedicatedThread\"",
+      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test --where \"class == UnitTest_Regions\"",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "UnitTest"
       }
-    },
-    "Benchmark": {
-      "commandName": "Executable",
-      "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe"
     }
   }
 }

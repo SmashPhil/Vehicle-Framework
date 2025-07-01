@@ -138,7 +138,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     if (transferables.Exists(transferable =>
       transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 }))
     {
-      Assert.IsTrue(TmpPawns.Count == 0);
+      using ScopedListRollback<Pawn> slr = new(TmpPawns);
       foreach (TransferableOneWay transferable in transferables)
       {
         if (transferable.AnyThing is Pawn pawn && transferable.CountToTransfer > 0 &&
@@ -146,20 +146,13 @@ internal class Patch_FormCaravanDialog : IPatchCategory
           TmpPawns.Add(pawn);
       }
       Assert.IsTrue(TmpPawns.Count > 0);
-      try
-      {
-        // Ugly but this is how RimWorld is set up so the patch should just match the flow
-        StringBuilder stringBuilder = explanation != null ? new StringBuilder() : null;
-        int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(TmpPawns, massUsage,
-          massCapacity, explanation: stringBuilder);
-        __result =
-          TilesPerDayCalculator.ApproxTilesPerDay(ticks, tile, nextTile, explanation: explanation,
-            caravanTicksPerMoveExplanation: stringBuilder?.ToString());
-      }
-      finally
-      {
-        TmpPawns.Clear();
-      }
+      // Ugly but this is how RimWorld is set up so the patch should just match the flow
+      StringBuilder stringBuilder = explanation != null ? new StringBuilder() : null;
+      int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(TmpPawns, massUsage,
+        massCapacity, explanation: stringBuilder);
+      __result =
+        TilesPerDayCalculator.ApproxTilesPerDay(ticks, tile, nextTile, explanation: explanation,
+          caravanTicksPerMoveExplanation: stringBuilder?.ToString());
       return false;
     }
     return true;

@@ -9,11 +9,11 @@ namespace Vehicles;
 
 public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehicle
 {
-  private static readonly List<VehiclePawn> multiSelectVehicles = [];
+  private static readonly List<VehiclePawn> MultiSelectVehicles = [];
 
   protected override bool SelectedVehicleValid(VehiclePawn vehicle, FloatMenuContext context)
   {
-    return vehicle.CanMoveFinal;
+    return vehicle.CanMoveFinal && vehicle.ignition.Drafted;
   }
 
   protected override FloatMenuOption GetSingleOption(FloatMenuContext context)
@@ -24,19 +24,19 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
     IntVec3 clickCell = context.ClickedCell;
     if (context.IsMultiselect)
     {
-      multiSelectVehicles.Clear();
+      using ScopedListRollback<VehiclePawn> slr = new(MultiSelectVehicles);
       foreach (Pawn pawn in context.ValidSelectedPawns)
       {
         if (pawn is VehiclePawn vehicle && VehicleCanGoto(vehicle, clickCell).Accepted)
-          multiSelectVehicles.Add(vehicle);
+          MultiSelectVehicles.Add(vehicle);
       }
-      if (multiSelectVehicles.Count == 0)
+      if (MultiSelectVehicles.Count == 0)
         return null;
 
       option = new FloatMenuOption("GoHere".Translate(),
         delegate
         {
-          VehicleOrientationController.StartOrienting(multiSelectVehicles, clickCell, clickCell);
+          VehicleOrientationController.StartOrienting(MultiSelectVehicles, clickCell, clickCell);
         }, MenuOptionPriority.GoHere);
     }
     else

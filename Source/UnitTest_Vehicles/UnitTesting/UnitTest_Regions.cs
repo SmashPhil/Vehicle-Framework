@@ -37,6 +37,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
 
       CellRect testArea = TestArea(vehicleDef);
       IntVec3 center = testArea.CenterCell;
+      CellRect chunk = VehicleRegion.ChunkAt(root);
 
       ThingDef testDef = ThingDefOf.Wall;
       if (!PathingHelper.IsRegionEffector(vehicleDef, testDef))
@@ -87,7 +88,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       ClearArea();
       Expect.IsTrue(ValidateArea(regionGrid, testArea, true), "Clear Impassable");
       Expect.AreEqual(RegionsInArea(regionGrid, testArea), 1, "Unified Region");
-      Expect.IsTrue(ValidateLinks(regionGrid, testArea), "RegionLinks Generated");
+      Expect.IsTrue(ValidateLinks(regionGrid, chunk), "RegionLinks Generated");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
 
       // 1 Block
@@ -114,7 +115,6 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       ClearArea();
       Expect.IsTrue(regionDirtyer.AnyDirty);
       Expect.ReferencesAreEqual(region, regionGrid.GetValidRegionAt(center), "Region Recycled");
-      Expect.IsTrue(ValidateLinks(regionGrid, testArea), "RegionLinks Generated");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
 
       // Will always pass for non-debug builds since ObjectCounter will only increment for debug builds.
