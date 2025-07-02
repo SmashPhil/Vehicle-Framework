@@ -1299,6 +1299,15 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     if (!targetInfo.IsValid && TurretTargeter.Turret != this &&
       !vehicle.CompVehicleTurrets.Deploying)
     {
+      float angleDifference = vehicle.Angle - parentAngleCached;
+      if (attachedTo is null)
+      {
+        transform.rotation +=
+          90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+      }
+      TurretRotationTargeted = transform.rotation;
+
+      // TODO - 
       if (parentRotCached != vehicle.Rotation)
       {
         parentRotCached = vehicle.Rotation;
@@ -1309,13 +1318,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
         //  transform.rotation = transform.rotation.Clamp(angleRestricted.x, angleRestricted.y);
         //}
       }
-      float angleDifference = vehicle.Angle - parentAngleCached;
-      if (attachedTo is null)
-      {
-        transform.rotation +=
-          90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
-      }
-      TurretRotationTargeted = transform.rotation;
     }
     parentAngleCached = vehicle.Angle;
   }

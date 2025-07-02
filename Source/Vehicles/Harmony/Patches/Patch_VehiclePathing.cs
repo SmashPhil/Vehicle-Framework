@@ -16,8 +16,7 @@ namespace Vehicles;
 
 internal class Patch_VehiclePathing : IPatchCategory
 {
-  private static readonly List<VehiclePawn> multiSelectGotoList = [];
-  private static readonly HashSet<IntVec3> hitboxUpdateCells = [];
+  private static readonly List<VehiclePawn> MultiSelectGotoList = [];
 
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
 
@@ -137,16 +136,16 @@ internal class Patch_VehiclePathing : IPatchCategory
     {
       if (context.allSelectedPawns.All(pawn => pawn is VehiclePawn))
       {
-        Assert.AreEqual(multiSelectGotoList.Count, 0);
-        multiSelectGotoList.AddRange(context.allSelectedPawns.Cast<VehiclePawn>());
-        if (!PathingHelper.TryFindNearestStandableCell(multiSelectGotoList.FirstOrDefault(),
+        Assert.AreEqual(MultiSelectGotoList.Count, 0);
+        MultiSelectGotoList.AddRange(context.allSelectedPawns.Cast<VehiclePawn>());
+        if (!PathingHelper.TryFindNearestStandableCell(MultiSelectGotoList.FirstOrDefault(),
           context.ClickedCell, out IntVec3 result))
         {
           return false;
         }
-        VehicleOrientationController.StartOrienting(multiSelectGotoList, result,
+        VehicleOrientationController.StartOrienting(MultiSelectGotoList, result,
           context.ClickedCell);
-        multiSelectGotoList.Clear();
+        MultiSelectGotoList.Clear();
         return false;
       }
       // Remove any vehicles if not all are vehicles, preventing vanilla assigned position goto's
@@ -247,7 +246,7 @@ internal class Patch_VehiclePathing : IPatchCategory
     {
       CodeInstruction instruction = instructionList[i];
       if (instruction.Calls(AccessTools.Method(typeof(CellIndices),
-        nameof(CellIndices.CellToIndex), new Type[] { typeof(int), typeof(int) })))
+        nameof(CellIndices.CellToIndex), [typeof(int), typeof(int)])))
       {
         Label label = ilg.DefineLabel();
         Label vehicleLabel = ilg.DefineLabel();
@@ -265,7 +264,7 @@ internal class Patch_VehiclePathing : IPatchCategory
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(PathingHelper),
             nameof(PathingHelper.VehicleImpassableInCell),
-            new Type[] { typeof(Map), typeof(int), typeof(int) }));
+            [typeof(Map), typeof(int), typeof(int)]));
 
         yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
         yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
@@ -285,71 +284,6 @@ internal class Patch_VehiclePathing : IPatchCategory
       }
 
       yield return instruction;
-    }
-  }
-
-  /// <summary>
-  /// Modify CanReach result if position is claimed by Vehicle in PositionManager
-  /// </summary>
-  /// <param name="start"></param>
-  /// <param name="dest"></param>
-  /// <param name="peMode"></param>
-  /// <param name="traverseParams"></param>
-  /// <param name="__result"></param>
-  private static bool CanReachVehiclePosition(IntVec3 start, LocalTargetInfo dest,
-    PathEndMode peMode, TraverseParms traverseParams, ref bool __result)
-  {
-    if (peMode == PathEndMode.OnCell && !(traverseParams.pawn is not null) &&
-      traverseParams.pawn?.Map.GetDetachedMapComponent<VehiclePositionManager>()
-       .ClaimedBy(dest.Cell) is VehiclePawn vehicle &&
-      vehicle.VehicleDef.passability != Traversability.Standable)
-    {
-      __result = false;
-      return false;
-    }
-
-    return true;
-  }
-
-  private static void ImpassableThroughVehicle(IntVec3 c, Map map, ref bool __result)
-  {
-    if (!__result && !PathingHelper.regionAndRoomUpdaterWorking(map.regionAndRoomUpdater))
-    {
-      __result = PathingHelper.VehicleImpassableInCell(map, c);
-    }
-  }
-
-  private static void WalkableThroughVehicle(IntVec3 loc, ref bool __result, Map ___map)
-  {
-    if (__result && !PathingHelper.regionAndRoomUpdaterWorking(___map.regionAndRoomUpdater))
-    {
-      __result = !PathingHelper.VehicleImpassableInCell(___map, loc);
-    }
-  }
-
-  private static void WalkableFastThroughVehicleIntVec3(IntVec3 loc, ref bool __result,
-    Map ___map)
-  {
-    if (__result && !PathingHelper.regionAndRoomUpdaterWorking(___map.regionAndRoomUpdater))
-    {
-      __result = !PathingHelper.VehicleImpassableInCell(___map, loc);
-    }
-  }
-
-  private static void WalkableFastThroughVehicleInt2(int x, int z, ref bool __result, Map ___map)
-  {
-    if (__result && !PathingHelper.regionAndRoomUpdaterWorking(___map.regionAndRoomUpdater))
-    {
-      __result = !PathingHelper.VehicleImpassableInCell(___map, new IntVec3(x, 0, z));
-    }
-  }
-
-  private static void WalkableFastThroughVehicleInt(int index, ref bool __result, Map ___map)
-  {
-    if (__result && !PathingHelper.regionAndRoomUpdaterWorking(___map.regionAndRoomUpdater))
-    {
-      __result =
-        !PathingHelper.VehicleImpassableInCell(___map, ___map.cellIndices.IndexToCell(index));
     }
   }
 
@@ -436,15 +370,12 @@ internal class Patch_VehiclePathing : IPatchCategory
     }
   }
 
-  private static void SetPositionAndUpdateVehicleRegions(Thing __instance, IntVec3 value)
+  private static void SetPositionAndUpdateVehicleRegions(Thing __instance)
   {
     if (__instance.Spawned)
     {
       if (__instance is VehiclePawn vehicle)
-      {
         vehicle.ReclaimPosition();
-      }
-
       PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
     }
   }

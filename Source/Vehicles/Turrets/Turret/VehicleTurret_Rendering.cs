@@ -413,12 +413,15 @@ public partial class VehicleTurret
 
       TurretDrawData turretDrawData = TurretGraphics[i];
       Turret_RecoilTracker subRecoilTracker = recoilTrackers[i];
-
+      float turretRotation =
+        transformData.rotation + rotation;
+      float pivotRotation = transformData.rotation + parentRotation;
       // This is more or less the same implementation as Graphic_Rgb::ParallelGetPreRenderResults
       // The fixed North orientation, turret rotation, and additional offsetting makes it more
       // trouble than its worth to try and fetch then modify.
       Vector3 rootPos =
-        turretDrawData.DrawOffset(transformData.position, transformData.orientation);
+        transformData.position +
+        turretDrawData.DrawOffset(transformData.orientation, pivotRotation);
       Vector3 recoilOffset = Vector3.zero;
       Vector3 parentRecoilOffset = Vector3.zero;
       if (subRecoilTracker is { Recoil: > 0f })
@@ -442,9 +445,9 @@ public partial class VehicleTurret
       {
         Transform vehicleTransform = vehicle.Transform;
         render.position += vehicleTransform.position;
-        rotation += vehicleTransform.rotation;
+        //rotation += vehicleTransform.rotation;
       }
-      render.quaternion = rotation.ToQuat();
+      render.quaternion = turretRotation.ToQuat();
       render.mesh = turretDrawData.graphic.MeshAt(transformData.orientation);
       render.material = turretDrawData.graphic.MatAt(Rot4.North);
 
@@ -1103,19 +1106,24 @@ public partial class VehicleTurret
       graphic = GenerateGraphicData(this, turret, copyFrom, patternData, ref graphicData);
     }
 
-    public Vector3 DrawOffset(Vector3 drawPos, Rot8 rot)
+    public Vector3 DrawOffset(Rot8 rot, float rotation)
     {
-      float locationRotation = 0f;
+      Rot8 offsetRot = rot;
+      if (turret.attachedTo != null)
+        offsetRot = Rot8.North;
+      Vector3 graphicOffset = graphic?.DrawOffset(offsetRot) ?? Vector3.zero;
+      Vector2 propsOffset = turret.renderProperties.OffsetFor(offsetRot);
+      Vector2 offset = new(graphicOffset.x + propsOffset.x, graphicOffset.z + propsOffset.y);
+
+      offset = offset.RotatePointClockwise(rotation);
+
       if (turret.attachedTo != null)
       {
-        locationRotation = TurretRotationFor(rot, turret.attachedTo.TurretRotation);
+        Vector3 parentOffset = turret.attachedTo.DrawPosition(rot);
+        offset.x += parentOffset.x;
+        offset.y += parentOffset.z;
       }
-
-      Vector3 graphicOffset = graphic.DrawOffset(rot);
-      Vector2 rotatedPoint =
-        Ext_Math.RotatePointClockwise(graphicOffset.x, graphicOffset.z, locationRotation);
-      return new Vector3(drawPos.x + rotatedPoint.x, drawPos.y + graphicOffset.y,
-        drawPos.z + rotatedPoint.y);
+      return new Vector3(offset.x, graphicOffset.y, offset.y);
     }
 
     public override string ToString()
