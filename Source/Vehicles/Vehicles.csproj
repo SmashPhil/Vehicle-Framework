@@ -9,7 +9,7 @@
         <CurrentDate>$([System.DateTime]::Now.ToString(yyyy/MM/dd HH:mm:ss))</CurrentDate>
 
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Configurations>Debug;Release;Unstable</Configurations>
+        <Configurations>Debug;Release;Unstable;RelWithDbInfo</Configurations>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
         <OutputType>Library</OutputType>
@@ -21,6 +21,10 @@
         <OutDir>..\..\1.6\Assemblies\</OutDir>
         <ManagedDirectory>..\..\..\..\RimWorldWin64_Data\Managed</ManagedDirectory>
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
+        <NoWarn>CS0649</NoWarn>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <!-- Build Events -->
@@ -38,29 +42,25 @@
     <!--Build Configurations -->
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
-        <DebugType>portable</DebugType>
         <Optimize>false</Optimize>
         <DefineConstants>TRACE;DEBUG;RAIDERS;BATCH_RENDERING;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'UnitTest|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
-        <DefineConstants>TRACE;DEBUG;RAIDERS;BATCH_RENDERING;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-        <NoWarn>CS0649</NoWarn>
-        <DebugType>portable</DebugType>
-        <ErrorReport>prompt</ErrorReport>
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE;UNSTABLE;RAIDERS;BATCH_RENDERING;</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <DebugType>portable</DebugType>
         <Optimize>true</Optimize>
         <DefineConstants>TRACE;RELEASE;</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <NoWarn>CS0649</NoWarn>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">
+        <DebugSymbols>true</DebugSymbols>
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
     </PropertyGroup>
 
     <!-- Dependencies -->

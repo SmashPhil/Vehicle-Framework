@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using DevTools.Benchmarking;
 using RimWorld;
 using Verse;
 
-// ReSharper disable all
-
+// ReSharper disable ForCanBeConvertedToForeach
 namespace SmashTools.Performance;
 
 [BenchmarkClass("GetComp"), SampleSize(1_000_000)]
@@ -18,7 +16,7 @@ internal class Benchmark_GetComp
   private const int CountFew = 3;
   private const int CountMany = 8;
 
-  private static readonly Type[] compTypes =
+  private static readonly Type[] CompTypes =
   [
     typeof(CompForbiddable),
     typeof(CompArt),
@@ -32,21 +30,18 @@ internal class Benchmark_GetComp
 
   // 1 Item
   [Benchmark(Label = "List 1")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_1_HEAD(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listSingle);
   }
 
   [Benchmark(Label = "Dictionary 1")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_1_HEAD(ref GetCompContext context)
   {
     _ = GetDictionary<CompForbiddable>(context.dictionarySingle);
   }
 
   [Benchmark(Label = "Sorted 1")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_1_HEAD(ref GetCompContext context)
   {
     _ = GetSorted<CompForbiddable>(context.sortedSingle);
@@ -55,21 +50,18 @@ internal class Benchmark_GetComp
 
   // 3 Items - Match at head of list
   [Benchmark(Label = "List 3 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_3_HEAD(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listFew);
   }
 
   [Benchmark(Label = "Dictionary 3 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_3_HEAD(ref GetCompContext context)
   {
     _ = GetDictionary<CompForbiddable>(context.dictionaryFew);
   }
 
   [Benchmark(Label = "Sorted 3 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_3_HEAD(ref GetCompContext context)
   {
     _ = GetSorted<CompForbiddable>(context.sortedFew);
@@ -78,21 +70,18 @@ internal class Benchmark_GetComp
 
   // 3 Items - Match at tail of list
   [Benchmark(Label = "List 3 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_3_TAIL(ref GetCompContext context)
   {
     _ = GetList<CompPowerBattery>(context.listFew);
   }
 
   [Benchmark(Label = "Dictionary 3 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_3_TAIL(ref GetCompContext context)
   {
     _ = GetDictionary<CompPowerBattery>(context.dictionaryFew);
   }
 
   [Benchmark(Label = "Sorted 3 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_3_TAIL(ref GetCompContext context)
   {
     _ = GetSorted<CompPowerBattery>(context.sortedFew);
@@ -101,7 +90,6 @@ internal class Benchmark_GetComp
 
   // 3 Items - Average time to search every item in the list
   [Benchmark(Label = "List 3 Average")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_3_AVERAGE(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listFew);
@@ -110,7 +98,6 @@ internal class Benchmark_GetComp
   }
 
   [Benchmark(Label = "Dictionary 3 Average")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_3_AVERAGE(ref GetCompContext context)
   {
     _ = GetDictionary<CompForbiddable>(context.dictionaryFew);
@@ -119,7 +106,6 @@ internal class Benchmark_GetComp
   }
 
   [Benchmark(Label = "Sorted 3 Average")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_3_AVERAGE(ref GetCompContext context)
   {
     _ = GetSorted<CompForbiddable>(context.sortedFew);
@@ -130,44 +116,37 @@ internal class Benchmark_GetComp
 
   // 8 Items - Match at head of list
   [Benchmark(Label = "List 8 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_8_HEAD(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listMany);
   }
 
   [Benchmark(Label = "Dictionary 8 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_8_HEAD(ref GetCompContext context)
   {
     _ = GetDictionary<CompForbiddable>(context.dictionaryMany);
   }
 
   [Benchmark(Label = "Sorted 8 Head")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_8_HEAD(ref GetCompContext context)
   {
     _ = GetSorted<CompForbiddable>(context.sortedMany);
   }
 
-
   // 8 Items - Match at tail of list
   [Benchmark(Label = "List 8 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_8_TAIL(ref GetCompContext context)
   {
     _ = GetList<CompStatue>(context.listMany);
   }
 
   [Benchmark(Label = "Dictionary 8 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_8_TAIL(ref GetCompContext context)
   {
     _ = GetDictionary<CompStatue>(context.dictionaryMany);
   }
 
   [Benchmark(Label = "Sorted 8 Tail")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_8_TAIL(ref GetCompContext context)
   {
     _ = GetSorted<CompStatue>(context.sortedMany);
@@ -176,7 +155,6 @@ internal class Benchmark_GetComp
 
   // 8 Items - Average time to search every item in the list
   [Benchmark(Label = "List 8 Average"), DivideBy(8)]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_List_8_AVERAGE(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listMany);
@@ -190,7 +168,6 @@ internal class Benchmark_GetComp
   }
 
   [Benchmark(Label = "Dictionary 8 Average")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Dictionary_8_AVERAGE(ref GetCompContext context)
   {
     _ = GetDictionary<CompForbiddable>(context.dictionaryMany);
@@ -204,7 +181,6 @@ internal class Benchmark_GetComp
   }
 
   [Benchmark(Label = "Sorted 8 Average")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
   private static void GetComp_Sorted_8_AVERAGE(ref GetCompContext context)
   {
     _ = GetSorted<CompForbiddable>(context.sortedMany);
@@ -246,7 +222,7 @@ internal class Benchmark_GetComp
     {
       if (comps[i] is T t)
       {
-        comps.CountIndex(i);
+        comps.Touch(i);
         return t;
       }
     }
@@ -286,7 +262,7 @@ internal class Benchmark_GetComp
     {
       for (int i = 0; i < comps; i++)
       {
-        yield return (ThingComp)Activator.CreateInstance(compTypes[i]);
+        yield return (ThingComp)Activator.CreateInstance(CompTypes[i]);
       }
     }
   }

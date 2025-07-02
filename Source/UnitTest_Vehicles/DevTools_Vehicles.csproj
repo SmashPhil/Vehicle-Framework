@@ -4,7 +4,7 @@
         <Authors>Smash Phil</Authors>
 
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Configurations>Debug;Release;Unstable</Configurations>
+        <Configurations>Debug;Release;Unstable;RelWithDbInfo</Configurations>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
         <OutputType>Library</OutputType>
@@ -16,39 +16,32 @@
         <Deterministic>true</Deterministic>
         <LangVersion>preview</LangVersion>
         <OutDir>..\..\1.6\Assemblies\</OutDir>
+        <DebugType>pdbonly</DebugType>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
-        <DebugType>portable</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>..\..\1.6\Assemblies\</OutputPath>
         <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <LangVersion>preview</LangVersion>
-        <NoWarn>CS0649</NoWarn>
-    </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>..\..\1.6\Assemblies\</OutputPath>
-        <DefineConstants>TRACE;UNITY_ASSERTIONS;</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <LangVersion>preview</LangVersion>
-        <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
-        <OutputPath>..\..\1.6\Assemblies\</OutputPath>
         <Optimize>true</Optimize>
-        <DefineConstants>TRACE;UNSTABLE;</DefineConstants>
-        <DebugType>portable</DebugType>
-        <LangVersion>8.0</LangVersion>
-        <ErrorReport>prompt</ErrorReport>
-        <NoWarn>CS0649</NoWarn>
+        <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">
+        <DebugSymbols>true</DebugSymbols>
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE;UNITY_ASSERTIONS;UNITY_ASSERTIONS;</DefineConstants>
     </PropertyGroup>
 
     <ItemGroup>

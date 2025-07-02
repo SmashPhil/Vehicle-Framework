@@ -335,13 +335,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     {
       if (!IsTargetable && attachedTo is null)
         return defaultAngleRotated + vehicle.FullRotation.AsAngle;
-
       UpdateRotationLock();
-
       transform.rotation = transform.rotation.ClampAngle();
-      if (angleRestricted != Vector2.zero)
-        transform.rotation = transform.rotation.Clamp(angleRestricted.x, angleRestricted.y);
-
       if (attachedTo != null)
         return transform.rotation + attachedTo.TurretRotation;
       return transform.rotation;
@@ -991,13 +986,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
     float rotationOffset = attachedTo?.TurretRotation ?? vehicle.Rotation.AsAngle + vehicle.Angle;
 
-    float start = angleRestricted.x + rotationOffset;
-    float end = angleRestricted.y + rotationOffset;
-
-    if (start > 360)
-      start -= 360;
-    if (end > 360)
-      end -= 360;
+    float start = (angleRestricted.x + rotationOffset).ClampAngle();
+    float end = (angleRestricted.y + rotationOffset).ClampAngle();
 
     float mid = (position - TurretLocation).AngleFlat();
     end = (end - start) < 0f ? end - start + 360 : end - start;
@@ -1303,22 +1293,31 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
   public void UpdateRotationLock()
   {
-    if (vehicle != null)
+    if (vehicle == null)
+      return;
+
+    if (!targetInfo.IsValid && TurretTargeter.Turret != this &&
+      !vehicle.CompVehicleTurrets.Deploying)
     {
-      if (!targetInfo.IsValid && TurretTargeter.Turret != this &&
-        !vehicle.CompVehicleTurrets.Deploying)
+      if (parentRotCached != vehicle.Rotation)
       {
-        float angleDifference = vehicle.Angle - parentAngleCached;
-        if (attachedTo is null)
-        {
-          transform.rotation +=
-            90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
-        }
-        TurretRotationTargeted = transform.rotation;
+        parentRotCached = vehicle.Rotation;
+        //if (angleRestricted != Vector2.zero)
+        //{
+        //  float min = (transform.rotation - angleRestricted.x).ClampAngle();
+        //  float max = (transform.rotation - angleRestricted.y).ClampAngle();
+        //  transform.rotation = transform.rotation.Clamp(angleRestricted.x, angleRestricted.y);
+        //}
       }
-      parentRotCached = vehicle.Rotation;
-      parentAngleCached = vehicle.Angle;
+      float angleDifference = vehicle.Angle - parentAngleCached;
+      if (attachedTo is null)
+      {
+        transform.rotation +=
+          90 * (vehicle.Rotation.AsInt - parentRotCached.AsInt) + angleDifference;
+      }
+      TurretRotationTargeted = transform.rotation;
     }
+    parentAngleCached = vehicle.Angle;
   }
 
   public virtual string GetUniqueLoadID()

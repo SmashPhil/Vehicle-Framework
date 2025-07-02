@@ -5,15 +5,17 @@ namespace Vehicles;
 
 internal static class DebugProperties
 {
+  #pragma warning disable CS0414
   // Enhanced debugging state which will enable many costly debugging features.
-  internal static readonly bool debug = false;
+  internal static readonly bool Debug = false;
 
-  internal static readonly bool drawPaths = false;
+  internal static readonly bool DrawPaths = false;
 
-  internal static readonly bool drawAllRegions = false;
+  internal static readonly bool DrawAllRegions = false;
 
-  private static readonly (string defName, DebugRegionType regionType) regionDebugging =
+  private static readonly (string defName, DebugRegionType regionType) RegionDebugging =
     ("VF_TestMarshal", DebugRegionType.Regions | DebugRegionType.Links);
+  #pragma warning restore CS0414
 
   internal static void Init()
   {
@@ -21,20 +23,20 @@ internal static class DebugProperties
     // a user to unset them. Set everything to default as a fail safe, but we should
     // still verify it's not enabled.
 #if RELEASE
-    Trace.IsFalse(debug);
+    Trace.IsFalse(Debug);
     typeof(DebugProperties).SetStaticFieldsDefault();
 #else
-    if (!debug)
+    if (!Debug)
     {
       typeof(DebugProperties).SetStaticFieldsDefault();
       return;
     }
 
     DebugHelper.Local.VehicleDef =
-      DefDatabase<VehicleDef>.GetNamedSilentFail(regionDebugging.defName);
+      DefDatabase<VehicleDef>.GetNamedSilentFail(RegionDebugging.defName);
     if (DebugHelper.Local.VehicleDef != null)
     {
-      DebugHelper.Local.DebugType = regionDebugging.regionType;
+      DebugHelper.Local.DebugType = RegionDebugging.regionType;
     }
 #endif
   }

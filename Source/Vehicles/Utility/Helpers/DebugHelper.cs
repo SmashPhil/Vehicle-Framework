@@ -74,7 +74,7 @@ namespace Vehicles
       o.Tile = from;
       o.SetFaction(Faction.OfMechanoids);
       Find.WorldObjects.Add(o);
-      if (DebugProperties.drawPaths)
+      if (DebugProperties.DrawPaths)
       {
         debugLines.Add(from.Layer.Pather.FindPath(from, to, null));
       }

@@ -5,7 +5,7 @@ using Verse;
 
 namespace SmashTools.Benchmarking;
 
-[BenchmarkClass("Contains"), SampleSize(1000000)]
+[BenchmarkClass("Contains"), SampleSize(1_000_000)]
 internal class Benchmark_Contains
 {
   [Benchmark(Label = "ContainsEnumeration")]

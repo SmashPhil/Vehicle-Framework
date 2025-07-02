@@ -267,7 +267,7 @@ public static class WorldHelper
             Find.WorldGrid[currentTile].PrimaryBiome.implemented &&
             Find.WorldGrid[currentTile].hilliness != Hilliness.Impassable)
           {
-            if (DebugProperties.debug && faction is not null)
+            if (DebugProperties.Debug && faction is not null)
             {
               DebugHelper.DebugDrawSettlement(tile, currentTile);
             }

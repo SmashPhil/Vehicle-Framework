@@ -241,7 +241,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
       room.DebugDraw(debugRegionType);
     }
 
-    if (DebugProperties.drawAllRegions)
+    if (DebugProperties.DrawAllRegions)
     {
       foreach (VehicleRegion debugRegion in AllRegionsNoRebuildInvalidAllowed)
       {

@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Reflection;
 using DevTools.Benchmarking;
 using HarmonyLib;
 using Verse;
-
-// ReSharper disable all
 
 namespace SmashTools.Performance;
 
@@ -32,15 +29,10 @@ internal class Benchmark_TypeByName
 
   private readonly struct TypeContext
   {
-    public readonly IEnumerable<Assembly> allAssemblies;
     public readonly List<string> typesToFind;
 
     public TypeContext()
     {
-      allAssemblies = (IEnumerable<Assembly>)AccessTools
-       .PropertyGetter(typeof(GenTypes), "AllActiveAssemblies")
-       .Invoke(null, []);
-
       typesToFind =
       [
         // Verse

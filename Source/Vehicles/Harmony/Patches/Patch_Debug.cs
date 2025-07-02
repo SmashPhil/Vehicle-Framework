@@ -33,7 +33,7 @@ internal class Patch_Debug : IPatchCategory
       prefix: new HarmonyMethod(typeof(Patch_Debug),
         nameof(DebugDamagePawnsInVehicleUntilDead)));
 
-    if (DebugProperties.debug)
+    if (DebugProperties.Debug)
     {
       HarmonyPatcher.Patch(
         original: AccessTools.Method(typeof(WorldRoutePlanner),
@@ -179,12 +179,12 @@ internal class Patch_Debug : IPatchCategory
   /// </summary>
   private static void DebugSettlementPaths()
   {
-    if (DebugProperties.drawPaths && DebugHelper.debugLines.NullOrEmpty())
+    if (DebugProperties.DrawPaths && DebugHelper.debugLines.NullOrEmpty())
     {
       return;
     }
 
-    if (DebugProperties.drawPaths)
+    if (DebugProperties.DrawPaths)
     {
       foreach (WorldPath wp in DebugHelper.debugLines)
       {

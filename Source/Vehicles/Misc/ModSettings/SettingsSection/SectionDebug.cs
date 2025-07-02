@@ -92,7 +92,7 @@ public class SectionDebug : SettingsSection
     Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
     Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
 
-    if (DebugProperties.debug)
+    if (DebugProperties.Debug)
     {
       Scribe_Values.Look(ref debugSpawnVehicleBuildingGodMode,
         nameof(debugSpawnVehicleBuildingGodMode));

@@ -1,12 +1,9 @@
-﻿using System.Runtime.CompilerServices;
-using DevTools.Benchmarking;
+﻿using DevTools.Benchmarking;
 using Verse;
-
-// ReSharper disable all
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("TypeCheck"), SampleSize(1000000)]
+[BenchmarkClass("TypeCheck"), SampleSize(1_000_000)]
 internal class Benchmark_TypeCheck
 {
   [Benchmark(Label = "IsSubclass")]

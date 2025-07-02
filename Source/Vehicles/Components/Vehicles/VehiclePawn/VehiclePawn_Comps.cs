@@ -143,7 +143,7 @@ public partial class VehiclePawn
     {
       if (cachedComps[i] is T t)
       {
-        cachedComps.CountIndex(i);
+        cachedComps.Touch(i);
         return t;
       }
     }
