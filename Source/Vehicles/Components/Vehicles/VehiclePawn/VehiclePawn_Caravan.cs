@@ -16,9 +16,9 @@ public partial class VehiclePawn
 
   public IntVec3 FollowerCell { get; protected set; }
 
-  // TODO 1.6 - check if devs make this virtual
-  public void ExitMapTemp(bool allowedToJoinOrCreateCaravan, Rot4 exitDir)
+  public override void ExitMap(bool allowedToJoinOrCreateCaravan, Rot4 exitDir)
   {
+    base.ExitMap(allowedToJoinOrCreateCaravan, exitDir);
     foreach (Pawn pawn in AllPawnsAboard)
     {
       pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ExitedMap);

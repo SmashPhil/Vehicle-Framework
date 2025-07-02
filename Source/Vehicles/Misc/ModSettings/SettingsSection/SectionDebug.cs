@@ -305,13 +305,6 @@ public class SectionDebug : SettingsSection
         SoundDefOf.Click.PlayOneShotOnCamera();
         WorldPathingDebugMenu();
       }
-
-#if DEBUG
-      if (listingStandard.ButtonText("Profiling"))
-      {
-        Find.WindowStack.Add(new Dialog_Profiler());
-      }
-#endif
     }
   }
 

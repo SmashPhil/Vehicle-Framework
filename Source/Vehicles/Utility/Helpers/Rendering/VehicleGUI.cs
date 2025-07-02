@@ -17,14 +17,14 @@ public static class VehicleGui
 
   private const float IdlerTimeExpiry = 10; // seconds
 
-  private static readonly List<VehicleTurret> allTurrets = [];
-  private static readonly List<GraphicOverlay> allOverlays = [];
+  private static readonly List<VehicleTurret> AllTurrets = [];
+  private static readonly List<GraphicOverlay> AllOverlays = [];
 
-  private static readonly RenderTextureIdler[] gizmoTextures;
+  private static readonly RenderTextureIdler[] GizmoTextures;
 
   static VehicleGui()
   {
-    gizmoTextures = new RenderTextureIdler[DefDatabase<VehicleDef>.DefCount];
+    GizmoTextures = new RenderTextureIdler[DefDatabase<VehicleDef>.DefCount];
   }
 
   private static (int width, int height) GetOptimalTextureSize(Rect rect, in BlitRequest request,
@@ -147,21 +147,21 @@ public static class VehicleGui
         vehicleDef.PropertyBlock, 0, 0));
       if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is { } props)
       {
-        allTurrets.AddRange(props.turrets);
+        AllTurrets.AddRange(props.turrets);
         AddAllTurretSettingsGUIProperties(rect,
-          vehicleDef, blitData.rot, allTurrets,
+          vehicleDef, blitData.rot, AllTurrets,
           blitData.patternData);
       }
-      allOverlays.AddRange(vehicleDef.drawProperties.overlays);
+      AllOverlays.AddRange(vehicleDef.drawProperties.overlays);
       AddAllOverlaySettingsGUIProperties(rect, vehicleDef, blitData.rot,
-        allOverlays, blitData.patternData);
+        AllOverlays, blitData.patternData);
       TextureDrawer.Draw(rect);
     }
     finally
     {
       TextureDrawer.Close();
-      allTurrets.Clear();
-      allOverlays.Clear();
+      AllTurrets.Clear();
+      AllOverlays.Clear();
     }
   }
 
@@ -339,13 +339,13 @@ public static class VehicleGui
       defaultPatternData.colorTwo = defaultPatternData.colorTwo.ToTransparent(0.6f);
       defaultPatternData.colorThree = defaultPatternData.colorThree.ToTransparent(0.6f);
     }
-    RenderTextureIdler rtIdler = gizmoTextures[vehicleDef.DefIndex];
+    RenderTextureIdler rtIdler = GizmoTextures[vehicleDef.DefIndex];
     if (rtIdler == null || rtIdler.Disposed)
     {
       BlitRequest request = BlitRequest.For(vehicleDef) with { patternData = defaultPatternData };
       rtIdler = new RenderTextureIdler(CreateRenderTextureBuffer(buttonRect, request),
         IdlerTimeExpiry);
-      gizmoTextures[vehicleDef.DefIndex] = rtIdler;
+      GizmoTextures[vehicleDef.DefIndex] = rtIdler;
       Blit(rtIdler.GetWrite(), buttonRect, request);
     }
     GUI.DrawTexture(buttonRect, rtIdler.Read);

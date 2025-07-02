@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -100,11 +99,6 @@ internal class Patch_VehiclePathing : IPatchCategory
         nameof(GenStep_RocksFromGrid.Generate)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(DisableRegionUpdatingRockGen)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(GenStep_RocksNearEdge),
-        nameof(GenStep_RocksNearEdge.Generate)),
-      prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
-        nameof(DisableRegionUpdatingRockGen)));
   }
 
   private static bool MultiselectVehicleGotoBlocked(Pawn pawn, ref AcceptanceReport __result)
@@ -167,22 +161,11 @@ internal class Patch_VehiclePathing : IPatchCategory
   {
     if (___pawn is VehiclePawn)
     {
-      __result = true;
-      if (__instance.curJob != null)
-      {
-        if (!__instance.curJob.def.playerInterruptible)
-        {
-          __result = false;
-        }
-        else if (__instance.curDriver != null && !__instance.curDriver.PlayerInterruptable)
-        {
-          __result = false;
-        }
-      }
-
+      __result = __instance is
+        { curJob.def.playerInterruptible: false } or
+        { curDriver.PlayerInterruptable: false };
       return false;
     }
-
     return true;
   }
 

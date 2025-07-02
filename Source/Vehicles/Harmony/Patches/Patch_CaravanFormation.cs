@@ -15,12 +15,6 @@ internal class Patch_CaravanFormation : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
-    // TODO 1.6 - 
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(Pawn),
-        nameof(Pawn.ExitMap)),
-      prefix: new HarmonyMethod(typeof(Patch_CaravanFormation),
-        nameof(VehicleExitMap)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanFormingUtility),
         nameof(CaravanFormingUtility.IsFormingCaravan)),
@@ -51,20 +45,6 @@ internal class Patch_CaravanFormation : IPatchCategory
         nameof(Pawn_InventoryTracker.UnloadEverything)),
       prefix: new HarmonyMethod(typeof(Patch_CaravanFormation),
         nameof(VehiclesShouldntUnloadEverything)));
-  }
-
-  /// <summary>
-  /// Exiting map with <see cref="VehiclePawn"/>
-  /// </summary>
-  private static bool VehicleExitMap(Pawn __instance, bool allowedToJoinOrCreateCaravan,
-    Rot4 exitDir)
-  {
-    if (__instance is VehiclePawn vehicle)
-    {
-      vehicle.ExitMapTemp(allowedToJoinOrCreateCaravan, exitDir);
-      return false;
-    }
-    return true;
   }
 
   /// <summary>

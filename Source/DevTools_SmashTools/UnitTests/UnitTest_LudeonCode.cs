@@ -1,8 +1,6 @@
 ﻿using System;
 using DevTools.UnitTesting;
-using UnityEngine;
 using Verse;
-using Object = UnityEngine.Object;
 
 // ReSharper disable all
 namespace SmashTools.UnitTesting;
@@ -32,6 +30,32 @@ public sealed class UnitTest_LudeonCode
       decimal d = 0;
       decimal ex = n / d;
     });
+  }
+
+  [Test]
+  private void Overflow()
+  {
+    int n = int.MaxValue;
+    n++;
+    Expect.AreEqual(n, int.MinValue);
+
+    unchecked
+    {
+      int un = int.MaxValue;
+      un++;
+      Expect.AreEqual(un, int.MinValue);
+    }
+
+    ulong ul = ulong.MaxValue;
+    ul++;
+    Expect.AreEqual(ul, 0u);
+
+    unchecked
+    {
+      ulong un = ulong.MaxValue;
+      long cl = (long)un;
+      Expect.IsTrue(cl < 0);
+    }
   }
 
   [Test]

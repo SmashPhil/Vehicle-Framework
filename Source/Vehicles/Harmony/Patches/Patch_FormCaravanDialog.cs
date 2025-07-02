@@ -103,6 +103,34 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TrySend"),
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(TryAndSendWithVehicles)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Dialog_FormCaravan), "DebugTryFormCaravanInstantly"),
+      prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog), nameof(TryFormCaravanInstantly)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(WorldGizmoUtility),
+        nameof(WorldGizmoUtility.TryGetCaravanGizmo)),
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(TryGetCaravanForVehicles)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(FormCaravanComp),
+        nameof(FormCaravanComp.CanReformNow)),
+      prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(ReformWithVehicles)));
+
+    // TODO - Sam said he'll look into removing the redundant check, which means I can patch
+    // FormCaravanComp::CanFormOrReformCaravanNow instead.
+    //const string TypeName = "<GetGizmos>d__18";
+    //const string GetGizmosDelName = "MoveNext";
+    //Type formCaravanCompTypes =
+    //  typeof(FormCaravanComp).GetNestedTypes(AccessTools.all)
+    //   .FirstOrDefault(type => type.Name == TypeName);
+    //// Compiler generated methods from FormCaravanComp::<GetGizmos>d__18
+    //List<MethodInfo> gotoMethods = formCaravanCompTypes.GetDeclaredMethods();
+    //MethodInfo getGizmosDelegate0 =
+    //  gotoMethods.FirstOrDefault(method => method.Name == GetGizmosDelName);
+    //HarmonyPatcher.Patch(original: getGizmosDelegate0,
+    //  transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+    //    nameof(ReformCaravanWithVehiclesGizmoTranspiler)));
   }
 
   /// <summary>
@@ -502,5 +530,139 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       return false;
     }
     return true;
+  }
+
+  private static bool TryFormCaravanInstantly(Dialog_FormCaravan __instance, Map ___map,
+    PlanetTile ___startingTile, PlanetTile ___destinationTile)
+  {
+    if (CaravanFormation.formation == null)
+      return true;
+    CaravanFormation.formation.RecacheTransferables();
+    if (CaravanFormation.formation.vehicles.NullOrEmpty())
+      return true;
+
+    if (CaravanFormation.formation.vehicles.Exists(vehicle =>
+      !Find.World.GetComponent<WorldVehiclePathGrid>()
+       .PassableFast(___map.Tile, vehicle.VehicleDef)))
+    {
+      Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
+      return false;
+    }
+    if (!CaravanFormation.formation.pawns.Concat(
+        CaravanFormation.formation.vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard))
+     .Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer)))
+    {
+      Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(),
+        MessageTypeDefOf.RejectInput, false);
+      return false;
+    }
+    CaravanHelper.BoardAllAssignedPawns();
+    CaravanFormation.formation.AddItemsFromTransferablesToRandomInventories(CaravanFormation
+     .formation.pawns);
+    PlanetTile exitTile = ___startingTile;
+    if (!exitTile.Valid)
+      exitTile = CaravanExitMapUtility.RandomBestExitTileFrom(___map);
+    if (!exitTile.Valid)
+      exitTile = __instance.CurrentTile;
+    CaravanHelper.ExitMapAndCreateVehicleCaravan(CaravanFormation.formation.vehicles.Concat(
+        CaravanFormation.formation.pawns), Faction.OfPlayer,
+      __instance.CurrentTile, exitTile, ___destinationTile);
+    SoundDefOf.Tick_High.PlayOneShotOnCamera();
+    __instance.Close(doCloseSound: false);
+    return false;
+  }
+
+  private static IEnumerable<CodeInstruction> TryGetCaravanForVehicles(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    List<CodeInstruction> instructionList = instructions.ToList();
+    FieldInfo mapPawnsField =
+      AccessTools.Field(typeof(Map), nameof(Map.mapPawns));
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+
+      if (instruction.LoadsField(mapPawnsField))
+      {
+        // ReSharper disable once RedundantAssignment
+        instruction = instructionList[++i]; // ldfld Map::mapPawns
+        instruction = instructionList[++i]; // callvirt MapPawns::get_ColonistCount
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
+            nameof(PawnsOrAutonomousVehicles)));
+      }
+
+      yield return instruction;
+    }
+  }
+
+  private static int PawnsOrAutonomousVehicles(Map map)
+  {
+    int count = map.mapPawns.ColonistCount;
+    if (count > 0)
+      return count;
+    // If there are no colonists registered in the map, we need to perform a check in vehicles and
+    // for autonomous vehicles.
+    VehiclePositionManager positionManager = map.GetDetachedMapComponent<VehiclePositionManager>();
+    Assert.IsNotNull(positionManager);
+    foreach (VehiclePawn vehicle in positionManager.AllClaimants)
+    {
+      if (vehicle.MovementPermissions == VehiclePermissions.Autonomous)
+        count++;
+      count += vehicle.AllPawnsAboard.Count;
+    }
+    return count;
+  }
+
+  private static bool ReformWithVehicles(out bool __result, FormCaravanComp __instance,
+    WorldObject ___parent)
+  {
+    __result = false;
+    if (!__instance.Reform)
+      return false;
+    if (__instance.CanFormOrReformCaravanNow)
+    {
+      __result = true;
+      return false;
+    }
+    MapParent mapParent = ___parent as MapParent;
+    Assert.IsNotNull(mapParent);
+    VehiclePositionManager positionManager =
+      mapParent.Map.GetDetachedMapComponent<VehiclePositionManager>();
+    Assert.IsNotNull(positionManager);
+    foreach (VehiclePawn vehicle in positionManager.AllClaimants)
+    {
+      if (vehicle.AllPawnsAboard.Count > 0 ||
+        vehicle.MovementPermissions == VehiclePermissions.Autonomous)
+      {
+        __result = true;
+        break;
+      }
+    }
+    return false;
+  }
+
+  private static IEnumerable<CodeInstruction> ReformCaravanWithVehiclesGizmoTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    List<CodeInstruction> instructionList = instructions.ToList();
+    FieldInfo mapPawnsField =
+      AccessTools.Field(typeof(Map), nameof(Map.mapPawns));
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+
+      //if (instruction.LoadsField(mapPawnsField))
+      //{
+      //  // ReSharper disable once RedundantAssignment
+      //  instruction = instructionList[++i]; // ldfld Map::mapPawns
+      //  instruction = instructionList[++i]; // callvirt MapPawns::get_FreeColonistsSpawnedCount
+      //  yield return new CodeInstruction(opcode: OpCodes.Call,
+      //    operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
+      //      nameof()));
+      //}
+
+      yield return instruction;
+    }
   }
 }
