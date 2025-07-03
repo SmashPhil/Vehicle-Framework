@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using DevTools;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
@@ -10,19 +11,20 @@ namespace Vehicles;
 
 internal static class TestDefGenerator
 {
-  private static readonly FieldInfo fleshField;
+  private static readonly FieldInfo FleshField;
 
-  private static readonly GeneratorVehiclePawnKindDef kindDefGenerator = new();
+  private static readonly GeneratorVehiclePawnKindDef KindDefGenerator = new();
 
   static TestDefGenerator()
   {
-    fleshField = AccessTools.Field(typeof(RaceProperties), "fleshType");
+    FleshField = AccessTools.Field(typeof(RaceProperties), "fleshType");
   }
 
   public static VehicleDef CreateTransientVehicleDef(string defName,
     [CanBeNull] MockSettings settings)
   {
-    Assert.IsNotNull(fleshField);
+    Assert.IsNotNull(FleshField);
+    DevLog.WriteVerbose($"Creating transient def {defName}");
     VehicleBuildDef buildDef = new()
     {
       defName = $"{defName}_Blueprint",
@@ -84,12 +86,12 @@ internal static class TestDefGenerator
         ]
       }
     };
-    fleshField.SetValue(def.race, DefDatabase<FleshTypeDef>.GetNamed("MetalVehicle"));
+    FleshField.SetValue(def.race, DefDatabase<FleshTypeDef>.GetNamed("MetalVehicle"));
 
     def.buildDef = buildDef;
     buildDef.thingToSpawn = def;
 
-    Assert.IsTrue(kindDefGenerator.TryGenerateImpliedDef(def, out _, false));
+    Assert.IsTrue(KindDefGenerator.TryGenerateImpliedDef(def, out _, false));
 
     def.PostLoad();
     def.ResolveReferences();

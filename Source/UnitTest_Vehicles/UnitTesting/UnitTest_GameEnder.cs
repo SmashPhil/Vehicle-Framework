@@ -39,8 +39,6 @@ internal sealed class UnitTest_GameEnder
   {
     manualVehicle.Dispose();
     autonomousVehicle.Dispose();
-
-    TestUtils.EmptyWorldAndMapOfVehicles();
   }
 
   [Test]

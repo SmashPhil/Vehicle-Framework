@@ -1,19 +1,33 @@
-﻿// Must use single name for namespace, RimWorld's ParseHelper::ParseAction does not support
-// sub namespaces and will fail to resolve the type.
+﻿using DevTools.UnitTesting;
+using SmashTools;
 
 namespace Vehicles;
 
+[StaticConstructorOnModInit]
 public static class ModSettingsDisabler
 {
   private static bool enabled;
 
-  public static void Disable()
+  static ModSettingsDisabler()
+  {
+    UnitTestManager.OnUnitTestStateChange += DisableModifiableSettingsForTesting;
+  }
+
+  private static void DisableModifiableSettingsForTesting(bool state)
+  {
+    if (state)
+      Disable();
+    else
+      Restore();
+  }
+
+  private static void Disable()
   {
     enabled = VehicleMod.settings.main.modifiableSettings;
     VehicleMod.settings.main.modifiableSettings = false;
   }
 
-  public static void Restore()
+  private static void Restore()
   {
     VehicleMod.settings.main.modifiableSettings = enabled;
   }

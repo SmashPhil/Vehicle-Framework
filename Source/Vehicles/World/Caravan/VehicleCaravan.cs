@@ -17,10 +17,10 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
 {
   private const int RepairMothballTicks = 300;
 
-  private static readonly Dictionary<VehicleDef, int> vehicleCounts = [];
+  private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
 
-  private static readonly MaterialPropertyBlock propertyBlock = new();
-  private static readonly Dictionary<ThingDef, Material> materials = [];
+  private static readonly MaterialPropertyBlock PropertyBlock = new();
+  private static readonly Dictionary<ThingDef, Material> Materials = [];
 
   public VehicleCaravan_PathFollower vehiclePather;
   public VehicleCaravanTweener vehicleTweener;
@@ -100,15 +100,15 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
       {
         return null;
       }
-      if (!materials.ContainsKey(leadVehicleDef))
+      if (!Materials.ContainsKey(leadVehicleDef))
       {
         Texture2D texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
         Material material = MaterialPool.MatFrom(texture,
           ShaderDatabase.WorldOverlayTransparentLit, Color.white,
           WorldMaterials.WorldObjectRenderQueue);
-        materials.Add(leadVehicleDef, material);
+        Materials.Add(leadVehicleDef, material);
       }
-      return materials[leadVehicleDef];
+      return Materials[leadVehicleDef];
     }
   }
 
@@ -155,10 +155,10 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
     {
       Color color = Material.color;
       float num = 1f - transitionPct;
-      propertyBlock.SetColor(ShaderPropertyIDs.Color,
+      PropertyBlock.SetColor(ShaderPropertyIDs.Color,
         new Color(color.r, color.g, color.b, color.a * num));
       WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material,
-        propertyBlock: propertyBlock);
+        propertyBlock: PropertyBlock);
       return;
     }
     WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
@@ -440,11 +440,14 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
 
   public override void Destroy()
   {
+    // Make sure we're not destroying based on a stale cache
+    RecacheVehicles();
+
     foreach (VehiclePawn vehicle in vehicles)
     {
-      while (vehicle.AllPawnsAboard.Count > 0)
+      for (int i = vehicle.AllPawnsAboard.Count; --i >= 0;)
       {
-        Pawn pawn = vehicle.AllPawnsAboard[0];
+        Pawn pawn = vehicle.AllPawnsAboard[i];
         vehicle.RemovePawn(pawn);
         Assert.IsFalse(pawn.IsWorldPawn());
         Find.WorldPawns.PassToWorld(pawn);
@@ -478,20 +481,19 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
 
     if (vehicleCount >= 1)
     {
-      vehicleCounts.Clear();
+      VehicleCounts.Clear();
       {
         foreach (VehiclePawn vehicle in VehiclesListForReading)
         {
-          if (!vehicleCounts.TryAdd(vehicle.VehicleDef, 1))
-            vehicleCounts[vehicle.VehicleDef]++;
+          if (!VehicleCounts.TryAdd(vehicle.VehicleDef, 1))
+            VehicleCounts[vehicle.VehicleDef]++;
         }
-
-        foreach ((VehicleDef vehicleDef, int count) in vehicleCounts)
+        foreach ((VehicleDef vehicleDef, int count) in VehicleCounts)
         {
           stringBuilder.Append($"{count} {vehicleDef.LabelCap}, ");
         }
       }
-      vehicleCounts.Clear();
+      VehicleCounts.Clear();
     }
     stringBuilder.Append("CaravanColonistsCount".Translate(colonists,
       (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));

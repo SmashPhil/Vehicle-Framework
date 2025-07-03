@@ -348,12 +348,21 @@ public partial class VehiclePawn
     if (!handler.thingOwner.TryAddOrTransfer(pawn, canMergeWithExistingStacks: false) &&
       pawn.holdingOwner != null)
     {
-      //If can't add to handler and currently has other owner, transfer
+      // If we can't add to handler and currently has other owner, transfer or else the pawn
+      // may get lost forever.
       result = pawn.holdingOwner.TryTransferToContainer(pawn, handler.thingOwner);
     }
     reservationManager?.ReleaseAllClaimedBy(pawn);
+
     if (result)
       EventRegistry?[VehicleEventDefOf.PawnEntered].ExecuteEvents();
+
+    // NOTE - VehicleCaravans need to recache the pawn lists, this is especially crucial for ticking
+    // behavior like caravan needs. This MUST occur after the PawnEntered event so the vehicle manifest
+    // or AllPawnsListForReading is updated beforehand.
+    if (this.GetVehicleCaravan() is { } caravan)
+      caravan.RecacheVehicles();
+
     return result;
   }
 
@@ -371,6 +380,12 @@ public partial class VehiclePawn
     if (handler.thingOwner.Remove(pawn))
     {
       EventRegistry[VehicleEventDefOf.PawnRemoved].ExecuteEvents();
+
+      // Same as TryAddPawn and DisembarkPawn, we need to notify caravans that the pawn is being
+      // moved around so it can update its pawn and vehicle lists.
+      if (this.GetVehicleCaravan() is { } caravan)
+        caravan.RecacheVehicles();
+
       if (Spawned)
         Map.GetCachedMapComponent<VehicleReservationManager>().ReleaseAllClaimedBy(pawn);
       return true;

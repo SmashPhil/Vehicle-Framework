@@ -255,18 +255,6 @@ public static class CaravanHelper
     Find.WindowStack.Add(new Dialog_StashVehicle(caravan));
   }
 
-  public static Caravan CaravanForMerging(Caravan caravan, List<Caravan> caravans)
-  {
-    Assert.IsNotNull(caravans);
-    if (caravans.Exists(caravanOpt => caravanOpt is VehicleCaravan))
-    {
-      // Prioritize vehicle caravans for merging into
-      caravan = caravans.MaxBy(caravanOpt =>
-        caravanOpt is VehicleCaravan vehicleCaravan ? vehicleCaravan.PawnsListForReading.Count : 0);
-    }
-    return caravan;
-  }
-
   /// <summary>
   /// Board all pawns automatically into assigned seats
   /// </summary>
@@ -504,20 +492,19 @@ public static class CaravanHelper
     {
       if (pawn.Dead)
       {
-        Log.Warning("Tried to form a caravan with a dead pawn " + pawn);
+        Trace.Fail($"Tried to form caravan with dead pawn {pawn}. Removing...");
+        continue;
       }
-      else
+      Assert.IsFalse(pawn.InVehicle(),
+        $"Trying to form caravan with {pawn} who is already in a vehicle. Add the vehicle instead.");
+      caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
+      if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
       {
-        caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
-        if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
-        {
-          Find.WorldPawns.PassToWorld(pawn);
-        }
+        Find.WorldPawns.PassToWorld(pawn);
       }
     }
     caravan.Name = CaravanNameGenerator.GenerateCaravanName(caravan);
     caravan.SetUniqueId(Find.UniqueIDsManager.GetNextCaravanID());
-
     caravan.PostInit();
     return caravan;
   }

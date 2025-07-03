@@ -2,15 +2,11 @@
 
 <Config>
   <log>
-    <verboseLogging>false</verboseLogging>
+    <verboseLogging>true</verboseLogging>
   </log>
 
-  <preTestActions>
-    <li>Vehicles.ModSettingsDisabler.Disable</li>
-  </preTestActions>
-
   <postTestActions>
-    <li>Vehicles.ModSettingsDisabler.Restore</li>
+    <li>Vehicles.TestActions.EmptyWorldAndMapOfVehicles</li>
   </postTestActions>
 
   <map>

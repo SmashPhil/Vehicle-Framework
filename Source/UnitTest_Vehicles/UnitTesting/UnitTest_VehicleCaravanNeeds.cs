@@ -19,8 +19,7 @@ namespace Vehicles.UnitTesting;
   TestCategoryNames.WorldPawnGC,
   TestCategoryNames.Caravaning
 )]
-[TestDescription("VehicleCaravan mechanics on the world map.")]
-// TODO Dub's Bad Hygiene - Water
+[TestDescription("VehicleCaravan needs mechanics on the world map.")]
 internal sealed class UnitTest_VehicleCaravanNeeds
 {
   private const int WorldUpdateTicksForPawn = 15;
@@ -48,12 +47,10 @@ internal sealed class UnitTest_VehicleCaravanNeeds
     group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
-      drivers = 1
+      drivers = 1,
+      // Give plenty of room for test cases without generating additional colonists
+      extraSlots = 999
     });
-
-    Assert.AreEqual(group.vehicle.handlers.Count, 1);
-    // Give plenty of room for test cases without generating additional colonists
-    group.vehicle.handlers[0].role.slots = 999;
 
     group.BoardAll();
     caravan = CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
@@ -163,10 +160,12 @@ internal sealed class UnitTest_VehicleCaravanNeeds
 
     need.CurLevel = 0;
     Assert.AreApproximatelyEqual(need.CurLevel, 0);
+    Assert.IsTrue(need.CurCategory < DrugDesireCategory.Satisfied);
     Assert.IsTrue(CaravanInventoryUtility.TryGetDrugToSatisfyChemicalNeed(caravan, addict,
-      need.AddictionHediff, out _, out _));
+      need.AddictionHediff, out Thing drug, out _));
+    Expect.ReferencesAreEqual(beer, drug);
     caravan.needs.NeedsTrackerTickInterval(1);
-    Assert.IsTrue(beer.Destroyed); // Beer was consumed
+    Expect.IsTrue(beer.Destroyed); // Beer was consumed
     Expect.IsTrue(addict.health.hediffSet.TryGetHediff(HediffDefOf.AlcoholHigh, out _));
 
     // 'Consume' pawn so we don't reuse them

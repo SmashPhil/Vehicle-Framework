@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DevTools;
 using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
@@ -123,6 +124,7 @@ public class VehicleGroup : IDisposable
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
+
     if (!settings.statModifiers.NullOrEmpty())
     {
       vehicleDef.vehicleStats = [.. settings.statModifiers];
@@ -145,14 +147,15 @@ public class VehicleGroup : IDisposable
       ];
     }
 
-    if (settings.passengers > 0)
+    int totalSlots = (int)(settings.passengers + settings.animals + settings.extraSlots);
+    if (totalSlots > 0)
     {
       vehicleDef.properties.roles =
       [
         new VehicleRole
         {
           key = "Passenger",
-          slots = (int)(settings.passengers + settings.animals)
+          slots = totalSlots
         }
       ];
     }
@@ -188,6 +191,7 @@ public class VehicleGroup : IDisposable
 
     // VehicleDef needs to be complete by this point for PostGeneration events
     VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, settings.faction);
+    DevLog.WriteVerbose($"Creating vehicle {vehicle}");
     VehicleGroup group = new(vehicle);
     for (int i = 0; i < settings.drivers + settings.passengers; i++)
     {
@@ -217,6 +221,7 @@ public class VehicleGroup : IDisposable
     public uint drivers;
     public uint passengers;
     public uint animals;
+    public uint extraSlots;
 
     public VehicleProperties properties;
 

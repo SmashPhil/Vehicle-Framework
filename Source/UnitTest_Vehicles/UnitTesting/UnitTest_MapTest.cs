@@ -78,12 +78,6 @@ internal abstract class UnitTest_MapTest
     vehicles.Clear();
   }
 
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  protected void DestroyAllVehicles()
-  {
-    TestUtils.EmptyWorldAndMapOfVehicles();
-  }
-
   protected readonly struct VehicleTestCase : IDisposable
   {
     private readonly VehiclePawn vehicle;

@@ -16,7 +16,7 @@
         <Deterministic>true</Deterministic>
         <LangVersion>preview</LangVersion>
         <OutDir>..\..\1.6\Assemblies\</OutDir>
-        <DebugType>pdbonly</DebugType>
+        <DebugType>portable</DebugType>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
         <NoWarn>CS0649</NoWarn>
@@ -29,6 +29,7 @@
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
+        <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
         <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;</DefineConstants>
     </PropertyGroup>

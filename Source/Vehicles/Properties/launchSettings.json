@@ -12,7 +12,7 @@
     "UnitTest": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe",
-      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test --where \"class == UnitTest_Regions\"",
+      "commandLineArgs": "-experimental-xml-loader --pid \"SmashPhil.VehicleFramework\" --test",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "UnitTest"
       }

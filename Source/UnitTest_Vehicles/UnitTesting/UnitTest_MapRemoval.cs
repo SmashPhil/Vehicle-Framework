@@ -61,8 +61,6 @@ internal sealed class UnitTest_MapRemoval
     manualVehicle.Dispose();
     autonomousVehicle.Dispose();
     aerialVehicle.Dispose();
-
-    TestUtils.EmptyWorldAndMapOfVehicles();
   }
 
   [TearDown]

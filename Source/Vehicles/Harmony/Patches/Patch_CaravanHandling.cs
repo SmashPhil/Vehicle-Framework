@@ -241,8 +241,8 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(RandomVehicleOwner)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanMergeUtility), "MergeCaravans"),
-      transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
-        nameof(MergeWithVehicleCaravanTranspiler)));
+      postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+        nameof(MergeCaravansWithVehicle)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanMergeUtility),
         nameof(CaravanMergeUtility.MergeCommand)),
@@ -1107,20 +1107,27 @@ internal class Patch_CaravanHandling : IPatchCategory
     return true;
   }
 
-  private static IEnumerable<CodeInstruction> MergeWithVehicleCaravanTranspiler(
-    IEnumerable<CodeInstruction> instructions)
+  private static void MergeCaravansWithVehicle(List<Caravan> caravans)
   {
-    foreach (CodeInstruction instruction in instructions)
+    Caravan survivor = caravans.First(NotDestroyed);
+    if (survivor.pawns.InnerListForReading.Exists(IsVehicle))
     {
-      if (instruction.opcode == OpCodes.Stloc_0)
-      {
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Call,
-          operand: AccessTools.Method(typeof(CaravanHelper),
-            nameof(CaravanHelper.CaravanForMerging)));
-      }
+      // Swap over to vehicle caravan
+      List<Pawn> pawns = survivor.pawns.InnerListForReading.ToList();
+      PlanetTile tile = survivor.Tile;
+      survivor.RemoveAllPawns();
+      _ = CaravanHelper.MakeVehicleCaravan(pawns, Faction.OfPlayer, tile, true);
+    }
+    return;
 
-      yield return instruction;
+    static bool NotDestroyed(Caravan caravan)
+    {
+      return !caravan.Destroyed;
+    }
+
+    static bool IsVehicle(Pawn pawn)
+    {
+      return pawn is VehiclePawn;
     }
   }
 

@@ -44,6 +44,12 @@ internal sealed class UnitTest_AerialVehicle
     }
   }
 
+  [TearDown, ExecutionPriority(Priority.BelowNormal)]
+  private void RemoveAllVehicleWorldPawns()
+  {
+    aerialVehicles.Clear();
+  }
+
   [Test, ExecutionPriority(Priority.First)]
   private void AerialVehicleInit()
   {
@@ -134,12 +140,5 @@ internal sealed class UnitTest_AerialVehicle
       // ReSharper disable PossibleUnintendedReferenceComparison
       return thing.ParentHolder == vehicle.inventory;
     }
-  }
-
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void RemoveAllVehicleWorldPawns()
-  {
-    TestUtils.EmptyWorldAndMapOfVehicles();
-    aerialVehicles.Clear();
   }
 }

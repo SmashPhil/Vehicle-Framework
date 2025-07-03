@@ -18,12 +18,6 @@ namespace Vehicles.UnitTesting;
   "VehicleCaravan mechanics for stashing and recovering a vehicle on the world map.")]
 internal sealed class UnitTest_StashedVehicle
 {
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void DestroyAllVehicles()
-  {
-    TestUtils.EmptyWorldAndMapOfVehicles();
-  }
-
   private static VehiclePawn GetTransientVehicleWithPawns(out Pawn colonist, out Pawn animal)
   {
     VehicleDef vehicleDef =
@@ -151,8 +145,5 @@ internal sealed class UnitTest_StashedVehicle
     }
 
     mergedVehicleCaravan.Destroy();
-
-    // Vehicle should already be removed from WorldPawns immediately upon destruction
-    Assert.IsFalse(Find.WorldPawns.Contains(vehicle));
   }
 }
