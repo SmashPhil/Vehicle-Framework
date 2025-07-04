@@ -494,7 +494,10 @@ public static class CaravanHelper
       }
       if (pawn.GetVehicle() is { } vehicle)
         vehicle.RemovePawn(pawn);
-      caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
+      if (pawn.GetCaravan() is { } otherCaravan)
+        caravan.TransferPawnOrItem(otherCaravan.pawns, pawn);
+      else
+        caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
       if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
       {
         Find.WorldPawns.PassToWorld(pawn);

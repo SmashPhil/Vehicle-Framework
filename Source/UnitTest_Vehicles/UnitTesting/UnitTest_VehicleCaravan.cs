@@ -364,16 +364,15 @@ internal sealed class UnitTest_VehicleCaravan
 
     List<Caravan> caravans = [];
     Find.WorldObjects.GetPlayerControlledCaravansAt(1, caravans);
-    Assert.IsFalse(caravan.Destroyed);
-    Assert.AreEqual(caravans.Count, 2);
-    Assert.IsTrue(caravans.All(carvn => carvn is VehicleCaravan));
-
     (Caravan ogCaravan, Caravan otherCaravan) = caravan == caravans[0] ?
       (caravans[0], caravans[1]) :
       (caravans[1], caravans[0]);
+    using ScopeWorldObject scopeOther = new(otherCaravan);
+    Assert.IsFalse(caravan.Destroyed);
+    Assert.AreEqual(caravans.Count, 2);
+    Assert.IsTrue(caravans.All(carvn => carvn is VehicleCaravan));
     Assert.IsFalse(ReferenceEquals(caravan, otherCaravan));
     Assert.IsTrue(ReferenceEquals(caravan, ogCaravan));
-    using ScopeWorldObject scopeOther = new(otherCaravan);
     foreach (TransferableOneWay transferable in transferables)
     {
       if (!transferable.HasAnyThing)
@@ -395,7 +394,92 @@ internal sealed class UnitTest_VehicleCaravan
   [Test]
   private void SplitIntoMixedCaravans()
   {
+    const int PawnCount = 5;
+
     Assert.IsFalse(CaravansAt(1));
+
+    using VehicleGroup group1 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = PawnCount
+    });
+    using VehicleGroup group2 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = PawnCount
+    });
+
+    group1.BoardAll();
+    group2.BoardAll();
+
+    VehicleCaravan caravan =
+      CaravanHelper.MakeVehicleCaravan([group1.vehicle, group2.vehicle],
+        Faction.OfPlayer, 1, true);
+    using ScopeWorldObject scopeCaravan = new(caravan);
+    group2.DisembarkOne();
+
+    Dialog_SplitCaravan splitCaravanDlg = new(caravan);
+    using ScopeWindow sw = new(splitCaravanDlg);
+    splitCaravanDlg.PreOpen();
+    splitCaravanDlg.PostOpen();
+
+    List<TransferableOneWay> transferables = TransferablesFieldRef.Invoke(splitCaravanDlg);
+    for (int i = 0; i < transferables.Count; i++)
+    {
+      TransferableOneWay transferable = transferables[i];
+      Assert.IsTrue(transferable.HasAnyThing);
+      int count;
+      if (transferable.AnyThing is VehiclePawn)
+      {
+        // All vehicles transfer to the same caravan
+        count = transferable.GetMaximumToTransfer();
+      }
+      else if (CaravanInventoryUtility.GetOwnerOf(caravan, transferable.AnyThing) is { } pawn &&
+        pawn.InVehicle())
+      {
+        count = 0;
+      }
+      else
+      {
+        count = i % 2 == 0 ? transferable.GetMaximumToTransfer() : 0;
+      }
+      transferable.AdjustTo(count);
+    }
+    SplitCaravansMethod.Invoke(splitCaravanDlg, null);
+    splitCaravanDlg.Close();
+
+    List<Caravan> caravans = [];
+    Find.WorldObjects.GetPlayerControlledCaravansAt(1, caravans);
+    (Caravan ogCaravan, Caravan otherCaravan) = caravan == caravans[0] ?
+      (caravans[0], caravans[1]) :
+      (caravans[1], caravans[0]);
+    using ScopeWorldObject scopeOg = new(ogCaravan);
+    using ScopeWorldObject scopeOther = new(otherCaravan);
+    Assert.IsTrue(caravan.Destroyed);
+    Assert.IsFalse(ReferenceEquals(caravan, otherCaravan));
+    Assert.IsFalse(ReferenceEquals(caravan, ogCaravan));
+    Assert.AreEqual(caravans.Count, 2);
+    Assert.IsFalse(caravans.All(carvn => carvn is VehicleCaravan));
+    // 1 VehicleCaravan, 1 vanilla Caravan
+    Assert.IsTrue(ogCaravan is VehicleCaravan ^ otherCaravan is VehicleCaravan);
+    foreach (TransferableOneWay transferable in transferables)
+    {
+      if (!transferable.HasAnyThing)
+        continue;
+
+      Caravan container = transferable.CountToTransfer > 0 ? otherCaravan : ogCaravan;
+      switch (transferable.AnyThing)
+      {
+        case Pawn pawn:
+          Expect.IsTrue(container.ContainsPawn(pawn.InVehicle() ? pawn.GetVehicle() : pawn));
+        break;
+        case not null:
+          Expect.IsTrue(container.AllThings.ContainsAllOf(transferable.things));
+        break;
+      }
+    }
   }
 
   [Test]
