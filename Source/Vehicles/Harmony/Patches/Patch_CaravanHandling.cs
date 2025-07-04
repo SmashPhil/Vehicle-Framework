@@ -22,7 +22,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 {
   private static readonly List<Thing> TmpAerialVehicleThingsWillToBuy = [];
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
+using System.Threading;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -46,7 +47,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     SplitCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_SplitCaravan+Tab", "RimWorld");
   }
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

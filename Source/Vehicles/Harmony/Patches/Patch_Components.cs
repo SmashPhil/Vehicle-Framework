@@ -8,7 +8,7 @@ namespace Vehicles;
 
 internal class Patch_Components : IPatchCategory
 {
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

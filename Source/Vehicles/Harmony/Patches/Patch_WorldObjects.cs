@@ -9,7 +9,7 @@ namespace Vehicles;
 
 internal class Patch_WorldObjects : IPatchCategory
 {
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {
@@ -22,7 +22,7 @@ internal class Patch_WorldObjects : IPatchCategory
         nameof(GetAdjustedTargetForAerialVehicle)));
   }
 
-  private static void AerialVehicleInFlightAltimeter(ISelectable sel, Rect rect)
+  private static void AerialVehicleInFlightAltimeter(ISelectable sel)
   {
     if (sel is AerialVehicleInFlight aerialVehicle)
     {
@@ -34,7 +34,7 @@ internal class Patch_WorldObjects : IPatchCategory
     ref GlobalTargetInfo __result)
   {
     if (target.HasThing && target.Thing.ParentHolder is VehicleRoleHandler handler &&
-      handler.vehicle.GetAerialVehicle() is AerialVehicleInFlight aerialVehicle)
+      handler.vehicle.GetAerialVehicle() is { } aerialVehicle)
     {
       __result = aerialVehicle;
     }

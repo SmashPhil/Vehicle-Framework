@@ -13,9 +13,9 @@ namespace Vehicles;
 
 internal class Patch_JobSystem : IPatchCategory
 {
-  private static bool startingErrorRecoverJob = false;
+  private static bool startingErrorRecoverJob;
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

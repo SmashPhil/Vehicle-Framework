@@ -17,7 +17,7 @@ internal class Patch_VehiclePathing : IPatchCategory
 {
   private static readonly List<VehiclePawn> MultiSelectGotoList = [];
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

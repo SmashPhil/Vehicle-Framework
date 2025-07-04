@@ -31,7 +31,7 @@ internal class Patch_Rendering : IPatchCategory
 
   private static readonly List<Pawn> TmpPawns = [];
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {

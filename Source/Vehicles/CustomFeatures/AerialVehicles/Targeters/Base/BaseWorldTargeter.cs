@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
 using RimWorld;
 using RimWorld.Planet;
-using SmashTools;
+using UnityEngine;
+using Verse;
 
 namespace Vehicles.World;
 
-[MustImplement("BeginTargeting")]
 public abstract class BaseWorldTargeter
 {
   protected int origin = -1;

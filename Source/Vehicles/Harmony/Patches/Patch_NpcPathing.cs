@@ -22,7 +22,7 @@ internal class Patch_NpcPathing : IPatchCategory
     Assert.IsNotNull(jobDriverGotoDisplayClassType);
   }
 
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.PostDefDatabase;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {
