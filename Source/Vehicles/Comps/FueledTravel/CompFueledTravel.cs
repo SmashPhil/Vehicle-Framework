@@ -613,7 +613,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
           motePosition = new Vector3(parent.Position.x + offsetX + CellOffsetIntVec3ToVector3,
             parent.Position.y, parent.Position.z + offsetZ + CellOffsetIntVec3ToVector3);
 
-          MoteThrown mote = (MoteThrown)ThingMaker.MakeThing(Props.MoteDisplayed);
+          MoteThrown mote = (MoteThrown)ThingMaker.MakeThing(Props.moteDisplayed);
           mote.exactPosition = motePosition;
           mote.Scale = 1f;
           mote.rotationRate = 15f;
@@ -627,7 +627,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
         catch (Exception ex)
         {
           Log.Error(
-            $"Exception thrown while trying to display {Props.MoteDisplayed.defName}.\n{ex}");
+            $"Exception thrown while trying to display {Props.moteDisplayed.defName}.\n{ex}");
           terminateMotes = true;
           return;
         }

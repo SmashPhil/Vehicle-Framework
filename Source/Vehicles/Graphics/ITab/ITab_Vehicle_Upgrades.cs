@@ -39,20 +39,20 @@ public class ITab_Vehicle_Upgrades : ITab
   public static readonly Vector2 GridSpacing = new(20, 20);
   public static readonly Vector2 GridOrigin = new(30, 30);
 
-  public static readonly int totalLinesAcross = Mathf.FloorToInt(ScreenWidth / GridSpacing.x) - 2;
-  private static readonly int totalLinesDown = Mathf.FloorToInt(ScreenHeight / GridSpacing.y) - 3;
+  internal static readonly int MaxLinesAcross = Mathf.FloorToInt(ScreenWidth / GridSpacing.x) - 2;
+  private static readonly int MaxLinesDown = Mathf.FloorToInt(ScreenHeight / GridSpacing.y) - 3;
 
-  private readonly Color notUpgradedColor = new(0, 0, 0, 0.3f);
-  private readonly Color upgradingColor = new(1, 0.75f, 0, 1);
-  private readonly Color disabledColor = new(0.25f, 0.25f, 0.25f, 1);
-  private readonly Color disabledLineColor = new(0.3f, 0.3f, 0.3f, 1);
-  private readonly Color gridLineColor = new(0.3f, 0.3f, 0.3f, 1);
+  public static readonly List<string> ReplaceNodes = [];
 
-  private readonly Color effectColorPositive = new(0.1f, 1f, 0.1f);
-  private readonly Color effectColorNegative = new(0.8f, 0.4f, 0.4f);
-  private readonly Color effectColorNeutral = new(0.5f, 0.5f, 0.5f, 0.75f);
+  private static readonly Color NotUpgradedColor = new(0, 0, 0, 0.3f);
+  private static readonly Color UpgradingColor = new(1, 0.75f, 0, 1);
+  private static readonly Color DisabledColor = new(0.25f, 0.25f, 0.25f, 1);
+  private static readonly Color DisabledLineColor = new(0.3f, 0.3f, 0.3f, 1);
+  private static readonly Color GridLineColor = new(0.3f, 0.3f, 0.3f, 1);
 
-  public static readonly List<string> replaceNodes = [];
+  private static readonly Color EffectColorPositive = new(0.1f, 1f, 0.1f);
+  private static readonly Color EffectColorNegative = new(0.8f, 0.4f, 0.4f);
+  private static readonly Color EffectColorNeutral = new(0.5f, 0.5f, 0.5f, 0.75f);
 
   private VehiclePawn openedFor;
 
@@ -69,10 +69,6 @@ public class ITab_Vehicle_Upgrades : ITab
   private readonly List<string> excludeTurrets = [];
 
   private bool showDetails;
-
-  private Vector2 scrollPosition;
-  private Vector2 resize;
-  private bool resizeCheck;
 
   private UpgradeNode InfoNode => selectedNode ?? highlightedNode;
 
@@ -95,25 +91,6 @@ public class ITab_Vehicle_Upgrades : ITab
           RecacheTurretRenderers();
         }
       }
-    }
-  }
-
-  public int TotalLinesDown
-  {
-    get
-    {
-      int maxCoord = totalLinesDown;
-      if (!Vehicle.CompUpgradeTree.Props.def.nodes.NullOrEmpty())
-      {
-        foreach (UpgradeNode node in Vehicle.CompUpgradeTree.Props.def.nodes)
-        {
-          if (node.GridCoordinate.z > maxCoord)
-          {
-            maxCoord = node.GridCoordinate.z;
-          }
-        }
-      }
-      return maxCoord;
     }
   }
 
@@ -146,8 +123,6 @@ public class ITab_Vehicle_Upgrades : ITab
     base.OnOpen();
     SelectedNode = null;
     highlightedNode = null;
-    resizeCheck = false;
-    scrollPosition = Vector2.zero;
   }
 
   protected override void CloseTab()
@@ -306,7 +281,7 @@ public class ITab_Vehicle_Upgrades : ITab
 
     if (!VehicleMod.settings.debug.debugDrawNodeGrid)
     {
-      using var lineColor = new TextBlock(gridLineColor);
+      using var lineColor = new TextBlock(GridLineColor);
       Widgets.DrawLineHorizontal(innerRect.x, innerRect.y, innerRect.width);
       Widgets.DrawLineHorizontal(innerRect.x, innerRect.yMax, innerRect.width);
 
@@ -375,13 +350,6 @@ public class ITab_Vehicle_Upgrades : ITab
 
   private void DrawGrid(Rect rect)
   {
-    float startY = TopPadding + GridOrigin.y;
-
-    //Rect outRect = new Rect(rect.x, rect.y + startY, ScreenWidth - UpgradeNodeDim, ScreenHeight - startY);
-    //Rect viewRect = new Rect(outRect.x, outRect.y, outRect.width - 21, outRect.y + TotalLinesDown * UpgradeNodeDim + UpgradeNodeDim / 2);
-
-    //Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
-
     if (DebugSettings.ShowDevGizmos && VehicleMod.settings.debug.debugDrawNodeGrid)
     {
       DrawBackgroundGridTop();
@@ -403,13 +371,14 @@ public class ITab_Vehicle_Upgrades : ITab
         continue;
       }
 
-      foreach (UpgradeNode prerequisite in Vehicle.CompUpgradeTree.Props.def.nodes.FindAll(
-        prereqNode => !prereqNode.hidden && upgradeNode.prerequisiteNodes.Contains(prereqNode.key)))
+      foreach (UpgradeNode prerequisite in
+        Vehicle.CompUpgradeTree.Props.def.nodes.FindAll(prereqNode =>
+          !prereqNode.hidden && upgradeNode.prerequisiteNodes.Contains(prereqNode.key)))
       {
         Vector2 start = GridCoordinateToScreenPos(upgradeNode.GridCoordinate);
         Vector2 end = GridCoordinateToScreenPos(prerequisite.GridCoordinate);
 
-        Color color = disabledLineColor;
+        Color color = DisabledLineColor;
 
         if (Vehicle.CompUpgradeTree.NodeUnlocked(upgradeNode))
         {
@@ -448,7 +417,7 @@ public class ITab_Vehicle_Upgrades : ITab
         !Vehicle.CompUpgradeTree.PrerequisitesMet(upgradeNode))
       {
         colored = true;
-        GUI.color = disabledColor;
+        GUI.color = DisabledColor;
       }
       Widgets.DrawTextureFitted(upgradeRect, Command.BGTex, 1);
       Widgets.DrawTextureFitted(upgradeRect, upgradeNode.UpgradeImage, 1);
@@ -495,24 +464,13 @@ public class ITab_Vehicle_Upgrades : ITab
     if (InfoNode != null)
     {
       detailRect = GetDetailRect(rect);
-      //detailRect.position += TabRect.position;
       Widgets.BeginGroup(detailRect);
       {
         Rect infoPanelRect = detailRect.AtZero();
         DrawInfoPanel(infoPanelRect);
       }
       Widgets.EndGroup();
-      //Find.WindowStack.ImmediateWindow(InfoNode.GetHashCode() ^ Vehicle.GetHashCode(), detailRect, WindowLayer.GameUI, delegate ()
-      //{
-      //	if (Vehicle != null && InfoNode != null)
-      //	{
-      //		Rect infoPanelRect = detailRect.AtZero();
-      //		DrawInfoPanel(infoPanelRect);
-      //	}
-      //}, doBackground: false);
     }
-
-    //Widgets.EndScrollView();
   }
 
   private Rect GetDetailRect(Rect rect, float padding = 5)
@@ -718,11 +676,7 @@ public class ITab_Vehicle_Upgrades : ITab
   protected override void UpdateSize()
   {
     base.UpdateSize();
-    if (resizeCheck)
-    {
-      size = resize;
-    }
-    else if (!Mathf.Approximately(size.x, ScreenWidth) ||
+    if (!Mathf.Approximately(size.x, ScreenWidth) ||
       !Mathf.Approximately(size.y, ScreenHeight))
     {
       size = new Vector2(ScreenWidth, ScreenHeight);
@@ -731,11 +685,11 @@ public class ITab_Vehicle_Upgrades : ITab
 
   private void DrawBackgroundGridTop()
   {
-    for (int i = 0; i <= totalLinesAcross; i++)
+    for (int i = 0; i <= MaxLinesAcross; i++)
     {
-      using var lineColor = new TextBlock(gridLineColor);
+      using var lineColor = new TextBlock(GridLineColor);
       Widgets.DrawLineVertical(GridSpacing.x + GridSpacing.x * i, TopPadding + GridSpacing.y,
-        totalLinesDown * GridSpacing.y);
+        MaxLinesDown * GridSpacing.y);
       if (i % 5 == 0)
       {
         GUI.color = Color.white;
@@ -748,11 +702,11 @@ public class ITab_Vehicle_Upgrades : ITab
 
   private void DrawBackgroundGridLeft()
   {
-    for (int i = 0; i <= totalLinesDown; i++)
+    for (int i = 0; i <= MaxLinesDown; i++)
     {
-      using var lineColor = new TextBlock(gridLineColor);
+      using var lineColor = new TextBlock(GridLineColor);
       Widgets.DrawLineHorizontal(GridSpacing.x, TopPadding + GridSpacing.y + GridSpacing.y * i,
-        totalLinesAcross * GridSpacing.x);
+        MaxLinesAcross * GridSpacing.x);
       if (i % 5 == 0)
       {
         GUI.color = Color.white;
@@ -818,10 +772,9 @@ public class ITab_Vehicle_Upgrades : ITab
 
           GUI.color = textEntry.effectType switch
           {
-            UpgradeEffectType.Positive => effectColorPositive,
-            UpgradeEffectType.Negative => effectColorNegative,
-            UpgradeEffectType.Neutral  => effectColorNeutral,
-            UpgradeEffectType.None     => Color.white,
+            UpgradeEffectType.Positive => EffectColorPositive,
+            UpgradeEffectType.Negative => EffectColorNegative,
+            UpgradeEffectType.Neutral  => EffectColorNeutral,
             _                          => Color.white,
           };
 
@@ -842,7 +795,7 @@ public class ITab_Vehicle_Upgrades : ITab
     }
     else if (Vehicle.CompUpgradeTree.NodeUnlocking == node)
     {
-      DrawBorder(rect, upgradingColor);
+      DrawBorder(rect, UpgradingColor);
     }
     else if (Vehicle.CompUpgradeTree.NodeUnlocked(node))
     {
@@ -850,11 +803,11 @@ public class ITab_Vehicle_Upgrades : ITab
     }
     else if (!colored)
     {
-      Widgets.DrawBoxSolid(rect, notUpgradedColor);
+      Widgets.DrawBoxSolid(rect, NotUpgradedColor);
     }
     else
     {
-      DrawBorder(rect, notUpgradedColor);
+      DrawBorder(rect, NotUpgradedColor);
     }
     return;
 

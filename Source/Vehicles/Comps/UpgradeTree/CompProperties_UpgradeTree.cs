@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Verse;
+﻿using System.Collections.Generic;
 using SmashTools;
+using Verse;
 
 namespace Vehicles
 {
@@ -37,10 +34,10 @@ namespace Vehicles
         foreach (UpgradeNode node in def.nodes)
         {
           if (node.GridCoordinate.x < 0 ||
-            node.GridCoordinate.x >= ITab_Vehicle_Upgrades.totalLinesAcross)
+            node.GridCoordinate.x >= ITab_Vehicle_Upgrades.MaxLinesAcross)
           {
             yield return
-              $"Maximum grid coordinate width={ITab_Vehicle_Upgrades.totalLinesAcross - 1}. Larger " +
+              $"Maximum grid coordinate width={ITab_Vehicle_Upgrades.MaxLinesAcross - 1}. Larger " +
               $"coordinates are not supported, consider going downward. Coord=({node.GridCoordinate.x}," +
               $"{node.GridCoordinate.z})".ConvertRichText();
           }
@@ -51,7 +48,7 @@ namespace Vehicles
     public override void ResolveReferences(ThingDef parentDef)
     {
       base.ResolveReferences(parentDef);
-      if (!(parentDef is VehicleDef vehicleDef))
+      if (parentDef is not VehicleDef vehicleDef)
       {
         Log.Error($"Attaching {GetType()} on non-vehicle def. This is not allowed.");
         return;

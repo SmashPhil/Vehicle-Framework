@@ -8,11 +8,9 @@ namespace Vehicles;
 [PublicAPI]
 public class ActionUpgrade : Upgrade
 {
-  private List<DynamicDelegate<VehiclePawn>> unlockMethods;
-
-  private List<DynamicDelegate<VehiclePawn>> refundMethods;
-
-  private bool unlockOnLoad;
+  public List<DynamicDelegate<VehiclePawn>> unlockMethods;
+  public List<DynamicDelegate<VehiclePawn>> refundMethods;
+  public bool unlockOnLoad;
 
   public override bool UnlockOnLoad => unlockOnLoad;
 

@@ -1,17 +1,19 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using SmashTools;
 using UnityEngine;
 using Verse;
 
 namespace Vehicles;
 
+[PublicAPI]
 [HeaderTitle(Label = "VF_FueledTravelPropertes", Translate = true)]
 public class CompProperties_FueledTravel : VehicleCompProperties
 {
   public ThingDef fuelType;
   public ThingDef leakDef;
 
-  private bool electricPowered;
+  public bool electricPowered;
 
   [PostToSettings(Label = "VF_DischargePerTick", Tooltip = "VF_DischargePerTickTooltip",
     Translate = true,
@@ -55,16 +57,17 @@ public class CompProperties_FueledTravel : VehicleCompProperties
 
   [PostToSettings(Label = "VF_AmbientHeat", Tooltip = "VF_AmbientHeatTooltip", Translate = true,
     UISettingsType = UISettingsType.FloatBox)]
-  public float ambientHeat = 0;
+  public float ambientHeat;
 
-  private string gizmoLabel;
+  [MustTranslate]
+  public string gizmoLabel;
 
   public FuelConsumptionCondition fuelConsumptionCondition = FuelConsumptionCondition.Drafted |
     FuelConsumptionCondition.Moving | FuelConsumptionCondition.Flying;
 
   public List<OffsetMote> motesGenerated;
 
-  public ThingDef MoteDisplayed;
+  public ThingDef moteDisplayed;
 
   public int ticksToSpawnMote;
 

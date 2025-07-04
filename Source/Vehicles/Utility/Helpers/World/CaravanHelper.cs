@@ -475,28 +475,25 @@ public static class CaravanHelper
       Log.Warning(
         "Tried to create a caravan but chose not to spawn a caravan but pass pawns to world. This can cause bugs because pawns can be discarded.");
     }
-    List<Pawn> pawnsList = pawns.ToList();
 
     VehicleCaravan caravan =
       (VehicleCaravan)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles.VehicleCaravan);
     if (startingTile.Valid)
-    {
       caravan.Tile = startingTile;
-    }
     caravan.SetFaction(faction);
     if (startingTile.Valid)
     {
       Find.WorldObjects.Add(caravan);
     }
-    foreach (Pawn pawn in pawnsList)
+    foreach (Pawn pawn in VehicleFilter.FilterOutPassengers(pawns))
     {
       if (pawn.Dead)
       {
         Trace.Fail($"Tried to form caravan with dead pawn {pawn}. Removing...");
         continue;
       }
-      Assert.IsFalse(pawn.InVehicle(),
-        $"Trying to form caravan with {pawn} who is already in a vehicle. Add the vehicle instead.");
+      if (pawn.GetVehicle() is { } vehicle)
+        vehicle.RemovePawn(pawn);
       caravan.AddPawn(pawn, addToWorldPawnsIfNotAlready);
       if (addToWorldPawnsIfNotAlready && !pawn.IsWorldPawn())
       {

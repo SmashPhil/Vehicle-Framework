@@ -1106,7 +1106,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
         int countRefilled = 0;
 
         Assert.IsTrue(ThingsToTakeReloading.Count == 0);
-        using ScopedListRollback<(Thing, int)> slr = new(ThingsToTakeReloading);
+        using ClearOnDispose<(Thing, int)> slr = new(ThingsToTakeReloading);
         //Deterine which items (and how much) to take
         foreach (Thing thing in vehicle.inventory.innerContainer)
         {

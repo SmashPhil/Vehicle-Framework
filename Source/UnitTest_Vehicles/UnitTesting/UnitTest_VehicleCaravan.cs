@@ -5,6 +5,7 @@ using DevTools.UnitTesting;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
@@ -23,6 +24,22 @@ internal sealed class UnitTest_VehicleCaravan
 {
   private static readonly MethodInfo MergeCaravansMethod =
     AccessTools.Method(typeof(CaravanMergeUtility), "MergeCaravans");
+
+  private static readonly MethodInfo SplitCaravansMethod =
+    AccessTools.Method(typeof(Dialog_SplitCaravan), "TrySplitCaravan");
+
+  private static readonly AccessTools.FieldRef<Dialog_SplitCaravan, List<TransferableOneWay>>
+    TransferablesFieldRef =
+      AccessTools.FieldRefAccess<Dialog_SplitCaravan, List<TransferableOneWay>>("transferables");
+
+  private static readonly List<Caravan> TmpCaravans = [];
+
+  private static bool CaravansAt(PlanetTile tile)
+  {
+    using ClearOnDispose<Caravan> slr = new(TmpCaravans);
+    Find.WorldObjects.GetPlayerControlledCaravansAt(tile, TmpCaravans);
+    return TmpCaravans.Count > 0;
+  }
 
   [Test]
   private void GetCaravan()
@@ -237,16 +254,148 @@ internal sealed class UnitTest_VehicleCaravan
   [Test]
   private void SplitIntoVanillaCaravans()
   {
+    const int PawnCount = 5;
+
+    Assert.IsFalse(CaravansAt(1));
+
+    List<Pawn> pawns = [];
+    for (int j = 0; j < PawnCount; j++)
+    {
+      Pawn colonist = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
+        Faction.OfPlayer, fixedBiologicalAge: 30));
+      Assert.IsNotNull(colonist);
+      Assert.AreEqual(colonist.Faction, Faction.OfPlayer);
+      pawns.Add(colonist);
+    }
+    Caravan caravan = CaravanMaker.MakeCaravan(pawns, Faction.OfPlayer, 1, true);
+    using ScopeWorldObject scopeCaravan = new(caravan);
+
+    Dialog_SplitCaravan splitCaravanDlg = new(caravan);
+    using ScopeWindow sw = new(splitCaravanDlg);
+    splitCaravanDlg.PreOpen();
+    splitCaravanDlg.PostOpen();
+
+    List<TransferableOneWay> transferables = TransferablesFieldRef.Invoke(splitCaravanDlg);
+    for (int i = 0; i < transferables.Count; i++)
+    {
+      TransferableOneWay transferable = transferables[i];
+      transferable.AdjustTo(i % 2 == 0 ? transferable.GetMaximumToTransfer() : 0);
+    }
+    SplitCaravansMethod.Invoke(splitCaravanDlg, null);
+    splitCaravanDlg.Close();
+
+    List<Caravan> caravans = [];
+    Find.WorldObjects.GetPlayerControlledCaravansAt(1, caravans);
+    Assert.IsFalse(caravan.Destroyed);
+    Assert.AreEqual(caravans.Count, 2);
+
+    Caravan otherCaravan = caravans.First(carvn => carvn != caravan);
+    using ScopeWorldObject scopeOther = new(otherCaravan);
+    foreach (TransferableOneWay transferable in transferables)
+    {
+      if (!transferable.HasAnyThing)
+        continue;
+
+      Caravan container = transferable.CountToTransfer > 0 ? otherCaravan : caravan;
+      switch (transferable.AnyThing)
+      {
+        case Pawn pawn:
+          Expect.IsTrue(container.ContainsPawn(pawn));
+        break;
+        case not null:
+          Expect.IsTrue(container.AllThings.ContainsAllOf(transferable.things));
+        break;
+      }
+    }
   }
 
   [Test]
   private void SplitIntoVehicleCaravans()
   {
+    const int PawnCount = 5;
+
+    Assert.IsFalse(CaravansAt(1));
+
+    using VehicleGroup group1 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = PawnCount
+    });
+    using VehicleGroup group2 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = PawnCount
+    });
+
+    group1.BoardAll();
+    group2.BoardAll();
+
+    VehicleCaravan caravan =
+      CaravanHelper.MakeVehicleCaravan([group1.vehicle, group2.vehicle],
+        Faction.OfPlayer, 1, true);
+    using ScopeWorldObject scopeCaravan = new(caravan);
+    group2.DisembarkOne();
+
+    Dialog_SplitCaravan splitCaravanDlg = new(caravan);
+    using ScopeWindow sw = new(splitCaravanDlg);
+    splitCaravanDlg.PreOpen();
+    splitCaravanDlg.PostOpen();
+
+    bool transferVehicle = false;
+    List<TransferableOneWay> transferables = TransferablesFieldRef.Invoke(splitCaravanDlg);
+    for (int i = 0; i < transferables.Count; i++)
+    {
+      TransferableOneWay transferable = transferables[i];
+      if (transferable.AnyThing is VehiclePawn)
+      {
+        // Ensure vehicles are distributed or we'll end up with mixed caravans
+        transferVehicle = !transferVehicle;
+        transferable.AdjustTo(transferVehicle ? transferable.GetMaximumToTransfer() : 0);
+      }
+      else
+      {
+        transferable.AdjustTo(i % 2 == 0 ? transferable.GetMaximumToTransfer() : 0);
+      }
+    }
+    SplitCaravansMethod.Invoke(splitCaravanDlg, null);
+    splitCaravanDlg.Close();
+
+    List<Caravan> caravans = [];
+    Find.WorldObjects.GetPlayerControlledCaravansAt(1, caravans);
+    Assert.IsFalse(caravan.Destroyed);
+    Assert.AreEqual(caravans.Count, 2);
+    Assert.IsTrue(caravans.All(carvn => carvn is VehicleCaravan));
+
+    (Caravan ogCaravan, Caravan otherCaravan) = caravan == caravans[0] ?
+      (caravans[0], caravans[1]) :
+      (caravans[1], caravans[0]);
+    Assert.IsFalse(ReferenceEquals(caravan, otherCaravan));
+    Assert.IsTrue(ReferenceEquals(caravan, ogCaravan));
+    using ScopeWorldObject scopeOther = new(otherCaravan);
+    foreach (TransferableOneWay transferable in transferables)
+    {
+      if (!transferable.HasAnyThing)
+        continue;
+
+      Caravan container = transferable.CountToTransfer > 0 ? otherCaravan : caravan;
+      switch (transferable.AnyThing)
+      {
+        case Pawn pawn:
+          Expect.IsTrue(container.ContainsPawn(pawn.InVehicle() ? pawn.GetVehicle() : pawn));
+        break;
+        case not null:
+          Expect.IsTrue(container.AllThings.ContainsAllOf(transferable.things));
+        break;
+      }
+    }
   }
 
   [Test]
   private void SplitIntoMixedCaravans()
   {
+    Assert.IsFalse(CaravansAt(1));
   }
 
   [Test]
@@ -254,6 +403,8 @@ internal sealed class UnitTest_VehicleCaravan
   {
     const int Caravans = 3;
     const int PawnsPerCaravan = 3;
+
+    Assert.IsFalse(CaravansAt(1));
 
     List<Caravan> caravans = [];
     for (int i = 0; i < Caravans; i++)
@@ -281,6 +432,8 @@ internal sealed class UnitTest_VehicleCaravan
   [Test]
   private void MergeVehicleCaravans()
   {
+    Assert.IsFalse(CaravansAt(1));
+
     using VehicleGroup group1 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
@@ -330,6 +483,8 @@ internal sealed class UnitTest_VehicleCaravan
   private void MergeMixedCaravans()
   {
     const int PawnsInVanillaCaravan = 3;
+
+    Assert.IsFalse(CaravansAt(1));
 
     using VehicleGroup group1 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {

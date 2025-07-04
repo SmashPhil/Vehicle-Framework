@@ -54,6 +54,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     }
   }
 
+  protected override bool DraggingBar { get; set; }
+
   protected override string GetTooltip()
   {
     return "";

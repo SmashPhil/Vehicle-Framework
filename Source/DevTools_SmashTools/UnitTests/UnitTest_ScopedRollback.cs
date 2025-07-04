@@ -27,7 +27,7 @@ internal class UnitTest_ScopedRollback
   private void EmptyList()
   {
     List<int> intList = [];
-    using (new ScopedListRollback<int>(intList))
+    using (new ClearOnDispose<int>(intList))
     {
       Assert.AreEqual(intList.Count, 0);
       for (int i = 0; i < 5; i++)
@@ -38,11 +38,26 @@ internal class UnitTest_ScopedRollback
   }
 
   [Test]
+  [TestDescription("Empty list is cleared when rolled back.")]
+  private void EmptyHashSet()
+  {
+    HashSet<int> intSet = [];
+    using (new ClearOnDispose<int>(intSet))
+    {
+      Assert.AreEqual(intSet.Count, 0);
+      for (int i = 0; i < 5; i++)
+        intSet.Add(i);
+      Assert.AreEqual(intSet.Count, 5);
+    }
+    Expect.AreEqual(intSet.Count, 0);
+  }
+
+  [Test]
   [TestDescription("Order of items is preserved when list is rolled back.")]
   private void PopulatedListReordered()
   {
     List<int> intList = [1, 2, 3, 4, 5];
-    using (new ScopedListRollback<int>(intList))
+    using (new ClearOnDispose<int>(intList))
     {
       Assert.AreEqual(intList.Count, 5);
       Assert.IsTrue(intList[0] == 1 && intList[^1] == 5);
@@ -57,7 +72,7 @@ internal class UnitTest_ScopedRollback
   private void PopulatedListCleared()
   {
     List<int> intList2 = [1, 2, 3, 4, 5];
-    using (new ScopedListRollback<int>(intList2))
+    using (new ClearOnDispose<int>(intList2))
     {
       Assert.AreEqual(intList2.Count, 5);
       intList2.Clear();
@@ -74,7 +89,7 @@ internal class UnitTest_ScopedRollback
     TestObject obj = new();
     int id = obj.id;
     List<TestObject> objList = [obj];
-    using (new ScopedListRollback<TestObject>(objList))
+    using (new ClearOnDispose<TestObject>(objList))
     {
       Assert.AreEqual(objList.Count, 1);
       Assert.IsTrue(ReferenceEquals(objList[0], obj));

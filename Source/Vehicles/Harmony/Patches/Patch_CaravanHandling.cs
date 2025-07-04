@@ -248,6 +248,9 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(CaravanMergeUtility.MergeCommand)),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(DisableMergeForAerialVehicles)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(CaravanMaker), nameof(CaravanMaker.MakeCaravan)),
+      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling), nameof(MakeVehicleCaravan)));
 
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanArrivalAction_Trade),
@@ -955,10 +958,9 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   public static void ContainsPawnInVehicle(Pawn p, Caravan __instance, ref bool __result)
   {
-    if (!__result)
+    if (!__result && p.GetVehicle() is { } vehicle)
     {
-      __result = __instance.PawnsListForReading.Any(v =>
-        v is VehiclePawn vehicle && vehicle.AllPawnsAboard.Contains(p));
+      __result = __instance.ContainsPawn(vehicle);
     }
   }
 
@@ -1146,6 +1148,20 @@ internal class Patch_CaravanHandling : IPatchCategory
         }
       }
     }
+  }
+
+  private static bool MakeVehicleCaravan(ref Caravan __result, IEnumerable<Pawn> pawns,
+    Faction faction, PlanetTile startingTile, bool addToWorldPawnsIfNotAlready)
+  {
+    // ReSharper disable PossibleMultipleEnumeration
+    if (pawns.Any(pawn => pawn is VehiclePawn))
+    {
+      __result =
+        CaravanHelper.MakeVehicleCaravan(pawns, faction, startingTile, addToWorldPawnsIfNotAlready);
+      return false;
+    }
+    return true;
+    // ReSharper restore PossibleMultipleEnumeration
   }
 
   private static void NoTradingUndocked(Caravan caravan, ref FloatMenuAcceptanceReport __result)

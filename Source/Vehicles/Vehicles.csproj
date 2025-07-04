@@ -21,7 +21,6 @@
         <OutDir>..\..\1.6\Assemblies\</OutDir>
         <ManagedDirectory>..\..\..\..\RimWorldWin64_Data\Managed</ManagedDirectory>
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
-        <NoWarn>CS0649</NoWarn>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
         <DebugType>portable</DebugType>

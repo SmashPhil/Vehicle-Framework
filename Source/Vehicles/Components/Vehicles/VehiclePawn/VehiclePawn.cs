@@ -204,6 +204,7 @@ namespace Vehicles
       RegenerateUnsavedComponents();
       RecacheComponents();
       RecachePawnCount();
+      RecacheMovementPermissions();
       animator?.PostLoad();
 
       foreach (ThingComp comp in AllComps)

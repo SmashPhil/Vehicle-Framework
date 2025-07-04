@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -28,19 +27,11 @@ public sealed class TransferableVehicleWidget
   private const float FirstTransferableY = 6f;
   private const float ExtraSpaceAfterSectionTitle = 5f;
 
-  public const float TopAreaWidth = 515f;
-
-  public const float CountColumnWidth = 75f;
-  public const float AdjustColumnWidth = 240f;
-  public const float MassColumnWidth = 100f;
-
   // HostilityResponseModeUtility::FleeIcon
-  private static readonly Texture2D pawnIcon =
+  private static readonly Texture2D PawnIcon =
     ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Flee");
 
-  private static readonly Color cardColor = new(1f, 1f, 1f, 0.04f);
-
-  private static readonly StringBuilder stringBuilder = new();
+  private static readonly Color CardColor = new(1f, 1f, 1f, 0.04f);
 
   private readonly Section vehicleSection;
   private readonly List<TransferableOneWay> pawns;
@@ -200,7 +191,7 @@ public sealed class TransferableVehicleWidget
 
         Widgets.BeginGroup(rect);
         rect = rect.AtZero().ContractedBy(CardSpacing / 2f);
-        Widgets.DrawBoxSolidWithOutline(rect, cardColor, Widgets.SeparatorLineColor);
+        Widgets.DrawBoxSolidWithOutline(rect, CardColor, Widgets.SeparatorLineColor);
         DrawCard(rect.ContractedBy(CardContentPadding), vehicleSection, transferable);
         Widgets.EndGroup();
       }
@@ -339,14 +330,14 @@ public sealed class TransferableVehicleWidget
     if (vehicle != null)
     {
       DrawIcon(ref rect, VehicleTex.DraftVehicle, vehicle.PawnCountToOperate.ToString());
-      DrawIcon(ref rect, pawnIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
+      DrawIcon(ref rect, PawnIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
     }
     else
     {
       int movementSlots = vehicleDef.properties.RoleSeats(HandlingType.Movement);
       int nonMovementSlots = vehicleDef.properties.TotalSeats - movementSlots;
       DrawIcon(ref rect, VehicleTex.DraftVehicle, movementSlots.ToString());
-      DrawIcon(ref rect, pawnIcon, nonMovementSlots.ToString());
+      DrawIcon(ref rect, PawnIcon, nonMovementSlots.ToString());
     }
     return;
 

@@ -22,6 +22,8 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
   private static readonly MaterialPropertyBlock PropertyBlock = new();
   private static readonly Dictionary<ThingDef, Material> Materials = [];
 
+  private static readonly StringBuilder ExplanationBuilder = new();
+
   public VehicleCaravan_PathFollower vehiclePather;
   public VehicleCaravanTweener vehicleTweener;
 
@@ -127,23 +129,29 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
 
   public bool VehicleCantMove
   {
-    get { return VehiclesListForReading.Any(vehicle => !vehicle.CanMoveFinal); }
+    get
+    {
+      return VehiclesListForReading.Exists(Immobile);
+
+      static bool Immobile(VehiclePawn vehicle)
+      {
+        return !vehicle.CanMoveFinal;
+      }
+    }
   }
 
-  // TODO - just patch Caravan
   public new int TicksPerMove
   {
     get { return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this); }
   }
 
-  // TODO - just patch Caravan
   public new string TicksPerMoveExplanation
   {
     get
     {
-      StringBuilder stringBuilder = new();
-      _ = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, stringBuilder);
-      return stringBuilder.ToString();
+      using ClearStringOnDispose ssr = new(ExplanationBuilder);
+      _ = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, ExplanationBuilder);
+      return ExplanationBuilder.ToString();
     }
   }
 
@@ -449,10 +457,11 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
       {
         Pawn pawn = vehicle.AllPawnsAboard[i];
         vehicle.RemovePawn(pawn);
-        Assert.IsFalse(pawn.IsWorldPawn());
-        Find.WorldPawns.PassToWorld(pawn);
+        if (!pawn.IsWorldPawn() && pawn is not VehiclePawn)
+          Find.WorldPawns.PassToWorld(pawn);
       }
-      vehicle.Destroy();
+      if (!vehicle.Destroyed)
+        vehicle.Destroy();
     }
     base.Destroy();
   }

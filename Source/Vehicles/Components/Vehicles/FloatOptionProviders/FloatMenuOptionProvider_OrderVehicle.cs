@@ -24,7 +24,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
     IntVec3 clickCell = context.ClickedCell;
     if (context.IsMultiselect)
     {
-      using ScopedListRollback<VehiclePawn> slr = new(MultiSelectVehicles);
+      using ClearOnDispose<VehiclePawn> slr = new(MultiSelectVehicles);
       foreach (Pawn pawn in context.ValidSelectedPawns)
       {
         if (pawn is VehiclePawn vehicle && VehicleCanGoto(vehicle, clickCell).Accepted)

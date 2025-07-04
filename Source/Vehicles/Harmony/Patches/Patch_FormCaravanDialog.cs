@@ -90,7 +90,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       original: AccessTools.Method(typeof(Dialog_FormCaravan),
         nameof(Dialog_FormCaravan.PostClose)),
       postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
-        nameof(ClearTabListPostClose)));
+        nameof(FormCaravanPostClose)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Dialog_FormCaravan),
         nameof(Dialog_FormCaravan.DoWindowContents)),
@@ -117,8 +117,18 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(ReformWithVehicles)));
 
-    // TODO - Sam said he'll look into removing the redundant check, which means I can patch
-    // FormCaravanComp::CanFormOrReformCaravanNow instead.
+    // Split Caravan
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Dialog_SplitCaravan),
+        nameof(Dialog_SplitCaravan.PostOpen)),
+      prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(SplitCaravanPostOpen)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Dialog_SplitCaravan),
+        nameof(Dialog_FormCaravan.DoWindowContents)),
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(SplitCaravanTabsTranspiler)));
+
     //const string TypeName = "<GetGizmos>d__18";
     //const string GetGizmosDelName = "MoveNext";
     //Type formCaravanCompTypes =
@@ -166,7 +176,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     if (transferables.Exists(transferable =>
       transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 }))
     {
-      using ScopedListRollback<Pawn> slr = new(TmpPawns);
+      using ClearOnDispose<Pawn> slr = new(TmpPawns);
       foreach (TransferableOneWay transferable in transferables)
       {
         if (transferable.AnyThing is Pawn pawn && transferable.CountToTransfer > 0 &&
@@ -299,7 +309,8 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   /// <summary>
   /// Clear static fields for dialog on close
   /// </summary>
-  private static void ClearTabListPostClose(List<TabRecord> ___tabsList, bool ___choosingRoute)
+  private static void FormCaravanPostClose(List<TabRecord> ___tabsList,
+    bool ___choosingRoute)
   {
     if (!___choosingRoute)
     {
@@ -369,11 +380,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
         yield return new CodeInstruction(opcode: OpCodes.Ldfld,
           operand: AccessTools.Field(typeof(Dialog_FormCaravan), "pawnsTransfer"));
-        // this->pawnsTransfer
+        // this->itemsTransfer
         yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
         yield return new CodeInstruction(opcode: OpCodes.Ldfld,
           operand: AccessTools.Field(typeof(Dialog_FormCaravan), "itemsTransfer"));
-        // this->pawnsTransfer
+        // this->travelSuppliesTransfer
         yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
         yield return new CodeInstruction(opcode: OpCodes.Ldfld,
           operand: AccessTools.Field(typeof(Dialog_FormCaravan), "travelSuppliesTransfer"));
@@ -417,7 +428,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       case 2: // Dialog_FormCaravan.Tab.TravelSupplies
         travelSuppliesTransfer.extraHeaderSpace = 35;
         travelSuppliesTransfer.OnGUI(transferablesRect, out anythingChanged);
-        __instance.DrawAutoSelectCheckbox(transferablesRect, ref anythingChanged);
+        __instance?.DrawAutoSelectCheckbox(transferablesRect, ref anythingChanged);
       break;
       case TabVehicles: // Vehicles Tab
         // TODO 1.6 - check if `anythingChanged` is usable in TransferableVehicleWidget
@@ -642,6 +653,109 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     return false;
   }
 
+  /// <summary>
+  /// Create vehicle tab and inject into tabs list without the need for a new enum value.
+  /// Also disables initial route planning since vehicle selection may occur and invalidate the route.
+  /// </summary>
+  private static void SplitCaravanPostOpen(List<TabRecord> ___tabsList)
+  {
+    //Assert.IsNull(CaravanFormation.formation);
+    //CaravanFormation.formation = new FormationInfo(__instance, map);
+    selectedTab = TabVehicles;
+    ___tabsList.Clear();
+    ___tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
+      delegate { selectedTab = TabVehicles; },
+      () => selectedTab == TabVehicles));
+    foreach (int value in Enum.GetValues(SplitCaravanTabEnumType))
+    {
+      string translationKey = !TabKeys.OutOfBounds(value) ? TabKeys[value] : "Missing Label";
+      ___tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
+        () => selectedTab == value));
+    }
+  }
+
+  private static IEnumerable<CodeInstruction> SplitCaravanTabsTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    // ReSharper disable ExtractCommonBranchingCode
+    List<CodeInstruction> instructionList = [.. instructions];
+
+    FieldInfo tabListField = AccessTools.Field(typeof(Dialog_SplitCaravan), "tabsList");
+    FieldInfo tabField = AccessTools.Field(typeof(Dialog_SplitCaravan), "tab");
+    MethodInfo clearTabList =
+      AccessTools.Method(typeof(List<TabRecord>), nameof(List<TabRecord>.Clear));
+    MethodInfo drawTabs = typeof(TabDrawer).GetMethods(BindingFlags.Static | BindingFlags.Public)
+     .Where(method => method.Name == nameof(TabDrawer.DrawTabs))
+     .FirstOrDefault(method => method.GetParameters().Length == 3)?
+     .MakeGenericMethod(typeof(TabRecord));
+    bool tabClearing = false;
+    bool switchBlockClearing = false;
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+
+      if (instruction.LoadsField(tabListField) && instructionList[i + 1].Calls(clearTabList))
+      {
+        // Flag transpiler to start skipping instructions until we reach the TabDrawer::DrawTabs call
+        tabClearing = true;
+      }
+      else if (instruction.Calls(drawTabs))
+      {
+        tabClearing = false;
+        // ReSharper disable once RedundantAssignment
+        instruction = instructionList[++i]; // Callvirt: TabDrawer::DrawTabs
+        instruction = instructionList[++i]; // Pop
+        // ref inRect
+        yield return new CodeInstruction(opcode: OpCodes.Ldarga_S, operand: 1);
+        // Dialog_SplitCaravan::tabsList
+        yield return new CodeInstruction(opcode: OpCodes.Ldsfld, operand: tabListField);
+        // DrawTabList(ref inRect, tabsList);
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(DrawTabList)));
+      }
+      // Since we're using our own int-based values parallel to the Tab enum, we can skip the entire
+      // switch block and just handle the drawing ourselves.
+      else if (!tabClearing && !switchBlockClearing && instruction.LoadsField(tabField))
+      {
+        switchBlockClearing = true;
+        instruction = instructionList[++i]; // Ldfld: Dialog_SplitCaravan::tab
+        // null
+        yield return new CodeInstruction(opcode: OpCodes.Pop);
+        yield return new CodeInstruction(opcode: OpCodes.Ldnull);
+        // transferablesRect
+        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 2);
+        // out bool anythingChanged
+        yield return new CodeInstruction(opcode: OpCodes.Ldloca_S, operand: 3);
+        // this->pawnsTransfer
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+          operand: AccessTools.Field(typeof(Dialog_SplitCaravan), "pawnsTransfer"));
+        // this->itemsTransfer
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+          operand: AccessTools.Field(typeof(Dialog_SplitCaravan), "itemsTransfer"));
+        // this->foodAndMedicineTransfer
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+          operand: AccessTools.Field(typeof(Dialog_SplitCaravan), "foodAndMedicineTransfer"));
+
+        // DrawActiveTab
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(DrawActiveTab)));
+      }
+      if (switchBlockClearing && instructionList[i + 1].opcode == OpCodes.Ldloc_3)
+      {
+        switchBlockClearing = false;
+        instruction = instructionList[++i]; // brfalse.s IL_029A  (end of switch block)
+      }
+
+      if (!tabClearing && !switchBlockClearing)
+        yield return instruction;
+    }
+    // ReSharper restore ExtractCommonBranchingCode
+  }
+
+  // TODO - Waiting for Sam's changes
   private static IEnumerable<CodeInstruction> ReformCaravanWithVehiclesGizmoTranspiler(
     IEnumerable<CodeInstruction> instructions)
   {
