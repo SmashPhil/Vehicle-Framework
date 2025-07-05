@@ -1,10 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using RimWorld;
+using SmashTools;
 using Verse;
 using Verse.AI;
-using SmashTools;
 
 namespace Vehicles
 {

@@ -226,6 +226,7 @@ namespace Vehicles
       vehicle.CompVehicleLauncher.inFlight = false;
       GenSpawn.Spawn(vehicle, Position, Map, Rotation);
       vehicle.Transform.rotation = angle + Rotation.AsAngle;
+      vehicle.EventRegistry[VehicleEventDefOf.Repaired].AddSingle("Transform", vehicle.Transform.Reset);
       vehicle.DisembarkAll();
       vehicle.ignition.Drafted = false;
       Destroy();

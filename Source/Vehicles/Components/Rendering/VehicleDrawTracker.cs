@@ -5,6 +5,7 @@ using SmashTools;
 using SmashTools.Animations;
 using SmashTools.Rendering;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles.Rendering;
@@ -59,6 +60,7 @@ public class VehicleDrawTracker
 
   public void AddRenderer(IParallelRenderer parallelRenderer)
   {
+    Assert.IsFalse(parallelRenderers.Contains(parallelRenderer));
     parallelRenderer.SetDirty();
     parallelRenderers.Add(parallelRenderer);
   }
@@ -104,6 +106,5 @@ public class VehicleDrawTracker
   public void Notify_Spawned()
   {
     tweener.ResetTweenedPosToRoot();
-    LongEventHandler.ExecuteWhenFinished(overlayRenderer.Init);
   }
 }

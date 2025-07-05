@@ -3,6 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
+using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Rendering;
@@ -67,6 +68,7 @@ namespace Vehicles
       //health.Reset();
       statHandler.InitializeComponents();
       RegenerateUnsavedComponents();
+      UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
 
       if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
       {
@@ -206,6 +208,7 @@ namespace Vehicles
       RecachePawnCount();
       RecacheMovementPermissions();
       animator?.PostLoad();
+      UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
 
       foreach (ThingComp comp in AllComps)
       {
