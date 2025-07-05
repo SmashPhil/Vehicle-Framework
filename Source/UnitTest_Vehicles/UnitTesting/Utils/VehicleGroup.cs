@@ -149,7 +149,7 @@ public class VehicleGroup : IDisposable
       ];
     }
 
-    int totalSlots = (int)(settings.passengers + settings.animals + settings.extraSlots);
+    int totalSlots = (settings.passengers + settings.animals + settings.extraSlots);
     if (totalSlots > 0)
     {
       vehicleDef.properties.roles =
@@ -169,8 +169,8 @@ public class VehicleGroup : IDisposable
       vehicleDef.properties.roles.Add(new VehicleRole
       {
         key = "Driver",
-        slots = (int)settings.drivers,
-        slotsToOperate = (int)settings.drivers,
+        slots = settings.drivers,
+        slotsToOperate = settings.drivers,
 
         handlingTypes = HandlingType.Movement
       });
@@ -211,11 +211,11 @@ public class VehicleGroup : IDisposable
 
     // Reverse mapping permissions to def restrictions for easy configuration
     public VehicleType type = VehicleType.Land;
-    public VehiclePermissions permissions;
-    public uint drivers;
-    public uint passengers;
-    public uint animals;
-    public uint extraSlots;
+    public VehiclePermissions permissions = VehiclePermissions.Mobile;
+    public int drivers;
+    public int passengers;
+    public int animals;
+    public int extraSlots;
 
     public VehicleProperties properties;
 

@@ -31,7 +31,7 @@ internal sealed class UnitTest_VehiclePawn
   }
 
   [Test]
-  private void Destroy()
+  private void SpawnDestroy()
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef("VehicleDef_ForDestruction", null);
