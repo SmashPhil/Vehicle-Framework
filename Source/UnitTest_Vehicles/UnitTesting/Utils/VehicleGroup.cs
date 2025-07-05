@@ -97,6 +97,7 @@ public class VehicleGroup : IDisposable
     vehicle.DisembarkAll();
     foreach (Pawn pawn in pawns)
     {
+      // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
       if (vehicle.InVehicleCaravan())
         Assert.IsTrue(pawn.InVehicleCaravan());
       else
@@ -120,7 +121,7 @@ public class VehicleGroup : IDisposable
     Assert.IsTrue(vehicle.Destroyed);
   }
 
-  private static VehicleDef CreateVehicleDef(MockSettings settings)
+  public static VehicleDef CreateVehicleDef(MockSettings settings)
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
@@ -173,15 +174,6 @@ public class VehicleGroup : IDisposable
 
         handlingTypes = HandlingType.Movement
       });
-    }
-
-    if (!settings.comps.NullOrEmpty())
-    {
-      foreach (CompProperties compProps in settings.comps)
-      {
-        compProps.ResolveReferences(vehicleDef);
-        vehicleDef.comps.Add(compProps);
-      }
     }
     return vehicleDef;
   }

@@ -10,16 +10,14 @@ public static class MapHelper
 {
   public static void UnfogMapFromEdge(Map map, VehicleDef vehicleDef = null)
   {
-    const int sqrRadius = 30;
+    const int SqrRadius = 30;
 
-    if (!CellFinder.TryFindRandomCellNear(map.Center, map, sqrRadius, Validator, out IntVec3 cell))
+    if (!CellFinder.TryFindRandomCellNear(map.Center, map, SqrRadius, Validator, out IntVec3 cell))
     {
       if (!CellFinder.TryFindRandomEdgeCellWith(Validator, map, 0f, out cell))
       {
         if (!CellFinder.TryFindRandomCell(map, Validator, out cell))
-        {
           return;
-        }
       }
     }
     FloodFillerFog.FloodUnfog(cell, map);
@@ -34,6 +32,8 @@ public static class MapHelper
       if (vehicleDef != null)
       {
         VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
+        if (mapping[vehicleDef].Suspended)
+          mapping.RequestGridsFor(vehicleDef, DeferredGridGeneration.Urgency.Urgent);
         return mapping[vehicleDef].VehicleReachability
          .CanReachMapEdge(cellToCheck, TraverseParms.For(TraverseMode.NoPassClosedDoors));
       }

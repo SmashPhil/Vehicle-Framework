@@ -43,6 +43,7 @@ internal sealed class UnitTest_AerialVehicle
         }
       ]
     };
+    mockSettings.vehicleDef = VehicleGroup.CreateVehicleDef(mockSettings);
   }
 
   [TearDown]
@@ -77,8 +78,6 @@ internal sealed class UnitTest_AerialVehicle
     VehicleCaravan caravan =
       CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, StartTile, true);
     using ScopeWorldObject swo = new(caravan);
-    AerialVehicleLaunchHelper.ChoseTargetOnMap(group.vehicle, caravan.Tile,
-      new GlobalTargetInfo(DestTile), 0);
     group.vehicle.CompVehicleLauncher.inFlight = true;
     AerialVehicleInFlight aerialVehicle =
       AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(group.vehicle);
@@ -102,7 +101,7 @@ internal sealed class UnitTest_AerialVehicle
   }
 
   [Test]
-  private void AerialVehicleGC()
+  private void WorldPawnGC()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(mockSettings);
     group.BoardAll();
@@ -161,8 +160,28 @@ internal sealed class UnitTest_AerialVehicle
         return pawn.ParentHolder is Pawn_InventoryTracker inventoryTracker &&
           inventoryTracker.pawn == vehicle;
       }
-      // ReSharper disable PossibleUnintendedReferenceComparison
       return thing.ParentHolder == vehicle.inventory;
+    }
+  }
+
+  [Test]
+  private void CrashEvent()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(mockSettings);
+    group.BoardAll();
+
+    PlanetTile tile =
+      Find.WorldGrid.Tiles.RandomElementByWeight(TileWeight)?.tile ?? PlanetTile.Invalid;
+    AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, tile);
+    aerialVehicle.InitiateCrashEvent();
+    Assert.IsTrue(aerialVehicle.Destroyed);
+    CrashSite site = Find.WorldObjects.WorldObjectAt<CrashSite>(tile);
+    Assert.IsNotNull(site);
+    return;
+
+    float TileWeight(SurfaceTile surfaceTile)
+    {
+      return Find.WorldPathGrid.PassableFast(surfaceTile.tile) ? 1 : 0;
     }
   }
 }

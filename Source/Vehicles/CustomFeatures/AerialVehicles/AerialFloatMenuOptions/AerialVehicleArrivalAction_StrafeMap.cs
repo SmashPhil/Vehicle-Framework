@@ -63,7 +63,7 @@ public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
           Thing thing =
             GenSpawn.Spawn(skyfaller, start, parent.Map, Rot8.North); //REDO - Other rotations?
         }, null, null, null, true);
-      aerialVehicle.Destroy();
+      aerialVehicle.ClearAndDestroy();
     }, "GeneratingMap", false, null);
   }
 

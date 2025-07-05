@@ -52,44 +52,6 @@ public class FlightPath : IExposable
     }
   }
 
-  public int AltitudeDirection
-  {
-    get
-    {
-      if (aerialVehicle.recon)
-      {
-        return 1;
-      }
-      int ticksLeft = 0;
-      Vector3 start = aerialVehicle.DrawPos;
-      float transitionPctLeft = 1 - aerialVehicle.transition;
-      if (circling || nodes.Count <= 1)
-      {
-        Vector3 nextTile = Find.WorldGrid.GetTileCenter(Last.tile);
-        float distance = Ext_Math.SphericalDistance(start, nextTile);
-        float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) *
-          aerialVehicle.vehicle.CompVehicleLauncher.FlightSpeed;
-        ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
-      }
-      else
-      {
-        foreach (FlightNode node in nodes)
-        {
-          Vector3 nextTile = Find.WorldGrid.GetTileCenter(node.tile);
-          float distance = Ext_Math.SphericalDistance(start, nextTile);
-          start = nextTile;
-
-          float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / distance) *
-            aerialVehicle.vehicle.CompVehicleLauncher.FlightSpeed;
-          ticksLeft += Mathf.RoundToInt(transitionPctLeft / speedPctPerTick);
-          transitionPctLeft = 1; //Only first node being traveled to has any progression
-        }
-      }
-      int direction = ticksLeft <= aerialVehicle.TicksTillLandingElevation ? -1 : 1;
-      return direction;
-    }
-  }
-
   public void VerifyFlightPath()
   {
     First.RecalculateCenter();

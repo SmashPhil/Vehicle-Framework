@@ -175,7 +175,7 @@ internal static class SectionDrawer
         VehicleMod.selectedPatterns.Clear();
         VehicleMod.selectedDefUpgradeComp = null;
         VehicleMod.selectedNode = null;
-        VehicleMod.settingsDisabledFor.Add(vehicleDef.defName);
+        VehicleMod.SettingsDisabledFor.Add(vehicleDef.defName);
       }
     }
     Widgets.EndScrollView();

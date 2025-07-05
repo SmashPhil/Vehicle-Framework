@@ -88,7 +88,7 @@ public class SectionVehicles : SettingsSection
   public override void ResetSettings()
   {
     base.ResetSettings();
-    VehicleMod.cachedFields.Clear();
+    VehicleMod.CachedFields.Clear();
     VehicleMod.PopulateCachedFields();
     fieldSettings.Clear();
     vehicleStats.Clear();
@@ -126,7 +126,7 @@ public class SectionVehicles : SettingsSection
     DrawVehicleOptions(rect);
     SectionDrawer.DrawVehicleList(rect,
       isValid => isValid ? string.Empty : "VF_SettingsDisabledTooltip".Translate().ToString(),
-      vehicleDef => !VehicleMod.settingsDisabledFor.Contains(vehicleDef.defName));
+      vehicleDef => !VehicleMod.SettingsDisabledFor.Contains(vehicleDef.defName));
   }
 
   private void RecalculateHeight()
@@ -278,7 +278,7 @@ public class SectionVehicles : SettingsSection
       {
         Log.Error(
           $"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
-        VehicleMod.settingsDisabledFor.Add(VehicleMod.selectedDef.defName);
+        VehicleMod.SettingsDisabledFor.Add(VehicleMod.selectedDef.defName);
         VehicleMod.selectedDef = null;
         VehicleMod.selectedPatterns.Clear();
         VehicleMod.selectedDefUpgradeComp = null;

@@ -24,17 +24,17 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
     Assert.IsTrue(executed);
   }
 
-  protected virtual string GetLetterText(AerialVehicleInFlight aerialVehicle, string[] reasons,
+  protected virtual string GetLetterText(VehiclePawn vehicle, string[] reasons,
     WorldObject culprit)
   {
     StringBuilder letterText = new();
     if (culprit != null)
     {
-      letterText.AppendLine("VF_IncidentCrashedSite_ShotDown".Translate(aerialVehicle, culprit));
+      letterText.AppendLine("VF_IncidentCrashedSite_ShotDown".Translate(vehicle, culprit));
     }
     else
     {
-      letterText.AppendLine("VF_IncidentCrashedSite_Crashing".Translate(aerialVehicle));
+      letterText.AppendLine("VF_IncidentCrashedSite_Crashing".Translate(vehicle));
       if (!reasons.NullOrEmpty())
       {
         letterText.AppendLine(
@@ -44,12 +44,11 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
     return letterText.ToString();
   }
 
-  protected virtual string GetLetterLabel(AerialVehicleInFlight aerialVehicle,
-    WorldObject culprit)
+  protected virtual TaggedString GetLetterLabel(VehiclePawn vehicle, WorldObject culprit)
   {
     return culprit is null ?
-      "VF_IncidentCrashedSiteLabel_Crashing".Translate(aerialVehicle.vehicle) :
-      "VF_IncidentCrashedSiteLabel_ShotDown".Translate(aerialVehicle.vehicle, culprit);
+      "VF_IncidentCrashedSiteLabel_Crashing".Translate(vehicle) :
+      "VF_IncidentCrashedSiteLabel_ShotDown".Translate(vehicle, culprit);
   }
 
   protected virtual bool TryExecuteEvent(AerialVehicleInFlight aerialVehicle, string[] reasons,
@@ -63,23 +62,23 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
       if (crashingCell == IntVec3.Invalid)
         return false;
 
+      VehiclePawn vehicle = aerialVehicle.vehicle;
       AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new(aerialVehicle.vehicle,
         crashSite.Parent, crashSite.Tile, crashingCell, Rot4.East);
       arrivalAction.Arrived(aerialVehicle, crashSite.Tile);
-      aerialVehicle.Destroy();
       string settlementLabel = culprit?.Label ?? string.Empty;
       if (ticksTillArrival > 0)
       {
         string hoursTillArrival = (ticksTillArrival / 2500f).RoundTo(1).ToString();
-        SendCrashSiteLetter(culprit, GetLetterLabel(aerialVehicle, culprit),
-          GetLetterText(aerialVehicle, reasons, culprit),
-          def.letterDef, crashSite.Parent, aerialVehicle.Label, settlementLabel, hoursTillArrival);
+        SendCrashSiteLetter(culprit, GetLetterLabel(vehicle, culprit),
+          GetLetterText(vehicle, reasons, culprit),
+          def.letterDef, crashSite.Parent, vehicle.Label, settlementLabel, hoursTillArrival);
       }
       else
       {
-        SendCrashSiteLetter(culprit, GetLetterLabel(aerialVehicle, culprit),
-          GetLetterText(aerialVehicle, reasons, culprit), def.letterDef, crashSite.Parent,
-          aerialVehicle.Label, settlementLabel);
+        SendCrashSiteLetter(culprit, GetLetterLabel(vehicle, culprit),
+          GetLetterText(vehicle, reasons, culprit), def.letterDef, crashSite.Parent,
+          vehicle.Label, settlementLabel);
       }
       return true;
     }
@@ -120,10 +119,12 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
     }
     else
     {
-      int num = CaravanIncidentUtility.CalculateIncidentMapSize(
+      VehiclePawn vehicle = aerialVehicle.vehicle;
+      Assert.IsNotNull(vehicle);
+      int mapSize = CaravanIncidentUtility.CalculateIncidentMapSize(
         aerialVehicle.vehicle.AllPawnsAboard, aerialVehicle.vehicle.AllPawnsAboard);
       crashSiteMap = GetOrGenerateMapUtility.GetOrGenerateMap(aerialVehicle.Tile,
-        new IntVec3(num, 1, num), WorldObjectDefOfVehicles.CrashedShipSite);
+        new IntVec3(mapSize, 1, mapSize), WorldObjectDefOfVehicles.CrashedShipSite);
       CrashSite crashSite = crashSiteMap.Parent as CrashSite;
       Assert.IsNotNull(crashSite);
 

@@ -304,6 +304,6 @@ internal class Patch_Debug : IPatchCategory
     skyfaller.vehicle = aerialVehicleInFlight.vehicle;
 
     GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
-    aerialVehicleInFlight.Destroy();
+    aerialVehicleInFlight.ClearAndDestroy();
   }
 }

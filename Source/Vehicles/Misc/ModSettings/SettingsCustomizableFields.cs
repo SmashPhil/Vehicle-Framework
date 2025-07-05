@@ -25,7 +25,7 @@ public static class SettingsCustomizableFields
         successfulGenerations.Add(upgrades);
         if (!fields || !upgrades)
         {
-          VehicleMod.settingsDisabledFor.Add(def.defName);
+          VehicleMod.SettingsDisabledFor.Add(def.defName);
         }
       }
       if (!successfulGenerations.NullOrEmpty() && successfulGenerations.All(b => b == false))
@@ -107,7 +107,7 @@ public static class SettingsCustomizableFields
   public static void IterateTypeFields(VehicleDef def, Type type, object obj,
     ref Dictionary<SaveableField, SavedField<object>> currentDict)
   {
-    if (VehicleMod.cachedFields.TryGetValue(type, out List<FieldInfo> fields))
+    if (VehicleMod.CachedFields.TryGetValue(type, out List<FieldInfo> fields))
     {
       var dict = VehicleMod.settings.vehicles.fieldSettings[def.defName];
       var defaultValuesDict = VehicleMod.settings.vehicles.defaultValues[def.defName];
@@ -158,7 +158,7 @@ public static class SettingsCustomizableFields
   public static void IterateUpgradeNode(VehicleDef def, UpgradeNode node,
     ref Dictionary<SaveableField, SavedField<object>> currentDict)
   {
-    if (VehicleMod.cachedFields.TryGetValue(node.GetType(), out var fields))
+    if (VehicleMod.CachedFields.TryGetValue(node.GetType(), out var fields))
     {
       var dict = VehicleMod.settings.upgrades.upgradeSettings[def.defName];
       foreach (FieldInfo field in fields)

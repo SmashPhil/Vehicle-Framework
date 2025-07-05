@@ -13,8 +13,6 @@ internal static class TestDefGenerator
 {
   private static readonly FieldInfo FleshField;
 
-  private static readonly GeneratorVehiclePawnKindDef KindDefGenerator = new();
-
   static TestDefGenerator()
   {
     FleshField = AccessTools.Field(typeof(RaceProperties), "fleshType");
@@ -25,6 +23,7 @@ internal static class TestDefGenerator
   {
     Assert.IsNotNull(FleshField);
     DevLog.WriteVerbose($"Creating transient def {defName}");
+
     VehicleBuildDef buildDef = new()
     {
       defName = $"{defName}_Blueprint",
@@ -87,12 +86,19 @@ internal static class TestDefGenerator
       }
     };
     FleshField.SetValue(def.race, DefDatabase<FleshTypeDef>.GetNamed("MetalVehicle"));
-
     def.buildDef = buildDef;
     buildDef.thingToSpawn = def;
 
-    Assert.IsTrue(KindDefGenerator.TryGenerateImpliedDef(def, out _, false));
+    if (settings != null && !settings.comps.NullOrEmpty())
+    {
+      foreach (CompProperties compProps in settings.comps)
+      {
+        compProps.ResolveReferences(def);
+        def.comps.Add(compProps);
+      }
+    }
 
+    Assert.IsTrue(VehicleMod.GenerateImpliedDefs(def, false));
     def.PostLoad();
     def.ResolveReferences();
     def.PostDefDatabase();

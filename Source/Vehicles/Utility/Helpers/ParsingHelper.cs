@@ -119,7 +119,7 @@ public static class ParsingHelper
         return;
       }
       string defName = defNode.InnerText;
-      VehicleMod.settingsDisabledFor.Add(defName);
+      VehicleMod.SettingsDisabledFor.Add(defName);
     }
   }
 

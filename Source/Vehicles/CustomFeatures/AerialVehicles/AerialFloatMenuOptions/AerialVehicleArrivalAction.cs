@@ -42,7 +42,7 @@ public abstract class AerialVehicleArrivalAction : IExposable
   {
     if (DestroyOnArrival)
     {
-      aerialVehicle.Destroy();
+      aerialVehicle.ClearAndDestroy();
     }
   }
 

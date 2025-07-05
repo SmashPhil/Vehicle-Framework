@@ -14,11 +14,15 @@ using SmashTools.Performance;
 
 namespace Vehicles;
 
+[PublicAPI]
 [StaticConstructorOnStartup]
 public class VehicleMod : Mod
 {
   public const int MaxCoastalSettlementPush = 21;
   public const float ResetImageSize = 22;
+
+  internal static readonly Dictionary<Type, List<FieldInfo>> CachedFields = [];
+  internal static readonly HashSet<string> SettingsDisabledFor = [];
 
   public static VehiclesModSettings settings;
   public static VehicleMod mod;
@@ -37,8 +41,6 @@ public class VehicleMod : Mod
 
   internal static List<FieldInfo> vehicleDefFields = [];
   private static Dictionary<Type, List<FieldInfo>> vehicleCompFields = [];
-  internal static readonly Dictionary<Type, List<FieldInfo>> cachedFields = [];
-  internal static readonly HashSet<string> settingsDisabledFor = [];
 
   public VehicleMod(ModContentPack content) : base(content)
   {
@@ -200,7 +202,7 @@ public class VehicleMod : Mod
     List<FieldInfo> fields = type.GetPostSettingsFields();
     if (!fields.NullOrEmpty())
     {
-      cachedFields[type] = fields;
+      CachedFields[type] = fields;
     }
   }
 
@@ -273,7 +275,7 @@ public class VehicleMod : Mod
   private static void ResetAllSettingsConfirmed()
   {
     SoundDefOf.Click.PlayOneShotOnCamera();
-    cachedFields.Clear();
+    CachedFields.Clear();
     PopulateCachedFields();
     settings.main.ResetSettings();
     settings.vehicles.ResetSettings();
@@ -307,6 +309,30 @@ public class VehicleMod : Mod
       if (generator.TryGenerateImpliedDef(vehicleDef, out D impliedDef, hotReload))
         DefGenerator.AddImpliedDef(impliedDef, hotReload);
     }
+  }
+
+  public static bool GenerateImpliedDefs(VehicleDef vehicleDef, bool hotReload)
+  {
+    bool success = true;
+    success &= TryGenerateImpliedDef<GeneratorVehiclePawnKindDef, PawnKindDef>(vehicleDef, false);
+    // TODO - Expected to fail since build def generation is incomplete
+    _ = TryGenerateImpliedDef<GeneratorVehicleBuildDef, VehicleBuildDef>(vehicleDef, false);
+
+    if (vehicleDef.GetCompProperties<CompProperties_VehicleLauncher>() is not null)
+    {
+      success &= TryGenerateImpliedDef<GeneratorVehicleSkyfallerLeaving, ThingDef>(vehicleDef, false);
+      success &= TryGenerateImpliedDef<GeneratorVehicleSkyfallerIncoming, ThingDef>(vehicleDef, false);
+      success &= TryGenerateImpliedDef<GeneratorVehicleSkyfallerCrashing, ThingDef>(vehicleDef, false);
+    }
+    return success;
+  }
+
+  public static bool TryGenerateImpliedDef<T, D>(VehicleDef vehicleDef, bool hotReload)
+    where T : IVehicleDefGenerator<D>, new()
+    where D : Def, new()
+  {
+    T generator = new();
+    return generator.TryGenerateImpliedDef(vehicleDef, out D impliedDef, hotReload);
   }
 
   /// <summary>

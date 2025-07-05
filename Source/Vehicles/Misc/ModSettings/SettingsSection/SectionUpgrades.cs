@@ -20,10 +20,7 @@ public class SectionUpgrades : SettingsSection
       {
         yield return new FloatMenuOption(
           "VF_DevMode_ResetVehicle".Translate(VehicleMod.selectedDef.LabelCap),
-          delegate
-          {
-            SettingsCustomizableFields.PopulateSaveableUpgrades(VehicleMod.selectedDef, true);
-          });
+          delegate { SettingsCustomizableFields.PopulateSaveableUpgrades(VehicleMod.selectedDef, true); });
       }
       yield return new FloatMenuOption("VF_DevMode_ResetAllVehicles".Translate(), ResetSettings);
 
@@ -62,7 +59,7 @@ public class SectionUpgrades : SettingsSection
     SectionDrawer.DrawVehicleList(rect,
       isValid =>
         isValid ? string.Empty : "VF_NonUpgradeableSettingsTooltip".Translate().ToString(),
-      vehicleDef => !VehicleMod.settingsDisabledFor.Contains(vehicleDef.defName) &&
+      vehicleDef => !VehicleMod.SettingsDisabledFor.Contains(vehicleDef.defName) &&
         vehicleDef.HasComp(typeof(CompUpgradeTree)));
   }
 
@@ -180,7 +177,7 @@ public class SectionUpgrades : SettingsSection
       {
         Log.Error(
           $"Exception thrown while trying to select {VehicleMod.selectedDef.defName}. Disabling vehicle to preserve mod settings.\nException={ex}");
-        VehicleMod.settingsDisabledFor.Add(VehicleMod.selectedDef.defName);
+        VehicleMod.SettingsDisabledFor.Add(VehicleMod.selectedDef.defName);
         VehicleMod.selectedDef = null;
         VehicleMod.selectedPatterns.Clear();
         VehicleMod.selectedDefUpgradeComp = null;

@@ -39,7 +39,7 @@ public static class SettingsCache
     }
     // Only unit tests should be creating transient vehicle defs
     if (!TestWatcher.RunningUnitTests)
-      Log.Error(
+      Trace.Fail(
         $"{def.defName} has not been cached in ModSettings.");
     return false;
   }
@@ -52,7 +52,7 @@ public static class SettingsCache
     FieldInfo fieldInfo = GetCachedField(containingType, fieldName);
     if (fieldInfo is null)
     {
-      Log.Error(
+      Trace.Fail(
         $"{fieldName} could not be found in CachedFields. Defaulting to defined fallback value.");
       return fallback;
     }

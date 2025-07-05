@@ -6,7 +6,6 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 
@@ -23,14 +22,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public const float TransitionTakeoff = 0.025f;
   public const float PctPerTick = 0.001f;
   public const int TicksPerValidateFlightPath = 60;
-
-  protected static readonly SimpleCurve climbRateCurve =
-  [
-    new CurvePoint(0, 0.65f),
-    new CurvePoint(0.05f, 1),
-    new CurvePoint(0.95f, 1),
-    new CurvePoint(1, 0.15f),
-  ];
 
   public VehiclePawn vehicle;
   public ThingOwner<VehiclePawn> innerContainer;
@@ -62,12 +53,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public float Elevation => 0; // vehicle.CompVehicleLauncher.inFlight ? elevation : 0;
 
   public float ElevationChange { get; protected set; }
-
-  public float Rate => vehicle.CompVehicleLauncher.ClimbRateStat *
-    climbRateCurve.Evaluate(Elevation / vehicle.CompVehicleLauncher.MaxAltitude);
-
-  public int TicksTillLandingElevation =>
-    Mathf.RoundToInt((Elevation - vehicle.CompVehicleLauncher.LandingAltitude / 2f) / Rate);
 
   protected virtual Rot8 FullRotation => Rot8.North;
 
@@ -251,7 +236,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
         yield return new Command_Action
         {
           defaultLabel = "Debug: Initiate Crash Event",
-          action = delegate { InitiateCrashEvent(null); }
+          action = delegate { InitiateCrashEvent(); }
         };
       }
     }
@@ -335,30 +320,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
-  protected void ChangeElevation()
-  {
-    int altSign = flightPath.AltitudeDirection;
-    float elevationChange = vehicle.CompVehicleLauncher.ClimbRateStat * climbRateCurve.Evaluate(
-      elevation /
-      vehicle.CompVehicleLauncher.MaxAltitude);
-    ElevationChange = elevationChange;
-    if (elevationChange < 0)
-    {
-      altSign = 1;
-    }
-    elevation += elevationChange * altSign;
-    elevation = elevation.Clamp(AltitudeMeter.MinimumAltitude, AltitudeMeter.MaximumAltitude);
-    if (!vehicle.CompVehicleLauncher.AnyFlightControl)
-    {
-      InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_FlightControl".Translate());
-    }
-    else if (elevation <= AltitudeMeter.MinimumAltitude &&
-      !vehicle.CompVehicleLauncher.ControlledDescent)
-    {
-      InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_FlightControl".Translate());
-    }
-  }
-
   public virtual void SpendFuel()
   {
     if (vehicle.CompFueledTravel != null &&
@@ -375,7 +336,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     vehicle.TakeDamage(damageInfo, cell);
   }
 
-  public void InitiateCrashEvent(WorldObject culprit, params string[] reasons)
+  public void InitiateCrashEvent(WorldObject culprit = null, params string[] reasons)
   {
     vehicle.CompVehicleLauncher.inFlight = false;
     Tile = WorldHelper.GetNearestTile(DrawPos);
@@ -402,8 +363,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
         if (flightPath.Path.Count > 1)
         {
           Vector3 newPos = DrawPos;
-          int ticksLeft = Mathf.RoundToInt(1 / speedPctPerTick);
-          flightPath.NodeReached(ticksLeft > TicksTillLandingElevation && !recon);
+          flightPath.NodeReached(!recon);
           if (Spawned)
           {
             InitializeNextFlight(newPos);
@@ -417,17 +377,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
               MessageTypeDefOf.NeutralEvent);
           }
           LandAtTile(flightPath.First.tile);
-
-          //if (Elevation <= vehicle.CompVehicleLauncher.LandingAltitude)
-          //{
-
-          //}
-          //else if (flightPath.Path.Count <= 1 && vehicle.CompVehicleLauncher.Props.circleToLand)
-          //{
-          //	Vector3 newPos = DrawPos;
-          //	SetCircle(flightPath.First.tile);
-          //	InitializeNextFlight(newPos);
-          //}
         }
       }
     }
@@ -468,16 +417,12 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     innerContainer.Remove(vehicle);
     VehicleCaravan vehicleCaravan =
       CaravanHelper.MakeVehicleCaravan([vehicle], vehicle.Faction, Tile, true);
-    vehicle = null;
+
     if (!Destroyed)
-    {
-      Destroy();
-    }
+      ClearAndDestroy();
 
     if (autoSelect)
-    {
       Find.WorldSelector.Select(vehicleCaravan, playSound: false);
-    }
   }
 
   private void InitializeNextFlight(Vector3 position)
@@ -568,6 +513,17 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   {
     base.PostMake();
     flightPath = new FlightPath(this);
+  }
+
+  /// <summary>
+  /// Clear contents of aerial vehicle before destroying the world object.
+  /// </summary>
+  /// <remarks>Keeps vehicle(s) alive post-destruction.</remarks>
+  public void ClearAndDestroy()
+  {
+    vehicle = null;
+    innerContainer.Clear();
+    Destroy();
   }
 
   public override void Destroy()

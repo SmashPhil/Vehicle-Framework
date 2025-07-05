@@ -151,6 +151,10 @@ namespace Vehicles
       base.SpawnSetup(map, respawningAfterLoad);
       if (!respawningAfterLoad)
       {
+        VehiclePathingSystem pathing =
+          map.GetCachedMapComponent<VehiclePathingSystem>();
+        pathing.RequestGridsFor(vehicle.VehicleDef,
+          DeferredGridGeneration.Urgency.Urgent);
         vehicle.CompVehicleLauncher.launchProtocol.Prepare(map, Position, Rotation);
         vehicle.CompVehicleLauncher.launchProtocol.OrderProtocol(LaunchProtocol.LaunchType.Landing);
         delayLandingTicks = vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties
