@@ -158,7 +158,7 @@ public class SectionDebug : SettingsSection
 #if DEBUG
         listingStandard.Header("Debugging Only", ListingExtension.BannerColor,
           fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
-
+#endif
 #if RAIDERS
         listingStandard.CheckboxLabeledWithMessage("Raiders / Traders (Experimental)",
           _ =>
@@ -171,6 +171,7 @@ public class SectionDebug : SettingsSection
           ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
 #endif
 
+#if DEBUG
         listingStandard.CheckboxLabeled("VF_DevMode_DebugSpawnVehiclesGodMode".Translate(),
           ref debugSpawnVehicleBuildingGodMode,
           "VF_DevMode_DebugSpawnVehiclesGodModeTooltip".Translate());
