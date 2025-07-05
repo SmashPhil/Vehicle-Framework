@@ -46,7 +46,7 @@ public class UpgradeNode
   public List<ResearchProjectDef> researchPrerequisites = [];
   public List<string> prerequisiteNodes = [];
 
-  [LoadAlias("costList")] //TODO 1.6 - switch to costList
+  [LoadAlias("costList")] //TODO 1.7 - switch to costList
   public List<ThingDefCountClass> ingredients = [];
 
   public float refundFraction = 0.5f; //Default in vanilla deconstructing is 50%

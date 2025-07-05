@@ -29,7 +29,7 @@ public class AerialVehicleArrivalAction_LoadMap : AerialVehicleArrivalAction
 
   public override bool DestroyOnArrival => true;
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     base.Arrived(aerialVehicle, tile);
     LongEventHandler.QueueLongEvent(delegate

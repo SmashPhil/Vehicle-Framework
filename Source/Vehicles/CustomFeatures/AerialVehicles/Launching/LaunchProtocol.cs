@@ -933,9 +933,9 @@ namespace Vehicles
     /// <param name="maxLaunchDistance"></param>
     /// <param name="launchAction"></param>
     public virtual bool ChoseWorldTarget(GlobalTargetInfo target, Vector3 pos,
-      Func<GlobalTargetInfo, Vector3, Action<int, AerialVehicleArrivalAction, bool>, bool>
+      Func<GlobalTargetInfo, Vector3, Action<PlanetTile, AerialVehicleArrivalAction, bool>, bool>
         validator,
-      Action<int, AerialVehicleArrivalAction, bool> launchAction)
+      Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
     {
       map = vehicle.Map;
       return validator(target, pos, launchAction);
@@ -944,7 +944,7 @@ namespace Vehicles
     private bool ChoseWorldTarget(GlobalTargetInfo target, float fuelCost)
     {
       bool Validator(GlobalTargetInfo target, Vector3 pos,
-        Action<int, AerialVehicleArrivalAction, bool> launchAction)
+        Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
       {
         if (!target.IsValid)
         {
@@ -998,7 +998,8 @@ namespace Vehicles
 
       ;
       return ChoseWorldTarget(target, WorldHelper.GetTilePos(vehicle.Map.Tile), Validator,
-        new Action<int, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher.TryLaunch));
+        new Action<PlanetTile, AerialVehicleArrivalAction, bool>(vehicle.CompVehicleLauncher
+         .TryLaunch));
     }
 
     public static bool CanLandInSpecificCell(MapParent mapParent)

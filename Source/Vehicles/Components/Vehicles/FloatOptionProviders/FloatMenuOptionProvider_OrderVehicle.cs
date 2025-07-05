@@ -18,7 +18,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
 
   protected override FloatMenuOption GetSingleOption(FloatMenuContext context)
   {
-    // TODO 1.6 - vehicle.Faction != Faction.OfPlayer needed?
+    // TODO Raiders vehicle.Faction != Faction.OfPlayer needed?
 
     FloatMenuOption option = null;
     IntVec3 clickCell = context.ClickedCell;

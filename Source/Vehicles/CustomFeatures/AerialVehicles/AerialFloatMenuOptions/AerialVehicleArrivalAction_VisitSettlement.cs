@@ -23,7 +23,7 @@ public class AerialVehicleArrivalAction_VisitSettlement
     this.settlement = settlement;
   }
 
-  public override FloatMenuAcceptanceReport StillValid(int destinationTile)
+  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
   {
     if (settlement != null && settlement.Tile != destinationTile)
     {

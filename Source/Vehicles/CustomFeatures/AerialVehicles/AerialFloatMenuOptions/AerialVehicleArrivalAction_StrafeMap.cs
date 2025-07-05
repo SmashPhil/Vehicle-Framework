@@ -21,7 +21,7 @@ public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
     this.parent = parent;
   }
 
-  public override FloatMenuAcceptanceReport StillValid(int destinationTile)
+  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
   {
     if (parent != null && parent.Tile != destinationTile)
     {
@@ -31,7 +31,7 @@ public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
   }
 
   // NOTE - Needs Unfogger called if map is generated
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     LongEventHandler.QueueLongEvent(delegate()
     {

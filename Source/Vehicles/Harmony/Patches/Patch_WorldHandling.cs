@@ -43,12 +43,6 @@ internal class Patch_WorldHandling : IPatchCategory
         nameof(PawnsFinder.AllCaravansAndTravellingTransporters_AliveOrDead)),
       postfix: new HarmonyMethod(typeof(Patch_WorldHandling),
         nameof(AllAerialVehicles_AliveOrDead)));
-    // TODO 1.6 - Recheck, banishing from aerial vehicle should not be allowed anymore
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(PawnBanishUtility), nameof(PawnBanishUtility.Banish),
-        parameters: [typeof(Pawn), typeof(PlanetTile), typeof(bool)]),
-      prefix: new HarmonyMethod(typeof(Patch_WorldHandling),
-        nameof(BanishPawnFromAerialVehicle)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(PawnUtility),
         nameof(PawnUtility.IsTravelingInTransportPodWorldObject)),
@@ -231,16 +225,6 @@ internal class Patch_WorldHandling : IPatchCategory
      .AerialVehicles)
     {
       __result.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
-    }
-  }
-
-  private static void BanishPawnFromAerialVehicle(Pawn pawn, ref PlanetTile tile)
-  {
-    if (pawn.GetAerialVehicle() is { } aerialVehicle)
-    {
-      CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn,
-        aerialVehicle.vehicle.AllPawnsAboard.Append(aerialVehicle.vehicle).ToList());
-      aerialVehicle.vehicle.RemovePawn(pawn);
     }
   }
 

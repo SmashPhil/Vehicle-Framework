@@ -9,7 +9,7 @@ namespace Vehicles.World;
 
 public abstract class BaseWorldTargeter
 {
-  protected int origin = -1;
+  protected PlanetTile origin = -1;
   protected Vector3 originOnMap;
   protected Action actionWhenFinished;
   protected Action onUpdate;

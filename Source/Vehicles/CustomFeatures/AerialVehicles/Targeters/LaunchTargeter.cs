@@ -30,7 +30,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
   public override bool IsTargeting => action != null;
 
   public static void BeginTargeting(VehiclePawn vehicle,
-    Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles,
+    Func<GlobalTargetInfo, float, bool> action, PlanetTile origin, bool canTargetTiles,
     Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false,
     Action onUpdate = null,
     Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
@@ -71,7 +71,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
   }
 
   public static void ContinueTargeting(VehiclePawn vehicle,
-    Func<GlobalTargetInfo, float, bool> action, int origin, bool canTargetTiles,
+    Func<GlobalTargetInfo, float, bool> action, PlanetTile origin, bool canTargetTiles,
     Texture2D mouseAttachment = null, bool closeWorldTabWhenFinished = false,
     Action onUpdate = null,
     Func<GlobalTargetInfo, List<FlightNode>, float, string> extraLabelGetter = null)
@@ -104,7 +104,8 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     Instance.OnStart();
   }
 
-  public override void RegisterActionOnTile(int tile, AerialVehicleArrivalAction arrivalAction)
+  public override void RegisterActionOnTile(PlanetTile tile,
+    AerialVehicleArrivalAction arrivalAction)
   {
     FlightPath.Pop();
     FlightPath.Add(new FlightNode(tile, arrivalAction));
@@ -134,7 +135,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
         GlobalTargetInfo arg = CurrentTargetUnderMouse();
         bool maxNodesHit = FlightPath.Count ==
           vehicle.CompVehicleLauncher.launchProtocol.MaxFlightNodes;
-        int sourceTile = aerialVehicle?.Tile ?? vehicle.Map?.Tile ?? origin;
+        PlanetTile sourceTile = aerialVehicle?.Tile ?? vehicle.Map?.Tile ?? origin;
         bool sameTile = !vehicle.CompVehicleLauncher.inFlight && sourceTile == arg.Tile &&
           FlightPath.NullOrEmpty();
         if (WorldHelper.WorldObjectAt(arg.Tile) is WorldObject &&
@@ -290,7 +291,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     }
 
     Vector3 start = originOnMap;
-    var tiles = new List<int>(FlightPath.Select(n => n.tile));
+    var tiles = new List<PlanetTile>(FlightPath.Select(n => n.tile));
     Material lineMat = null;
     switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
     {
@@ -306,7 +307,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     }
     for (int n = 0; n < FlightPath.Count; n++)
     {
-      int curTile = tiles.PopAt(0);
+      PlanetTile curTile = tiles.PopAt(0);
       Vector3 end = WorldHelper.GetTilePos(curTile);
       DrawTravelPoint(start, end, lineMat);
       start = end;
@@ -356,7 +357,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     Vector3 source = originOnMap;
     foreach (FlightNode node in FlightPath)
     {
-      int tile = node.tile;
+      PlanetTile tile = node.tile;
       Vector3 target = WorldHelper.GetTilePos(tile);
       (float nextFuelCost, float nextDistance) = CostAndDistanceCalculator(source, target);
 

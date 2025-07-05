@@ -30,7 +30,7 @@ internal class Patch_Gizmos : IPatchCategory
       prefix: null,
       postfix: new HarmonyMethod(typeof(Patch_Gizmos),
         nameof(AddVehicleCaravanGizmoPassthrough)));
-    // TODO 1.6 - Remove
+    // TODO 
     //HarmonyPatcher.Patch(
     //  original: AccessTools.Method(typeof(FormCaravanComp), nameof(FormCaravanComp.GetGizmos)),
     //  prefix: null,

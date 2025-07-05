@@ -8,6 +8,7 @@ using SmashTools;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
+using Verse.Sound;
 
 namespace Vehicles.World;
 
@@ -195,30 +196,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
           defaultDesc = "CommandLaunchGroupDesc".Translate(),
           icon = TexData.LaunchCommandTex,
           alsoClickIfOtherInGroupClicked = false,
-          action = delegate
-          {
-            void LaunchAction() => LaunchTargeter.BeginTargeting(vehicle,
-              (target, fuelCost) =>
-                AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile,
-              true, TexData.TargeterMouseAttachment, closeWorldTabWhenFinished: false,
-              onUpdate: null,
-              extraLabelGetter: (target, path, fuelCost) =>
-                vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile,
-                  path, fuelCost));
-
-            int pawnCount = PawnsListForReading.Count;
-            if (pawnCount > vehicle.TotalSeats)
-            {
-              Find.WindowStack.Add(new Dialog_Confirm(
-                "VF_PawnsLeftBehindConfirm".Translate(),
-                "VF_PawnsLeftBehindConfirmDesc".Translate(),
-                LaunchAction));
-            }
-            else
-            {
-              LaunchAction();
-            }
-          }
+          action = LaunchAerialVehicle
         };
         if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
         {
@@ -326,6 +304,46 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
           }
         }
       };
+    }
+  }
+
+  public void LaunchAerialVehicle()
+  {
+    if (!AerialVehicle)
+    {
+      Trace.Fail(
+        "Trying to launch aerial vehicle with caravan not registered as an aerial vehicle!");
+      SoundDefOf.ClickReject.PlayOneShotOnCamera();
+      return;
+    }
+
+    Assert.IsTrue(vehicles.Count == 1);
+    VehiclePawn vehicle = vehicles[0];
+
+    int pawnCount = PawnsListForReading.Count;
+    if (pawnCount > vehicle.TotalSeats)
+    {
+      Find.WindowStack.Add(new Dialog_Confirm(
+        "VF_PawnsLeftBehindConfirm".Translate(),
+        "VF_PawnsLeftBehindConfirmDesc".Translate(),
+        LaunchAction));
+    }
+    else
+    {
+      LaunchAction();
+    }
+    return;
+
+    void LaunchAction()
+    {
+      LaunchTargeter.BeginTargeting(vehicle,
+        (target, fuelCost) =>
+          AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile,
+        true, TexData.TargeterMouseAttachment, closeWorldTabWhenFinished: false,
+        onUpdate: null,
+        extraLabelGetter: (target, path, fuelCost) =>
+          vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile,
+            path, fuelCost));
     }
   }
 

@@ -230,7 +230,6 @@ internal class Patch_CaravanHandling : IPatchCategory
       transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(GiveSoldThingToVehicleTranspiler)));
 
-    // TODO 1.6 - recheck if this is needed
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),

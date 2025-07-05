@@ -62,15 +62,16 @@ public static class AerialVehicleLaunchHelper
     return aerialVehicle;
   }
 
-  public static bool ChoseTargetOnMap(VehiclePawn vehicle, int fromTile, GlobalTargetInfo target,
+  public static bool ChoseTargetOnMap(VehiclePawn vehicle, PlanetTile fromTile,
+    GlobalTargetInfo target,
     float fuelCost)
   {
     return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target,
       Find.WorldGrid.GetTileCenter(fromTile),
       (GlobalTargetInfo target, Vector3 pos,
-          Action<int, AerialVehicleArrivalAction, bool> launchAction) =>
+          Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction) =>
         CanTarget(vehicle, fuelCost, target, pos, launchAction),
-      (int destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon) =>
+      (PlanetTile destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon) =>
         NewDestination(vehicle, fromTile, destinationTile, arrivalAction, recon));
   }
 
@@ -85,7 +86,7 @@ public static class AerialVehicleLaunchHelper
   }
 
   private static bool CanTarget(VehiclePawn vehicle, float fuelCost, GlobalTargetInfo target,
-    Vector3 pos, Action<int, AerialVehicleArrivalAction, bool> launchAction)
+    Vector3 pos, Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
   {
     if (!target.IsValid)
     {
@@ -94,7 +95,7 @@ public static class AerialVehicleLaunchHelper
       return false;
     }
     else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) >
-      vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel.Fuel)
+      vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel?.Fuel)
     {
       Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(),
         MessageTypeDefOf.RejectInput, false);

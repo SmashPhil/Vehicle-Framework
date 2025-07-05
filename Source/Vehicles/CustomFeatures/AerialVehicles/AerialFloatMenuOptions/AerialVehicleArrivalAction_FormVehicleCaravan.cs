@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using RimWorld.Planet;
 using Verse;
 
 namespace Vehicles.World;
@@ -13,18 +14,18 @@ public class AerialVehicleArrivalAction_FormVehicleCaravan : AerialVehicleArriva
   {
   }
 
-  public override FloatMenuAcceptanceReport StillValid(int destinationTile)
+  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
   {
     return !Find.World.Impassable(destinationTile);
   }
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     // SwitchToCaravan handles destroying aerial vehicle object
     aerialVehicle.SwitchToCaravan();
   }
 
-  public static bool CanFormCaravanAt(VehiclePawn vehicle, int tile)
+  public static bool CanFormCaravanAt(VehiclePawn vehicle, PlanetTile tile)
   {
     return WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
   }

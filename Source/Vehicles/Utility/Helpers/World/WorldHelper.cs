@@ -62,7 +62,7 @@ public static class WorldHelper
     return heading;
   }
 
-  public static WorldObject WorldObjectAt(int tile)
+  public static WorldObject WorldObjectAt(PlanetTile tile)
   {
     foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
     {
@@ -74,8 +74,8 @@ public static class WorldHelper
     return null;
   }
 
-  public static (WorldObject sourceObject, WorldObject destObject) WorldObjectsAt(int source,
-    int destination)
+  public static (WorldObject sourceObject, WorldObject destObject) WorldObjectsAt(PlanetTile source,
+    PlanetTile destination)
   {
     WorldObject sourceObject = null;
     WorldObject destObject = null;
@@ -95,19 +95,19 @@ public static class WorldHelper
     return (sourceObject, destObject);
   }
 
-  public static Vector3 GetTilePos(int tile)
+  public static Vector3 GetTilePos(PlanetTile tile)
   {
     WorldObject worldObject = WorldObjectAt(tile);
     return GetTilePos(tile, worldObject, out _);
   }
 
-  public static Vector3 GetTilePos(int tile, out bool spaceObject)
+  public static Vector3 GetTilePos(PlanetTile tile, out bool spaceObject)
   {
     WorldObject worldObject = WorldObjectAt(tile);
     return GetTilePos(tile, worldObject, out spaceObject);
   }
 
-  public static Vector3 GetTilePos(int tile, WorldObject worldObject, out bool spaceObject)
+  public static Vector3 GetTilePos(PlanetTile tile, WorldObject worldObject, out bool spaceObject)
   {
     Vector3 pos = Find.WorldGrid.GetTileCenter(tile);
     spaceObject = false;
@@ -119,7 +119,7 @@ public static class WorldHelper
     return pos;
   }
 
-  public static float GetTileDistance(int source, int destination)
+  public static float GetTileDistance(PlanetTile source, PlanetTile destination)
   {
     (WorldObject sourceObject, WorldObject destObject) = WorldObjectsAt(source, destination);
 
@@ -134,7 +134,7 @@ public static class WorldHelper
   /// </summary>
   /// <param name="caravan"></param>
   /// <param name="tile"></param>
-  public static int BestGotoDestForVehicle(VehicleCaravan caravan, int tile)
+  public static int BestGotoDestForVehicle(VehicleCaravan caravan, PlanetTile tile)
   {
     if (CaravanReachable(tile))
     {

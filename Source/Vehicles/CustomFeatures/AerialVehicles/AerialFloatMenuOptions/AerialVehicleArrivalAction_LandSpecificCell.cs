@@ -28,12 +28,12 @@ public class AerialVehicleArrivalAction_LandSpecificCell : AerialVehicleArrivalA
 
   public virtual bool CanArriveInMap => mapParent?.Map != null;
 
-  public override FloatMenuAcceptanceReport StillValid(int destinationTile)
+  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
   {
     return WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
   }
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     if (!CanArriveInMap)
     {

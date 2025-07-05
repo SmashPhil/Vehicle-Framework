@@ -1,5 +1,6 @@
 ﻿using JetBrains.Annotations;
 using RimWorld;
+using RimWorld.Planet;
 using Verse;
 
 namespace Vehicles.World;
@@ -27,17 +28,17 @@ public abstract class AerialVehicleArrivalAction : IExposable
 
   public virtual bool DestroyOnArrival => false;
 
-  public virtual FloatMenuAcceptanceReport StillValid(int destinationTile)
+  public virtual FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
   {
     return true;
   }
 
-  public virtual bool ShouldUseLongEvent(int tile)
+  public virtual bool ShouldUseLongEvent(PlanetTile tile)
   {
     return false;
   }
 
-  public virtual void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public virtual void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     if (DestroyOnArrival)
     {

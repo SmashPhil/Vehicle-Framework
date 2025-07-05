@@ -432,7 +432,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         __instance?.DrawAutoSelectCheckbox(transferablesRect, ref anythingChanged);
       break;
       case TabVehicles: // Vehicles Tab
-        // TODO 1.6 - check if `anythingChanged` is usable in TransferableVehicleWidget
         vehiclesTransfer.OnGUI(transferablesRect /*, out anythingChanged*/);
       break;
       default:

@@ -124,6 +124,7 @@ public class VehicleGroup : IDisposable
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
+    vehicleDef.type = settings.type;
 
     if (!settings.statModifiers.NullOrEmpty())
     {
@@ -217,6 +218,7 @@ public class VehicleGroup : IDisposable
     public string debugLabel;
 
     // Reverse mapping permissions to def restrictions for easy configuration
+    public VehicleType type = VehicleType.Land;
     public VehiclePermissions permissions;
     public uint drivers;
     public uint passengers;

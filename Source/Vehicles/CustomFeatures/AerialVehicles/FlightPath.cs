@@ -106,24 +106,24 @@ public class FlightPath : IExposable
     }
   }
 
-  public void AddNode(int tile, AerialVehicleArrivalAction arrivalAction = null)
+  public void AddNode(PlanetTile tile, AerialVehicleArrivalAction arrivalAction = null)
   {
     nodes.Add(new FlightNode(tile, arrivalAction));
   }
 
-  public void PushCircleAt(int tile)
+  public void PushCircleAt(PlanetTile tile)
   {
     reconTiles.Clear();
     Ext_World.GetTileNeighbors(tile, reconTiles,
       radius: aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
-    foreach (int neighborTile in reconTiles)
+    foreach (PlanetTile neighborTile in reconTiles)
     {
       nodes.Insert(0, new FlightNode(neighborTile));
     }
     circling = true;
   }
 
-  public void ReconCircleAt(int tile)
+  public void ReconCircleAt(PlanetTile tile)
   {
     if (Last.tile == tile)
     {
@@ -132,7 +132,7 @@ public class FlightPath : IExposable
     reconTiles.Clear();
     Ext_World.GetTileNeighbors(tile, reconTiles,
       radius: aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
-    foreach (int rTile in reconTiles)
+    foreach (PlanetTile rTile in reconTiles)
     {
       nodes.Add(new FlightNode(rTile));
     }
@@ -145,13 +145,13 @@ public class FlightPath : IExposable
   public void NodeReached(bool haltCircle = false)
   {
     FlightNode currentNode = nodes.PopAt(0);
-    int currentTile = currentNode.tile;
+    PlanetTile currentTile = currentNode.tile;
     aerialVehicle.Tile = currentTile;
     currentlyInRecon = reconTiles.Contains(aerialVehicle.Tile);
     currentNode.arrivalAction?.Arrived(aerialVehicle, aerialVehicle.Tile);
     if (circling && haltCircle)
     {
-      int origin = Last.tile;
+      PlanetTile origin = Last.tile;
       ResetPath();
       AddNode(origin);
     }
@@ -202,7 +202,7 @@ public class FlightPath : IExposable
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public struct FlightNode : IExposable
 {
-  public int tile;
+  public PlanetTile tile;
   public Vector3 origin;
   public AerialVehicleArrivalAction arrivalAction;
 
@@ -210,7 +210,7 @@ public struct FlightNode : IExposable
 
   public WorldObject WorldObject { get; private set; }
 
-  public FlightNode(int tile)
+  public FlightNode(PlanetTile tile)
   {
     this.tile = tile;
     arrivalAction = null;
@@ -219,7 +219,7 @@ public struct FlightNode : IExposable
     origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
   }
 
-  public FlightNode(int tile, AerialVehicleArrivalAction arrivalAction)
+  public FlightNode(PlanetTile tile, AerialVehicleArrivalAction arrivalAction)
   {
     this.tile = tile;
     this.arrivalAction = arrivalAction;

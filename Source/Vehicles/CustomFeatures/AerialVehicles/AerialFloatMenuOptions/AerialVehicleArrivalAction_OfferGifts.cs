@@ -17,7 +17,7 @@ public class AerialVehicleArrivalAction_OfferGifts : AerialVehicleArrivalAction_
   {
   }
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, int tile)
+  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
   {
     base.Arrived(aerialVehicle, tile);
     if (AerialVehicleArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) == null)
@@ -37,7 +37,7 @@ public class AerialVehicleArrivalAction_OfferGifts : AerialVehicleArrivalAction_
       LetterDefOf.NeutralEvent, false, true);
   }
 
-  public override FloatMenuAcceptanceReport StillValid(int destinationTile) =>
+  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile) =>
     base.StillValid(destinationTile) &&
     AerialVehicleArrivalAction_Trade.CanTradeWith(vehicle, settlement);
 

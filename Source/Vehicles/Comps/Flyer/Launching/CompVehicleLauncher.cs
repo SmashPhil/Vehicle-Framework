@@ -248,7 +248,7 @@ namespace Vehicles
       return "ReadyForLaunch".Translate();
     }
 
-    public void TryLaunch(int destinationTile, AerialVehicleArrivalAction arrivalAction,
+    public void TryLaunch(PlanetTile destinationTile, AerialVehicleArrivalAction arrivalAction,
       bool recon = false)
     {
       if (!Vehicle.Spawned)
@@ -282,7 +282,7 @@ namespace Vehicles
       Vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLaunch].ExecuteEvents();
     }
 
-    public float FuelNeededToLaunchAtDist(Vector3 origin, int destination)
+    public float FuelNeededToLaunchAtDist(Vector3 origin, PlanetTile destination)
     {
       float tileDistance = Ext_Math.SphericalDistance(origin, WorldHelper.GetTilePos(destination));
       return FuelNeededToLaunchAtDist(tileDistance);

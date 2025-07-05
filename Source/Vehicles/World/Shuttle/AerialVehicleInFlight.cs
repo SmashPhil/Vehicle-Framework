@@ -263,7 +263,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       NewDestination);
 
     bool Validator(GlobalTargetInfo globalTarget, Vector3 pos,
-      Action<int, AerialVehicleArrivalAction, bool> launchAction)
+      Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
     {
       if (!globalTarget.IsValid)
       {
@@ -310,7 +310,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
-  public void NewDestination(int destinationTile, AerialVehicleArrivalAction arrivalAction,
+  public void NewDestination(PlanetTile destinationTile, AerialVehicleArrivalAction arrivalAction,
     bool recon = false)
   {
     vehicle.CompVehicleLauncher.inFlight = true;
@@ -323,19 +323,16 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     base.Tick();
     if (vehicle.CompVehicleLauncher.inFlight)
     {
-      MoveForward();
       SpendFuel();
 
       if (vehicle.CompFueledTravel?.Fuel <= 0)
       {
         InitiateCrashEvent(null, "VF_IncidentCrashedSiteReason_OutOfFuel".Translate());
       }
-      //ChangeElevation();
+
+      // Self destructive, should always tick last
+      MoveForward();
     }
-    //if (Find.TickManager.TicksGame % TicksPerValidateFlightPath == 0)
-    //{
-    //	flightPath.VerifyFlightPath();
-    //}
   }
 
   protected void ChangeElevation()
@@ -436,12 +433,12 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
-  public void LandAtTile(int tile)
+  public void LandAtTile(PlanetTile tile)
   {
     Tile = tile;
     ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
-    arrivalAction?.Arrived(this, tile);
     vehicle.CompVehicleLauncher.inFlight = false;
+    arrivalAction?.Arrived(this, tile);
     AirDefensePositionTracker.DeregisterAerialVehicle(this);
   }
 
@@ -449,13 +446,8 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     AerialVehicleArrivalAction arrivalAction = null)
   {
     if (flightPath.NullOrEmpty() || flightPath.Any(node => node.tile < 0))
-    {
       return;
-    }
-    if (arrivalAction != null)
-    {
-      this.arrivalAction = arrivalAction;
-    }
+    this.arrivalAction = arrivalAction;
     this.flightPath.NewPath(flightPath);
     InitializeNextFlight(origin);
     List<AirDefense> flyoverDefenses =
@@ -476,6 +468,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     innerContainer.Remove(vehicle);
     VehicleCaravan vehicleCaravan =
       CaravanHelper.MakeVehicleCaravan([vehicle], vehicle.Faction, Tile, true);
+    vehicle = null;
     if (!Destroyed)
     {
       Destroy();
@@ -536,12 +529,12 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
-  public void SetCircle(int tile)
+  public void SetCircle(PlanetTile tile)
   {
     flightPath.PushCircleAt(tile);
   }
 
-  public void GenerateMapForRecon(int tile)
+  public void GenerateMapForRecon(PlanetTile tile)
   {
     if (flightPath.InRecon && Find.WorldObjects.MapParentAt(tile) is { HasMap: false } mapParent)
     {
@@ -585,7 +578,11 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     // reference still attached.
     if (vehicle is { Destroyed: false })
     {
-      Assert.IsTrue(innerContainer is { Any: true });
+      if (innerContainer is { Any: false })
+      {
+        Trace.Fail($"Trying to destroy {vehicle} but it's not inside the aerial vehicle.");
+        return;
+      }
       vehicle.DestroyVehicleAndPawns();
       innerContainer.Clear();
     }
@@ -636,7 +633,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     return vehicle.inventory.innerContainer;
   }
 
-  public static AerialVehicleInFlight Create(VehiclePawn vehicle, int tile)
+  public static AerialVehicleInFlight Create(VehiclePawn vehicle, PlanetTile tile)
   {
     AerialVehicleInFlight aerialVehicle =
       (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles
