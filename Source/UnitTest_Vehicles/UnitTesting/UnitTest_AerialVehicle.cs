@@ -1,4 +1,6 @@
-﻿using DevTools.UnitTesting;
+﻿using System.Collections.Generic;
+using System.Linq;
+using DevTools.UnitTesting;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
@@ -81,6 +83,8 @@ internal sealed class UnitTest_AerialVehicle
     group.vehicle.CompVehicleLauncher.inFlight = true;
     AerialVehicleInFlight aerialVehicle =
       AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(group.vehicle);
+    Assert.IsNotNull(aerialVehicle);
+    using ScopeWorldObject sav = new(aerialVehicle);
     aerialVehicle.recon = false;
     aerialVehicle.OrderFlyToTiles([new FlightNode(DestTile)],
       Find.WorldGrid.GetTileCenter(DestTile),
@@ -174,12 +178,26 @@ internal sealed class UnitTest_AerialVehicle
       Find.WorldGrid.Tiles.RandomElementByWeight(TileWeight)?.tile ?? PlanetTile.Invalid;
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, tile);
     aerialVehicle.InitiateCrashEvent();
+    using ScopeWorldObject swo = new(aerialVehicle);
     Assert.IsTrue(aerialVehicle.Destroyed);
     CrashSite site = Find.WorldObjects.WorldObjectAt<CrashSite>(tile);
     Assert.IsNotNull(site);
+    List<VehicleSkyfaller_Arriving> skyfallers =
+      site.Map.listerThings.GetThingsOfType<VehicleSkyfaller_Arriving>().ToList();
+    Assert.AreEqual(skyfallers.Count, 1);
+    VehicleSkyfaller_Arriving skyfaller = skyfallers[0];
+    using ScopeEntity se = new(skyfaller);
+    Assert.IsNotNull(skyfaller);
+    Assert.IsTrue(skyfaller.Spawned);
+    CameraJumper.TryJump(skyfaller);
+    Find.CameraDriver.SetRootSize(0);
+    Assert.AreEqual(skyfaller.UpdateRateTicks, 1);
+    skyfaller.FinalizeLanding();
+    Expect.IsTrue(skyfaller.Destroyed);
+    Expect.IsTrue(group.vehicle.Spawned);
     return;
 
-    float TileWeight(SurfaceTile surfaceTile)
+    static float TileWeight(SurfaceTile surfaceTile)
     {
       return Find.WorldPathGrid.PassableFast(surfaceTile.tile) ? 1 : 0;
     }

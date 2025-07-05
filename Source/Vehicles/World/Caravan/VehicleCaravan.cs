@@ -719,7 +719,6 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
       {
         component.HealComponent(vehicle.GetStatValue(VehicleStatDefOf.RepairRate) *
           RepairMothballTicks / JobDriver_RepairVehicle.TicksForRepair);
-        vehicle.CrashLanded = false;
         return; //Only repair 1 vehicle at a time
       }
     }

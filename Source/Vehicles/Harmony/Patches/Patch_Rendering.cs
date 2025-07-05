@@ -238,7 +238,7 @@ internal class Patch_Rendering : IPatchCategory
     if (vehicle != null)
     {
       Vector3[] brackets = new Vector3[4];
-      float angle = vehicle.Angle;
+      float angle = vehicle.Angle + vehicle.Transform.rotation;
 
       Ext_Pawn.CalculateSelectionBracketPositionsWorldForMultiCellPawns(brackets, vehicle,
         vehicle.DrawPos, vehicle.RotatedSize.ToVector2(), SelectionDrawer.SelectTimes, Vector2.one,

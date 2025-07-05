@@ -71,7 +71,7 @@ namespace Vehicles
       }
     }
 
-    protected virtual void FinalizeLanding()
+    public virtual void FinalizeLanding()
     {
       vehicle.CompVehicleLauncher.launchProtocol.Release();
       vehicle.CompVehicleLauncher.inFlight = false;

@@ -8,29 +8,31 @@ using SmashTools;
 
 namespace Vehicles
 {
-	public class JobDriver_RepairVehicle : JobDriver_WorkVehicle
-	{
-		public const float TicksForRepair = 60;
+  public class JobDriver_RepairVehicle : JobDriver_WorkVehicle
+  {
+    public const float TicksForRepair = 60;
 
-		protected override JobDef JobDef => JobDefOf_Vehicles.RepairVehicle;
+    protected override JobDef JobDef => JobDefOf_Vehicles.RepairVehicle;
 
-		protected override float TotalWork => TicksForRepair;
+    protected override float TotalWork => TicksForRepair;
 
-		protected override StatDef Stat => StatDefOf.ConstructionSpeed;
+    protected override StatDef Stat => StatDefOf.ConstructionSpeed;
 
-		protected override void WorkComplete(Pawn actor)
-		{
-			if (!Vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1))
-			{
-				MapComponentCache<ListerVehiclesRepairable>.GetComponent(Vehicle.Map).NotifyVehicleRepaired(Vehicle);
-				actor.records.Increment(RecordDefOf.ThingsRepaired);
-				actor.jobs.EndCurrentJob(JobCondition.Succeeded);
-				return;
-			}
-			ResetWork();
-			VehicleComponent component = Vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
-			component.HealComponent(Vehicle.GetStatValue(VehicleStatDefOf.RepairRate));
-			Vehicle.CrashLanded = false;
-		}
-	}
+    protected override void WorkComplete(Pawn actor)
+    {
+      if (!Vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1))
+      {
+        MapComponentCache<ListerVehiclesRepairable>.GetComponent(Vehicle.Map).NotifyVehicleRepaired(Vehicle);
+        actor.records.Increment(RecordDefOf.ThingsRepaired);
+        actor.jobs.EndCurrentJob(JobCondition.Succeeded);
+        return;
+      }
+      ResetWork();
+      VehicleComponent component = Vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
+      component.HealComponent(Vehicle.GetStatValue(VehicleStatDefOf.RepairRate));
+      Vehicle.Transform.rotation = 0;
+      if (!Vehicle.VehicleDef.graphicData.drawRotated)
+        Vehicle.Rotation = Vehicle.VehicleDef.defaultPlacingRot;
+    }
+  }
 }

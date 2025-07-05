@@ -27,7 +27,7 @@ namespace Vehicles
     {
       get
       {
-        return def.skyfaller.moteSpawnTime != float.MinValue && Mathf.Approximately(
+        return !Mathf.Approximately(def.skyfaller.moteSpawnTime, float.MinValue) && Mathf.Approximately(
           def.skyfaller.moteSpawnTime, vehicle.CompVehicleLauncher.launchProtocol.TimeInAnimation);
       }
     }
@@ -221,12 +221,11 @@ namespace Vehicles
       }
     }
 
-    protected override void FinalizeLanding()
+    public override void FinalizeLanding()
     {
-      vehicle.CrashLanded = true;
       vehicle.CompVehicleLauncher.inFlight = false;
       GenSpawn.Spawn(vehicle, Position, Map, Rotation);
-      vehicle.Angle = angle + Rotation.AsAngle;
+      vehicle.Transform.rotation = angle + Rotation.AsAngle;
       vehicle.DisembarkAll();
       vehicle.ignition.Drafted = false;
       Destroy();

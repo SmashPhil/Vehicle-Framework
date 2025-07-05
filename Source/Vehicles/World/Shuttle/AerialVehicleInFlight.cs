@@ -197,9 +197,10 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       if (vehicle.CompFueledTravel != null)
       {
         yield return new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
-        foreach (Gizmo fuelGizmo in vehicle.CompFueledTravel.DevModeGizmos())
+        if (DebugSettings.ShowDevGizmos)
         {
-          yield return fuelGizmo;
+          foreach (Gizmo fuelGizmo in vehicle.CompFueledTravel.DevModeGizmos())
+            yield return fuelGizmo;
         }
       }
       if (vehicle.CompVehicleLauncher.ControlInFlight)

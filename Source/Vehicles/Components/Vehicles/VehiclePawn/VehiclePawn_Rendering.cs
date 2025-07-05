@@ -78,29 +78,6 @@ public partial class VehiclePawn
 
   public Transform Transform => transform;
 
-  public bool CrashLanded
-  {
-    get { return crashLanded; }
-    set
-    {
-      if (crashLanded == value)
-      {
-        return;
-      }
-
-      crashLanded = value;
-      if (!crashLanded)
-      {
-        if (!VehicleDef.graphicData.drawRotated)
-        {
-          Rotation = VehicleDef.defaultPlacingRot;
-        }
-
-        Angle = 0;
-      }
-    }
-  }
-
   public float Angle
   {
     get
@@ -110,7 +87,6 @@ public partial class VehiclePawn
       {
         return 0f;
       }
-
       return angle;
     }
     set
@@ -136,10 +112,7 @@ public partial class VehiclePawn
     set
     {
       if (value == FullRotation)
-      {
         return;
-      }
-
       Rotation = value;
       Angle = 0;
       if (value == Rot8.NorthEast || value == Rot8.SouthWest)
