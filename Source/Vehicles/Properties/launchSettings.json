@@ -2,7 +2,6 @@
   "profiles": {
     "Debug": {
       "commandName": "Executable",
-      "commandLineArgs": "-experimental-xml-loader",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe"
     },
     "Release": {
@@ -12,7 +11,7 @@
     "UnitTest": {
       "commandName": "Executable",
       "executablePath": "..\\..\\..\\..\\..\\RimWorld\\RimWorldWin64.exe",
-      "commandLineArgs": "--pid \"SmashPhil.VehicleFramework\" --test",
+      "commandLineArgs": "--pid \"SmashPhil.VehicleFramework\" --test --where \"Method == OrderGoto\"",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "UnitTest"
       }

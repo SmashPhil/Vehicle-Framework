@@ -48,12 +48,12 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
-        <DefineConstants>TRACE;UNSTABLE;RAIDERS;BATCH_RENDERING;</DefineConstants>
+        <DefineConstants>TRACE;UNSTABLE;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
         <Optimize>true</Optimize>
-        <DefineConstants>TRACE;RELEASE;</DefineConstants>
+        <DefineConstants>TRACE;RELEASE</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">

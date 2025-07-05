@@ -130,11 +130,10 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
             "MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate();
           Messages.Message(text, vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
         }
-        if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-        {
+        jobSuccess = vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+
+        if (jobSuccess)
           vehicle.vehiclePather.SetEndRotation(rot);
-        }
-        jobSuccess = vehicle.jobs.TryTakeOrderedJob(job);
       }
     }
     if (jobSuccess)

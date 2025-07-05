@@ -161,9 +161,14 @@ internal class Patch_VehiclePathing : IPatchCategory
   {
     if (___pawn is VehiclePawn)
     {
+      if (__instance.curJob == null || __instance.curDriver == null)
+      {
+        __result = true;
+        return false;
+      }
       __result = __instance is
-        { curJob.def.playerInterruptible: false } or
-        { curDriver.PlayerInterruptable: false };
+        { curJob.def.playerInterruptible: true } or
+        { curDriver.PlayerInterruptable: true };
       return false;
     }
     return true;
@@ -198,7 +203,6 @@ internal class Patch_VehiclePathing : IPatchCategory
       vehicle.vehiclePather.StartPath(dest, peMode);
       return false;
     }
-
     return true;
   }
 

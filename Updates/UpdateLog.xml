@@ -3,61 +3,68 @@
   <!--Can utilize Version.txt file placed in mod's root directory-->
   <currentVersion>1.6.2036</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
-  <updateOn>GameInit</updateOn>
+  <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Welcome to the 1.6 Beta! There are too many changes to list out so I'm only going to list out the big ones.
+Welcome to the 1.6 Beta!
 
-If you are a modder, visit the &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) for a list of all changes you'll need to look out for.
-&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Graphic Overlays with patterns not rendering properly for blueprint placement.
+It's been nearly a year since the last update and there have been a tremendous number of changes and bugfixes. Unsurprisingly, 1.6 came with a ton of changes which did impact Vehicle Framework quite a bit so if you encounter issues please report them on discord.
 
-- Raiders still attacking vehicles with no pawns inside if turret was set to auto-target
-
-- Vehicles not deregistering from cover grid when rotating.
-
-- Vehicles could spawn out of bounds at certain angles when arriving with vanilla-chosen spawn position.
-
-- Mods using vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting.
-
-- Vehicles entering maps would not take road areas into account.
-
-- Upgrades could be transfered to other vehicles by selecting another vehicle in the menu right before confirming the upgrade.
-
-- Vehicles spawning into a map would reset their target fuel level.
-
-- Pawns would not board a vehicle unless standing within distance to instant-board.
+If you are a modder, there is a &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) with a list of all relevant changes you'll need to look out for.
 &lt;title&gt;Performance Optimization&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Targeters don't run unless activated.
 
-- Vehicle regions are now pooled and 'lazy', only generating if you have a vehicle that needs the grid.
+- Vehicle regions are now pooled and 'lazy', only generating if you have a vehicle that needs the grid. This will speed up map generation significantly.
 
-- Vehicle regions are also generated parallel to the main thread, significantly reducing map generation time.
+- Vehicle regions are generated parallel to the main thread, also significantly reducing map generation time.
 
 - Vehicle rendering now utilizes Unity Jobs, a similar implementation to the pawn render tree from 1.5
 
+- Vehicles utilize Variable Tick Rate, a new 1.6 feature that will make vehicles even more performant when idle or out of view.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicles can be temporarily disabled by EMPs.
+- Vehicle Caravans will ignore biome and road costs when traveling on roads.
 
 - Vehicles can be 'stashed' on the world map, allowing your colonists to continue on foot and retrieve your vehicles at a later time.
-&lt;b&gt;Players&lt;/b&gt;
+
+- Vehicles can be temporarily disabled by EMPs.
+
+- Vehicles will no longer run over friendly pawns by default, this setting can be re-enabled in the mod settings.
+
 - Vehicles consume 50% less fuel while idle
 
 - Added more entries to vehicle info cards including build costs, total health, turrets, etc.
 
 - Added 'teleport' DevMode button to vehicles when godmode is enabled, moving the vehicle instantly to a targeted location.
-&lt;b&gt;Modders&lt;/b&gt;
-- Added affectedByEMP bool to vehicle properties.
 
-- FireMode shotsPerBurst and ticksBetweenBursts are now IntRange, allowing for varied burst counts and varied timing between bursts to make machine gun fire less robotic.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+ There are too many fixes to list out so I'm only going to list out the big ones.
+
+- Vehicles could spawn out of bounds at certain angles when arriving. This resulted in some vehicles being destroyed immediately upon entering the map.
+
+- Mods using the vanilla targeter such as 'Rimworld of Magic' and 'Eccentric Extras - Flares' would prevent vehicle targeters from starting. This included aerial launch targeting and being unable to fly to any map.
+
+- Vehicles entering maps would not take road areas into account.
+
+- Upgrades could be transfered to other vehicles by selecting another vehicle in the menu right before confirming the upgrade.
+
+- Vehicle caravans would not tick needs properly, either not ticking at all or sometimes double ticking. The new implementation should also account for other mods so Dub's Bad Hygiene should be compatible now.
+
+- Some grids didn't deregister vehicles properly, leaving behind ghost objects that affected things such as cover and movement.
+
+- AerialVehicles not unfogging the map upon landing.  This should apply to land vehicles as well but this is untested so please report this if you encounter this bug again.
+
+- Game Over screen if you have all pawns inside vehicles.
+
+- Some map types unloaded if you have all pawns inside vehicles or only had an autonomous vehicle on the map with no dismounted pawns.
+
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
-  <testing>false</testing>
+  <testing>true</testing>
   <!--Icon bar shown to the right of the mod's name.-->
   <rightIconBar>
     <li>

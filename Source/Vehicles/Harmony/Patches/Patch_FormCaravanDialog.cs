@@ -630,6 +630,8 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     WorldObject ___parent)
   {
     __result = false;
+    if (___parent is not MapParent { HasMap: true } mapParent)
+      return false;
     if (!__instance.Reform)
       return false;
     if (__instance.CanFormOrReformCaravanNow)
@@ -637,7 +639,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       __result = true;
       return false;
     }
-    MapParent mapParent = ___parent as MapParent;
     Assert.IsNotNull(mapParent);
     VehiclePositionManager positionManager =
       mapParent.Map.GetDetachedMapComponent<VehiclePositionManager>();

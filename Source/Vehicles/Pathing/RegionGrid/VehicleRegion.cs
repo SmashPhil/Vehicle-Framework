@@ -50,7 +50,9 @@ public sealed class VehicleRegion : IPoolable
 
   public VehicleRegion()
   {
+#if DEBUG
     ObjectCounter.Increment<VehicleRegion>();
+#endif
   }
 
   public int Id { get; private set; }

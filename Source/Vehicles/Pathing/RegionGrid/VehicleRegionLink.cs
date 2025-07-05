@@ -39,7 +39,9 @@ public class VehicleRegionLink : IPoolable
 
   public VehicleRegionLink()
   {
+#if DEBUG
     ObjectCounter.Increment<VehicleRegionLink>();
+#endif
   }
 
   public bool InPool { get; set; }

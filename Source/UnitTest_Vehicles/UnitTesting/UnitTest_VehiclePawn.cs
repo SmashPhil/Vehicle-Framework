@@ -1,5 +1,6 @@
 ﻿using DevTools.UnitTesting;
 using RimWorld;
+using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
@@ -9,6 +10,26 @@ namespace Vehicles.UnitTesting;
 [TestCategory(TestCategoryNames.VehiclePawn)]
 internal sealed class UnitTest_VehiclePawn
 {
+  [Test]
+  private void OrderGoto()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1
+    });
+    group.Spawn();
+    group.vehicle.ignition.Drafted = true;
+    Assert.IsTrue(group.vehicle.Drafted);
+    Assert.IsTrue(group.vehicle.CanMoveFinal);
+    IntVec3 gotoLoc = group.vehicle.Position + new IntVec3(0, 0, 1);
+    Assert.IsTrue(gotoLoc.Walkable(group.vehicle.VehicleDef, group.vehicle.Map));
+    FloatMenuOptionProvider_OrderVehicle.PawnGotoAction(gotoLoc, group.vehicle, gotoLoc,
+      Rot8.North);
+    Assert.IsTrue(group.vehicle.jobs.curJob.def == JobDefOf.Goto);
+  }
+
   [Test]
   private void Destroy()
   {

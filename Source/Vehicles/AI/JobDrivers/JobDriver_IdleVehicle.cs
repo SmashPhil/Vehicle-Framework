@@ -17,6 +17,13 @@ public class JobDriver_IdleVehicle : JobDriver
     Mathf.RoundToInt(Vehicle.AverageSkillOfCapablePawns(SkillDefOf.Animals) / 20f *
       VehicleMod.settings.main.fishingDelay) + VehicleMod.settings.main.fishingDelay;
 
+  public override void Notify_PatherFailed()
+  {
+    // Can't set JobCondition as Errored or ErroredPather otherwise it will force assign a Wait job
+    // which really messes with idling behavior.
+    EndJobWith(JobCondition.Incompletable);
+  }
+
   public override bool TryMakePreToilReservations(bool errorOnFailed)
   {
     return true;
