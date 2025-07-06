@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using DevTools.UnitTesting;
 using UnityEngine.Assertions;
 
@@ -8,7 +7,7 @@ using UnityEngine.Assertions;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils)]
+[TestCategory(TestCategoryNames.Utils)]
 [TestDescription("IDictionary extension utils.")]
 internal class UnitTest_IDictionary
 {

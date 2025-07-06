@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils)]
+[TestCategory(TestCategoryNames.Utils)]
 [TestDescription("Rolling back values with disposable pattern.")]
 internal class UnitTest_ScopedRollback
 {

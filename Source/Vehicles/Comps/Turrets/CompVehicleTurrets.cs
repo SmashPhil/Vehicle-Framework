@@ -590,9 +590,10 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
   public override void EventRegistration()
   {
-    Vehicle.AddEvent(VehicleEventDefOf.PawnEntered, RecacheTurretPermissions);
+    Vehicle.AddEvent(VehicleEventDefOf.PawnEntered, RecacheTurretPermissions, ReloadAllTurretsIfEmpty);
     Vehicle.AddEvent(VehicleEventDefOf.PawnExited, RecacheTurretPermissions);
-    Vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecacheTurretPermissions);
+    Vehicle.AddEvent(VehicleEventDefOf.CargoAdded, ReloadAllTurretsIfEmpty);
+    Vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecacheTurretPermissions, ReloadAllTurretsIfEmpty);
     Vehicle.AddEvent(VehicleEventDefOf.PawnKilled, RecacheTurretPermissions);
     Vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, RecacheTurretPermissions);
 
@@ -604,11 +605,9 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
   private void RegisterEventsFor(VehicleTurret turret)
   {
-    turret.FillEvents_Def();
+    turret.FillEventsDef();
     if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
-    {
       turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
-    }
   }
 
   private void CreateTurretInstances()
@@ -933,6 +932,14 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
     foreach (VehicleTurret turret in turrets)
     {
       turret.RecacheMannedStatus();
+    }
+  }
+
+  public void ReloadAllTurretsIfEmpty()
+  {
+    foreach (VehicleTurret turret in turrets)
+    {
+      turret.ReloadIfEmpty();
     }
   }
 

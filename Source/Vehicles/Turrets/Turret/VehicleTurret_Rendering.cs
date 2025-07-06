@@ -988,7 +988,7 @@ public partial class VehicleTurret
           {
             ThingDef ammo = ammoAvailable[i];
             options.Add(new FloatMenuOption(ammoAvailable[i].LabelCap,
-              delegate { turret.Reload(ammo, ammo != turret.savedAmmoType); }));
+              delegate { turret.Reload(ammo); }));
           }
 
           if (options.NullOrEmpty())
@@ -1011,10 +1011,7 @@ public partial class VehicleTurret
   public static SubGizmo SubGizmo_FireMode(VehicleTurret turret)
   {
     return new SubGizmo(
-      drawGizmo: delegate(Rect rect)
-      {
-        Widgets.DrawTextureFitted(rect, turret.CurrentFireMode.Icon, 1);
-      },
+      drawGizmo: delegate(Rect rect) { Widgets.DrawTextureFitted(rect, turret.CurrentFireMode.Icon, 1); },
       canClick: () => turret.def.fireModes.Count > 1,
       onClick: turret.CycleFireMode,
       tooltip: turret.CurrentFireMode.label

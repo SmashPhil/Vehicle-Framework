@@ -4,7 +4,7 @@ using Verse;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils)]
+[TestCategory(TestCategoryNames.Utils)]
 [TestDescription("Math extension utils.")]
 internal class UnitTest_Numerics
 {

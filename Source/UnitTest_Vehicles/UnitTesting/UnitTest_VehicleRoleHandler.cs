@@ -5,7 +5,7 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
-using TickerTypeRoolback = DevTools.UnitTesting.ScopedValueRollback<Verse.TickerType>;
+using TickerTypeRollback = SmashTools.ScopedValueRollback<Verse.TickerType>;
 
 namespace Vehicles.UnitTesting;
 
@@ -227,7 +227,7 @@ internal sealed class UnitTest_VehicleRoleHandler
     Assert.AreEqual(food.ParentHolder, group.vehicle.inventory);
     using (TickObserver<ThingWithComps> observer = new(food))
     {
-      using TickerTypeRoolback rb = new(ref food.def.tickerType);
+      using TickerTypeRollback rb = new(ref food.def.tickerType);
       food.def.tickerType = TickerType.Normal;
       Find.TickManager.DoSingleTick();
       Expect.AreEqual(observer.TickCount, 1);

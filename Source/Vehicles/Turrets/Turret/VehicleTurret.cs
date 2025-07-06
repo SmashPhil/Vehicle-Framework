@@ -1025,30 +1025,55 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     TurretRotationTargeted = angle - additionalAngle;
   }
 
-  public virtual void Reload(ThingDef ammo = null, bool ignoreTimer = false)
+  public void ReloadIfEmpty()
   {
-    if ((ammo == savedAmmoType || ammo is null) && shellCount == def.magazineCapacity)
-    {
+    if (shellCount > 0 && loadedAmmo != null)
       return;
-    }
+    // Get any available ammo for auto-reloading
+    ThingDef ammoDef = savedAmmoType;
+    ammoDef ??= vehicle.inventory.innerContainer
+     .Where(thing => ContainsAmmoDefOrShell(thing.def)).Select(thing => thing.def).Distinct().FirstOrDefault();
+    if (ammoDef == null)
+      return;
+    Reload(ammoDef);
+  }
+
+  public void Reload()
+  {
+    Reload(loadedAmmo ?? savedAmmoType);
+  }
+
+  public void Reload(ThingDef ammoDef)
+  {
+    // TODO - loadedAmmo can be cleaned up, the chambered shot and savedAmmoType should always be the same.
+    // Changing ammo would write over savedAmmoType before chamber.
+    Reload(ammoDef, ammoDef != loadedAmmo && ammoDef != savedAmmoType);
+  }
+
+  public virtual void Reload(ThingDef ammoDef, bool ignoreTimer)
+  {
+    if (!IsManned || ComponentDisabled)
+      return;
+    if ((ammoDef == savedAmmoType || ammoDef is null) && shellCount == def.magazineCapacity)
+      return;
 
     if (def.ammunition is null)
     {
       shellCount = def.magazineCapacity;
       return;
     }
+    ammoDef ??= savedAmmoType;
+    if (ammoDef == null)
+      return;
 
-    if (loadedAmmo is null || (ammo != null && shellCount < def.magazineCapacity) ||
-      shellCount <= 0 || ammo != null)
+    if (loadedAmmo is null || shellCount < def.magazineCapacity || shellCount <= 0)
     {
-      if (ReloadInternal(ammo))
-      {
-        ActivateTimer(ignoreTimer);
-      }
-      else
+      if (!ReloadInternal(ammoDef))
       {
         Messages.Message("VF_NoAmmoAvailable".Translate(), MessageTypeDefOf.RejectInput);
+        return;
       }
+      ActivateTimer(ignoreTimer);
     }
   }
 
@@ -1058,6 +1083,9 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   /// <returns>True if Cannon has been successfully reloaded.</returns>
   public virtual bool AutoReload()
   {
+    if (!IsManned || ComponentDisabled)
+      return false;
+
     ThingDef ammoType = vehicle.inventory.innerContainer.FirstOrDefault(t =>
         def.ammunition.Allows(t) || def.ammunition.Allows(t.def.projectileWhenLoaded))
     ?.def;
@@ -1065,7 +1093,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     {
       return ReloadInternal(ammoType);
     }
-
     Debug.Warning($"Failed to auto-reload {def.label}");
     return false;
   }
@@ -1075,84 +1102,71 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     shellCount = Mathf.Clamp(count, 0, def.magazineCapacity);
   }
 
-  protected bool ReloadInternal(ThingDef ammo)
+  protected bool ReloadInternal([NotNull] ThingDef ammoDef)
   {
     try
     {
-      if (vehicle.inventory.innerContainer.Contains(savedAmmoType) ||
-        vehicle.inventory.innerContainer.Contains(ammo))
+      if (!vehicle.inventory.innerContainer.Contains(ammoDef))
+        return false;
+
+      // Remembers previously stored ammo for auto-loading by colonists
+      if (ammoDef != savedAmmoType)
+        TryClearChamber();
+
+      int countToRefill = def.magazineCapacity - shellCount;
+      int countToTake = Mathf.CeilToInt(countToRefill * def.chargePerAmmoCount);
+      int countRefilled = 0;
+
+      Assert.IsTrue(ThingsToTakeReloading.Count == 0);
+      using ClearOnDispose<(Thing, int)> slr = new(ThingsToTakeReloading);
+      // Deterine which items (and how much) to take
+      foreach (Thing thing in vehicle.inventory.innerContainer)
       {
-        //Remembers previously stored ammo for auto-loading feature
-        Thing storedAmmo;
-        if (ammo != null)
+        if (thing.def == ammoDef)
         {
-          storedAmmo = vehicle.inventory.innerContainer.FirstOrFallback(x => x.def == ammo);
-          savedAmmoType = ammo;
-          TryClearChamber();
+          int availableCount = thing.stackCount -
+            thing.stackCount % Mathf.CeilToInt(def.chargePerAmmoCount);
+          int takingFromThing = Mathf.Min(countToTake, availableCount);
+          ThingsToTakeReloading.Add((thing, takingFromThing));
+          countToTake -= takingFromThing;
+          if (countToTake <= 0)
+            break;
         }
-        else if (savedAmmoType != null)
-        {
-          storedAmmo =
-            vehicle.inventory.innerContainer.FirstOrFallback(x => x.def == savedAmmoType);
-        }
-        else
-        {
-          Log.Error("No saved or specified shell upon reload");
-          return false;
-        }
+      }
 
-        int countToRefill = def.magazineCapacity - shellCount;
-        int countToTake = Mathf.CeilToInt(countToRefill * def.chargePerAmmoCount);
-        int countRefilled = 0;
+      // Quick check to make sure to not even bother removing items from inventory if there
+      // is not enough to reload 1 shot minimum
+      if (ThingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
+        return false;
 
-        Assert.IsTrue(ThingsToTakeReloading.Count == 0);
-        using ClearOnDispose<(Thing, int)> slr = new(ThingsToTakeReloading);
-        //Deterine which items (and how much) to take
-        foreach (Thing thing in vehicle.inventory.innerContainer)
-        {
-          if (thing.def == storedAmmo.def)
-          {
-            int availableCount = thing.stackCount -
-              thing.stackCount % Mathf.CeilToInt(def.chargePerAmmoCount);
-            int takingFromThing = Mathf.Min(countToTake, availableCount);
-            ThingsToTakeReloading.Add((thing, takingFromThing));
-            countToTake -= takingFromThing;
-            if (countToTake <= 0) break;
-          }
-        }
-
-        //Quick check to make sure to not even bother removing items from inventory if there is not enough to reload 1 shot minimum
-        if (ThingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
-        {
-          return false;
-        }
-
-        //Take items from inventory without going over the amount required
+      // Execute cargo event once at the end of reloading to avoid repeated permissions recaching
+      // and potentially infinite reload attempts.
+      using (EventDisabler<VehicleEventDef> ed = new(vehicle, VehicleEventDefOf.CargoRemoved))
+      {
+        // Take items from inventory without going over the amount required
         for (int i = ThingsToTakeReloading.Count - 1; i >= 0; i--)
         {
           if (ThingsToTakeReloading.Sum(pair => pair.Item2) < def.chargePerAmmoCount)
-          {
             break;
-          }
-
           (Thing thing, int count) = ThingsToTakeReloading[i];
           countRefilled += count;
           vehicle.TakeFromInventory(thing, count);
           ThingsToTakeReloading.RemoveAt(i);
         }
-
-        if (countRefilled % def.chargePerAmmoCount != 0)
-        {
-          Log.Warning(
-            $"Taking more than necessary to reload {this}. This is not supposed to occur. CountRefilled={countRefilled} CountNeeded={countToRefill * def.chargePerAmmoCount}");
-        }
-
-        loadedAmmo = storedAmmo.def;
-        shellCount = Mathf.CeilToInt(countRefilled / def.chargePerAmmoCount)
-         .Clamp(0, def.magazineCapacity);
-        EventRegistry[VehicleTurretEventDefOf.Reload].ExecuteEvents();
-        def.reloadSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
       }
+
+      if (!Mathf.Approximately(countRefilled % def.chargePerAmmoCount, 0))
+      {
+        Log.Warning(
+          $"Taking more than necessary to reload {this}. CountRefilled={countRefilled} CountNeeded={countToRefill * def.chargePerAmmoCount}");
+      }
+
+      loadedAmmo = ammoDef;
+      shellCount = Mathf.CeilToInt(countRefilled / def.chargePerAmmoCount)
+       .Clamp(0, def.magazineCapacity);
+      vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
+      EventRegistry[VehicleTurretEventDefOf.Reload].ExecuteEvents();
+      def.reloadSound?.PlayOneShot(new TargetInfo(vehicle.Position, vehicle.Map));
     }
     catch (Exception ex)
     {
@@ -1160,7 +1174,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
         $"Unable to reload Cannon: {uniqueID} on Pawn: {vehicle.LabelShort}. Exception: {ex}");
       return false;
     }
-
     return true;
   }
 
@@ -1179,13 +1192,15 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   {
     if (loadedAmmo != null && shellCount > 0)
     {
+      using EventDisabler<VehicleEventDef> ed = new(vehicle, VehicleEventDefOf.CargoAdded);
       Thing thing = ThingMaker.MakeThing(loadedAmmo);
       thing.stackCount = Mathf.CeilToInt(shellCount * def.chargePerAmmoCount);
-      //vehicle.inventory.innerContainer.TryAdd(thing);
-      vehicle.AddOrTransfer(thing);
-      loadedAmmo = null;
-      shellCount = 0;
-      ActivateTimer(true);
+      if (vehicle.AddOrTransfer(thing) > 0)
+      {
+        loadedAmmo = null;
+        shellCount = 0;
+        ActivateTimer(true);
+      }
     }
   }
 

@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils)]
+[TestCategory(TestCategoryNames.Utils)]
 [TestDescription(
   "Self ordering list for bumping items to the front for less frequent worst case reads.")]
 internal class UnitTest_SelfOrderingList

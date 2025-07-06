@@ -171,6 +171,7 @@ internal sealed class UnitTest_AerialVehicle
   [Test]
   private void CrashEvent()
   {
+    using GenStepWarningDisabler gswd = new();
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(mockSettings);
     group.BoardAll();
 

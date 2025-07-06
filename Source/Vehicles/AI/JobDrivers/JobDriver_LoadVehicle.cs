@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using Verse;
@@ -8,24 +9,25 @@ using Verse.AI;
 
 namespace Vehicles;
 
+[PublicAPI]
 public class JobDriver_LoadVehicle : JobDriver
 {
-  private static FieldInfo countToTransferFieldInfo =
+  private static readonly FieldInfo CountToTransferFieldInfo =
     AccessTools.Field(typeof(TransferableOneWay), "countToTransfer");
 
-  public virtual string ListerTag => ReservationType.LoadVehicle;
+  protected virtual string ListerTag => ReservationType.LoadVehicle;
 
   public virtual Thing Item
   {
     get { return job.GetTarget(TargetIndex.A).Thing; }
   }
 
-  public virtual VehiclePawn Vehicle
+  protected virtual VehiclePawn Vehicle
   {
     get { return job.GetTarget(TargetIndex.B).Thing as VehiclePawn; }
   }
 
-  public virtual bool FailJob()
+  protected virtual bool FailJob()
   {
     return !MapComponentCache<VehicleReservationManager>.GetComponent(Map)
      .VehicleListed(Vehicle, ListerTag);
@@ -59,7 +61,7 @@ public class JobDriver_LoadVehicle : JobDriver
   {
     return new Toil
     {
-      initAction = delegate()
+      initAction = delegate
       {
         Pawn pawn = CaravanHelper.UsableVehicleWithTheMostFreeSpace(this.pawn);
         if (pawn is null)
@@ -78,22 +80,22 @@ public class JobDriver_LoadVehicle : JobDriver
   {
     return new Toil
     {
-      initAction = delegate()
+      initAction = delegate
       {
         if (Item is null || Item.stackCount == 0)
         {
-          pawn.jobs.EndCurrentJob(JobCondition.Incompletable, true);
+          pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
         }
         else
         {
           int stackCount = Item.stackCount; //store before transfer for transferable recache
 
-          int result = Vehicle.AddOrTransfer(Item, stackCount);
+          Vehicle.AddOrTransfer(Item, stackCount);
           TransferableOneWay transferable = GetTransferable(Vehicle.cargoToLoad, Vehicle, Item);
           if (transferable != null)
           {
             int count = transferable.CountToTransfer - stackCount;
-            countToTransferFieldInfo.SetValue(transferable, count);
+            CountToTransferFieldInfo.SetValue(transferable, count);
             if (transferable.CountToTransfer <= 0)
             {
               Vehicle.cargoToLoad.Remove(transferable);
@@ -112,9 +114,7 @@ public class JobDriver_LoadVehicle : JobDriver
       foreach (Thing transferableThing in transferable.things)
       {
         if (transferableThing == thing)
-        {
           return transferable;
-        }
       }
     }
     //Unable to find thing instance, match on def
@@ -123,9 +123,7 @@ public class JobDriver_LoadVehicle : JobDriver
       foreach (Thing transferableThing in transferable.things)
       {
         if (transferableThing.def == thing.def)
-        {
           return transferable;
-        }
       }
     }
     return null;

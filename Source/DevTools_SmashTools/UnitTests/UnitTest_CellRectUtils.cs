@@ -6,7 +6,7 @@ using Verse;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils)]
+[TestCategory(TestCategoryNames.Utils)]
 [TestDescription("CellRect extension methods.")]
 internal class UnitTest_CellRectUtils
 {

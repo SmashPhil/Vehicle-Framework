@@ -1,12 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SmashTools.UnitTesting;
+﻿namespace SmashTools.UnitTesting;
 
 public static class TestCategoryNames
 {
-  public const string ComponentCache = "ComponentCache";
+  // Performance
+  public const string ComponentCache = "SmashTools.ComponentCache";
+  public const string Multithreading = "Multithreading";
+  public const string ObjectPool = "ObjectPool";
+  public const string DedicatedThread = "DedicatedThread";
+
+  // Features
+  public const string Rendering = "Rendering";
+  public const string Utils = "Utils";
+  public const string Events = "Events";
+
+  public const string Animations = "Animations";
 }

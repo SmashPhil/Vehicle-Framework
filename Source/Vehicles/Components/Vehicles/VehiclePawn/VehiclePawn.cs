@@ -102,7 +102,7 @@ namespace Vehicles
       if (EventRegistry != null && EventRegistry.Initialized())
         return; //Disallow re-registering events
 
-      this.FillEvents_Def();
+      this.FillEventsDef();
 
       this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
       this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);

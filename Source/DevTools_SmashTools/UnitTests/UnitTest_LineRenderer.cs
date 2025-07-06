@@ -9,7 +9,7 @@ using Object = UnityEngine.Object;
 namespace SmashTools.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
-[TestCategory(TestGroup.Utils, TestGroup.Rendering)]
+[TestCategory(TestCategoryNames.Utils, TestCategoryNames.Rendering)]
 [TestDescription(
   "LineRenderer generator for baking line vertices into a single mesh for efficient rendering of complex line strips.")]
 internal class UnitTest_LineRenderer
