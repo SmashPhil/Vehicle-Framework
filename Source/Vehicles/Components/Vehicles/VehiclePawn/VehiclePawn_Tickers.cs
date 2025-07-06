@@ -109,7 +109,12 @@ public partial class VehiclePawn
   public override void TickRare()
   {
     base.TickRare();
-    statHandler.MarkAllDirty();
+    EventRegistry[VehicleEventDefOf.ScanRare].ExecuteEvents();
+  }
+
+  private void TickShort()
+  {
+    EventRegistry[VehicleEventDefOf.ScanShort].ExecuteEvents();
   }
 
   protected override void TickInterval(int delta)
@@ -136,7 +141,12 @@ public partial class VehiclePawn
 
   protected virtual void BaseTickOptimized()
   {
-    if (this.IsHashIntervalTick(GenTicks.TickRareInterval))
+    const int ScanShortTicks = 60;
+    const int ScanRareTicks = GenTicks.TickRareInterval;
+
+    if (this.IsHashIntervalTick(ScanShortTicks))
+      TickShort();
+    if (this.IsHashIntervalTick(ScanRareTicks))
       TickRare();
 
     sustainers.Tick();

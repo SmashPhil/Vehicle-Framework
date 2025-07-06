@@ -493,7 +493,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public void LeakTick()
   {
-    //Validate leak every so often
     if (Find.TickManager.TicksGame % TicksPerLeakCheck == 0 && !FuelComponents.NullOrEmpty())
     {
       FuelLeaking = false;
@@ -503,7 +502,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
       }
     }
 
-    //If leaking, then loop through and spawn filth
     if (FuelLeaking)
     {
       foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)

@@ -128,6 +128,7 @@ namespace Vehicles
           ignition.Drafted = false;
         }
       });
+      this.AddEvent(VehicleEventDefOf.ScanRare, statHandler.MarkAllDirty);
       this.AddEvent(VehicleEventDefOf.UpgradeCompleted, ResetRenderStatus,
         RecacheMovementPermissions);
       this.AddEvent(VehicleEventDefOf.UpgradeRefundCompleted, ResetRenderStatus,

@@ -2,6 +2,7 @@
 
 namespace Vehicles;
 
+// ReSharper disable InconsistentNaming
 [DefOf]
 public static class VehicleEventDefOf
 {
@@ -28,6 +29,10 @@ public static class VehicleEventDefOf
   public static VehicleEventDef PawnCapacitiesDirty;
   public static VehicleEventDef PawnKilled;
   public static VehicleEventDef PawnRemoved;
+
+  // Ticking
+  public static VehicleEventDef ScanShort; // 60 ticks
+  public static VehicleEventDef ScanRare; // 250 ticks
 
   // Comps
   public static VehicleEventDef OutOfFuel;

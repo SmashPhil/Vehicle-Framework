@@ -598,11 +598,16 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
     foreach (VehicleTurret turret in turrets)
     {
-      turret.FillEvents_Def();
-      if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
-      {
-        turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
-      }
+      RegisterEventsFor(turret);
+    }
+  }
+
+  private void RegisterEventsFor(VehicleTurret turret)
+  {
+    turret.FillEvents_Def();
+    if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
+    {
+      turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
     }
   }
 
@@ -614,7 +619,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
       {
         try
         {
-          AddTurret(turret);
+          CopyAndAddTurret(turret);
         }
         catch (Exception ex)
         {
@@ -635,21 +640,37 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
   }
 
   /// <summary>
-  /// Creates shallow copy of turret reference and adds to comp.
+  /// Creates shallow copy of turret reference and adds it to the turret list.
   /// </summary>
-  public void AddTurret(VehicleTurret reference, string upgradeKey = null)
+  /// <returns>Instance of vehicle turret created from <paramref name="reference"/></returns>
+  public VehicleTurret CopyAndAddTurret(VehicleTurret reference, string upgradeKey = null)
   {
     VehicleTurret newTurret =
       (VehicleTurret)Activator.CreateInstance(reference.GetType(), Vehicle, reference);
-    newTurret.SetTarget(LocalTargetInfo.Invalid);
-    newTurret.ResetAngle();
-    newTurret.upgradeKey = upgradeKey;
-    newTurret.FillEvents_Def();
+    SetDefaults(newTurret);
     newTurret.Init(reference);
-    turrets.Add(newTurret);
-    RevalidateTurrets();
-    TryRegisterRenderer(newTurret);
+    AddTurret(newTurret, upgradeKey: upgradeKey);
+    return newTurret;
+  }
 
+  private void SetDefaults(VehicleTurret turret)
+  {
+    turret.SetTarget(LocalTargetInfo.Invalid);
+    turret.ResetAngle();
+    RegisterEventsFor(turret);
+  }
+
+  /// <summary>
+  /// Adds the turret to the turret list and re-registers turret to renderer if a graphic exists.
+  /// </summary>
+  /// <param name="turret"></param>
+  /// <param name="upgradeKey"></param>
+  public void AddTurret(VehicleTurret turret, string upgradeKey)
+  {
+    turret.upgradeKey = upgradeKey;
+    turrets.Add(turret);
+    RevalidateTurrets();
+    TryRegisterRenderer(turret);
     if (Vehicle.Spawned)
       LongEventHandler.ExecuteWhenFinished(RecacheGizmos);
 
@@ -658,9 +679,9 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
       for (int i = 0; i < backupQuotas.Count; i++)
       {
         BackupTurretQuota quota = backupQuotas[i];
-        if (quota.key == newTurret.key && quota.upgradeKey == newTurret.upgradeKey)
+        if (quota.key == turret.key && quota.upgradeKey == turret.upgradeKey)
         {
-          SetQuotaLevel(newTurret, quota.config);
+          SetQuotaLevel(turret, quota.config);
           backupQuotas.RemoveAt(i);
           break;
         }
@@ -668,7 +689,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
     }
 
     if (upgradeKey != null && Vehicle.CompUpgradeTree != null &&
-      Vehicle.CompUpgradeTree.TryGetStates(newTurret.key, out List<UpgradeState> states))
+      Vehicle.CompUpgradeTree.TryGetStates(turret.key, out List<UpgradeState> states))
     {
       // Re-unlock turret-type settings to ensure proper values are
       // initialized for new turrets of existing keys
@@ -680,7 +701,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
         foreach (UpgradeState.Setting setting in state.settings)
         {
           if (setting is UpgradeSetting_Turret turretSetting &&
-            turretSetting.turretKey == newTurret.key)
+            turretSetting.turretKey == turret.key)
           {
             turretSetting.Unlocked(Vehicle, false);
           }

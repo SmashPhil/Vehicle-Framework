@@ -6,6 +6,8 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
+[TestCategory(TestCategoryNames.VehicleTurret, TestCategoryNames.Def)]
+[TestDescription("TurretDef configurations.")]
 internal sealed class UnitTest_VehicleTurretDef : UnitTest_VehicleDefTest
 {
   protected override bool ShouldTest(VehicleDef vehicleDef)

@@ -5,6 +5,7 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.MainMenu)]
+[TestCategory(TestCategoryNames.ParallelRenderer, TestCategoryNames.Memory, TestCategoryNames.Def)]
 internal sealed class UnitTest_MaterialPoolDefs : UnitTest_VehicleDefTest
 {
   private const string HotReloadSuffix = "_HotReloadedThrowaway";

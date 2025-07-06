@@ -324,9 +324,8 @@ public class VehicleTurretDef : Def, ITweakFields
     LongEventHandler.ExecuteWhenFinished(delegate
     {
       if (graphicData == null)
-      {
         return;
-      }
+
       FixInvalidGraphicDataFields(graphicData);
       if (!graphics.NullOrEmpty())
       {
@@ -364,9 +363,8 @@ public class VehicleTurretDef : Def, ITweakFields
   private static void FixInvalidGraphicDataFields(GraphicDataRGB graphicData)
   {
     if (graphicData == null)
-    {
       return;
-    }
+
     if (graphicData.shaderType == null)
     {
       graphicData.shaderType = ShaderTypeDefOf.Cutout;
@@ -378,7 +376,6 @@ public class VehicleTurretDef : Def, ITweakFields
           ShaderTypeDefOf.CutoutComplex :
           graphicData.shaderType;
     }
-
     graphicData.RecacheLayerOffsets();
   }
 

@@ -19,7 +19,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
                                      IEventManager<VehicleTurretEventDef>, IMaterialCacheTarget,
                                      IParallelRenderer, IBlitTarget, ITransformable
 {
-  public const int AutoTargetInterval = 60;
   public const int TicksPerOverheatingFrame = 15;
   public const int TicksTillBeginCooldown = 60;
   public const float MaxHeatCapacity = 100;
@@ -382,16 +381,9 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     set
     {
       if (!CanAutoTarget || value == autoTargetingActive)
-      {
         return;
-      }
-
       autoTargetingActive = value;
-
-      if (autoTargetingActive)
-      {
-        StartTicking();
-      }
+      UpdateScanEvent();
     }
   }
 
@@ -442,6 +434,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
     ResetAngle();
     LongEventHandler.ExecuteWhenFinished(() => PropertyBlock ??= new MaterialPropertyBlock());
+    UpdateScanEvent();
   }
 
   public virtual void PostSpawnSetup(bool respawningAfterLoad)
@@ -581,7 +574,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     bool reloadTicked = TurretReloadTick();
     bool rotationTicked = TurretRotationTick();
     bool targeterTicked = TurretTargeterTick();
-    bool autoTicked = TurretAutoTick();
     bool recoilTicked = false;
     if (recoilTracker != null)
     {
@@ -596,8 +588,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
       }
     }
 
-    //Keep ticking until no longer needed
-    return cooldownTicked || reloadTicked || autoTicked || rotationTicked || targeterTicked ||
+    // Keep ticking until no longer needed
+    return cooldownTicked || reloadTicked || rotationTicked || targeterTicked ||
       recoilTicked;
   }
 
@@ -660,32 +652,29 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     return false;
   }
 
-  protected virtual bool TurretAutoTick()
+  protected virtual void ScanForTarget()
   {
-    if (vehicle.Spawned && !queuedToFire && AutoTarget)
+    if (!AutoTarget)
     {
-      if (Find.TickManager.TicksGame % AutoTargetInterval == 0)
-      {
-        if (TurretDisabled)
-        {
-          return false;
-        }
-
-        if (!targetInfo.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
-        {
-          if (this.TryGetTarget(out LocalTargetInfo autoTarget,
-            additionalFlags: TargetScanFlags.NeedAutoTargetable))
-          {
-            AlignToAngleRestricted(TurretLocation.AngleToPoint(autoTarget.Thing.DrawPos));
-            SetTarget(autoTarget);
-          }
-        }
-      }
-
-      return true;
+      Log.ErrorOnce("Scanning for target but auto targeting is disabled.", GetHashCode());
+      UpdateScanEvent();
+      return;
     }
 
-    return false;
+    if (!vehicle.Spawned || queuedToFire)
+      return;
+    if (TurretDisabled)
+      return;
+
+    if (!targetInfo.IsValid && TurretTargeter.Turret != this && ReloadTicks <= 0 && HasAmmo)
+    {
+      if (this.TryGetTarget(out LocalTargetInfo autoTarget,
+        additionalFlags: TargetScanFlags.NeedAutoTargetable))
+      {
+        AlignToAngleRestricted(TurretLocation.AngleToPoint(autoTarget.Thing.DrawPos));
+        SetTarget(autoTarget);
+      }
+    }
   }
 
   protected virtual bool TurretRotationTick()
@@ -802,9 +791,20 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     return false;
   }
 
+  private void UpdateScanEvent()
+  {
+    vehicle.RemoveEvent(VehicleEventDefOf.ScanShort, ScanForTarget);
+    if (autoTargetingActive)
+    {
+      string eventKey = $"{GetUniqueLoadID()}::{nameof(ScanForTarget)}";
+      Assert.IsFalse(vehicle.EventRegistry[VehicleEventDefOf.ScanShort].Contains(eventKey));
+      vehicle.AddEvent(VehicleEventDefOf.ScanShort, ScanForTarget, eventKey);
+    }
+  }
+
   public virtual CompVehicleTurrets.TurretData GenerateTurretData()
   {
-    return new CompVehicleTurrets.TurretData()
+    return new CompVehicleTurrets.TurretData
     {
       shots = CurrentFireMode.shotsPerBurst.RandomInRange,
       ticksTillShot = 0,
@@ -1366,6 +1366,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
   public virtual void OnDestroy()
   {
+    AutoTarget = false; // Deregister event
     RGBMaterialPool.Release(this);
     if (!turretGraphics.NullOrEmpty())
     {
@@ -1420,7 +1421,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
       {
         AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
       }
-
       InitRecoilTrackers();
     }
   }

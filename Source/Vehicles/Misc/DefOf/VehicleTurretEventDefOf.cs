@@ -1,24 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
-using RimWorld;
+﻿using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class VehicleTurretEventDefOf
 {
-	[DefOf]
-	public static class VehicleTurretEventDefOf
-	{
-		static VehicleTurretEventDefOf()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(VehicleTurretEventDefOf));
-		}
+  static VehicleTurretEventDefOf()
+  {
+    DefOfHelper.EnsureInitializedInCtor(typeof(VehicleTurretEventDefOf));
+  }
 
-		public static VehicleTurretEventDef Queued;
-		public static VehicleTurretEventDef Dequeued;
-		public static VehicleTurretEventDef ShotFired;
-		public static VehicleTurretEventDef Reload;
-		public static VehicleTurretEventDef Warmup;
-		public static VehicleTurretEventDef Cooldown;
-	}
+  public static VehicleTurretEventDef Queued;
+  public static VehicleTurretEventDef Dequeued;
+  public static VehicleTurretEventDef ShotFired;
+  public static VehicleTurretEventDef Reload;
+  public static VehicleTurretEventDef Warmup;
+  public static VehicleTurretEventDef Cooldown;
 }

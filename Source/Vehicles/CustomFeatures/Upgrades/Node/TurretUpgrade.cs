@@ -39,7 +39,7 @@ namespace Vehicles
           {
             try
             {
-              vehicle.CompVehicleTurrets.AddTurret(turret, node.key);
+              vehicle.CompVehicleTurrets.CopyAndAddTurret(turret, node.key);
             }
             catch (Exception ex)
             {
@@ -77,7 +77,7 @@ namespace Vehicles
           }
           else
           {
-            vehicle.CompVehicleTurrets.AddTurret(turret);
+            vehicle.CompVehicleTurrets.CopyAndAddTurret(turret);
           }
         }
       }

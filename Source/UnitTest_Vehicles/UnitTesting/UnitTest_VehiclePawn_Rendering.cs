@@ -5,6 +5,7 @@ namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn)]
+[TestDescription("Vehicle rendering with the parallel renderer system.")]
 [Disabled]
 internal sealed class UnitTest_VehiclePawn_Rendering
 {
