@@ -46,7 +46,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     innerContainer = new ThingOwner<VehiclePawn>(this, false, LookMode.Reference);
   }
 
-  public override string Label => vehicle.Label;
+  public override string Label => vehicle?.Label;
 
   public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 

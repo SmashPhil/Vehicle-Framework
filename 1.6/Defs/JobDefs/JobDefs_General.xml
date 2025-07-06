@@ -22,6 +22,12 @@
 		<isIdle>true</isIdle>
 		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
 	</JobDef>
+
+  <JobDef>
+		<defName>IdleVehicleDeSpawned</defName>
+		<driverClass>Vehicles.JobDriver_IdleVehicleDeSpawned</driverClass>
+		<reportString>Idle.</reportString>
+	</JobDef>
 	
 	<JobDef>
 		<defName>DeployVehicle</defName>

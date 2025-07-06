@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using HarmonyLib;
 using LudeonTK;
 using RimWorld;
@@ -10,7 +9,6 @@ using SmashTools;
 using SmashTools.Patching;
 using Vehicles.World;
 using Verse;
-using Verse.AI;
 
 namespace Vehicles;
 
@@ -48,8 +46,7 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(Pawn_JobTracker),
-    //    nameof(Pawn_JobTracker.TryTakeOrderedJob)),
+    //  original: AccessTools.Method(typeof(JobGiver_IdleWhileDespawned), "TryGiveJob"),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
@@ -71,22 +68,11 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Job job, bool requestQueueing, Pawn ___pawn)
+  private static void TestPrefix(Pawn pawn)
   {
     try
     {
-      Log.Message($"Job: {job.def.defName} Queue: {requestQueueing}");
-      bool flag = ___pawn.jobs.IsCurrentJobPlayerInterruptible();
-      Log.Message($"flag: {flag}");
-      bool flag2 = ___pawn.CurJob != null && ___pawn.CurJob.def.forceCompleteBeforeNextJob;
-      Log.Message($"flag2: {flag2}");
-      bool flag3 = flag && !flag2;
-      Log.Message($"flag3: {flag3}");
-      bool flag4 = ___pawn.mindState.IsIdle || ___pawn.CurJob == null || ___pawn.CurJob.def.isIdle;
-      Log.Message($"flag4: {flag4}");
-      bool flag5 = KeyBindingDefOf.QueueOrder.IsDownEvent;
-      flag5 |= requestQueueing;
-      Log.Message($"FORCE: {flag3} && ({flag5} || {flag4})");
+      Log.Message($"{pawn} idling.");
     }
     catch (Exception ex)
     {

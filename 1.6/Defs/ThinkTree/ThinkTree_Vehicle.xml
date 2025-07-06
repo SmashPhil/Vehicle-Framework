@@ -48,7 +48,7 @@
 			<subNodes>
 				<!-- Despawned -->
 				<li Class="ThinkNode_Subtree">
-					<treeDef>Despawned</treeDef>
+					<treeDef>Vehicle_DeSpawned</treeDef>
 				</li>
 
 				<li Class="ThinkNode_ConditionalCanDoConstantThinkTreeJobNow">
