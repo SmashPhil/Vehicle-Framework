@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Targeting;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -14,7 +15,8 @@ namespace Vehicles.World;
 
 [PublicAPI]
 [StaticConstructorOnStartup]
-public class VehicleCaravan : Caravan, IVehicleWorldObject
+public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<GlobalTargetInfo, ArrivalOption>,
+                              ILauncher
 {
   private const int RepairMothballTicks = 300;
 
@@ -50,6 +52,11 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
   public bool VehiclesNeedRepairs { get; private set; }
 
   public override Vector3 DrawPos => vehicleTweener.TweenedPos;
+
+  bool ITargeterSource<GlobalTargetInfo, ArrivalOption>.TargeterValid =>
+    !Destroyed && LeadVehicle is { Spawned: false, Destroyed: false };
+
+  public Vector3 Origin => Tile.Valid ? Find.WorldGrid.GetTileCenter(Tile) : DrawPos;
 
   public bool CanDismount => true;
 
@@ -336,15 +343,53 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject
 
     void LaunchAction()
     {
-      LaunchTargeter.BeginTargeting(vehicle,
-        (target, fuelCost) =>
-          AerialVehicleLaunchHelper.ChoseTargetOnMap(vehicle, Tile, target, fuelCost), Tile,
-        true, TexData.TargeterMouseAttachment, closeWorldTabWhenFinished: false,
-        onUpdate: null,
-        extraLabelGetter: (target, path, fuelCost) =>
-          vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile,
-            path, fuelCost));
+      CameraJumper.TryJump(CameraJumper.GetWorldTarget(this));
+      Find.WorldSelector.ClearSelection();
+      ITargeterUpdate<GlobalTargetInfo> updater =
+        LeadVehicle.CompFueledTravel != null ?
+          new FuelTargetUpdater(LeadVehicle, this) :
+          null;
+      new WorldTargeter<ArrivalOption>(this, updater)
+      {
+        TargetTexture = TexData.TargeterMouseAttachment
+      }.Start();
     }
+  }
+
+  TargetValidation ITargeterSource<GlobalTargetInfo, ArrivalOption>.CanTarget(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.CanTarget(target);
+  }
+
+  TargeterResult ITargeterSource<GlobalTargetInfo, ArrivalOption>.Select(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.Select(target);
+  }
+
+  void ITargeterSource<GlobalTargetInfo, ArrivalOption>.OnTargetingFinished(
+    TargetData<GlobalTargetInfo> targetData,
+    ArrivalOption arrivalOption)
+  {
+    if (arrivalOption.continueWith != null)
+    {
+      arrivalOption.continueWith(targetData);
+    }
+    else
+    {
+      Launch(targetData, arrivalOption.arrivalAction);
+    }
+  }
+
+  public void Launch(TargetData<GlobalTargetInfo> targetData, IArrivalAction arrivalAction)
+  {
+    AerialVehicleInFlight aerialVehicle = LeadVehicle.GetOrMakeAerialVehicle();
+    List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
+    aerialVehicle.OrderFlyToTiles(nodes, arrivalAction);
+  }
+
+  IEnumerable<ArrivalOption> ILauncher.OptionsAt(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.OptionsAt(target);
   }
 
   public void Notify_VehicleTeleported()

@@ -3,20 +3,20 @@ using SmashTools;
 using UnityEngine;
 using Verse;
 
+// ReSharper disable RedundantDefaultMemberInitializer
+
 namespace Vehicles
 {
   public class SectionMain : SettingsSection
   {
     private const int MainSectionColumns = 3;
 
-    // ReSharper disable RedundantDefaultMemberInitializer
-
-    /* Map & World Generation */
+    // Map & World Generation
     public float beachMultiplier = 0f;
     public float riverMultiplier = 0f;
     public int forceFactionCoastRadius = 1;
 
-    /* General */
+    // General
     public bool modifiableSettings = true;
     public bool useCustomShaders = true;
     public bool allowDiagonalRendering = true;
@@ -27,30 +27,28 @@ namespace Vehicles
     public bool ignoreBiomeCostOnRoads = true;
     public bool multiplePawnsPerJob = true;
 
-    /* Graphics */
+    // Graphics
     public bool passiveWaterWaves = true;
     public bool aerialVehicleEffects = true;
 
-    /* Turrets */
+    // Turrets
     public bool overheatMechanics = true;
 
-    /* Performance */
-    public bool opportunisticTicking = true;
-
-    /* Fishing */
+    // Fishing
     public float fishingMultiplier = 1f;
     public int fishingDelay = 1000;
     public int fishingSkillIncrease = 5;
     public bool fishingPersists = true;
 
-    /* Aerial */
+    // Aerial
     public bool drawLandingGhost = false;
     public bool burnRadiusOnRockets = true;
     public bool deployOnLanding = true;
-    public bool airDefenses = true;
     public float delayDeployOnLanding = 0;
 
-    /* Combat */
+    public bool airDefenses = true;
+
+    // Combat
     public float meleeDamageMultiplier = 1;
     public float rangedDamageMultiplier = 1;
     public float explosiveDamageMultiplier = 1;
@@ -58,9 +56,6 @@ namespace Vehicles
     public bool runOverPawns = true;
     public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.None;
     public float friendlyFireChance = 0.5f;
-
-    /* Upgrades */
-    public bool overrideDrawColors = true;
 
     public override void ResetSettings()
     {
@@ -93,9 +88,6 @@ namespace Vehicles
       passiveWaterWaves = true;
       aerialVehicleEffects = true;
 
-      // Performance
-      opportunisticTicking = true;
-
       // Fishing
       fishingMultiplier = 1f;
       fishingDelay = 1000;
@@ -114,9 +106,6 @@ namespace Vehicles
       runOverPawns = true;
       friendlyFire = VehicleTracksFriendlyFire.None;
       friendlyFireChance = 0.5f;
-
-      // Upgrades
-      overrideDrawColors = true;
     }
 
     public override void ExposeData()
@@ -150,9 +139,6 @@ namespace Vehicles
       Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects),
         defaultValue: true);
 
-      Scribe_Values.Look(ref opportunisticTicking, nameof(opportunisticTicking),
-        defaultValue: true);
-
       Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
       Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 1000);
       Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: 5);
@@ -170,7 +156,6 @@ namespace Vehicles
       Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire),
         defaultValue: VehicleTracksFriendlyFire.None);
       Scribe_Values.Look(ref friendlyFireChance, nameof(friendlyFireChance), defaultValue: 0.5f);
-      Scribe_Values.Look(ref overrideDrawColors, nameof(overrideDrawColors), defaultValue: true);
     }
 
     public override void OnGUI(Rect rect)
@@ -208,16 +193,12 @@ namespace Vehicles
           GameFont.Small, TextAnchor.MiddleCenter);
         listingStandard.Gap(4);
         listingStandard.CheckboxLabeledWithMessage("VF_ModifiableSettings".Translate(),
-          delegate
-          {
-            return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-          }, ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
+          delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
+          ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 
         listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),
-          delegate
-          {
-            return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-          }, ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
+          delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
+          ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
 
         listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(),
           ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
@@ -227,10 +208,8 @@ namespace Vehicles
           ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
 
         listingStandard.CheckboxLabeledWithMessage("VF_RoadBiomeCostPathing".Translate(),
-          delegate
-          {
-            return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput);
-          }, ref ignoreBiomeCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
+          delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
+          ref ignoreBiomeCostOnRoads, "VF_RoadBiomeCostPathingTooltip".Translate());
 
         listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(),
           ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
@@ -248,10 +227,8 @@ namespace Vehicles
         listingStandard.Gap(8);
 
         // Performance
-        listingStandard.Header("VF_PerformanceSettings".Translate(), ListingExtension.BannerColor,
-          GameFont.Small, TextAnchor.MiddleCenter);
-        listingStandard.CheckboxLabeled("VF_OpportunisticTicking".Translate(),
-          ref opportunisticTicking, "VF_OpportunisticTickingTooltip".Translate());
+        //listingStandard.Header("VF_PerformanceSettings".Translate(), ListingExtension.BannerColor,
+        //  GameFont.Small, TextAnchor.MiddleCenter);
 
         listingStandard.NewColumn();
 
@@ -334,21 +311,8 @@ namespace Vehicles
         }
 
         // Upgrades
-        listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor,
-          GameFont.Small, TextAnchor.MiddleCenter);
-        listingStandard.CheckboxLabeled("VF_OverrideDrawColor".Translate(), ref overrideDrawColors,
-          "VF_OverrideDrawColorTooltip".Translate());
-
-        //listingStandard.NewColumn();
-        //listingStandard.Header("VF_VehicleDamageMultipliers".Translate(),
-        //  ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-        //listingStandard.Gap(4);
-        //listingStandard.SliderLabeled("VF_MeleeDamageMultiplier".Translate(), string.Empty, "%",
-        //  ref meleeDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
-        //listingStandard.SliderLabeled("VF_RangedDamageMultiplier".Translate(), string.Empty, "%",
-        //  ref rangedDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
-        //listingStandard.SliderLabeled("VF_ExplosiveDamageMultiplier".Translate(), string.Empty, "%",
-        //  ref explosiveDamageMultiplier, 0, 2, multiplier: 100, decimalPlaces: 0);
+        //listingStandard.Header("VF_Upgrades".Translate(), ListingExtension.BannerColor,
+        //  GameFont.Small, TextAnchor.MiddleCenter);
         listingStandard.Gap(8);
 
         // Turrets

@@ -21,7 +21,7 @@ namespace Vehicles;
 /// <summary>
 /// Rendering & Graphics
 /// </summary>
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[PublicAPI]
 public partial class VehiclePawn
 {
   [AnimationProperty, TweakField]

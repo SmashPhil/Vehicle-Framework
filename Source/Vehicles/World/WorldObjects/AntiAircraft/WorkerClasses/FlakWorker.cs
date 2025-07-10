@@ -55,7 +55,7 @@ public class FlakWorker : AntiAircraftWorker
     {
       if (airDefense.parent is MapParent mapParent && mapParent.HasMap)
       {
-        if (!CurrentTarget.vehicle.CompVehicleLauncher.inFlight ||
+        if (!CurrentTarget.Vehicle.CompVehicleLauncher.inFlight ||
           Ext_Math.SphericalDistance(airDefense.parent.DrawPos, CurrentTarget.DrawPos) >
           airDefense.MaxDistance)
         {

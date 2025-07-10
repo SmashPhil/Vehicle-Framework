@@ -8,8 +8,8 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public static class Targeters
 {
-  private static readonly List<BaseTargeter> targeters = [];
-  private static readonly List<BaseWorldTargeter> worldTargeters = [];
+  private static readonly List<BaseTargeter> MapTargeters = [];
+  private static readonly List<BaseWorldTargeter> WorldTargeters = [];
 
   private static BaseTargeter CurrentTargeter { get; set; }
 
@@ -20,13 +20,13 @@ public static class Targeters
     foreach (Type type in typeof(BaseTargeter).InstantiableDescendantsAndSelf())
     {
       BaseTargeter targeter = (BaseTargeter)Activator.CreateInstance(type, null);
-      targeters.Add(targeter);
+      MapTargeters.Add(targeter);
       targeter.PostInit();
     }
     foreach (Type type in typeof(BaseWorldTargeter).InstantiableDescendantsAndSelf())
     {
       BaseWorldTargeter targeter = (BaseWorldTargeter)Activator.CreateInstance(type, null);
-      worldTargeters.Add(targeter);
+      WorldTargeters.Add(targeter);
       targeter.PostInit();
     }
   }

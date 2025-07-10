@@ -2,39 +2,41 @@
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles.World;
 
 [PublicAPI]
-public class AerialVehicleArrivalAction_Trade : AerialVehicleArrivalAction_VisitSettlement
+public class ArrivalAction_Trade : ArrivalAction_VisitSettlement
 {
-  public AerialVehicleArrivalAction_Trade()
+  public ArrivalAction_Trade()
   {
   }
 
-  public AerialVehicleArrivalAction_Trade(VehiclePawn vehicle, Settlement settlement) : base(
-    vehicle, settlement)
+  public ArrivalAction_Trade(VehiclePawn vehicle) : base(vehicle)
   {
   }
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
+  public override void Arrived(GlobalTargetInfo target)
   {
-    base.Arrived(aerialVehicle, tile);
-    if (GetValidNegotiator(vehicle, settlement) == null) return;
+    base.Arrived(target);
+    Settlement settlement = target.WorldObject as Settlement;
+    Assert.IsNotNull(settlement);
+
+    if (GetValidNegotiator(vehicle, settlement) is null)
+      return;
 
     Pawn negotiator =
-      WorldHelper.FindBestNegotiator(vehicle, settlement.Faction, settlement.TraderKind);
-    if (negotiator == null) return;
+      vehicle.FindBestNegotiator(settlement.Faction, settlement.TraderKind);
+    if (negotiator == null)
+      return;
 
     Find.WindowStack.Add(new Dialog_Trade(negotiator, settlement));
     PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(),
       "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural),
-      LetterDefOf.NeutralEvent, false, true);
+      LetterDefOf.NeutralEvent);
   }
-
-  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile) =>
-    base.StillValid(destinationTile) && CanTradeWith(vehicle, settlement);
 
   public static bool ValidGiftOrTradePartner(Settlement settlement)
   {
@@ -53,12 +55,13 @@ public class AerialVehicleArrivalAction_Trade : AerialVehicleArrivalAction_Visit
   {
     foreach (Pawn pawn in vehicle.AllPawnsAboard)
     {
-      if (!pawn.Dead && !pawn.Downed && !pawn.InMentalState &&
-        !StatDefOf.TradePriceImprovement.Worker.IsDisabledFor(pawn) &&
-        FactionUtility.CanTradeWith(pawn, settlement.Faction, settlement.TraderKind))
-      {
+      if (pawn.Dead || pawn.Downed || pawn.InMentalState)
+        continue;
+      if (StatDefOf.TradePriceImprovement.Worker.IsDisabledFor(pawn))
+        continue;
+
+      if (pawn.CanTradeWith(settlement.Faction, settlement.TraderKind))
         return pawn;
-      }
     }
     return null;
   }

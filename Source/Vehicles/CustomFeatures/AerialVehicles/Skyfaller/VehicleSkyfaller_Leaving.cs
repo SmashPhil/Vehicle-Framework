@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
-using Verse;
 using UnityEngine;
 using Vehicles.World;
+using Verse;
 
 namespace Vehicles;
 
 public class VehicleSkyfaller_Leaving : VehicleSkyfaller
 {
-  public AerialVehicleArrivalAction arrivalAction;
+  public IArrivalAction arrivalAction;
 
   public List<FlightNode> flightPath;
 
@@ -48,11 +47,11 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
       base.LeaveMap();
       return;
     }
-    if (flightPath.Any(node => node.tile < 0))
+    if (flightPath.Any(node => !node.Tile.Valid))
     {
       Log.Error(
         "AerialVehicle left the map but has a flight path Tile that is invalid. Removing node from path.");
-      flightPath.RemoveAll(node => node.tile < 0);
+      flightPath.RemoveAll(node => !node.Tile.Valid);
       if (flightPath.NullOrEmpty())
       {
         //REDO - Handle better here
@@ -67,11 +66,10 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
     if (createWorldObject)
     {
       AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
-      aerialVehicle.OrderFlyToTiles(new List<FlightNode>(flightPath),
-        WorldHelper.GetTilePos(Map.Tile), arrivalAction);
+      aerialVehicle.OrderFlyToTiles(flightPath, arrivalAction);
       if (orderRecon)
       {
-        aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().tile);
+        aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().Tile);
       }
 
       Find.WorldPawns.PassToWorld(vehicle);
@@ -109,10 +107,9 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
   public override void ExposeData()
   {
     base.ExposeData();
-    Scribe_Deep.Look(ref arrivalAction, "arrivalAction", Array.Empty<object>());
     Scribe_Collections.Look(ref flightPath, "flightPath");
     Scribe_Values.Look(ref orderRecon, "orderRecon");
-    Scribe_Values.Look(ref createWorldObject, "createWorldObject", true, false);
+    Scribe_Values.Look(ref createWorldObject, "createWorldObject", true);
     Scribe_Values.Look(ref delayLaunchingTicks, "delayLaunchingTicks");
   }
 }

@@ -62,10 +62,10 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
       if (crashingCell == IntVec3.Invalid)
         return false;
 
-      VehiclePawn vehicle = aerialVehicle.vehicle;
-      AerialVehicleArrivalAction_CrashSpecificCell arrivalAction = new(aerialVehicle.vehicle,
-        crashSite.Parent, crashSite.Tile, crashingCell, Rot4.East);
-      arrivalAction.Arrived(aerialVehicle, crashSite.Tile);
+      VehiclePawn vehicle = aerialVehicle.Vehicle;
+      ArrivalAction_CrashInMap arrivalAction = new(aerialVehicle.Vehicle,
+        crashSite.Parent, crashingCell, Rot4.East);
+      arrivalAction.Arrived(crashSite.Parent);
       string settlementLabel = culprit?.Label ?? string.Empty;
       if (ticksTillArrival > 0)
       {
@@ -102,8 +102,8 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
       if (!cell.InBounds(crashSite))
         return false;
 
-      return aerialVehicle.vehicle.PawnOccupiedCells(cell, Rot4.East).All(hitboxCell =>
-        hitboxCell.Walkable(aerialVehicle.vehicle.VehicleDef,
+      return aerialVehicle.Vehicle.PawnOccupiedCells(cell, Rot4.East).All(hitboxCell =>
+        hitboxCell.Walkable(aerialVehicle.Vehicle.VehicleDef,
           crashSite.GetCachedMapComponent<VehiclePathingSystem>()) &&
         !Ext_Vehicles.IsRoofed(hitboxCell, crashSite));
     }
@@ -119,10 +119,10 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
     }
     else
     {
-      VehiclePawn vehicle = aerialVehicle.vehicle;
+      VehiclePawn vehicle = aerialVehicle.Vehicle;
       Assert.IsNotNull(vehicle);
       int mapSize = CaravanIncidentUtility.CalculateIncidentMapSize(
-        aerialVehicle.vehicle.AllPawnsAboard, aerialVehicle.vehicle.AllPawnsAboard);
+        aerialVehicle.Vehicle.AllPawnsAboard, aerialVehicle.Vehicle.AllPawnsAboard);
       crashSiteMap = GetOrGenerateMapUtility.GetOrGenerateMap(aerialVehicle.Tile,
         new IntVec3(mapSize, 1, mapSize), WorldObjectDefOfVehicles.CrashedShipSite);
       CrashSite crashSite = crashSiteMap.Parent as CrashSite;
@@ -130,7 +130,7 @@ public class IncidentWorker_ShuttleDowned : IncidentWorker
 
       if (culprit is Settlement settlement)
         ticksTillArrival = crashSite.InitiateReinforcementsRequest(settlement);
-      MapHelper.UnfogMapFromEdge(crashSiteMap, aerialVehicle.vehicle.VehicleDef);
+      MapHelper.UnfogMapFromEdge(crashSiteMap, aerialVehicle.Vehicle.VehicleDef);
     }
     return ticksTillArrival;
   }

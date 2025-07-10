@@ -5,7 +5,9 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Targeting;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 
@@ -13,7 +15,8 @@ namespace Vehicles.World;
 
 [PublicAPI]
 [StaticConstructorOnStartup]
-public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject
+public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject,
+                                     ILauncher, ITargeterSource<GlobalTargetInfo, ArrivalOption>
 {
   private static readonly Texture2D ViewQuestCommandTex =
     ContentFinder<Texture2D>.Get("UI/Commands/ViewQuest");
@@ -23,12 +26,12 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public const float PctPerTick = 0.001f;
   public const int TicksPerValidateFlightPath = 60;
 
-  public VehiclePawn vehicle;
+  private VehiclePawn vehicle;
   public ThingOwner<VehiclePawn> innerContainer;
 
-  public AerialVehicleArrivalAction arrivalAction;
-
   protected internal FlightPath flightPath;
+
+  private Gizmo_RefuelableFuelTravel fuelGizmo;
 
   internal float transition;
   public float elevation;
@@ -41,12 +44,15 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   private Material vehicleMatNonLit;
   private Material material;
 
+  [Obsolete("This constructor is requierd for Xml Deserialization, use AerialVehicleInFlight::Create instead")]
   public AerialVehicleInFlight()
   {
     innerContainer = new ThingOwner<VehiclePawn>(this, false, LookMode.Reference);
   }
 
   public override string Label => vehicle?.Label;
+
+  public VehiclePawn Vehicle => vehicle;
 
   public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
@@ -66,15 +72,18 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
   public bool CanDismount => false;
 
+  Vector3 ILauncher.Origin => DrawPos;
+
+  bool ITargeterSource<GlobalTargetInfo, ArrivalOption>.TargeterValid =>
+    !Destroyed && Vehicle is { Spawned: false, Destroyed: false };
+
   public override Vector3 DrawPos
   {
     get
     {
       Vector3 nodePos = flightPath.First.GetCenter(this);
       if (position == nodePos)
-      {
         return position;
-      }
       return Vector3.Slerp(position, nodePos, transition);
     }
   }
@@ -145,6 +154,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public virtual void Initialize()
   {
     position = base.DrawPos;
+    fuelGizmo = new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
   }
 
   public virtual Vector3 DrawPosAhead(int ticksAhead)
@@ -196,11 +206,11 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     {
       if (vehicle.CompFueledTravel != null)
       {
-        yield return new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
+        yield return fuelGizmo;
         if (DebugSettings.ShowDevGizmos)
         {
-          foreach (Gizmo fuelGizmo in vehicle.CompFueledTravel.DevModeGizmos())
-            yield return fuelGizmo;
+          foreach (Gizmo devModeGizmo in vehicle.CompFueledTravel.DevModeGizmos())
+            yield return devModeGizmo;
         }
       }
       if (vehicle.CompVehicleLauncher.ControlInFlight)
@@ -211,14 +221,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
           defaultDesc = "CommandLaunchGroupDesc".Translate(),
           icon = TexData.LaunchCommandTex,
           alsoClickIfOtherInGroupClicked = false,
-          action = delegate
-          {
-            LaunchTargeter.BeginTargeting(vehicle, ChoseTargetOnMap, this, true,
-              TexData.TargeterMouseAttachment, false, null,
-              (target, path, fuelCost) =>
-                vehicle.CompVehicleLauncher.launchProtocol.TargetingLabelGetter(target, Tile,
-                  path, fuelCost));
-          }
+          action = StartTargeting
         };
         if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
         {
@@ -243,65 +246,18 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
-  public virtual bool ChoseTargetOnMap(GlobalTargetInfo target, float fuelCost)
+  private void StartTargeting()
   {
-    return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target, DrawPos, Validator,
-      NewDestination);
-
-    bool Validator(GlobalTargetInfo globalTarget, Vector3 pos,
-      Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
+    CameraJumper.TryJump(CameraJumper.GetWorldTarget(this));
+    Find.WorldSelector.ClearSelection();
+    ITargeterUpdate<GlobalTargetInfo> updater =
+      Vehicle.CompFueledTravel != null ?
+        new FuelTargetUpdater(Vehicle, this) :
+        null;
+    new WorldTargeter<ArrivalOption>(this, updater)
     {
-      if (!globalTarget.IsValid)
-      {
-        Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(),
-          MessageTypeDefOf.RejectInput, false);
-        return false;
-      }
-
-      if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(globalTarget.Tile)) >
-        vehicle.CompVehicleLauncher.MaxLaunchDistance || (vehicle.CompFueledTravel is not null &&
-          fuelCost > vehicle.CompFueledTravel.Fuel))
-      {
-        Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(),
-          MessageTypeDefOf.RejectInput, false);
-        return false;
-      }
-
-      List<FloatMenuOption> source =
-        vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(globalTarget.Tile)
-         .ToList();
-      if (source.NullOrEmpty())
-      {
-        if (!WorldVehiclePathGrid.Instance.Passable(globalTarget.Tile, vehicle.VehicleDef))
-        {
-          Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(),
-            MessageTypeDefOf.RejectInput, false);
-          return false;
-        }
-        launchAction(globalTarget.Tile, null, false);
-        return true;
-      }
-
-      if (source.Count != 1)
-      {
-        Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
-        return false;
-      }
-      if (!source[0].Disabled)
-      {
-        source[0].action();
-        return true;
-      }
-      return false;
-    }
-  }
-
-  public void NewDestination(PlanetTile destinationTile, AerialVehicleArrivalAction arrivalAction,
-    bool recon = false)
-  {
-    vehicle.CompVehicleLauncher.inFlight = true;
-    this.recon = recon;
-    OrderFlyToTiles(LaunchTargeter.FlightPath, DrawPos, arrivalAction: arrivalAction);
+      TargetTexture = TexData.TargeterMouseAttachment
+    }.Start();
   }
 
   protected override void Tick()
@@ -341,7 +297,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   {
     vehicle.CompVehicleLauncher.inFlight = false;
     Tile = WorldHelper.GetNearestTile(DrawPos);
-    ResetPosition(WorldHelper.GetTilePos(Tile));
+    ResetPosition(DrawPos);
     flightPath.ResetPath();
     AirDefensePositionTracker.DeregisterAerialVehicle(this);
     IncidentWorker_ShuttleDowned.Execute(this, reasons, culprit: culprit);
@@ -352,7 +308,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     if (flightPath.Empty)
     {
       Log.Error($"{this} in flight with empty FlightPath.  Grounding to current Tile.");
-      ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
+      ResetPosition(DrawPos);
       vehicle.CompVehicleLauncher.inFlight = false;
       AirDefensePositionTracker.DeregisterAerialVehicle(this);
     }
@@ -361,49 +317,17 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       transition += speedPctPerTick;
       if (transition >= 1)
       {
-        if (flightPath.Path.Count > 1)
+        if (vehicle.Faction.IsPlayer)
         {
-          Vector3 newPos = DrawPos;
-          flightPath.NodeReached(!recon);
-          if (Spawned)
-          {
-            InitializeNextFlight(newPos);
-          }
+          Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort),
+            MessageTypeDefOf.NeutralEvent);
         }
-        else
-        {
-          if (vehicle.Faction.IsPlayer)
-          {
-            Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort),
-              MessageTypeDefOf.NeutralEvent);
-          }
-          LandAtTile(flightPath.First.tile);
-        }
+        LandAtTile(flightPath.First.Tile);
+        flightPath.ConsumeNode(!recon);
+        if (Spawned)
+          InitializeNextFlight(DrawPos);
       }
     }
-  }
-
-  public void LandAtTile(PlanetTile tile)
-  {
-    Tile = tile;
-    ResetPosition(Find.WorldGrid.GetTileCenter(Tile));
-    vehicle.CompVehicleLauncher.inFlight = false;
-    arrivalAction?.Arrived(this, tile);
-    AirDefensePositionTracker.DeregisterAerialVehicle(this);
-  }
-
-  public void OrderFlyToTiles(List<FlightNode> flightPath, Vector3 origin,
-    AerialVehicleArrivalAction arrivalAction = null)
-  {
-    if (flightPath.NullOrEmpty() || flightPath.Any(node => node.tile < 0))
-      return;
-    this.arrivalAction = arrivalAction;
-    this.flightPath.NewPath(flightPath);
-    InitializeNextFlight(origin);
-    List<AirDefense> flyoverDefenses =
-      AirDefensePositionTracker.GetNearbyObjects(this, speedPctPerTick);
-    AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
-    vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleOrdered].ExecuteEvents();
   }
 
   private void ResetPosition(Vector3 position)
@@ -426,25 +350,90 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       Find.WorldSelector.Select(vehicleCaravan, playSound: false);
   }
 
-  private void InitializeNextFlight(Vector3 position)
+  private void InitializeNextFlight(Vector3 origin)
   {
     vehicle.CompVehicleLauncher.inFlight = true;
-    ResetPosition(position);
+    ResetPosition(origin);
     SetSpeed();
   }
 
   private void SetSpeed()
   {
     Vector3 center = flightPath.First.GetCenter(this);
-    if (position == center) //If position is still at origin, set speed to instantaneous
+    if (position == center)
     {
       speedPctPerTick = 1;
       return;
     }
     float tileDistance = Mathf.Clamp(Ext_Math.SphericalDistance(position, center), 0.00001f,
-      float.MaxValue); //Clamp tile distance to PctPerTick
+      float.MaxValue); // Clamp tile distance to PctPerTick
     float flightSpeed = recon ? ReconFlightSpeed : vehicle.CompVehicleLauncher.FlightSpeed;
     speedPctPerTick = (PctPerTick / tileDistance) * flightSpeed.Clamp(0, 99999);
+  }
+
+  TargetValidation ITargeterSource<GlobalTargetInfo, ArrivalOption>.CanTarget(GlobalTargetInfo target)
+  {
+    if (vehicle == null || Destroyed)
+      return TargetValidation.Failed; // TODO Launcher - Cancel if aerial vehicle destroys
+    return vehicle.CompVehicleLauncher.CanTarget(target);
+  }
+
+  TargeterResult ITargeterSource<GlobalTargetInfo, ArrivalOption>.Select(GlobalTargetInfo target)
+  {
+    return vehicle.CompVehicleLauncher.Select(target);
+  }
+
+  void ITargeterSource<GlobalTargetInfo, ArrivalOption>.OnTargetingFinished(
+    TargetData<GlobalTargetInfo> targetData,
+    ArrivalOption arrivalOption)
+  {
+    if (arrivalOption.continueWith != null)
+    {
+      arrivalOption.continueWith(targetData);
+    }
+    else
+    {
+      Launch(targetData, arrivalOption.arrivalAction);
+    }
+  }
+
+  public void Launch(TargetData<GlobalTargetInfo> targetData, IArrivalAction arrivalAction)
+  {
+    List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
+    OrderFlyToTiles(nodes, arrivalAction);
+  }
+
+  IEnumerable<ArrivalOption> ILauncher.OptionsAt(GlobalTargetInfo target)
+  {
+    return vehicle.CompVehicleLauncher.OptionsAt(target);
+  }
+
+  public void LandAtTile(PlanetTile tile)
+  {
+    Tile = tile;
+    ResetPosition(DrawPos);
+    vehicle.CompVehicleLauncher.inFlight = false;
+    AirDefensePositionTracker.DeregisterAerialVehicle(this);
+  }
+
+  private void ResumePathPostLoad(FlightPath flightPath)
+  {
+    OrderFlyToTiles(flightPath.Path, flightPath.ArrivalAction);
+  }
+
+  public void OrderFlyToTiles(List<FlightNode> flightPath, [NotNull] IArrivalAction arrivalAction)
+  {
+    Assert.IsFalse(flightPath.NullOrEmpty());
+    if (flightPath.Any(node => !node.Tile.Valid))
+      throw new ArgumentException("Invalid tiles in flight path.", nameof(flightPath));
+    vehicle.CompVehicleLauncher.inFlight = true;
+    Vector3 origin = DrawPos; // Capture position before registered Tile changes through flight path change
+    this.flightPath.NewPath(flightPath, arrivalAction);
+    InitializeNextFlight(origin);
+    List<AirDefense> flyoverDefenses =
+      AirDefensePositionTracker.GetNearbyObjects(this, speedPctPerTick);
+    AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
+    vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleOrdered].ExecuteEvents();
   }
 
   public override void DrawExtraSelectionOverlays()
@@ -453,25 +442,22 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     DrawFlightPath();
   }
 
-  public void DrawFlightPath()
+  private void DrawFlightPath()
   {
-    if (!LaunchTargeter.Instance.IsTargeting)
+    if (flightPath.Path.Count > 1)
     {
-      if (flightPath.Path.Count > 1)
+      Vector3 nodePosition = DrawPos;
+      for (int i = 0; i < flightPath.Path.Count; i++)
       {
-        Vector3 nodePosition = DrawPos;
-        for (int i = 0; i < flightPath.Path.Count; i++)
-        {
-          Vector3 nextNodePosition = flightPath[i].GetCenter(this);
-          LaunchTargeter.DrawTravelPoint(nodePosition, nextNodePosition);
-          nodePosition = nextNodePosition;
-        }
-        LaunchTargeter.DrawTravelPoint(nodePosition, flightPath.Last.GetCenter(this));
+        Vector3 nextNodePosition = flightPath[i].GetCenter(this);
+        FlightPath.DrawPath(nodePosition, nextNodePosition, TexData.WorldLineMatWhite);
+        nodePosition = nextNodePosition;
       }
-      else if (flightPath.Path.Count == 1)
-      {
-        LaunchTargeter.DrawTravelPoint(DrawPos, flightPath.First.GetCenter(this));
-      }
+      FlightPath.DrawPath(nodePosition, flightPath.Last.GetCenter(this), TexData.WorldLineMatWhite);
+    }
+    else if (flightPath.Path.Count == 1)
+    {
+      FlightPath.DrawPath(DrawPos, flightPath.First.GetCenter(this), TexData.WorldLineMatWhite);
     }
   }
 
@@ -551,7 +537,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     Scribe_References.Look(ref vehicle, nameof(vehicle), true);
 
     Scribe_Deep.Look(ref flightPath, nameof(flightPath), this);
-    Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
     Scribe_Values.Look(ref transition, nameof(transition));
     Scribe_Values.Look(ref position, nameof(position));
 
@@ -574,9 +559,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
     if (flightPath != null && !flightPath.Path.NullOrEmpty())
     {
-      //Needs new list instance to avoid clearing before reset.
-      //This is only necessary for resetting with saved flight path due to flight being uninitialized from load.
-      OrderFlyToTiles(flightPath.Path.ToList(), DrawPos, arrivalAction: arrivalAction);
+      ResumePathPostLoad(flightPath);
     }
   }
 

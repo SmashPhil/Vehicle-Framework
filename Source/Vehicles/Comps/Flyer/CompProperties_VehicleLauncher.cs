@@ -18,21 +18,25 @@ public class CompProperties_VehicleLauncher : VehicleCompProperties
   //[PostToSettings(Label = "VF_RateOfClimb", Translate = true, Tooltip = "VF_RateOfClimbTooltip", UISettingsType = UISettingsType.SliderFloat, VehicleType = VehicleType.Air)]
   [SliderValues(MinValue = 1, MaxValue = 200, EndValue = 999999f, RoundDecimalPlaces = 0,
     Increment = 1, MaxValueDisplay = "VF_Instant")]
+  [Unsaved]
   public float rateOfClimb = 10f;
 
   //[PostToSettings(Label = "VF_MaxFallRate", Translate = true, Tooltip = "VF_MaxFallRateTooltip", UISettingsType = UISettingsType.SliderFloat, VehicleType = VehicleType.Air)]
   [SliderValues(MinValue = 1, MaxValue = 101, EndValue = 100000, RoundDecimalPlaces = 1,
     Increment = 1, MaxValueDisplay = "VF_Instant")]
+  [Unsaved]
   public float maxFallRate = 20;
 
   //[PostToSettings(Label = "VF_MaxAltitude", Translate = true, Tooltip = "VF_MaxAltitudeTooltip", UISettingsType = UISettingsType.IntegerBox, VehicleType = VehicleType.Air)]
   [NumericBoxValues(MinValue = AltitudeMeter.MinimumAltitude,
     MaxValue = AltitudeMeter.MaximumAltitude)]
+  [Unsaved]
   public int maxAltitude = 10000;
 
   //[PostToSettings(Label = "VehicleLandingAltitude", Translate = true, Tooltip = "VehicleLandingAltitudeTooltip", UISettingsType = UISettingsType.IntegerBox, VehicleType = VehicleType.Air)]
   [NumericBoxValues(MinValue = AltitudeMeter.MinimumAltitude,
     MaxValue = AltitudeMeter.MaximumAltitude)]
+  [Unsaved]
   public int landingAltitude = 1000;
 
   [PostToSettings(Label = "VF_ReconDistance", Translate = true,
@@ -70,6 +74,13 @@ public class CompProperties_VehicleLauncher : VehicleCompProperties
     ModPackageIds.Universum, ModPackageIds.Odyssey
   ])]
   public bool spaceFlight = false;
+
+  [PostToSettings(Label = "VF_SignalJamming", Translate = true, Tooltip = "VF_SignalJammingTooltip",
+    UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Air)]
+  [DisableSettingConditional(MemberType = typeof(CompProperties_VehicleLauncher),
+    Field = nameof(spaceFlight), DisableIfEqualTo = false)]
+  [DisableSettingConditional(MayRequire = ModPackageIds.Odyssey)]
+  public bool signalJammer = false;
 
   public bool faceDirectionOfTravel = true;
   public bool circleToLand = true;

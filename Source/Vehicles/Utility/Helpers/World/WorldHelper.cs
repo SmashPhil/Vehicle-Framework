@@ -11,17 +11,18 @@ namespace Vehicles.World;
 
 public static class WorldHelper
 {
-  private static readonly List<Thing> inventoryItems = [];
+  private static readonly List<Thing> InventoryItems = [];
 
   public static List<Thing> AllInventoryItems(AerialVehicleInFlight aerialVehicle)
   {
-    inventoryItems.Clear();
-    foreach (Pawn pawn in aerialVehicle.vehicle.AllPawnsAboard)
+    // TODO - could use some cleanup either with ClearOnDispose or iterator method
+    InventoryItems.Clear();
+    foreach (Pawn pawn in aerialVehicle.Vehicle.AllPawnsAboard)
     {
-      inventoryItems.AddRange(pawn.inventory.innerContainer);
+      InventoryItems.AddRange(pawn.inventory.innerContainer);
     }
-    inventoryItems.AddRange(aerialVehicle.vehicle.inventory.innerContainer);
-    return inventoryItems;
+    InventoryItems.AddRange(aerialVehicle.Vehicle.inventory.innerContainer);
+    return InventoryItems;
   }
 
   public static float RiverCostAt(int tile, VehiclePawn vehicle)
@@ -95,22 +96,28 @@ public static class WorldHelper
     return (sourceObject, destObject);
   }
 
+  // TODO - These helpers can get removed if SOS2 gives their space objects a position on the space layer
   public static Vector3 GetTilePos(PlanetTile tile)
   {
     WorldObject worldObject = WorldObjectAt(tile);
     return GetTilePos(tile, worldObject, out _);
   }
 
+  // TODO - These helpers can get removed if SOS2 gives their space objects a position on the space layer
   public static Vector3 GetTilePos(PlanetTile tile, out bool spaceObject)
   {
     WorldObject worldObject = WorldObjectAt(tile);
     return GetTilePos(tile, worldObject, out spaceObject);
   }
 
+  // TODO - These helpers can get removed if SOS2 gives their space objects a position on the space layer
   public static Vector3 GetTilePos(PlanetTile tile, WorldObject worldObject, out bool spaceObject)
   {
-    Vector3 pos = Find.WorldGrid.GetTileCenter(tile);
     spaceObject = false;
+    if (!tile.Valid)
+      return Vector3.zero;
+
+    Vector3 pos = Find.WorldGrid.GetTileCenter(tile);
     if (worldObject != null && worldObject.def.HasModExtension<SpaceObjectDefModExtension>())
     {
       spaceObject = true;
@@ -134,12 +141,11 @@ public static class WorldHelper
   /// </summary>
   /// <param name="caravan"></param>
   /// <param name="tile"></param>
-  public static int BestGotoDestForVehicle(VehicleCaravan caravan, PlanetTile tile)
+  public static PlanetTile BestGotoDestForVehicle(VehicleCaravan caravan, PlanetTile tile)
   {
     if (CaravanReachable(tile))
-    {
       return tile;
-    }
+
     GenWorldClosest.TryFindClosestTile(tile, CaravanReachable, out PlanetTile result, 50);
     return result;
 

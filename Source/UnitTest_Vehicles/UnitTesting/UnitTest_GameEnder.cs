@@ -181,17 +181,14 @@ internal sealed class UnitTest_GameEnder
       AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(manualVehicle.vehicle, 0);
       Assert.IsTrue(aerialVehicle.Spawned);
       Assert.IsFalse(aerialVehicle.Destroyed);
-      Assert.AreEqual(aerialVehicle.vehicle.AllPawnsAboard.Count, manualVehicle.pawns.Count);
+      Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, manualVehicle.pawns.Count);
       Assert.IsNotNull(aerialVehicle);
       gameEnder.CheckOrUpdateGameOver();
       Expect.IsFalse(gameEnder.gameEnding);
 
-      aerialVehicle.vehicle = null;
-      aerialVehicle.innerContainer.Clear();
-      Assert.IsNull(aerialVehicle.vehicle);
-      Assert.IsTrue(aerialVehicle.innerContainer.Count == 0);
-      aerialVehicle.Destroy();
+      aerialVehicle.ClearAndDestroy();
       Assert.IsTrue(aerialVehicle.Destroyed);
+      Assert.IsFalse(aerialVehicle.Vehicle.Destroyed);
       gameEnder.CheckOrUpdateGameOver();
       Expect.IsTrue(gameEnder.gameEnding);
     }

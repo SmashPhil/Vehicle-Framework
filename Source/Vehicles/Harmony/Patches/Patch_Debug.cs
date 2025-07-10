@@ -268,15 +268,15 @@ internal class Patch_Debug : IPatchCategory
     }
 
     LaunchProtocol launchProtocol =
-      aerialVehicleInFlight.vehicle.CompVehicleLauncher.launchProtocol;
+      aerialVehicleInFlight.Vehicle.CompVehicleLauncher.launchProtocol;
     Rot4 vehicleRotation = launchProtocol.LandingProperties?.forcedRotation ?? Rot4.Random;
     if (!CellFinderExtended.TryFindRandomCenterCell(nearestSettlement.Map,
-      (cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle,
+      (cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.Vehicle,
         nearestSettlement.Map, cell, vehicleRotation), out IntVec3 cell))
     {
       if (!CellFinderExtended.TryRadialSearchForCell(nearestSettlement.Map.Center,
         nearestSettlement.Map, 50,
-        (cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.vehicle,
+        (cell) => !MapHelper.ImpassableOrVehicleBlocked(aerialVehicleInFlight.Vehicle,
           nearestSettlement.Map, cell, vehicleRotation), out cell))
       {
         Log.Warning($"Could not find cell to spawn aerial vehicle.  Picking random cell.");
@@ -285,9 +285,9 @@ internal class Patch_Debug : IPatchCategory
     }
 
     VehicleSkyfaller_Arriving skyfaller =
-      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.vehicle
+      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.Vehicle
        .CompVehicleLauncher.Props.skyfallerIncoming);
-    skyfaller.vehicle = aerialVehicleInFlight.vehicle;
+    skyfaller.vehicle = aerialVehicleInFlight.Vehicle;
 
     GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
     aerialVehicleInFlight.ClearAndDestroy();

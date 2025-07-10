@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/WorldObjectDef[defName = "Gravship"]</xpath>
+		<value>
+			<li Class = "SpaceObjectDefModExtension" />
+		</value>
+	</Operation>
+
+  <Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/WorldObjectDef[@Name = "SpaceBase" or "SpaceSite" or "GeneratedAsteroid"]</xpath>
+		<value>
+			<li Class = "SpaceObjectDefModExtension" />
+		</value>
+	</Operation>
+</Patch>

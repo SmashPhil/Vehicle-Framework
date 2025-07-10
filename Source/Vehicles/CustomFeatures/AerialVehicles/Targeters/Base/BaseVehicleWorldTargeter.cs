@@ -8,6 +8,5 @@ public abstract class BaseVehicleWorldTargeter : BaseWorldTargeter
   protected VehiclePawn vehicle;
   protected AerialVehicleInFlight aerialVehicle;
 
-  public abstract void RegisterActionOnTile(PlanetTile tile,
-    AerialVehicleArrivalAction arrivalAction);
+  public abstract void RegisterActionOnTile(PlanetTile tile, IArrivalAction arrivalAction);
 }

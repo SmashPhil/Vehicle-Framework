@@ -606,7 +606,7 @@ public static class CaravanHelper
         "Improper use of CanFitInVehicle which should only operate during TradeSessions.");
       return true;
     }
-    return aerialVehicle.vehicle.SeatsAvailable - pawnsBeingAdded > 0;
+    return aerialVehicle.Vehicle.SeatsAvailable - pawnsBeingAdded > 0;
   }
 
   /// <summary>

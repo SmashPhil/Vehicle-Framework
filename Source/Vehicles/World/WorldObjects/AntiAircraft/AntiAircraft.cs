@@ -109,9 +109,9 @@ public abstract class AntiAircraft : DynamicDrawnWorldObject
 
   public override void Destroy()
   {
-    if (Rand.Chance(AADef.accuracy) && (target?.vehicle.CompVehicleLauncher.inFlight ?? false))
+    if (Rand.Chance(AADef.accuracy) && (target?.Vehicle.CompVehicleLauncher.inFlight ?? false))
     {
-      IntVec3 randomHit = target.vehicle.OccupiedRect().RandomCell;
+      IntVec3 randomHit = target.Vehicle.OccupiedRect().RandomCell;
       target.TakeDamage(new DamageInfo(DamageDefOf.Bomb, AADef.damage), randomHit.ToIntVec2);
     }
     base.Destroy();

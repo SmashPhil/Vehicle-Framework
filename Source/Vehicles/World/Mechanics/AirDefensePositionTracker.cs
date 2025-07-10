@@ -145,7 +145,7 @@ public class AirDefensePositionTracker : WorldComponentTemp //Reimplement as wor
     Vector3 start = aerialVehicle.DrawPos;
     for (int i = 0; i < aerialVehicle.flightPath.Path.Count; i++)
     {
-      int destination = aerialVehicle.flightPath[i].tile;
+      int destination = aerialVehicle.flightPath[i].Tile;
       Vector3 destinationPos = Find.WorldGrid.GetTileCenter(destination);
       Vector3 position = start;
       for (float transition = 0; transition < 1; transition += halfTicksPerTileTraveled)

@@ -30,7 +30,7 @@ internal class TestActions
     {
       AerialVehicleInFlight aerialVehicle = worldObjects.AerialVehicles[i];
       aerialVehicle.Destroy();
-      DestroyAndRemoveFromWorldPawns(aerialVehicle.vehicle);
+      DestroyAndRemoveFromWorldPawns(aerialVehicle.Vehicle);
     }
     Expect.IsTrue(worldObjects.VehicleCaravans.Count == 0);
     for (int i = worldObjects.VehicleCaravans.Count - 1; i >= 0; i--)

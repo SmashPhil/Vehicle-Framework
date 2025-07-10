@@ -91,6 +91,18 @@ internal sealed class UnitTest_EventManager
   }
 
   [Test]
+  private void EventControl()
+  {
+    IEventControl control = new TestControl();
+    Assert.IsFalse(control.Enabled);
+    using (new EventDisabler<EventType>(control))
+    {
+      Expect.IsFalse(control.Enabled);
+    }
+    Expect.IsTrue(control.Enabled);
+  }
+
+  [Test]
   private void DisableGlobal()
   {
     TestObject obj = new();
@@ -99,7 +111,7 @@ internal sealed class UnitTest_EventManager
     obj.AddEvent(EventType.Two, SetIntTwo);
     obj.AddEvent(EventType.Three, SetIntThree);
 
-    using (new EventDisabler<EventType>(obj))
+    using (new EventDisabler<EventType>(obj.EventRegistry))
     {
       Assert.IsFalse(obj.EventRegistry.Enabled);
       // Individual event triggers don't get disabled, only the manager does
@@ -127,7 +139,7 @@ internal sealed class UnitTest_EventManager
     obj.AddEvent(EventType.Two, SetIntTwo);
     obj.AddEvent(EventType.Three, SetIntThree);
 
-    using (new EventDisabler<EventType>(obj, EventType.Two))
+    using (new EventDisabler<EventType>(obj.EventRegistry[EventType.Two]))
     {
       Assert.IsTrue(obj.EventRegistry.Enabled);
       Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
