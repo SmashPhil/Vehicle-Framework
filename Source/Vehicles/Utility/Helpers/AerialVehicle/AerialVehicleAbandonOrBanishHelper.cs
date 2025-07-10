@@ -29,7 +29,7 @@ public static class AerialVehicleAbandonOrBanishHelper
       Find.WindowStack.Add(window);
       return;
     }
-    if (!aerialVehicle.vehicle.AllCapablePawns.Any((Pawn innerPawn) =>
+    if (!aerialVehicle.Vehicle.AllCapablePawns.Any((Pawn innerPawn) =>
       innerPawn != pawn && !innerPawn.NonHumanlikeOrWildMan()))
     {
       Messages.Message("MessageCantBanishLastColonist".Translate(), aerialVehicle,
@@ -176,7 +176,7 @@ public static class AerialVehicleAbandonOrBanishHelper
     if (parentHolder is Pawn_InventoryTracker)
     {
       Pawn pawn = (Pawn)parentHolder.ParentHolder;
-      if (pawn == aerialVehicle.vehicle || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
+      if (pawn == aerialVehicle.Vehicle || aerialVehicle.Vehicle.AllPawnsAboard.Contains(pawn))
       {
         return pawn;
       }

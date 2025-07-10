@@ -7,6 +7,8 @@ using Verse;
 
 namespace Vehicles.World;
 
+// ReSharper disable once InconsistentNaming
+// It's cleaner to just stick with RimWorld's naming convention when deriving from their types.
 public class WITab_AerialVehicle_Items : WITab_AerialVehicle
 {
   private const float SortersSpace = 25f;
@@ -35,9 +37,9 @@ public class WITab_AerialVehicle_Items : WITab_AerialVehicle
     }
 
     float ammoWeight = 0f;
-    if (SelAerialVehicle.vehicle.CompVehicleTurrets != null)
+    if (SelAerialVehicle.Vehicle.CompVehicleTurrets != null)
     {
-      foreach (VehicleTurret turret in SelAerialVehicle.vehicle.CompVehicleTurrets.Turrets)
+      foreach (VehicleTurret turret in SelAerialVehicle.Vehicle.CompVehicleTurrets.Turrets)
       {
         ammoWeight += turret.loadedAmmo is null ?
           0f :
@@ -46,8 +48,8 @@ public class WITab_AerialVehicle_Items : WITab_AerialVehicle
     }
 
     Rect massLabelRect = rect.ContractedBy(10);
-    float mass = MassUtility.GearAndInventoryMass(SelAerialVehicle.vehicle) + ammoWeight;
-    float capacity = SelAerialVehicle.vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+    float mass = MassUtility.GearAndInventoryMass(SelAerialVehicle.Vehicle) + ammoWeight;
+    float capacity = SelAerialVehicle.Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
     Widgets.Label(massLabelRect,
       "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
 

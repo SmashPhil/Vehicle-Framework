@@ -1,26 +1,23 @@
 ﻿using JetBrains.Annotations;
-using Verse;
-using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using Verse;
 
 namespace Vehicles.World;
 
 [PublicAPI]
-public class AerialVehicleArrivalAction_LandSpecificCell : AerialVehicleArrivalAction_LandInMap
+public class ArrivalAction_LandToCell : ArrivalAction_LandInMap
 {
   protected IntVec3 landingCell;
   protected Rot4 landingRot;
 
-  public AerialVehicleArrivalAction_LandSpecificCell()
+  public ArrivalAction_LandToCell()
   {
   }
 
-  public AerialVehicleArrivalAction_LandSpecificCell(VehiclePawn vehicle, MapParent mapParent,
-    int tile, IntVec3 landingCell, Rot4 landingRot)
-    : base(vehicle, mapParent, tile)
+  public ArrivalAction_LandToCell(VehiclePawn vehicle, MapParent mapParent, IntVec3 landingCell, Rot4 landingRot)
+    : base(vehicle, mapParent)
   {
-    this.tile = tile;
     this.mapParent = mapParent;
     this.landingCell = landingCell;
     this.landingRot = landingRot;
@@ -28,21 +25,16 @@ public class AerialVehicleArrivalAction_LandSpecificCell : AerialVehicleArrivalA
 
   public virtual bool CanArriveInMap => mapParent?.Map != null;
 
-  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
+  public override void Arrived(GlobalTargetInfo target)
   {
-    return WorldVehiclePathGrid.Instance.Passable(tile, vehicle.VehicleDef);
-  }
-
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
-  {
-    if (!CanArriveInMap)
+    if (!mapParent.HasMap)
     {
       Trace.Fail(
         $"Unable to land {vehicle} at destination. Map no longer exists, spawning as caravan nearby...");
-      aerialVehicle.SwitchToCaravan();
+      AerialVehicle.SwitchToCaravan();
       return;
     }
-    base.Arrived(aerialVehicle, tile);
+    base.Arrived(target);
     SpawnSkyfaller();
     ExecuteEvents();
   }

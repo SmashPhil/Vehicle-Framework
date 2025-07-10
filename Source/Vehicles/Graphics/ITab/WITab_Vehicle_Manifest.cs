@@ -9,6 +9,8 @@ using Verse.Sound;
 
 namespace Vehicles.World;
 
+// ReSharper disable once InconsistentNaming
+// It's cleaner to just stick with RimWorld's naming convention when deriving from their types.
 public class WITab_Vehicle_Manifest : WITab
 {
   private Vector2 scrollPosition;

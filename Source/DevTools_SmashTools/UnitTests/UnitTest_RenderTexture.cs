@@ -22,6 +22,25 @@ internal sealed class UnitTest_RenderTexture
     objectsToDestroy.Clear();
   }
 
+  [TearDown]
+  private void DestroyAllObjects()
+  {
+    for (int i = objectsToDestroy.Count - 1; i >= 0; i--)
+    {
+      RenderTexture rTex = objectsToDestroy[i];
+      // RenderTextures should already be destroyed here but by gathering all newly instantiated
+      // test objects separate from the object pool we can verify independently that all
+      // objects created from the object pool will be destroyed when dumped.
+      Expect.IsFalse(rTex);
+      if (rTex)
+      {
+        rTex.Release();
+        Object.Destroy(rTex);
+      }
+    }
+    objectsToDestroy.Clear();
+  }
+
   [Test, ExecutionPriority(Priority.First)]
   private void CreateFormatted()
   {
@@ -109,24 +128,5 @@ internal sealed class UnitTest_RenderTexture
 
     Expect.IsFalse(rtA);
     Expect.IsFalse(rtB);
-  }
-
-  [TearDown]
-  private void DestroyAllObjects()
-  {
-    for (int i = objectsToDestroy.Count - 1; i >= 0; i--)
-    {
-      RenderTexture rTex = objectsToDestroy[i];
-      // RenderTextures should already be destroyed here but by gathering all newly instantiated
-      // test objects separate from the object pool we can verify independently that all
-      // objects created from the object pool will be destroyed when dumped.
-      Expect.IsFalse(rTex);
-      if (rTex)
-      {
-        rTex.Release();
-        Object.Destroy(rTex);
-      }
-    }
-    objectsToDestroy.Clear();
   }
 }

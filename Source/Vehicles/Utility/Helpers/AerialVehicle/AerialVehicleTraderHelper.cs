@@ -33,8 +33,8 @@ public static class AerialVehicleTraderHelper
     {
       playerCaravanAllPawnsAndItems =
       [
-        .. aerialVehicle.vehicle.AllPawnsAboard,
-        .. aerialVehicle.vehicle.inventory.innerContainer,
+        .. aerialVehicle.Vehicle.AllPawnsAboard,
+        .. aerialVehicle.Vehicle.inventory.innerContainer,
       ];
     }
   }
@@ -47,8 +47,8 @@ public static class AerialVehicleTraderHelper
       tmpInfo.Clear();
       {
         //Mass Usage
-        float massCapacity = aerialVehicle.vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
-        float massUsage = (float)massUsagePropertyInfo.Invoke(tradeDialog, new object[] { });
+        float massCapacity = aerialVehicle.Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+        float massUsage = (float)massUsagePropertyInfo.Invoke(tradeDialog, []);
         TaggedString massUsageReadout =
           $"{massUsage.ToStringEnsureThreshold(massCapacity, 0)} / {massCapacity:F0} {"kg".Translate()}";
         string massTip = GetMassTip(massUsage, massCapacity);
@@ -77,7 +77,7 @@ public static class AerialVehicleTraderHelper
 
   private static string GetSpeedLabel()
   {
-    return VehicleStatDefOf.FlightSpeed.Worker.StatValueFormatted(aerialVehicle.vehicle);
+    return VehicleStatDefOf.FlightSpeed.Worker.StatValueFormatted(aerialVehicle.Vehicle);
   }
 
   private static Color GetMassColor(float massUsage, float massCapacity, bool lerpMassColor)

@@ -9,7 +9,7 @@ using Verse;
 
 namespace Vehicles.World;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[PublicAPI]
 public static class EnterMapUtilityVehicles
 {
   public static void EnterAndSpawn(VehicleCaravan caravan, Map map, CaravanEnterMode enterMode,

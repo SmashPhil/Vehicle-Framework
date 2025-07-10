@@ -107,10 +107,10 @@ internal class Patch_CaravanFormation : IPatchCategory
       CaravanHelper.FindAerialVehicleToJoinForAllowingVehicles(pawn) is { } aerialVehicle)
     {
       VehicleRoleHandler handler =
-        aerialVehicle.vehicle.handlers.FirstOrDefault(handler => handler.AreSlotsAvailable);
+        aerialVehicle.Vehicle.handlers.FirstOrDefault(handler => handler.AreSlotsAvailable);
       if (handler != null)
       {
-        aerialVehicle.vehicle.TryAddPawn(pawn, handler);
+        aerialVehicle.Vehicle.TryAddPawn(pawn, handler);
         return false;
       }
     }

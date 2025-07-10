@@ -12,6 +12,7 @@ using Vehicles.World;
 
 namespace Vehicles;
 
+// TODO - Launcher (REMOVE)
 public class LaunchTargeter : BaseVehicleWorldTargeter
 {
   private const float BaseFeedbackTexSize = 0.8f;
@@ -104,11 +105,10 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     Instance.OnStart();
   }
 
-  public override void RegisterActionOnTile(PlanetTile tile,
-    AerialVehicleArrivalAction arrivalAction)
+  public override void RegisterActionOnTile(PlanetTile tile, IArrivalAction arrivalAction)
   {
     FlightPath.Pop();
-    FlightPath.Add(new FlightNode(tile, arrivalAction));
+    FlightPath.Add(new FlightNode(tile));
   }
 
   public override void StopTargeting()
@@ -143,7 +143,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
         {
           FlightPath.Add(new FlightNode(arg.Tile));
         }
-        if (FlightPath.LastOrDefault().tile == arg.Tile)
+        if (FlightPath.LastOrDefault().Tile == arg.Tile)
         {
           if (action(arg, TotalFuelCost))
           {
@@ -208,7 +208,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     Vector3 flightPathOrigin = originOnMap;
     if (!FlightPath.NullOrEmpty())
     {
-      flightPathOrigin = WorldHelper.GetTilePos(FlightPath.LastOrDefault().tile);
+      flightPathOrigin = WorldHelper.GetTilePos(FlightPath.LastOrDefault().Tile);
     }
     float finalFuelCost = fuelOnPathCost;
     float finalDistance = sphericalDistance;
@@ -281,30 +281,26 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     }
     if (arg.IsValid && !Mouse.IsInputBlockedNow)
     {
-      if (vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(arg.Tile)
-       .NotNullAndAny())
-      {
-        WorldRendererUtility.DrawQuadTangentialToPlanet(pos,
-          BaseFeedbackTexSize * Find.WorldGrid.AverageTileSize, 0.018f,
-          WorldMaterials.CurTargetingMat);
-      }
+      WorldRendererUtility.DrawQuadTangentialToPlanet(pos,
+        BaseFeedbackTexSize * Find.WorldGrid.AverageTileSize, 0.018f,
+        WorldMaterials.CurTargetingMat);
     }
 
     Vector3 start = originOnMap;
-    var tiles = new List<PlanetTile>(FlightPath.Select(n => n.tile));
+    var tiles = new List<PlanetTile>(FlightPath.Select(n => n.Tile));
     Material lineMat = null;
-    switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
-    {
-      case ShuttleLaunchStatus.Valid:
-        lineMat = TexData.WorldLineMatWhite;
-      break;
-      case ShuttleLaunchStatus.NoReturnTrip:
-        lineMat = TexData.WorldLineMatYellow;
-      break;
-      case ShuttleLaunchStatus.Invalid:
-        lineMat = TexData.WorldLineMatRed;
-      break;
-    }
+    //switch (vehicle.CompVehicleLauncher.GetShuttleStatus(arg, start))
+    //{
+    //  case ShuttleLaunchStatus.Valid:
+    //    lineMat = TexData.WorldLineMatWhite;
+    //  break;
+    //  case ShuttleLaunchStatus.NoReturnTrip:
+    //    lineMat = TexData.WorldLineMatYellow;
+    //  break;
+    //  case ShuttleLaunchStatus.Invalid:
+    //    lineMat = TexData.WorldLineMatRed;
+    //  break;
+    //}
     for (int n = 0; n < FlightPath.Count; n++)
     {
       PlanetTile curTile = tiles.PopAt(0);
@@ -357,7 +353,7 @@ public class LaunchTargeter : BaseVehicleWorldTargeter
     Vector3 source = originOnMap;
     foreach (FlightNode node in FlightPath)
     {
-      PlanetTile tile = node.tile;
+      PlanetTile tile = node.Tile;
       Vector3 target = WorldHelper.GetTilePos(tile);
       (float nextFuelCost, float nextDistance) = CostAndDistanceCalculator(source, target);
 

@@ -8,9 +8,11 @@ using Verse;
 
 namespace Vehicles.World;
 
+// TODO - cleanup
 [PublicAPI]
 public class FlightPath : IExposable
 {
+  private IArrivalAction arrivalAction;
   private List<FlightNode> nodes = [];
   private List<PlanetTile> reconTiles = [];
   private AerialVehicleInFlight aerialVehicle;
@@ -36,6 +38,10 @@ public class FlightPath : IExposable
 
   public bool InRecon => currentlyInRecon;
 
+  public IArrivalAction ArrivalAction => arrivalAction;
+
+  public float TotalDistance { get; private set; }
+
   public float DistanceLeft
   {
     get
@@ -44,7 +50,7 @@ public class FlightPath : IExposable
       Vector3 start = aerialVehicle.DrawPos;
       foreach (FlightNode node in nodes)
       {
-        Vector3 nextTile = WorldHelper.GetTilePos(node.tile);
+        Vector3 nextTile = WorldHelper.GetTilePos(node.Tile);
         distance += Ext_Math.SphericalDistance(start, nextTile);
         start = nextTile;
       }
@@ -68,16 +74,17 @@ public class FlightPath : IExposable
     }
   }
 
-  public void AddNode(PlanetTile tile, AerialVehicleArrivalAction arrivalAction = null)
+  public void AddNode(PlanetTile tile)
   {
-    nodes.Add(new FlightNode(tile, arrivalAction));
+    nodes.Add(new FlightNode(tile));
+    RecalculateDistance();
   }
 
   public void PushCircleAt(PlanetTile tile)
   {
     reconTiles.Clear();
     Ext_World.GetTileNeighbors(tile, reconTiles,
-      radius: aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
+      radius: aerialVehicle.Vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
     foreach (PlanetTile neighborTile in reconTiles)
     {
       nodes.Insert(0, new FlightNode(neighborTile));
@@ -87,13 +94,13 @@ public class FlightPath : IExposable
 
   public void ReconCircleAt(PlanetTile tile)
   {
-    if (Last.tile == tile)
+    if (Last.Tile == tile)
     {
       nodes.Pop();
     }
     reconTiles.Clear();
     Ext_World.GetTileNeighbors(tile, reconTiles,
-      radius: aerialVehicle.vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
+      radius: aerialVehicle.Vehicle.CompVehicleLauncher.ReconDistance, aerialVehicle.DrawPos);
     foreach (PlanetTile rTile in reconTiles)
     {
       nodes.Add(new FlightNode(rTile));
@@ -104,16 +111,15 @@ public class FlightPath : IExposable
     aerialVehicle.GenerateMapForRecon(tile);
   }
 
-  public void NodeReached(bool haltCircle = false)
+  public void ConsumeNode(bool haltCircle = false)
   {
     FlightNode currentNode = nodes.PopAt(0);
-    PlanetTile currentTile = currentNode.tile;
+    PlanetTile currentTile = currentNode.Tile;
     aerialVehicle.Tile = currentTile;
     currentlyInRecon = reconTiles.Contains(aerialVehicle.Tile);
-    currentNode.arrivalAction?.Arrived(aerialVehicle, aerialVehicle.Tile);
     if (circling && haltCircle)
     {
-      PlanetTile origin = Last.tile;
+      PlanetTile origin = Last.Tile;
       ResetPath();
       AddNode(origin);
     }
@@ -121,13 +127,16 @@ public class FlightPath : IExposable
     {
       if (aerialVehicle.recon)
       {
-        ReconCircleAt(First.tile);
+        ReconCircleAt(First.Tile);
       }
       else
       {
-        PushCircleAt(First.tile);
+        PushCircleAt(First.Tile);
       }
     }
+
+    if (nodes.NullOrEmpty())
+      arrivalAction?.Arrived(currentNode);
   }
 
   public void ResetPath()
@@ -137,84 +146,71 @@ public class FlightPath : IExposable
     circling = false;
     aerialVehicle.recon = false;
     currentlyInRecon = false;
+    TotalDistance = 0;
   }
 
   public void NewPath(FlightPath flightPath)
   {
     ResetPath();
     nodes.AddRange(flightPath.Path);
+    arrivalAction = flightPath.arrivalAction;
+    RecalculateDistance();
   }
 
-  public void NewPath(List<FlightNode> path)
+  public void NewPath(List<FlightNode> path, IArrivalAction arrivalAction)
   {
     ResetPath();
     nodes.AddRange(path);
-  }
-
-  public void ExposeData()
-  {
-    Scribe_Collections.Look(ref nodes, "nodes");
-    Scribe_Collections.Look(ref reconTiles, "reconTiles");
-    Scribe_References.Look(ref aerialVehicle, "aerialVehicle");
-    Scribe_Values.Look(ref circling, "circling");
-    Scribe_Values.Look(ref currentlyInRecon, "currentlyInRecon");
-  }
-}
-
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
-public struct FlightNode : IExposable
-{
-  public PlanetTile tile;
-  public Vector3 origin;
-  public AerialVehicleArrivalAction arrivalAction;
-
-  public bool spaceObject;
-
-  public WorldObject WorldObject { get; private set; }
-
-  public FlightNode(PlanetTile tile)
-  {
-    this.tile = tile;
-    arrivalAction = null;
-
-    WorldObject = WorldHelper.WorldObjectAt(tile);
-    origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
-  }
-
-  public FlightNode(PlanetTile tile, AerialVehicleArrivalAction arrivalAction)
-  {
-    this.tile = tile;
     this.arrivalAction = arrivalAction;
-
-    WorldObject = WorldHelper.WorldObjectAt(tile);
-    origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+    RecalculateDistance();
   }
 
-  public Vector3 GetCenter(AerialVehicleInFlight aerialVehicle)
+  private void RecalculateDistance()
   {
-    if (WorldObject != null && WorldObject != aerialVehicle)
-    {
-      return WorldObject.DrawPos;
-    }
-    return origin;
-  }
+    TotalDistance = 0;
+    if (nodes.NullOrEmpty())
+      return;
 
-  public void RecalculateCenter()
-  {
-    if (spaceObject)
+    FlightNode fromNode = nodes[0];
+    for (int i = 1; i < nodes.Count; i++)
     {
-      origin = WorldHelper.GetTilePos(tile, WorldObject, out _);
+      FlightNode toNode = nodes[i];
+      TotalDistance += Ext_Math.SphericalDistance(
+        WorldHelper.GetTilePos(fromNode.Tile),
+        WorldHelper.GetTilePos(toNode.Tile));
     }
   }
 
   public void ExposeData()
   {
-    Scribe_Values.Look(ref tile, nameof(tile));
+    Scribe_Collections.Look(ref nodes, nameof(nodes));
     Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
+    Scribe_Collections.Look(ref reconTiles, nameof(reconTiles));
+    Scribe_References.Look(ref aerialVehicle, nameof(aerialVehicle));
+    Scribe_Values.Look(ref circling, nameof(circling));
+    Scribe_Values.Look(ref currentlyInRecon, nameof(currentlyInRecon));
+
     if (Scribe.mode == LoadSaveMode.LoadingVars)
     {
-      WorldObject = WorldHelper.WorldObjectAt(tile);
-      origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
+      RecalculateDistance();
+    }
+  }
+
+  public static void DrawPath(Vector3 start, Vector3 end, Material material)
+  {
+    double distance = Ext_Math.SphericalDistance(start, end);
+    int steps = Mathf.CeilToInt((float)(distance * 100) / 5);
+    start += start.normalized * 0.05f;
+    end += end.normalized * 0.05f;
+    Vector3 previous = start;
+
+    for (int i = 1; i <= steps; i++)
+    {
+      float t = (float)i / steps;
+      Vector3 midPoint = Vector3.Slerp(start, end, t);
+
+      GenDraw.DrawWorldLineBetween(previous, midPoint, material, 0.5f);
+      previous = midPoint;
     }
   }
 }

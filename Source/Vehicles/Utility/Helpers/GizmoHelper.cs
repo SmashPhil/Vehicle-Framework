@@ -18,7 +18,7 @@ public static class GizmoHelper
   public static Command_Action AerialVehicleTradeCommand(this AerialVehicleInFlight aerialVehicle,
     Faction faction = null, TraderKindDef trader = null)
   {
-    Pawn bestNegotiator = aerialVehicle.vehicle.FindBestNegotiator(faction, trader);
+    Pawn bestNegotiator = aerialVehicle.Vehicle.FindBestNegotiator(faction, trader);
     Command_Action commandAction = new()
     {
       defaultLabel = "CommandTrade".Translate(),
@@ -40,7 +40,7 @@ public static class GizmoHelper
     if (bestNegotiator is null)
     {
       if (trader != null && trader.permitRequiredForTrading != null &&
-        !aerialVehicle.vehicle.AllPawnsAboard.Any((pawn) => pawn.royalty != null &&
+        !aerialVehicle.Vehicle.AllPawnsAboard.Any((pawn) => pawn.royalty != null &&
           pawn.royalty.HasPermit(trader.permitRequiredForTrading, faction)))
       {
         commandAction.Disable(

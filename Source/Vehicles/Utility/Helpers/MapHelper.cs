@@ -70,13 +70,13 @@ public static class MapHelper
     foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
      .AerialVehicles)
     {
-      if (aerialVehicle.flightPath.InRecon && aerialVehicle.flightPath.Last.tile == map.Tile)
+      if (aerialVehicle.flightPath.InRecon && aerialVehicle.flightPath.Last.Tile == map.Tile)
       {
-        return true; //Keep open while performing recon
+        return true; // Keep open while performing recon
       }
-      if (aerialVehicle.arrivalAction != null && aerialVehicle.flightPath.Last.tile == map.Tile)
+      if (aerialVehicle.flightPath.ArrivalAction != null && aerialVehicle.flightPath.Last.Tile == map.Tile)
       {
-        return true; //Keep open if aerial vehicle has active arrival action on tile
+        return true; // Keep open if aerial vehicle has active arrival action on tile
       }
     }
     return false;
@@ -125,41 +125,5 @@ public static class MapHelper
       }
     }
     return null;
-  }
-
-  /// <summary>
-  /// Strafe option for combat aerial vehicles targeting open maps
-  /// </summary>
-  /// <param name="vehicle"></param>
-  /// <param name="parent"></param>
-  public static FloatMenuOption StrafeFloatMenuOption(VehiclePawn vehicle, MapParent parent)
-  {
-    if (parent.EnterCooldownBlocksEntering())
-    {
-      return new FloatMenuOption(
-        $"{"AerialStrafeRun".Translate(parent.Label)} ({"EnterCooldownBlocksEntering".Translate()})",
-        null);
-    }
-    return new FloatMenuOption("AerialStrafeRun".Translate(parent.Label), delegate
-    {
-      if (vehicle.Spawned)
-      {
-        vehicle.CompVehicleLauncher.TryLaunch(parent.Tile, null, true);
-      }
-      else
-      {
-        AerialVehicleInFlight aerial = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
-        if (aerial is null)
-        {
-          Log.Error(
-            $"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-          return;
-        }
-        List<FlightNode> flightPath = [.. LaunchTargeter.FlightPath];
-        aerial.OrderFlyToTiles(flightPath, aerial.DrawPos);
-        aerial.flightPath.ReconCircleAt(parent.Tile);
-        vehicle.CompVehicleLauncher.inFlight = true;
-      }
-    });
   }
 }

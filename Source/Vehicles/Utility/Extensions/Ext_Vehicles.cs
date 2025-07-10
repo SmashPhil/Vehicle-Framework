@@ -300,16 +300,16 @@ public static class Ext_Vehicles
   {
     return mode switch
     {
-      DestroyMode.Vanish => 0,
-      DestroyMode.WillReplace => 0,
-      DestroyMode.KillFinalize => 0.25f,
+      DestroyMode.Vanish                   => 0,
+      DestroyMode.WillReplace              => 0,
+      DestroyMode.KillFinalize             => 0.25f,
       DestroyMode.KillFinalizeLeavingsOnly => 0,
-      DestroyMode.Deconstruct => vehicleDef.resourcesFractionWhenDeconstructed,
-      DestroyMode.FailConstruction => 0.5f,
-      DestroyMode.Cancel => 1,
-      DestroyMode.Refund => 1,
-      DestroyMode.QuestLogic => 0,
-      _ => throw new ArgumentException("Unknown destroy mode " + mode),
+      DestroyMode.Deconstruct              => vehicleDef.resourcesFractionWhenDeconstructed,
+      DestroyMode.FailConstruction         => 0.5f,
+      DestroyMode.Cancel                   => 1,
+      DestroyMode.Refund                   => 1,
+      DestroyMode.QuestLogic               => 0,
+      _                                    => throw new ArgumentException("Unknown destroy mode " + mode),
     };
   }
 
@@ -452,7 +452,7 @@ public static class Ext_Vehicles
      .AerialVehicles)
     {
       Assert.IsNotNull(aerialVehicle);
-      if (aerialVehicle.vehicle == pawn || aerialVehicle.vehicle.AllPawnsAboard.Contains(pawn))
+      if (aerialVehicle.Vehicle == pawn || aerialVehicle.Vehicle.AllPawnsAboard.Contains(pawn))
         return aerialVehicle;
     }
     return null;

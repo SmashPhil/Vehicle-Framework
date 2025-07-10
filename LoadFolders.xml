@@ -32,15 +32,16 @@
   <v1.6>
 		<li>/</li>
 		<li>1.6</li>
-		<li IfModActive = "Ludeon.RimWorld.Royalty">1.6/_Royalty</li>
-		<li IfModActive = "Ludeon.RimWorld.Ideology">1.6/_Ideology</li>
-		<li IfModActive = "Ludeon.RimWorld.Biotech">1.6/_Biotech</li>
-		<li IfModActive = "Ludeon.RimWorld.Anomaly">1.6/_Anomaly</li>
+		<li IfModActive = "Ludeon.RimWorld.Royalty">1.6/Compatibility/Royalty</li>
+		<li IfModActive = "Ludeon.RimWorld.Ideology">1.6/Compatibility/Ideology</li>
+		<li IfModActive = "Ludeon.RimWorld.Biotech">1.6/Compatibility/Biotech</li>
+		<li IfModActive = "Ludeon.RimWorld.Anomaly">1.6/Compatibility/Anomaly</li>
+		<li IfModActive = "Ludeon.RimWorld.Anomaly">1.6/Compatibility/Odyssey</li>
+
+		<li IfModActive = "kentington.saveourship2">1.6/Compatibility/SaveOurShip2</li>
+		<li IfModActive = "sindre0830.rimnauts2">1.6/Compatibility/RimNauts2</li>
+		<li IfModActive = "sindre0830.universum">1.6/Compatibility/Universum</li>
 		
-		<li IfModActive = "kentington.saveourship2">1.6/_SaveOurShip2</li>
-		<li IfModActive = "sindre0830.rimnauts2">1.6/_RimNauts2</li>
-		<li IfModActive = "sindre0830.universum">1.6/_Universum</li>
-		
-		<li IfModActive = "monkey5206.carrycapacityfixed">1.6/_CarryCapacityFixed</li>
+		<li IfModActive = "monkey5206.carrycapacityfixed">1.6/Compatibility/CarryCapacityFixed</li>
 	</v1.6>
 </loadFolders>

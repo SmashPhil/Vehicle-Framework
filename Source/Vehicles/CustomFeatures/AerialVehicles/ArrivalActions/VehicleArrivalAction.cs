@@ -1,19 +1,19 @@
 ﻿using JetBrains.Annotations;
-using RimWorld;
 using RimWorld.Planet;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles.World;
 
 [PublicAPI]
-public abstract class AerialVehicleArrivalAction : IExposable
+public abstract class VehicleArrivalAction : IArrivalAction
 {
   protected VehiclePawn vehicle;
 
   /// <summary>
   /// XML Save/Load initialization
   /// </summary>
-  protected AerialVehicleArrivalAction()
+  protected VehicleArrivalAction()
   {
   }
 
@@ -21,29 +21,20 @@ public abstract class AerialVehicleArrivalAction : IExposable
   /// Use for programmatic instantiation
   /// </summary>
   /// <param name="vehicle"></param>
-  protected AerialVehicleArrivalAction(VehiclePawn vehicle)
+  protected VehicleArrivalAction(VehiclePawn vehicle)
   {
     this.vehicle = vehicle;
   }
 
   public virtual bool DestroyOnArrival => false;
 
-  public virtual FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
-  {
-    return true;
-  }
+  public AerialVehicleInFlight AerialVehicle => vehicle.GetAerialVehicle();
 
-  public virtual bool ShouldUseLongEvent(PlanetTile tile)
+  public virtual void Arrived(GlobalTargetInfo target)
   {
-    return false;
-  }
-
-  public virtual void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
-  {
+    Assert.IsNotNull(AerialVehicle);
     if (DestroyOnArrival)
-    {
-      aerialVehicle.ClearAndDestroy();
-    }
+      AerialVehicle.ClearAndDestroy();
   }
 
   public virtual void ExposeData()

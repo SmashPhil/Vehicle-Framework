@@ -148,11 +148,11 @@ internal class Patch_WorldHandling : IPatchCategory
       }
       else if (worldObject is AerialVehicleInFlight aerialVehicle)
       {
-        if (aerialVehicle.vehicle == p || aerialVehicle.vehicle.AllPawnsAboard.Contains(p))
+        if (aerialVehicle.Vehicle == p || aerialVehicle.Vehicle.AllPawnsAboard.Contains(p))
         {
           return false;
         }
-        foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
+        foreach (Thing thing in aerialVehicle.Vehicle.inventory.innerContainer)
         {
           if (thing == p)
           {
@@ -189,7 +189,7 @@ internal class Patch_WorldHandling : IPatchCategory
       foreach (AerialVehicleInFlight aerialVehicle in Find.World
        .GetComponent<VehicleWorldObjectsHolder>().AerialVehicles)
       {
-        foreach (Pawn pawn in aerialVehicle.vehicle.AllPawnsAboard)
+        foreach (Pawn pawn in aerialVehicle.Vehicle.AllPawnsAboard)
         {
           if (pawn.IsFreeColonist)
           {
@@ -224,7 +224,7 @@ internal class Patch_WorldHandling : IPatchCategory
     foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
      .AerialVehicles)
     {
-      __result.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
+      __result.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
     }
   }
 

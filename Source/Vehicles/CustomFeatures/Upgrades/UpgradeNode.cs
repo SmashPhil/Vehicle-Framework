@@ -109,28 +109,26 @@ public class UpgradeNode
         vehicle.DrawTracker.overlayRenderer.AddOverlay(key, graphicOverlay);
       }
     }
-    if (VehicleMod.settings.main.overrideDrawColors)
+
+    bool colorChanged = false;
+    if (drawColorOne != null)
     {
-      bool colorChanged = false;
-      if (drawColorOne != null)
-      {
-        vehicle.DrawColor = drawColorOne.Value;
-        colorChanged = true;
-      }
-      if (drawColorTwo != null)
-      {
-        vehicle.DrawColorTwo = drawColorTwo.Value;
-        colorChanged = true;
-      }
-      if (drawColorThree != null)
-      {
-        vehicle.DrawColorThree = drawColorThree.Value;
-        colorChanged = true;
-      }
-      if (colorChanged)
-      {
-        vehicle.Notify_ColorChanged();
-      }
+      vehicle.DrawColor = drawColorOne.Value;
+      colorChanged = true;
+    }
+    if (drawColorTwo != null)
+    {
+      vehicle.DrawColorTwo = drawColorTwo.Value;
+      colorChanged = true;
+    }
+    if (drawColorThree != null)
+    {
+      vehicle.DrawColorThree = drawColorThree.Value;
+      colorChanged = true;
+    }
+    if (colorChanged)
+    {
+      vehicle.Notify_ColorChanged();
     }
   }
 

@@ -31,7 +31,7 @@ public class VehicleWorldObjectsHolder : WorldComponent
 
   public AerialVehicleInFlight AerialVehicleObject(VehiclePawn vehicle)
   {
-    return AerialVehicles.FirstOrDefault(a => a.vehicle == vehicle);
+    return AerialVehicles.FirstOrDefault(a => a.Vehicle == vehicle);
   }
 
   public VehicleCaravan VehicleCaravanObject(VehiclePawn vehicle)

@@ -72,6 +72,8 @@
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
 
+        <PackageReference Include="PolySharp" Version="1.*" />
+
         <!--Local -->
         <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
             <SpecificVersion>False</SpecificVersion>

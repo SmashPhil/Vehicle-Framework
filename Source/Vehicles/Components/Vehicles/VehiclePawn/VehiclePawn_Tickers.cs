@@ -71,12 +71,6 @@ public partial class VehiclePawn
 
   public bool RequestTickStop<T>(T comp) where T : ThingComp
   {
-    if (!VehicleMod.settings.main.opportunisticTicking)
-    {
-      // If opportunistic ticking is off, disallow removal from ticker list.
-      // VehicleComp should then always tick.
-      return false;
-    }
     return compTickers.Remove(comp);
   }
 

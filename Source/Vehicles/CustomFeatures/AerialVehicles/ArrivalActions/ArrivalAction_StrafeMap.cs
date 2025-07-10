@@ -7,7 +7,7 @@ using Verse;
 namespace Vehicles.World;
 
 [PublicAPI]
-public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
+public class AerialVehicleArrivalAction_StrafeMap : VehicleArrivalAction
 {
   public MapParent parent;
 
@@ -21,21 +21,12 @@ public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
     this.parent = parent;
   }
 
-  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile)
-  {
-    if (parent != null && parent.Tile != destinationTile)
-    {
-      return false;
-    }
-    return CanAttack(vehicle, parent);
-  }
-
   // NOTE - Needs Unfogger called if map is generated
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
+  public override void Arrived(GlobalTargetInfo target)
   {
-    LongEventHandler.QueueLongEvent(delegate()
+    LongEventHandler.QueueLongEvent(delegate
     {
-      Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, null); //MAP INDEX BUG
+      Map map = GetOrGenerateMapUtility.GetOrGenerateMap(target.Tile, null); // MAP INDEX BUG
       TaggedString label = "LetterLabelCaravanEnteredEnemyBase".Translate();
       TaggedString text = "LetterTransportPodsLandedInEnemyBase".Translate(parent.Label)
        .CapitalizeFirst();
@@ -61,7 +52,7 @@ public class AerialVehicleArrivalAction_StrafeMap : AerialVehicleArrivalAction
               vehicle.CompVehicleLauncher.Props.skyfallerStrafing, vehicle, start, end);
           skyfaller.aerialVehicle = aerialVehicle;
           Thing thing =
-            GenSpawn.Spawn(skyfaller, start, parent.Map, Rot8.North); //REDO - Other rotations?
+            GenSpawn.Spawn(skyfaller, start, parent.Map, Rot8.North); // REDO - Other rotations?
         }, null, null, null, true);
       aerialVehicle.ClearAndDestroy();
     }, "GeneratingMap", false, null);

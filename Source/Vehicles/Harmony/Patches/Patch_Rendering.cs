@@ -213,7 +213,7 @@ internal class Patch_Rendering : IPatchCategory
       try
       {
         Assert.IsTrue(TmpPawns.Count == 0);
-        TmpPawns.AddRange(aerialVehicle.vehicle.AllPawnsAboard);
+        TmpPawns.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
         PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
         foreach (Pawn pawn in TmpPawns)
         {

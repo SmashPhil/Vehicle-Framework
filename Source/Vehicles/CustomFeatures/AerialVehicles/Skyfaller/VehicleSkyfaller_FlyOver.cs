@@ -126,18 +126,10 @@ namespace Vehicles
 
     protected virtual void ExitMap()
     {
-      AerialVehicleInFlight flyingVehicle =
-        (AerialVehicleInFlight)WorldObjectMaker.MakeWorldObject(WorldObjectDefOfVehicles
-         .AerialVehicle);
-      flyingVehicle.vehicle = vehicle;
-      flyingVehicle.Tile = Map.Tile;
-      flyingVehicle.SetFaction(vehicle.Faction);
-      flyingVehicle.OrderFlyToTiles(aerialVehicle.flightPath.Path, WorldHelper.GetTilePos(Map.Tile),
-        aerialVehicle.arrivalAction);
-      //Recon edge case?
-      flyingVehicle.Initialize();
-      Find.WorldObjects.Add(flyingVehicle);
+      //AerialVehicleInFlight flyingVehicle = AerialVehicleInFlight.Create(vehicle, Map.Tile);
+      //flyingVehicle.OrderFlyToTiles(aerialVehicle.flightPath.Path, aerialVehicle.flightPath.arrival);
       Destroy();
+      throw new NotImplementedException("TODO");
     }
 
     public override void ExposeData()

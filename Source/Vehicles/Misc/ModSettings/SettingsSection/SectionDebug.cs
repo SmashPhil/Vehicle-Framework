@@ -20,6 +20,7 @@ public class SectionDebug : SettingsSection
   private const int DebugSectionColumns = 2;
 
   public bool debugDraftAnyVehicle;
+  public bool debugInstantSendOff;
   public bool debugShootAnyTurret;
 
   public bool debugDrawCannonGrid;
@@ -47,8 +48,8 @@ public class SectionDebug : SettingsSection
   {
     base.ResetSettings();
     debugDraftAnyVehicle = false;
+    debugInstantSendOff = false;
     debugShootAnyTurret = false;
-
 
     debugDrawCannonGrid = false;
     debugDrawNodeGrid = false;
@@ -75,6 +76,7 @@ public class SectionDebug : SettingsSection
   public override void ExposeData()
   {
     Scribe_Values.Look(ref debugDraftAnyVehicle, nameof(debugDraftAnyVehicle));
+    Scribe_Values.Look(ref debugInstantSendOff, nameof(debugInstantSendOff));
     Scribe_Values.Look(ref debugShootAnyTurret, nameof(debugShootAnyTurret));
 
     Scribe_Values.Look(ref debugDrawCannonGrid, nameof(debugDrawCannonGrid));
@@ -140,6 +142,10 @@ public class SectionDebug : SettingsSection
           anchor: TextAnchor.MiddleCenter);
         listingStandard.CheckboxLabeled("VF_DevMode_DebugDraftAnyVehicle".Translate(),
           ref debugDraftAnyVehicle, "VF_DevMode_DebugDraftAnyVehicleTooltip".Translate());
+#if DEBUG
+        listingStandard.CheckboxLabeled("VF_DevMode_DebugInstantSendOff".Translate(),
+          ref debugInstantSendOff, "VF_DevMode_DebugInstantSendOffTooltip".Translate());
+#endif
         bool shootAnyTurret = debugShootAnyTurret;
         listingStandard.CheckboxLabeled("VF_DevMode_DebugShootAnyTurret".Translate(),
           ref debugShootAnyTurret, "VF_DevMode_DebugShootAnyTurretTooltip".Translate());

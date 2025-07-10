@@ -1,18 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
-using RimWorld;
-using RimWorld.Planet;
+﻿using System.Collections.Generic;
+using LudeonTK;
 using SmashTools;
+using Verse;
 
 namespace Vehicles.World;
 
 public static class AerialVehicleLaunchHelper
 {
-  public static AerialVehicleInFlight GetOrMakeAerialVehicle(VehiclePawn vehicle, int fromTile = -1)
+  public static AerialVehicleInFlight GetOrMakeAerialVehicle(this VehiclePawn vehicle)
   {
+    if (vehicle.CompVehicleLauncher is null)
+    {
+      Trace.Fail($"Trying to launch {vehicle} which is not launchable.");
+      return null;
+    }
     AerialVehicleInFlight aerialVehicle =
       VehicleWorldObjectsHolder.Instance.AerialVehicleObject(vehicle);
     if (aerialVehicle == null)
@@ -22,20 +23,11 @@ public static class AerialVehicleLaunchHelper
       if (vehicleCaravan == null)
       {
         Log.Error(
-          $"Unable to launch aerial vehicle to empty tile. No existing aerial vehicle or caravan found to launch from.");
+          "Unable to launch aerial vehicle to empty tile. No existing aerial vehicle or caravan found to launch from.");
         return null;
       }
-      bool autoSelect = false;
-      if (Find.WorldSelector.SelectedObjects.Contains(vehicleCaravan))
-      {
-        autoSelect = true;
-      }
-
-      if (fromTile < 0)
-      {
-        fromTile = vehicleCaravan.Tile;
-      }
-      aerialVehicle = AerialVehicleInFlight.Create(vehicle, fromTile);
+      aerialVehicle = AerialVehicleInFlight.Create(vehicle, vehicleCaravan.Tile);
+      bool autoSelect = Find.WorldSelector.SelectedObjects.Contains(vehicleCaravan);
 
       // Pawns not boarded will be transfered to the converted vanilla Caravan
       // and left behind. Board as many pawns as possible, a pop-up should have
@@ -43,90 +35,46 @@ public static class AerialVehicleLaunchHelper
       for (int i = vehicleCaravan.pawns.Count - 1; i >= 0; i--)
       {
         Pawn pawn = vehicleCaravan.pawns.InnerListForReading[i];
-        if (pawn.InVehicle()) continue;
+        if (pawn.InVehicle())
+          continue;
 
         if (vehicle.TryAddPawn(pawn))
-        {
           vehicleCaravan.RemovePawn(pawn);
-        }
       }
       // Removing vehicle will convert back to a vanilla Caravan and
       // destroy this instance.
       vehicleCaravan.RemovePawn(vehicle);
 
       if (autoSelect)
-      {
         Find.WorldSelector.Select(aerialVehicle, playSound: false);
-      }
     }
     return aerialVehicle;
   }
 
-  public static bool ChoseTargetOnMap(VehiclePawn vehicle, PlanetTile fromTile,
-    GlobalTargetInfo target,
-    float fuelCost)
+  [DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Lock Camera to Thing",
+    actionType = DebugActionType.ToolMap, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+  private static void LockCameraToThing()
   {
-    return vehicle.CompVehicleLauncher.launchProtocol.ChoseWorldTarget(target,
-      Find.WorldGrid.GetTileCenter(fromTile),
-      (GlobalTargetInfo target, Vector3 pos,
-          Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction) =>
-        CanTarget(vehicle, fuelCost, target, pos, launchAction),
-      (PlanetTile destinationTile, AerialVehicleArrivalAction arrivalAction, bool recon) =>
-        NewDestination(vehicle, fromTile, destinationTile, arrivalAction, recon));
-  }
-
-  private static void NewDestination(VehiclePawn vehicle, int fromTile, int destinationTile,
-    AerialVehicleArrivalAction arrivalAction, bool recon = false)
-  {
-    vehicle.CompVehicleLauncher.inFlight = true;
-    AerialVehicleInFlight aerialVehicle = GetOrMakeAerialVehicle(vehicle);
-    aerialVehicle.recon = recon;
-    aerialVehicle.OrderFlyToTiles(LaunchTargeter.FlightPath, Find.WorldGrid.GetTileCenter(fromTile),
-      arrivalAction: arrivalAction);
-  }
-
-  private static bool CanTarget(VehiclePawn vehicle, float fuelCost, GlobalTargetInfo target,
-    Vector3 pos, Action<PlanetTile, AerialVehicleArrivalAction, bool> launchAction)
-  {
-    if (!target.IsValid)
+    Map map = Find.CurrentMap;
+    if (map == null)
     {
-      Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(),
-        MessageTypeDefOf.RejectInput, false);
-      return false;
+      Log.Error("Attempting to use LockCameraToThing with null map.");
+      return;
     }
-    else if (Ext_Math.SphericalDistance(pos, WorldHelper.GetTilePos(target.Tile)) >
-      vehicle.CompVehicleLauncher.MaxLaunchDistance || fuelCost > vehicle.CompFueledTravel?.Fuel)
+    IntVec3 cell = UI.MouseCell();
+    if (cell.InBounds(map))
     {
-      Messages.Message("TransportPodDestinationBeyondMaximumRange".Translate(),
-        MessageTypeDefOf.RejectInput, false);
-      return false;
-    }
-    IEnumerable<FloatMenuOption> source =
-      vehicle.CompVehicleLauncher.launchProtocol.GetFloatMenuOptionsAt(target.Tile);
-    if (!source.Any())
-    {
-      if (!WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
+      List<Thing> thingList = map.thingGrid.ThingsListAtFast(cell);
+      if (!thingList.NullOrEmpty())
       {
-        Messages.Message("MessageTransportPodsDestinationIsInvalid".Translate(),
-          MessageTypeDefOf.RejectInput, false);
-        return false;
+        List<FloatMenuOption> options = new List<FloatMenuOption>();
+        foreach (Thing thing in thingList)
+        {
+          options.Add(new FloatMenuOption(thing.Label,
+            delegate() { CameraAttacher.Create(thing); }));
+        }
+        Find.WindowStack.Add(new FloatMenu(options));
       }
-      launchAction(target.Tile, null, false);
-      return true;
-    }
-    else
-    {
-      if (source.Count() != 1)
-      {
-        Find.WindowStack.Add(new FloatMenuTargeter(source.ToList()));
-        return false;
-      }
-      if (!source.First().Disabled)
-      {
-        source.First().action();
-        return true;
-      }
-      return false;
     }
   }
 }

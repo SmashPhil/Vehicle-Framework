@@ -277,7 +277,7 @@ public sealed class VehiclePathingSystem : MapComponent
   {
     // Try to generate regions immediately for a vehicle being spawned and cut in line
     // in front of any deferred region requests that may have just been queued.
-    RequestGridsFor(vehicle.VehicleDef, DeferredGridGeneration.UrgencyFor(vehicle));
+    RequestGridsFor(vehicle.VehicleDef, DeferredGridGeneration.UrgencyFor(map, vehicle));
   }
 
   public void RequestGridsFor(VehicleDef vehicleDef, DeferredGridGeneration.Urgency urgency)

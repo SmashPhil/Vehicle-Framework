@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
 using RimWorld.Planet;
 
 namespace Vehicles.Compatibility;
 
+// TODO - this is sus, revisit later
 public static class AerialVehicleCompatibility
 {
-  private static readonly HashSet<Type> canLandInWorldObjects = [];
+  private static readonly HashSet<Type> CanLandInWorldObjects = [];
 
   public static void AddObject(Type type)
   {
-    canLandInWorldObjects.Add(type);
+    CanLandInWorldObjects.Add(type);
   }
 
   public static bool CanLandIn(MapParent mapParent)
   {
-    return canLandInWorldObjects.Contains(mapParent.GetType());
+    return CanLandInWorldObjects.Contains(mapParent.GetType());
   }
 }

@@ -849,11 +849,11 @@ internal class Patch_CaravanHandling : IPatchCategory
     if (aerialVehicle != null)
     {
       TmpAerialVehicleThingsWillToBuy.Clear();
-      foreach (Thing thing in aerialVehicle.vehicle.inventory.innerContainer)
+      foreach (Thing thing in aerialVehicle.Vehicle.inventory.innerContainer)
       {
         TmpAerialVehicleThingsWillToBuy.Add(thing);
       }
-      List<Pawn> pawns = aerialVehicle.vehicle.AllPawnsAboard;
+      List<Pawn> pawns = aerialVehicle.Vehicle.AllPawnsAboard;
       foreach (Pawn pawn in pawns)
       {
         if (!CaravanUtility.IsOwner(pawn, aerialVehicle.Faction))
@@ -1037,13 +1037,13 @@ internal class Patch_CaravanHandling : IPatchCategory
       thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, ___settlement);
       if (thing is Pawn pawn && pawn.RaceProps.Humanlike)
       {
-        VehicleRoleHandler handler = aerial.vehicle.GetNextAvailableHandler(HandlingType.None);
+        VehicleRoleHandler handler = aerial.Vehicle.GetNextAvailableHandler(HandlingType.None);
         if (handler == null)
         {
           Log.Error(
             $"Unable to locate available handler for {toGive}. Squeezing into other role to avoid aborted trade.");
-          handler = aerial.vehicle.GetAnyAvailableHandler();
-          handler ??= aerial.vehicle.handlers.RandomElementWithFallback(fallback: null);
+          handler = aerial.Vehicle.GetAnyAvailableHandler();
+          handler ??= aerial.Vehicle.handlers.RandomElementWithFallback(fallback: null);
 
           if (handler == null)
           {
@@ -1052,10 +1052,10 @@ internal class Patch_CaravanHandling : IPatchCategory
             return true;
           }
         }
-        aerial.vehicle.TryAddPawn(pawn, handler);
+        aerial.Vehicle.TryAddPawn(pawn, handler);
         return false;
       }
-      if (aerial.vehicle.AddOrTransfer(thing) <= 0)
+      if (aerial.Vehicle.AddOrTransfer(thing) <= 0)
       {
         Log.Error("Could not add sold thing to inventory.");
         thing.Destroy();

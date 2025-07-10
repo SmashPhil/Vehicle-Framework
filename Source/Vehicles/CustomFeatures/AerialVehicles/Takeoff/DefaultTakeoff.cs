@@ -6,6 +6,7 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using UnityEngine.Assertions;
 using Vehicles.World;
 
 namespace Vehicles;
@@ -172,49 +173,11 @@ public class DefaultTakeoff : LaunchProtocol
     return base.AnimateTakeoff(drawPos, rotation, shadowData);
   }
 
-  protected override FloatMenuOption FloatMenuOption_LandInsideMap(MapParent mapParent, int tile)
-  {
-    return new FloatMenuOption("LandInExistingMap".Translate(vehicle.Label), delegate()
-    {
-      Current.Game.CurrentMap = mapParent.Map;
-      CameraJumper.TryHideWorld();
-      LandingTargeter.Instance.BeginTargeting(vehicle, delegate(LocalTargetInfo target, Rot4 rot)
-        {
-          if (vehicle.Spawned)
-          {
-            vehicle.CompVehicleLauncher.TryLaunch(tile,
-              new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell,
-                rot));
-          }
-          else
-          {
-            AerialVehicleInFlight
-              aerial = AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(vehicle);
-            if (aerial is null)
-            {
-              Log.Error(
-                $"Attempted to launch into existing map where CurrentMap is null and no AerialVehicle with {vehicle.Label} exists.");
-              return;
-            }
-            aerial.arrivalAction =
-              new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell,
-                rot);
-            aerial.OrderFlyToTiles(LaunchTargeter.FlightPath, aerial.DrawPos,
-              new AerialVehicleArrivalAction_LandSpecificCell(vehicle, mapParent, tile, target.Cell,
-                rot));
-            vehicle.CompVehicleLauncher.inFlight = true;
-            CameraJumper.TryShowWorld();
-          }
-        }, allowRotating: vehicle.VehicleDef.rotatable,
-        targetValidator: (targetInfo) =>
-          !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
-    }, MenuOptionPriority.Default, null, null, 0f, null, null);
-  }
-
   public override void ResolveProperties(LaunchProtocol reference)
   {
     base.ResolveProperties(reference);
     DefaultTakeoff defaultReference = reference as DefaultTakeoff;
+    Assert.IsNotNull(defaultReference);
     launchProperties = defaultReference.launchProperties;
     landingProperties = defaultReference.landingProperties;
   }

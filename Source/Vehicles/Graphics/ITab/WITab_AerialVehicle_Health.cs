@@ -11,6 +11,8 @@ using RimWorld.Planet;
 
 namespace Vehicles.World;
 
+// ReSharper disable once InconsistentNaming
+// It's cleaner to just stick with RimWorld's naming convention when deriving from their types.
 [StaticConstructorOnStartup]
 public class WITab_AerialVehicle_Health : WITab_AerialVehicle
 {
@@ -327,7 +329,7 @@ public class WITab_AerialVehicle_Health : WITab_AerialVehicle
   private void EnsureSpecificHealthTabForPawnValid()
   {
     if (specificHealthTabForPawn != null && (specificHealthTabForPawn.Destroyed ||
-      !SelAerialVehicle.vehicle.AllPawnsAboard.Contains(specificHealthTabForPawn)))
+      !SelAerialVehicle.Vehicle.AllPawnsAboard.Contains(specificHealthTabForPawn)))
     {
       specificHealthTabForPawn = null;
     }

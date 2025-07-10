@@ -81,14 +81,11 @@ internal sealed class UnitTest_AerialVehicle
       CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, StartTile, true);
     using ScopeWorldObject swo = new(caravan);
     group.vehicle.CompVehicleLauncher.inFlight = true;
-    AerialVehicleInFlight aerialVehicle =
-      AerialVehicleLaunchHelper.GetOrMakeAerialVehicle(group.vehicle);
+    AerialVehicleInFlight aerialVehicle = group.vehicle.GetOrMakeAerialVehicle();
     Assert.IsNotNull(aerialVehicle);
     using ScopeWorldObject sav = new(aerialVehicle);
     aerialVehicle.recon = false;
-    aerialVehicle.OrderFlyToTiles([new FlightNode(DestTile)],
-      Find.WorldGrid.GetTileCenter(DestTile),
-      arrivalAction: new AerialVehicleArrivalAction_FormVehicleCaravan(group.vehicle));
+    aerialVehicle.OrderFlyToTiles([new FlightNode(DestTile)], new ArrivalAction_LandToCaravan(group.vehicle));
     Assert.IsTrue(group.vehicle.CompVehicleLauncher.inFlight);
     Assert.IsTrue(caravan.Destroyed);
     Assert.IsFalse(group.vehicle.Destroyed);
@@ -111,7 +108,7 @@ internal sealed class UnitTest_AerialVehicle
     group.BoardAll();
 
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 1);
-    VehiclePawn vehicle = aerialVehicle.vehicle;
+    VehiclePawn vehicle = aerialVehicle.Vehicle;
     // Pass vehicle and passengers to world
     Find.WorldPawns.PassToWorld(vehicle);
     foreach (Pawn pawn in vehicle.AllPawnsAboard)
@@ -154,7 +151,7 @@ internal sealed class UnitTest_AerialVehicle
       "Inventory GC discarded.");
 
     aerialVehicle.Destroy();
-    Expect.IsFalse(Find.WorldPawns.Contains(aerialVehicle.vehicle));
+    Expect.IsFalse(Find.WorldPawns.Contains(aerialVehicle.Vehicle));
     return;
 
     static bool ThingInVehicle(VehiclePawn vehicle, Thing thing)

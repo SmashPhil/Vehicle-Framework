@@ -458,7 +458,7 @@ public partial class VehiclePawn
     }
     else if (Spawned)
     {
-      using (new EventDisabler<VehicleEventDef>(this))
+      using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
       {
         for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
         {

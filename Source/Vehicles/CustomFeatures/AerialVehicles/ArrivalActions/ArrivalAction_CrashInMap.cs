@@ -3,16 +3,14 @@ using Verse;
 
 namespace Vehicles.World;
 
-public class AerialVehicleArrivalAction_CrashSpecificCell
-  : AerialVehicleArrivalAction_LandSpecificCell
+public class ArrivalAction_CrashInMap : ArrivalAction_LandToCell
 {
-  public AerialVehicleArrivalAction_CrashSpecificCell()
+  public ArrivalAction_CrashInMap()
   {
   }
 
-  public AerialVehicleArrivalAction_CrashSpecificCell(VehiclePawn vehicle, MapParent mapParent,
-    int tile, IntVec3 landingCell, Rot4 landingRot)
-    : base(vehicle, mapParent, tile, landingCell, landingRot)
+  public ArrivalAction_CrashInMap(VehiclePawn vehicle, MapParent mapParent, IntVec3 landingCell, Rot4 landingRot) :
+    base(vehicle, mapParent, landingCell, landingRot)
   {
   }
 

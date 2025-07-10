@@ -1141,7 +1141,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
       // Execute cargo event once at the end of reloading to avoid repeated permissions recaching
       // and potentially infinite reload attempts.
-      using (EventDisabler<VehicleEventDef> ed = new(vehicle, VehicleEventDefOf.CargoRemoved))
+      using (EventDisabler<VehicleEventDef> ed = new(vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved]))
       {
         // Take items from inventory without going over the amount required
         for (int i = ThingsToTakeReloading.Count - 1; i >= 0; i--)
@@ -1192,7 +1192,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   {
     if (loadedAmmo != null && shellCount > 0)
     {
-      using EventDisabler<VehicleEventDef> ed = new(vehicle, VehicleEventDefOf.CargoAdded);
+      using EventDisabler<VehicleEventDef> ed = new(vehicle.EventRegistry[VehicleEventDefOf.CargoAdded]);
       Thing thing = ThingMaker.MakeThing(loadedAmmo);
       thing.stackCount = Mathf.CeilToInt(shellCount * def.chargePerAmmoCount);
       if (vehicle.AddOrTransfer(thing) > 0)

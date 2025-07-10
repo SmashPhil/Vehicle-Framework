@@ -85,7 +85,7 @@ internal sealed class UnitTest_DeferredGeneration
 
     // Faction.OfPlayer
     Expect.IsTrue(group.vehicle.Spawned, "Spawned");
-    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map, group.vehicle),
       DeferredGridGeneration.Urgency.Deferred, "Player Deferred");
 
     // We need to wait for the dedicated thread to finish generating vehicle's grids so we can
@@ -123,7 +123,7 @@ internal sealed class UnitTest_DeferredGeneration
     group.vehicle.SetFactionDirect(Find.World.factionManager.OfAncientsHostile);
     group.Spawn();
     Expect.IsTrue(group.vehicle.Spawned, "Enemy Spawned");
-    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map, group.vehicle),
       DeferredGridGeneration.Urgency.Urgent, "Enemy Spawn Urgent");
 
     Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Enemy Regions Generated");

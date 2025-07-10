@@ -6,40 +6,36 @@ using Verse;
 
 namespace Vehicles.World;
 
-public class AerialVehicleArrivalAction_OfferGifts : AerialVehicleArrivalAction_VisitSettlement
+public class ArrivalAction_OfferGifts : ArrivalAction_VisitSettlement
 {
-  public AerialVehicleArrivalAction_OfferGifts()
+  public ArrivalAction_OfferGifts()
   {
   }
 
-  public AerialVehicleArrivalAction_OfferGifts(VehiclePawn vehicle, Settlement settlement) : base(
-    vehicle, settlement)
+  public ArrivalAction_OfferGifts(VehiclePawn vehicle) : base(vehicle)
   {
   }
 
-  public override void Arrived(AerialVehicleInFlight aerialVehicle, PlanetTile tile)
+  public override void Arrived(GlobalTargetInfo target)
   {
-    base.Arrived(aerialVehicle, tile);
-    if (AerialVehicleArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) == null)
+    base.Arrived(target);
+    Settlement settlement = target.WorldObject as Settlement;
+    Assert.IsNotNull(settlement);
+    if (ArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) == null)
     {
       Log.Warning($"No valid negotiator to trade with for {vehicle}.");
       return;
     }
-
+    // TODO - refactor the way we pull negotiator
     // Valid negotiator already verified, should never not find someone to take the role
-    Pawn negotiator =
-      WorldHelper.FindBestNegotiator(vehicle, settlement.Faction, settlement.TraderKind);
+    Pawn negotiator = vehicle.FindBestNegotiator(settlement.Faction, settlement.TraderKind);
     Assert.IsNotNull(negotiator);
 
     Find.WindowStack.Add(new Dialog_Trade(negotiator, settlement, giftsOnly: true));
     PawnRelationUtility.Notify_PawnsSeenByPlayer_Letter_Send(settlement.Goods.OfType<Pawn>(),
       "LetterRelatedPawnsTradingWithSettlement".Translate(Faction.OfPlayer.def.pawnsPlural),
-      LetterDefOf.NeutralEvent, false, true);
+      LetterDefOf.NeutralEvent);
   }
-
-  public override FloatMenuAcceptanceReport StillValid(PlanetTile destinationTile) =>
-    base.StillValid(destinationTile) &&
-    AerialVehicleArrivalAction_Trade.CanTradeWith(vehicle, settlement);
 
   /// <summary>
   /// AerialVehicle <paramref name="vehicle"/> can offer gifts to <paramref name="settlement"/>
@@ -49,8 +45,8 @@ public class AerialVehicleArrivalAction_OfferGifts : AerialVehicleArrivalAction_
   public static FloatMenuAcceptanceReport CanOfferGiftsTo(VehiclePawn vehicle,
     Settlement settlement)
   {
-    return AerialVehicleArrivalAction_Trade.ValidGiftOrTradePartner(settlement) &&
+    return ArrivalAction_Trade.ValidGiftOrTradePartner(settlement) &&
       settlement.Faction.HostileTo(Faction.OfPlayer) &&
-      AerialVehicleArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) != null;
+      ArrivalAction_Trade.GetValidNegotiator(vehicle, settlement) != null;
   }
 }

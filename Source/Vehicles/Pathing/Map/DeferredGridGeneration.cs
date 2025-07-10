@@ -252,8 +252,17 @@ public class DeferredGridGeneration
 #endif
   }
 
-  public static Urgency UrgencyFor(VehiclePawn vehicle)
+  public static Urgency UrgencyFor(Map map, VehiclePawn vehicle)
   {
+    Assert.IsNotNull(map);
+
+    // Map just generated, the vehicle is spawning and will need the grids for validation.
+    if (map.generationTick == GenTicks.TicksGame)
+      return Urgency.Urgent;
+    // Spawning event maps requires the grids immediately for spawning.
+    //if (map.ParentFaction != Faction.OfPlayer)
+    //  return Urgency.Urgent;
+
     // If null faction, vehicle should be immovable
     if (vehicle.Faction == null)
       return Urgency.None;

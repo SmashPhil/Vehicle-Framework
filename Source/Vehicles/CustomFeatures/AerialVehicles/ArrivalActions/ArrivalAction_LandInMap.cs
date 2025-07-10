@@ -5,19 +5,17 @@ using Verse;
 namespace Vehicles.World;
 
 [PublicAPI]
-public abstract class AerialVehicleArrivalAction_LandInMap : AerialVehicleArrivalAction
+public abstract class ArrivalAction_LandInMap : VehicleArrivalAction
 {
-  protected int tile;
   protected MapParent mapParent;
 
-  protected AerialVehicleArrivalAction_LandInMap()
+  protected ArrivalAction_LandInMap()
   {
   }
 
-  protected AerialVehicleArrivalAction_LandInMap(VehiclePawn vehicle, MapParent mapParent, int tile)
+  protected ArrivalAction_LandInMap(VehiclePawn vehicle, MapParent mapParent)
     : base(vehicle)
   {
-    this.tile = tile;
     this.mapParent = mapParent;
   }
 
@@ -31,7 +29,6 @@ public abstract class AerialVehicleArrivalAction_LandInMap : AerialVehicleArriva
   public override void ExposeData()
   {
     base.ExposeData();
-    Scribe_Values.Look(ref tile, nameof(tile));
     Scribe_References.Look(ref mapParent, nameof(mapParent));
   }
 }
