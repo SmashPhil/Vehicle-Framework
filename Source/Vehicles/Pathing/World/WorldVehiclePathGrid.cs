@@ -16,7 +16,6 @@ namespace Vehicles.World;
 /// <summary>
 /// WorldGrid for vehicles
 /// </summary>
-[PublicAPI]
 public class WorldVehiclePathGrid : WorldComponent
 {
   public const float ImpassableMovementDifficulty = 1000f;
@@ -65,9 +64,11 @@ public class WorldVehiclePathGrid : WorldComponent
   /// </summary>
   public static WorldVehiclePathGrid Instance { get; private set; }
 
-  public bool Recalculating { get; private set; }
+  private bool Recalculating { get; set; }
 
   public bool Initialized { get; private set; }
+
+  public PathGrid this[VehicleDef vehicleDef] => pathGrids[vehicleDef.DefIndex];
 
   /// <summary>
   /// Day of year at 0 longitude for recalculating pathGrids
@@ -206,15 +207,14 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <summary>
   /// Recalculate pathCost at <paramref name="tile"/> for <paramref name="vehicleDef"/>
   /// </summary>
-  private void RecalculatePerceivedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef,
-    int? ticksAbs = null)
+  private void RecalculatePerceivedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef)
   {
     if (!Find.WorldGrid.InBounds(tile))
     {
       return;
     }
     pathGrids[vehicleDef.DefIndex][tile] =
-      CalculatedMovementDifficultyAt(tile, vehicleDef, ticksAbs);
+      CalculatedMovementDifficultyAt(tile, vehicleDef);
   }
 
   /// <summary>
@@ -249,11 +249,7 @@ public class WorldVehiclePathGrid : WorldComponent
     using GridInitializerState gis = new(this);
     foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
     {
-      for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
-      {
-        RecalculatePerceivedMovementDifficultyAt(i, vehicleDef, ticksAbs);
-      }
-      OnPathGridRecalculated?.Invoke(vehicleDef);
+      RecalculateAllPerceivedPathCostsFor(vehicleDef);
     }
 
     // Only needs to be done once and not for every grid owner
@@ -261,6 +257,15 @@ public class WorldVehiclePathGrid : WorldComponent
     {
       RecalculateWinterPercentAt(i, ticksAbs);
     }
+  }
+
+  internal void RecalculateAllPerceivedPathCostsFor(VehicleDef vehicleDef)
+  {
+    for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
+    {
+      RecalculatePerceivedMovementDifficultyAt(i, vehicleDef);
+    }
+    OnPathGridRecalculated?.Invoke(vehicleDef);
   }
 
   private void RecalculateWinterPercentAt(PlanetTile tile, int? ticksAbs = null)
@@ -272,7 +277,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// Calculate path cost for <paramref name="vehicleDef"/> at <paramref name="tile"/>
   /// </summary>
   public static float CalculatedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef,
-    int? ticksAbs = null, StringBuilder explanation = null, bool coastalTravel = true)
+    StringBuilder explanation = null, bool coastalTravel = true)
   {
     Tile worldTile = Find.WorldGrid[tile];
     if (worldTile is not SurfaceTile surfaceTile)
@@ -387,8 +392,8 @@ public class WorldVehiclePathGrid : WorldComponent
   public static float ConsistentDirectionCost(PlanetTile tile, PlanetTile neighbor,
     VehicleDef vehicleDef)
   {
-    return Mathf.Max(CalculatedMovementDifficultyAt(tile, vehicleDef, null, null, false),
-      CalculatedMovementDifficultyAt(neighbor, vehicleDef, null, null, false));
+    return Mathf.Max(CalculatedMovementDifficultyAt(tile, vehicleDef),
+      CalculatedMovementDifficultyAt(neighbor, vehicleDef));
   }
 
   [DebugAction(VehicleHarmony.VehiclesLabel, name = "Regen WorldGrid",

@@ -93,6 +93,7 @@ public class VehicleCaravan_PathFollower : IExposable
   public bool StartPath(PlanetTile destTile, CaravanArrivalAction arrivalAction,
     bool repathImmediately = false, bool resetPauseStatus = true)
   {
+    caravan.EnsureWorldGridInitialized();
     caravan.autoJoinable = false;
     if (resetPauseStatus)
     {
@@ -327,8 +328,7 @@ public class VehicleCaravan_PathFollower : IExposable
     foreach (VehicleDef vehicleDef in vehicleDefs)
     {
       float newCost =
-        WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicleDef, ticksAbs,
-          stringBuilder);
+        WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicleDef, stringBuilder);
       if (newCost < cost)
       {
         cost = newCost;
@@ -376,9 +376,7 @@ public class VehicleCaravan_PathFollower : IExposable
 
     foreach (VehiclePawn vehicle in vehicles)
     {
-      float newCost =
-        WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle.VehicleDef, ticksAbs,
-          stringBuilder);
+      float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle.VehicleDef, stringBuilder);
       if (newCost < cost)
       {
         cost = newCost;

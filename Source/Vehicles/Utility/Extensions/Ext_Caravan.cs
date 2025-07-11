@@ -132,7 +132,36 @@ public static class Ext_Caravan
   }
 
   /// <summary>
-  /// Ensures that the world map pathing grids for the vehicle def are initialized on the given map.
+  /// Ensures the world vehicle path grid for the given <see cref="VehicleDef"/> is initialized on the global map,
+  /// recalculating path costs if necessary.
+  /// </summary>
+  /// <param name="vehicleDef">
+  /// The vehicle def whose world grid should be initialized.
+  /// </param>
+  public static void EnsureWorldGridInitialized(this VehicleDef vehicleDef)
+  {
+    WorldVehiclePathGrid pathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
+    if (!pathGrid[vehicleDef].Enabled)
+      pathGrid.RecalculateAllPerceivedPathCostsFor(vehicleDef);
+  }
+
+  /// <summary>
+  /// Ensures that world vehicle path grids are initialized for all vehicle defs in the specified
+  /// <see cref="VehicleCaravan"/>, recalculating path costs if necessary.
+  /// </summary>
+  /// <param name="caravan">
+  /// The vehicle caravan whose vehicle defs should have their world path grids initialized.
+  /// </param>
+  public static void EnsureWorldGridInitialized(this VehicleCaravan caravan)
+  {
+    foreach (VehiclePawn vehicle in caravan.VehiclesListForReading)
+    {
+      vehicle.VehicleDef.EnsureWorldGridInitialized();
+    }
+  }
+
+  /// <summary>
+  /// Ensures that the local map pathing grids for the vehicle def are initialized on the given map.
   /// </summary>
   /// <param name="vehicleDef">The vehicle def to initialize grids for urgently.</param>
   /// <param name="map">The <see cref="Map"/> to prepare.
@@ -145,28 +174,29 @@ public static class Ext_Caravan
   }
 
   /// <summary>
-  /// Ensures that the world map pathing grids for the vehicle defs are initialized on the given map.
+  /// Ensures that the local map pathing grids for the vehicle defs are initialized on the given map.
   /// </summary>
-  /// <param name="vehicleDefs">A collection of vehicle defs to initialize grids for urgently.</param>
+  /// <param name="vehicles">A list of vehicles to initialize grids for urgently.</param>
   /// <param name="map">The <see cref="Map"/> to prepare.
   /// </param>
-  public static void EnsureMapInitialized(IEnumerable<VehicleDef> vehicleDefs, Map map)
+  public static void EnsureMapInitialized(List<VehiclePawn> vehicles, Map map)
   {
     VehiclePathingSystem pathingSystem = map.GetCachedMapComponent<VehiclePathingSystem>();
-    foreach (VehicleDef vehicleDef in vehicleDefs)
+    foreach (VehiclePawn vehicle in vehicles)
     {
+      VehicleDef vehicleDef = vehicle.VehicleDef;
       if (pathingSystem[vehicleDef].Suspended || !pathingSystem[vehicleDef].VehiclePathGrid.Enabled)
         pathingSystem.RequestGridsFor(vehicleDef, DeferredGridGeneration.Urgency.Urgent);
     }
   }
 
   /// <summary>
-  /// Ensures that the world map pathing grids for all vehicles in the caravan are initialized on the given map.
+  /// Ensures that the local map pathing grids for all vehicles in the caravan are initialized on the given map.
   /// </summary>
   /// <param name="caravan">The caravan whose vehicles to initialize.</param>
   /// <param name="map">The <see cref="Map"/> to prepare.</param>
-  public static void EnsureMapInitialized(this Caravan caravan, Map map)
+  public static void EnsureMapInitialized(this VehicleCaravan caravan, Map map)
   {
-    EnsureMapInitialized(caravan.UniqueVehicleDefsInCaravan(), map);
+    EnsureMapInitialized(caravan.VehiclesListForReading, map);
   }
 }
