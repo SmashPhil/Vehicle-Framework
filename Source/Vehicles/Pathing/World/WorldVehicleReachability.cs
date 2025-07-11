@@ -25,7 +25,7 @@ public class WorldVehicleReachability
     this.pathGrid = pathGrid;
     regionGrids = new WorldRegionGrid[DefDatabase<VehicleDef>.DefCount];
     InitReachabilityGrid();
-    pathGrid.OnPathGridRecalculated += RegenerateRegionsFor;
+    pathGrid.OnReachabilityDirty += RegenerateRegionsFor;
   }
 
   public WorldRegionGrid GetRegionGrid(VehicleDef vehicleDef)
@@ -62,9 +62,7 @@ public class WorldVehicleReachability
 
   private void RegenerateRegionsFor(VehicleDef vehicleDef)
   {
-    if (!GridOwners.World.IsOwner(vehicleDef))
-      return;
-    regionGrids[vehicleDef.DefIndex].GenerateRegions();
+    regionGrids[GridOwners.World.GetOwner(vehicleDef).DefIndex].GenerateRegions();
   }
 
   /// <summary>

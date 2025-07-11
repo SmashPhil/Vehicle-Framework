@@ -22,7 +22,7 @@ public class WorldVehiclePathGrid : WorldComponent
 
   private static readonly Func<Hilliness, float> HillinessMovementDifficultyOffset;
 
-  public event Action<VehicleDef> OnPathGridRecalculated;
+  public event Action<VehicleDef> OnReachabilityDirty;
 
   /// <summary>
   /// Store entire pathGrid for each <see cref="VehicleDef"/>
@@ -205,16 +205,44 @@ public class WorldVehiclePathGrid : WorldComponent
   }
 
   /// <summary>
-  /// Recalculate pathCost at <paramref name="tile"/> for <paramref name="vehicleDef"/>
+  /// Recomputes and stores the perceived movement difficulty for a single world tile
+  /// and reports which part of the pathing data needs updating.
   /// </summary>
-  private void RecalculatePerceivedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef)
+  /// <param name="tile">
+  /// The <see cref="PlanetTile"/> whose difficulty to recalculate.
+  /// </param>
+  /// <param name="vehicleDef">
+  /// The <see cref="VehicleDef"/> for which the difficulty is calculated.
+  /// </param>
+  /// <returns>
+  /// A <see cref="GridState"/> flag indicating:
+  /// <list type="bullet">
+  ///   <item>
+  ///     <term>None</term>
+  ///     <description>If <paramref name="tile"/> is out of bounds.</description>
+  ///   </item>
+  ///   <item>
+  ///     <term>RegionsDirty</term>
+  ///     <description>If the tile’s passability crossed the impassable threshold, potentially changing region connectivity.</description>
+  ///   </item>
+  ///   <item>
+  ///     <term>PathGridDirty</term>
+  ///     <description>If only the movement cost changed but passability remained the same.</description>
+  ///   </item>
+  /// </list>
+  /// </returns>
+  [PublicAPI]
+  public GridState RecalculatePerceivedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef)
   {
     if (!Find.WorldGrid.InBounds(tile))
-    {
-      return;
-    }
-    pathGrids[vehicleDef.DefIndex][tile] =
-      CalculatedMovementDifficultyAt(tile, vehicleDef);
+      return GridState.None;
+    PathGrid pathGrid = pathGrids[vehicleDef.DefIndex];
+    float before = pathGrid[tile.tileId];
+    float after = CalculatedMovementDifficultyAt(tile, vehicleDef);
+    pathGrid[tile.tileId] = after;
+    if (before >= ImpassableMovementDifficulty ^ after >= ImpassableMovementDifficulty)
+      return GridState.RegionsDirty;
+    return GridState.PathGridDirty;
   }
 
   /// <summary>
@@ -261,11 +289,14 @@ public class WorldVehiclePathGrid : WorldComponent
 
   internal void RecalculateAllPerceivedPathCostsFor(VehicleDef vehicleDef)
   {
+    bool dirty = false;
     for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
     {
-      RecalculatePerceivedMovementDifficultyAt(i, vehicleDef);
+      GridState state = RecalculatePerceivedMovementDifficultyAt(i, vehicleDef);
+      dirty |= state == GridState.RegionsDirty;
     }
-    OnPathGridRecalculated?.Invoke(vehicleDef);
+    if (dirty)
+      OnReachabilityDirty?.Invoke(vehicleDef);
   }
 
   private void RecalculateWinterPercentAt(PlanetTile tile, int? ticksAbs = null)
@@ -404,6 +435,32 @@ public class WorldVehiclePathGrid : WorldComponent
   }
 
   [PublicAPI]
+  public enum GridState
+  {
+    None,
+    PathGridDirty,
+    RegionsDirty
+  }
+
+  private readonly struct GridInitializerState : IDisposable
+  {
+    private readonly WorldVehiclePathGrid pathGrid;
+
+    public GridInitializerState(WorldVehiclePathGrid pathGrid)
+    {
+      this.pathGrid = pathGrid;
+      this.pathGrid.Initialized = false;
+      this.pathGrid.Recalculating = true;
+    }
+
+    void IDisposable.Dispose()
+    {
+      pathGrid.Recalculating = false;
+      pathGrid.Initialized = true;
+    }
+  }
+
+  [PublicAPI]
   public class PathGrid
   {
     private VehicleDef owner;
@@ -424,23 +481,5 @@ public class WorldVehiclePathGrid : WorldComponent
     public bool Enabled { get; internal set; }
 
     public VehicleDef Owner => owner;
-  }
-
-  private readonly struct GridInitializerState : IDisposable
-  {
-    private readonly WorldVehiclePathGrid pathGrid;
-
-    public GridInitializerState(WorldVehiclePathGrid pathGrid)
-    {
-      this.pathGrid = pathGrid;
-      this.pathGrid.Initialized = false;
-      this.pathGrid.Recalculating = true;
-    }
-
-    void IDisposable.Dispose()
-    {
-      pathGrid.Recalculating = false;
-      pathGrid.Initialized = true;
-    }
   }
 }
