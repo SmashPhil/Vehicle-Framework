@@ -46,7 +46,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_AerialVehicleEffects>Aerial Vehicle Effects</VF_AerialVehicleEffects>
   <VF_AerialVehicleEffectsTooltip>When aerial vehicles takeoff and land, spawn flecks and render overlay textures.</VF_AerialVehicleEffectsTooltip>
   
-  <VF_VehicleDamageMultipliers>Vehicle Damage</VF_VehicleDamageMultipliers>
   <VF_MeleeDamageMultiplier>Melee Damage Multiplier</VF_MeleeDamageMultiplier>
   <VF_RangedDamageMultiplier>Ranged Damage Multiplier</VF_RangedDamageMultiplier>
   <VF_ExplosiveDamageMultiplier>Explosive Damage Multiplier</VF_ExplosiveDamageMultiplier>

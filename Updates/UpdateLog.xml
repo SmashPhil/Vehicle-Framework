@@ -6,23 +6,27 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Quick patch for unstable build.
+This is going to be where unstable builds get pushed going forward. I would like to push out more iterations with more hands on testing. I know having to redownload the entire mod folder manually is a pain unless you have something like RimSort.
+
+IMPORTANT: If you are using this steam version, I highly recommend you join the discord channel to give feedback and report bugs. This upload is strictly for users in the discord, but I know it will get shared around.
 
 If you are a modder, there is a &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) with a list of all relevant changes you'll need to look out for.
+&lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added Odyssey compatibility.
+- Added auto-reloading feature to turrets. Colonists will now auto-reload the turret (if it is empty) upon entering the vehicle, or if cargo is added.
+- Added DefaultImpassable flag for more verbose control over which path configs are impassable by default.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- AerialVehicles destroy inner vehicle upon landing.
-- Various targeters were only configured to target surface layer tiles.
-- Crash landing event for aerial vehicles didn't trigger properly.
-- Map generation issue with aerial vehicles entering maps.
-- Vehicle spawn event would double register overlays to the new parallel renderer.
-- Crashed aerial vehicles would not tilt correctly post-spawn.
-- Aerial vehicles would land and enter wrong idle job.
+- Fixed various issues with targeting Odyssey space objects.
+- Fixed bug where vehicles could target platforms which required signal jammer.
+- Fixed bug where event maps were unable to spawn vehicles due to lazy grids not generating urgently.
+- Fixed autonomous aerial vehicles not being launchable.
+- Fixed caravans restarting paths post-load causing an error due to lazy world grid generation.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
   <actionOnUpdate></actionOnUpdate>
   <!--Show update log on next startup.-->
-  <update>false</update>
+  <update>true</update>
   <!--Testing mode prevents the update from saving over the UpdateLog file-->
   <testing>false</testing>
   <!--Icon bar shown to the right of the mod's name.-->

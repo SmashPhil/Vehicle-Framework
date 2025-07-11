@@ -28,10 +28,10 @@
         <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Unstable|AnyCPU' ">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
-        <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;</DefineConstants>
+        <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">
