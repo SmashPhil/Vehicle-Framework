@@ -1,6 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration>
-  <Title>[DEV] Vehicle Framework</Title>
   <Excluded>
     <exclude>.git</exclude>
     <exclude>.vs</exclude>
