@@ -206,8 +206,8 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
       }
     }
 
-    if (!VehicleMod.settings.debug.debugDraftAnyVehicle &&
-      !Vehicle.CanMoveWithOperators && !Vehicle.MovementPermissions.HasFlag(VehiclePermissions.Autonomous))
+    if ((!Vehicle.CanMoveWithOperators || Vehicle.PawnCountToOperateLeft > 0) &&
+      !VehicleMod.settings.debug.debugDraftAnyVehicle)
     {
       disableReason = "VF_NotEnoughToOperate".Translate();
     }

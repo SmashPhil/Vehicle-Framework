@@ -70,7 +70,7 @@ public partial class VehiclePawn
           }
         }
       }
-      return MovementPermissions.HasFlag(VehiclePermissions.Mobile);
+      return true;
     }
   }
 
