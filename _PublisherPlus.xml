@@ -1,24 +1,19 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration>
+  <Title>[DEV] Vehicle Framework</Title>
   <Excluded>
     <exclude>.git</exclude>
-    <exclude>.github</exclude>
-    <exclude>.gitignore</exclude>
-    <exclude>.gitattributes</exclude>
-    <exclude>.gitmodules</exclude>
     <exclude>.vs</exclude>
+    <exclude>1.4\Assemblies\0Harmony.dll</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
-    <exclude>1.5\Defs\Ignore</exclude>
     <exclude>1.5\Assemblies\0Harmony.dll</exclude>
-    <exclude>1.5\Assemblies\0Harmony.pdb</exclude>
-    <exclude>1.5\Assemblies\Vehicles.pdb</exclude>
-    <exclude>1.5\Assemblies\SmashTools.pdb</exclude>
-    <exclude>1.5\Assemblies\UpdateLogTool.pdb</exclude>
+    <exclude>1.6\Defs\Ignore</exclude>
     <exclude>About\PreviewArt</exclude>
-    <exclude>Source</exclude>
+    <exclude>DevTools</exclude>
     <exclude>SmashTools</exclude>
-    <exclude>UpdateLog</exclude>
+    <exclude>Source</exclude>
     <exclude>Textures\Ignore</exclude>
+    <exclude>UpdateLog</exclude>
     <exclude>UpdateTodoList.txt</exclude>
   </Excluded>
 </Configuration>
