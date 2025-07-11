@@ -34,7 +34,11 @@ public static class VehicleHarmony
   {
     Assert.IsTrue(UnityData.IsInMainThread);
 
+#if !RELEASE
+    Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion} Unstable");
+#else
     Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion}");
+#endif
 
     List<ConditionalPatch.Result> compatPatches = ConditionalPatches.GetPatches(VehiclesUniqueId);
     if (!compatPatches.NullOrEmpty())
