@@ -6,21 +6,33 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-This is going to be where unstable builds get pushed going forward. I would like to push out more iterations with more hands on testing. I know having to redownload the entire mod folder manually is a pain unless you have something like RimSort.
+This is a 1.6 pre-release. There is still a lot of internal testing that must go on so expect weekly to biweekly updates over the next few months.
 
-IMPORTANT: If you are using this steam version, I highly recommend you join the discord channel to give feedback and report bugs. This upload is strictly for users in the discord, but I know it will get shared around.
+There have been many changes since 1.5. As I'm sure you're all aware, it's been nearly a year since the last update.  I am still very much working on Vehicle Framework, however, I will be taking releases more slowly going forward so the steam version doesn't get sudden bugs introduced with no warning.
+The idea behind this is to allow internal testers to play with new versions (and features) first before pushing it to the official release.  If you want to help test new versions, join the discord for more information.
 
-If you are a modder, there is a &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) with a list of all relevant changes you'll need to look out for.
-&lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added Odyssey compatibility.
+If you are a modder, there is a &lt;link&gt;https://docs.google.com/document/d/1ZxrrevFj6pPA4HgRmi3I8GZZcmbo4nHwXECTqfR9acE&lt;/link&gt;(google doc) with a list of all relevant changes you'll want to bookmark.
+
+Note: There are far too many changes and bugfixes to list. Only the most impactful changes will be listed below.
+&lt;title&gt;New Features&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Vehicles can be 'stashed' on the world map, allowing your colonists to continue on foot and retrieve your vehicles at a later time.
+- Vehicles can be temporarily disabled by EMPs. (configurable by modders)
+- Vehicle turrets can now have range based shooting accuracy. This is the same as weapon accuracy and is primarily for bullet based turrets.
 - Added auto-reloading feature to turrets. Colonists will now auto-reload the turret (if it is empty) upon entering the vehicle, or if cargo is added.
-- Added DefaultImpassable flag for more verbose control over which path configs are impassable by default.
-&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fixed various issues with targeting Odyssey space objects.
-- Fixed bug where vehicles could target platforms which required signal jammer.
-- Fixed bug where event maps were unable to spawn vehicles due to lazy grids not generating urgently.
-- Fixed autonomous aerial vehicles not being launchable.
-- Fixed caravans restarting paths post-load causing an error due to lazy world grid generation.
+&lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Vehicle Caravans will ignore biome and road costs when traveling on roads.
+- Vehicles will no longer run over friendly pawns by default, this setting can be re-enabled in the mod settings.
+- Vehicles consume 50% less fuel while idle.
+- Merged 'Form Caravan' dialog with 'Form Vehicle Caravan'
+&lt;title&gt;Performance&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Harmony patches are now ran in the background while the rest of the game is loaded, reducing startup time.
+- All assets are now pre-packaged into asset bundles, reducing startup time and memory usage for textures.
+- Vehicle regions are now pooled and 'lazy', only generating if you have a vehicle that needs the grid.
+- Vehicle rendering is now multithreaded.
+- Vehicles utilize Variable Tick Rate, a new 1.6 feature that will make vehicles even more performant while idle or out of view.
+- Made significant changes and improvements to the multithreading capabilities of Vehicle Framework.
+- Fixed various problematic patches that caused high tps spikes with larger mod lists.
+
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
