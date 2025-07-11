@@ -35,12 +35,7 @@ public static class SettingsCache
         value = (T)result.EndValue;
         return true;
       }
-      return false;
     }
-    // Only unit tests should be creating transient vehicle defs
-    if (!TestWatcher.RunningUnitTests)
-      Trace.Fail(
-        $"{def.defName} has not been cached in ModSettings.");
     return false;
   }
 
