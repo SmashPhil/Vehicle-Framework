@@ -288,17 +288,24 @@ public class WorldVehiclePathGrid : WorldComponent
     if (!rivers.NullOrEmpty())
     {
       SurfaceTile.RiverLink riverLink = WorldHelper.BiggestRiverOnTile(rivers);
-      if (riverLink.river != null &&
-        vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river, out float riverCost)
-        && !Mathf.Approximately(riverCost, ImpassableMovementDifficulty))
+      if (riverLink.river != null)
       {
-        explanation?.Append($"{riverLink.river.LabelCap}: {riverCost.ToStringWithSign("0.#")}");
-        return riverCost;
+        if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Rivers))
+        {
+          explanation?.Append($"{riverLink.river.LabelCap}: Impassable");
+          return ImpassableMovementDifficulty;
+        }
+        if (vehicleDef.properties.customRiverCosts.TryGetValue(riverLink.river, out float riverCost)
+          && !Mathf.Approximately(riverCost, ImpassableMovementDifficulty))
+        {
+          explanation?.Append($"{riverLink.river.LabelCap}: {riverCost.ToStringWithSign("0.#")}");
+          return riverCost;
+        }
       }
     }
 
     float defaultBiomeCost;
-    if (vehicleDef.properties.defaultBiomesImpassable)
+    if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Biomes))
     {
       defaultBiomeCost = ImpassableMovementDifficulty;
     }
@@ -319,22 +326,32 @@ public class WorldVehiclePathGrid : WorldComponent
     float biomeCost =
       vehicleDef.properties.customBiomeCosts.TryGetValue(surfaceTile.PrimaryBiome,
         defaultBiomeCost);
-    float hillinessCost =
-      vehicleDef.properties.customHillinessCosts.TryGetValue(surfaceTile.hilliness,
-        HillinessMovementDifficultyOffset(surfaceTile.hilliness));
 
-    if (biomeCost >= ImpassableMovementDifficulty ||
-      hillinessCost >= ImpassableMovementDifficulty)
+    if (!vehicleDef.properties.customHillinessCosts.TryGetValue(surfaceTile.hilliness, out float hillinessCost))
+    {
+      if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Roads))
+        return ImpassableMovementDifficulty;
+      hillinessCost = HillinessMovementDifficultyOffset(surfaceTile.hilliness);
+    }
+
+    if (biomeCost >= ImpassableMovementDifficulty || hillinessCost >= ImpassableMovementDifficulty)
     {
       explanation?.Append("Impassable".Translate());
       return ImpassableMovementDifficulty;
     }
 
-    if (biomeCost < ImpassableMovementDifficulty &&
-      VehicleMod.settings.main.ignoreBiomeCostOnRoads && !surfaceTile.Roads.NullOrEmpty())
+    if (!surfaceTile.Roads.NullOrEmpty())
     {
-      biomeCost = 1;
-      hillinessCost = 0;
+      if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Roads) &&
+        !surfaceTile.Roads.Exists(PassableRoad))
+      {
+        return ImpassableMovementDifficulty;
+      }
+      if (biomeCost < ImpassableMovementDifficulty && VehicleMod.settings.main.ignoreBiomeCostOnRoads)
+      {
+        biomeCost = 1;
+        hillinessCost = 0;
+      }
     }
 
     explanation?.Append(surfaceTile.PrimaryBiome.LabelCap + ": " +
@@ -351,6 +368,11 @@ public class WorldVehiclePathGrid : WorldComponent
       WinterPathingHelper.GetCurrentWinterMovementDifficultyFor(vehicleDef, tile,
         explanation: explanation);
     return totalCost;
+
+    bool PassableRoad(SurfaceTile.RoadLink roadLink)
+    {
+      return vehicleDef.properties.customRoadCosts.ContainsKey(roadLink.road);
+    }
   }
 
   /// <summary>

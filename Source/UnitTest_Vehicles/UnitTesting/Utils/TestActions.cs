@@ -13,6 +13,24 @@ namespace Vehicles;
 internal class TestActions
 {
   /// <summary>
+  /// Ensure a player focused map is always focused before beginning any tests to eliminate interruptions
+  /// from map parent faction assumptions.
+  /// </summary>
+  [UsedImplicitly] // Pre-test action
+  public static void RefocusMap()
+  {
+    if (Current.ProgramState != ProgramState.Playing || Find.World is null)
+      return;
+    if (Find.CurrentMap is { IsPlayerHome: true })
+      return;
+
+    Map map = Find.AnyPlayerHomeMap;
+    Assert.IsNotNull(map);
+    Current.Game.CurrentMap = map;
+    CameraJumper.TryHideWorld();
+  }
+
+  /// <summary>
   /// Ensure no vehicles or vehicle world objects remain after test is conducted, polluting subsequent
   /// tests and resulting in false negatives.
   /// </summary>

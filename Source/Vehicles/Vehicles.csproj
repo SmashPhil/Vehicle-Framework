@@ -23,7 +23,7 @@
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
-        <DebugType>portable</DebugType>
+        <DebugType>embedded</DebugType>
     </PropertyGroup>
 
     <!-- Build Events -->

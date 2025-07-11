@@ -38,16 +38,19 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
   {
     private readonly VehicleDef vehicleDef;
 
-    private readonly bool defaultBiomesImpassable;
+    private readonly DefaultImpassable defaultWorldImpassable;
     private readonly SimpleDictionary<BiomeDef, float> customBiomeCosts;
     private readonly SimpleDictionary<Hilliness, float> customHillinessCosts;
     private readonly SimpleDictionary<RiverDef, float> customRiverCosts;
 
     internal PathConfig(VehicleDef vehicleDef)
     {
+      const DefaultImpassable BitMaskWorld =
+        DefaultImpassable.Biomes | DefaultImpassable.Rivers | DefaultImpassable.Hilliness;
+
       this.vehicleDef = vehicleDef;
 
-      this.defaultBiomesImpassable = vehicleDef.properties.defaultBiomesImpassable;
+      this.defaultWorldImpassable = vehicleDef.properties.defaultImpassable & BitMaskWorld;
       this.customBiomeCosts = vehicleDef.properties.customBiomeCosts;
       this.customHillinessCosts = vehicleDef.properties.customHillinessCosts;
       this.customRiverCosts = vehicleDef.properties.customRiverCosts;
@@ -61,7 +64,7 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
       if (other is not PathConfig pathConfig)
         return false;
 
-      if (defaultBiomesImpassable != pathConfig.defaultBiomesImpassable)
+      if (defaultWorldImpassable != pathConfig.defaultWorldImpassable)
         return false;
       if (!MatchingValues(customBiomeCosts, pathConfig.customBiomeCosts))
         return false;

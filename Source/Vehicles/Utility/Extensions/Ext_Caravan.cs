@@ -1,15 +1,21 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools;
 using Verse;
 
 namespace Vehicles.World;
 
+/// <summary>
+/// Extension methods for <see cref="Caravan"/> and related world vehicle functionality.
+/// </summary>
 public static class Ext_Caravan
 {
   /// <summary>
-  /// Caravan contains one or more Vehicles
+  /// Determines whether the caravan contains one or more vehicles.
   /// </summary>
+  /// <param name="caravan">The caravan to inspect.</param>
+  /// <returns><see langword="true"/> if the caravan has at least one vehicle, otherwise <see langword="false"/>.</returns>
   public static bool HasVehicle(this Caravan caravan)
   {
     return (caravan is VehicleCaravan vehicleCaravan &&
@@ -21,8 +27,10 @@ public static class Ext_Caravan
   }
 
   /// <summary>
-  /// Caravan contains one or more Boats
+  /// Determines whether the caravan contains one or more boats.
   /// </summary>
+  /// <param name="caravan">The caravan to inspect.</param>
+  /// <returns><see langword="true"/> if the caravan has at least one boat, otherwise <see langword="false"/>.</returns>
   public static bool HasBoat(this Caravan caravan)
   {
     return (caravan is VehicleCaravan vehicleCaravan &&
@@ -34,9 +42,12 @@ public static class Ext_Caravan
   }
 
   /// <summary>
-  /// Get all unique Vehicles in Caravan <paramref name="caravan"/>
+  /// Retrieves a set of unique vehicle definitions present in the caravan.
   /// </summary>
-  /// <returns>New <see cref="HashSet{T}"/> with unique VehicleDefs in <paramref name="caravan"/></returns>
+  /// <param name="caravan">The caravan from which to extract vehicles.</param>
+  /// <returns>
+  /// A new <see cref="HashSet{VehicleDef}"/> containing each distinct <see cref="VehicleDef"/> found in the caravan.
+  /// </returns>
   public static HashSet<VehicleDef> UniqueVehicleDefsInCaravan(this Caravan caravan)
   {
     HashSet<VehicleDef> vehicleSet = [];
@@ -49,10 +60,13 @@ public static class Ext_Caravan
   }
 
   /// <summary>
-  /// Validate if <paramref name="vehicle"/> is able to join <paramref name="vehicleCaravan"/> without causing caravan to not be able to path on world map with current path settings
+  /// Validates whether adding a vehicle to the caravan would maintain world pathing compatibility.
   /// </summary>
-  /// <param name="vehicleCaravan"></param>
-  /// <param name="vehicle"></param>
+  /// <param name="vehicleCaravan">The target vehicle caravan.</param>
+  /// <param name="vehicle">The vehicle pawn to test.</param>
+  /// <returns>
+  /// <see langword="true"/> if the vehicle can join without breaking world pathing rules, otherwise <see langword="false"/>.
+  /// </returns>
   public static bool ViableForCaravan(this VehicleCaravan vehicleCaravan, VehiclePawn vehicle)
   {
     foreach (VehiclePawn caravanVehicle in vehicleCaravan.VehiclesListForReading)
@@ -62,14 +76,16 @@ public static class Ext_Caravan
         return false;
       }
     }
-
     return true;
   }
 
   /// <summary>
-  /// Get all pawns from Caravan inside vehicles
+  /// Retrieves all pawns in the caravan, including those inside vehicles, without throwing on null.
   /// </summary>
-  /// <param name="caravan"></param>
+  /// <param name="caravan">The caravan to extract pawns from.</param>
+  /// <returns>
+  /// A <see cref="List{Pawn}"/> of all pawns, or <see langword="null"/> if the caravan is <see langword="null"/> or has no vehicles.
+  /// </returns>
   public static List<Pawn> GrabPawnsFromVehicleCaravanSilentFail(this Caravan caravan)
   {
     if (caravan is null || !caravan.HasVehicle())
@@ -90,6 +106,12 @@ public static class Ext_Caravan
     return vehicles;
   }
 
+  /// <summary>
+  /// Transfers a pawn or item into the caravan's owner container.
+  /// </summary>
+  /// <param name="caravan">The caravan receiving the transfer.</param>
+  /// <param name="owner">The <see cref="ThingOwner"/> to receive the thing.</param>
+  /// <param name="thing">The pawn or item to transfer.</param>
   public static void TransferPawnOrItem(this Caravan caravan, ThingOwner owner, Thing thing)
   {
     if (thing is Pawn)
@@ -107,5 +129,44 @@ public static class Ext_Caravan
         thing.Destroy();
       }
     }
+  }
+
+  /// <summary>
+  /// Ensures that the world map pathing grids for the vehicle def are initialized on the given map.
+  /// </summary>
+  /// <param name="vehicleDef">The vehicle def to initialize grids for urgently.</param>
+  /// <param name="map">The <see cref="Map"/> to prepare.
+  /// </param>
+  public static void EnsureMapInitialized(this VehicleDef vehicleDef, Map map)
+  {
+    VehiclePathingSystem pathingSystem = map.GetCachedMapComponent<VehiclePathingSystem>();
+    if (pathingSystem[vehicleDef].Suspended || !pathingSystem[vehicleDef].VehiclePathGrid.Enabled)
+      pathingSystem.RequestGridsFor(vehicleDef, DeferredGridGeneration.Urgency.Urgent);
+  }
+
+  /// <summary>
+  /// Ensures that the world map pathing grids for the vehicle defs are initialized on the given map.
+  /// </summary>
+  /// <param name="vehicleDefs">A collection of vehicle defs to initialize grids for urgently.</param>
+  /// <param name="map">The <see cref="Map"/> to prepare.
+  /// </param>
+  public static void EnsureMapInitialized(IEnumerable<VehicleDef> vehicleDefs, Map map)
+  {
+    VehiclePathingSystem pathingSystem = map.GetCachedMapComponent<VehiclePathingSystem>();
+    foreach (VehicleDef vehicleDef in vehicleDefs)
+    {
+      if (pathingSystem[vehicleDef].Suspended || !pathingSystem[vehicleDef].VehiclePathGrid.Enabled)
+        pathingSystem.RequestGridsFor(vehicleDef, DeferredGridGeneration.Urgency.Urgent);
+    }
+  }
+
+  /// <summary>
+  /// Ensures that the world map pathing grids for all vehicles in the caravan are initialized on the given map.
+  /// </summary>
+  /// <param name="caravan">The caravan whose vehicles to initialize.</param>
+  /// <param name="map">The <see cref="Map"/> to prepare.</param>
+  public static void EnsureMapInitialized(this Caravan caravan, Map map)
+  {
+    EnsureMapInitialized(caravan.UniqueVehicleDefsInCaravan(), map);
   }
 }

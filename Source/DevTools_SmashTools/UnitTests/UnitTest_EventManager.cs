@@ -94,7 +94,7 @@ internal sealed class UnitTest_EventManager
   private void EventControl()
   {
     IEventControl control = new TestControl();
-    Assert.IsFalse(control.Enabled);
+    Assert.IsTrue(control.Enabled);
     using (new EventDisabler<EventType>(control))
     {
       Expect.IsFalse(control.Enabled);
@@ -177,7 +177,7 @@ internal sealed class UnitTest_EventManager
 
   private class TestControl : IEventControl
   {
-    bool IEventControl.Enabled { get; set; }
+    bool IEventControl.Enabled { get; set; } = true;
   }
 
   private class TestObject : IEventManager<EventType>

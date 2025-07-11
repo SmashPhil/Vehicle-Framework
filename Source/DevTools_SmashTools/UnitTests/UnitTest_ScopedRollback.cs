@@ -51,4 +51,34 @@ internal class UnitTest_ScopedRollback
     }
     Expect.AreEqual(intSet.Count, 0);
   }
+
+  [Test]
+  [TestDescription("Revert reference type field between 2 references.")]
+  private void ReferenceField()
+  {
+    const string Old = "Initial";
+    const string New = "Temporary";
+
+    TestObject obj = new(Old);
+    Assert.AreEqual(obj.name, Old);
+    // Manual assignment in scope
+    using (new ScopedReferenceRollback<TestObject, string>(obj, nameof(TestObject.name)))
+    {
+      obj.name = New;
+      Expect.AreEqual(obj.name, New);
+    }
+    Expect.AreEqual(obj.name, Old);
+
+    // FieldRef pre-assignment
+    using (new ScopedReferenceRollback<TestObject, string>(obj, nameof(TestObject.name), New))
+    {
+      Expect.AreEqual(obj.name, New);
+    }
+    Expect.AreEqual(obj.name, Old);
+  }
+
+  private class TestObject(string name)
+  {
+    public string name = name;
+  }
 }

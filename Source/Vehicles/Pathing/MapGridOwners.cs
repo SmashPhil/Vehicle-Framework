@@ -36,14 +36,17 @@ public class MapGridOwners : GridOwnerList<MapGridOwners.PathConfig>
     private readonly HashSet<ThingDef> impassableThingDefs;
     private readonly HashSet<TerrainDef> impassableTerrain;
     private readonly int size;
-    private readonly bool defaultTerrainImpassable;
+
+    private readonly DefaultImpassable defaultMapImpassable;
 
     internal PathConfig(VehicleDef vehicleDef)
     {
-      this.vehicleDef = vehicleDef;
+      const DefaultImpassable BitMaskMap = DefaultImpassable.Terrain | DefaultImpassable.Things;
 
+      this.vehicleDef = vehicleDef;
       size = Mathf.Min(vehicleDef.Size.x, vehicleDef.Size.z);
-      defaultTerrainImpassable = vehicleDef.properties.defaultTerrainImpassable;
+
+      defaultMapImpassable = vehicleDef.properties.defaultImpassable & BitMaskMap;
       impassableThingDefs = vehicleDef.properties.customThingCosts
        .Where(kvp => kvp.Value >= VehiclePathGrid.ImpassableCost).Select(kvp => kvp.Key)
        .ToHashSet();
@@ -60,7 +63,7 @@ public class MapGridOwners : GridOwnerList<MapGridOwners.PathConfig>
       if (other is not PathConfig pathConfig)
         return false;
       return size == pathConfig.size &&
-        defaultTerrainImpassable == pathConfig.defaultTerrainImpassable &&
+        defaultMapImpassable == pathConfig.defaultMapImpassable &&
         impassableThingDefs.SetEquals(pathConfig.impassableThingDefs) &&
         impassableTerrain.SetEquals(pathConfig.impassableTerrain);
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using DevTools.UnitTesting;
 using RimWorld;
@@ -92,8 +93,10 @@ internal sealed class UnitTest_AerialVehicle
     Assert.IsTrue(ReferenceEquals(aerialVehicle, group.vehicle.GetAerialVehicle()));
     using ScopeWorldObject swoAerial = new(aerialVehicle);
     Assert.IsNotNull(aerialVehicle);
-    aerialVehicle.LandAtTile(DestTile);
+    aerialVehicle.transition = 1;
+    aerialVehicle.MoveForward(); // Update aerial vehicle status to land and trigger arrival action
     Assert.IsTrue(aerialVehicle.Destroyed);
+    Assert.IsNull(aerialVehicle.Vehicle);
     Assert.IsFalse(group.vehicle.Destroyed);
     Assert.IsFalse(group.vehicle.CompVehicleLauncher.inFlight);
     VehicleCaravan newCaravan = group.vehicle.GetVehicleCaravan();
@@ -175,6 +178,7 @@ internal sealed class UnitTest_AerialVehicle
     PlanetTile tile =
       Find.WorldGrid.Tiles.RandomElementByWeight(TileWeight)?.tile ?? PlanetTile.Invalid;
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, tile);
+    Assert.IsNull(Find.WorldObjects.SettlementAt(tile));
     aerialVehicle.InitiateCrashEvent();
     using ScopeWorldObject swo = new(aerialVehicle);
     Assert.IsTrue(aerialVehicle.Destroyed);
@@ -197,6 +201,8 @@ internal sealed class UnitTest_AerialVehicle
 
     static float TileWeight(SurfaceTile surfaceTile)
     {
+      if (Find.WorldObjects.AnyWorldObjectAt(surfaceTile.tile))
+        return 0;
       return Find.WorldPathGrid.PassableFast(surfaceTile.tile) ? 1 : 0;
     }
   }

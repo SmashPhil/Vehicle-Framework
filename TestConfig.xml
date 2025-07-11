@@ -5,6 +5,10 @@
     <verboseLogging>true</verboseLogging>
   </log>
 
+  <preTestActions>
+    <li>Vehicles.TestActions.RefocusMap</li>
+  </preTestActions>
+  
   <postTestActions>
     <li>Vehicles.TestActions.EmptyWorldAndMapOfVehicles</li>
   </postTestActions>

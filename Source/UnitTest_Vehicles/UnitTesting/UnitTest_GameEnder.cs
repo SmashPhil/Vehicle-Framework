@@ -37,8 +37,8 @@ internal sealed class UnitTest_GameEnder
   [TearDown, ExecutionPriority(Priority.BelowNormal)]
   private void DestroyAll()
   {
-    manualVehicle.Dispose();
-    autonomousVehicle.Dispose();
+    manualVehicle?.Dispose();
+    autonomousVehicle?.Dispose();
   }
 
   [Test]
@@ -188,7 +188,7 @@ internal sealed class UnitTest_GameEnder
 
       aerialVehicle.ClearAndDestroy();
       Assert.IsTrue(aerialVehicle.Destroyed);
-      Assert.IsFalse(aerialVehicle.Vehicle.Destroyed);
+      Expect.IsNull(aerialVehicle.Vehicle);
       gameEnder.CheckOrUpdateGameOver();
       Expect.IsTrue(gameEnder.gameEnding);
     }

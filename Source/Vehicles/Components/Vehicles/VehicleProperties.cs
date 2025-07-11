@@ -45,7 +45,8 @@ public class VehicleProperties
   [DisableSettingConditional(MemberType = typeof(VehicleDef),
     Property = nameof(VehicleDef.CanDisableEMPSetting), DisableIfEqualTo = true,
     DisableReason = "VF_VehicleCannotStun")]
-  public bool canAdaptToEMP;
+  [LoadAlias("canAdaptToEMP")]
+  public bool canAdaptToEmp;
 
   public float visibilityWeight = 1;
 
@@ -68,8 +69,7 @@ public class VehicleProperties
 
   //---------------   Pathing   ---------------
 
-  public bool defaultTerrainImpassable;
-  public bool defaultBiomesImpassable;
+  public DefaultImpassable defaultImpassable = DefaultImpassable.None;
 
   // Local Pathing
   /// <summary>

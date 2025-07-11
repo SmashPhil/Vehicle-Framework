@@ -718,7 +718,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
   private void ElectrifyAllComponents(ref DamageInfo dinfo)
   {
     bool canAdapt = SettingsCache.TryGetValue(vehicle.VehicleDef, typeof(VehicleProperties),
-      nameof(VehicleProperties.canAdaptToEMP), vehicle.VehicleDef.properties.canAdaptToEMP);
+      nameof(VehicleProperties.canAdaptToEmp), vehicle.VehicleDef.properties.canAdaptToEmp);
 
     // EMP Damage may stun, disable stun patch temporarily to allow for StunFor to pass through
     OverrideStunPatch = true;

@@ -223,16 +223,13 @@ namespace Vehicles
         }
 
         WeatherBuildupCategory weatherBuildupCategory = map.snowGrid.GetCategory(cell);
-        if (!vehicleDef.properties.customWeatherCosts.TryGetValue(weatherBuildupCategory,
-          out int snowPathCost))
+        if (!vehicleDef.properties.customWeatherCosts.TryGetValue(weatherBuildupCategory, out int weatherPathCost))
         {
-          snowPathCost = WeatherBuildupUtility.MovementTicksAddOn(weatherBuildupCategory);
+          weatherPathCost = WeatherBuildupUtility.MovementTicksAddOn(weatherBuildupCategory);
         }
-
-        snowPathCost = snowPathCost.Clamp(0, 450);
-
-        stringBuilder?.AppendLine($"snowPathCost: {snowPathCost}");
-        pathCost += snowPathCost;
+        weatherPathCost = weatherPathCost.Clamp(0, 450);
+        stringBuilder?.AppendLine($"weatherPathCost: {weatherPathCost}");
+        pathCost += weatherPathCost;
         stringBuilder?.AppendLine($"final cost: {pathCost}");
       }
       catch (Exception ex)
@@ -259,6 +256,11 @@ namespace Vehicles
           stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
           return ImpassableCost;
         }
+      }
+      else if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Things))
+      {
+        stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
+        return ImpassableCost;
       }
       else if (thingDef.ImpassableForVehicles())
       {
@@ -294,7 +296,7 @@ namespace Vehicles
         stringBuilder?.AppendLine($"terrainDef impassable: {ImpassableCost}");
         return ImpassableCost;
       }
-      else if (vehicleDef.properties.defaultTerrainImpassable)
+      else if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Terrain))
       {
         stringBuilder?.AppendLine("defaultTerrain is impassable and no custom pathCost was found.");
         return ImpassableCost;

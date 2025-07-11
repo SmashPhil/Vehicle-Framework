@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Threading;
 using DevTools.UnitTesting;
+using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Performance;
 using UnityEngine.Assertions;
@@ -85,8 +87,33 @@ internal sealed class UnitTest_DeferredGeneration
 
     // Faction.OfPlayer
     Expect.IsTrue(group.vehicle.Spawned, "Spawned");
-    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map, group.vehicle),
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
       DeferredGridGeneration.Urgency.Deferred, "Player Deferred");
+
+    using (new MockGameTicks(mapping.map.generationTick))
+    {
+      // Map just generated, a vehicle requesting the grid can be presumed to be spawning and needs the
+      // grids urgently for cell finder and reachability resolution.
+      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map), DeferredGridGeneration.Urgency.Urgent);
+    }
+    using (new MockGameTicks(mapping.map.generationTick + 1))
+    {
+      // Vehicle is spawning offset from map generation, we can allow deferred generation as the position
+      // should already be chosen and no path or region grids need immediate access.
+      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map), DeferredGridGeneration.Urgency.Deferred);
+    }
+    // Player faction can defer grid generation
+    using (new ScopedReferenceRollback<MapParent, Faction>(mapping.map.Parent, "factionInt",
+      Faction.OfPlayer))
+    {
+      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map), DeferredGridGeneration.Urgency.Deferred);
+    }
+    // Non-player factions must generate urgently, this will only happen on event maps regardless of generation tick
+    using (new ScopedReferenceRollback<MapParent, Faction>(mapping.map.Parent, "factionInt",
+      Faction.OfPirates))
+    {
+      Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map), DeferredGridGeneration.Urgency.Urgent);
+    }
 
     // We need to wait for the dedicated thread to finish generating vehicle's grids so we can
     // validate that every grid is initialized.
@@ -123,7 +150,7 @@ internal sealed class UnitTest_DeferredGeneration
     group.vehicle.SetFactionDirect(Find.World.factionManager.OfAncientsHostile);
     group.Spawn();
     Expect.IsTrue(group.vehicle.Spawned, "Enemy Spawned");
-    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(mapping.map, group.vehicle),
+    Expect.AreEqual(DeferredGridGeneration.UrgencyFor(group.vehicle),
       DeferredGridGeneration.Urgency.Urgent, "Enemy Spawn Urgent");
 
     Expect.IsTrue(pathData.VehicleRegionAndRoomUpdater.Enabled, "Enemy Regions Generated");

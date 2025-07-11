@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using LudeonTK;
 using RimWorld;
 using SmashTools;
@@ -252,17 +253,16 @@ public class DeferredGridGeneration
 #endif
   }
 
-  public static Urgency UrgencyFor(Map map, VehiclePawn vehicle)
+  public static Urgency UrgencyFor([NotNull] Map map)
   {
-    Assert.IsNotNull(map);
-
     // Map just generated, the vehicle is spawning and will need the grids for validation.
     if (map.generationTick == GenTicks.TicksGame)
       return Urgency.Urgent;
-    // Spawning event maps requires the grids immediately for spawning.
-    //if (map.ParentFaction != Faction.OfPlayer)
-    //  return Urgency.Urgent;
+    return map.ParentFaction != Faction.OfPlayer ? Urgency.Urgent : Urgency.Deferred;
+  }
 
+  public static Urgency UrgencyFor(VehiclePawn vehicle)
+  {
     // If null faction, vehicle should be immovable
     if (vehicle.Faction == null)
       return Urgency.None;
@@ -272,6 +272,17 @@ public class DeferredGridGeneration
       return Urgency.Urgent;
 
     return Urgency.Deferred;
+  }
+
+  public static Urgency UrgencyFor(Map map, VehiclePawn vehicle)
+  {
+    Urgency mapUrgency = UrgencyFor(map);
+    if (mapUrgency == Urgency.Urgent)
+      return mapUrgency;
+    Urgency vehicleUrgency = UrgencyFor(vehicle);
+    if (vehicleUrgency == Urgency.Urgent)
+      return vehicleUrgency;
+    return Ext_Enum.Max(mapUrgency, vehicleUrgency);
   }
 
   [DebugAction(VehicleHarmony.VehiclesLabel, "Force Remove Unused Regions")]
@@ -338,6 +349,7 @@ public class DeferredGridGeneration
     }
   }
 
+  // Descending order of priority (Urgent > Deferred > None)
   public enum Urgency
   {
     None,

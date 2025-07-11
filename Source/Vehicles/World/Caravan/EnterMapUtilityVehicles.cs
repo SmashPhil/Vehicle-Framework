@@ -105,6 +105,7 @@ public static class EnterMapUtilityVehicles
   public static IntVec3 GetEnterCellVehicle(VehicleCaravan caravan, Map map,
     CaravanEnterMode enterMode, Predicate<IntVec3> extraCellValidator)
   {
+    caravan.EnsureMapInitialized(map);
     switch (enterMode)
     {
       case CaravanEnterMode.Edge:

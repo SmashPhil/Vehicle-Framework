@@ -76,12 +76,6 @@ namespace Vehicles
       }
     }
 
-    public override void PostMake()
-    {
-      base.PostMake();
-      this.EnsureUncachedCompList();
-    }
-
     private void GenerateInventory()
     {
       if (VehicleDef.npcProperties?.raidParams?.inventory != null)
@@ -313,7 +307,6 @@ namespace Vehicles
           RecacheComponents();
         break;
         case LoadSaveMode.PostLoadInit:
-          this.EnsureUncachedCompList();
           PostLoad();
         break;
       }
