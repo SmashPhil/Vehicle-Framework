@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using RimWorld;
+using SmashTools;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -14,6 +15,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
   private readonly CompFueledTravel refuelable;
   private readonly bool showVehicleLabel;
+
+  private float fuelAvailable;
 
   public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showVehicleLabel)
   {
@@ -61,6 +64,32 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     return "";
   }
 
+  public void UpdateDisableStatus()
+  {
+    disabled = false;
+    disabledReason = null;
+    fuelAvailable = 0;
+    if (Mathf.Approximately(refuelable.FuelPercent, 1))
+    {
+      Disable(reason: "VF_VehicleFullyFueled".Translate(refuelable.Vehicle.LabelCap));
+      return;
+    }
+    fuelAvailable = FuelInVehicle(refuelable.Vehicle);
+    if (fuelAvailable == 0)
+    {
+      Disable(reason: "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap));
+    }
+    return;
+
+    static float FuelInVehicle(VehiclePawn vehicle)
+    {
+      float fuel = 0;
+      foreach (Thing thing in CompFueledTravel.AllFuelFromInventory(vehicle))
+        fuel += thing.stackCount;
+      return fuel;
+    }
+  }
+
   public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
   {
     if (SteamDeck.IsSteamDeckInNonKeyboardMode)
@@ -80,12 +109,14 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
   protected override void DrawHeader(Rect headerRect, ref bool mouseOverElement)
   {
+    const float IconBarPadding = 4;
+
     headerRect.xMax -= FuelIconSize;
     Rect iconRect = new(headerRect.xMax, headerRect.y, FuelIconSize, FuelIconSize);
 
     bool electric = refuelable.Props.ElectricPowered;
 
-    GUI.DrawTexture(iconRect, electric ? TexData.FlickerIcon : refuelable.Props.FuelIcon);
+    GUI.DrawTexture(iconRect, electric ? TexData.FlickerIcon : ThingDefOf.Chemfuel.uiIcon);
     Rect subIconRect =
       new(iconRect.center.x, iconRect.y, iconRect.width / 2f, iconRect.height / 2f);
     bool checkOn = electric ? refuelable.Charging : refuelable.allowAutoRefuel;
@@ -93,7 +124,7 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
     if (Widgets.ButtonInvisible(iconRect))
     {
-      ToggleSwitch();
+      ToggleAutoRefuel();
     }
 
     if (Mouse.IsOver(iconRect))
@@ -105,6 +136,32 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
       mouseOverElement = true;
     }
 
+    if (!electric && !refuelable.Vehicle.InAerialVehicle())
+    {
+      iconRect.x -= iconRect.width + IconBarPadding;
+      GenUI.DrawTextureWithMaterial(iconRect, Building_PassengerShuttle.RefuelFromCargoIcon.Texture,
+        disabled ? TexUI.GrayscaleGUI : null);
+      if (Widgets.ButtonInvisible(iconRect))
+      {
+        if (disabled)
+        {
+          Messages.Message(disabledReason, MessageTypeDefOf.RejectInput);
+          return;
+        }
+        const int MinRefuelCount = 1;
+        int maxRefuel = Mathf.FloorToInt(Mathf.Min(fuelAvailable, refuelable.FuelCapacity - refuelable.Fuel));
+        Dialog_Slider slider = new(
+          count => "VF_RefuelFromInventoryCount".Translate(count, refuelable.Props.fuelType.label),
+          MinRefuelCount, maxRefuel, refuelable.ConsumeFuelFromInventory);
+        Find.WindowStack.Add(slider);
+      }
+      if (Mouse.IsOver(iconRect))
+      {
+        Widgets.DrawHighlight(iconRect);
+        TooltipHandler.TipRegion(iconRect, RefuelFromInventoryTip, "RefuelFromInventoryTip".GetHashCode());
+        mouseOverElement = true;
+      }
+    }
     base.DrawHeader(headerRect, ref mouseOverElement);
   }
 
@@ -145,7 +202,7 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
   private string PowerNetTip()
   {
     StringBuilder tooltip = UIHelper.tooltipBuilder;
-    tooltip.Clear();
+    using ClearStringOnDispose csod = new(tooltip);
     tooltip.AppendLine("VF_ElectricFlick".Translate());
     tooltip.AppendLine();
     tooltip.AppendLine();
@@ -155,15 +212,13 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     tooltip.AppendLine();
     tooltip.AppendLine(
       $"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_TogglePower, KeyPrefs.BindingSlot.A).ToStringReadable()}");
-    string text = tooltip.ToString();
-    tooltip.Clear();
-    return text;
+    return tooltip.ToString();
   }
 
   private string RefuelTip()
   {
     StringBuilder tooltip = UIHelper.tooltipBuilder;
-    tooltip.Clear();
+    using ClearStringOnDispose csod = new(tooltip);
     tooltip.AppendLine("CommandToggleAllowAutoRefuel".Translate());
     tooltip.AppendLine();
     tooltip.AppendLine();
@@ -179,8 +234,14 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     tooltip.AppendLine();
     tooltip.AppendLine(
       $"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_ItemForbid, KeyPrefs.BindingSlot.A).ToStringReadable()}");
-    string text = tooltip.ToString();
-    tooltip.Clear();
-    return text;
+    return tooltip.ToString();
+  }
+
+  private string RefuelFromInventoryTip()
+  {
+    StringBuilder tooltip = UIHelper.tooltipBuilder;
+    using ClearStringOnDispose csod = new(tooltip);
+    tooltip.AppendLine("VF_RefuelFromInventoryDesc".Translate(refuelable.Vehicle.LabelCap));
+    return tooltip.ToString();
   }
 }

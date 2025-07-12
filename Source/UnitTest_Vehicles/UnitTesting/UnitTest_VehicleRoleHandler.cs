@@ -58,6 +58,40 @@ internal sealed class UnitTest_VehicleRoleHandler
   }
 
   [Test]
+  private void PawnListCaching()
+  {
+    const int Drivers = 2;
+    const int Passengers = 2;
+    const int Animals = 2;
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = Drivers,
+      passengers = Passengers,
+      animals = Animals,
+    });
+    TestUtils.ForceSpawn(group.vehicle);
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == 0);
+    Assert.IsTrue(group.vehicle.AllColonistsAboard.Count == 0);
+    Assert.AreEqual(group.pawns.Count, Drivers + Passengers + Animals);
+
+    Pawn colonist = group.pawns.FirstOrDefault(pawn => pawn.IsColonist);
+    Assert.IsNotNull(colonist);
+    Assert.IsTrue(group.vehicle.TryAddPawn(colonist));
+    Expect.IsTrue(group.vehicle.AllPawnsAboard.Count == 1);
+    Expect.IsTrue(group.vehicle.AllColonistsAboard.Count == 1);
+    Pawn animal = group.pawns.FirstOrDefault(pawn => pawn.IsAnimal);
+    Assert.IsNotNull(animal);
+    Assert.IsTrue(group.vehicle.TryAddPawn(animal));
+    Expect.IsTrue(group.vehicle.AllPawnsAboard.Count == 2);
+    Expect.IsTrue(group.vehicle.AllColonistsAboard.Count == 1);
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, Drivers + Passengers + Animals);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, Drivers + Passengers);
+  }
+
+  [Test]
   private void BoardingUnboardingCaravan()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings

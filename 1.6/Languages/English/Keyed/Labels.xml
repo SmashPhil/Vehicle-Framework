@@ -17,7 +17,10 @@
   <VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
   <VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
   <VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
-  <VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
+  <VF_RefuelFromInventoryCount>Refuel {0}x {1}</VF_RefuelFromInventoryCount>
+  <VF_RefuelFromInventoryDesc>Refuel {0} using fuel stored in cargo.</VF_RefuelFromInventoryDesc>
+  <VF_VehicleFullyFueled>{0} is already fully fueled.</VF_VehicleFullyFueled>
+  <VF_NoFuelInVehicle>No fuel in {0}.</VF_NoFuelInVehicle>
   <VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
   <VF_TransferToVehicle_Order>Transfer to vehicle</VF_TransferToVehicle_Order>
   <VF_TransferToVehicle_Order_Desc>Transfer selected thing(s) to the target vehicle's cargo.</VF_TransferToVehicle_Order_Desc>

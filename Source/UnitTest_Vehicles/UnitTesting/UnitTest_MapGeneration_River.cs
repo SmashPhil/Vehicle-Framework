@@ -15,7 +15,7 @@ namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration)]
-[TestDescription("Maps generate with beach and river multipliers taken into account.")]
+[TestDescription("Maps generate with the ModSettings river multiplier taken into account.")]
 internal sealed class UnitTest_MapGeneration_River
 {
   private static readonly IntVec3 DefaultMapSize = new(50, 1, 50);

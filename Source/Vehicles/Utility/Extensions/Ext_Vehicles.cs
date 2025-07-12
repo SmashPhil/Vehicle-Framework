@@ -436,6 +436,12 @@ public static class Ext_Vehicles
     }
   }
 
+  [Pure]
+  public static bool InAerialVehicle(this Pawn pawn)
+  {
+    return pawn.GetAerialVehicle() != null;
+  }
+
   /// <summary>
   /// Get AerialVehicle pawn is currently inside
   /// </summary>

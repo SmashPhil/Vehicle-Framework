@@ -12,6 +12,7 @@ using Vehicles.Rendering;
 using Vehicles.World;
 using Verse;
 using Verse.AI;
+using Verse.Sound;
 
 namespace Vehicles;
 
@@ -27,6 +28,8 @@ public class CompFueledTravel : VehicleComp, IRefundable
   private const float EfficiencyIdleMultiplier = 0.5f;
   private const float CellOffsetIntVec3ToVector3 = 0.5f;
   private const float TicksToCharge = 120;
+
+  private static readonly List<Thing> FuelToConsume = [];
 
   private static readonly Texture2D ElectricPowerTex =
     ContentFinder<Texture2D>.Get("UI/Overlays/NeedsPower");
@@ -246,6 +249,39 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
+  public void ConsumeFuelFromInventory(int count)
+  {
+    Refuel(count);
+    foreach (Thing thing in AllFuelFromInventory(Vehicle))
+    {
+      Thing thing2 = thing.SplitOff(Mathf.Min(count, thing.stackCount));
+      count -= thing2.stackCount;
+      if (count <= 0)
+        break;
+    }
+  }
+
+  public static IEnumerable<Thing> AllFuelFromInventory(VehiclePawn vehicle)
+  {
+    CompProperties_FueledTravel props = vehicle.CompFueledTravel.Props;
+    if (vehicle.GetVehicleCaravan() is { } vehicleCaravan)
+    {
+      foreach (Thing thing in vehicleCaravan.AllThings)
+      {
+        if (thing.def == props.fuelType)
+          yield return thing;
+      }
+    }
+    else if (vehicle.Spawned)
+    {
+      foreach (Thing thing in vehicle.inventory.innerContainer.InnerListForReading)
+      {
+        if (thing.def == props.fuelType)
+          yield return thing;
+      }
+    }
+  }
+
   public virtual void Refuel(float amount)
   {
     if (fuel >= FuelCapacity)
@@ -359,6 +395,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
     if (Find.Selector.SelectedObjects.Count == 1)
     {
+      refuelGizmo.UpdateDisableStatus();
       yield return refuelGizmo;
     }
 

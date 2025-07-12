@@ -24,6 +24,7 @@ public partial class VehiclePawn
   public List<VehicleRoleHandler> OccupiedHandlers { get; private set; } = [];
 
   public List<Pawn> AllPawnsAboard { get; private set; } = [];
+  public List<Pawn> AllColonistsAboard { get; private set; } = [];
 
   public Dictionary<HandlingType, List<Pawn>> PawnsByHandlingType { get; private set; } = new()
   {
@@ -138,6 +139,7 @@ public partial class VehiclePawn
     PawnsByHandlingType.ClearValueLists();
     OccupiedHandlers.Clear();
     AllPawnsAboard.Clear();
+    AllColonistsAboard.Clear();
 
     foreach (VehicleRoleHandler handler in handlers)
     {
@@ -147,6 +149,8 @@ public partial class VehiclePawn
         foreach (Pawn pawn in handler.thingOwner)
         {
           AllPawnsAboard.Add(pawn);
+          if (pawn.IsColonist)
+            AllColonistsAboard.Add(pawn);
 
           if (handler.role.HandlingTypes == HandlingType.None)
           {
