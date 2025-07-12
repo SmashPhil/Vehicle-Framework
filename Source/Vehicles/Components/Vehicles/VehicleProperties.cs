@@ -184,7 +184,7 @@ public class VehicleProperties
       foreach (RiverDef riverDef in DefDatabase<RiverDef>.AllDefsListForReading)
       {
         if (!customRiverCosts.ContainsKey(riverDef) &&
-          ModSettingsHelper.RiverMultiplier(riverDef) >= minWidth)
+          ModSettingsHelper.RiverSizeWithMultiplier(riverDef) >= minWidth)
         {
           customRiverCosts[riverDef] = riverCost;
         }

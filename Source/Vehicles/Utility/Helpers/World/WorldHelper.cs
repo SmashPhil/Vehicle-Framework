@@ -38,7 +38,7 @@ public static class WorldHelper
   /// <param name="list"></param>
   public static SurfaceTile.RiverLink BiggestRiverOnTile(List<SurfaceTile.RiverLink> list)
   {
-    return list.MaxBy(riverlink => ModSettingsHelper.RiverMultiplier(riverlink.river));
+    return list.MaxBy(riverlink => ModSettingsHelper.RiverSizeWithMultiplier(riverlink.river));
   }
 
   /// <summary>
@@ -51,7 +51,7 @@ public static class WorldHelper
       return false;
     }
     //Multiplied by sqrt(2) to account for worst case scenario where river is diagonal
-    return ModSettingsHelper.RiverMultiplier(riverDef) / 2 < vehicleDef.Size.x;
+    return ModSettingsHelper.RiverSizeWithMultiplier(riverDef) / 2 < vehicleDef.Size.x;
   }
 
   /// <summary>

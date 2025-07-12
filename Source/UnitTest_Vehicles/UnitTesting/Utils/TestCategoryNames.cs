@@ -7,6 +7,8 @@ internal static class TestCategoryNames
   public const string WorldPawnGC = "WorldPawnGC";
   public const string Caravaning = "Caravaning";
 
+  public const string MapGeneration = "MapGeneration";
+
   // Vehicle
   public const string VehiclePawn = "VehiclePawn";
   public const string VehiclePermissions = "VehiclePermissions";
