@@ -29,7 +29,7 @@ public partial class VehiclePawn
     MovementPermissions.HasFlag(VehiclePermissions.Mobile) &&
     movementStatus == VehicleMovementStatus.Online;
 
-  public bool CanMoveFinal => CanMove && (CanMoveWithOperators ||
+  public bool CanMoveFinal => CanMove && (HasEnoughOperators ||
     Spawned && VehicleMod.settings.debug.debugDraftAnyVehicle);
 
   public CellRect Hitbox { get; private set; }
@@ -348,10 +348,10 @@ public partial class VehiclePawn
           damageResult.damageInfo.Def == DamageDefOf.Bullet ?
             VehicleDef.BodyType.deflectionEffectBullet :
             VehicleDef.BodyType.deflectionEffect,
-        VehicleComponent.Penetration.Diminished => VehicleDef.BodyType.diminishedEffect,
-        VehicleComponent.Penetration.Penetrated => VehicleDef.BodyType.damageEffecter,
+        VehicleComponent.Penetration.Diminished  => VehicleDef.BodyType.diminishedEffect,
+        VehicleComponent.Penetration.Penetrated  => VehicleDef.BodyType.damageEffecter,
         VehicleComponent.Penetration.Electrified => VehicleDef.BodyType.electrifiedEffect,
-        _ => throw new NotImplementedException("Unhandled Penetration result.")
+        _                                        => throw new NotImplementedException("Unhandled Penetration result.")
       };
 
       if (effecterDef != null && (health.deflectionEffecter == null ||

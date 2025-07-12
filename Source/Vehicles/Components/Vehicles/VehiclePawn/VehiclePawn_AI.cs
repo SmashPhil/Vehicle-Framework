@@ -126,7 +126,6 @@ namespace Vehicles
 
     public virtual AcceptanceReport CanDraft()
     {
-      bool draftAnyVehicle = VehicleMod.settings.debug.debugDraftAnyVehicle;
       foreach (ThingComp thingComp in AllComps)
       {
         if (thingComp is VehicleComp vehicleComp)
@@ -138,7 +137,7 @@ namespace Vehicles
           }
         }
       }
-      if (!draftAnyVehicle && !CanMoveWithOperators)
+      if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !HasEnoughOperators)
       {
         return "VF_NotEnoughToOperate".Translate(this);
       }

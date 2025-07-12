@@ -19,6 +19,7 @@
         <DebugType>embedded</DebugType>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <NoWarn>CS0649</NoWarn>
     </PropertyGroup>
 

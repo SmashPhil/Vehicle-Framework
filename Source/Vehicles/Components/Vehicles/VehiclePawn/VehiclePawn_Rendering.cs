@@ -501,9 +501,7 @@ public partial class VehiclePawn
   public override IEnumerable<Gizmo> GetGizmos()
   {
     if (Faction != Faction.OfPlayer && !DebugSettings.ShowDevGizmos)
-    {
       yield break;
-    }
 
     if (MovementPermissions.HasFlag(VehiclePermissions.Mobile))
     {

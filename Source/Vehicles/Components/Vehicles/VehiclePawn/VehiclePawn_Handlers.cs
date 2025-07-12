@@ -55,6 +55,14 @@ public partial class VehiclePawn
     get { return PawnCountToOperate - PawnsByHandlingType[HandlingType.Movement].Count; }
   }
 
+  #pragma warning disable 618
+  public bool HasEnoughOperators => CanMoveWithOperators;
+
+  // TODO 1.7 - Rename to 'HasEnoughOperators'
+  /// <summary>
+  /// Vehicle handler requirements are satisfied
+  /// </summary>
+  [Obsolete("Use CanMoveWithOperators instead. Will be removed in 1.7")]
   public bool CanMoveWithOperators
   {
     get
@@ -73,6 +81,7 @@ public partial class VehiclePawn
       return true;
     }
   }
+  #pragma warning restore 618
 
   public List<Pawn> Passengers => PawnsByHandlingType[HandlingType.None];
 

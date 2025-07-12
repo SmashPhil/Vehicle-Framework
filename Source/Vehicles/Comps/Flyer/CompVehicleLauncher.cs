@@ -206,7 +206,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
       }
     }
 
-    if ((!Vehicle.CanMoveWithOperators || Vehicle.PawnCountToOperateLeft > 0) &&
+    if ((!Vehicle.HasEnoughOperators || Vehicle.PawnCountToOperateLeft > 0) &&
       !VehicleMod.settings.debug.debugDraftAnyVehicle)
     {
       disableReason = "VF_NotEnoughToOperate".Translate();
@@ -229,7 +229,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
 
   public override string CompInspectStringExtra()
   {
-    if (Vehicle.CanMoveWithOperators && AnyLeftToLoad)
+    if (Vehicle.HasEnoughOperators && AnyLeftToLoad)
     {
       return
         $"{"NotReadyForLaunch".Translate()}: {"TransportPodInGroupHasSomethingLeftToLoad".Translate().CapitalizeFirst()}.";

@@ -611,7 +611,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
           vehicleIncapacitated = vehicle;
           vehicleIncapReason = "VF_VehicleUnableToMove".Translate(vehicle);
         }
-        else if (!vehicle.CanMoveWithOperators)
+        else if (!vehicle.HasEnoughOperators)
         {
           vehicleIncapacitated = vehicle;
           vehicleIncapReason = "VF_NotEnoughToOperate".Translate();

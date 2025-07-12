@@ -52,7 +52,7 @@ public class Command_CooldownAction : Command_Turret
   {
     using TextBlock textBlock = new(GameFont.Tiny);
     Rect rect = new(topLeft.x, topLeft.y, GetWidth(maxWidth), GizmoHeight);
-    _ = GUI.color;
+
     Material material = disabled ? TexUI.GrayscaleGUI : null;
     Material cooldownMaterial = turret.OnCooldown ? TexUI.GrayscaleGUI : material;
 
