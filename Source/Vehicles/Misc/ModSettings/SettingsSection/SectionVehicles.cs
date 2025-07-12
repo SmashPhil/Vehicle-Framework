@@ -191,17 +191,20 @@ public class SectionVehicles : SettingsSection
 
         Widgets.BeginGroup(iconRect);
         Rect vehicleRect = new(Vector2.zero, iconRect.size);
-        if (textureDirty)
+        if (Event.current.type == EventType.Repaint)
         {
-          BlitRequest request = BlitRequest.For(VehicleMod.selectedDef) with
+          if (textureDirty)
           {
-            rot = directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing)
-          };
-          buffer ??= VehicleGui.CreateRenderTextureBuffer(vehicleRect, request);
-          VehicleGui.Blit(buffer.GetWrite(), vehicleRect, request);
-          textureDirty = false;
+            BlitRequest request = BlitRequest.For(VehicleMod.selectedDef) with
+            {
+              rot = directionFacing.TryGetValue(VehicleMod.selectedDef, currentVehicleFacing)
+            };
+            buffer ??= VehicleGui.CreateRenderTextureBuffer(vehicleRect, request);
+            VehicleGui.Blit(buffer.GetWrite(), vehicleRect, request);
+            textureDirty = false;
+          }
+          GUI.DrawTexture(vehicleRect, buffer.Read);
         }
-        GUI.DrawTexture(vehicleRect, buffer.Read);
         Widgets.EndGroup();
 
         Rect enableButtonRect = menuRect.ContractedBy(10);

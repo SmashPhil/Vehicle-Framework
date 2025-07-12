@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using SmashTools.Rendering;
@@ -9,7 +8,6 @@ using Verse.Sound;
 
 namespace Vehicles.Rendering;
 
-[UsedImplicitly(ImplicitUseTargetFlags.Members)]
 public class Command_CooldownAction : Command_Turret
 {
   private const float IdlerTimeExpiry = 5; // seconds
@@ -54,7 +52,7 @@ public class Command_CooldownAction : Command_Turret
   {
     using TextBlock textBlock = new(GameFont.Tiny);
     Rect rect = new(topLeft.x, topLeft.y, GetWidth(maxWidth), GizmoHeight);
-
+    _ = GUI.color;
     Material material = disabled ? TexUI.GrayscaleGUI : null;
     Material cooldownMaterial = turret.OnCooldown ? TexUI.GrayscaleGUI : material;
 
@@ -160,7 +158,6 @@ public class Command_CooldownAction : Command_Turret
     return new GizmoResult(mouseOver ? GizmoState.Mouseover : GizmoState.Clear);
   }
 
-  [UsedImplicitly]
   protected virtual float DrawGizmoButton(Rect rect, Material cooldownMaterial,
     out bool mouseOver, out bool ammoLoaded, out bool fireTurret, out bool haltTurret)
   {
@@ -171,55 +168,57 @@ public class Command_CooldownAction : Command_Turret
     fireTurret = false;
 
     Widgets.BeginGroup(rect);
+
+    Rect gizmoRect = rect.AtZero();
+    // top right
+    Rect subIconRect = new(gizmoRect.xMax - SubIconSize, gizmoRect.y, SubIconSize, SubIconSize);
+    if ((turret.loadedAmmo is null || turret.shellCount <= 0) && turret.def.ammunition != null)
     {
-      Rect gizmoRect = rect.AtZero();
-      // top right
-      Rect subIconRect = new(gizmoRect.xMax - SubIconSize, gizmoRect.y, SubIconSize, SubIconSize);
-      if ((turret.loadedAmmo is null || turret.shellCount <= 0) && turret.def.ammunition != null)
+      Disable("VF_NoAmmoLoadedTurret".Translate());
+      ammoLoaded = false;
+    }
+    else if (turret.ProjectileDef is { projectile.flyOverhead: true } &&
+      vehicle.Position.Roofed(vehicle.Map))
+    {
+      Disable($"{"CannotFire".Translate()}: {"Roofed".Translate().CapitalizeFirst()}");
+    }
+    else if (!turret.OnCooldown && Mouse.IsOver(gizmoRect) &&
+      (!Mouse.IsOver(subIconRect) || !turret.targetInfo.IsValid))
+    {
+      if (!disabled)
       {
-        Disable("VF_NoAmmoLoadedTurret".Translate());
-        ammoLoaded = false;
+        GUI.color = GenUI.MouseoverColor;
       }
-      else if (turret.ProjectileDef is { projectile.flyOverhead: true } &&
-        vehicle.Position.Roofed(vehicle.Map))
+      mouseOver = true;
+      turret.GizmoHighlighted = true;
+    }
+    else
+    {
+      turret.GizmoHighlighted = false;
+    }
+
+    GenUI.DrawTextureWithMaterial(gizmoRect, BGTex, cooldownMaterial);
+    MouseoverSounds.DoRegion(gizmoRect, SoundDefOf.Mouseover_Command);
+    GUI.color = IconDrawColor;
+
+    using (new TextBlock(Color.white))
+    {
+      Rect turretRect = gizmoRect.ContractedBy(2);
+      if (!turret.def.gizmoIconTexPath.NullOrEmpty())
       {
-        Disable($"{"CannotFire".Translate()}: {"Roofed".Translate().CapitalizeFirst()}");
-      }
-      else if (!turret.OnCooldown && Mouse.IsOver(gizmoRect) &&
-        (!Mouse.IsOver(subIconRect) || !turret.targetInfo.IsValid))
-      {
-        if (!disabled)
-        {
-          GUI.color = GenUI.MouseoverColor;
-        }
-        mouseOver = true;
-        turret.GizmoHighlighted = true;
+        Widgets.BeginGroup(turretRect);
+        Rect iconRect = turretRect.AtZero()
+         .ExpandedBy(turretRect.width * (turret.def.gizmoIconScale * iconDrawScale - 1));
+        UIElements.DrawTextureWithMaterialOnGUI(iconRect, turret.GizmoIcon, null, 0);
+        Widgets.EndGroup();
       }
       else
       {
-        turret.GizmoHighlighted = false;
-      }
+        if (rtIdler is { Disposed: true })
+          rtIdler = null;
 
-      GenUI.DrawTextureWithMaterial(gizmoRect, BGTex, cooldownMaterial);
-      MouseoverSounds.DoRegion(gizmoRect, SoundDefOf.Mouseover_Command);
-      GUI.color = IconDrawColor;
-
-      using (new TextBlock(Color.white))
-      {
-        Rect turretRect = gizmoRect.ContractedBy(2);
-        if (!turret.def.gizmoIconTexPath.NullOrEmpty())
+        if (Event.current.type == EventType.Repaint)
         {
-          Widgets.BeginGroup(turretRect);
-          Rect iconRect = turretRect.AtZero()
-           .ExpandedBy(turretRect.width * (turret.def.gizmoIconScale * iconDrawScale - 1));
-          UIElements.DrawTextureWithMaterialOnGUI(iconRect, turret.GizmoIcon, null, 0);
-          Widgets.EndGroup();
-        }
-        else
-        {
-          if (rtIdler is { Disposed: true })
-            rtIdler = null;
-
           if (textureDirty || rtIdler == null)
           {
             BlitRequest request = new(vehicle)
@@ -235,29 +234,30 @@ public class Command_CooldownAction : Command_Turret
           GUI.DrawTexture(turretRect, rtIdler.Read);
         }
       }
-
-      if (!ammoLoaded)
-      {
-        Widgets.DrawBoxSolid(gizmoRect, DarkGrey);
-      }
-
-      if (turret.ReloadTicks > 0)
-      {
-        float percent = turret.ReloadTicks / (float)turret.MaxTicks;
-        UIElements.VerticalFillableBar(gizmoRect, percent, UIData.FillableBarTexture,
-          UIData.ClearBarTexture);
-      }
-
-      if (DrawSubIcons(subIconRect, cooldownMaterial, out haltTurret))
-      {
-        mouseOver = false;
-        fireTurret = false;
-      }
-      else if (ammoLoaded && Widgets.ButtonInvisible(gizmoRect))
-      {
-        fireTurret = true;
-      }
     }
+
+    if (!ammoLoaded)
+    {
+      Widgets.DrawBoxSolid(gizmoRect, DarkGrey);
+    }
+
+    if (turret.ReloadTicks > 0)
+    {
+      float percent = turret.ReloadTicks / (float)turret.MaxTicks;
+      UIElements.VerticalFillableBar(gizmoRect, percent, UIData.FillableBarTexture,
+        UIData.ClearBarTexture);
+    }
+
+    if (DrawSubIcons(subIconRect, cooldownMaterial, out haltTurret))
+    {
+      mouseOver = false;
+      fireTurret = false;
+    }
+    else if (ammoLoaded && Widgets.ButtonInvisible(gizmoRect))
+    {
+      fireTurret = true;
+    }
+
     Widgets.EndGroup();
 
     return rect.width;

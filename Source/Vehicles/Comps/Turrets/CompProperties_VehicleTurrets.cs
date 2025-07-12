@@ -37,7 +37,7 @@ public class CompProperties_VehicleTurrets : VehicleCompProperties
     {
       foreach (VehicleTurret turret in turrets)
       {
-        turret.ResetAngle();
+        turret.TurretRotationTargeted = turret.defaultAngleRotated;
         turret.vehicleDef = vehicleDef;
         ResolveChildTurrets(turret);
         turret.def.ammunition?.ResolveReferences();
