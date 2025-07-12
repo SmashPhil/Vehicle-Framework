@@ -150,10 +150,7 @@ internal class Patch_Gizmos : IPatchCategory
           defaultLabel = "VF_CommandFormVehicleCaravan".Translate(),
           defaultDesc = "VF_CommandFormVehicleCaravanDesc".Translate(),
           icon = VehicleTex.FormCaravanVehicle,
-          action = delegate()
-          {
-            Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map));
-          }
+          action = delegate() { Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map)); }
         };
       }
       else if (mapParent.Map.mapPawns.AllPawnsSpawned.Any(pawn => pawn is VehiclePawn))
@@ -164,10 +161,7 @@ internal class Patch_Gizmos : IPatchCategory
           defaultDesc = "VF_CommandReformVehicleCaravanDesc".Translate(),
           icon = VehicleTex.FormCaravanVehicle,
           hotKey = KeyBindingDefOf.Misc2,
-          action = delegate()
-          {
-            Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map, true));
-          }
+          action = delegate() { Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map, true)); }
         };
         if (GenHostility.AnyHostileActiveThreatToPlayer(mapParent.Map))
         {
@@ -356,20 +350,17 @@ internal class Patch_Gizmos : IPatchCategory
   private static IEnumerable<Gizmo> ThingTransferToVehicleGizmo(IEnumerable<Gizmo> __result,
     Thing __instance)
   {
-    IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
-
-    while (enumerator.MoveNext())
+    foreach (Gizmo gizmo in __result)
     {
-      yield return enumerator.Current;
+      yield return gizmo;
     }
 
     if (__instance.CanBeTransferredToVehiclesCargo())
     {
-      yield return Command_TransferToVehicle_Order.Instance;
-
+      yield return Command_TransferToVehicle_Order.Command;
       if (__instance.IsOrderedToBeTransferredToAnyVehicle())
       {
-        yield return Command_TransferToVehicle_Cancel.Instance;
+        yield return Command_TransferToVehicle_Cancel.Command;
       }
     }
   }
