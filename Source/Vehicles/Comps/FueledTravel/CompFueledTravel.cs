@@ -24,7 +24,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
   private const float MaxTicksPerLeak = 400;
 
   private const float EfficiencyTickMultiplier = 1f / GenDate.TicksPerDay;
-  private const float EfficiencyIdleMultiplier = 0.5f;
+  internal const float EfficiencyIdleMultiplier = 0.5f;
   private const float CellOffsetIntVec3ToVector3 = 0.5f;
   private const float TicksToCharge = 120;
 
@@ -93,8 +93,22 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   private float FuelPercentOfTarget => TargetFuelLevel == 0 ? 0 : fuel / TargetFuelLevel;
 
-  // Fuel Consumption
-  public float ConsumptionRatePerTick => FuelEfficiency * EfficiencyTickMultiplier;
+  public float ConsumptionRatePerTick
+  {
+    get
+    {
+      float amount = FuelEfficiency * EfficiencyTickMultiplier;
+      // Idle vehicles get a discount to consumption if they consume fuel both when 'drafted'
+      // and when moving. Drafted will discount to x%, and moving will resume max consumption.
+      if (Vehicle is { Spawned: true, vehiclePather.Moving: false } &&
+        FuelCondition.HasFlag(FuelConsumptionCondition.Drafted) &&
+        FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
+      {
+        return amount * EfficiencyIdleMultiplier;
+      }
+      return amount;
+    }
+  }
 
   public float ConsumptionRateWorldPerTick =>
     ConsumptionRatePerTick * Props.fuelConsumptionWorldMultiplier;
@@ -109,7 +123,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
     parent.Map.designationManager.DesignationOn(Vehicle,
       DesignationDefOf_Vehicles.DisassembleVehicle) == null;
 
-  // Electric
+  // Electric Vehicles
   public bool Charging => connectedPower != null && !FullTank &&
     connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
 
@@ -197,16 +211,11 @@ public class CompFueledTravel : VehicleComp, IRefundable
       if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
       {
         if (Vehicle.Spawned && Vehicle.vehiclePather.Moving)
-        {
           return true;
-        }
 
         if (Vehicle.GetVehicleCaravan() is { } caravan && caravan.vehiclePather.MovingNow)
-        {
           return true;
-        }
       }
-
       return false;
     }
   }
@@ -287,15 +296,10 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public virtual void Refuel(float amount)
   {
-    if (fuel >= FuelCapacity)
-      return;
-
-    fuel += amount;
+    if (amount <= 0)
+      throw new ArgumentException("Refuel amount must be greater than 0.", nameof(amount));
+    fuel = Mathf.Clamp(fuel + amount, 0, FuelCapacity);
     Vehicle.EventRegistry?[VehicleEventDefOf.Refueled].ExecuteEvents();
-    if (fuel >= FuelCapacity)
-    {
-      fuel = FuelCapacity;
-    }
   }
 
   /// <summary>
@@ -309,15 +313,12 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public virtual void ConsumeFuel(float amount)
   {
-    if (fuel <= 0f)
+    if (Mathf.Approximately(fuel, 0))
       return;
 
-    fuel -= amount;
-    if (fuel <= 0f)
-    {
-      fuel = 0f;
+    fuel = Mathf.Clamp(fuel - amount, 0, FuelCapacity);
+    if (Mathf.Approximately(fuel, 0))
       Vehicle.EventRegistry[VehicleEventDefOf.OutOfFuel].ExecuteEvents();
-    }
   }
 
   public virtual void ConsumeFuelWorld()
@@ -517,9 +518,10 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public override void CompTick()
   {
-    float fuelToConsume = ConsumptionRatePerTick;
-    if (!Vehicle.vehiclePather.Moving) fuelToConsume *= EfficiencyIdleMultiplier;
-    ConsumeFuel(fuelToConsume);
+    if (!ShouldConsumeNow)
+      return;
+
+    ConsumeFuel(ConsumptionRatePerTick);
 
     // TODO - Remove when animation system is finalized
     if (!terminateMotes && !Props.motesGenerated.NullOrEmpty() &&

@@ -601,7 +601,7 @@ public abstract class LaunchProtocol : IExposable
   public virtual IEnumerable<ArrivalOption> GetArrivalOptions(GlobalTargetInfo target)
   {
     if (WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef) &&
-      target.WorldObject is not MapParent)
+      !Find.WorldObjects.AnySettlementBaseAt(target.Tile) && !Find.WorldObjects.AnySiteAt(target.Tile))
     {
       yield return new ArrivalOption("FormCaravanHere".Translate(), new ArrivalAction_LandToCaravan(vehicle));
     }
@@ -637,7 +637,7 @@ public abstract class LaunchProtocol : IExposable
                 !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
           });
       }
-      else if (!mapParent.HasMap && AerialVehicleCompatibility.CanLandIn(mapParent))
+      else if (!mapParent.HasMap /* && AerialVehicleCompatibility.CanLandIn(mapParent)*/)
       {
         // TODO - Acceptance report based on ArrivalAction_LoadMap::CanLand
         if (vehicle.CompVehicleLauncher.ControlInFlight)

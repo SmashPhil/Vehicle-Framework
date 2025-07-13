@@ -239,6 +239,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     }
   }
 
+  // TODO - Decouple from CompFueledTravel and let the comp handle this condition
   public virtual void SpendFuel()
   {
     if (vehicle.CompFueledTravel != null &&

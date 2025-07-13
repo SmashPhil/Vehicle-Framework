@@ -62,8 +62,7 @@ public class CompProperties_FueledTravel : VehicleCompProperties
   [MustTranslate]
   public string gizmoLabel;
 
-  public FuelConsumptionCondition fuelConsumptionCondition = FuelConsumptionCondition.Drafted |
-    FuelConsumptionCondition.Moving | FuelConsumptionCondition.Flying;
+  public FuelConsumptionCondition fuelConsumptionCondition = FuelConsumptionCondition.All;
 
   public List<OffsetMote> motesGenerated;
 
