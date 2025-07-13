@@ -39,12 +39,13 @@ public class CompProperties_VehicleLauncher : VehicleCompProperties
   [Unsaved]
   public int landingAltitude = 1000;
 
-  [PostToSettings(Label = "VF_ReconDistance", Translate = true,
-    Tooltip = "VF_ReconDistanceTooltip", UISettingsType = UISettingsType.SliderInt,
-    VehicleType = VehicleType.Air)]
-  [SliderValues(MinValue = 1, MaxValue = 8)]
-  [DisableSettingConditional(MemberType = typeof(CompProperties_VehicleLauncher),
-    Field = nameof(controlInFlight), DisableIfEqualTo = false)]
+  // TODO - Enable recon settings when air combat is more fleshed out
+  //[PostToSettings(Label = "VF_ReconDistance", Translate = true,
+  //  Tooltip = "VF_ReconDistanceTooltip", UISettingsType = UISettingsType.SliderInt,
+  //  VehicleType = VehicleType.Air)]
+  //[SliderValues(MinValue = 1, MaxValue = 8)]
+  //[DisableSettingConditional(MemberType = typeof(CompProperties_VehicleLauncher),
+  //  Field = nameof(controlInFlight), DisableIfEqualTo = false)]
   public int reconDistance = 1;
 
   [PostToSettings(Label = "VF_LaunchFixedMaxDistance", Translate = true,

@@ -36,19 +36,8 @@ public class WITab_AerialVehicle_Items : WITab_AerialVehicle
       //Find.WindowStack.Add(new Dialog_AssignCaravanDrugPolicies(SelCaravan));
     }
 
-    float ammoWeight = 0f;
-    if (SelAerialVehicle.Vehicle.CompVehicleTurrets != null)
-    {
-      foreach (VehicleTurret turret in SelAerialVehicle.Vehicle.CompVehicleTurrets.Turrets)
-      {
-        ammoWeight += turret.loadedAmmo is null ?
-          0f :
-          turret.loadedAmmo.BaseMass * turret.shellCount;
-      }
-    }
-
     Rect massLabelRect = rect.ContractedBy(10);
-    float mass = MassUtility.GearAndInventoryMass(SelAerialVehicle.Vehicle) + ammoWeight;
+    float mass = MassUtility.GearAndInventoryMass(SelAerialVehicle.Vehicle);
     float capacity = SelAerialVehicle.Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
     Widgets.Label(massLabelRect,
       "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));

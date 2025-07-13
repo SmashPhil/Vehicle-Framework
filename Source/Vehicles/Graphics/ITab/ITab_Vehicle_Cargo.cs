@@ -50,18 +50,8 @@ namespace Vehicles
 
     protected override void DrawHeader(ref float curY, float width)
     {
-      Rect rect = new Rect(0f, curY, width, StandardLineHeight);
-      float cannonsNum = 0f;
-      if (Vehicle.TryGetComp<CompVehicleTurrets>() != null)
-      {
-        foreach (VehicleTurret turret in Vehicle.CompVehicleTurrets.Turrets)
-        {
-          cannonsNum += turret.loadedAmmo is null ?
-            0f :
-            turret.loadedAmmo.BaseMass * turret.shellCount;
-        }
-      }
-      float mass = MassUtility.GearAndInventoryMass(Vehicle) + cannonsNum;
+      Rect rect = new(0f, curY, width, StandardLineHeight);
+      float mass = MassUtility.GearAndInventoryMass(Vehicle);
       float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
       Widgets.Label(rect,
         "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
