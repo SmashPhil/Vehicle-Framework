@@ -701,26 +701,25 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
       return true;
     }
 
-    if (Math.Abs(TurretRotation - TurretRotationTargeted) < def.rotationSpeed + 0.1f)
+    const float AngleSnapThreshold = 0.1f;
+
+    float current = transform.rotation;
+    float target = TurretRotationTargeted;
+
+    target = target.ClampAngle();
+    float angleDelta = Mathf.DeltaAngle(current, target);
+    if (Mathf.Abs(angleDelta) < def.rotationSpeed + AngleSnapThreshold)
     {
-      TurretRotation = TurretRotationTargeted;
+      TurretRotation = target;
     }
     else
     {
-      int rotationDir;
-      if (TurretRotation < TurretRotationTargeted)
-      {
-        rotationDir = Mathf.Abs(TurretRotation - TurretRotationTargeted) < 180 ? 1 : -1;
-      }
-      else
-      {
-        rotationDir = Mathf.Abs(TurretRotation - TurretRotationTargeted) < 180 ? -1 : 1;
-      }
-      float delta = def.rotationDelta > 0 ?
-        Ext_Math.SmoothStep(0, 1, ticksRotating / (def.rotationDelta * 60)) :
-        1;
+      float rotationDir = Mathf.Sign(angleDelta);
+
+      float delta = def.rotationDelta > 0 ? Ext_Math.SmoothStep(0, 1, ticksRotating / (def.rotationDelta * 60)) : 1;
+
       float rotateStep = delta * def.rotationSpeed * rotationDir;
-      TurretRotation += rotateStep;
+      TurretRotation = current + rotateStep;
       ticksRotating++;
     }
     return true;
