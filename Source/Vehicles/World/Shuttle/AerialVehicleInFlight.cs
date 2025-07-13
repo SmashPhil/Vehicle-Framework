@@ -40,8 +40,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
   public Vector3 position;
 
-  private Material vehicleMat;
-  private Material vehicleMatNonLit;
   private Material material;
 
   [Obsolete("This constructor is requierd for Xml Deserialization, use AerialVehicleInFlight::Create instead")]
@@ -100,51 +98,15 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     get { yield break; }
   }
 
-  [Obsolete]
-  public virtual Material VehicleMat
-  {
-    get
-    {
-      if (vehicle is null)
-      {
-        return Material;
-      }
-      vehicleMat ??= new Material(vehicle.VehicleGraphic.MatAtFull(FullRotation))
-      {
-        shader = ShaderDatabase.WorldOverlayTransparentLit,
-        renderQueue = WorldMaterials.WorldObjectRenderQueue
-      };
-      return vehicleMat;
-    }
-  }
-
-  [Obsolete]
-  public virtual Material VehicleMatNonLit
-  {
-    get
-    {
-      if (vehicle is null)
-      {
-        return Material;
-      }
-      vehicleMatNonLit ??= new Material(vehicle.VehicleGraphic.MatAtFull(FullRotation))
-      {
-        shader = ShaderDatabase.WorldOverlayTransparent,
-        renderQueue = WorldMaterials.WorldObjectRenderQueue
-      };
-      return vehicleMatNonLit;
-    }
-  }
-
   public override Material Material
   {
     get
     {
       if (!material)
       {
-        material = MaterialPool.MatFrom(VehicleTex.CachedTextureIconPaths.TryGetValue(
-            vehicle.VehicleDef,
-            VehicleTex.DefaultVehicleIconTexPath), ShaderDatabase.WorldOverlayTransparentLit,
+        string texPath = VehicleTex.CachedTextureIconPaths.TryGetValue(
+          vehicle.VehicleDef, VehicleTex.DefaultVehicleIconTexPath);
+        material = MaterialPool.MatFrom(texPath, ShaderDatabase.WorldOverlayTransparentLit, Faction.Color,
           WorldMaterials.WorldObjectRenderQueue);
       }
       return material;
