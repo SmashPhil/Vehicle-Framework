@@ -39,6 +39,8 @@ public static class JobDefOf_Vehicles
 
   public static JobDef LoadUpgradeMaterials;
 
+  public static JobDef RemoveFuelFromVehicle;
+
   public static JobDef RefuelVehicle;
 
   public static JobDef RefuelVehicleAtomic;

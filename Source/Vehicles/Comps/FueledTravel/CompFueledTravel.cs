@@ -12,7 +12,6 @@ using Vehicles.Rendering;
 using Vehicles.World;
 using Verse;
 using Verse.AI;
-using Verse.Sound;
 
 namespace Vehicles;
 
@@ -79,6 +78,10 @@ public class CompFueledTravel : VehicleComp, IRefundable
   public bool FullTank => Mathf.Approximately(fuel, TargetFuelLevel);
 
   public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
+
+  private int FuelToEject => Mathf.FloorToInt(Fuel - TargetFuelLevel);
+
+  public bool CanEjectFuel => FuelToEject > 0;
 
   public float TargetFuelPercent
   {
@@ -334,6 +337,22 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
+  public void EjectFuel()
+  {
+    int count = FuelToEject;
+    while (count > 0)
+    {
+      Thing thing = ThingMaker.MakeThing(Props.fuelType);
+      thing.stackCount = Mathf.Min(count, Props.fuelType.stackLimit);
+      count -= thing.stackCount;
+      fuel -= thing.stackCount;
+      GenPlace.TryPlaceThing(thing, parent.Position, parent.Map, ThingPlaceMode.Near);
+      thing.SetForbidden(true);
+    }
+    if (fuel == 0)
+      Vehicle.EventRegistry[VehicleEventDefOf.OutOfFuel].ExecuteEvents();
+  }
+
   public override void PostDraw()
   {
     base.PostDraw();
@@ -571,27 +590,27 @@ public class CompFueledTravel : VehicleComp, IRefundable
   {
     base.CompTickRare();
 
-    RevalidateConsumptionStatus(); //Intermittent checks to ensure no missed cases cause vehicle to drain
+    // Intermittent checks to ensure no missed cases cause fuel to leak without damaged parts
+    RevalidateConsumptionStatus();
 
     if (!Vehicle.Spawned)
       return;
 
+    VehicleReservationManager resMgr = Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
     if (!FullTank)
-    {
-      Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>()
-       .RegisterLister(Vehicle, ReservationType.Refuel);
-    }
+      resMgr.RegisterLister(Vehicle, ReservationType.Refuel);
     else
-    {
-      Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>()
-       .RemoveLister(Vehicle, ReservationType.Refuel);
-    }
+      resMgr.RemoveLister(Vehicle, ReservationType.Refuel);
+
+    if (CanEjectFuel)
+      resMgr.RegisterLister(Vehicle, ReservationType.RemoveFuel);
+    else
+      resMgr.RemoveLister(Vehicle, ReservationType.RemoveFuel);
 
     if (!Mathf.Approximately(Props.ambientHeat, 0))
     {
       GenTemperature.PushHeat(Vehicle, Props.ambientHeat);
     }
-
     if (Vehicle.vehiclePather.Moving)
     {
       DisconnectPower();

@@ -114,6 +114,14 @@
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
 	
+  <JobDef>
+		<defName>RemoveFuelFromVehicle</defName>
+		<driverClass>Vehicles.JobDriver_RemoveFuelFromVehicle</driverClass>
+		<reportString>Emptying TargetA</reportString>
+		<allowOpportunisticPrefix>true</allowOpportunisticPrefix>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+
 	<JobDef>
 		<defName>FollowVehicle</defName>
 		<driverClass>Vehicles.JobDriver_FollowVehicle</driverClass>

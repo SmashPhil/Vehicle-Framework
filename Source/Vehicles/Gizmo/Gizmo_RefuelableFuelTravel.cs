@@ -17,6 +17,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
   private readonly bool showVehicleLabel;
 
   private float fuelAvailable;
+  private bool refuelFromInventoryDisabled;
+  private string refuelFromInventoryDisabledReason;
 
   public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showVehicleLabel)
   {
@@ -61,23 +63,25 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
   protected override string GetTooltip()
   {
-    return "";
+    return $"{refuelable.TargetFuelLevel:F0} {refuelable.Props.fuelType.LabelCap}";
   }
 
   public void UpdateDisableStatus()
   {
-    disabled = false;
-    disabledReason = null;
+    refuelFromInventoryDisabled = false;
+    refuelFromInventoryDisabledReason = null;
     fuelAvailable = 0;
     if (Mathf.Approximately(refuelable.FuelPercent, 1))
     {
-      Disable(reason: "VF_VehicleFullyFueled".Translate(refuelable.Vehicle.LabelCap));
+      refuelFromInventoryDisabled = true;
+      refuelFromInventoryDisabledReason = "VF_VehicleFullyFueled".Translate(refuelable.Vehicle.LabelCap);
       return;
     }
     fuelAvailable = FuelInVehicle(refuelable.Vehicle);
     if (fuelAvailable == 0)
     {
-      Disable(reason: "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap));
+      refuelFromInventoryDisabled = true;
+      refuelFromInventoryDisabledReason = "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap);
     }
     return;
 
@@ -140,12 +144,12 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     {
       iconRect.x -= iconRect.width + IconBarPadding;
       GenUI.DrawTextureWithMaterial(iconRect, Building_PassengerShuttle.RefuelFromCargoIcon.Texture,
-        disabled ? TexUI.GrayscaleGUI : null);
+        refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
       if (Widgets.ButtonInvisible(iconRect))
       {
-        if (disabled)
+        if (refuelFromInventoryDisabled)
         {
-          Messages.Message(disabledReason, MessageTypeDefOf.RejectInput);
+          Messages.Message(refuelFromInventoryDisabledReason, MessageTypeDefOf.RejectInput);
           return;
         }
         const int MinRefuelCount = 1;

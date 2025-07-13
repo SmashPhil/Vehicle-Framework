@@ -83,6 +83,20 @@
 			<li>Manipulation</li>
 		</requiredCapacities>
 	</WorkGiverDef>
+
+  <WorkGiverDef>
+		<defName>RemoveFuelFromVehicle</defName>
+		<label>remove fuel from vehicle</label>
+		<giverClass>Vehicles.WorkGiver_RemoveFuelFromVehicle</giverClass>
+		<workType>Hauling</workType>
+		<verb>refuel</verb>
+		<gerund>emptying</gerund>
+		<priorityInType>100</priorityInType>
+		
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
 	
 	<WorkGiverDef>
 		<defName>RepairVehicle</defName>
