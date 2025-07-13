@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<VF_IncidentCrashedSiteLabel_Crashing>{0} Crash Landed</VF_IncidentCrashedSiteLabel_Crashing>
+	<VF_IncidentCrashedSiteLabel_ShotDown>{1} Shot Down {0}</VF_IncidentCrashedSiteLabel_ShotDown>
+	
+	<VF_IncidentReasonLister>\n\nReason:\n {0}</VF_IncidentReasonLister>
+	<VF_IncidentCrashedSite_Crashing>{0} has crashed.</VF_IncidentCrashedSite_Crashing>
+	<VF_IncidentCrashedSite_ShotDown>{0} has been shot down by {1}.</VF_IncidentCrashedSite_ShotDown>
+	<VF_IncidentCrashedSiteReason_OutOfFuel>Ran out of fuel</VF_IncidentCrashedSiteReason_OutOfFuel>
+	<VF_IncidentCrashedSiteReason_FlightControl>Lost all flight control</VF_IncidentCrashedSiteReason_FlightControl>
+	
+	<VF_ReinforcementsArrivedLabel>Reinforcements</VF_ReinforcementsArrivedLabel>
+	<VF_ReinforcementsArrived>{0} has arrived with reinforcements to investigate the crash site.</VF_ReinforcementsArrived>
+	
+	<VF_BoatSunk>Boat Sunk</VF_BoatSunk>
+	<VF_BoatSunkDesc>{0} has sunk to the depths of the ocean.</VF_BoatSunkDesc>
+	<VF_BoatSunkWithPawnsDesc>{0} has sunk to the depths of the ocean. 
+
+It has taken the following pawns down with it:
+{1}</VF_BoatSunkWithPawnsDesc>
+</LanguageData>

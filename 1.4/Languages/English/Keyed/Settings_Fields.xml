@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<!-- (VehicleDef)-->
+	<VF_VehicleEnabled>Enabled</VF_VehicleEnabled>
+	<VF_VehicleDisabled>Disabled</VF_VehicleDisabled>
+	<VF_VehiclePlayerOnly>Player Only</VF_VehiclePlayerOnly>
+	<VF_VehicleRaiderOnly>NPC Only</VF_VehicleRaiderOnly>
+	
+	<VF_EnableButtonTooltip>If disabled this vehicle will not be available in-game. Applies to both the player and NPC factions.</VF_EnableButtonTooltip>
+	
+	<VF_MovementPermissions>Control Type</VF_MovementPermissions>
+	<VF_NavigationType>Navigation</VF_NavigationType>
+	<VF_NavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VF_NavigationTypeTooltip>
+	
+	<VF_Nameable>Can Assign Name</VF_Nameable>
+	<VF_NameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VF_NameableTooltip>
+	
+	<VF_CombatPower>Combat Power</VF_CombatPower>
+	<VF_CombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VF_CombatPowerTooltip>
+	
+	<VF_CanCaravan>Caravan</VF_CanCaravan>
+	<VF_CanCaravanTooltip>Vehicle is able to be taken on caravans.</VF_CanCaravanTooltip>
+	
+	<!-- Disabled Tooltip -->
+	<VF_SaveableFieldDisabledConditionTooltip>Disabled. {0}</VF_SaveableFieldDisabledConditionTooltip>
+	<VF_DisabledSingleModDependencyTooltip>Disabled. Compatible mod not in active mod list: {0}</VF_DisabledSingleModDependencyTooltip>
+	<VF_DisabledMultipleModsDependencyTooltip>Disabled. Compatible mods not in active mod list: {0}</VF_DisabledMultipleModsDependencyTooltip>
+	<VF_SaveableFieldDisabledTooltip>Disabled for this Vehicle Type.</VF_SaveableFieldDisabledTooltip>
+	<VF_SaveableFieldLockedTooltip>Setting is locked for this Vehicle.</VF_SaveableFieldLockedTooltip>
+	<VF_DebugDisabledTooltip>Disabled for all Vehicles at this time.</VF_DebugDisabledTooltip>
+	<VF_GizmoDisabledTooltip>Disabled in the mod settings.</VF_GizmoDisabledTooltip>
+	
+	<!-- Performance -->
+	<VF_OpportunisticTicking>Opportunistic Ticking</VF_OpportunisticTicking>
+	<VF_OpportunisticTickingTooltip>Vehicle components only tick when necessary, reducing impact on performance when idle.</VF_OpportunisticTickingTooltip>
+	
+	<!-- (Properties) -->
+	<VF_CollisionMultiplier>Pawn Damage</VF_CollisionMultiplier>
+	<VF_CollisionMultiplierTooltip>Multiplier for damage applied to pawns being run over by vehicles.</VF_CollisionMultiplierTooltip>
+	<VF_CollisionVehicleMultiplier>Vehicle Damage</VF_CollisionVehicleMultiplier>
+	<VF_CollisionVehicleMultiplierTooltip>Multiplier for damage applied to the vehicle when running over a pawn.</VF_CollisionVehicleMultiplierTooltip>
+	
+	<VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
+	<VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+	<VF_FishingEnabled>Can Fish</VF_FishingEnabled>
+	<VF_FishingEnabledTooltip>Enables fishing when stationary over water.</VF_FishingEnabledTooltip>
+	
+	<VF_JobLimitations>Vehicle Jobs</VF_JobLimitations>
+	<VF_MaxWorkers>Max Workers</VF_MaxWorkers>
+	
+	<VF_WinterSpeedMultiplier>Winter Speed Multiplier</VF_WinterSpeedMultiplier>
+	<VF_WinterSpeedMultiplierTooltip>Additional cost for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
+	<VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
+	<VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
+	
+	<VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
+	<VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
+	<VF_FuelConsumptionRate>Fuel Rate</VF_FuelConsumptionRate>
+	<VF_FuelConsumptionRateTooltip>Fuel consumed per day</VF_FuelConsumptionRateTooltip>
+	<VF_FuelConsumptionRateWorldMultiplier>Fuel World %</VF_FuelConsumptionRateWorldMultiplier>
+	<VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
+	<VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+	<VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
+	<VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
+	<VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
+	
+	<VF_FuelConsumptionWorld>Fuel Rate %</VF_FuelConsumptionWorld>
+	<VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+	<VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
+	<VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>
+	<VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
+	<VF_ReconDistance>Recon Distance</VF_ReconDistance>
+	<VF_ReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VF_ReconDistanceTooltip>
+	<VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
+	<VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
+	<VF_SpaceFlight>Space Faring</VF_SpaceFlight>
+	<VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
+	
+	<VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
+	<VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
+	<VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
+	<VF_MaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VF_MaxAltitudeTooltip>
+	<VF_MaxFallRate>Max Fall Rate</VF_MaxFallRate>
+	<VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
+	
+	<VF_Instant>Instant</VF_Instant>
+	<VF_DeployTime>Deploy Time</VF_DeployTime>
+</LanguageData>

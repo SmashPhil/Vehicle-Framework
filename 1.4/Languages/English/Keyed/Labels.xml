@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<!-- Labels and Titles -->
+	<VehicleFramework>Vehicle Framework</VehicleFramework>
+	<VF_Vehicles>Vehicles</VF_Vehicles>
+	
+	<!-- Gizmos / Float Menus -->
+	<VF_LoadCargo>Load Cargo</VF_LoadCargo>
+	<VF_HaulPawnToVehicle>Load Pawn</VF_HaulPawnToVehicle>
+	<VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
+	<VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+	<VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
+	
+	<VF_StopVehicle>Stop</VF_StopVehicle>
+	<VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
+	<VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
+	<VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
+	<VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
+	<VF_RefuelFromInventory>Refuel From Inventory</VF_RefuelFromInventory>
+	
+	<!-- UI / Buttons -->
+	<VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
+	<VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
+	<VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
+	<VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
+	<VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
+	
+	<VF_ColorOne>ColorOne</VF_ColorOne>
+	<VF_ColorTwo>ColorTwo</VF_ColorTwo>
+	<VF_ColorThree>ColorThree</VF_ColorThree>
+	<VF_ColorPickerHex>Hex</VF_ColorPickerHex>
+	
+	<VF_JobSettings>Job Settings</VF_JobSettings>
+	<VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
+	
+	<!-- Stats -->
+	<VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
+	
+	<!-- Designators -->
+	
+	<!-- Tooltips -->
+	<VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
+	<VF_RecolorTooltip>Change colors or pattern.</VF_RecolorTooltip>
+	<VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
+	<VF_SwapColors>Cycle colors between each other.\nColorOne -> ColorTwo -> ColorThree</VF_SwapColors>
+	<VF_StartFishing>Fish</VF_StartFishing>
+	<VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
+	<VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
+	<VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
+	<VF_ComponentClickMoreInfoTooltip>Click for detailed information.</VF_ComponentClickMoreInfoTooltip>
+	
+	<!-- Turrets -->
+	<VF_Deploy>Deploy</VF_Deploy>
+	<VF_Undeploy>Undeploy</VF_Undeploy>
+	<VF_DeployDescription>Deploy vehicle to enable use of turrets.</VF_DeployDescription>
+	<VF_MustBeDeployed>Must be deployed.</VF_MustBeDeployed>
+	<VF_MustBeUndeployed>Must be undeployed.</VF_MustBeUndeployed>
+	<VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
+	<VF_TurretComponentDisabled>{0} needs repairs.</VF_TurretComponentDisabled>
+	
+	<!-- Color Picker -->
+	<VF_Patterns>Patterns</VF_Patterns>
+	<VF_Skins>Skins</VF_Skins>
+	<VF_PatternZoom>Zoom</VF_PatternZoom>
+	<VF_PatternZoomTooltip>Scale the pattern up or down.</VF_PatternZoomTooltip>
+	<VF_PatternDisplacementX>Displacement X</VF_PatternDisplacementX>
+	<VF_PatternDisplacementY>Displacement Y</VF_PatternDisplacementY>
+	
+	<VF_Electric>Electric</VF_Electric>
+	<VF_ElectricFlick>Charge Battery</VF_ElectricFlick>
+	<VF_ElectricFlickDesc>Connect to PowerNet below vehicle.</VF_ElectricFlickDesc>
+	<VF_OutOfFuel>Cannot Move. Out of Fuel.</VF_OutOfFuel>
+	
+	<VF_Assign>Assign</VF_Assign>
+	<VF_Assigned>Assigned</VF_Assigned>
+	<VF_ApplyButton>Apply</VF_ApplyButton>
+	<VF_Colonists>Colonists</VF_Colonists>
+	<VF_ClearSeats>Clear</VF_ClearSeats>
+	<VF_RemoveFromRole>Remove</VF_RemoveFromRole>
+	<VF_AddToRole>Add</VF_AddToRole>
+	<VF_RoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VF_RoutePlannerButtonTip>
+	<VF_SelectVehiclesForPlanner>Select Vehicles</VF_SelectVehiclesForPlanner>
+	<VF_StartVehicleRoutePlanner>Start Route</VF_StartVehicleRoutePlanner>
+	<VF_OkName>Confirm Name</VF_OkName>
+	<VF_RemoveName>Remove Name</VF_RemoveName>
+	
+	<!-- Aerial Vehicles -->
+	<VF_NoFlightSpeed>Unable to launch with Flight Speed = 0.</VF_NoFlightSpeed>
+	<VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
+	<VF_CannotLaunchImmobile>{0} cannot launch without being able to move.</VF_CannotLaunchImmobile>
+	<VF_CannotLaunchOverEncumbered>{0} cannot launch while over-encumbered.</VF_CannotLaunchOverEncumbered>
+	
+	<VF_TabCargo>Cargo</VF_TabCargo>
+	<VF_TabPassengers>Pawns</VF_TabPassengers>
+	<VF_TabComponents>Health</VF_TabComponents>
+	<VF_TabUpgrades>Customize</VF_TabUpgrades>
+	
+	<VF_ComponentHealth>Health</VF_ComponentHealth>
+	<VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>
+	<VF_ComponentArmor>Armor</VF_ComponentArmor>
+	
+	<VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
+	<VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
+	<VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
+	
+	<!-- HeaderTitles -->
+	<VF_Cargo>Cargo</VF_Cargo>
+	<VF_Properties>Properties</VF_Properties>
+	<VF_LauncherProperties>Launch Properties</VF_LauncherProperties>
+	<VF_FueledTravelPropertes>Fuel</VF_FueledTravelPropertes>
+	<VF_JobLimitations>Max Workers per Job</VF_JobLimitations>
+</LanguageData>

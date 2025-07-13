@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<VF_ReloadVehicleTurret>Reload</VF_ReloadVehicleTurret>
+	
+	<VF_AutoTargeting>AutoTarget: {0}</VF_AutoTargeting>
+	<VF_AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</VF_AutoTargetingDisabled>
+	
+	<VF_VehicleTurrets_NoAmmoToReload>No usable ammo.</VF_VehicleTurrets_NoAmmoToReload>
+	
+	<VF_SetReloadLevel>Set auto-reloading level to {0}</VF_SetReloadLevel>
+	<VF_SetReloadLevelTooltip>Configure Ammo Level</VF_SetReloadLevelTooltip>
+</LanguageData>

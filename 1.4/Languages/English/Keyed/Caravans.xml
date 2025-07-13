@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<LanguageData>
+	<VF_Caravan_Dismounted>Dismounted</VF_Caravan_Dismounted>
+	
+	<VF_Sailing>Sailing</VF_Sailing>
+	
+	<VF_DockToCaravan>Items to Take</VF_DockToCaravan>
+	
+	<VF_ImpassableBiome>Biome impassable for this vehicle.</VF_ImpassableBiome>
+	<VF_CaravanDisabled>Caravaning Disabled.</VF_CaravanDisabled>
+	<VF_CaravanCantMove>Unable to move.</VF_CaravanCantMove>
+	<VF_CantMergeAerialVehicle>Can't merge aerial vehicles.</VF_CantMergeAerialVehicle>
+	
+	<VF_CommandDockShip>Dock</VF_CommandDockShip>
+	<VF_CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</VF_CommandDockShipDesc>
+	
+	<VF_CommandDisembark>Stash Vehicles</VF_CommandDisembark>
+	<VF_CommandDisembarkDesc>Leave all vehicles behind and go on foot.  Vehicles will remain on the world map for up to 20-30 days.</VF_CommandDisembarkDesc>
+	<VF_CommandDisembarkImpassableBiome>Cannot disembark, tile is impassable for colonists.</VF_CommandDisembarkImpassableBiome>
+	
+	<VF_ToggleRepairVehicle>Repair Vehicles</VF_ToggleRepairVehicle>
+	<VF_ToggleRepairVehicleDesc>Rest and perform repairs on vehicles inside the caravan</VF_ToggleRepairVehicleDesc>
+	
+	<!-- Obsolete -->
+	<VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
+	<VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>
+	
+	<VF_CommandUndockShip>Fetch vehicle.</VF_CommandUndockShip>
+	<VF_CommandUndockShipDesc>Load all pawns and items into vehicle.</VF_CommandUndockShipDesc>
+	<VF_CommandAttackDockDisable>Cannot attack {0} while docked at their Settlement</VF_CommandAttackDockDisable>
+	<VF_CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</VF_CommandTradeDockDisable>
+	
+	<VF_CaravanMustHaveEnoughSpaceOnShip>Not enough space on ships to house all pawns.</VF_CaravanMustHaveEnoughSpaceOnShip>
+	<VF_CaravanMustHaveEnoughPawnsToOperate>Not enough Pawns selected to set sail. Need {0}</VF_CaravanMustHaveEnoughPawnsToOperate>
+	
+	<VF_CaravanMustHaveAtLeastOneVehicle>Must have at least 1 vehicle selected in order to choose a route.</VF_CaravanMustHaveAtLeastOneVehicle>
+	<VF_CommandFormVehicleCaravan>Form Vehicle Caravan</VF_CommandFormVehicleCaravan>
+	<VF_CommandFormVehicleCaravanDesc>Form caravan with vehicles included.</VF_CommandFormVehicleCaravanDesc>
+	
+	<VF_CommandReformVehicleCaravan>Reform Vehicle Caravan</VF_CommandReformVehicleCaravan>
+	<VF_CommandReformVehicleCaravanDesc>Reform vehicle caravan with vehicles selected.</VF_CommandReformVehicleCaravanDesc>
+	
+	<VF_RoutePlannerToggleVehicleDefs>VehicleDefs</VF_RoutePlannerToggleVehicleDefs>
+	<VF_RoutePlannerToggleVehicles>Vehicles</VF_RoutePlannerToggleVehicles>
+</LanguageData>
