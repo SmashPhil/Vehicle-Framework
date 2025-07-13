@@ -17,6 +17,7 @@ public class Command_TransferToVehicle_Order : Command_Target
     defaultLabel = "VF_TransferToVehicle_Order".Translate();
     defaultDesc = "VF_TransferToVehicle_Order_Desc".Translate();
     icon = VehicleTex.PackCargoIcon[(uint)VehicleType.Land];
+    hotKey = KeyBindingDefOf.Misc2;
     action = Action;
     targetingParams = TargetingParameters.ForPawns();
     targetingParams.validator = IsVehicle;

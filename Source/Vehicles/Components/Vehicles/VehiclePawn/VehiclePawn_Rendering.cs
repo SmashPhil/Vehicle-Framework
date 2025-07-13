@@ -516,13 +516,13 @@ public partial class VehiclePawn
       yield return new Command_Action
       {
         defaultLabel = $"Gear: {(Reverse ? "Reverse" : "Drive")}",
-        hotKey = KeyBindingDefOf_Vehicles.VF_Command_ReverseVehicle,
+        hotKey = KeyBindingDefOf.Misc3,
         action = delegate { Reverse = !Reverse; }
       };
       yield return new Command_Action
       {
         defaultLabel = "Teleport",
-        action = delegate()
+        action = delegate
         {
           Find.Targeter.BeginTargeting(new TargetingParameters()
           {
@@ -584,6 +584,7 @@ public partial class VehiclePawn
       {
         defaultLabel = "VF_LoadCargo".Translate(),
         icon = VehicleDef.LoadCargoIcon,
+        hotKey = KeyBindingDefOf.Misc2,
         action = delegate() { Find.WindowStack.Add(new Dialog_LoadCargo(this)); }
       };
       if (upgrading)

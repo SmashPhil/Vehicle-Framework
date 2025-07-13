@@ -1,12 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
-	<KeyBindingDef ParentName="SelectionSpecialKeyBinding">
-		<defName>VF_Command_ReverseVehicle</defName>
-		<label>toggle gear</label>
-    <defaultKeyCodeA>H</defaultKeyCodeA>
-  </KeyBindingDef>
-
   <!-- Debug -->
   <KeyBindingDef>
 		<defName>VF_RestartGame</defName>

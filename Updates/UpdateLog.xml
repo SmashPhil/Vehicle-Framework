@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.6.2044</currentVersion>
+  <currentVersion>1.6.2045</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
@@ -13,6 +13,7 @@ Hotfix for major bugs on release and some small QoL improvements.
 - Added 'refuel from inventory' button to fuel gizmo.
 - Added job for colonists to remove excess fuel when target fuel level is below the current fuel amount.
 - Colorized vehicle world objects, matching their RimWorld equivalents.
+- Added Misc2 hotkey for 'Load Cargo' gizmo on vehicles.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 - Immobile aerial vehicles such as helicopters were not able to launch even with all seats filled.
 - Rivers would be set to 0 width during map generation by default.
