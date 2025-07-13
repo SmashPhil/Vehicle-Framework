@@ -120,7 +120,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
     bool electric = refuelable.Props.ElectricPowered;
 
-    GUI.DrawTexture(iconRect, electric ? TexData.FlickerIcon : ThingDefOf.Chemfuel.uiIcon);
+    Texture fuelTexture = electric ? TexData.FlickerIcon : ThingDefOf.Chemfuel.uiIcon;
+    GUI.DrawTexture(iconRect, fuelTexture);
     Rect subIconRect =
       new(iconRect.center.x, iconRect.y, iconRect.width / 2f, iconRect.height / 2f);
     bool checkOn = electric ? refuelable.Charging : refuelable.allowAutoRefuel;
@@ -143,7 +144,9 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     if (!electric && !refuelable.Vehicle.InAerialVehicle())
     {
       iconRect.x -= iconRect.width + IconBarPadding;
-      GenUI.DrawTextureWithMaterial(iconRect, Building_PassengerShuttle.RefuelFromCargoIcon.Texture,
+      GenUI.DrawTextureWithMaterial(iconRect, fuelTexture,
+        refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
+      GenUI.DrawTextureWithMaterial(iconRect, VehicleTex.UnloadIcon,
         refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
       if (Widgets.ButtonInvisible(iconRect))
       {
