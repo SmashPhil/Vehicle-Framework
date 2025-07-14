@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using SmashTools;
+using UnityEngine;
 using Verse;
 
 namespace Vehicles
@@ -34,10 +36,10 @@ namespace Vehicles
                 {
                   yield return textEntry;
                 }
-                break;
+              break;
               case UpgradeType.Set:
                 component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
-                break;
+              break;
             }
           }
         }
@@ -68,10 +70,10 @@ namespace Vehicles
             {
               case UpgradeType.Add:
                 component.AddArmorModifiers[node.key] = armorUpgrade.statModifiers;
-                break;
+              break;
               case UpgradeType.Set:
                 component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
-                break;
+              break;
             }
           }
         }
@@ -90,13 +92,15 @@ namespace Vehicles
               {
                 case UpgradeType.Add:
                   component.AddHealthModifiers[node.key] = healthUpgrade.value.Value;
-                  break;
+                break;
                 case UpgradeType.Set:
                   component.SetHealthModifier = healthUpgrade.value.Value;
-                  break;
+                break;
+                default:
+                  throw new NotImplementedException(nameof(UpgradeType));
               }
+              component.health = Mathf.Clamp(component.health + healthUpgrade.value.Value, 0, component.MaxHealth);
             }
-
 
             if (healthUpgrade.depth != null)
             {
@@ -131,10 +135,10 @@ namespace Vehicles
             {
               case UpgradeType.Add:
                 component.AddArmorModifiers.Remove(node.key);
-                break;
+              break;
               case UpgradeType.Set:
                 component.SetArmorModifiers.Remove(node.key);
-                break;
+              break;
             }
           }
         }
@@ -153,13 +157,15 @@ namespace Vehicles
               {
                 case UpgradeType.Add:
                   component.AddHealthModifiers.Remove(node.key);
-                  break;
+                break;
                 case UpgradeType.Set:
                   component.SetHealthModifier = -1;
-                  break;
+                break;
+                default:
+                  throw new NotImplementedException(nameof(UpgradeType));
               }
+              component.health = Mathf.Clamp(component.health - healthUpgrade.value.Value, 0, component.MaxHealth);
             }
-
 
             if (healthUpgrade.depth != null)
             {

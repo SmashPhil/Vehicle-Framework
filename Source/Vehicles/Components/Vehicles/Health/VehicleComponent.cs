@@ -175,11 +175,7 @@ public class VehicleComponent : IExposable, ITweakFields
 
   public virtual void HealComponent(float amount)
   {
-    health += amount;
-    if (health > MaxHealth)
-    {
-      health = MaxHealth;
-    }
+    health = Mathf.Clamp(health + amount, 0, MaxHealth);
     vehicle.EventRegistry[VehicleEventDefOf.Repaired].ExecuteEvents();
     vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
   }
@@ -188,9 +184,8 @@ public class VehicleComponent : IExposable, ITweakFields
   {
     result = Penetration.NonPenetrated;
     if (dinfo.Def.armorCategory == null)
-    {
       return;
-    }
+
     DamageArmorCategoryDef armorCategoryDef = dinfo.Def.armorCategory;
     float armorRating = ArmorRating(armorCategoryDef, out _);
     float armorDiff = armorRating - dinfo.ArmorPenetrationInt;

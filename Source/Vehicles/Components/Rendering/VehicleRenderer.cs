@@ -1,6 +1,5 @@
 ﻿using System;
 using RimWorld;
-using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
 using Verse;
