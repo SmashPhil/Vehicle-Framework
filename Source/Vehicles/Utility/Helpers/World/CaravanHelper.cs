@@ -356,12 +356,11 @@ public static class CaravanHelper
     {
       pawn.ExitMap(false, exitDir);
     }
-    foreach (Pawn pawn in caravan.PawnsListForReading)
+    // NOTE - use pawns NOT PawnsListForReading, don't add boarded to world pawns or they'll get ticked twice
+    foreach (Pawn pawn in caravan.pawns)
     {
       if (!pawn.IsWorldPawn())
-      {
         Find.WorldPawns.PassToWorld(pawn);
-      }
     }
     if (map != null)
     {

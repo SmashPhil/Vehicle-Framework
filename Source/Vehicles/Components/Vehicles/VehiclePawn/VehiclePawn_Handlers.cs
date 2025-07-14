@@ -57,14 +57,15 @@ public partial class VehiclePawn
   }
 
   #pragma warning disable 618
-  public bool HasEnoughOperators => CanMoveWithOperators;
 
   // TODO 1.7 - Rename to 'HasEnoughOperators'
+  [Obsolete("Use HasEnoughOperators instead. Will be removed in 1.7")]
+  public bool CanMoveWithOperators => HasEnoughOperators;
+
   /// <summary>
   /// Vehicle handler requirements are satisfied
   /// </summary>
-  [Obsolete("Use CanMoveWithOperators instead. Will be removed in 1.7")]
-  public bool CanMoveWithOperators
+  public bool HasEnoughOperators
   {
     get
     {
@@ -463,8 +464,11 @@ public partial class VehiclePawn
       {
         for (int i = handler.thingOwner.Count; --i >= 0;)
         {
-          handler.thingOwner.TryTransferToContainer(handler.thingOwner[i], caravan.pawns,
-            canMergeWithExistingStacks: false);
+          Pawn pawn = handler.thingOwner[i];
+          handler.thingOwner.Remove(pawn);
+          if (!pawn.IsWorldPawn())
+            Find.WorldPawns.PassToWorld(pawn);
+          caravan.AddPawn(pawn, true);
           EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
         }
       }

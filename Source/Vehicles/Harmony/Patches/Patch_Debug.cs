@@ -14,7 +14,7 @@ namespace Vehicles;
 
 internal class Patch_Debug : IPatchCategory
 {
-  PatchSequence IPatchCategory.PatchAt => PatchSequence.Mod;
+  PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
   {
@@ -46,7 +46,7 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(JobGiver_IdleWhileDespawned), "TryGiveJob"),
+    //  original: AccessTools.Method(typeof(Pawn_NeedsTracker), "NeedsTrackerTickInterval"),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
@@ -68,11 +68,15 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Pawn pawn)
+  private static void TestPrefix(Pawn ___pawn)
   {
     try
     {
-      Log.Message($"{pawn} idling.");
+      if (___pawn is { IsColonist: true, Spawned: false } && ___pawn.Faction == Faction.OfPlayer)
+      {
+        Log.Message("---");
+        Log.Message($"{___pawn} tick");
+      }
     }
     catch (Exception ex)
     {

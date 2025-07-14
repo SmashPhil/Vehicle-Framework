@@ -55,6 +55,8 @@ public static class VehicleGui
     (int width, int height) = GetOptimalTextureSize(rect, in request, oversampleFactor);
     RenderTexture rtA = RenderTextureUtil.CreateRenderTexture(width, height);
     RenderTexture rtB = RenderTextureUtil.CreateRenderTexture(width, height);
+    Assert.IsNotNull(rtA);
+    Assert.IsNotNull(rtB);
     return new RenderTextureBuffer(rtA, rtB);
   }
 

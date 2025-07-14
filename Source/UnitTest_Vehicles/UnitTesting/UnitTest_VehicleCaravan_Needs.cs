@@ -20,7 +20,7 @@ namespace Vehicles.UnitTesting;
   TestCategoryNames.Caravaning
 )]
 [TestDescription("VehicleCaravan needs mechanics on the world map.")]
-internal sealed class UnitTest_VehicleCaravanNeeds
+internal sealed class UnitTest_VehicleCaravan_Needs
 {
   private const int WorldUpdateTicksForPawn = 15;
   private static readonly Action<Pawn, ChemicalDef> ApplyAddiction;
@@ -30,7 +30,7 @@ internal sealed class UnitTest_VehicleCaravanNeeds
   private VehicleGroup group;
   private VehicleCaravan caravan;
 
-  static UnitTest_VehicleCaravanNeeds()
+  static UnitTest_VehicleCaravan_Needs()
   {
     MethodInfo method = AccessTools.Method(typeof(PawnAddictionHediffsGenerator), "ApplyAddiction");
     Assert.IsNotNull(method);
