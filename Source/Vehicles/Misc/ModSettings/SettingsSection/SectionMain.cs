@@ -182,11 +182,11 @@ public class SectionMain : SettingsSection
         GameFont.Small, TextAnchor.MiddleCenter);
       listingStandard.Gap(4);
       listingStandard.SliderLabeled("VF_BeachGenMultiplier".Translate(),
-        "VF_BeachGenMultiplierTooltip".Translate(), "%", ref beachMultiplier, BeachMultMin, BeachMultMax,
-        multiplier: 100, decimalPlaces: 0);
+        "VF_BeachGenMultiplierTooltip".Translate(), startSymbol: "+", endSymbol: "%", ref beachMultiplier,
+        BeachMultMin, BeachMultMax, multiplier: 100, decimalPlaces: 0);
       listingStandard.SliderLabeled("VF_RiverGenMultiplier".Translate(),
-        "VF_RiverGenMultiplierTooltip".Translate(), "%", ref riverMultiplier, RiverMultMin, RiverMultMax,
-        multiplier: 100, decimalPlaces: 0);
+        "VF_RiverGenMultiplierTooltip".Translate(), startSymbol: "+", endSymbol: "%", ref riverMultiplier,
+        RiverMultMin, RiverMultMax, multiplier: 100, decimalPlaces: 0);
       listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(),
         "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}",
         ref forceFactionCoastRadius, 0,

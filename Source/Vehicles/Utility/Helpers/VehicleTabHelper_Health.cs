@@ -24,6 +24,9 @@ public static class VehicleTabHelper_Health
 
   private const int ColumnCount = 2;
 
+  private static readonly Color SlightlyUpgraded = new(0.7f, 0.75f, 1);
+  private static readonly Color HeavilyUpgraded = Color.cyan;
+
   private static readonly Color MouseOverColor = new(0.85f, 0.85f, 0.85f, 0.1f);
   private static readonly Color AlternatingColor = new(0.75f, 0.75f, 0.75f, 0.1f);
 
@@ -329,8 +332,8 @@ public static class VehicleTabHelper_Health
       >= -0.5f and < -0.25f => HealthUtility.ImpairedColor,
       >= -0.25f and < 0     => HealthUtility.SlightlyImpairedColor,
       0                     => HealthUtility.GoodConditionColor,
-      > 0 and < 0.5f        => new Color(0.7f, 0.75f, 1),
-      >= 0.5f               => Color.cyan,
+      > 0 and < 0.5f        => SlightlyUpgraded,
+      >= 0.5f               => HeavilyUpgraded,
       _                     => HealthUtility.GoodConditionColor
     };
   }
