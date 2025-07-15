@@ -6,19 +6,13 @@ namespace Vehicles;
 
 public static class ModSettingsHelper
 {
-  private const int MediumMapSize = 250;
-
-  public static float BeachMultiplier(float coastWidth, Map map)
+  public static FloatRange BeachMultiplier(FloatRange coastOffset)
   {
-    const float MaxBeachSize = 60f;
-
-    if (Mathf.Approximately(VehicleMod.settings.main.beachMultiplier, 0))
-      return coastWidth;
-    // % is based on medium sized map
-    float mapSizeMultiplier =
-      (float)(map.Size.x >= map.Size.z ? map.Size.x : map.Size.z) / MediumMapSize;
-    // Set to max possible width by vanilla standards, then apply multiplier
-    return MaxBeachSize * (1 + VehicleMod.settings.main.beachMultiplier) * mapSizeMultiplier;
+    float multiplier = VehicleMod.settings.main.beachMultiplier;
+    if (Mathf.Approximately(multiplier, 0))
+      return coastOffset;
+    multiplier += 1; // Min is 100%, the multiplier is additive
+    return new FloatRange(coastOffset.min * multiplier, coastOffset.max * multiplier);
   }
 
   public static float RiverMultiplier => 1 +

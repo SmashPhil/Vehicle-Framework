@@ -58,8 +58,7 @@ internal class Patch_MapHandling : IPatchCategory
   /// </summary>
   private static void CoastSizeMultiplier(ref FloatRange __result)
   {
-    // result is a multiplier underneath, 0% = 100% original width
-    __result *= VehicleMod.settings.main.beachMultiplier;
+    __result = ModSettingsHelper.BeachMultiplier(__result);
   }
 
   /// <summary>
@@ -68,7 +67,6 @@ internal class Patch_MapHandling : IPatchCategory
   /// </summary>
   private static void RiverNodeWidth(ref float __result)
   {
-    // result is a flat width underneath, 0% = 0% original width so we start at 100%
     __result *= ModSettingsHelper.RiverMultiplier;
   }
 
