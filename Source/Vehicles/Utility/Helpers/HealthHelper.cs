@@ -34,10 +34,10 @@ namespace Vehicles
       StringBuilder explanation = new();
       foreach (VehicleComponent component in vehicle.statHandler.components)
       {
-        current += Mathf.RoundToInt(component.health);
+        current += Mathf.RoundToInt(component.Health);
         max += component.props.health;
         explanation.AppendLine(
-          $"{component.props.label}: {component.health} / {component.props.health}");
+          $"{component.props.label}: {component.Health} / {component.props.health}");
 
         float armorBlunt = component.ArmorRating(bluntArmor, out _);
         explanation.AppendLine(

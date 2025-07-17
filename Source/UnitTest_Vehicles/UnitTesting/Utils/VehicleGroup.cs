@@ -125,7 +125,6 @@ public class VehicleGroup : IDisposable
   {
     VehicleDef vehicleDef =
       TestDefGenerator.CreateTransientVehicleDef($"VehicleDef_MOCK_{Rand.Int}", settings);
-    vehicleDef.type = settings.type;
 
     if (!settings.statModifiers.NullOrEmpty())
     {
@@ -218,9 +217,9 @@ public class VehicleGroup : IDisposable
     public int extraSlots;
 
     public VehicleProperties properties;
-
     public Faction faction = Faction.OfPlayer;
 
+    public List<VehicleComponentProperties> components;
     public List<VehicleStatModifier> statModifiers;
     public List<CompProperties> comps;
   }

@@ -182,8 +182,8 @@ public class VehiclePathFinder : VehicleGridManager
       Mathf.Min(createdFor.Size.x, createdFor.Size.z) :
       1;
 
-    ChunkSet chunks = null;
 #if HIERARCHAL_PATHFINDING
+    ChunkSet chunks = null;
     if (VehicleMod.settings.debug.hierarchalPathfinding)
     {
       try
@@ -202,8 +202,6 @@ public class VehiclePathFinder : VehicleGridManager
 
     bool useHPA = VehicleMod.settings.debug.hierarchalPathfinding && chunks != null &&
       !chunks.NullOrEmpty();
-#else
-    const bool useHPA = false;
 #endif
 
     context.InitStatusesAndPushStartNode(startIndex);
@@ -268,11 +266,12 @@ public class VehiclePathFinder : VehicleGridManager
         IntVec3 cellToCheck = new(cellIntX, 0, cellIntZ);
 
         Rot8 pathDir = Rot8.DirectionFromCells(prevCell, cellToCheck);
+#if HIERARCHAL_PATHFINDING
         if (useHPA && !chunks.Cells.Contains(cellToCheck))
         {
           goto SkipNode; //Node not included in hierarchal path, ignore
         }
-
+#endif
         if (context.calcGrid[cellIndex].status != context.statusClosedValue || weightedHeuristics)
         {
           int initialCost = 0;

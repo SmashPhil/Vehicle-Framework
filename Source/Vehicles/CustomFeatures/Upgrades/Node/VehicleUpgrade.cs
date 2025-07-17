@@ -92,14 +92,15 @@ namespace Vehicles
               {
                 case UpgradeType.Add:
                   component.AddHealthModifiers[node.key] = healthUpgrade.value.Value;
+                  component.SetHealth(component.Health + healthUpgrade.value.Value);
                 break;
                 case UpgradeType.Set:
                   component.SetHealthModifier = healthUpgrade.value.Value;
+                  component.SetHealth(component.MaxHealth);
                 break;
                 default:
                   throw new NotImplementedException(nameof(UpgradeType));
               }
-              component.health = Mathf.Clamp(component.health + healthUpgrade.value.Value, 0, component.MaxHealth);
             }
 
             if (healthUpgrade.depth != null)
@@ -157,16 +158,16 @@ namespace Vehicles
               {
                 case UpgradeType.Add:
                   component.AddHealthModifiers.Remove(node.key);
+                  component.SetHealth(component.Health + healthUpgrade.value.Value);
                 break;
                 case UpgradeType.Set:
                   component.SetHealthModifier = -1;
+                  component.SetHealth(component.MaxHealth);
                 break;
                 default:
                   throw new NotImplementedException(nameof(UpgradeType));
               }
-              component.health = Mathf.Clamp(component.health - healthUpgrade.value.Value, 0, component.MaxHealth);
             }
-
             if (healthUpgrade.depth != null)
             {
               component.depthOverride = null;

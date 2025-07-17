@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
@@ -17,7 +16,7 @@ public class VehicleComponent : IExposable, ITweakFields
   [TweakField]
   public VehicleComponentProperties props;
 
-  public float health;
+  private float health;
 
   public IndicatorDef indicator;
   public Color highlightColor = Color.white;
@@ -29,21 +28,20 @@ public class VehicleComponent : IExposable, ITweakFields
     this.vehicle = vehicle;
   }
 
+  public float Health => health;
+
   public float HealthPercent => (health / MaxHealth).RoundTo(0.01f);
 
   public float Efficiency =>
     props.efficiency.Evaluate(HealthPercent); //Allow evaluating beyond 100% via stat parts
 
-  public Dictionary<string, List<StatModifier>> SetArmorModifiers { get; private set; } =
-    new Dictionary<string, List<StatModifier>>();
+  public Dictionary<string, List<StatModifier>> SetArmorModifiers { get; private set; } = [];
 
-  public Dictionary<string, List<StatModifier>> AddArmorModifiers { get; private set; } =
-    new Dictionary<string, List<StatModifier>>();
+  public Dictionary<string, List<StatModifier>> AddArmorModifiers { get; private set; } = [];
 
   public float SetHealthModifier { get; set; } = -1;
 
-  public Dictionary<string, float> AddHealthModifiers { get; private set; } =
-    new Dictionary<string, float>();
+  public Dictionary<string, float> AddHealthModifiers { get; private set; } = [];
 
   public VehiclePartDepth Depth => depthOverride ?? props.depth;
 
@@ -62,9 +60,9 @@ public class VehicleComponent : IExposable, ITweakFields
       float value = props.health;
       if (!AddHealthModifiers.NullOrEmpty())
       {
-        foreach (float health in AddHealthModifiers.Values)
+        foreach (float healthModifier in AddHealthModifiers.Values)
         {
-          value += health;
+          value += healthModifier;
         }
       }
       return value;
@@ -80,12 +78,20 @@ public class VehicleComponent : IExposable, ITweakFields
     }
   }
 
-  public void TakeDamage(VehiclePawn vehicle, DamageInfo dinfo, bool ignoreArmor = false)
+  public void SetHealth(float health)
   {
-    TakeDamage(vehicle, ref dinfo, ignoreArmor: ignoreArmor);
+    this.health = Mathf.Clamp(health, 0, MaxHealth);
+    vehicle?.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
   }
 
-  public virtual Penetration TakeDamage(VehiclePawn vehicle, ref DamageInfo dinfo,
+  // TODO 1.7 - Remove vehicle param
+  public void TakeDamage(VehiclePawn _, DamageInfo dinfo, bool ignoreArmor = false)
+  {
+    TakeDamage(null, ref dinfo, ignoreArmor: ignoreArmor);
+  }
+
+  // TODO 1.7 - Remove vehicle param
+  public virtual Penetration TakeDamage(VehiclePawn _, ref DamageInfo dinfo,
     bool ignoreArmor = false)
   {
     Penetration penetration = Penetration.NonPenetrated;
@@ -102,7 +108,7 @@ public class VehicleComponent : IExposable, ITweakFields
 
     health -= dinfo.Amount;
     float remainingDamage = Mathf.Clamp(-health, 0, float.MaxValue);
-    health = health.Clamp(0, MaxHealth);
+    health = Mathf.Clamp(health, 0, MaxHealth);
 
     if (dinfo.Amount > 0)
     {
@@ -116,14 +122,11 @@ public class VehicleComponent : IExposable, ITweakFields
 
       vehicle.EventRegistry[VehicleEventDefOf.DamageTaken].ExecuteEvents();
       vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
+
       if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
-      {
         vehicle.ignition.Drafted = false;
-      }
       if (vehicle.Spawned && vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity) < 0.01f)
-      {
         vehicle.Kill(dinfo);
-      }
     }
 
     if (penetration == Penetration.Electrified)
@@ -175,9 +178,13 @@ public class VehicleComponent : IExposable, ITweakFields
 
   public virtual void HealComponent(float amount)
   {
+    float oldHealth = health;
     health = Mathf.Clamp(health + amount, 0, MaxHealth);
-    vehicle.EventRegistry[VehicleEventDefOf.Repaired].ExecuteEvents();
-    vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
+    if (!Mathf.Approximately(oldHealth, health))
+    {
+      vehicle.EventRegistry[VehicleEventDefOf.Repaired].ExecuteEvents();
+      vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
+    }
   }
 
   public virtual void ReduceDamageFromArmor(ref DamageInfo dinfo, out Penetration result)
@@ -216,7 +223,6 @@ public class VehicleComponent : IExposable, ITweakFields
   /// <summary>
   /// Pulls armor rating of component for <paramref name="armorCategoryDef"/>.  If armor rating is not specified, defaults to vehicles overall armor rating for that armor category.
   /// </summary>
-  /// <param name="armorCategoryDef"></param>
   /// <returns>armor rating %</returns>
   public float ArmorRating(DamageArmorCategoryDef armorCategoryDef, out float upgraded)
   {
@@ -259,9 +265,9 @@ public class VehicleComponent : IExposable, ITweakFields
     upgraded = value - baseValue;
     return value;
 
-    bool TryGetModifier(List<StatModifier> statModifiers, out float value)
+    bool TryGetModifier(List<StatModifier> statModifiers, out float statModifierValue)
     {
-      value = 0;
+      statModifierValue = 0;
       if (statModifiers.NullOrEmpty())
       {
         return false;
@@ -270,7 +276,7 @@ public class VehicleComponent : IExposable, ITweakFields
       {
         if (statModifier.stat == armorCategoryDef.armorRatingStat)
         {
-          value = statModifier.value;
+          statModifierValue = statModifier.value;
           return true;
         }
       }
@@ -300,7 +306,7 @@ public class VehicleComponent : IExposable, ITweakFields
   {
   }
 
-  //Yes I'm aware this is very similar to BodyPartDepth, creating this for clarity that this is an entirely different set of mechanics for similar purpose
+  // Similar functionality to BodyPartDepth
   public enum VehiclePartDepth
   {
     Undefined,

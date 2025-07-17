@@ -781,7 +781,7 @@ public partial class VehiclePawn
             options.Add(new FloatMenuOption(component.props.label, delegate()
             {
               component.TakeDamage(this,
-                new DamageInfo(DamageDefOf.Vaporize, component.health * Rand.Range(0.1f, 1)),
+                new DamageInfo(DamageDefOf.Vaporize, component.Health * Rand.Range(0.1f, 1)),
                 ignoreArmor: true);
               Notify_TookDamage();
             }));

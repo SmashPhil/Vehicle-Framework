@@ -94,10 +94,6 @@ public partial class VehiclePawn
       // Must run back to front in case CompTick methods trigger their own removal
       compTickers[i].CompTick();
     }
-    // TODO - should check leaking when vehicle takes damage
-    // Leak tick is separate from tick by request so the fuel can continue to leak even if
-    // the comp itself does not need to be ticking.
-    CompFueledTravel?.LeakTick();
   }
 
   public override void TickRare()

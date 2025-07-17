@@ -60,13 +60,12 @@ namespace Vehicles
 
     public virtual void PostGenerationSetup()
     {
-      this.RegisterEvents();
-      InitializeVehicle();
       ageTracker.AgeBiologicalTicks = 0;
       ageTracker.AgeChronologicalTicks = 0;
       ageTracker.BirthAbsTicks = 0;
-      //health.Reset();
       statHandler.InitializeComponents();
+      this.RegisterEvents();
+      InitializeVehicle();
       RegenerateUnsavedComponents();
       UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
 

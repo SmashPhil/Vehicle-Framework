@@ -307,7 +307,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
       return 0;
     }
 
-    return component.health;
+    return component.Health;
   }
 
   /// <summary>
@@ -323,7 +323,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
       return;
     }
 
-    component.health = value;
+    component.SetHealth(value);
     MarkAllDirty();
     vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
   }
@@ -352,7 +352,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
       return;
     }
 
-    component.health = component.MaxHealth * value;
+    component.SetHealth(component.MaxHealth * value);
     MarkAllDirty();
     vehicle.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
   }
@@ -473,7 +473,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
     float total = 0;
     foreach (VehicleComponent component in components)
     {
-      current += component.health;
+      current += component.Health;
       total += component.MaxHealth;
     }
 

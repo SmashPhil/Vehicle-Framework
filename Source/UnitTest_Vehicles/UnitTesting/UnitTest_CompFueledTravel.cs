@@ -631,4 +631,119 @@ internal sealed class UnitTest_CompFueledTravel
     Expect.AreApproximatelyEqual(compFuel.Fuel, 0);
     Expect.AreEqual(listener.CountRaised, 1);
   }
+
+  [Test]
+  [TestDescription("Fuel leak operates intermittently based on health percent.")]
+  private void TicksPerLeak()
+  {
+    const float FuelLeakPercent = 0.5f;
+    const int TickLeakMin = 4;
+    const int TickLeakMax = 1;
+
+    // not the same as constants, conversion is TicksPerRealSecond / leakRate so min = 60 ticks, max = 1 tick
+    FloatRange leakRate = new((float)GenTicks.TicksPerRealSecond / TickLeakMin, GenTicks.TicksPerRealSecond);
+    int ticksPerLeak = CompFueledTravel.TicksPerLeak(1, FuelLeakPercent, leakRate);
+    Expect.AreEqual(ticksPerLeak, -1);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(0.75f, FuelLeakPercent, leakRate);
+    Expect.AreEqual(ticksPerLeak, -1);
+
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(FuelLeakPercent, FuelLeakPercent, leakRate);
+    Expect.AreEqual(ticksPerLeak, TickLeakMin);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(0, FuelLeakPercent, leakRate);
+    Expect.AreEqual(ticksPerLeak, TickLeakMax);
+
+    // Edge cases
+    FloatRange edgeCaseRate = new(0, leakRate.max);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(0.5f, FuelLeakPercent, edgeCaseRate);
+    Expect.AreEqual(ticksPerLeak, -1);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(-100, FuelLeakPercent, edgeCaseRate);
+    Expect.AreEqual(ticksPerLeak, TickLeakMax);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(100, FuelLeakPercent, edgeCaseRate);
+    Expect.AreEqual(ticksPerLeak, -1);
+    ticksPerLeak = CompFueledTravel.TicksPerLeak(0, 0, edgeCaseRate);
+    Expect.AreEqual(ticksPerLeak, -1);
+  }
+
+  [Test]
+  [TestDescription("Fuel leaks when component is damaged.")]
+  private void FuelLeakEvents()
+  {
+    const string ComponentKey = "MockComp";
+    const int MaxHealth = 100;
+    const float LeakHealthPct = 0.5f;
+    const float HealthToLeak = MaxHealth * LeakHealthPct;
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      components =
+      [
+        new VehicleComponentProperties
+        {
+          key = ComponentKey,
+          health = MaxHealth,
+
+          reactors =
+          [
+            new Reactor_FuelLeak
+            {
+              healthPercent = LeakHealthPct
+            }
+          ]
+        }
+      ],
+      comps =
+      [
+        new CompProperties_FueledTravel
+        {
+          compClass = typeof(CompFueledTravel),
+          fuelCapacity = FuelCapacity,
+          fuelType = ThingDefOf.Chemfuel,
+          fuelConsumptionRate = FuelConsumptionRate,
+          fuelConsumptionCondition = FuelConsumptionCondition.Drafted
+        }
+      ]
+    });
+    group.Spawn();
+    Assert.IsFalse(group.vehicle.Drafted);
+    CompFueledTravel compFuel = group.vehicle.CompFueledTravel;
+    Assert.IsNotNull(compFuel);
+    VehicleComponent component = group.vehicle.statHandler.GetComponent(ComponentKey);
+    Assert.IsNotNull(component);
+    compFuel.Refuel(compFuel.FuelCapacity);
+
+    Assert.AreApproximatelyEqual(compFuel.FuelPercent, 1);
+    Assert.AreEqual(component.HealthPercent, 1);
+    Expect.IsFalse(compFuel.FuelLeaking);
+
+    using (EventListener<VehicleEventDef> listener = new(group.vehicle, VehicleEventDefOf.DamageTaken))
+    {
+      DamageInfo damageInfo = new(DamageDefOf.Vaporize, MaxHealth - HealthToLeak);
+      component.TakeDamage(group.vehicle, damageInfo, ignoreArmor: true);
+      Assert.AreEqual(component.Health, HealthToLeak);
+      Assert.AreEqual(listener.CountRaised, 1);
+      Expect.IsTrue(compFuel.FuelLeaking);
+    }
+
+    using (EventListener<VehicleEventDef> listener = new(group.vehicle, VehicleEventDefOf.Repaired))
+    {
+      component.HealComponent(MaxHealth);
+      Assert.AreEqual(component.Health, MaxHealth);
+      Assert.AreEqual(listener.CountRaised, 1);
+      Expect.IsFalse(compFuel.FuelLeaking);
+    }
+
+    using (EventListener<VehicleEventDef> listener = new(group.vehicle, VehicleEventDefOf.HealthChanged))
+    {
+      component.SetHealth(HealthToLeak);
+      Assert.AreEqual(component.Health, HealthToLeak);
+      Assert.AreEqual(listener.CountRaised, 1);
+      Expect.IsTrue(compFuel.FuelLeaking);
+      component.SetHealth(MaxHealth);
+      Assert.AreEqual(component.Health, MaxHealth);
+      Assert.AreEqual(listener.CountRaised, 2);
+      Expect.IsFalse(compFuel.FuelLeaking);
+    }
+  }
 }

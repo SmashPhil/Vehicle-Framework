@@ -495,7 +495,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   private void RevalidateConsumptionStatus()
   {
-    if (ShouldConsumeNow || Charging)
+    if (ShouldConsumeNow || Charging || FuelLeaking)
     {
       StartTicking();
     }
@@ -518,6 +518,9 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public override void CompTick()
   {
+    if (FuelLeaking)
+      LeakTick();
+
     if (!ShouldConsumeNow)
       return;
 
@@ -549,43 +552,37 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
-  public void LeakTick()
+  private void LeakTick()
   {
-    if (Find.TickManager.TicksGame % TicksPerLeakCheck == 0 && !FuelComponents.NullOrEmpty())
+    foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
     {
-      FuelLeaking = false;
-      foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
+      int ticksPerLeak = TicksPerLeak(component.HealthPercent, fuelLeak.healthPercent, fuelLeak.rate);
+      if (Find.TickManager.TicksGame % ticksPerLeak != 0)
+        continue;
+
+      ConsumeFuel(FuelPerLeak);
+      if (Vehicle.Spawned && Props.leakDef != null && !EmptyTank)
       {
-        FuelLeaking |= component.HealthPercent <= fuelLeak.healthPercent;
+        IntVec2 offset =
+          component.props.hitbox.cells.RandomElementWithFallback(fallback: IntVec2.Zero);
+        IntVec3 leakCell = new(Vehicle.Position.x + offset.x, 0,
+          Vehicle.Position.z + offset.z);
+        FilthMaker.TryMakeFilth(leakCell, Vehicle.Map, Props.leakDef);
       }
     }
+  }
 
-    if (FuelLeaking)
-    {
-      foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
-      {
-        float t = (fuelLeak.healthPercent - component.HealthPercent) * (1 / fuelLeak.healthPercent);
-        float rate = Mathf.Lerp(fuelLeak.rate.min, fuelLeak.rate.max, t);
-        if (rate == 0)
-        {
-          continue;
-        }
-
-        int ticksPerLeak = Mathf.CeilToInt(60 / rate);
-        if (Find.TickManager.TicksGame % ticksPerLeak == 0)
-        {
-          ConsumeFuel(FuelPerLeak);
-          if (Vehicle.Spawned && Props.leakDef != null && !EmptyTank)
-          {
-            IntVec2 offset =
-              component.props.hitbox.cells.RandomElementWithFallback(fallback: IntVec2.Zero);
-            IntVec3 leakCell = new(Vehicle.Position.x + offset.x, 0,
-              Vehicle.Position.z + offset.z);
-            FilthMaker.TryMakeFilth(leakCell, Vehicle.Map, Props.leakDef);
-          }
-        }
-      }
-    }
+  public static int TicksPerLeak(float healthPercent, float fuelLeakPercent, FloatRange leakRate)
+  {
+    if (fuelLeakPercent <= 0)
+      return -1;
+    float t = (fuelLeakPercent - healthPercent) * (1 / fuelLeakPercent);
+    if (t < 0)
+      return -1;
+    float rate = Mathf.Lerp(leakRate.min, leakRate.max, t);
+    if (rate <= 0)
+      return -1;
+    return Mathf.CeilToInt(GenTicks.TicksPerRealSecond / rate);
   }
 
   public override void CompTickRare()
@@ -691,9 +688,24 @@ public class CompFueledTravel : VehicleComp, IRefundable
     }
   }
 
+  private void RevalidateFuelLeakage()
+  {
+    if (FuelComponents.NullOrEmpty())
+      return;
+
+    bool wasLeaking = FuelLeaking;
+    FuelLeaking = false;
+    foreach ((VehicleComponent component, Reactor_FuelLeak fuelLeak) in FuelComponents)
+    {
+      FuelLeaking |= component.HealthPercent <= fuelLeak.healthPercent;
+    }
+    if (FuelLeaking != wasLeaking)
+      RevalidateConsumptionStatus();
+  }
+
   public override void EventRegistration()
   {
-    FuelComponents = new List<(VehicleComponent component, Reactor_FuelLeak fuelLeak)>();
+    FuelComponents = [];
     foreach (VehicleComponent component in Vehicle.statHandler.components.Where(component =>
       component.props.HasReactor<Reactor_FuelLeak>()))
     {
@@ -709,7 +721,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
     Vehicle.AddEvent(VehicleEventDefOf.Refueled, RevalidateConsumptionStatus);
     Vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, RevalidateConsumptionStatus);
     Vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, RevalidateConsumptionStatus);
-    Vehicle.AddEvent(VehicleEventDefOf.HealthChanged, RevalidateConsumptionStatus);
+    Vehicle.AddEvent(VehicleEventDefOf.HealthChanged, RevalidateFuelLeakage);
   }
 
   public override void PostGeneration()

@@ -89,6 +89,12 @@ internal static class TestDefGenerator
     def.buildDef = buildDef;
     buildDef.thingToSpawn = def;
 
+    if (settings != null)
+    {
+      def.type = settings.type;
+      def.components = settings.components;
+    }
+
     if (settings != null && !settings.comps.NullOrEmpty())
     {
       foreach (CompProperties compProps in settings.comps)

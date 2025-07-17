@@ -29,10 +29,10 @@ public class Dialog_VehiclePainter : Window
   private const int GridDimensionRows = 2;
   private const int SampleCount = GridDimensionColumns * GridDimensionRows;
 
-  private static readonly Texture2D mouseOpenCursor =
+  private static readonly Texture2D MouseOpenCursor =
     ContentFinder<Texture2D>.Get("UI/Cursors/MouseHandOpen");
 
-  private static readonly Texture2D mouseClosedCursor =
+  private static readonly Texture2D MouseClosedCursor =
     ContentFinder<Texture2D>.Get("UI/Cursors/MouseHandClosed");
 
   private int pageNumber;
@@ -445,12 +445,12 @@ public class Dialog_VehiclePainter : Window
   {
     if (selectedPattern.properties.dynamicTiling && Mouse.IsOver(rect))
     {
-      if (!mouseOver && mouseOpenCursor)
+      if (!mouseOver && MouseOpenCursor)
       {
         mouseOver = true;
-        Cursor.SetCursor(mouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
+        Cursor.SetCursor(MouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
       }
-      if (Input.GetMouseButtonDown(0) && !draggingDisplacement && mouseClosedCursor)
+      if (Input.GetMouseButtonDown(0) && !draggingDisplacement && MouseClosedCursor)
       {
         draggingDisplacement = true;
         initialDragDifferenceX =
@@ -459,7 +459,7 @@ public class Dialog_VehiclePainter : Window
         initialDragDifferenceY =
           Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y) * 2 - 1 -
           displacementY;
-        Cursor.SetCursor(mouseClosedCursor, new Vector2(3, 3), CursorMode.Auto);
+        Cursor.SetCursor(MouseClosedCursor, new Vector2(3, 3), CursorMode.Auto);
       }
       if (draggingDisplacement && Event.current.isMouse)
       {
@@ -480,10 +480,10 @@ public class Dialog_VehiclePainter : Window
           SetRenderTexturesDirty();
         }
       }
-      if (Input.GetMouseButtonUp(0) && mouseOpenCursor)
+      if (Input.GetMouseButtonUp(0) && MouseOpenCursor)
       {
         draggingDisplacement = false;
-        Cursor.SetCursor(mouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
+        Cursor.SetCursor(MouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
       }
     }
     else
