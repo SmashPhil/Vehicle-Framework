@@ -12,7 +12,7 @@ using Verse;
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(TestCategoryNames.VehiclePawn)]
+[TestCategory(TestCategoryNames.VehiclePawn, TestCategoryNames.Events)]
 [TestDescription("Mechanics related to fuel for vehicle pawns.")]
 internal sealed class UnitTest_CompFueledTravel
 {

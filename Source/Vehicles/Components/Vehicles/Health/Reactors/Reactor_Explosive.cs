@@ -40,6 +40,9 @@ public class Reactor_Explosive : Reactor, ITweakFields
   public override void Hit(VehiclePawn vehicle, VehicleComponent component, ref DamageInfo dinfo,
     VehicleComponent.Penetration penetration)
   {
+    if (!vehicle.Spawned)
+      return;
+
     if (component.Health > 0 && component.HealthPercent <= healthPercent && Rand.Chance(chance))
     {
       SpawnExploder(vehicle, component);
