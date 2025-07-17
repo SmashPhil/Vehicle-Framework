@@ -46,7 +46,11 @@ public struct BlitRequest
     if (vehicle.GetCachedComp<CompVehicleTurrets>() is { } compTurrets &&
       !compTurrets.Turrets.NullOrEmpty())
     {
-      request.blitTargets.AddRange(compTurrets.Turrets);
+      foreach (VehicleTurret turret in compTurrets.Turrets)
+      {
+        if (!turret.NoGraphic)
+          request.blitTargets.Add(turret);
+      }
     }
     if (!vehicle.DrawTracker.overlayRenderer.AllOverlaysListForReading.NullOrEmpty())
     {
@@ -62,7 +66,11 @@ public struct BlitRequest
     request.blitTargets.Add(vehicleDef);
     if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is { } props)
     {
-      request.blitTargets.AddRange(props.turrets);
+      foreach (VehicleTurret turret in props.turrets)
+      {
+        if (!turret.NoGraphic)
+          request.blitTargets.Add(turret);
+      }
     }
     if (!vehicleDef.drawProperties.overlays.NullOrEmpty())
     {

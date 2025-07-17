@@ -53,7 +53,7 @@ internal static class TestDefGenerator
       selectable = true,
       useHitPoints = false,
       properties = settings?.properties ?? new VehicleProperties(),
-
+      drawProperties = settings?.drawProperties ?? new VehicleDrawProperties(),
       graphicData = new GraphicDataRGB
       {
         graphicClass = typeof(Graphic_Vehicle),

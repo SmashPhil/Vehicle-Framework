@@ -217,6 +217,7 @@ public class VehicleGroup : IDisposable
     public int extraSlots;
 
     public VehicleProperties properties;
+    public VehicleDrawProperties drawProperties;
     public Faction faction = Faction.OfPlayer;
 
     public List<VehicleComponentProperties> components;
