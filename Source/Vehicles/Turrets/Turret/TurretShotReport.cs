@@ -50,14 +50,16 @@ public struct TurretShotReport
   public static TurretShotReport HitReportFor(VehiclePawn vehicle, VehicleTurret turret,
     LocalTargetInfo target, Pawn caster = null)
   {
+    Map map = vehicle.Map;
     IntVec3 cell = target.Cell;
     Vector3 cellPos = cell.ToVector3Shifted();
-    Vector3 turretPos = turret.DrawPosition(vehicle.FullRotation);
+    Vector3 turretPos = turret.DrawPosition(vehicle.FullRotation) + vehicle.DrawPos;
+    IntVec3 turretCell = turretPos.ToIntVec3();
     TurretShotReport result = new()
     {
       distance = Vector2.Distance(new Vector2(cellPos.x, cellPos.z),
         new Vector2(turretPos.x, turretPos.z)),
-      target = target.ToTargetInfo(vehicle.Map)
+      target = target.ToTargetInfo(map)
     };
     result.factorFromShooterAndDist = turret.CurrentFireMode.canMiss ?
       HitFactorFromShooter(caster, result.distance) :
@@ -65,17 +67,17 @@ public struct TurretShotReport
     result.factorFromTurret = turret.CurrentFireMode.GetHitChanceFactor(result.distance);
 
     // Cover
-    result.covers = CoverUtility.CalculateCoverGiverSet(target, vehicle.Position, vehicle.Map);
+    result.covers = CoverUtility.CalculateCoverGiverSet(target, turretCell, map);
     result.coversOverallBlockChance =
-      CoverUtility.CalculateOverallBlockChance(target, vehicle.Position, vehicle.Map);
+      CoverUtility.CalculateOverallBlockChance(target, turretCell, map);
 
     // Gas
     result.factorFromCoveringGas = 1f;
-    if (turret.TryFindShootLineFromTo(turretPos.ToIntVec3(), target, out result.shootLine))
+    if (turret.TryFindShootLineFromTo(turretCell, target, out result.shootLine))
     {
       foreach (IntVec3 item in result.shootLine.Points())
       {
-        if (item.AnyGas(vehicle.Map, GasType.BlindSmoke))
+        if (item.InBounds(map) && item.AnyGas(map, GasType.BlindSmoke))
         {
           result.factorFromCoveringGas = 0.7f;
           break;
@@ -89,9 +91,9 @@ public struct TurretShotReport
 
     // Weather
     result.factorFromWeather =
-      vehicle.Position.Roofed(vehicle.Map) && target.Cell.Roofed(vehicle.Map) ?
+      turretCell.Roofed(map) && target.Cell.Roofed(map) ?
         1 :
-        vehicle.Map.weatherManager.CurWeatherAccuracyMultiplier;
+        map.weatherManager.CurWeatherAccuracyMultiplier;
     if (target.HasThing)
     {
       if (target.Thing is Pawn pawn)
