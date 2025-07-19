@@ -1,11 +1,12 @@
 ﻿using JetBrains.Annotations;
+using SmashTools;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[PublicAPI]
 public class GraphicDataLayered : GraphicData
 {
   public const int SubLayerCount = 10;

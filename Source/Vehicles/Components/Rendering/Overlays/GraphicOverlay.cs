@@ -24,6 +24,7 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 
   private PreRenderResults results;
 
+  [TweakField]
   private Graphic graphic;
 
   // ReSharper disable once FieldCanBeMadeReadOnly.Local

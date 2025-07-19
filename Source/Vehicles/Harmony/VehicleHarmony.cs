@@ -157,6 +157,8 @@ public static class VehicleHarmony
   private static void RegisterTweakFieldsInEditor()
   {
     EditWindow_TweakFields.RegisterField(
+      AccessTools.Field(typeof(Graphic), nameof(Graphic.data)), string.Empty, string.Empty, UISettingsType.None);
+    EditWindow_TweakFields.RegisterField(
       AccessTools.Field(typeof(GraphicData), nameof(GraphicData.drawOffset)),
       string.Empty, string.Empty, UISettingsType.FloatBox);
     EditWindow_TweakFields.RegisterField(
