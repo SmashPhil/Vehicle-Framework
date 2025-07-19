@@ -91,9 +91,9 @@ public class FlakWorker : AntiAircraftWorker
   {
     if (airDefense.parent is MapParent mapParent && mapParent.HasMap)
     {
-      turretsCachedInMap.Clear();
-      turretsCachedInMap.AddRange(mapParent.Map.GetCachedMapComponent<ListerAirDefenses>()
-       .AllAirDefenses());
+      //turretsCachedInMap.Clear();
+      //turretsCachedInMap.AddRange(mapParent.Map.GetCachedMapComponent<ListerAirDefenses>()
+      // .AllAirDefenses());
     }
   }
 

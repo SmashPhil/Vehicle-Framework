@@ -220,60 +220,6 @@ internal class Patch_VehiclePathing : IPatchCategory
     return true;
   }
 
-  /// <summary>
-  /// Set cells in which vehicles reside as impassable to other Pawns
-  /// </summary>
-  /// <param name="instructions"></param>
-  /// <param name="ilg"></param>
-  private static IEnumerable<CodeInstruction> PathAroundVehicles(
-    IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-  {
-    List<CodeInstruction> instructionList = instructions.ToList();
-    for (int i = 0; i < instructionList.Count; i++)
-    {
-      CodeInstruction instruction = instructionList[i];
-      if (instruction.Calls(AccessTools.Method(typeof(CellIndices),
-        nameof(CellIndices.CellToIndex), [typeof(int), typeof(int)])))
-      {
-        Label label = ilg.DefineLabel();
-        Label vehicleLabel = ilg.DefineLabel();
-
-        yield return instruction; //CALLVIRT CELLTOINDEX
-        instruction = instructionList[++i];
-        yield return instruction; //STLOC.S 43
-        instruction = instructionList[++i];
-
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
-          operand: AccessTools.Field(typeof(PathFinder), "map"));
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 41);
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, 42);
-        yield return new CodeInstruction(opcode: OpCodes.Call,
-          operand: AccessTools.Method(typeof(PathingHelper),
-            nameof(PathingHelper.VehicleImpassableInCell),
-            [typeof(Map), typeof(int), typeof(int)]));
-
-        yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-        yield return new CodeInstruction(opcode: OpCodes.Ldc_I4_0);
-        yield return new CodeInstruction(opcode: OpCodes.Br, vehicleLabel);
-
-        for (int j = i; j < instructionList.Count; j++)
-        {
-          CodeInstruction instruction2 = instructionList[j];
-          if (instruction2.opcode == OpCodes.Brfalse || instruction2.opcode == OpCodes.Brfalse_S)
-          {
-            instruction2.labels.Add(vehicleLabel);
-            break;
-          }
-        }
-
-        instruction.labels.Add(label);
-      }
-
-      yield return instruction;
-    }
-  }
-
   private static bool OccupiedRectVehicles(Thing t, ref CellRect __result)
   {
     if (t is VehiclePawn vehicle)

@@ -409,8 +409,8 @@ namespace Vehicles
     /// <param name="cell"></param>
     public static bool VehicleImpassableInCell(Map map, IntVec3 cell)
     {
-      return map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is { } vehicle &&
-        vehicle.VehicleDef.passability == Traversability.Impassable;
+      return map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is
+        { VehicleDef.passability: Traversability.Impassable };
     }
 
     /// <see cref="VehicleImpassableInCell(Map, IntVec3)"/>

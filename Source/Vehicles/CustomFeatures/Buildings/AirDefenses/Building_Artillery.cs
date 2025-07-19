@@ -330,13 +330,13 @@ namespace Vehicles
 
     public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
     {
-      Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseDespawned(this);
+      //Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseDespawned(this);
       base.DeSpawn(mode);
     }
 
     public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
     {
-      Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseDespawned(this);
+      //Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseDespawned(this);
       base.Destroy(mode);
     }
 
@@ -348,7 +348,7 @@ namespace Vehicles
         TopArtillery.SetRotationFromOrientation();
         burstCooldownTicksLeft = def.building.turretInitialCooldownTime.SecondsToTicks();
       }
-      Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseSpawned(this);
+      //Map.GetCachedMapComponent<ListerAirDefenses>().Notify_AirDefenseSpawned(this);
       ActiveVerb = base.AttackVerb;
       TopArtillery.PostSpawnSetup();
     }
