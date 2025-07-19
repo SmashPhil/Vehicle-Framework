@@ -88,6 +88,8 @@
   <VF_CanRoofPunchTooltip>Vehicle can punch through roofs when landing.</VF_CanRoofPunchTooltip>
   <VF_SpaceFlight>Space Faring</VF_SpaceFlight>
   <VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
+  <VF_SignalJamming>Signal Jammer</VF_SignalJamming>
+  <VF_SignalJammingTooltip>Vehicle is capable of jamming signals in order to visit certain orbital platforms.</VF_SignalJammingTooltip>
   <VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
   <VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
   <VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
