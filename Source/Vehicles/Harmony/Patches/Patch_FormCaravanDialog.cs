@@ -279,6 +279,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
           i += 3;
           Assert.IsFalse(instructionList.OutOfBounds(i));
           instruction = instructionList[i];
+
+          // SetInitialTab(this)
+          yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+          yield return new CodeInstruction(opcode: OpCodes.Call,
+            operand: AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(SetInitialTab)));
         }
       }
       yield return instruction;
@@ -293,7 +298,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       Assert.IsNull(CaravanFormation.formation);
       Assert.IsTrue(tabsList.NullOrEmpty());
       CaravanFormation.formation = new FormationInfo(formCaravan, map);
-      selectedTab = TabVehicles;
       tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
         delegate { selectedTab = TabVehicles; },
         () => selectedTab == TabVehicles));
@@ -303,6 +307,19 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
           () => selectedTab == value));
       }
+    }
+  }
+
+  private static void SetInitialTab(Dialog_FormCaravan formCaravan)
+  {
+    const int TabPawns = 0;
+
+    selectedTab = formCaravan.transferables.Exists(HasVehicleTransferable) ? TabVehicles : TabPawns;
+    return;
+
+    static bool HasVehicleTransferable(TransferableOneWay transferable)
+    {
+      return transferable.AnyThing is VehiclePawn;
     }
   }
 
