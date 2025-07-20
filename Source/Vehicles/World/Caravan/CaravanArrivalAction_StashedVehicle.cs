@@ -20,7 +20,7 @@ public class CaravanArrivalAction_StashedVehicle : CaravanArrivalAction
     this.stashedVehicle = stashedVehicle;
   }
 
-  public override string Label => "VF_CommandUndockShip".Translate(stashedVehicle.Label);
+  public override string Label => "VF_RecoverVehicles".Translate();
 
   public override string ReportString => "CaravanVisiting".Translate(stashedVehicle.Label);
 
@@ -62,7 +62,7 @@ public class CaravanArrivalAction_StashedVehicle : CaravanArrivalAction
     return CaravanArrivalActionUtility.GetFloatMenuOptions(
       () => CanVisit(caravan, stashedVehicle),
       () => new CaravanArrivalAction_StashedVehicle(stashedVehicle),
-      "VF_CommandUndockShip".Translate(stashedVehicle.Label), caravan, stashedVehicle.Tile,
+      "VF_RecoverVehicles".Translate(), caravan, stashedVehicle.Tile,
       stashedVehicle);
   }
 }

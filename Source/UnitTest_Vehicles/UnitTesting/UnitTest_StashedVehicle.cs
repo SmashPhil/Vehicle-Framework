@@ -84,9 +84,11 @@ internal sealed class UnitTest_StashedVehicle
 
     VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
     Assert.IsNotNull(mergedVehicleCaravan);
+    Expect.IsTrue(mergedVehicleCaravan.PawnsListForReading.Contains(colonist), "Passenger Transferred");
+    Expect.IsTrue(mergedVehicleCaravan.PawnsListForReading.Contains(animal), "Animal Transferred");
+    Expect.IsTrue(mergedVehicleCaravan.ContainsPawn(vehicle), "Vehicle Merged Into Caravan");
     Expect.IsTrue(caravan.Destroyed, "Caravan Destroyed");
     Expect.IsTrue(stashedVehicle.Destroyed, "StashedVehicle Destroyed");
-    Expect.IsTrue(mergedVehicleCaravan.ContainsPawn(vehicle), "Vehicle Merged Into Caravan");
 
     mergedVehicleCaravan.Destroy();
     Assert.IsTrue(mergedVehicleCaravan.Destroyed);

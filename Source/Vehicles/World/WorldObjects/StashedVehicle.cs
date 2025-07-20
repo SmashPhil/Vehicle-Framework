@@ -81,6 +81,7 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 
     VehicleCaravan mergedCaravan =
       CaravanHelper.MakeVehicleCaravan(pawns, caravan.Faction, caravan.Tile, true);
+    mergedCaravan.RecacheVehicles();
 
     for (int i = stash.Count - 1; i >= 0; i--)
     {

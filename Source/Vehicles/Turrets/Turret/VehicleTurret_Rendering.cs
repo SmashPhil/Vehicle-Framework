@@ -1126,7 +1126,7 @@ public partial class VehicleTurret
         offset.x += parentOffset.x;
         offset.y += parentOffset.z;
       }
-      return new Vector3(offset.x, graphicOffset.y, offset.y);
+      return new Vector3(offset.x, graphicOffset.y + turret.DrawLayerOffset, offset.y);
     }
 
     public override string ToString()

@@ -5,9 +5,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using UnityEngine;
 using UnityEngine.Assertions;
-using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 
@@ -91,19 +89,20 @@ public partial class VehiclePawn
   {
     get
     {
-      List<Pawn> pawnsOnShip = new List<Pawn>();
-      if (!(handlers is null) && handlers.Count > 0)
+      // TODO - can be cached
+      List<Pawn> pawnsOnShip = [];
+      if (handlers is { Count: > 0 })
       {
         foreach (VehicleRoleHandler handler in handlers)
         {
-          if (!(handler.thingOwner is null) && handler.thingOwner.Count > 0)
-            pawnsOnShip.AddRange(handler.thingOwner);
+          foreach (Pawn pawn in handler.thingOwner)
+          {
+            if (pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+              pawnsOnShip.Add(pawn);
+          }
         }
       }
-
-      pawnsOnShip = pawnsOnShip
-       .Where(x => x.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))?.ToList();
-      return pawnsOnShip ?? new List<Pawn>() { };
+      return pawnsOnShip;
     }
   }
 
