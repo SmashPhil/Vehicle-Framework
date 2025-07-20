@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
+using SmashTools;
 using UnityEngine;
 using Verse;
-using RimWorld;
-using SmashTools;
 
 namespace Vehicles;
 
+[PublicAPI]
 public class UpgradeNode
 {
   // ReSharper disable once UnassignedReadonlyField
-  public readonly string key;
+  public string key;
   public string label;
   public string description;
   public string upgradeExplanation;

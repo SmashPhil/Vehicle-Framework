@@ -200,7 +200,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
     if (CompPropsUpgradeTree != null)
     {
-      inspectorTabs.Add(typeof(ITab_Vehicle_Upgrades));
+      inspectorTabs?.Add(typeof(ITab_Vehicle_Upgrades));
     }
 
     base.ResolveReferences();

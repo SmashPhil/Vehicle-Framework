@@ -180,7 +180,7 @@ public static class VehicleGhostUtility
       {
         Graphic graphic = vehicleDef.GhostGraphicFor(turret, ghostColor);
         VehicleTurret.TurretDrawData turretDrawData = turret.TurretGraphics[i];
-        Vector3 rootPos = drawPos + turretDrawData.DrawOffset(rot, extraRotation);
+        Vector3 rootPos = drawPos + turretDrawData.DrawOffset(rot, 0, extraRotation);
         Mesh cannonMesh = graphic.MeshAt(rot);
         Graphics.DrawMesh(cannonMesh, rootPos, extraRotation.ToQuat(), graphic.MatAt(rot), 0);
       }

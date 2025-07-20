@@ -42,6 +42,8 @@ public class VehicleDrawTracker
 
   private bool RenderersInitialized { get; set; }
 
+  internal IReadOnlyList<IParallelRenderer> ParallelRenderers => parallelRenderers;
+
   public Vector3 DrawPos
   {
     get

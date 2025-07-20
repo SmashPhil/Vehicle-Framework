@@ -97,7 +97,7 @@ public partial class VehicleTurret
   private RotatingList<Texture2D> overheatIcons;
 
   [Unsaved]
-  private bool selfDirty;
+  private bool selfDirty = true;
 
   bool IParallelRenderer.IsDirty
   {
@@ -182,7 +182,7 @@ public partial class VehicleTurret
   {
     get
     {
-      if (cachedMaterial is null)
+      if (!cachedMaterial)
         ResolveGraphics(vehicle);
       return cachedMaterial;
     }
@@ -299,6 +299,14 @@ public partial class VehicleTurret
         // Ensure meshes are created and cached
         for (int i = 0; i < 4; i++)
           _ = Graphic.MeshAt(new Rot4(i));
+        if (!TurretGraphics.NullOrEmpty())
+        {
+          foreach (TurretDrawData drawData in TurretGraphics)
+          {
+            for (int i = 0; i < 4; i++)
+              drawData.graphic.MeshAt(new Rot4(i));
+          }
+        }
 
         if (!childTurrets.NullOrEmpty())
         {
@@ -367,8 +375,7 @@ public partial class VehicleTurret
     // This is more or less the same implementation as Graphic_Rgb::ParallelGetPreRenderResults
     // The fixed North orientation, turret rotation, and additional offsetting makes it more
     // trouble than its worth to try and fetch then modify. May want to refactor in the future.
-    float turretRotation =
-      transformData.rotation + rotation;
+    float turretRotation = transformData.rotation + rotation;
     float pivotRotation = transformData.rotation + parentRotation;
     //Vector3 rootPos = transformData.position +
     //  TurretDrawLocFor(transformData.orientation, pivotRotation);
@@ -413,15 +420,13 @@ public partial class VehicleTurret
 
       TurretDrawData turretDrawData = TurretGraphics[i];
       Turret_RecoilTracker subRecoilTracker = recoilTrackers[i];
-      float turretRotation =
-        transformData.rotation + rotation;
+      float turretRotation = transformData.rotation + rotation;
       float pivotRotation = transformData.rotation + parentRotation;
       // This is more or less the same implementation as Graphic_Rgb::ParallelGetPreRenderResults
       // The fixed North orientation, turret rotation, and additional offsetting makes it more
       // trouble than its worth to try and fetch then modify.
-      Vector3 rootPos =
-        transformData.position +
-        turretDrawData.DrawOffset(transformData.orientation, pivotRotation);
+      Vector3 rootPos = transformData.position +
+        turretDrawData.DrawOffset(transformData.orientation, turretRotation, pivotRotation);
       Vector3 recoilOffset = Vector3.zero;
       Vector3 parentRecoilOffset = Vector3.zero;
       if (subRecoilTracker is { Recoil: > 0f })
@@ -1103,14 +1108,15 @@ public partial class VehicleTurret
       graphic = GenerateGraphicData(this, turret, copyFrom, patternData, ref graphicData);
     }
 
-    public Vector3 DrawOffset(Rot8 rot, float rotation)
+    public Vector3 DrawOffset(Rot8 rot, float parentRotation, float rotation)
     {
       Rot8 offsetRot = rot;
       if (turret.attachedTo != null)
         offsetRot = Rot8.North;
       Vector3 graphicOffset = graphic?.DrawOffset(offsetRot) ?? Vector3.zero;
+      Vector2 graphicOffsetRotated = new Vector2(graphicOffset.x, graphicOffset.z).RotatePointClockwise(parentRotation);
       Vector2 propsOffset = turret.renderProperties.OffsetFor(offsetRot);
-      Vector2 offset = new(graphicOffset.x + propsOffset.x, graphicOffset.z + propsOffset.y);
+      Vector2 offset = new(graphicOffsetRotated.x + propsOffset.x, graphicOffsetRotated.y + propsOffset.y);
 
       offset = offset.RotatePointClockwise(rotation);
 

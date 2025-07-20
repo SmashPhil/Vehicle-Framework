@@ -240,7 +240,7 @@ namespace Vehicles
     /// </summary>
     public void FinishUnlock(UpgradeNode node)
     {
-      if (upgrade != null && upgrade.Removal)
+      if (upgrade is { Removal: true })
       {
         ResetUnlock(node);
         return;

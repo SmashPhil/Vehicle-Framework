@@ -179,6 +179,7 @@ public class TimedExplosion : IExposable, IParallelRenderer
     if (ticksLeft <= 0)
     {
       Explode();
+      return false;
     }
 
     ticksLeft--;

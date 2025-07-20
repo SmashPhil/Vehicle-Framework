@@ -648,7 +648,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
       (VehicleTurret)Activator.CreateInstance(reference.GetType(), Vehicle, reference);
     SetDefaults(newTurret);
     newTurret.Init(reference);
-    AddTurret(newTurret, upgradeKey: upgradeKey);
+    AddTurret(newTurret, upgradeKey);
     return newTurret;
   }
 
@@ -659,17 +659,15 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
     RegisterEventsFor(turret);
   }
 
+  // TODO - Can be optimized to only revalidate turret children at the end if multiple turrets are added
   /// <summary>
   /// Adds the turret to the turret list and re-registers turret to renderer if a graphic exists.
   /// </summary>
-  /// <param name="turret"></param>
-  /// <param name="upgradeKey"></param>
   public void AddTurret(VehicleTurret turret, string upgradeKey)
   {
     turret.upgradeKey = upgradeKey;
     turrets.Add(turret);
     RevalidateTurrets();
-    TryRegisterRenderer(turret);
     if (Vehicle.Spawned)
       LongEventHandler.ExecuteWhenFinished(RecacheGizmos);
 
@@ -748,15 +746,17 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
   private void TryRegisterRenderer(VehicleTurret turret)
   {
-    // Parent turrets take ownership for rendering child turrets so transform data
-    // can be properly passed down and inherited in the final render results.
+    // Parent turrets take ownership for rendering child turrets so transform data can be properly passed down and
+    // inherited in the final render results.
     if (!turret.NoGraphic && turret.attachedTo is null)
       Vehicle.DrawTracker.AddRenderer(turret);
   }
 
   private void TryDeregisterRenderer(VehicleTurret turret)
   {
-    if (!turret.NoGraphic && turret.attachedTo is null)
+    // If attachedTo is somehow null at the time of registering, we still need to ensure no references are left behind
+    // otherwise the renderer will be there forever until the game is reloaded.
+    if (!turret.NoGraphic)
       Vehicle.DrawTracker.RemoveRenderer(turret);
   }
 
@@ -769,9 +769,18 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
   private void ResolveAllTurretChildren()
   {
+    // Break all connections, then reassign. Out of sequence parent and renderer registration can result in child 
+    // turrets being registered as renderers, even though they're drawn by their parents.
     foreach (VehicleTurret turret in turrets)
     {
+      turret.attachedTo = null;
+      turret.childTurrets.Clear();
+      TryDeregisterRenderer(turret);
       ResolveTurretChildren(turret);
+    }
+    foreach (VehicleTurret turret in turrets)
+    {
+      TryRegisterRenderer(turret);
     }
   }
 
@@ -790,11 +799,9 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
             Log.Error($"Recursive turret attachments detected, this is not allowed. " +
               $"Disconnecting turret from parent.");
             turret.attachedTo = null;
+            continue;
           }
-          else
-          {
-            parentTurret.childTurrets.Add(turret);
-          }
+          parentTurret.childTurrets.Add(turret);
         }
       }
     }
@@ -899,7 +906,6 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
   {
     turret.Init(reference);
     ResolveTurretChildren(turret);
-    TryRegisterRenderer(turret);
     QueueTicker(turret); // Queue all turrets initially, will be sorted out after 1st tick
   }
 
