@@ -1,10 +1,13 @@
 ﻿using System.Linq;
+using System.Reflection;
 using DevTools.UnitTesting;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
+using TickerTypeRollback = SmashTools.ScopedValueRollback<Verse.TickerType>;
 
 namespace Vehicles.UnitTesting;
 
@@ -18,6 +21,20 @@ namespace Vehicles.UnitTesting;
   "VehicleCaravan mechanics for stashing and recovering a vehicle on the world map.")]
 internal sealed class UnitTest_StashedVehicle
 {
+  private static readonly MethodInfo ThingUpdateRateTicks =
+    AccessTools.PropertyGetter(typeof(Thing), nameof(Thing.UpdateRateTicks));
+
+  private static readonly MethodInfo VehicleUpdateRateTicks =
+    AccessTools.PropertyGetter(typeof(VehiclePawn), nameof(VehiclePawn.UpdateRateTicks));
+
+  private static readonly MethodInfo OverrideMethod =
+    AccessTools.Method(typeof(UnitTest_VehicleCaravan_Tick), nameof(OverrideUpdateRateTicks));
+
+  private static void OverrideUpdateRateTicks(out int __result)
+  {
+    __result = 1;
+  }
+
   private static VehiclePawn GetTransientVehicleWithPawns(out Pawn colonist, out Pawn animal)
   {
     VehicleDef vehicleDef =
@@ -92,6 +109,90 @@ internal sealed class UnitTest_StashedVehicle
 
     mergedVehicleCaravan.Destroy();
     Assert.IsTrue(mergedVehicleCaravan.Destroyed);
+  }
+
+  [Test]
+  [TestDescription("Verify that saving with created and recovered vehicle stash does not log scribe warnings.")]
+  private void Save()
+  {
+    Map map = Find.CurrentMap;
+    Assert.IsNotNull(map);
+    RimWorld.Planet.World world = Find.World;
+    Assert.IsNotNull(world);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1,
+      animals = 1
+    });
+
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
+    vehicleCaravan.Tile = map.Tile;
+    using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
+    SaveTester.Write();
+
+    StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    Assert.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle), "Vehicle Stashed");
+    Assert.IsNotNull(caravan);
+    using ScopeWorldObject scopeStash = new(stashedVehicle);
+    SaveTester.Write();
+
+    VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
+    Assert.IsNotNull(mergedVehicleCaravan);
+    using ScopeWorldObject scopeMerge = new(mergedVehicleCaravan);
+    SaveTester.Write();
+  }
+
+  [Test]
+  private void StashTick()
+  {
+    Map map = Find.CurrentMap;
+    Assert.IsNotNull(map);
+    RimWorld.Planet.World world = Find.World;
+    Assert.IsNotNull(world);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1,
+      animals = 1
+    });
+
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
+    vehicleCaravan.Tile = map.Tile;
+    using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
+
+    StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    Assert.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle), "Vehicle Stashed");
+    Assert.IsNotNull(caravan);
+    Assert.IsFalse(stashedVehicle.GetDirectlyHeldThings().dontTickContents);
+    ThingWithComps beer = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.Beer);
+    beer.stackCount = 1;
+    Assert.AreEqual(stashedVehicle.GetDirectlyHeldThings().TryAddOrTransfer(beer, beer.stackCount), beer.stackCount);
+    using ScopeWorldObject scopeStash = new(stashedVehicle);
+
+    using (new ScopedMethodHook(VehicleUpdateRateTicks, postfix: new HarmonyMethod(OverrideMethod)))
+    {
+      using TickObserver<VehiclePawn> to = new(group.vehicle);
+      Assert.AreEqual(group.vehicle.UpdateRateTicks, 1);
+      Assert.IsFalse(group.vehicle.IsWorldPawn());
+      stashedVehicle.DoTick();
+      Expect.AreEqual(to.TickCount, 1);
+    }
+
+    using (new ScopedMethodHook(ThingUpdateRateTicks, postfix: new HarmonyMethod(OverrideMethod)))
+    {
+      using TickObserver<ThingWithComps> to = new(beer);
+      using TickerTypeRollback ttr = new(ref beer.def.tickerType);
+      beer.def.tickerType = TickerType.Normal;
+      Assert.AreEqual(beer.UpdateRateTicks, 1);
+      Assert.IsTrue(stashedVehicle.GetDirectlyHeldThings().Contains(beer));
+      stashedVehicle.DoTick();
+      Expect.AreEqual(to.TickCount, 1);
+    }
   }
 
   [Test]

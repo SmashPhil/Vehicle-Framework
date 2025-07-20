@@ -14,8 +14,8 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 {
   private ThingOwner<Thing> stash = [];
 
-  private static readonly StringBuilder inspectStringBuilder = new();
-  private static readonly Dictionary<VehicleDef, int> vehicleCounts = [];
+  private static readonly StringBuilder InspectStringBuilder = new();
+  private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
 
   private Material cachedMaterial;
 
@@ -110,24 +110,19 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 
   public override string GetInspectString()
   {
-    inspectStringBuilder.Clear();
-    vehicleCounts.Clear();
+    using ClearStringOnDispose csod = new(InspectStringBuilder);
+    using ClearOnDispose<KeyValuePair<VehicleDef, int>> cod = new(VehicleCounts);
+    foreach (VehiclePawn vehicle in Vehicles)
     {
-      foreach (VehiclePawn vehicle in Vehicles)
-      {
-        if (!vehicleCounts.TryAdd(vehicle.VehicleDef, 1))
-          vehicleCounts[vehicle.VehicleDef]++;
-      }
-
-      foreach ((VehicleDef vehicleDef, int count) in vehicleCounts)
-      {
-        inspectStringBuilder.AppendLine($"{count} {vehicleDef.LabelCap}");
-      }
+      if (!VehicleCounts.TryAdd(vehicle.VehicleDef, 1))
+        VehicleCounts[vehicle.VehicleDef]++;
     }
-    vehicleCounts.Clear();
-
-    inspectStringBuilder.Append(base.GetInspectString());
-    return inspectStringBuilder.ToString();
+    foreach ((VehicleDef vehicleDef, int count) in VehicleCounts)
+    {
+      InspectStringBuilder.AppendLine($"{count} {vehicleDef.LabelCap}");
+    }
+    InspectStringBuilder.Append(base.GetInspectString());
+    return InspectStringBuilder.ToString();
   }
 
   public override void Destroy()
@@ -236,6 +231,9 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
     for (int i = vehicleCaravan.pawns.Count - 1; i >= 0; i--)
     {
       Pawn vehicle = vehicleCaravan.pawns[i];
+      if (vehicle.IsWorldPawn())
+        Find.WorldPawns.RemovePawn(vehicle);
+      Assert.IsTrue(vehicle is VehiclePawn);
       if (!vehicleCaravan.pawns.TryTransferToContainer(vehicle, stashedVehicle.stash,
         canMergeWithExistingStacks: false))
       {
