@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using RimWorld;
@@ -616,23 +617,8 @@ public abstract class LaunchProtocol : IExposable
             Current.Game.CurrentMap = mapParent.Map;
             CameraJumper.TryHideWorld();
             LandingTargeter.Instance.BeginTargeting(vehicle,
-              action: delegate(LocalTargetInfo landingCell, Rot4 rot)
-              {
-                if (vehicle.Spawned)
-                {
-                  vehicle.CompVehicleLauncher.Launch(targetData,
-                    new ArrivalAction_LandToCell(vehicle, mapParent, landingCell.Cell, rot));
-                }
-                else
-                {
-                  AerialVehicleInFlight aerialVehicle = vehicle.GetOrMakeAerialVehicle();
-                  List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
-                  aerialVehicle.OrderFlyToTiles(nodes,
-                    new ArrivalAction_LandToCell(vehicle, mapParent, landingCell.Cell, rot));
-                  vehicle.CompVehicleLauncher.inFlight = true;
-                  CameraJumper.TryShowWorld();
-                }
-              }, allowRotating: vehicle.VehicleDef.rotatable,
+              action: (landingCell, rot) => StartTargetingLocalMap(vehicle, targetData, mapParent, landingCell, rot),
+              allowRotating: vehicle.VehicleDef.rotatable,
               targetValidator: targetInfo =>
                 !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
           });
@@ -696,6 +682,26 @@ public abstract class LaunchProtocol : IExposable
     if (target.WorldObject is Site { HasMap: false } site)
     {
       // TODO - make sure we can remove this, map parent is covered above
+    }
+  }
+
+  [PublicAPI] // Reused by SOS2
+  public static void StartTargetingLocalMap(VehiclePawn vehicle, TargetData<GlobalTargetInfo> targetData,
+    MapParent mapParent, LocalTargetInfo landingCell, Rot4 rot)
+  {
+    if (vehicle.Spawned)
+    {
+      vehicle.CompVehicleLauncher.Launch(targetData,
+        new ArrivalAction_LandToCell(vehicle, mapParent, landingCell.Cell, rot));
+    }
+    else
+    {
+      AerialVehicleInFlight aerialVehicle = vehicle.GetOrMakeAerialVehicle();
+      List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
+      aerialVehicle.OrderFlyToTiles(nodes,
+        new ArrivalAction_LandToCell(vehicle, mapParent, landingCell.Cell, rot));
+      vehicle.CompVehicleLauncher.inFlight = true;
+      CameraJumper.TryShowWorld();
     }
   }
 
