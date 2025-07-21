@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Xml;
 using JetBrains.Annotations;
-using UnityEngine;
-using Verse;
 using RimWorld;
 using RimWorld.Planet;
-using LudeonTK;
 using SmashTools;
-using SmashTools.Rendering;
 using SmashTools.Targeting;
+using UnityEngine;
 using Vehicles.Compatibility;
 using Vehicles.World;
+using Verse;
 
 namespace Vehicles;
 
@@ -623,7 +620,7 @@ public abstract class LaunchProtocol : IExposable
                 !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
           });
       }
-      else if (!mapParent.HasMap /* && AerialVehicleCompatibility.CanLandIn(mapParent)*/)
+      else if (!mapParent.HasMap && (mapParent is Site || AerialVehicleCompatibility.CanLandIn(mapParent)))
       {
         // TODO - Acceptance report based on ArrivalAction_LoadMap::CanLand
         if (vehicle.CompVehicleLauncher.ControlInFlight)
@@ -678,10 +675,6 @@ public abstract class LaunchProtocol : IExposable
         yield return new ArrivalOption("AttackAndDropInCenter".Translate(settlement.Label),
           new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
       }
-    }
-    if (target.WorldObject is Site { HasMap: false } site)
-    {
-      // TODO - make sure we can remove this, map parent is covered above
     }
   }
 
