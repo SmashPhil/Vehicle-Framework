@@ -74,6 +74,7 @@
     <!-- Dependencies -->
     <ItemGroup>
         <!-- Nuget -->
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4523" />
         <PackageReference Include="Lib.Harmony" Version="2.3.6">
             <IncludeAssets>compile; build</IncludeAssets>
             <ExcludeAssets>runtime</ExcludeAssets>
@@ -93,6 +94,7 @@
             <Private>False</Private>
         </Reference>
         <!-- Dependencies -->
+        <!--
         <Reference Include="mscorlib">
             <HintPath>$(ManagedDirectory)\mscorlib.dll</HintPath>
             <Private>False</Private>
@@ -149,5 +151,6 @@
             <HintPath>$(ManagedDirectory)\UnityEngine.TextRenderingModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        -->
     </ItemGroup>
 </Project>

@@ -63,7 +63,17 @@
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4523" />
 
+        <Reference Include="DevTools">
+            <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
+        </Reference>
+        <Reference Include="SmashTools">
+            <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
+            <Private>False</Private>
+        </Reference>
+
+        <!--
         <Reference Include="Assembly-CSharp">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>
@@ -71,13 +81,6 @@
         <Reference Include="mscorlib">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\mscorlib.dll</HintPath>
             <Private>False</Private>
-        </Reference>
-        <Reference Include="DevTools">
-            <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
-        </Reference>
-        <Reference Include="SmashTools">
-          <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
-          <Private>False</Private>
         </Reference>
         <Reference Include="System">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\System.dll</HintPath>
@@ -99,6 +102,7 @@
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        -->
     </ItemGroup>
 
     <ItemGroup>
