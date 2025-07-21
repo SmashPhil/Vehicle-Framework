@@ -28,7 +28,7 @@
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>false</Optimize>
-        <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
+        <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
@@ -38,12 +38,6 @@
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">
-        <DebugSymbols>true</DebugSymbols>
-        <Optimize>true</Optimize>
-        <DefineConstants>TRACE;RELEASE;</DefineConstants>
-    </PropertyGroup>
-
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithTests|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
         <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>

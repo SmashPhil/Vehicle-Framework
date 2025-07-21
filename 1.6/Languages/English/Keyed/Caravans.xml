@@ -11,20 +11,13 @@
   <VF_CaravanCantMove>Unable to move.</VF_CaravanCantMove>
   <VF_CantMergeAerialVehicle>Cannot merge aerial vehicles.</VF_CantMergeAerialVehicle>
   
-  <VF_CommandDockShip>Dock</VF_CommandDockShip>
-  <VF_CommandDockShipDesc>Unload all passengers and enable trade with the Settlement of {0}.</VF_CommandDockShipDesc>
-  
-  <VF_CommandDisembark>Stash Vehicles</VF_CommandDisembark>
+  <VF_RecoverVehicles>Recover vehicles</VF_RecoverVehicles>
+  <VF_CommandDisembark>Stash vehicles</VF_CommandDisembark>
   <VF_CommandDisembarkDesc>Leave all vehicles behind and go on foot.  Vehicles will remain on the world map for up to 20-30 days.</VF_CommandDisembarkDesc>
   <VF_ToggleRepairVehicle>Repair Vehicles</VF_ToggleRepairVehicle>
   <VF_ToggleRepairVehicleDesc>Rest and perform repairs on vehicles inside the caravan</VF_ToggleRepairVehicleDesc>
   
   <VF_CommandDisembarkImpassableBiome>Cannot disembark, tile is impassable for colonists.</VF_CommandDisembarkImpassableBiome>
-  <VF_CommandDockShipDisembark>Dock and Disembark</VF_CommandDockShipDisembark>
-  <VF_CommandDockShipObjectDesc>Dock Boats and go on foot</VF_CommandDockShipObjectDesc>
-  
-  <VF_CommandUndockShip>Undock</VF_CommandUndockShip>
-  <VF_CommandUndockShipDesc>Unload pawns and items from caravan.</VF_CommandUndockShipDesc>
   <VF_CommandAttackDockDisable>Cannot attack {0} while docked.</VF_CommandAttackDockDisable>
   <VF_CommandTradeDockDisable>Cannot trade with {0}. Must dock boat first</VF_CommandTradeDockDisable>
   
