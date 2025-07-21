@@ -32,8 +32,8 @@ internal class TestActions
   }
 
   /// <summary>
-  /// VVE is saving liberally, resulting in transient defs writing to the save file. This makes loading test saves
-  /// difficult as it may break other things when failing to load the mock defs during loading.
+  /// VVE is tracking defs liberally, resulting in transient defs writing to the save file. This makes loading
+  /// test saves difficult as it may break other things when failing to load the mock defs during loading.
   /// </summary>
   public static void ClearVanillaVehiclesExpandedTrackerCache()
   {

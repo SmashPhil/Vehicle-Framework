@@ -15,7 +15,7 @@ namespace Vehicles.World;
 
 [PublicAPI]
 [StaticConstructorOnStartup]
-public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject,
+public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObject, IThingHolderTickable,
                                      ILauncher, ITargeterSource<GlobalTargetInfo, ArrivalOption>
 {
   private static readonly Texture2D ViewQuestCommandTex =
@@ -51,6 +51,9 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public override string Label => vehicle?.Label;
 
   public VehiclePawn Vehicle => vehicle;
+
+  // Vehicle is stored and ticked from world pawns
+  bool IThingHolderTickable.ShouldTickContents => false;
 
   public virtual bool IsPlayerControlled => vehicle.Faction == Faction.OfPlayer;
 
@@ -271,25 +274,25 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     if (flightPath.Empty)
     {
       Log.Error($"{this} in flight with empty FlightPath.  Grounding to current Tile.");
-      ResetPosition(DrawPos);
-      vehicle.CompVehicleLauncher.inFlight = false;
-      AirDefensePositionTracker.DeregisterAerialVehicle(this);
-    }
-    else
-    {
-      transition += speedPctPerTick;
-      if (transition >= 1)
+      if (!Destroyed)
       {
-        if (vehicle.Faction.IsPlayer)
-        {
-          Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort),
-            MessageTypeDefOf.NeutralEvent);
-        }
-        LandAtTile(flightPath.First.Tile);
-        flightPath.ConsumeNode(!recon);
-        if (Spawned)
-          InitializeNextFlight(DrawPos);
+        ArriveAtTile(flightPath.First.Tile);
+        SwitchToCaravan();
       }
+      return;
+    }
+    transition += speedPctPerTick;
+    if (transition >= 1)
+    {
+      if (vehicle.Faction.IsPlayer && flightPath.Count == 1)
+      {
+        Messages.Message("VF_AerialVehicleArrived".Translate(vehicle.LabelShort),
+          MessageTypeDefOf.NeutralEvent);
+      }
+      ArriveAtTile(flightPath.First.Tile);
+      flightPath.ConsumeNode(!recon);
+      if (!Destroyed)
+        InitializeNextFlight(DrawPos);
     }
   }
 
@@ -371,7 +374,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     return vehicle.CompVehicleLauncher.OptionsAt(target);
   }
 
-  public void LandAtTile(PlanetTile tile)
+  public void ArriveAtTile(PlanetTile tile)
   {
     Tile = tile;
     ResetPosition(DrawPos);
@@ -547,6 +550,13 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     aerialVehicle.Initialize();
     aerialVehicle.innerContainer.TryAddOrTransfer(vehicle, canMergeWithExistingStacks: false);
     Find.WorldObjects.Add(aerialVehicle);
+    if (!vehicle.IsWorldPawn())
+      Find.WorldPawns.PassToWorld(vehicle);
+    foreach (Pawn pawn in vehicle.AllPawnsAboard)
+    {
+      if (pawn.IsWorldPawn())
+        Find.WorldPawns.RemovePawn(pawn);
+    }
     return aerialVehicle;
   }
 }

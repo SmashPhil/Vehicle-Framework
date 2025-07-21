@@ -49,9 +49,10 @@ internal sealed class UnitTest_AerialVehicle
   }
 
   [TearDown]
-  private void RemoveSettings()
+  private void RemoveSettingsAndSave()
   {
     mockSettings = null;
+    SaveTester.Write();
   }
 
   [Test, ExecutionPriority(Priority.First)]
@@ -65,8 +66,9 @@ internal sealed class UnitTest_AerialVehicle
 
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 1);
     using ScopeWorldObject swo = new(aerialVehicle);
-    Expect.IsFalse(group.vehicle.Destroyed, "Vehicle destroyed.");
-    Expect.IsFalse(group.vehicle.Discarded, "Vehicle discarded.");
+    Expect.IsFalse(group.vehicle.Destroyed);
+    Expect.IsFalse(group.vehicle.Discarded);
+    SaveTester.Write();
   }
 
   [Test]
@@ -112,24 +114,20 @@ internal sealed class UnitTest_AerialVehicle
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 1);
     VehiclePawn vehicle = aerialVehicle.Vehicle;
     // Pass vehicle and passengers to world
-    Find.WorldPawns.PassToWorld(vehicle);
     foreach (Pawn pawn in vehicle.AllPawnsAboard)
     {
       Expect.IsFalse(pawn.Destroyed, "Passenger destroyed.");
       Expect.IsFalse(pawn.Discarded, "Passenger discarded.");
-      if (!pawn.IsWorldPawn())
-      {
-        Find.WorldPawns.PassToWorld(pawn);
-      }
+      Expect.IsFalse(pawn.IsWorldPawn());
     }
     // Pass inventory pawns to world
     foreach (Thing thing in vehicle.inventory.innerContainer)
     {
-      if (thing is Pawn pawn && !pawn.IsWorldPawn())
+      if (thing is Pawn pawn)
       {
         Expect.IsFalse(pawn.Destroyed, "Inventory pawn destroyed.");
         Expect.IsFalse(pawn.Discarded, "Inventory pawn discarded.");
-        Find.WorldPawns.PassToWorld(pawn);
+        Expect.IsFalse(pawn.IsWorldPawn());
       }
     }
     Expect.ReferencesAreEqual(vehicle.ParentHolder, aerialVehicle, "Vehicle ParentHolder");

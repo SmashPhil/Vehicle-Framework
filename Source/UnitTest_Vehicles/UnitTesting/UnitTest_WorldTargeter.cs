@@ -78,7 +78,7 @@ internal sealed class UnitTest_WorldTargeter
     Assert.IsTrue(ReferenceEquals(aerialVehicle, group.vehicle.GetAerialVehicle()));
     using ScopeWorldObject swoAerial = new(aerialVehicle);
     Assert.IsNotNull(aerialVehicle);
-    aerialVehicle.LandAtTile(DestTile);
+    aerialVehicle.ArriveAtTile(DestTile);
     Assert.IsTrue(aerialVehicle.Destroyed);
     Assert.IsFalse(group.vehicle.Destroyed);
     Assert.IsFalse(group.vehicle.CompVehicleLauncher.inFlight);

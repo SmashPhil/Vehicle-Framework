@@ -30,6 +30,8 @@ public class FlightPath : IExposable
 
   public FlightNode Last => nodes.LastOrDefault();
 
+  public int Count => nodes.Count;
+
   public bool Empty => nodes.NullOrEmpty();
 
   public FlightNode this[int index] => nodes[index];

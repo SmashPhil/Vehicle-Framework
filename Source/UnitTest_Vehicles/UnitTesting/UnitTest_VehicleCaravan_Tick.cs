@@ -24,6 +24,9 @@ internal sealed class UnitTest_VehicleCaravan_Tick
   private static readonly MethodInfo VehicleUpdateRateTicks =
     AccessTools.PropertyGetter(typeof(VehiclePawn), nameof(VehiclePawn.UpdateRateTicks));
 
+  private static readonly MethodInfo VehicleCaravanUpdateRateTicks =
+    AccessTools.PropertyGetter(typeof(WorldObject), "UpdateRateTicks");
+
   private static readonly MethodInfo OverrideMethod =
     AccessTools.Method(typeof(UnitTest_VehicleCaravan_Tick), nameof(OverrideUpdateRateTicks));
 
@@ -68,6 +71,8 @@ internal sealed class UnitTest_VehicleCaravan_Tick
       CaravanHelper.ExitMapAndCreateVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, 2, 3, sendMessage: false);
     Assert.IsNotNull(vehicleCaravan);
     using ScopeWorldObject swo = new(vehicleCaravan);
+    using ScopedMethodHook smhCaravan = new(VehicleCaravanUpdateRateTicks, postfix: new HarmonyMethod(OverrideMethod));
+    using ScopedMethodHook smhVehicle = new(VehicleUpdateRateTicks, postfix: new HarmonyMethod(OverrideMethod));
     using ScopedMethodHook smh = new(PawnUpdateRateTicks, postfix: new HarmonyMethod(OverrideMethod));
     foreach (Pawn pawn in group.vehicle.AllPawnsAboard)
     {

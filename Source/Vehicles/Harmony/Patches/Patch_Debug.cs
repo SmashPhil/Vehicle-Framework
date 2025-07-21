@@ -46,7 +46,7 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(Pawn_NeedsTracker), "NeedsTrackerTickInterval"),
+    //  original: AccessTools.Method(typeof(Pawn), "Tick"),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
@@ -68,15 +68,11 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Pawn ___pawn)
+  private static void TestPrefix(Pawn __instance)
   {
     try
     {
-      if (___pawn is { IsColonist: true, Spawned: false } && ___pawn.Faction == Faction.OfPlayer)
-      {
-        Log.Message("---");
-        Log.Message($"{___pawn} tick");
-      }
+      Log.Message($"{__instance} tick");
     }
     catch (Exception ex)
     {

@@ -5,7 +5,7 @@ namespace Vehicles;
 
 internal class SaveTester
 {
-  private const string SaveFileName = "SaveTester_TEMP";
+  private const string SaveFileName = "_TEST_SAVE";
 
   public static void Clear()
   {

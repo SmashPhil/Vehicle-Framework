@@ -3,6 +3,7 @@ using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
 
@@ -71,22 +72,7 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
       {
         aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().Tile);
       }
-
-      Find.WorldPawns.PassToWorld(vehicle);
-      foreach (Pawn pawn in vehicle.AllPawnsAboard)
-      {
-        if (!pawn.IsWorldPawn())
-        {
-          Find.WorldPawns.PassToWorld(pawn);
-        }
-      }
-      foreach (Thing thing in vehicle.inventory.innerContainer)
-      {
-        if (thing is Pawn pawn && !pawn.IsWorldPawn())
-        {
-          Find.WorldPawns.PassToWorld(pawn);
-        }
-      }
+      Assert.IsTrue(vehicle.IsWorldPawn());
     }
     vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLeftMap].ExecuteEvents();
     base.LeaveMap();
