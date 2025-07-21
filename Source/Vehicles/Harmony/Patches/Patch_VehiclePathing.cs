@@ -39,9 +39,6 @@ internal class Patch_VehiclePathing : IPatchCategory
         nameof(Pawn_JobTracker.IsCurrentJobPlayerInterruptible)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(JobInterruptibleForVehicle)));
-    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pawn_PathFollower), "NeedNewPath"),
-      postfix: new HarmonyMethod(typeof(Patch_VehiclePathing),
-        nameof(IsVehicleInNextCell)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Pawn_PathFollower),
         nameof(Pawn_PathFollower.StartPath)),
@@ -172,22 +169,6 @@ internal class Patch_VehiclePathing : IPatchCategory
       return false;
     }
     return true;
-  }
-
-  /// <summary>
-  /// Determine if next cell is walkable with final determination if vehicle is in cell or not
-  /// </summary>
-  private static void IsVehicleInNextCell(ref bool __result, Pawn ___pawn,
-    Pawn_PathFollower __instance)
-  {
-    if (!__result)
-    {
-      //Peek 2 nodes ahead to avoid collision last second
-      __result = (__instance.curPath.NodesLeftCount > 1 &&
-          PathingHelper.VehicleImpassableInCell(___pawn.Map, __instance.curPath.Peek(1))) ||
-        (__instance.curPath.NodesLeftCount > 2 &&
-          PathingHelper.VehicleImpassableInCell(___pawn.Map, __instance.curPath.Peek(2)));
-    }
   }
 
   /// <summary>

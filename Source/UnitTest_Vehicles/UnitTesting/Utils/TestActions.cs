@@ -1,8 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using DevTools.UnitTesting;
+using HarmonyLib;
 using JetBrains.Annotations;
+using SmashTools;
 using UnityEngine.Assertions;
+using Vehicles.Compatibility;
 using Vehicles.World;
 using Verse;
 
@@ -10,13 +16,35 @@ using Verse;
 // we have to use 1 singular namespace here.
 namespace Vehicles;
 
+[PublicAPI]
 internal class TestActions
 {
+  private static readonly FieldInfo VehicleTrackersDict;
+
+  static TestActions()
+  {
+    if (Ext_Mods.HasActiveMod(ModPackageIds.VanillaVehiclesExpanded))
+    {
+      Type vveType = GenTypes.GetTypeInAnyAssembly("VanillaVehiclesExpanded.Pawn_ExposeData_Patch");
+      Assert.IsNotNull(vveType);
+      VehicleTrackersDict = AccessTools.Field(vveType, "pawnVehicleTrackers");
+    }
+  }
+
+  /// <summary>
+  /// VVE is saving liberally, resulting in transient defs writing to the save file. This makes loading test saves
+  /// difficult as it may break other things when failing to load the mock defs during loading.
+  /// </summary>
+  public static void ClearVanillaVehiclesExpandedTrackerCache()
+  {
+    IDictionary dict = VehicleTrackersDict?.GetValue(null) as IDictionary;
+    dict?.Clear();
+  }
+
   /// <summary>
   /// Ensure a player focused map is always focused before beginning any tests to eliminate interruptions
   /// from map parent faction assumptions.
   /// </summary>
-  [UsedImplicitly] // Pre-test action
   public static void RefocusMap()
   {
     if (Current.ProgramState != ProgramState.Playing || Find.World is null)
@@ -34,7 +62,6 @@ internal class TestActions
   /// Ensure no vehicles or vehicle world objects remain after test is conducted, polluting subsequent
   /// tests and resulting in false negatives.
   /// </summary>
-  [UsedImplicitly] // Post-test action
   public static void EmptyWorldAndMapOfVehicles()
   {
     if (Current.ProgramState != ProgramState.Playing || Find.World is null)

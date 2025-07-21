@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using SmashTools;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -10,6 +11,7 @@ public static class RoleHelper
   // TODO - use RoleAssignment
   public static void Distribute(List<VehiclePawn> vehicles, List<Pawn> pawns)
   {
+    pawns.RemoveAll(Ext_Vehicles.InVehicle);
     RotatingList<VehiclePawn> vehicleRotator = vehicles.ToRotatingList();
     DistributeOnPriority(vehicleRotator, pawns, HandlingType.Movement);
     DistributeOnPriority(vehicleRotator, pawns, HandlingType.Turret);
@@ -29,6 +31,7 @@ public static class RoleHelper
           continue;
 
         Pawn pawn = pawns.Pop();
+        Assert.IsFalse(pawn.InVehicle());
         vehicle.TryAddPawn(pawn, roleHandler);
       }
     }
@@ -45,7 +48,9 @@ public static class RoleHelper
         Trace.IsTrue(removed, "Failed to remove vehicle from distribution.");
         continue;
       }
-      vehicle.TryAddPawn(pawns.Pop());
+      Pawn pawn = pawns.Pop();
+      Assert.IsFalse(pawn.InVehicle());
+      vehicle.TryAddPawn(pawn);
     }
   }
 }

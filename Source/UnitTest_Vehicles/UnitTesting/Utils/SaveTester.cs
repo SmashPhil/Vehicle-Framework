@@ -14,6 +14,7 @@ internal class SaveTester
 
   public static void Write()
   {
+    TestActions.ClearVanillaVehiclesExpandedTrackerCache();
     GameDataSaveLoader.SaveGame(SaveFileName);
   }
 

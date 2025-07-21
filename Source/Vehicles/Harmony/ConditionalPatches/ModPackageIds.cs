@@ -9,11 +9,12 @@ public static class ModPackageIds
   public const string Anomaly = "ludeon.rimWorld.anomaly";
   public const string Odyssey = "ludeon.rimWorld.odyssey";
 
-  // Mods
+  // Major Compatibilities
   public const string CombatExtended = "CETeam.CombatExtended";
-
-  public const string DubsBadHygiene = "Dubwise.DubsBadHygiene";
   public const string SoS2 = "kentington.saveourship2";
+
+  // Minor Compatibilities
+  public const string DubsBadHygiene = "Dubwise.DubsBadHygiene";
   public const string RimNauts = "sindre0830.rimnauts2";
   public const string Universum = "sindre0830.universum";
   public const string GeologicalLandforms = "m00nl1ght.GeologicalLandforms";
@@ -23,8 +24,9 @@ public static class ModPackageIds
   public const string RealRuins = "Woolstrand.RealRuins";
   public const string DualWield = "Roolo.DualWield";
   public const string BulkCarrier = "Vanya.Tools.BulkCarrier";
-
   public const string VanillaExpandedFishing = "VanillaExpanded.VCEF";
-
   public const string RimHUD = "Jaxe.RimHUD";
+
+  // None
+  public const string VanillaVehiclesExpanded = "OskarPotocki.VanillaVehiclesExpanded";
 }

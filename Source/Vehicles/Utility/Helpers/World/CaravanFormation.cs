@@ -25,14 +25,12 @@ public static class CaravanFormation
   {
     Assert.IsNotNull(formation);
     formation.RecacheTransferables();
-    if (formation.Map.mapPawns.SpawnedPawnsInFaction(Faction.OfPlayer).HasVehicle())
+    if (formation.unselectedVehicles.Count > 0 && !formCaravan.transferables.Exists(PawnLeftBehind))
     {
-      List<Pawn> pawns = TransferableUtility.GetPawnsFromTransferables(formCaravan.transferables);
-
       string vehicles = "";
-      foreach (Pawn pawn in pawns.Where(p => p is VehiclePawn))
+      foreach (VehiclePawn vehicle in formation.unselectedVehicles)
       {
-        vehicles += pawn.LabelShort;
+        vehicles += vehicle.LabelShort;
       }
 
       Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
@@ -41,11 +39,10 @@ public static class CaravanFormation
           if (!CheckForErrors())
             return;
 
-          formation.AddItemsFromTransferablesToRandomInventories(pawns);
-          VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(pawns,
+          formation.AddItemsFromTransferablesToRandomInventories(formation.pawnsAndVehicles);
+          VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(formation.pawnsAndVehicles,
             Faction.OfPlayer, formCaravan.CurrentTile, formCaravan.CurrentTile,
-            formation.DestinationTile,
-            false);
+            formation.DestinationTile, false);
           formation.Map.Parent.CheckRemoveMapNow();
           TaggedString taggedString = "MessageReformedCaravan".Translate();
           if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
@@ -58,12 +55,23 @@ public static class CaravanFormation
       return true;
     }
     return false;
+
+    static bool PawnLeftBehind(TransferableOneWay transferable)
+    {
+      return transferable.AnyThing is Pawn and not VehiclePawn && transferable.CountToTransfer == 0;
+    }
   }
 
   public static void TrySendVehicleCaravan(Dialog_FormCaravan formCaravan)
   {
     Assert.IsNotNull(formation);
     formation.RecacheTransferables();
+    if (formation.Reform)
+    {
+      ReformInstantly();
+      return;
+    }
+
     StringBuilder warningBuilder = new();
     (float days, float tillRot) daysWorthOfFood = formation.DaysWorthOfFood;
     if (daysWorthOfFood.days < 5f)
@@ -173,6 +181,30 @@ public static class CaravanFormation
         MessageTypeDefOf.PositiveEvent, false);
       return true;
     }
+  }
+
+  private static void ReformInstantly()
+  {
+    if (!CheckForErrors())
+    {
+      SoundDefOf.ClickReject.PlayOneShotOnCamera();
+      return;
+    }
+    CaravanHelper.BoardAllAssignedPawns();
+    RoleHelper.Distribute(formation.vehicles, formation.pawns);
+    formation.AddItemsFromTransferablesToRandomInventories(formation.pawnsAndVehicles);
+    VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(formation.pawnsAndVehicles,
+      Faction.OfPlayer, formation.Dialog.CurrentTile, formation.Dialog.CurrentTile, formation.DestinationTile,
+      sendMessage: false);
+    formation.Map.Parent.CheckRemoveMapNow();
+    TaggedString taggedString = "MessageReformedCaravan".Translate();
+    if (caravan.vehiclePather.Moving && caravan.vehiclePather.ArrivalAction != null)
+    {
+      taggedString += " " + "MessageFormedCaravan_Orders".Translate() + ": " +
+        caravan.vehiclePather.ArrivalAction.Label + ".";
+    }
+    Messages.Message(taggedString, caravan, MessageTypeDefOf.TaskCompletion, false);
+    formation.Dialog.Close(doCloseSound: false);
   }
 
   private static bool CheckForErrors()
@@ -545,6 +577,8 @@ public class FormationInfo
   public readonly List<Pawn> pawns = [];
   public readonly List<VehiclePawn> vehicles = [];
   public readonly List<Thing> things = [];
+  public readonly List<Pawn> pawnsAndVehicles = [];
+  public readonly List<VehiclePawn> unselectedVehicles = [];
 
   private readonly Map map;
   private readonly Dialog_FormCaravan formCaravan;
@@ -693,11 +727,23 @@ public class FormationInfo
   internal void RecacheTransferables()
   {
     leadVehicle = null;
+    pawns.Clear();
+    vehicles.Clear();
+    things.Clear();
+    pawnsAndVehicles.Clear();
+    unselectedVehicles.Clear();
+
     int largestMagnitude = -1;
     foreach (TransferableOneWay transferable in formCaravan.transferables)
     {
-      if (transferable.AnyThing is null || transferable.CountToTransfer == 0)
+      if (transferable.AnyThing is null)
         continue;
+      if (transferable.CountToTransfer == 0)
+      {
+        if (transferable.AnyThing is VehiclePawn vehicle)
+          unselectedVehicles.Add(vehicle);
+        continue;
+      }
 
       foreach (Thing thing in transferable.things)
       {
@@ -720,5 +766,7 @@ public class FormationInfo
         }
       }
     }
+    pawnsAndVehicles.AddRange(pawns);
+    pawnsAndVehicles.AddRange(vehicles);
   }
 }

@@ -575,24 +575,23 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
       return false;
     }
-    if (!CaravanFormation.formation.pawns.Concat(
-        CaravanFormation.formation.vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard))
-     .Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer)))
+    if (!CaravanFormation.formation.pawnsAndVehicles.Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer)))
     {
       Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(),
         MessageTypeDefOf.RejectInput, false);
       return false;
     }
     CaravanHelper.BoardAllAssignedPawns();
-    CaravanFormation.formation.AddItemsFromTransferablesToRandomInventories(CaravanFormation
-     .formation.pawns);
+    CaravanFormation.formation.AddItemsFromTransferablesToRandomInventories(CaravanFormation.formation
+     .pawnsAndVehicles);
+
     PlanetTile exitTile = ___startingTile;
     if (!exitTile.Valid)
       exitTile = CaravanExitMapUtility.RandomBestExitTileFrom(___map);
     if (!exitTile.Valid)
       exitTile = __instance.CurrentTile;
-    CaravanHelper.ExitMapAndCreateVehicleCaravan(CaravanFormation.formation.vehicles.Concat(
-        CaravanFormation.formation.pawns), Faction.OfPlayer,
+
+    CaravanHelper.ExitMapAndCreateVehicleCaravan(CaravanFormation.formation.pawnsAndVehicles, Faction.OfPlayer,
       __instance.CurrentTile, exitTile, ___destinationTile);
     SoundDefOf.Tick_High.PlayOneShotOnCamera();
     __instance.Close(doCloseSound: false);
@@ -676,8 +675,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   /// </summary>
   private static void SplitCaravanPostOpen(List<TabRecord> ___tabsList)
   {
-    //Assert.IsNull(CaravanFormation.formation);
-    //CaravanFormation.formation = new FormationInfo(__instance, map);
     selectedTab = TabVehicles;
     ___tabsList.Clear();
     ___tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),

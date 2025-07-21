@@ -402,6 +402,7 @@ namespace Vehicles
       }
     }
 
+    // TODO 1.7 - these 2 functions can be removed
     /// <summary>
     /// Check if cell is currently claimed by a vehicle
     /// </summary>

@@ -136,6 +136,8 @@ internal sealed class UnitTest_MapGeneration_River
         new ScopedReferenceRollback<TileMutatorWorker_River, ModuleBase>(Worker, RiverWidthPerlinNoiseName, perlin);
       this.def = def;
       TileMutatorDef existingDef = tile.Tile.Mutators.FirstOrDefault(mutDef => mutDef == def);
+      if (existingDef == null)
+        tile.Tile.Mutators.Add(def);
       Assert.IsNotNull(existingDef);
       Assert.IsTrue(ReferenceEquals(existingDef, this.def));
 

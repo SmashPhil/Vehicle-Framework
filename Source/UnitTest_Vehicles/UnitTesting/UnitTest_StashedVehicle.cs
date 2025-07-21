@@ -74,6 +74,12 @@ internal sealed class UnitTest_StashedVehicle
     return vehicle;
   }
 
+  [TearDown]
+  private void ClearSaveOfStashedVehicle()
+  {
+    SaveTester.Write();
+  }
+
   [Test]
   private void Recovery()
   {

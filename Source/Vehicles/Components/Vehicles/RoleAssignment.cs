@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -39,27 +40,36 @@ public class RoleAssignment
     Resort();
   }
 
+  // TODO - passengers could be prioritized based on move speed so the slowest are assigned to vehicles
+  // first, giving optimal move speeds in vehicle caravans.
   public bool TryPull(VehicleRoleHandler handler, out Pawn pawn)
   {
     HandlingType handlingType = handler.role.HandlingTypes;
 
     pawn = null;
-    if (handlingType.HasFlag(HandlingType.Movement))
-    {
-      if (!drivers.NullOrEmpty())
-        pawn = drivers.Pop();
-      // Pull from turret operators as a last resort
-      if (!turretOperators.NullOrEmpty())
-        pawn ??= turretOperators.Pop();
-    }
     if (handlingType.HasFlag(HandlingType.Turret))
     {
-      if (!turretOperators.NullOrEmpty())
-        pawn ??= turretOperators.Pop();
+      pawn ??= TryPop(turretOperators);
     }
-    if (!passengers.NullOrEmpty())
-      pawn ??= passengers.Pop();
+    else if (handlingType.HasFlag(HandlingType.Movement))
+    {
+      pawn ??= TryPop(drivers);
+      // Pull from turret operators as a last resort, though most pawns will be turret operators
+      // as long as they are capable of shooting / violence.
+      pawn ??= TryPop(turretOperators);
+    }
+    else if (handlingType == HandlingType.None)
+    {
+      pawn ??= TryPop(turretOperators);
+      pawn ??= TryPop(drivers);
+      pawn ??= TryPop(passengers);
+    }
     return pawn != null;
+
+    static Pawn TryPop(List<Pawn> pawns)
+    {
+      return pawns.Count == 0 ? null : pawns.Pop();
+    }
   }
 
   private void Resort()

@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using DevTools.UnitTesting;
 using RimWorld;
@@ -178,12 +177,13 @@ internal sealed class UnitTest_AerialVehicle
     PlanetTile tile =
       Find.WorldGrid.Tiles.RandomElementByWeight(TileWeight)?.tile ?? PlanetTile.Invalid;
     AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, tile);
+    using ScopeWorldObject swo = new(aerialVehicle);
     Assert.IsNull(Find.WorldObjects.SettlementAt(tile));
     aerialVehicle.InitiateCrashEvent();
-    using ScopeWorldObject swo = new(aerialVehicle);
     Assert.IsTrue(aerialVehicle.Destroyed);
     CrashSite site = Find.WorldObjects.WorldObjectAt<CrashSite>(tile);
     Assert.IsNotNull(site);
+    using ScopeWorldObject scopeSite = new(site);
     List<VehicleSkyfaller_Arriving> skyfallers =
       site.Map.listerThings.GetThingsOfType<VehicleSkyfaller_Arriving>().ToList();
     Assert.AreEqual(skyfallers.Count, 1);

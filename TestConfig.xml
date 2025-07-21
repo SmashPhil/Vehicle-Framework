@@ -11,6 +11,7 @@
   
   <postTestActions>
     <li>Vehicles.TestActions.EmptyWorldAndMapOfVehicles</li>
+    <li>Vehicles.TestActions.ClearVanillaVehiclesExpandedTrackerCache</li>
   </postTestActions>
 
   <map>

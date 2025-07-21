@@ -1,5 +1,6 @@
 ﻿using System;
 using RimWorld;
+using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
@@ -15,11 +16,14 @@ internal class PawnAnchorer : IDisposable
 
   static PawnAnchorer()
   {
-    pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, faction: Faction.OfPlayer);
+    // We need to clear the pawn reference between test runs, Faction.OfPlayer will not persist at
+    // the main menu, resulting in null relations and errors from AttackTargetsCache registration.
+    GameEvent.OnWorldRemoved += () => pawn = null;
   }
 
   public PawnAnchorer()
   {
+    pawn ??= PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, faction: Faction.OfPlayer);
     if (pawn.Spawned)
       pawn.DeSpawn();
     Assert.IsFalse(pawn.Spawned);
