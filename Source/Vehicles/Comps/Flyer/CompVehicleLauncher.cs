@@ -263,7 +263,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
     if (AnyLeftToLoad)
     {
       Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(
-        "ConfirmSendNotCompletelyLoadedPods".Translate(Vehicle.LabelCapNoCount), ConfirmStart));
+        "ConfirmSendNotCompletelyLoadedLaunchable".Translate(Vehicle.LabelCapNoCount), ConfirmStart));
       return;
     }
     ConfirmStart();

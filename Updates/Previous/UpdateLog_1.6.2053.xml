@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.6.2053</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
+This is round 2 of critical bugfixes for the 1.6 release.
+
+Thank you to everyone that took the time to report bugs in the discord server! It makes it so much easier to fix things when I have all of the relevant information.
+&lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Form Caravan dialog will start at 'Pawns' tab if player has no vehicles present on the map.
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- ComponentCache would misalign after the player generated and then unloaded multiple maps in a row. This occurred frequently with grav ships.
+
+- Aerial vehicles were unable to land at any site on the world map.
+
+- Reforming caravan would prompt user to leave vehicles behind.
+
+- Confirming reform would dismount all pawns, leaving the caravan immobile until the player moved all pawns back into vehicles.
+
+- Recovering stashed vehicles wouldn't recache available pawns correctly, resulting in immobile caravans upon arrival.
+
+- Stashed vehicles double saving vehicles, resulting in save load errors.
+
+- Vehicle turret upgrades with child attachments would double register renderers.
+
+- 'Refuel From Inventory' icon was Odyssey exclusive, replaced with temporary icon for now.
+
+- Vehicle Caravans would double or triple tick pawns inside vehicles, resulting in rapid needs depletion.
+
+- Aerial Vehicles would double tick pawns inside the vehicle, resulting in rapid needs depletion while flying.
+
+- Health upgrades wouldn't reset vehicle health, resulting in loss of health or health that exceeded max hp upon finalizing an upgrade.
+
+- Beach multiplier at 0% would override coast size to 0.
+
+- Unspawned vehicles would fail to trigger explosion when taking damage.
+
+- Turrets with no graphics would still try to generate UI icon.
+
+- Turret shootline would use raw offset as position, resulting in miscalculated accuracy.
+
+- Missing translation key for 'Signal Jamming'
+&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Fixed issue where "Useful Marks" would patch over vehicle icons, preventing players from accessing the color painter for vehicle patterns.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Cursed Crew</name>
+      <icon>cursedCrewIcon</icon>
+      <url>https://discord.gg/NNe2VxAU7Z</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
