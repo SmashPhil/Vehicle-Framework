@@ -119,7 +119,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   public virtual void Initialize()
   {
     position = base.DrawPos;
-    fuelGizmo = new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
   }
 
   public virtual Vector3 DrawPosAhead(int ticksAhead)
@@ -171,6 +170,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     {
       if (vehicle.CompFueledTravel != null)
       {
+        fuelGizmo ??= new Gizmo_RefuelableFuelTravel(vehicle.CompFueledTravel, false);
         yield return fuelGizmo;
         if (DebugSettings.ShowDevGizmos)
         {
@@ -382,9 +382,11 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     AirDefensePositionTracker.DeregisterAerialVehicle(this);
   }
 
-  private void ResumePathPostLoad(FlightPath flightPath)
+  private void ResumePathPostLoad()
   {
-    OrderFlyToTiles(flightPath.Path, flightPath.ArrivalAction);
+    // NewPath clears current flight path, new up list so it doesn't clear before reassigning.
+    // TODO - this is ugly, but it works currently so revisit later
+    OrderFlyToTiles(flightPath.Path.ToList(), flightPath.ArrivalAction);
   }
 
   public void OrderFlyToTiles(List<FlightNode> flightPath, [NotNull] IArrivalAction arrivalAction)
@@ -392,13 +394,12 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     Assert.IsFalse(flightPath.NullOrEmpty());
     if (flightPath.Any(node => !node.Tile.Valid))
       throw new ArgumentException("Invalid tiles in flight path.", nameof(flightPath));
-    vehicle.CompVehicleLauncher.inFlight = true;
     Vector3 origin = DrawPos; // Capture position before registered Tile changes through flight path change
     this.flightPath.NewPath(flightPath, arrivalAction);
     InitializeNextFlight(origin);
-    List<AirDefense> flyoverDefenses =
-      AirDefensePositionTracker.GetNearbyObjects(this, speedPctPerTick);
-    AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
+    //List<AirDefense> flyoverDefenses =
+    //  AirDefensePositionTracker.GetNearbyObjects(this, speedPctPerTick);
+    //AirDefensePositionTracker.RegisterAerialVehicle(this, flyoverDefenses);
     vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleOrdered].ExecuteEvents();
   }
 
@@ -514,6 +515,9 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       // No need to save container, vehicle is already saved. HoldingOwner is necessary for Vehicle's ParentHolder to
       // point to the aerial vehicle for WorldPawnGC and misc. world map handling.
       innerContainer.TryAdd(vehicle, canMergeWithExistingStacks: false);
+
+      if (flightPath != null && !flightPath.Path.NullOrEmpty())
+        ResumePathPostLoad();
     }
   }
 
@@ -522,11 +526,6 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
     base.SpawnSetup();
 
     vehicle.RegisterEvents();
-
-    if (flightPath != null && !flightPath.Path.NullOrEmpty())
-    {
-      ResumePathPostLoad(flightPath);
-    }
   }
 
   void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)

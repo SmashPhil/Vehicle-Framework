@@ -13,7 +13,7 @@ namespace Vehicles.World;
 /// and the world object at that tile, I'd be mutating GlobalTargetInfo into something it wasn't designed for.
 /// </remarks>
 [PublicAPI] // TODO - could probably generalize and move to SmashTools
-public struct FlightNode : IExposable
+public class FlightNode : IExposable
 {
   private PlanetTile tile;
 
@@ -23,6 +23,13 @@ public struct FlightNode : IExposable
   public PlanetTile Tile => tile;
 
   public WorldObject WorldObject { get; private set; }
+
+  /// <summary>
+  /// For Xml Deserialization only
+  /// </summary>
+  public FlightNode()
+  {
+  }
 
   public FlightNode(PlanetTile tile)
   {
@@ -69,7 +76,7 @@ public struct FlightNode : IExposable
   public void ExposeData()
   {
     Scribe_Values.Look(ref tile, nameof(tile));
-    if (Scribe.mode == LoadSaveMode.LoadingVars)
+    if (Scribe.mode == LoadSaveMode.PostLoadInit)
     {
       WorldObject = WorldHelper.WorldObjectAt(tile);
       origin = WorldHelper.GetTilePos(tile, WorldObject, out spaceObject);
