@@ -606,8 +606,9 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
   private void RegisterEventsFor(VehicleTurret turret)
   {
     turret.FillEventsDef();
-    if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
-      turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
+    // TODO Raiders - add stop to shoot AI behavior in a less problematic way. Needs to account for vehicles swapping hands
+    //if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
+    //  turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);
   }
 
   private void CreateTurretInstances()

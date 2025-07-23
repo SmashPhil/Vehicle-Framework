@@ -82,6 +82,8 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   {
     get
     {
+      if (flightPath.Path.NullOrEmpty())
+        return Find.WorldGrid.GetTileCenter(Tile);
       Vector3 nodePos = flightPath.First.GetCenter(this);
       if (position == nodePos)
         return position;

@@ -608,7 +608,7 @@ public abstract class LaunchProtocol : IExposable
       if (mapParent is { Spawned: true, HasMap: true } && !mapParent.EnterCooldownBlocksEntering())
       {
         // TODO VF-82: Clean up for targeter continuation rather than this gross delegate. But 1.6 release is close
-        yield return new ArrivalOption("LandInExistingMap".Translate(vehicle.Label),
+        yield return new ArrivalOption("LandInExistingMap".Translate(mapParent.Label),
           continueWith: delegate(TargetData<GlobalTargetInfo> targetData)
           {
             Current.Game.CurrentMap = mapParent.Map;

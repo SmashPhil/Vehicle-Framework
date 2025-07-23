@@ -415,7 +415,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
     if (Find.Selector.SelectedObjects.Count == 1)
     {
-      refuelGizmo.UpdateDisableStatus();
       yield return refuelGizmo;
     }
 

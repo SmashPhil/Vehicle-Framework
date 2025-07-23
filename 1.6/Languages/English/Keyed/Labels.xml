@@ -21,6 +21,7 @@
   <VF_RefuelFromInventoryDesc>Refuel {0} using fuel stored in cargo.</VF_RefuelFromInventoryDesc>
   <VF_VehicleFullyFueled>{0} is already fully fueled.</VF_VehicleFullyFueled>
   <VF_NoFuelInVehicle>No fuel in {0}.</VF_NoFuelInVehicle>
+  <VF_CantRefuelWhileFlying>Cannot refuel {0} while inflight.</VF_CantRefuelWhileFlying>
   <VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
   <VF_TransferToVehicle_Order>Transfer to vehicle</VF_TransferToVehicle_Order>
   <VF_TransferToVehicle_Order_Desc>Transfer selected thing(s) to the target vehicle's cargo.</VF_TransferToVehicle_Order_Desc>

@@ -26,9 +26,9 @@ public class FlightPath : IExposable
 
   public List<FlightNode> Path => nodes;
 
-  public FlightNode First => nodes.FirstOrDefault();
+  public FlightNode First => nodes[0];
 
-  public FlightNode Last => nodes.LastOrDefault();
+  public FlightNode Last => nodes[^1];
 
   public int Count => nodes.Count;
 

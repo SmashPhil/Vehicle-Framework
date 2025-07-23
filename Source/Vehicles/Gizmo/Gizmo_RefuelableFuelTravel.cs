@@ -2,6 +2,7 @@
 using RimWorld;
 using SmashTools;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
 using Verse.Steam;
@@ -66,7 +67,7 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
     return $"{refuelable.TargetFuelLevel:F0} {refuelable.Props.fuelType.LabelCap}";
   }
 
-  public void UpdateDisableStatus()
+  private void UpdateDisableStatus()
   {
     refuelFromInventoryDisabled = false;
     refuelFromInventoryDisabledReason = null;
@@ -83,6 +84,11 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
       refuelFromInventoryDisabled = true;
       refuelFromInventoryDisabledReason = "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap);
     }
+    if (refuelable.Vehicle.InAerialVehicle())
+    {
+      refuelFromInventoryDisabled = true;
+      refuelFromInventoryDisabledReason = "VF_CantRefuelWhileFlying".Translate(refuelable.Vehicle.LabelCap);
+    }
     return;
 
     static float FuelInVehicle(VehiclePawn vehicle)
@@ -98,6 +104,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
   {
     if (SteamDeck.IsSteamDeckInNonKeyboardMode)
       return base.GizmoOnGUI(topLeft, maxWidth, parms);
+
+    UpdateDisableStatus();
 
     KeyCode hotKeyCode = KeyBindDef.MainKey;
     if (hotKeyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(hotKeyCode))
@@ -141,7 +149,7 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
       mouseOverElement = true;
     }
 
-    if (!electric && !refuelable.Vehicle.InAerialVehicle())
+    if (!electric)
     {
       iconRect.x -= iconRect.width + IconBarPadding;
       GenUI.DrawTextureWithMaterial(iconRect, fuelTexture,
@@ -157,6 +165,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
         }
         const int MinRefuelCount = 1;
         int maxRefuel = Mathf.FloorToInt(Mathf.Min(fuelAvailable, refuelable.FuelCapacity - refuelable.Fuel));
+        if (maxRefuel < MinRefuelCount)
+          maxRefuel = MinRefuelCount;
         Dialog_Slider slider = new(
           count => "VF_RefuelFromInventoryCount".Translate(count, refuelable.Props.fuelType.label),
           MinRefuelCount, maxRefuel, refuelable.ConsumeFuelFromInventory);
