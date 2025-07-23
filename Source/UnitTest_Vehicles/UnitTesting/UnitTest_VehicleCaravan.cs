@@ -62,6 +62,52 @@ internal sealed class UnitTest_VehicleCaravan
   }
 
   [Test]
+  private void AllInventoryItems()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1
+    });
+    group.BoardAll();
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    using ScopeWorldObject swo = new(vehicleCaravan);
+    Pawn dismounted = group.DisembarkOne();
+    Pawn mounted = group.pawns.FirstOrDefault(Ext_Vehicles.InVehicle);
+    Assert.AreNotEqual(dismounted, mounted);
+
+    List<Thing> inventoryItems = CaravanInventoryUtility.AllInventoryItems(vehicleCaravan);
+    ThingWithComps beer = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.Beer);
+    beer.stackCount = 1;
+    using ScopeEntity scopeBeer = new(beer);
+    ThingWithComps mealPack = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.MealSurvivalPack);
+    mealPack.stackCount = 1;
+    using ScopeEntity scopeMealPack = new(mealPack);
+    ThingWithComps yayo = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.Yayo);
+    yayo.stackCount = 1;
+    using ScopeEntity scopeYayo = new(yayo);
+    ThingWithComps mealSimple = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.MealSimple);
+    mealSimple.stackCount = 1;
+    using ScopeEntity scopeMealSimple = new(mealSimple);
+
+    Assert.IsFalse(inventoryItems.Contains(beer));
+    Assert.IsFalse(inventoryItems.Contains(mealPack));
+    Assert.IsFalse(inventoryItems.Contains(yayo));
+    Assert.IsFalse(inventoryItems.Contains(mealSimple));
+    mounted.inventory.TryAddAndUnforbid(beer);
+    dismounted.inventory.TryAddAndUnforbid(mealPack);
+    group.vehicle.inventory.TryAddAndUnforbid(yayo);
+    vehicleCaravan.AddPawnOrItem(mealSimple, true);
+    inventoryItems = CaravanInventoryUtility.AllInventoryItems(vehicleCaravan);
+    Expect.IsTrue(inventoryItems.Contains(beer));
+    Expect.IsTrue(inventoryItems.Contains(mealPack));
+    Expect.IsTrue(inventoryItems.Contains(yayo));
+    Expect.IsTrue(inventoryItems.Contains(mealSimple));
+  }
+
+  [Test]
   private void VanillaVisibility()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings

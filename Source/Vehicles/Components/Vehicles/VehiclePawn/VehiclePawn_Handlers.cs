@@ -357,6 +357,10 @@ public partial class VehiclePawn
     if (pawn.Spawned)
       pawn.DeSpawn();
 
+    // Vehicle saves and ticks boarded pawns, no need for world pawns
+    if (pawn.IsWorldPawn())
+      Find.WorldPawns.RemovePawn(pawn);
+
     bool result = true;
     if (!handler.thingOwner.TryAddOrTransfer(pawn, canMergeWithExistingStacks: false) &&
       pawn.holdingOwner != null)

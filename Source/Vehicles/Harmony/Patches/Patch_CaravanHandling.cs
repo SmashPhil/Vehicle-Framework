@@ -256,6 +256,10 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(CaravanArrivalAction_Trade.CanTradeWith)),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(NoTradingUndocked)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(TradeDeal), "InSellablePosition"),
+      postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+        nameof(NegotiatorInVehicle)));
   }
 
   private static IEnumerable<CodeInstruction> VehicleVisibilityInCaravanTranspiler(
@@ -1169,6 +1173,14 @@ internal class Patch_CaravanHandling : IPatchCategory
       !caravan.PawnsListForReading.NotNullAndAny(p => !p.IsBoat()))
     {
       __result = false;
+    }
+  }
+
+  private static void NegotiatorInVehicle(ref bool __result, Thing t)
+  {
+    if (!__result)
+    {
+      __result = TradeSession.playerNegotiator.GetVehicle() is { } vehicle && vehicle.InVehicleCaravan();
     }
   }
 }

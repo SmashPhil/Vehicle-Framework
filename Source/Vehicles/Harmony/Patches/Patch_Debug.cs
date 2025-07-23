@@ -46,13 +46,12 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(Pawn), "Tick"),
+    //  original: AccessTools.Method(typeof(Dialog_Trade), "CacheTradeables"),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(WorldPathGrid),
-    //    nameof(WorldPathGrid.RecalculateAllPerceivedPathCosts)),
-    //  postfix: new HarmonyMethod(typeof(Debugging),
+    //  original: AccessTools.Method(typeof(Dialog_Trade), "CacheTradeables"),
+    //  postfix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPostfix)));
     //HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Thing), "ExposeData"),
     //	finalizer: new HarmonyMethod(typeof(Debugging),
@@ -68,11 +67,11 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Pawn __instance)
+  private static void TestPrefix(Dialog_Trade __instance, List<Thing> ___playerCaravanAllPawnsAndItems)
   {
     try
     {
-      Log.Message($"{__instance} tick");
+      Log.Message($"{___playerCaravanAllPawnsAndItems.Count} items");
     }
     catch (Exception ex)
     {
@@ -81,12 +80,11 @@ internal class Patch_Debug : IPatchCategory
     }
   }
 
-  private static void TestPostfix(FloatMenuContext context, List<FloatMenuOption> options)
+  private static void TestPostfix(Dialog_Trade __instance, List<Tradeable> ___cachedTradeables)
   {
     try
     {
-      Log.Message(
-        $"Options: {options.Count} | Multi={context.IsMultiselect} | {string.Join(",", options.Select(option => option.Label))}");
+      _ = TradeSession.deal;
     }
     catch (Exception ex)
     {

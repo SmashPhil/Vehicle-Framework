@@ -34,6 +34,7 @@ public class VehicleTurretDef : Def, ITweakFields
   /// <summary>
   /// Ammunition filter for which types of ammo this turret can use.
   /// </summary>
+  [CanBeNull]
   public ThingFilter ammunition;
 
   /// <summary>

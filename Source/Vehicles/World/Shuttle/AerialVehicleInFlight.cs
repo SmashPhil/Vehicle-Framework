@@ -29,7 +29,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
   private VehiclePawn vehicle;
   public ThingOwner<VehiclePawn> innerContainer;
 
-  protected internal FlightPath flightPath;
+  public FlightPath flightPath;
 
   private Gizmo_RefuelableFuelTravel fuelGizmo;
 
@@ -276,7 +276,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
       Log.Error($"{this} in flight with empty FlightPath.  Grounding to current Tile.");
       if (!Destroyed)
       {
-        ArriveAtTile(flightPath.First.Tile);
+        ArriveAtTile(Tile);
         SwitchToCaravan();
       }
       return;

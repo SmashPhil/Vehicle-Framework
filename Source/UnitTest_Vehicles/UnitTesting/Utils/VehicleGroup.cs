@@ -186,7 +186,7 @@ public class VehicleGroup : IDisposable
     for (int i = 0; i < settings.drivers + settings.passengers; i++)
     {
       Pawn colonist = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
-        Faction.OfPlayer, fixedBiologicalAge: 30));
+        Faction.OfPlayer, fixedBiologicalAge: 30, forceNoBackstory: true));
       Assert.IsNotNull(colonist);
       Assert.AreEqual(colonist.Faction, Faction.OfPlayer);
       group.pawns.Add(colonist);
