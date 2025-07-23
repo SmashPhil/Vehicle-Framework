@@ -93,20 +93,23 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   private float FuelPercentOfTarget => TargetFuelLevel == 0 ? 0 : fuel / TargetFuelLevel;
 
+  public float ConsumptionRatePerTickRaw => FuelEfficiency * EfficiencyTickMultiplier;
+
+  // NOTE - Consumption rate is variable with idle state, and may fluctuate down the road with other conditions
+  // taken into account. Use ConsumptionRatePerTickRaw for calculations, and ConsumptionRatePerTick for consumption.
   public float ConsumptionRatePerTick
   {
     get
     {
-      float amount = FuelEfficiency * EfficiencyTickMultiplier;
       // Idle vehicles get a discount to consumption if they consume fuel both when 'drafted'
       // and when moving. Drafted will discount to x%, and moving will resume max consumption.
       if (Vehicle is { Spawned: true, vehiclePather.Moving: false } &&
         FuelCondition.HasFlag(FuelConsumptionCondition.Drafted) &&
         FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
       {
-        return amount * EfficiencyIdleMultiplier;
+        return ConsumptionRatePerTickRaw * EfficiencyIdleMultiplier;
       }
-      return amount;
+      return ConsumptionRatePerTickRaw;
     }
   }
 

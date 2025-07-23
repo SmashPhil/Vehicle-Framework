@@ -253,7 +253,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
     if (Vehicle.CompFueledTravel == null)
       return 0;
     float speedPctPerTick = (AerialVehicleInFlight.PctPerTick / tileDistance) * FlightSpeed;
-    float amount = Vehicle.CompFueledTravel.ConsumptionRatePerTick *
+    float amount = Vehicle.CompFueledTravel.ConsumptionRatePerTickRaw *
       FuelConsumptionWorldMultiplier;
     return amount / speedPctPerTick;
   }
