@@ -178,24 +178,40 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
     stashedVehicle.GetComponent<TimeoutComp>()
      .StartTimeout(Mathf.CeilToInt(timeoutDays * GenDate.TicksPerDay));
 
-    List<Pawn> inventoryCandidates = [];
-
     caravan = CaravanMaker.MakeCaravan([], vehicleCaravan.Faction, vehicleCaravan.Tile, true);
 
-    foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+    List<Pawn> pawns = [];
+    foreach (Pawn pawn in vehicleCaravan.pawns)
     {
+      if (pawn is not VehiclePawn vehicle)
+      {
+        pawns.Add(pawn);
+        continue;
+      }
+
       foreach (VehicleRoleHandler handler in vehicle.handlers)
       {
         for (int i = handler.thingOwner.Count - 1; i >= 0; i--)
         {
-          Pawn pawn = handler.thingOwner[i];
-          inventoryCandidates.Add(pawn);
-          // We need to remove then add, so that the vehicle registers that the pawn was taken
-          // out of the vehicle handler (and also triggers the PawnRemoved event)
-          vehicle.TryRemovePawn(pawn, handler);
-          caravan.AddPawn(pawn, true);
+          pawns.Add(handler.thingOwner[i]);
         }
       }
+    }
+    foreach (Pawn pawn in pawns)
+    {
+      VehicleRoleHandler handler = pawn.ParentHolder as VehicleRoleHandler;
+      handler?.vehicle.TryRemovePawn(pawn, handler);
+      vehicleCaravan.RemovePawn(pawn);
+
+      caravan.AddPawn(pawn, true);
+      // We need to remove then add, so that the vehicle registers that the pawn was taken
+      // out of the vehicle handler (and also triggers the PawnRemoved event)
+      if (!pawn.IsWorldPawn())
+        Find.WorldPawns.PassToWorld(pawn);
+    }
+
+    foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+    {
       for (int i = vehicle.inventory.innerContainer.Count - 1; i >= 0; i--)
       {
         Thing thing = vehicle.inventory.innerContainer[i];
@@ -220,7 +236,7 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
             else
             {
               CaravanInventoryUtility.MoveInventoryToSomeoneElse(ownerOf, thing,
-                inventoryCandidates, vehicleCaravan.pawns.InnerListForReading,
+                pawns, vehicleCaravan.pawns.InnerListForReading,
                 numToTake);
             }
           });
@@ -231,6 +247,7 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
     for (int i = vehicleCaravan.pawns.Count - 1; i >= 0; i--)
     {
       Pawn vehicle = vehicleCaravan.pawns[i];
+      Assert.IsTrue(vehicle is VehiclePawn);
       if (vehicle.IsWorldPawn())
         Find.WorldPawns.RemovePawn(vehicle);
       Assert.IsTrue(vehicle is VehiclePawn);

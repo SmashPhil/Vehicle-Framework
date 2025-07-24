@@ -7,6 +7,7 @@ using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
+using Priority = DevTools.UnitTesting.Priority;
 using TickerTypeRollback = SmashTools.ScopedValueRollback<Verse.TickerType>;
 
 namespace Vehicles.UnitTesting;
@@ -26,6 +27,9 @@ internal sealed class UnitTest_StashedVehicle
 
   private static readonly MethodInfo VehicleUpdateRateTicks =
     AccessTools.PropertyGetter(typeof(VehiclePawn), nameof(VehiclePawn.UpdateRateTicks));
+
+  private static readonly MethodInfo CheckAnyNonWorldPawns =
+    AccessTools.Method(typeof(Caravan), "CheckAnyNonWorldPawns");
 
   private static readonly MethodInfo OverrideMethod =
     AccessTools.Method(typeof(UnitTest_VehicleCaravan_Tick), nameof(OverrideUpdateRateTicks));
@@ -80,8 +84,36 @@ internal sealed class UnitTest_StashedVehicle
     SaveTester.Write();
   }
 
+  [Test, ExecutionPriority(Priority.AboveNormal)]
+  private void Create()
+  {
+    Map map = Find.CurrentMap;
+    Assert.IsNotNull(map);
+    RimWorld.Planet.World world = Find.World;
+    Assert.IsNotNull(world);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 2,
+      passengers = 2,
+      animals = 1
+    });
+    group.BoardAll();
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
+    Assert.IsNotNull(vehicleCaravan);
+    using ScopeWorldObject swo = new(vehicleCaravan);
+    group.DisembarkOne();
+
+    StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    using ScopeWorldObject swc = new(caravan);
+    Expect.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle));
+    CheckAnyNonWorldPawns.Invoke(caravan, null);
+    Expect.AreEqual(caravan.PawnsListForReading.Count, 5);
+  }
+
   [Test]
-  private void Recovery()
+  private void Recover()
   {
     Map map = Find.CurrentMap;
     Assert.IsNotNull(map);
