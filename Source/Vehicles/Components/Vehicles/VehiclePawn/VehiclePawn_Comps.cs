@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using SmashTools;
-using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -36,13 +36,11 @@ public partial class VehiclePawn
   private SelfOrderingList<ThingComp> cachedComps = [];
 
   [Unsaved]
-  private List<ThingComp> deactivatedComps = [];
-
-  [Unsaved]
   private List<ThingComp> compTickers = [];
 
-  private List<ActivatableThingComp> activatableComps = [];
-  private List<Type> deactivatedCompTypes = [];
+  internal List<ThingComp> deactivatedComps = [];
+  internal List<ActivatableThingComp> activatableComps = [];
+  internal List<Type> deactivatedCompTypes = [];
 
   public CompVehicleTurrets CompVehicleTurrets
   {
@@ -199,82 +197,20 @@ public partial class VehiclePawn
     }
   }
 
-  private void SyncActivatableComps()
+  private void LoadVarsActivatableComps()
   {
+    Assert.IsTrue(Scribe.mode == LoadSaveMode.LoadingVars);
+    if (CompUpgradeTree == null || activatableComps.NullOrEmpty())
+      return;
+
     foreach (ActivatableThingComp activatableComp in activatableComps)
     {
-      ThingComp matchingComp =
-        AllComps.FirstOrDefault(thingComp => thingComp.GetType() == activatableComp.Type);
-      if (matchingComp == null)
+      if (activatableComp.Comp == null)
       {
-        Log.Error($"Unable to sync {activatableComp.Type}. No matching comp in comp list.");
-        continue;
+        Log.Error($"Unable to load variables from {activatableComp.Type?.Name ?? "NULL"}");
+        return;
       }
-      activatableComp.Init(matchingComp);
-      activatableComp.RevalidateCompStatus();
-    }
-  }
-
-  private class ActivatableThingComp : IExposable
-  {
-    [Unsaved]
-    private readonly VehiclePawn vehicle;
-
-    [Unsaved]
-    private ThingComp comp;
-
-    private int owners;
-    private Type type;
-
-    public ActivatableThingComp(VehiclePawn vehicle)
-    {
-      this.vehicle = vehicle;
-    }
-
-    private bool Deactivated => owners == 0;
-
-    public Type Type => type;
-
-    public int Owners
-    {
-      get { return owners; }
-      set
-      {
-        if (owners != value)
-        {
-          owners = Mathf.Clamp(value, 0, int.MaxValue);
-          RevalidateCompStatus();
-        }
-      }
-    }
-
-    public void RevalidateCompStatus()
-    {
-      if (Deactivated)
-      {
-        if (vehicle.RemoveComp(comp))
-        {
-          vehicle.deactivatedComps.Add(comp);
-          vehicle.deactivatedCompTypes.Add(comp.GetType());
-          vehicle.activatableComps.Remove(this);
-        }
-      }
-      else if (!vehicle.AllComps.Contains(comp))
-      {
-        vehicle.AddComp(comp);
-      }
-    }
-
-    public void Init(ThingComp comp)
-    {
-      this.comp = comp;
-      type = comp.GetType();
-    }
-
-    public void ExposeData()
-    {
-      Scribe_Values.Look(ref owners, nameof(owners));
-      Scribe_Values.Look(ref type, nameof(type));
+      activatableComp.Comp.PostExposeData();
     }
   }
 }

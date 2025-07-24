@@ -311,34 +311,36 @@ namespace Vehicles
       Vehicle.DisembarkAll();
     }
 
-    private void ReloadUnlocks()
+    // TODO - Should be refactored into something less messy, but this needs to be called after all comps
+    // finish calling PostExposeData or activated comps will re-activate and add during iteration.
+    internal void ReloadUnlocks()
     {
-      if (!upgrades.NullOrEmpty())
+      if (upgrades.NullOrEmpty())
+        return;
+
+      foreach (string key in upgrades)
       {
-        foreach (string key in upgrades)
+        UpgradeNode node = Props.def.GetNode(key);
+        if (node == null)
+          continue;
+
+        node.AddOverlays(Vehicle);
+        if (node.upgrades.NullOrEmpty())
+          continue;
+
+        foreach (Upgrade upgrade in node.upgrades)
         {
-          UpgradeNode node = Props.def.GetNode(key);
-          if (node != null)
+          if (!upgrade.UnlockOnLoad)
+            continue;
+
+          try
           {
-            node.AddOverlays(Vehicle);
-            if (!node.upgrades.NullOrEmpty())
-            {
-              foreach (Upgrade upgrade in node.upgrades)
-              {
-                if (upgrade.UnlockOnLoad)
-                {
-                  try
-                  {
-                    upgrade.Unlock(Vehicle, true);
-                  }
-                  catch (Exception ex)
-                  {
-                    Log.Error(
-                      $"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
-                  }
-                }
-              }
-            }
+            upgrade.Unlock(Vehicle, true);
+          }
+          catch (Exception ex)
+          {
+            Log.Error(
+              $"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
           }
         }
       }
@@ -532,13 +534,8 @@ namespace Vehicles
       Scribe_Deep.Look(ref upgrade, nameof(upgrade));
       Scribe_Deep.Look(ref upgradeContainer, nameof(upgradeContainer));
 
-      upgrades ??= new HashSet<string>();
-      upgradeContainer ??= new ThingOwner<Thing>();
-
-      if (Scribe.mode == LoadSaveMode.PostLoadInit)
-      {
-        ReloadUnlocks();
-      }
+      upgrades ??= [];
+      upgradeContainer ??= [];
     }
   }
 }

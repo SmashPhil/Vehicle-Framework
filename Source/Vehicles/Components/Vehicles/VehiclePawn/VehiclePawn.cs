@@ -300,26 +300,20 @@ namespace Vehicles
     public override void ExposeData()
     {
       // Needs to occur before comps so vehicle can initialize managers before comps access them
-      switch (Scribe.mode)
-      {
-        case LoadSaveMode.LoadingVars:
-          RecacheComponents();
-        break;
-        case LoadSaveMode.PostLoadInit:
-          PostLoad();
-        break;
-      }
+      if (Scribe.mode == LoadSaveMode.PostLoadInit)
+        PostLoad();
 
       base.ExposeData();
 
-      Scribe_Collections.Look(ref activatableComps, nameof(activatableComps),
-        lookMode: LookMode.Deep, this);
-      activatableComps ??= [];
-
       if (Scribe.mode == LoadSaveMode.LoadingVars)
       {
-        SyncActivatableComps();
+        RecacheComponents();
+        CompUpgradeTree?.ReloadUnlocks();
+        // Execute after comp list has called PostExposeData so activated comps don't accidentally run
+        // twice, registering duplicates to cross refs.
+        LoadVarsActivatableComps();
       }
+      activatableComps ??= [];
 
       if (!deactivatedComps.NullOrEmpty())
       {
