@@ -137,7 +137,10 @@ internal sealed class UnitTest_MapGeneration_River
       this.def = def;
       TileMutatorDef existingDef = tile.Tile.Mutators.FirstOrDefault(mutDef => mutDef == def);
       if (existingDef == null)
+      {
         tile.Tile.Mutators.Add(def);
+        existingDef = def;
+      }
       Assert.IsNotNull(existingDef);
       Assert.IsTrue(ReferenceEquals(existingDef, this.def));
 

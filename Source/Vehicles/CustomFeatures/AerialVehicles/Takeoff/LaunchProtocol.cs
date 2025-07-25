@@ -596,12 +596,7 @@ public abstract class LaunchProtocol : IExposable
   /// </summary>
   public virtual IEnumerable<ArrivalOption> GetArrivalOptions(GlobalTargetInfo target)
   {
-    if (WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef) &&
-      !Find.WorldObjects.AnySettlementBaseAt(target.Tile) && !Find.WorldObjects.AnySiteAt(target.Tile))
-    {
-      yield return new ArrivalOption("FormCaravanHere".Translate(), new ArrivalAction_LandToCaravan(vehicle));
-    }
-    else if (target.WorldObject is MapParent mapParent)
+    if (target.WorldObject is MapParent mapParent)
     {
       if (mapParent is { Spawned: true, HasMap: true } && !mapParent.EnterCooldownBlocksEntering())
       {
@@ -618,19 +613,55 @@ public abstract class LaunchProtocol : IExposable
                 !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
           });
       }
-      else if (!mapParent.HasMap && (mapParent is Site || AerialVehicleCompatibility.CanLandIn(mapParent)))
+      else if (!mapParent.HasMap)
       {
-        // TODO - Acceptance report based on ArrivalAction_LoadMap::CanLand
-        if (vehicle.CompVehicleLauncher.ControlInFlight)
+        if (mapParent is Settlement settlement)
         {
-          yield return new ArrivalOption("VF_LandVehicleTargetedLanding".Translate(mapParent.Label),
-            new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.TargetedLanding));
+          if (settlement.Visitable)
+          {
+            yield return new ArrivalOption("VisitSettlement".Translate(settlement.Label),
+              new ArrivalAction_VisitSettlement(vehicle));
+
+            if (ArrivalAction_Trade.CanTradeWith(vehicle, settlement))
+            {
+              yield return new ArrivalOption("TradeWith".Translate(settlement.Label), new ArrivalAction_Trade(vehicle));
+            }
+            if (ArrivalAction_OfferGifts.CanOfferGiftsTo(vehicle, settlement))
+            {
+              yield return new ArrivalOption("OfferGifts".Translate(settlement.Label),
+                new ArrivalAction_OfferGifts(vehicle));
+            }
+          }
+
+          if (ArrivalAction_AttackSettlement.CanAttack(vehicle, settlement))
+          {
+            // TODO Launcher - Acceptance report based on ArrivalAction_AttackSettlement::CanAttack
+            if (vehicle.CompVehicleLauncher.ControlInFlight)
+            {
+              yield return new ArrivalOption("VF_AttackAndTargetLanding".Translate(settlement.Label),
+                new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.TargetedLanding));
+            }
+            yield return new ArrivalOption("AttackAndDropAtEdge".Translate(settlement.Label),
+              new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.EdgeDrop));
+            yield return new ArrivalOption("AttackAndDropInCenter".Translate(settlement.Label),
+              new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
+          }
         }
-        yield return new ArrivalOption("VF_LandVehicleEdge".Translate(mapParent.Label),
-          new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.EdgeDrop));
-        yield return new ArrivalOption("VF_LandVehicleCenter".Translate(mapParent.Label),
-          new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
+        else if (mapParent is Site || AerialVehicleCompatibility.CanLandIn(mapParent))
+        {
+          // TODO - Acceptance report based on ArrivalAction_LoadMap::CanLand
+          if (vehicle.CompVehicleLauncher.ControlInFlight)
+          {
+            yield return new ArrivalOption("VF_LandVehicleTargetedLanding".Translate(mapParent.Label),
+              new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.TargetedLanding));
+          }
+          yield return new ArrivalOption("VF_LandVehicleEdge".Translate(mapParent.Label),
+            new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.EdgeDrop));
+          yield return new ArrivalOption("VF_LandVehicleCenter".Translate(mapParent.Label),
+            new ArrivalAction_LoadMap(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
+        }
       }
+
       // TODO - proof of concepts not finished
       //if (vehicle.CompVehicleLauncher.ControlInFlight)
       //{
@@ -642,37 +673,9 @@ public abstract class LaunchProtocol : IExposable
       //  "VF_StrafeRun".Translate()
       //}
     }
-    if (target.WorldObject is Settlement settlement)
+    else if (WorldVehiclePathGrid.Instance.Passable(target.Tile, vehicle.VehicleDef))
     {
-      if (settlement.Visitable)
-      {
-        yield return new ArrivalOption("VisitSettlement".Translate(settlement.Label),
-          new ArrivalAction_VisitSettlement(vehicle));
-
-        if (ArrivalAction_Trade.CanTradeWith(vehicle, settlement))
-        {
-          yield return new ArrivalOption("TradeWith".Translate(settlement.Label), new ArrivalAction_Trade(vehicle));
-        }
-        if (ArrivalAction_OfferGifts.CanOfferGiftsTo(vehicle, settlement))
-        {
-          yield return new ArrivalOption("OfferGifts".Translate(settlement.Label),
-            new ArrivalAction_OfferGifts(vehicle));
-        }
-      }
-
-      if (ArrivalAction_AttackSettlement.CanAttack(vehicle, settlement))
-      {
-        // TODO Launcher - Acceptance report based on ArrivalAction_AttackSettlement::CanAttack
-        if (vehicle.CompVehicleLauncher.ControlInFlight)
-        {
-          yield return new ArrivalOption("VF_AttackAndTargetLanding".Translate(settlement.Label),
-            new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.TargetedLanding));
-        }
-        yield return new ArrivalOption("AttackAndDropAtEdge".Translate(settlement.Label),
-          new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.EdgeDrop));
-        yield return new ArrivalOption("AttackAndDropInCenter".Translate(settlement.Label),
-          new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
-      }
+      yield return new ArrivalOption("FormCaravanHere".Translate(), new ArrivalAction_LandToCaravan(vehicle));
     }
   }
 
