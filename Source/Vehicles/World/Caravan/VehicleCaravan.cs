@@ -324,7 +324,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
     if (!AerialVehicle)
     {
       Trace.Fail(
-        "Trying to launch aerial vehicle with caravan not registered as an aerial vehicle!");
+        "Trying to launch aerial vehicle with caravan not registered as an aerial vehicle.");
       SoundDefOf.ClickReject.PlayOneShotOnCamera();
       return;
     }
@@ -332,7 +332,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
     Assert.IsTrue(vehicles.Count == 1);
     VehiclePawn vehicle = vehicles[0];
 
-    int pawnCount = PawnsListForReading.Count;
+    int pawnCount = PawnsListForReading.CountWhere(pawn => pawn is not VehiclePawn);
     if (pawnCount > vehicle.TotalSeats)
     {
       Find.WindowStack.Add(new Dialog_Confirm(

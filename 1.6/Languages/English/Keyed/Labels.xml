@@ -138,7 +138,7 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   <VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
   <VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
   <VF_PawnsLeftBehindConfirm>Not Enough Seats</VF_PawnsLeftBehindConfirm>
-  <VF_PawnsLeftBehindConfirmDesc>There are not enough seats for all colonists, some will be left behind. Are you sure you want to takeoff?</VF_PawnsLeftBehindConfirmDesc>
+  <VF_PawnsLeftBehindConfirmDesc>Leave</VF_PawnsLeftBehindConfirmDesc>
   <!-- Header Titles -->
   
   <VF_Cargo>Cargo</VF_Cargo>

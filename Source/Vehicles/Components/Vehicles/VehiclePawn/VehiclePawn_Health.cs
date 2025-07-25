@@ -29,8 +29,8 @@ public partial class VehiclePawn
     MovementPermissions.HasFlag(VehiclePermissions.Mobile) &&
     movementStatus == VehicleMovementStatus.Online;
 
-  public bool CanMoveFinal => CanMove && (HasEnoughOperators ||
-    Spawned && VehicleMod.settings.debug.debugDraftAnyVehicle);
+  public bool CanMoveFinal =>
+    CanMove && (HasEnoughOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
 
   public CellRect Hitbox { get; private set; }
 
