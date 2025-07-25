@@ -42,10 +42,6 @@ internal sealed class UnitTest_AerialVehicle_Tick
   [SetUp]
   private void CreateAerialVehicleSettings()
   {
-    RimWorld.Planet.World world = Find.World;
-    Assert.IsNotNull(world);
-    Map map = Find.CurrentMap;
-    Assert.IsNotNull(map);
     // We can't initialize this on launch, it requires the faction manager.
     mockSettings = new VehicleGroup.MockSettings
     {
@@ -120,18 +116,6 @@ internal sealed class UnitTest_AerialVehicle_Tick
   [Test] // TODO
   [TestDescription("Aerial vehicle launch from and to caravans ticks at the correct rate for all pawns onboard.")]
   private void CaravanSkippingBoardedPawns()
-  {
-  }
-
-  [Test] // TODO
-  [TestDescription("Skyfaller leaving launch ticks at the correct rate for the inner vehicle.")]
-  private void SkyfallerExitVehicle()
-  {
-  }
-
-  [Test] // TODO
-  [TestDescription("Skyfaller leaving launch ticks at the correct rate for all pawns onboard.")]
-  private void SkyfallerExitBoardedPawns()
   {
   }
 }

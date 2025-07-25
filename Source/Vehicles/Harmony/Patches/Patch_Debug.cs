@@ -46,7 +46,7 @@ internal class Patch_Debug : IPatchCategory
     }
 
     //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(Dialog_Trade), "CacheTradeables"),
+    //  original: AccessTools.Method(typeof(Pawn), "Tick"),
     //  prefix: new HarmonyMethod(typeof(Patch_Debug),
     //    nameof(TestPrefix)));
     //HarmonyPatcher.Patch(
@@ -67,11 +67,12 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Dialog_Trade __instance, List<Thing> ___playerCaravanAllPawnsAndItems)
+  private static void TestPrefix(Pawn __instance)
   {
     try
     {
-      Log.Message($"{___playerCaravanAllPawnsAndItems.Count} items");
+      if (__instance.IsColonist && __instance.Faction == Faction.OfPlayer)
+        Log.Message($"{__instance} tick");
     }
     catch (Exception ex)
     {

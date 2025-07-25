@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -70,7 +69,7 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
       aerialVehicle.OrderFlyToTiles(flightPath, arrivalAction);
       if (orderRecon)
       {
-        aerialVehicle.flightPath.ReconCircleAt(flightPath.LastOrDefault().Tile);
+        aerialVehicle.flightPath.ReconCircleAt(flightPath[^1].Tile);
       }
       Assert.IsTrue(vehicle.IsWorldPawn());
     }

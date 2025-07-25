@@ -116,7 +116,6 @@ namespace Vehicles
 
     protected override void Tick()
     {
-      vehicle.CompVehicleLauncher.launchProtocol.Tick();
       if (!DrawPos.InBounds(Map) && vehicle.CompVehicleLauncher.launchProtocol.TicksPassed >
         def.skyfaller.ticksToImpactRange.max)
       {

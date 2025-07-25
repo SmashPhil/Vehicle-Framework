@@ -323,8 +323,6 @@ public abstract class LaunchProtocol : IExposable
   /// </summary>
   public void Tick()
   {
-    vehicle.DoTick();
-
     switch (launchType)
     {
       case LaunchType.Landing:
