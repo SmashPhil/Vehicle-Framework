@@ -596,6 +596,12 @@ public abstract class LaunchProtocol : IExposable
   /// </summary>
   public virtual IEnumerable<ArrivalOption> GetArrivalOptions(GlobalTargetInfo target)
   {
+    if (target.WorldObject != null)
+    {
+      if (!vehicle.CompVehicleLauncher.SpaceFlight &&
+        target.WorldObject.def.GetModExtension<SpaceObjectDefModExtension>() != null)
+        yield break;
+    }
     if (target.WorldObject is MapParent mapParent)
     {
       if (mapParent is { Spawned: true, HasMap: true } && !mapParent.EnterCooldownBlocksEntering())
@@ -647,7 +653,7 @@ public abstract class LaunchProtocol : IExposable
               new ArrivalAction_AttackSettlement(vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
           }
         }
-        else if (mapParent is Site || AerialVehicleCompatibility.CanLandIn(mapParent))
+        else if (mapParent is Site || mapParent is SpaceMapParent || AerialVehicleCompatibility.CanLandIn(mapParent))
         {
           // TODO - Acceptance report based on ArrivalAction_LoadMap::CanLand
           if (vehicle.CompVehicleLauncher.ControlInFlight)

@@ -400,11 +400,19 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
       failReason = "MessageTransportPodsDestinationIsInvalid".Translate();
       return false;
     }
-    if (ModsConfig.OdysseyActive && target.HasWorldObject && target.WorldObject.RequiresSignalJammerToReach &&
-      !SignalJammer)
+    if (target.HasWorldObject)
     {
-      failReason = "TransportPodDestinationRequiresSignalJammer".Translate();
-      return false;
+      if (!SpaceFlight && target.WorldObject.def.GetModExtension<SpaceObjectDefModExtension>() != null)
+      {
+        failReason = "VF_NoSpaceFlight".Translate(Vehicle.LabelCap);
+        return false;
+      }
+      if (ModsConfig.OdysseyActive && target.WorldObject.RequiresSignalJammerToReach &&
+        !SignalJammer)
+      {
+        failReason = "TransportPodDestinationRequiresSignalJammer".Translate();
+        return false;
+      }
     }
 
     float tileDistance = Ext_Math.SphericalDistance(Origin, WorldHelper.GetTilePos(target.Tile));

@@ -4,14 +4,14 @@
 	<Operation Class = "PatchOperationAddModExtension">
 		<xpath>Defs/WorldObjectDef[defName = "Gravship"]</xpath>
 		<value>
-			<li Class = "SpaceObjectDefModExtension" />
+			<li Class = "Vehicles.SpaceObjectDefModExtension" />
 		</value>
 	</Operation>
 
   <Operation Class = "PatchOperationAddModExtension">
-		<xpath>Defs/WorldObjectDef[@Name = "SpaceBase" or "SpaceSite" or "GeneratedAsteroid"]</xpath>
+		<xpath>Defs/WorldObjectDef[@Name = "SpaceBase" or @Name = "SpaceSite" or @Name = "GeneratedAsteroid"]</xpath>
 		<value>
-			<li Class = "SpaceObjectDefModExtension" />
+			<li Class = "Vehicles.SpaceObjectDefModExtension" />
 		</value>
 	</Operation>
 </Patch>
