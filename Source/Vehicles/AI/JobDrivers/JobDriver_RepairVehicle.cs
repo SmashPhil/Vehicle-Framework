@@ -9,12 +9,17 @@ namespace Vehicles
   public class JobDriver_RepairVehicle : JobDriver_WorkVehicle
   {
     public const float TicksForRepair = 60;
+    private const float VanillaSkillAmount = 0.05f;
 
     protected override JobDef JobDef => JobDefOf_Vehicles.RepairVehicle;
 
     protected override float TotalWork => TicksForRepair;
 
     protected override StatDef Stat => StatDefOf.ConstructionSpeed;
+
+    protected override SkillDef Skill => SkillDefOf.Construction;
+
+    protected override float SkillAmount => VanillaSkillAmount;
 
     protected override void WorkComplete(Pawn actor)
     {
