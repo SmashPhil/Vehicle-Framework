@@ -247,44 +247,37 @@ public static class WorldHelper
   /// Change <paramref name="tile"/> if tile is within CoastRadius of a coast <see cref="VehiclesModSettings"/>
   /// </summary>
   /// <returns>new tileID if a nearby coast is found or <paramref name="tile"/> if not found</returns>
-  public static PlanetTile PushSettlementToCoast(PlanetTile tile, Faction faction)
+  public static PlanetTile PushSettlementToCoast(PlanetTile tile)
   {
-    if (VehicleMod.CoastRadius <= 0)
-    {
+    if (VehicleMod.CoastRadius <= 0 || tile.LayerDef.isSpace)
       return tile;
-    }
 
     if (Find.World.CoastDirectionAt(tile).IsValid)
     {
-      if (Find.WorldGrid[tile].PrimaryBiome.canBuildBase && faction is not null)
-      {
-        DebugHelper.tiles.Add((tile, 0));
-      }
+      if (DebugProperties.Debug && Find.WorldGrid[tile].PrimaryBiome.canBuildBase)
+        DebugHelper.tiles.Add((tile, radius: 0));
       return tile;
     }
 
-    List<int> neighbors = [];
+    List<PlanetTile> neighbors = [];
     return Ext_World.Bfs(tile, neighbors, VehicleMod.CoastRadius,
-      result: delegate(int currentTile, int currentRadius)
+      result: delegate(PlanetTile currentTile, PlanetTile currentRadius)
       {
-        if (Find.World.CoastDirectionAt(currentTile).IsValid)
+        if (!Find.World.CoastDirectionAt(currentTile).IsValid)
+          return false;
+        if (!Find.WorldGrid[currentTile].PrimaryBiome.canBuildBase)
+          return false;
+        if (!Find.WorldGrid[currentTile].PrimaryBiome.implemented)
+          return false;
+        if (Find.WorldGrid[currentTile].hilliness == Hilliness.Impassable)
+          return false;
+
+        if (DebugProperties.Debug)
         {
-          if (Find.WorldGrid[currentTile].PrimaryBiome.canBuildBase &&
-            Find.WorldGrid[currentTile].PrimaryBiome.implemented &&
-            Find.WorldGrid[currentTile].hilliness != Hilliness.Impassable)
-          {
-            if (DebugProperties.Debug && faction is not null)
-            {
-              DebugHelper.DebugDrawSettlement(tile, currentTile);
-            }
-            if (faction != null)
-            {
-              DebugHelper.tiles.Add((currentTile, currentRadius));
-            }
-            return true;
-          }
+          DebugHelper.DebugDrawSettlement(tile, currentTile);
+          DebugHelper.tiles.Add((currentTile, currentRadius));
         }
-        return false;
+        return true;
       });
   }
 

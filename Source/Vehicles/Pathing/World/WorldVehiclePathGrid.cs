@@ -108,10 +108,16 @@ public class WorldVehiclePathGrid : WorldComponent
 
   private void FlashWorldGrid()
   {
-    if (DebugHelper.World.VehicleDef != null && Find.WorldSelector.SelectedTile >= 0 &&
-      Find.TickManager.TicksGame % 30 == 0) //Twice per second at 60fps
+    // Twice per second at 60 tps
+    if (DebugHelper.World.VehicleDef == null || !Find.WorldSelector.SelectedTile.Valid ||
+      Find.TickManager.TicksGame % 30 != 0)
     {
-      if (DebugHelper.World.DebugType == WorldPathingDebugType.PathCosts)
+      return;
+    }
+
+    switch (DebugHelper.World.DebugType)
+    {
+      case WorldPathingDebugType.PathCosts:
       {
         PlanetTile tile = Find.WorldSelector.SelectedTile;
         List<PlanetTile> neighbors = [];
@@ -120,21 +126,22 @@ public class WorldVehiclePathGrid : WorldComponent
         float cost = pathGrids[DebugHelper.World.VehicleDef.DefIndex][tile];
         Find.World.debugDrawer.FlashTile(tile, colorPct: cost * 10 / ImpassableMovementDifficulty,
           text: cost.ToString(), duration: 15);
-        foreach (int neighborTile in neighbors)
+        foreach (PlanetTile neighborTile in neighbors)
         {
           Find.World.debugDrawer.FlashTile(neighborTile,
             text: pathGrids[DebugHelper.World.VehicleDef.DefIndex][neighborTile]
              .ToString(), duration: 30);
         }
       }
-      else if (DebugHelper.World.DebugType == WorldPathingDebugType.Reachability)
+      break;
+      case WorldPathingDebugType.Reachability:
       {
         PlanetTile tile = Find.WorldSelector.SelectedTile;
-        List<int> neighbors = [];
+        List<PlanetTile> neighbors = [];
         Ext_World.Bfs(tile, neighbors, radius: 10);
 
         Find.World.debugDrawer.FlashTile(tile, colorPct: 0.8f, text: IdStringAt(tile), 15);
-        foreach (int neighbor in neighbors)
+        foreach (PlanetTile neighbor in neighbors)
         {
           bool canReach =
             Instance.reachability.CanReach(vehicleDef: DebugHelper.World.VehicleDef,
@@ -145,26 +152,30 @@ public class WorldVehiclePathGrid : WorldComponent
             duration: 30);
         }
 
-        static string IdStringAt(int t) => Instance.reachability.GetRegionId(
+        static string IdStringAt(PlanetTile t) => Instance.reachability.GetRegionId(
           DebugHelper.World.VehicleDef,
           t).ToString();
       }
-      else if (DebugHelper.World.DebugType == WorldPathingDebugType.WinterPct)
+      break;
+      case WorldPathingDebugType.WinterPct:
       {
         PlanetTile tile = Find.WorldSelector.SelectedTile;
-        List<int> neighbors = [];
+        List<PlanetTile> neighbors = [];
         Ext_World.Bfs(tile, neighbors, radius: 10);
 
         float winterPct = WinterPercentAt(tile);
         Find.World.debugDrawer.FlashTile(tile, colorPct: winterPct,
           text: winterPct.ToString("#.00"), duration: 15);
-        foreach (int neighbor in neighbors)
+        foreach (PlanetTile neighbor in neighbors)
         {
           winterPct = WinterPercentAt(neighbor);
           Find.World.debugDrawer.FlashTile(neighbor, colorPct: winterPct,
             text: winterPct.ToString("#.00"), duration: 30);
         }
       }
+      break;
+      default:
+        throw new NotImplementedException(nameof(WorldPathingDebugType));
     }
   }
 
