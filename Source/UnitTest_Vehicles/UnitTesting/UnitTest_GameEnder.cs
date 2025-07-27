@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Reflection;
 using DevTools.UnitTesting;
 using HarmonyLib;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
@@ -15,63 +17,15 @@ namespace Vehicles.UnitTesting;
 [TestDescription("Vehicles with passengers are checked for game ending conditions.")]
 internal sealed class UnitTest_GameEnder
 {
-  private VehicleGroup manualVehicle;
-  private VehicleGroup autonomousVehicle;
+  // GameEnder only applies after first 300 ticks to allow starter pods to land
+  private const int GameTicksBuffer = 300;
 
-  [SetUp]
-  private void GenerateVehicle()
+  private PawnAnchorer anchorer;
+
+  [SetUp, ExecutionPriority(Priority.First)]
+  private void KillEverything()
   {
-    manualVehicle = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-    {
-      permissions = VehiclePermissions.Mobile,
-      drivers = 1,
-      passengers = 1
-    });
-    autonomousVehicle = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-    {
-      permissions = VehiclePermissions.Autonomous,
-      passengers = 1
-    });
-  }
-
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void DestroyAll()
-  {
-    manualVehicle?.Dispose();
-    autonomousVehicle?.Dispose();
-  }
-
-  [Test]
-  private void GameOverCondition()
-  {
-    using PawnAnchorer anchorer = new();
-
-    const int GameTicksBuffer = 300;
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    // GameEnder only applies after first 300 ticks to allow starter pods to land
-    using MockGameTicks gameTicks = new(GameTicksBuffer);
-    Game game = Current.Game;
-    Assert.IsNotNull(game);
-    GameEnder gameEnder = game.gameEnder;
-    Assert.IsNotNull(gameEnder);
-    Assert.IsFalse(gameEnder.gameEnding);
-
-    // Go through and make sure all game ending disablers are invalid before we start testing if
-    // vehicles cause game ending events.
-    Assert.IsTrue(Find.TickManager.TicksGame >= 300);
-    Assert.IsFalse(ShipCountdown.CountingDown);
-    Assert.IsTrue(!ModsConfig.OdysseyActive ||
-      !WorldComponent_GravshipController.CutsceneInProgress);
-    Assert.IsNull(Find.CurrentGravship);
-    Assert.IsTrue(
-      !ModsConfig.AnomalyActive || !DeathRefusalUtility.PlayerHasCorpseWithDeathRefusal());
-    Assert.IsTrue(Find.WorldObjects.CaravansCount == 0);
-    Assert.IsTrue(Find.WorldObjects.TravellingTransporters.Count == 0);
-    Assert.IsTrue(QuestUtility.TotalBorrowedColonistCount() == 0);
-
+    anchorer = new PawnAnchorer();
     // Kill everything
     foreach (Map map in Find.Maps)
     {
@@ -93,105 +47,500 @@ internal sealed class UnitTest_GameEnder
         }
       }
     }
+  }
+
+  [SetUp]
+  private void GameInit()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    // Go through and make sure all game ending disablers are invalid before we start testing if
+    // vehicles cause game ending events.
+    Assert.IsTrue(Find.TickManager.TicksGame >= GameTicksBuffer);
+    Assert.IsFalse(ShipCountdown.CountingDown);
+    Assert.IsTrue(!ModsConfig.OdysseyActive ||
+      !WorldComponent_GravshipController.CutsceneInProgress);
+    Assert.IsNull(Find.CurrentGravship);
+    Assert.IsTrue(
+      !ModsConfig.AnomalyActive || !DeathRefusalUtility.PlayerHasCorpseWithDeathRefusal());
+    Assert.IsTrue(Find.WorldObjects.CaravansCount == 0);
+    Assert.IsTrue(Find.WorldObjects.TravellingTransporters.Count == 0);
+    Assert.IsTrue(QuestUtility.TotalBorrowedColonistCount() == 0);
+    Game game = Current.Game;
+    Assert.IsNotNull(game);
+    GameEnder gameEnder = game.gameEnder;
+    Assert.IsNotNull(gameEnder);
+    Assert.IsFalse(gameEnder.gameEnding);
+
     using (new GameEnderBlock(gameEnder))
     {
       gameEnder.CheckOrUpdateGameOver();
       Expect.IsTrue(gameEnder.gameEnding);
     }
+  }
 
-    manualVehicle.Spawn();
-    Assert.IsTrue(manualVehicle.vehicle.Spawned);
+  [TearDown]
+  private void SpawnAnchorPawn()
+  {
+    anchorer?.Dispose();
+    anchorer = null;
+  }
+
+  [Test]
+  [TestDescription("Verify vehicle with passengers prevents game ender event.")]
+  private void Manual()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1
+    });
+    group.Spawn();
 
     // Vehicle spawned with pawns on map
-    using (new GameEnderBlock(gameEnder))
-    {
-      manualVehicle.DisembarkAll();
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsFalse(gameEnder.gameEnding);
-    }
+    group.DisembarkAll();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
 
     // Vehicle spawned with no pawns in map, has passengers
-    using (new GameEnderBlock(gameEnder))
+    group.BoardAll();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    // Vehicle spawned with no pawns in map, no passengers
+    group.DisembarkAll();
+    group.DeSpawnPawns();
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.IsFalse(group.pawns.Any(pawn => pawn.Spawned));
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify autonomous vehicles do not prevent game ender event if no pawns are onboard.")]
+  private void Autonomous()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      manualVehicle.BoardAll();
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsFalse(gameEnder.gameEnding);
-    }
+      permissions = VehiclePermissions.Autonomous,
+      passengers = 1
+    });
 
-    using (new GameEnderBlock(gameEnder))
+    // Autonomous vehicle spawned with no pawns in map, no passengers
+    group.Spawn();
+    group.DisembarkAll();
+    group.DeSpawnPawns();
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == 0);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+
+    // Autonomous vehicle spawned with passengers
+    group.BoardAll();
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == group.pawns.Count);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    // Autonomous vehicle doesn't prevent game ender globally
+    group.DeSpawn();
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify vehicle caravan prevents game ender event.")]
+  private void Caravan()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsTrue(gameEnder.gameEnding);
-    }
-
-    manualVehicle.DeSpawn();
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-
-    // Autonomous Vehicle spawned with no pawns in map, no passengers
-    using (new GameEnderBlock(gameEnder))
-    {
-      autonomousVehicle.Spawn();
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsTrue(autonomousVehicle.vehicle.AllPawnsAboard.Count == 0);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsTrue(gameEnder.gameEnding);
-
-      autonomousVehicle.BoardAll();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsTrue(autonomousVehicle.vehicle.AllPawnsAboard.Count ==
-        autonomousVehicle.pawns.Count);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsFalse(gameEnder.gameEnding);
-
-      autonomousVehicle.DeSpawn();
-      gameEnder.CheckOrUpdateGameOver();
-      Assert.IsTrue(gameEnder.gameEnding);
-    }
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1,
+      animals = 1
+    });
 
     // Vehicle in caravan with passengers
-    using (new GameEnderBlock(gameEnder))
+    group.BoardAll();
+    VehicleCaravan caravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    Assert.IsNotNull(caravan);
+    using ScopeWorldObject swo = new(caravan);
+    Assert.IsTrue(caravan.Spawned);
+    Assert.IsFalse(caravan.Destroyed);
+    Assert.AreEqual(caravan.PawnsListForReading.Count, group.pawns.Count + 1);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    // Empty vehicle caravan
+    caravan.RemoveAllPawns();
+    Assert.IsTrue(caravan.pawns.InnerListForReading.NullOrEmpty());
+    Assert.IsTrue(caravan.PawnsListForReading.NullOrEmpty());
+    Assert.IsTrue(caravan.Vehicles.NullOrEmpty());
+    Assert.IsTrue(caravan.Destroyed);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify aerial vehicle prevents game ender event.")]
+  private void AerialVehicle()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      manualVehicle.BoardAll();
-      VehicleCaravan caravan =
-        CaravanHelper.MakeVehicleCaravan([manualVehicle.vehicle], Faction.OfPlayer, 0, true);
-      Assert.IsTrue(caravan.Spawned);
-      Assert.IsFalse(caravan.Destroyed);
-      Assert.AreEqual(caravan.PawnsListForReading.Count, manualVehicle.pawns.Count + 1);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsFalse(gameEnder.gameEnding);
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      passengers = 1,
+      animals = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
 
-      caravan.RemoveAllPawns();
-      Assert.IsTrue(caravan.pawns.InnerListForReading.NullOrEmpty());
-      Assert.IsTrue(caravan.PawnsListForReading.NullOrEmpty());
-      Assert.IsTrue(caravan.Vehicles.NullOrEmpty());
-      Assert.IsTrue(caravan.Destroyed);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsTrue(gameEnder.gameEnding);
-    }
-
+    CompVehicleLauncher compLauncher = group.vehicle.CompVehicleLauncher;
+    Assert.IsNotNull(compLauncher);
     // Aerial vehicle with passengers
-    using (new GameEnderBlock(gameEnder))
-    {
-      manualVehicle.BoardAll();
-      AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(manualVehicle.vehicle, 0);
-      Assert.IsTrue(aerialVehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.Destroyed);
-      Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, manualVehicle.pawns.Count);
-      Assert.IsNotNull(aerialVehicle);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsFalse(gameEnder.gameEnding);
+    group.BoardAll();
+    AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 0);
+    aerialVehicle.OrderFlyToTiles([new FlightNode(0), new FlightNode(1)],
+      new ArrivalAction_LandToCaravan(group.vehicle));
+    Assert.IsNotNull(aerialVehicle);
+    using ScopeWorldObject swo = new(aerialVehicle);
+    Assert.IsTrue(aerialVehicle.Spawned);
+    Assert.IsFalse(aerialVehicle.Destroyed);
+    Assert.IsTrue(compLauncher.inFlight);
+    Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, group.pawns.Count);
 
-      aerialVehicle.ClearAndDestroy();
-      Assert.IsTrue(aerialVehicle.Destroyed);
-      Expect.IsNull(aerialVehicle.Vehicle);
-      gameEnder.CheckOrUpdateGameOver();
-      Expect.IsTrue(gameEnder.gameEnding);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    aerialVehicle.ClearAndDestroy();
+    Assert.IsTrue(aerialVehicle.Destroyed);
+    Expect.IsNull(aerialVehicle.Vehicle);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+
+  [Test]
+  [TestDescription("Verify outgoing skyfaller prevents game ender event.")]
+  private void VehicleSkyfaller_Leaving()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Leaving skyfaller =
+      (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerLeaving);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    skyfaller.Destroy();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify incoming skyfaller prevents game ender event.")]
+  private void VehicleSkyfaller_Arriving()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Arriving skyfaller =
+      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    skyfaller.Destroy();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify crashing skyfaller prevents game ender.")]
+  private void VehicleSkyfaller_Crashing()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Crashing skyfaller =
+      (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+
+    skyfaller.Destroy();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify landing targeter disables game over condition.")]
+  private void TargetedLanding()
+  {
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    Assert.IsFalse(group.vehicle.Spawned);
+
+    LandingTargeter.Instance.BeginTargeting(group.vehicle, action: NoOpTargeterAction);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+    LandingTargeter.Instance.StopTargeting();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+    return;
+
+    // NOTE - Old Targeter system determines active state with non-null action, we must provide one.
+    static void NoOpTargeterAction(LocalTargetInfo t, Rot4 r)
+    {
     }
+  }
+
+  [Test]
+  [TestDescription("Verify transition from map generation to landing targeter catches game ender events.")]
+  private IEnumerator TargetedLandingGenerated()
+  {
+    using GenStepWarningDisabler gswd = new();
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    CompVehicleLauncher compLauncher = group.vehicle.CompVehicleLauncher;
+    Assert.IsNotNull(compLauncher);
+    // Aerial vehicle with passengers
+    group.BoardAll();
+
+    Faction enemyFaction =
+      Find.FactionManager.AllFactionsListForReading.FirstOrDefault(faction => faction.HostileTo(Faction.OfPlayer));
+    PlanetTile baseTile = TestUtils.FindValidTile(PlanetLayerDefOf.Surface, enemyFaction);
+    Settlement enemySettlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
+    Assert.IsNotNull(enemySettlement);
+    using ScopeWorldObject ses = new(enemySettlement);
+    enemySettlement.Tile = baseTile;
+    enemySettlement.SetFaction(enemyFaction);
+    Find.WorldObjects.Add(enemySettlement);
+    Assert.IsNotNull(Find.WorldObjects.MapParentAt(baseTile));
+    AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 0);
+    aerialVehicle.OrderFlyToTiles([new FlightNode(enemySettlement)],
+      new ArrivalAction_AttackSettlement(group.vehicle, AerialVehicleArrivalModeDefOf.TargetedLanding));
+    Assert.IsNotNull(aerialVehicle);
+    using ScopeWorldObject swo = new(aerialVehicle);
+    Assert.IsTrue(aerialVehicle.Spawned);
+    Assert.IsFalse(aerialVehicle.Destroyed);
+    Assert.IsTrue(compLauncher.inFlight);
+    Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, group.pawns.Count);
+    aerialVehicle.ArriveAtTile(baseTile);
+    aerialVehicle.flightPath.ConsumeNode();
+
+    // Wait for map to finish generating
+    while (LongEventHandler.AnyEventNowOrWaiting || Current.ProgramState == ProgramState.MapInitializing)
+      yield return null;
+
+    // Check status immediately after map gen, Pawn spawning will trigger checks before targeter starts
+    Expect.IsFalse(gameEnder.gameEnding);
+    Assert.IsTrue(aerialVehicle.Destroyed);
+    Assert.IsTrue(LandingTargeter.Instance.IsTargeting);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+    LandingTargeter.Instance.StopTargeting();
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsTrue(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify edge landing skyfaller updates game ender during map generation.")]
+  private IEnumerator EdgeLandingGenerated()
+  {
+    using GenStepWarningDisabler gswd = new();
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    CompVehicleLauncher compLauncher = group.vehicle.CompVehicleLauncher;
+    Assert.IsNotNull(compLauncher);
+    // Aerial vehicle with passengers
+    group.BoardAll();
+
+    Faction enemyFaction =
+      Find.FactionManager.AllFactionsListForReading.FirstOrDefault(faction => faction.HostileTo(Faction.OfPlayer));
+    PlanetTile baseTile = TestUtils.FindValidTile(PlanetLayerDefOf.Surface, enemyFaction);
+    Settlement enemySettlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
+    Assert.IsNotNull(enemySettlement);
+    using ScopeWorldObject ses = new(enemySettlement);
+    enemySettlement.Tile = baseTile;
+    enemySettlement.SetFaction(enemyFaction);
+    Find.WorldObjects.Add(enemySettlement);
+    Assert.IsNotNull(Find.WorldObjects.MapParentAt(baseTile));
+    AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 0);
+    aerialVehicle.OrderFlyToTiles([new FlightNode(enemySettlement)],
+      new ArrivalAction_AttackSettlement(group.vehicle, AerialVehicleArrivalModeDefOf.EdgeDrop));
+    Assert.IsNotNull(aerialVehicle);
+    using ScopeWorldObject swo = new(aerialVehicle);
+    Assert.IsTrue(aerialVehicle.Spawned);
+    Assert.IsFalse(aerialVehicle.Destroyed);
+    Assert.IsTrue(compLauncher.inFlight);
+    Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, group.pawns.Count);
+    aerialVehicle.ArriveAtTile(baseTile);
+    aerialVehicle.flightPath.ConsumeNode();
+
+    // Wait for map to finish generating
+    while (LongEventHandler.AnyEventNowOrWaiting || Current.ProgramState == ProgramState.MapInitializing)
+      yield return null;
+
+    // Check status immediately after map gen, Pawn spawning will trigger checks before targeter starts
+    Expect.IsFalse(gameEnder.gameEnding);
+    Assert.IsTrue(aerialVehicle.Destroyed);
+    Assert.IsFalse(LandingTargeter.Instance.IsTargeting);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
+  }
+
+  [Test]
+  [TestDescription("Verify center landing skyfaller updates game ender during map generation.")]
+  private IEnumerator CenterLandingGenerated()
+  {
+    using GenStepWarningDisabler gswd = new();
+    using MockGameTicks gameTicks = new(GameTicksBuffer);
+    GameEnder gameEnder = Current.Game.gameEnder;
+    using GameEnderBlock endBlock = new(gameEnder);
+
+    gameEnder.CheckOrUpdateGameOver();
+    Assert.IsTrue(gameEnder.gameEnding);
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      drivers = 1,
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
+    });
+    CompVehicleLauncher compLauncher = group.vehicle.CompVehicleLauncher;
+    Assert.IsNotNull(compLauncher);
+    // Aerial vehicle with passengers
+    group.BoardAll();
+
+    Faction enemyFaction =
+      Find.FactionManager.AllFactionsListForReading.FirstOrDefault(faction => faction.HostileTo(Faction.OfPlayer));
+    PlanetTile baseTile = TestUtils.FindValidTile(PlanetLayerDefOf.Surface, enemyFaction);
+    Settlement enemySettlement = (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
+    Assert.IsNotNull(enemySettlement);
+    using ScopeWorldObject ses = new(enemySettlement);
+    enemySettlement.Tile = baseTile;
+    enemySettlement.SetFaction(enemyFaction);
+    Find.WorldObjects.Add(enemySettlement);
+    Assert.IsNotNull(Find.WorldObjects.MapParentAt(baseTile));
+    AerialVehicleInFlight aerialVehicle = AerialVehicleInFlight.Create(group.vehicle, 0);
+    aerialVehicle.OrderFlyToTiles([new FlightNode(enemySettlement)],
+      new ArrivalAction_AttackSettlement(group.vehicle, AerialVehicleArrivalModeDefOf.CenterDrop));
+    Assert.IsNotNull(aerialVehicle);
+    using ScopeWorldObject swo = new(aerialVehicle);
+    Assert.IsTrue(aerialVehicle.Spawned);
+    Assert.IsFalse(aerialVehicle.Destroyed);
+    Assert.IsTrue(compLauncher.inFlight);
+    Assert.AreEqual(aerialVehicle.Vehicle.AllPawnsAboard.Count, group.pawns.Count);
+    aerialVehicle.ArriveAtTile(baseTile);
+    aerialVehicle.flightPath.ConsumeNode();
+
+    // Wait for map to finish generating
+    while (LongEventHandler.AnyEventNowOrWaiting || Current.ProgramState == ProgramState.MapInitializing)
+      yield return null;
+
+    // Check status immediately after map gen, Pawn spawning will trigger checks before targeter starts
+    Expect.IsFalse(gameEnder.gameEnding);
+    Assert.IsTrue(aerialVehicle.Destroyed);
+    Assert.IsFalse(LandingTargeter.Instance.IsTargeting);
+    gameEnder.CheckOrUpdateGameOver();
+    Expect.IsFalse(gameEnder.gameEnding);
   }
 
   private readonly struct GameEnderBlock : IDisposable

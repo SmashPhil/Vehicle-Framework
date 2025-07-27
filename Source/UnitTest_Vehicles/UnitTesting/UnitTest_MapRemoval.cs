@@ -20,28 +20,6 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
 
   protected virtual Faction Faction => Faction.OfPlayer;
 
-  private static CompProperties_VehicleLauncher CompPropertiesVehicleLauncher => new()
-  {
-    compClass = typeof(CompVehicleLauncher),
-    launchProtocol = new DefaultTakeoff
-    {
-      launchProperties = new LaunchProtocolProperties(),
-      landingProperties = new LaunchProtocolProperties()
-    }
-  };
-
-  private PlanetTile FindValidTile(PlanetLayerDef layerDef)
-  {
-    PlanetLayer layer = Find.WorldGrid.FirstLayerOfDef(layerDef);
-    return TileFinder.RandomSettlementTileFor(layer, Faction,
-      extraValidator: ValidObjectTile);
-
-    bool ValidObjectTile(PlanetTile tile)
-    {
-      return !Find.WorldObjects.AnyWorldObjectAt(tile);
-    }
-  }
-
   protected virtual void PostGenerateMap()
   {
   }
@@ -51,7 +29,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
   {
     using GenStepWarningDisabler gswd = new();
 
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
+    PlanetTile tile = TestUtils.FindValidTile(PlanetLayerDefOf.Surface, Faction);
     Assert.IsTrue(tile.Valid);
     Assert.IsNull(mapParent);
     Assert.IsNotNull(WorldObjectDef);
@@ -162,7 +140,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     {
       permissions = VehiclePermissions.Mobile,
       passengers = 1,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.Spawn();
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
@@ -177,7 +155,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     {
       permissions = VehiclePermissions.Mobile,
       animals = 1,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.Spawn();
     Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
@@ -189,7 +167,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.Spawn();
     Assert.IsTrue(group.pawns.NullOrEmpty());
@@ -203,7 +181,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     {
       permissions = VehiclePermissions.Mobile,
       passengers = 1,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.BoardAll();
     VehicleSkyfaller_Arriving skyfaller =
@@ -222,7 +200,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     {
       permissions = VehiclePermissions.Mobile,
       passengers = 1,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.BoardAll();
     VehicleSkyfaller_Leaving skyfaller =
@@ -241,7 +219,7 @@ internal abstract class UnitTest_MapRemoval<T> where T : MapParent
     {
       permissions = VehiclePermissions.Mobile,
       passengers = 1,
-      comps = [CompPropertiesVehicleLauncher]
+      comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.BoardAll();
     VehicleSkyfaller_Crashing skyfaller =

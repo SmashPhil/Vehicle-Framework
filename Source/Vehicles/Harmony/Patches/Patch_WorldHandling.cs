@@ -168,6 +168,12 @@ internal class Patch_WorldHandling : IPatchCategory
   {
     if (__instance.gameEnding)
     {
+      if (LandingTargeter.Instance.IsTargeting)
+      {
+        __instance.gameEnding = false;
+        ___ticksToGameOver = -1;
+        return;
+      }
       foreach (Map map in Find.Maps)
       {
         VehiclePositionManager positionManager =

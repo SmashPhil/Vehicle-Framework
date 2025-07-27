@@ -36,6 +36,11 @@ internal static class TestDefGenerator
       rotatable = true,
       blockWind = true,
       useHitPoints = true,
+      graphicData = new GraphicDataRGB
+      {
+        graphicClass = typeof(Graphic_Single),
+        texPath = "Ignore/Vehicles/Land/Tier3_ModernArmor/Tier3_ModernArmor",
+      },
       building = new BuildingProperties
       {
         canPlaceOverImpassablePlant = false,

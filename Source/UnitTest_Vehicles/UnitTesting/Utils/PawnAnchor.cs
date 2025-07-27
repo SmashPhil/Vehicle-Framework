@@ -29,7 +29,7 @@ internal class PawnAnchorer : IDisposable
     Assert.IsFalse(pawn.Spawned);
   }
 
-  void IDisposable.Dispose()
+  public void Dispose()
   {
     if (pawn.Destroyed || pawn.Discarded)
       pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, faction: Faction.OfPlayer);

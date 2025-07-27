@@ -14,7 +14,11 @@ public class AerialVehicleArrivalModeWorker_TargetedDrop : AerialVehicleArrivalM
         (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
       skyfaller.vehicle = vehicle;
       GenSpawn.Spawn(skyfaller, target.Cell, map, rot);
-    }, null, null, null, vehicle.VehicleDef.rotatable, true);
+    }, allowRotating: vehicle.VehicleDef.rotatable, forcedTargeting: true);
+
+    // Needs updating if spawning full colonist list into generated map. LandingTargeter will flag game ender to false
+    // for the duration of targeting
+    Find.GameEnder.CheckOrUpdateGameOver();
   }
 
   public override bool TryResolveRaidSpawnCenter(IncidentParms parms)
@@ -27,14 +31,15 @@ public class AerialVehicleArrivalModeWorker_TargetedDrop : AerialVehicleArrivalM
     parms.spawnRotation = Rot4.Random;
     if (!parms.spawnCenter.IsValid)
     {
-      bool flag = parms.faction == Faction.OfMechanoids;
-      bool flag2 = parms.faction != null && parms.faction.HostileTo(Faction.OfPlayer);
-      if (Rand.Chance(0.4f) && !flag &&
+      bool mechFaction = parms.faction == Faction.OfMechanoids;
+      bool hostile = parms.faction != null && parms.faction.HostileTo(Faction.OfPlayer);
+      if (Rand.Chance(0.4f) && !mechFaction &&
         map.listerBuildings.ColonistsHaveBuildingWithPowerOn(ThingDefOf.OrbitalTradeBeacon))
       {
         parms.spawnCenter = DropCellFinder.TradeDropSpot(map);
       }
-      else if (!DropCellFinder.TryFindRaidDropCenterClose(out parms.spawnCenter, map, !flag && flag2, !flag, true, -1))
+      else if (!DropCellFinder.TryFindRaidDropCenterClose(out parms.spawnCenter, map,
+        canRoofPunch: !mechFaction && hostile, allowIndoors: !mechFaction))
       {
         parms.raidArrivalMode = PawnsArrivalModeDefOf.EdgeDrop;
         return parms.raidArrivalMode.Worker.TryResolveRaidSpawnCenter(parms);

@@ -84,7 +84,7 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
     Vector3 pos = center;
     pos.y = AltitudeLayer.Shadows.AltitudeFor();
     float num = 1f + ticksToLand / 100f;
-    Vector3 s = new Vector3(num * shadowSize.x, 1f, num * shadowSize.y);
+    Vector3 s = new(num * shadowSize.x, 1f, num * shadowSize.y);
     Color white = Color.white;
     if (ticksToLand > 150)
     {
@@ -116,6 +116,8 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
     // Reset required for recaching handler lists. Loading save file will not recache these since
     // vehicle will be despawned initially
     vehicle.ResetRenderStatus();
+    // Needs updating if spawning full colonist list into generated map with no targeter
+    Find.GameEnder.CheckOrUpdateGameOver();
   }
 
   public override void ExposeData()

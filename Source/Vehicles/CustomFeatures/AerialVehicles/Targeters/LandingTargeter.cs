@@ -31,7 +31,7 @@ namespace Vehicles
 
     public static LandingTargeter Instance { get; private set; }
 
-    public bool ForcedTargeting { get; set; }
+    public bool ForcedTargeting { get; private set; }
 
     public override bool IsTargeting => action != null;
 
@@ -50,7 +50,7 @@ namespace Vehicles
       Action actionWhenFinished = null, Texture2D mouseAttachment = null,
       bool allowRotating = false, bool forcedTargeting = false)
     {
-      targeterQueue.Enqueue(delegate()
+      targeterQueue.Enqueue(delegate
       {
         actionOnStart?.Invoke();
         this.vehicle = vehicle;
@@ -232,13 +232,12 @@ namespace Vehicles
       if (localTargetInfo.IsValid)
       {
         Color color = GhostDrawerColor(GetPosState(localTargetInfo, true));
-        color.a = (Mathf.PingPong(framesOpen, PingPongTickLength / 1.5f) / PingPongTickLength) +
-          0.25f;
-        GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation,
-          vehicle.VehicleDef.buildDef, vehicle.VehicleDef.buildDef.graphic, color,
-          AltitudeLayer.Blueprint);
+        color.a = Mathf.PingPong(framesOpen, PingPongTickLength / 1.5f) / PingPongTickLength + 0.25f;
+        GhostDrawer.DrawGhostThing(localTargetInfo.Cell, landingRotation, vehicle.VehicleDef.buildDef,
+          vehicle.VehicleDef.buildDef.graphic,
+          color, AltitudeLayer.Blueprint);
       }
-      if (framesOpen % 60 == 0) //Reset every second
+      if (framesOpen % 60 == 0) // Reset every second
       {
         ResetRestrictionCache();
       }
@@ -250,7 +249,6 @@ namespace Vehicles
       {
         PositionState.Invalid    => Designator_Place.CannotPlaceColor,
         PositionState.Obstructed => GhostOccupiedColor,
-        PositionState.Valid      => Designator_Place.CanPlaceColor,
         _                        => Designator_Place.CanPlaceColor,
       };
     }
