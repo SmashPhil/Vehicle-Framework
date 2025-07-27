@@ -34,6 +34,7 @@ public static class VehicleHarmony
   {
     Assert.IsTrue(UnityData.IsInMainThread);
 
+    using DeepProfilerScope dps = new(nameof(VehicleHarmony));
 #if !RELEASE
     Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion} Unstable");
 #else

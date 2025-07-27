@@ -18,6 +18,8 @@ public class VehicleGroup : IDisposable
     this.vehicle = vehicle;
   }
 
+  // NOTE - many tests rely on the behavior that spawning the vehicle group will immediately board all pawns.
+  // This should not be changed without first checking every location a vehicle group is spawned.
   public void Spawn()
   {
     DeSpawn();
@@ -148,7 +150,7 @@ public class VehicleGroup : IDisposable
       ];
     }
 
-    int totalSlots = (settings.passengers + settings.animals + settings.extraSlots);
+    int totalSlots = settings.passengers + settings.animals + settings.extraSlots;
     if (totalSlots > 0)
     {
       vehicleDef.properties.roles =

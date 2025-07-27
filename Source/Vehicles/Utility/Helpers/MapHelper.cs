@@ -47,17 +47,14 @@ public static class MapHelper
   /// </summary>
   public static bool AnyVehicleSkyfallersBlockingMap(Map map)
   {
-    List<Thing> thingHolders = map?.listerThings?.ThingsInGroup(ThingRequestGroup.ThingHolder);
-    if (thingHolders.NullOrEmpty())
-      return false;
-
-    foreach (Thing thing in thingHolders)
-    {
-      if (thing is VehicleSkyfaller)
-      {
-        return true;
-      }
-    }
+    //VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
+    //foreach (Thing thing in positionMgr.AllSkyfallers)
+    //{
+    //  if (thing is VehicleSkyfaller)
+    //  {
+    //    return true;
+    //  }
+    //}
     return false;
   }
 
@@ -70,14 +67,12 @@ public static class MapHelper
     foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
      .AerialVehicles)
     {
+      // Ongoing recon
       if (aerialVehicle.flightPath.InRecon && aerialVehicle.flightPath.Last.Tile == map.Tile)
-      {
-        return true; // Keep open while performing recon
-      }
+        return true;
+      // Arrival action on tile
       if (aerialVehicle.flightPath.ArrivalAction != null && aerialVehicle.flightPath.Last.Tile == map.Tile)
-      {
-        return true; // Keep open if aerial vehicle has active arrival action on tile
-      }
+        return true;
     }
     return false;
   }

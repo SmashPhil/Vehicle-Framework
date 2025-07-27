@@ -1,80 +1,39 @@
-﻿using System.Linq;
-using DevTools.UnitTesting;
+﻿using DevTools.UnitTesting;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Verse;
-using Priority = DevTools.UnitTesting.Priority;
 
 namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
-[TestCategory(TestCategoryNames.VehiclePermissions)]
-[TestDescription("Maps account for vehicles when checking removal conditions.")]
-internal sealed class UnitTest_MapRemoval
+[TestCategory(
+  TestCategoryNames.VehiclePermissions,
+  TestCategoryNames.VehiclePawn, TestCategoryNames.WorldObject)]
+internal abstract class UnitTest_MapRemoval<T> where T : MapParent
 {
-  private static readonly IntVec3 DefaultMapSize = new(50, 1, 50);
+  private const int DefaultMapSize = 50;
 
-  private VehicleGroup manualVehicle;
-  private VehicleGroup autonomousVehicle;
-  private VehicleGroup aerialVehicle;
+  protected T mapParent;
 
-  [SetUp]
-  private void GenerateVehicle()
+  protected abstract WorldObjectDef WorldObjectDef { get; }
+
+  protected virtual Faction Faction => Faction.OfPlayer;
+
+  private static CompProperties_VehicleLauncher CompPropertiesVehicleLauncher => new()
   {
-    manualVehicle = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    compClass = typeof(CompVehicleLauncher),
+    launchProtocol = new DefaultTakeoff
     {
-      debugLabel = "Mobile Ground Vehicle",
-      permissions = VehiclePermissions.Mobile,
-      drivers = 1,
-      passengers = 1
-    });
-    autonomousVehicle = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-    {
-      debugLabel = "Autonomous Ground Vehicle",
-      permissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous,
-      passengers = 1
-    });
-    aerialVehicle = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-    {
-      debugLabel = "Autonomous Aerial Vehicle",
-      permissions = VehiclePermissions.Autonomous,
-      passengers = 1,
-      comps =
-      [
-        new CompProperties_VehicleLauncher
-        {
-          compClass = typeof(CompVehicleLauncher),
-          launchProtocol = new DefaultTakeoff
-          {
-            launchProperties = new LaunchProtocolProperties(),
-            landingProperties = new LaunchProtocolProperties()
-          }
-        }
-      ]
-    });
-  }
+      launchProperties = new LaunchProtocolProperties(),
+      landingProperties = new LaunchProtocolProperties()
+    }
+  };
 
-  [TearDown, ExecutionPriority(Priority.BelowNormal)]
-  private void DestroyAll()
-  {
-    manualVehicle.Dispose();
-    autonomousVehicle.Dispose();
-    aerialVehicle.Dispose();
-  }
-
-  [TearDown]
-  private void RefocusCamera()
-  {
-    Map map = Find.Maps.FirstOrDefault();
-    if (map != null)
-      CameraJumper.TryJump(map.Center, map);
-  }
-
-  private static PlanetTile FindValidTile(PlanetLayerDef layerDef)
+  private PlanetTile FindValidTile(PlanetLayerDef layerDef)
   {
     PlanetLayer layer = Find.WorldGrid.FirstLayerOfDef(layerDef);
-    return TileFinder.RandomSettlementTileFor(layer, Faction.OfPirates,
+    return TileFinder.RandomSettlementTileFor(layer, Faction,
       extraValidator: ValidObjectTile);
 
     bool ValidObjectTile(PlanetTile tile)
@@ -83,666 +42,214 @@ internal sealed class UnitTest_MapRemoval
     }
   }
 
-  /// <summary>
-  /// Player settlements should never be removed
-  /// </summary>
-  [Test]
-  private void Settlement()
+  protected virtual void PostGenerateMap()
   {
-    using GenStepWarningDisabler warningDisabler = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
-    Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
-    {
-      Settlement settlement =
-        (Settlement)WorldObjectMaker.MakeWorldObject(WorldObjectDefOf.Settlement);
-      settlement.Tile = tile;
-      settlement.SetFaction(Faction.OfPlayer);
-      Find.WorldObjects.Add(settlement);
-      map = MapGenerator.GenerateMap(DefaultMapSize, settlement, settlement.MapGeneratorDef);
-      CameraJumper.TryJump(map.Center, map);
-
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
-    {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
-
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
   }
 
-  /// <summary>
-  /// Only hold site open while a conscious player-controlled pawn exists or if an autonomous
-  /// vehicle is still on the map.
-  /// </summary>
-  [Test]
-  private void Site()
+  [SetUp]
+  protected void GenerateMap()
   {
     using GenStepWarningDisabler gswd = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
 
     PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
     Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
-    {
-      map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-        WorldObjectDefOf.Site);
-      Site site = map.Parent as Site;
-      Assert.IsNotNull(site);
-      Assert.IsFalse(map.Disposed);
-      CameraJumper.TryJump(map.Center, map);
-
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsTrue(site.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(site.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
-    {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
-
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
+    Assert.IsNull(mapParent);
+    Assert.IsNotNull(WorldObjectDef);
+    mapParent = (T)WorldObjectMaker.MakeWorldObject(WorldObjectDef);
+    mapParent.Tile = tile;
+    mapParent.SetFaction(Faction);
+    Find.WorldObjects.Add(mapParent);
+    Map map = MapGenerator.GenerateMap(new IntVec3(DefaultMapSize, 1, DefaultMapSize), mapParent,
+      mapParent.MapGeneratorDef);
+    CameraJumper.TryJump(map.Center, map);
+    PostGenerateMap();
   }
 
-  /// <summary>
-  /// Only hold camp open while a conscious player-controlled pawn exists or if an autonomous
-  /// vehicle is still on the map.
-  /// </summary>
-  [Test]
-  private void Camp()
+  [TearDown]
+  protected void RemoveMap()
   {
-    using GenStepWarningDisabler gswd = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
-    Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
+    if (mapParent?.Map is { Disposed: false })
     {
-      map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-        WorldObjectDefOf.Camp);
-      map.Parent.SetFaction(Faction.OfPlayer);
-      Camp camp = map.Parent as Camp;
-      Assert.IsNotNull(camp);
-      CameraJumper.TryJump(map.Center, map);
-
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsTrue(camp.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(camp.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
-    {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
-
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      WorldObject dummyCamp =
-        Find.WorldObjects.WorldObjectAt(tile, WorldObjectDefOf.AbandonedCamp);
-      dummyCamp?.Destroy();
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
+      Map map = mapParent.Map;
+      Current.Game.DeinitAndRemoveMap(map, false);
+      mapParent.Destroy();
+      Assert.IsTrue(map is { Disposed: true });
+      Assert.IsTrue(mapParent is { Destroyed: true });
+      mapParent = null;
     }
   }
 
   [Test]
-  private void CaravansBattlefield()
+  protected void ManualWithPassengers()
   {
-    using GenStepWarningDisabler gswd = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
-    Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-        WorldObjectDefOf.AttackedNonPlayerCaravan);
-      CaravansBattlefield battlefield = map.Parent as CaravansBattlefield;
-      Assert.IsNotNull(battlefield);
-      CameraJumper.TryJump(map.Center, map);
-
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsTrue(battlefield.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(battlefield.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
-    {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
-
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
+      permissions = VehiclePermissions.Mobile,
+      passengers = 1
+    });
+    group.Spawn();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+    group.DisembarkAll();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
   [Test]
-  private void DestroyedSettlement()
+  protected void ManualWithAnimals()
   {
-    using GenStepWarningDisabler gswd = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
-    Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-        WorldObjectDefOf.DestroyedSettlement);
-      DestroyedSettlement settlement = map.Parent as DestroyedSettlement;
-      Assert.IsNotNull(settlement);
-      CameraJumper.TryJump(map.Center, map);
-
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsTrue(settlement.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(settlement.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
-    {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
-
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
+      permissions = VehiclePermissions.Mobile,
+      animals = 1
+    });
+    group.Spawn();
+    Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
   }
 
   [Test]
-  [LoadIfOdysseyActive]
-  private void SpaceMapParent()
+  protected void ManualEmpty()
   {
-    using GenStepWarningDisabler gswd = new();
-    using PawnAnchorer anchorer = new();
-
-    Assert.IsFalse(manualVehicle.vehicle.Spawned);
-    Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-
-    PlanetTile tile = FindValidTile(PlanetLayerDefOf.Orbit);
-    Assert.IsTrue(tile.Valid);
-
-    Map map = null;
-    try
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      WorldObjectDef asteroidObjectDef =
-        DefDatabase<WorldObjectDef>.GetNamed("AsteroidMiningSite");
-      Assert.IsNotNull(asteroidObjectDef);
-      MapParent mapParent = Find.WorldObjects.MapParentAt(tile);
-      Assert.IsNull(mapParent);
-      mapParent = (MapParent)WorldObjectMaker.MakeWorldObject(asteroidObjectDef);
-      mapParent.Tile = tile;
-      Assert.IsNotNull(mapParent);
-      map = MapGenerator.GenerateMap(DefaultMapSize, mapParent, asteroidObjectDef.mapGenerator);
-      // Ensure we're testing a derivative of the type that actually implements a check for map removal
-      Assert.IsTrue(map.Parent is SpaceMapParent);
-      Assert.AreEqual(map.Parent, mapParent);
-      ResourceAsteroidMapParent asteroid = mapParent as ResourceAsteroidMapParent;
-      Assert.IsNotNull(asteroid);
-      CameraJumper.TryJump(map.Center, map);
+      permissions = VehiclePermissions.Mobile
+    });
+    group.Spawn();
+    Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
+  }
 
-      // Manual vehicle with passengers
-      manualVehicle.Spawn();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      manualVehicle.DisembarkAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-      manualVehicle.BoardAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      // Manual vehicle no passengers
-      manualVehicle.DisembarkAll();
-      manualVehicle.DeSpawnPawns();
-      Assert.IsTrue(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Expect.IsTrue(asteroid.ShouldRemoveMapNow(out _));
-
-      manualVehicle.BoardAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      manualVehicle.DeSpawn();
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous vehicle with passengers
-      autonomousVehicle.Spawn();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      autonomousVehicle.DisembarkAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-      autonomousVehicle.BoardAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      // Autonomous vehicle no passengers CanMove
-      autonomousVehicle.DisembarkAll();
-      autonomousVehicle.DeSpawnPawns();
-      Assert.IsTrue(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsTrue(autonomousVehicle.vehicle.CanMove);
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      autonomousVehicle.DeSpawn();
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-
-      // Autonomous aerial vehicle with passengers
-      aerialVehicle.Spawn();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      aerialVehicle.DisembarkAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-      aerialVehicle.BoardAll();
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      // Autonomous aerial vehicle no passengers CanMove
-      aerialVehicle.DisembarkAll();
-      aerialVehicle.DeSpawnPawns();
-      Assert.IsTrue(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.CanMove);
-      Assert.IsTrue(aerialVehicle.vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out _));
-      Expect.IsFalse(asteroid.ShouldRemoveMapNow(out _));
-
-      aerialVehicle.DeSpawn();
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
-    }
-    finally
+  [Test]
+  protected void AutonomousWithPassengers()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
-      manualVehicle.DeSpawn();
-      autonomousVehicle.DeSpawn();
-      aerialVehicle.DeSpawn();
+      permissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous,
+      passengers = 1
+    });
+    group.Spawn();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+    group.DisembarkAll();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
 
-      Assert.IsFalse(manualVehicle.vehicle.Spawned);
-      Assert.IsFalse(manualVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(autonomousVehicle.vehicle.Spawned);
-      Assert.IsFalse(autonomousVehicle.pawns.Any(pawn => pawn.Spawned));
-      Assert.IsFalse(aerialVehicle.vehicle.Spawned);
-      Assert.IsFalse(aerialVehicle.pawns.Any(pawn => pawn.Spawned));
+  [Test]
+  protected void AutonomousWithAnimals()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous,
+      animals = 1
+    });
+    group.Spawn();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
 
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
+  [Test]
+  protected void AutonomousEmpty()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous
+    });
+    group.Spawn();
+    Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void AerialWithPassengers()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      passengers = 1,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.Spawn();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+    group.DisembarkAll();
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void AerialWithAnimals()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      animals = 1,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.Spawn();
+    Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void AerialEmpty()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.Spawn();
+    Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void VehicleSkyfallerArriving()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      passengers = 1,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Arriving skyfaller =
+      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void VehicleSkyfallerLeaving()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      passengers = 1,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Leaving skyfaller =
+      (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerLeaving);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+  }
+
+  [Test]
+  protected void VehicleSkyfallerCrashing()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      permissions = VehiclePermissions.Mobile,
+      passengers = 1,
+      comps = [CompPropertiesVehicleLauncher]
+    });
+    group.BoardAll();
+    VehicleSkyfaller_Crashing skyfaller =
+      (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
+    Assert.IsNotNull(skyfaller);
+    using ScopeEntity se = new(skyfaller);
+    skyfaller.vehicle = group.vehicle;
+    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 }

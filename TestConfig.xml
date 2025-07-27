@@ -5,6 +5,10 @@
     <verboseLogging>true</verboseLogging>
   </log>
 
+  <warningsAllowed>
+    <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
+  </warningsAllowed>
+
   <preTestActions>
     <li>Vehicles.TestActions.RefocusMap</li>
   </preTestActions>

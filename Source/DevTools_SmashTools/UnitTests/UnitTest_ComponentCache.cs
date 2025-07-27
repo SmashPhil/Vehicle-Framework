@@ -42,33 +42,20 @@ internal class UnitTest_ComponentCache
     PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
     Assert.IsTrue(tile.Valid);
 
-    Map map = null;
-    try
-    {
-      map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-        WorldObjectDefOf.Site);
-      Site site = map.Parent as Site;
-      Assert.IsNotNull(site);
-      Assert.IsFalse(map.Disposed);
-      BreakdownManager component = map.GetComponent<BreakdownManager>();
-      Assert.IsNotNull(component);
-      BreakdownManager cacheComponent = map.GetCachedMapComponent<BreakdownManager>();
-      Assert.IsNotNull(cacheComponent);
-      Expect.ReferencesAreEqual(component, cacheComponent);
-      Expect.ReferencesAreEqual(component.map, cacheComponent.map);
-      Expect.AreEqual(component.map.uniqueID, cacheComponent.map.uniqueID);
-    }
-    finally
-    {
-      if (map is { Disposed: false })
-      {
-        Current.Game.DeinitAndRemoveMap(map, false);
-        map.Parent.Destroy();
-      }
-      Assert.IsFalse(map is { Disposed: false });
-      Assert.IsFalse(map?.Parent is { Destroyed: false });
-      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
-    }
+    Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
+      WorldObjectDefOf.Settlement);
+    Assert.IsNotNull(map);
+    using ScopeWorldObject swo = new(map.Parent);
+    Settlement settlement = map.Parent as Settlement;
+    Assert.IsNotNull(settlement);
+    Assert.IsFalse(map.Disposed);
+    BreakdownManager component = map.GetComponent<BreakdownManager>();
+    Assert.IsNotNull(component);
+    BreakdownManager cacheComponent = map.GetCachedMapComponent<BreakdownManager>();
+    Assert.IsNotNull(cacheComponent);
+    Expect.ReferencesAreEqual(component, cacheComponent);
+    Expect.ReferencesAreEqual(component.map, cacheComponent.map);
+    Expect.AreEqual(component.map.uniqueID, cacheComponent.map.uniqueID);
   }
 
   [Test]
@@ -77,7 +64,7 @@ internal class UnitTest_ComponentCache
     const int MapCount = 3;
     using GenStepWarningDisabler gswd = new();
 
-    List<(Map map, PlanetTile tile)> maps = [];
+    List<Map> maps = [];
     try
     {
       for (int i = 0; i < MapCount; i++)
@@ -85,10 +72,11 @@ internal class UnitTest_ComponentCache
         PlanetTile tile = FindValidTile(PlanetLayerDefOf.Surface);
         Assert.IsTrue(tile.Valid);
         Map map = GetOrGenerateMapUtility.GetOrGenerateMap(tile, DefaultMapSize,
-          WorldObjectDefOf.Site);
-        maps.Add((map, tile));
-        Site site = map.Parent as Site;
-        Assert.IsNotNull(site);
+          WorldObjectDefOf.Settlement);
+        Assert.IsNotNull(map);
+        maps.Add(map);
+        Settlement settlement = map.Parent as Settlement;
+        Assert.IsNotNull(settlement);
         Assert.IsFalse(map.Disposed);
         BreakdownManager component = map.GetComponent<BreakdownManager>();
         Assert.IsNotNull(component);
@@ -101,8 +89,7 @@ internal class UnitTest_ComponentCache
       Expect.AreEqual(MapComponentCache<BreakdownManager>.Count(), 3);
 
       const int RemoveIndex = 1;
-      Map mapToRemove = maps[RemoveIndex].map;
-      Current.Game.DeinitAndRemoveMap(mapToRemove, false);
+      Map mapToRemove = maps[RemoveIndex];
       mapToRemove.Parent.Destroy();
       Expect.IsNull(mapToRemove.GetCachedMapComponent<BreakdownManager>());
       Expect.AreEqual(MapComponentCache<BreakdownManager>.ClearAllDisposed(), 0);
@@ -110,8 +97,8 @@ internal class UnitTest_ComponentCache
 
       for (int i = 0; i < MapCount; i++)
       {
-        BreakdownManager component = maps[i].map.GetComponent<BreakdownManager>();
-        BreakdownManager cacheComponent = maps[i].map.GetCachedMapComponent<BreakdownManager>();
+        BreakdownManager component = maps[i].GetComponent<BreakdownManager>();
+        BreakdownManager cacheComponent = maps[i].GetCachedMapComponent<BreakdownManager>();
 
         // NOTE - Ludeon does not clear map component list, map will be cleaned by GC anyways, just checking here in
         // case this behavior ever changes which will affect the ComponentCache since we can then properly clean up
@@ -131,16 +118,10 @@ internal class UnitTest_ComponentCache
     }
     finally
     {
-      foreach ((Map map, PlanetTile tile) in maps)
+      foreach (Map map in maps)
       {
-        if (map is { Disposed: false })
-        {
-          Current.Game.DeinitAndRemoveMap(map, false);
+        if (!map.Parent.Destroyed)
           map.Parent.Destroy();
-        }
-        Assert.IsFalse(map is { Disposed: false });
-        Assert.IsFalse(map?.Parent is { Destroyed: false });
-        Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
       }
     }
   }
@@ -156,10 +137,12 @@ internal class UnitTest_ComponentCache
       existingMap.GetCachedMapComponent<BreakdownManager>();
     Expect.AreEqual(MapComponentCache<BreakdownManager>.Count(), Find.Maps.Count);
 
+    int countBefore = MapComponentCache<BreakdownManager>.Count();
     for (int i = 0; i < MapGensForCaching; i++)
     {
       PlanetTile tile = TestUtils.FindValidTile(PlanetLayerDefOf.Surface);
       Assert.IsTrue(tile.Valid);
+      Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
 
       Map map = null;
       try
@@ -182,16 +165,10 @@ internal class UnitTest_ComponentCache
       }
       finally
       {
-        if (map is { Disposed: false })
-        {
-          Current.Game.DeinitAndRemoveMap(map, false);
+        if (map?.Parent is { Destroyed: false })
           map.Parent.Destroy();
-        }
-        Assert.IsFalse(map is { Disposed: false });
-        Assert.IsFalse(map?.Parent is { Destroyed: false });
-        Assert.IsFalse(Find.WorldObjects.AnyWorldObjectAt(tile));
       }
     }
-    Expect.AreEqual(MapComponentCache<BreakdownManager>.Count(), Find.Maps.Count);
+    Expect.AreEqual(MapComponentCache<BreakdownManager>.Count(), countBefore);
   }
 }

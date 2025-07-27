@@ -271,6 +271,8 @@ public static class WorldHelper
           return false;
         if (Find.WorldGrid[currentTile].hilliness == Hilliness.Impassable)
           return false;
+        if (Find.WorldObjects.AnyWorldObjectAt(currentTile))
+          return false;
 
         if (DebugProperties.Debug)
         {

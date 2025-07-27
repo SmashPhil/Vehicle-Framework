@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -14,6 +11,13 @@ namespace Vehicles;
 
 internal class Patch_MapHandling : IPatchCategory
 {
+  private static readonly FastInvokeHandler IsValidColonyPawn;
+
+  static Patch_MapHandling()
+  {
+    IsValidColonyPawn = MethodInvoker.GetHandler(AccessTools.Method(typeof(MapPawns), "IsValidColonyPawn"));
+  }
+
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
   void IPatchCategory.PatchMethods()
@@ -74,6 +78,9 @@ internal class Patch_MapHandling : IPatchCategory
   /// </summary>
   public static void PushSettlementToCoast(ref PlanetTile __result)
   {
+    if (TestWatcher.RunningUnitTests)
+      return;
+
     __result = WorldHelper.PushSettlementToCoast(__result);
   }
 
@@ -85,13 +92,11 @@ internal class Patch_MapHandling : IPatchCategory
     if (__result is false)
     {
       if (LandingTargeter.Instance.IsTargeting && Current.Game.CurrentMap == ___map ||
-        MapHelper.AnyVehicleSkyfallersBlockingMap(___map) ||
         MapHelper.AnyAerialVehiclesInRecon(___map))
       {
         __result = true;
         return;
       }
-
       foreach (VehiclePawn vehicle in ___map.GetDetachedMapComponent<VehiclePositionManager>()
        .AllClaimants)
       {
@@ -103,27 +108,13 @@ internal class Patch_MapHandling : IPatchCategory
 
         foreach (Pawn passenger in vehicle.AllPawnsAboard)
         {
-          if (PawnKeepsMapOpen(passenger))
+          if ((bool)IsValidColonyPawn.Invoke(___map.mapPawns, passenger))
           {
             __result = true;
             return;
           }
         }
       }
-    }
-    return;
-
-    static bool PawnKeepsMapOpen(Pawn pawn)
-    {
-      if (pawn is { Downed: false, IsColonist: true })
-        return true;
-      if (pawn.relations is { relativeInvolvedInRescueQuest: not null })
-        return true;
-      if (pawn.Faction == Faction.OfPlayer || pawn.HostFaction == Faction.OfPlayer)
-        return true;
-      if (pawn is { CurJob.exitMapOnArrival: true })
-        return true;
-      return false;
     }
   }
 

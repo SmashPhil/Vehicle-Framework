@@ -1,4 +1,5 @@
 ﻿using RimWorld.Planet;
+using SmashTools;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -55,6 +56,7 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
 
   public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
   {
+    Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(vehicle);
     base.DeSpawn(mode);
     vehicle.ReleaseSustainerTarget();
   }
@@ -109,7 +111,7 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
         }
       }
     }
-
+    Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
     vehicle.SetSustainerTarget(this);
     // Reset required for recaching handler lists. Loading save file will not recache these since
     // vehicle will be despawned initially

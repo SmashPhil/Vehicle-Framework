@@ -9,9 +9,11 @@ using Verse.AI.Group;
 
 namespace Vehicles.World;
 
+[PublicAPI]
 public class CrashSite : MapParent
 {
-  private const int TicksTillRemovalAfterCrash = 500;
+  // 10 seconds of observation before removal if all pawns are downed / dead
+  public const int TicksTillRemovalAfterCrash = 10 * GenTicks.TicksPerRealSecond;
 
   private Settlement reinforcementsFrom;
 
@@ -21,10 +23,7 @@ public class CrashSite : MapParent
 
   private WorldPath pathToSite;
 
-  public virtual Settlement Settlement
-  {
-    get { return reinforcementsFrom; }
-  }
+  public virtual Settlement Settlement => reinforcementsFrom;
 
   public int InitiateReinforcementsRequest([NotNull] Settlement reinforcementsFrom)
   {
@@ -43,11 +42,7 @@ public class CrashSite : MapParent
   protected override void Tick()
   {
     base.Tick();
-    if (!MapHelper.AnyVehicleSkyfallersBlockingMap(Map))
-    {
-      ticksSinceCrash++;
-    }
-
+    ticksSinceCrash++;
     ticksTillReinforcements--;
     if (ticksTillReinforcements < 0 && reinforcementsFrom != null)
     {
@@ -98,17 +93,29 @@ public class CrashSite : MapParent
     ticksTillReinforcements = Mathf.RoundToInt(pathToSite.TotalCost * scaleFactor.RandomInRange);
   }
 
+  // TODO 1.7 - convert into Site with site part for followup raid
   public override bool ShouldRemoveMapNow(out bool alsoRemoveWorldObject)
   {
-    if (!Map.mapPawns.AnyPawnBlockingMapRemoval &&
-      !MapHelper.AnyVehicleSkyfallersBlockingMap(Map) &&
-      ticksSinceCrash >= TicksTillRemovalAfterCrash)
-    {
-      alsoRemoveWorldObject = true;
-      return true;
-    }
     alsoRemoveWorldObject = false;
-    return false;
+    if (ticksSinceCrash < TicksTillRemovalAfterCrash)
+      return false;
+
+    // Copying Site::ShouldRemoveNow
+    if (Map.mapPawns.AnyPawnBlockingMapRemoval)
+      return false;
+    foreach (PocketMapParent pocketMapParent in Find.World.pocketMaps)
+    {
+      if (pocketMapParent.sourceMap == Map && pocketMapParent.Map.mapPawns.AnyPawnBlockingMapRemoval)
+        return false;
+    }
+    if (ModsConfig.OdysseyActive && Map.listerThings.AnyThingWithDef(ThingDefOf.GravAnchor))
+      return false;
+
+    if (TransporterUtility.IncomingTransporterPreventingMapRemoval(Map))
+      return false;
+
+    alsoRemoveWorldObject = true;
+    return true;
   }
 
   public override void ExposeData()
