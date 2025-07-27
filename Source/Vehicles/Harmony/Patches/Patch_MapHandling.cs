@@ -35,7 +35,7 @@ internal class Patch_MapHandling : IPatchCategory
         nameof(TileFinder.RandomSettlementTileFor),
         parameters: [typeof(PlanetLayer), typeof(Faction), typeof(bool), typeof(Predicate<PlanetTile>)]),
       postfix: new HarmonyMethod(typeof(Patch_MapHandling),
-        nameof(PushSettlementToCoast)));
+        nameof(AdjustSettlement)));
     HarmonyPatcher.Patch(
       original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval))
        .GetGetMethod(),
@@ -76,12 +76,14 @@ internal class Patch_MapHandling : IPatchCategory
   /// <summary>
   /// Move settlement's spawning location towards the coastline with radius r specified in the mod settings
   /// </summary>
-  public static void PushSettlementToCoast(ref PlanetTile __result)
+  public static void AdjustSettlement(ref PlanetTile __result)
   {
     if (TestWatcher.RunningUnitTests)
       return;
+    if (VehicleMod.settings.main.adjustSettlementRadius == 0)
+      return;
 
-    __result = WorldHelper.PushSettlementToCoast(__result);
+    __result = WorldHelper.AdjustSettlement(__result);
   }
 
   /// <summary>

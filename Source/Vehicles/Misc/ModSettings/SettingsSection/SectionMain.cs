@@ -11,16 +11,25 @@ public class SectionMain : SettingsSection
 {
   private const int MainSectionColumns = 3;
 
+  private const int MaxSettlementAdjustRadius = 15;
+  private const int MaxRoadAdjustRadius = 4;
+
   public const float BeachMultMin = 0;
   public const float BeachMultMax = 2;
 
   public const float RiverMultMin = 0;
   public const float RiverMultMax = 2;
 
+  private const int DefaultSettlementAdjustRadius = 1;
+  private const float DefaultCoastWeight = 1;
+  private const float DefaultRiverWeight = 1;
+
   // Map & World Generation
   public float beachMultiplier = BeachMultMin;
   public float riverMultiplier = RiverMultMin;
-  public int forceFactionCoastRadius = 1;
+  public int adjustSettlementRadius = DefaultSettlementAdjustRadius;
+  public float adjustCoastWeight = DefaultCoastWeight;
+  public float adjustRiverWeight = DefaultRiverWeight;
 
   // General
   public bool modifiableSettings = true;
@@ -63,14 +72,22 @@ public class SectionMain : SettingsSection
   public VehicleTracksFriendlyFire friendlyFire = VehicleTracksFriendlyFire.None;
   public float friendlyFireChance = 0.5f;
 
+  private string inputBufferCoast;
+  private string inputBufferRiver;
+
   public override void ResetSettings()
   {
     base.ResetSettings();
 
+    inputBufferCoast = null;
+    inputBufferRiver = null;
+
     // Map & World Generation
     beachMultiplier = 0f;
     riverMultiplier = 0f;
-    forceFactionCoastRadius = 1;
+    adjustSettlementRadius = DefaultSettlementAdjustRadius;
+    adjustCoastWeight = DefaultCoastWeight;
+    adjustRiverWeight = DefaultRiverWeight;
 
     // General
     modifiableSettings = true;
@@ -118,32 +135,29 @@ public class SectionMain : SettingsSection
   {
     Scribe_Values.Look(ref beachMultiplier, nameof(beachMultiplier), defaultValue: BeachMultMin);
     Scribe_Values.Look(ref riverMultiplier, nameof(riverMultiplier), defaultValue: RiverMultMin);
-    Scribe_Values.Look(ref forceFactionCoastRadius, nameof(forceFactionCoastRadius),
-      defaultValue: 1);
+    Scribe_Values.Look(ref adjustSettlementRadius, nameof(adjustSettlementRadius),
+      defaultValue: DefaultSettlementAdjustRadius);
+    Scribe_Values.Look(ref adjustCoastWeight, nameof(adjustCoastWeight), defaultValue: DefaultCoastWeight);
+    Scribe_Values.Look(ref adjustRiverWeight, nameof(adjustRiverWeight), defaultValue: DefaultRiverWeight);
 
     Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
     Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
 
-    Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering),
-      defaultValue: true);
+    Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
     Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
     Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
 
-    Scribe_Values.Look(ref ignoreBiomeCostOnRoads,
-      nameof(ignoreBiomeCostOnRoads), defaultValue: true);
+    Scribe_Values.Look(ref ignoreBiomeCostOnRoads, nameof(ignoreBiomeCostOnRoads), defaultValue: true);
     Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
 
     Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
-    Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier),
-      defaultValue: 1);
-    Scribe_Values.Look(ref explosiveDamageMultiplier, nameof(explosiveDamageMultiplier),
-      defaultValue: 1);
+    Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);
+    Scribe_Values.Look(ref explosiveDamageMultiplier, nameof(explosiveDamageMultiplier), defaultValue: 1);
 
     Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), defaultValue: true);
 
     Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
-    Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects),
-      defaultValue: true);
+    Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
 
     Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
     Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 1000);
@@ -156,11 +170,9 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref airDefenses, nameof(airDefenses), defaultValue: true);
     Scribe_Values.Look(ref delayDeployOnLanding, nameof(delayDeployOnLanding), defaultValue: 0);
 
-    Scribe_Values.Look(ref reduceExplosionsOnWater, nameof(reduceExplosionsOnWater),
-      defaultValue: true);
+    Scribe_Values.Look(ref reduceExplosionsOnWater, nameof(reduceExplosionsOnWater), defaultValue: true);
     Scribe_Values.Look(ref runOverPawns, nameof(runOverPawns), defaultValue: true);
-    Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire),
-      defaultValue: VehicleTracksFriendlyFire.None);
+    Scribe_Values.Look(ref friendlyFire, nameof(friendlyFire), defaultValue: VehicleTracksFriendlyFire.None);
     Scribe_Values.Look(ref friendlyFireChance, nameof(friendlyFireChance), defaultValue: 0.5f);
   }
 
@@ -187,11 +199,17 @@ public class SectionMain : SettingsSection
       listingStandard.SliderLabeled("VF_RiverGenMultiplier".Translate(),
         "VF_RiverGenMultiplierTooltip".Translate(), startSymbol: "+", endSymbol: "%", ref riverMultiplier,
         RiverMultMin, RiverMultMax, multiplier: 100, decimalPlaces: 0);
-      listingStandard.SliderLabeled("VF_ForceSettlementCoast".Translate(),
-        "VF_ForceSettlementCoastTooltip".Translate(), $" {"VF_WorldTiles".Translate()}",
-        ref forceFactionCoastRadius, 0,
-        VehicleMod.MaxCoastalSettlementPush, 1, "VF_EverySettlementToCoast".Translate());
 
+      listingStandard.SliderLabeled("VF_AdjustSettlementRadius".Translate(),
+        "VF_AdjustSettlementRadiusTooltip".Translate(), $" {"VF_WorldTiles".Translate()}",
+        ref adjustSettlementRadius, min: 0, max: MaxSettlementAdjustRadius);
+      if (adjustSettlementRadius > 0)
+      {
+        listingStandard.TextFieldNumericLabeled("VF_AdjustCoastWeight".Translate(), ref adjustCoastWeight,
+          ref inputBufferCoast);
+        listingStandard.TextFieldNumericLabeled("VF_AdjustRiverWeight".Translate(), ref adjustRiverWeight,
+          ref inputBufferRiver);
+      }
       listingStandard.Gap(8);
 
       // General

@@ -18,7 +18,6 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public class VehicleMod : Mod
 {
-  public const int MaxCoastalSettlementPush = 21;
   public const float ResetImageSize = 22;
 
   internal static readonly Dictionary<Type, List<FieldInfo>> CachedFields = [];
@@ -62,11 +61,6 @@ public class VehicleMod : Mod
   }
 
   public static bool ModifiableSettings => settings.main.modifiableSettings;
-
-  public static int CoastRadius =>
-    settings.main.forceFactionCoastRadius >= MaxCoastalSettlementPush ?
-      9999 :
-      settings.main.forceFactionCoastRadius;
 
   public static float FishingSkillValue => settings.main.fishingSkillIncrease / 100f;
 

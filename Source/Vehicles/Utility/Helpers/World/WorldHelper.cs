@@ -6,12 +6,19 @@ using Verse;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Algorithms;
+using Unity.Collections;
+using UnityEngine.Assertions;
 
 namespace Vehicles.World;
 
 public static class WorldHelper
 {
   private static readonly List<Thing> InventoryItems = [];
+
+  private static readonly BFS<PlanetTile> WorldTileBfs = new();
+  private static readonly Dictionary<PlanetTile, float> TileWeights = [];
+  private static readonly List<PlanetTile> CandidateTiles = [];
 
   public static List<Thing> AllInventoryItems(AerialVehicleInFlight aerialVehicle)
   {
@@ -244,43 +251,74 @@ public static class WorldHelper
   }
 
   /// <summary>
-  /// Change <paramref name="tile"/> if tile is within CoastRadius of a coast <see cref="VehiclesModSettings"/>
+  /// Adjust <paramref name="tile"/> by weight if within radius of a river or coastline.
   /// </summary>
-  /// <returns>new tileID if a nearby coast is found or <paramref name="tile"/> if not found</returns>
-  public static PlanetTile PushSettlementToCoast(PlanetTile tile)
+  /// <returns>new tileID if a nearby feature is found or <paramref name="tile"/> if not found</returns>
+  public static PlanetTile AdjustSettlement(PlanetTile tile)
   {
-    if (VehicleMod.CoastRadius <= 0 || tile.LayerDef.isSpace)
+    if (tile.LayerDef.isSpace)
+      return tile;
+    if (tile.Tile.IsCoastal)
+      return tile;
+    if (tile.Tile.OnSurface &&
+      tile.Tile is SurfaceTile { Roads.Count: > 0 } ||
+      tile.Tile is SurfaceTile { Rivers.Count: > 0 })
       return tile;
 
-    if (Find.World.CoastDirectionAt(tile).IsValid)
-    {
-      if (DebugProperties.Debug && Find.WorldGrid[tile].PrimaryBiome.canBuildBase)
-        DebugHelper.tiles.Add((tile, radius: 0));
+    using ClearOnDispose<PlanetTile> cod = new(CandidateTiles);
+    Ext_World.Bfs(tile, ProcessTile, VehicleMod.settings.main.adjustSettlementRadius, CanEnter);
+
+    if (CandidateTiles.NullOrEmpty())
       return tile;
+    PlanetTile result = CandidateTiles.RandomElementByWeightWithFallback(GetTileWeight, fallback: tile);
+
+    if (DebugProperties.Debug)
+      DebugHelper.DebugAddSettlementOrigin(tile, result);
+
+    return result;
+
+    static float GetTileWeight(PlanetTile currentTile)
+    {
+      return TileWeights.TryGetValue(currentTile);
     }
 
-    List<PlanetTile> neighbors = [];
-    return Ext_World.Bfs(tile, neighbors, VehicleMod.CoastRadius,
-      result: delegate(PlanetTile currentTile, PlanetTile currentRadius)
-      {
-        if (!Find.World.CoastDirectionAt(currentTile).IsValid)
-          return false;
-        if (!Find.WorldGrid[currentTile].PrimaryBiome.canBuildBase)
-          return false;
-        if (!Find.WorldGrid[currentTile].PrimaryBiome.implemented)
-          return false;
-        if (Find.WorldGrid[currentTile].hilliness == Hilliness.Impassable)
-          return false;
-        if (Find.WorldObjects.AnyWorldObjectAt(currentTile))
-          return false;
+    static bool CanEnter(PlanetTile currentTile)
+    {
+      if (!Find.WorldGrid[currentTile].PrimaryBiome.canBuildBase)
+        return false;
+      if (!Find.WorldGrid[currentTile].PrimaryBiome.implemented)
+        return false;
+      if (Find.WorldGrid[currentTile].hilliness == Hilliness.Impassable)
+        return false;
+      if (Find.WorldObjects.AnySettlementBaseAtOrAdjacent(currentTile, out _))
+        return false;
+      return SettleInEmptyTileUtility.CanCreateMapAt(currentTile);
+    }
 
-        if (DebugProperties.Debug)
-        {
-          DebugHelper.DebugDrawSettlement(tile, currentTile);
-          DebugHelper.tiles.Add((currentTile, currentRadius));
-        }
-        return true;
-      });
+    static void ProcessTile(PlanetTile currentTile)
+    {
+      CandidateTiles.Add(currentTile);
+
+      // Only process tiles once, there may be some overlap with larger radii settings
+      if (TileWeights.ContainsKey(currentTile))
+        return;
+      float weight = TileWeightAt(currentTile);
+      TileWeights[currentTile] = weight;
+    }
+
+    static float TileWeightAt(PlanetTile currentTile)
+    {
+      float weight = 0;
+      if (currentTile.Tile.IsCoastal)
+        weight += VehicleMod.settings.main.adjustCoastWeight;
+
+      if (currentTile.Tile.OnSurface && currentTile.Tile is SurfaceTile surfaceTile)
+      {
+        if (!surfaceTile.Rivers.NullOrEmpty())
+          weight += surfaceTile.Rivers.Count * VehicleMod.settings.main.adjustRiverWeight;
+      }
+      return weight;
+    }
   }
 
   /// <summary>

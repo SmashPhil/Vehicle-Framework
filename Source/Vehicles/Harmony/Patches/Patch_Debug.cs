@@ -39,10 +39,6 @@ internal class Patch_Debug : IPatchCategory
           nameof(WorldRoutePlanner.WorldRoutePlannerUpdate)),
         postfix: new HarmonyMethod(typeof(Patch_Debug),
           nameof(DebugSettlementPaths)));
-      HarmonyPatcher.Patch(
-        original: AccessTools.Method(typeof(WorldObjectsHolder), nameof(WorldObjectsHolder.Add)),
-        prefix: new HarmonyMethod(typeof(Patch_Debug),
-          nameof(DebugWorldObjects)));
     }
 
     //HarmonyPatcher.Patch(
@@ -106,18 +102,6 @@ internal class Patch_Debug : IPatchCategory
   }
 
   /// <summary>
-  /// Show original settlement positions before being moved to the coast
-  /// </summary>
-  /// <param name="o"></param>
-  private static void DebugWorldObjects(WorldObject o)
-  {
-    if (o is Settlement)
-    {
-      DebugHelper.tiles.Add((o.Tile, 0));
-    }
-  }
-
-  /// <summary>
   /// Removes Vehicle entries from Spawn Pawn menu, as that uses vanilla Pawn Generation whereas vehicles need special handling
   /// </summary>
   /// <param name="__result"></param>
@@ -175,22 +159,12 @@ internal class Patch_Debug : IPatchCategory
   /// </summary>
   private static void DebugSettlementPaths()
   {
-    if (DebugProperties.DrawPaths && DebugHelper.debugLines.NullOrEmpty())
-    {
+    if (!DebugProperties.DrawPaths || DebugHelper.debugLines.NullOrEmpty())
       return;
-    }
 
-    if (DebugProperties.DrawPaths)
+    foreach (WorldPath wp in DebugHelper.debugLines)
     {
-      foreach (WorldPath wp in DebugHelper.debugLines)
-      {
-        wp.DrawPath(null);
-      }
-    }
-
-    foreach ((PlanetTile tile, int radius) in DebugHelper.tiles)
-    {
-      GenDraw.DrawWorldRadiusRing(tile, radius);
+      wp.DrawPath(null);
     }
   }
 

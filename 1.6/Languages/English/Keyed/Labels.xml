@@ -136,6 +136,7 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   
   <VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
   <VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
+  <VF_NoSpaceFlight>{0} is incapable of space flight.</VF_NoSpaceFlight>
   <VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
   <VF_PawnsLeftBehindConfirm>Not Enough Seats</VF_PawnsLeftBehindConfirm>
   <VF_PawnsLeftBehindConfirmDesc>Leave</VF_PawnsLeftBehindConfirmDesc>

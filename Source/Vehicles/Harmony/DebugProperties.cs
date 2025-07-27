@@ -3,9 +3,9 @@ using Verse;
 
 namespace Vehicles;
 
+// ReSharper disable RedundantDefaultMemberInitializer
 internal static class DebugProperties
 {
-  #pragma warning disable CS0414
   // Enhanced debugging state which will enable many costly debugging features.
   internal static readonly bool Debug = false;
 
@@ -15,7 +15,6 @@ internal static class DebugProperties
 
   private static readonly (string defName, DebugRegionType regionType) RegionDebugging =
     ("VF_TestMarshal", DebugRegionType.Regions | DebugRegionType.Links);
-  #pragma warning restore CS0414
 
   internal static void Init()
   {
