@@ -295,6 +295,8 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
     if (CanDeploy)
     {
+      deployToggle.Disabled = false;
+      deployToggle.disabledReason = null;
       deployToggle.icon = Deployed ? VehicleTex.UndeployVehicle : VehicleTex.DeployVehicle;
       deployToggle.defaultLabel = Deployed ? "VF_Undeploy".Translate() : "VF_Deploy".Translate();
       deployToggle.defaultDesc = "VF_DeployDescription".Translate();

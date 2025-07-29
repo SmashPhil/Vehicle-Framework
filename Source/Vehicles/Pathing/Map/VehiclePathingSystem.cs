@@ -317,33 +317,32 @@ public sealed class VehiclePathingSystem : MapComponent
   public override void MapComponentUpdate()
   {
     UpdateRegions();
-#if DEBUG
-    FlashGridType flashGridType = VehicleMod.settings.debug.debugDrawFlashGrid;
-    if (flashGridType != FlashGridType.None)
+
+    FlashGridType flashGridType = SectionDebug.debugDrawFlashGrid;
+    if (flashGridType > FlashGridType.None)
     {
-      if (Find.CurrentMap != null && !WorldRendererUtility.WorldRendered)
+      if (Find.CurrentMap is null || WorldRendererUtility.WorldRendered)
+        return;
+
+      switch (flashGridType)
       {
-        switch (flashGridType)
-        {
-          case FlashGridType.CoverGrid:
-            FlashCoverGrid();
-          break;
-          case FlashGridType.GasGrid:
-            FlashGasGrid();
-          break;
-          case FlashGridType.PositionManager:
-            FlashClaimants();
-          break;
-          case FlashGridType.ThingGrid:
-            FlashThingGrid();
-          break;
-          default:
-            Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
-          break;
-        }
+        case FlashGridType.CoverGrid:
+          FlashCoverGrid();
+        break;
+        case FlashGridType.GasGrid:
+          FlashGasGrid();
+        break;
+        case FlashGridType.PositionManager:
+          FlashClaimants();
+        break;
+        case FlashGridType.ThingGrid:
+          FlashThingGrid();
+        break;
+        default:
+          Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
+        break;
       }
     }
-#endif
   }
 
   private void FlashCoverGrid()

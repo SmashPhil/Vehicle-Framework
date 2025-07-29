@@ -29,8 +29,11 @@ public class SectionDebug : SettingsSection
   public bool debugDrawVehicleTracks;
   public bool debugDrawBumpers;
   public bool debugDrawLordMeetingPoint;
+
   public bool debugDrawFleePoint;
-  public FlashGridType debugDrawFlashGrid = FlashGridType.None;
+
+  // static for fast access in MapComponentUpdate
+  public static FlashGridType debugDrawFlashGrid = FlashGridType.None;
 
   public bool debugLogging;
   public bool debugPathCostChanges;
@@ -230,12 +233,12 @@ public class SectionDebug : SettingsSection
         listingStandard.CheckboxLabeled("VF_DevMode_DebugDrawFleePoints".Translate(),
           ref debugDrawFleePoint,
           "VF_DevMode_DebugDrawFleePointsTooltip".Translate());
-#if !RELEASE // Disabled in VehicleMapping.MapComponentUpdate for Release builds
+
         listingStandard.EnumSliderLabeled("VF_DevMode_DebugDrawGrid".Translate(),
           ref debugDrawFlashGrid,
           "VF_DevMode_DebugDrawGridTooltip".Translate(), string.Empty,
           valueNameGetter: flashGridType => flashGridType.ToString());
-#endif
+
 
         listingStandard.Header("VF_DevMode_Pathing".Translate(), ListingExtension.BannerColor,
           fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);

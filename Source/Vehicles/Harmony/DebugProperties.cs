@@ -3,9 +3,12 @@ using Verse;
 
 namespace Vehicles;
 
-// ReSharper disable RedundantDefaultMemberInitializer
 internal static class DebugProperties
 {
+  // ReSharper disable RedundantDefaultMemberInitializer
+  // NOTE - Release build can and should have most of these fields entirely unreferenced
+  #pragma warning disable CS0414
+
   // Enhanced debugging state which will enable many costly debugging features.
   internal static readonly bool Debug = false;
 
