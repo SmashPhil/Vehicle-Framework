@@ -11,8 +11,8 @@ public class AerialVehicleArrivalModeWorker_TargetedDrop : AerialVehicleArrivalM
     LandingTargeter.Instance.BeginTargeting(vehicle, map, delegate(LocalTargetInfo target, Rot4 rot)
     {
       VehicleSkyfaller_Arriving skyfaller =
-        (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-      skyfaller.vehicle = vehicle;
+        (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(
+          vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
       GenSpawn.Spawn(skyfaller, target.Cell, map, rot);
     }, allowRotating: vehicle.VehicleDef.rotatable, forcedTargeting: true);
 

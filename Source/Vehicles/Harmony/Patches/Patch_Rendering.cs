@@ -191,12 +191,13 @@ internal class Patch_Rendering : IPatchCategory
 
   private static void RecacheLocalVehicleEntries(Map map, List<Pawn> tmpPawns)
   {
-    foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+    VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
+    foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
     {
-      if (pawn.Faction != Faction.OfPlayer)
+      if (vehicle.Faction != Faction.OfPlayer)
         continue;
 
-      if (pawn is VehiclePawn { AllPawnsAboard.Count: > 0 } vehicle)
+      if (vehicle.AllPawnsAboard.Count > 0)
         tmpPawns.AddRange(vehicle.AllPawnsAboard);
     }
   }

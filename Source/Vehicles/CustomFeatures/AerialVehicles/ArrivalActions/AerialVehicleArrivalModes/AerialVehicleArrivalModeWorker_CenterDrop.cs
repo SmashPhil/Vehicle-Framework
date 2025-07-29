@@ -18,8 +18,8 @@ public class AerialVehicleArrivalModeWorker_CenterDrop : AerialVehicleArrivalMod
     }
 
     VehicleSkyfaller_Arriving skyfaller =
-      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
-    skyfaller.vehicle = vehicle;
+      (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(
+        vehicle.CompVehicleLauncher.Props.skyfallerIncoming, vehicle);
     GenSpawn.Spawn(skyfaller, result, map, vehicleRotation);
   }
 

@@ -258,9 +258,8 @@ internal class Patch_Debug : IPatchCategory
     }
 
     VehicleSkyfaller_Arriving skyfaller =
-      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(aerialVehicleInFlight.Vehicle
-       .CompVehicleLauncher.Props.skyfallerIncoming);
-    skyfaller.vehicle = aerialVehicleInFlight.Vehicle;
+      (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(aerialVehicleInFlight.Vehicle
+       .CompVehicleLauncher.Props.skyfallerIncoming, aerialVehicleInFlight.Vehicle);
 
     GenSpawn.Spawn(skyfaller, cell, nearestSettlement.Map, vehicleRotation);
     aerialVehicleInFlight.ClearAndDestroy();

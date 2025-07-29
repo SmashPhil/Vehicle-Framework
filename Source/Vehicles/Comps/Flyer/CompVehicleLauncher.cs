@@ -293,15 +293,11 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
     VehicleSkyfaller_Leaving vehicleLeaving =
       (VehicleSkyfaller_Leaving)VehicleSkyfallerMaker.MakeSkyfaller(Props.skyfallerLeaving,
         Vehicle);
-    vehicleLeaving.vehicle = Vehicle;
     vehicleLeaving.arrivalAction = arrivalAction;
     vehicleLeaving.flightPath = targetData.targets.Select(target => new FlightNode(target)).ToList();
     GenSpawn.Spawn(vehicleLeaving, Vehicle.Position, Vehicle.Map,
-      Vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties.forcedRotation ??
-      Vehicle.Rotation);
+      Vehicle.CompVehicleLauncher.launchProtocol.CurAnimationProperties.forcedRotation ?? Vehicle.Rotation);
 
-    if (Vehicle.Spawned)
-      Vehicle.DeSpawn();
     CameraJumper.TryHideWorld();
     Vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLaunch].ExecuteEvents();
 

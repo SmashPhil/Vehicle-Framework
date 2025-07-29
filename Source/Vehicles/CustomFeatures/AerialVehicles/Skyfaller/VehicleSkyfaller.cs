@@ -1,4 +1,6 @@
-﻿using RimWorld.Planet;
+﻿using System;
+using System.Collections.Generic;
+using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
 using Verse;
@@ -7,7 +9,7 @@ using Verse.Sound;
 namespace Vehicles;
 
 [StaticConstructorOnStartup]
-public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTarget
+public abstract class VehicleSkyfaller : Thing, IThingHolderTickable, IRoofCollapseAlert, ISustainerTarget
 {
   protected static MaterialPropertyBlock shadowPropertyBlock = new();
 
@@ -20,11 +22,16 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
 
   public VehiclePawn vehicle;
 
+  // Hook for vanilla ticking and ParentHolder resolving, just holds a reference to the inner vehicle.
+  private readonly ThingOwner<VehiclePawn> innerContainer = [];
+
   public override Vector3 DrawPos => launchProtocolDrawPos;
 
   protected Vector3 RootPos => vehicle.TrueCenter(Position, base.DrawPos.y);
 
   public ThingWithComps Thing => vehicle;
+
+  bool IThingHolderTickable.ShouldTickContents => true;
 
   TargetInfo ISustainerTarget.Target => this;
 
@@ -46,7 +53,6 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
   protected override void Tick()
   {
     vehicle.CompVehicleLauncher.launchProtocol.Tick();
-    vehicle.DoTick();
   }
 
   protected virtual void LeaveMap()
@@ -56,7 +62,11 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
 
   public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
   {
-    Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(vehicle);
+    innerContainer.Remove(vehicle);
+    // NOTE - Vehicle can be spawned right before the skyfaller despawns, we only want to release claims for outgoing
+    // skyfallers, releasing the claim of a spawned vehicle would enable map removal and game ender conditions.
+    if (!vehicle.Spawned)
+      Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(vehicle);
     base.DeSpawn(mode);
     vehicle.ReleaseSustainerTarget();
   }
@@ -96,6 +106,17 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
     Graphics.DrawMesh(MeshPool.plane10Back, matrix, material, 0, null, 0, shadowPropertyBlock);
   }
 
+  // TODO 1.7 - Remove in favor of compact generator class
+  private void PackVehicle()
+  {
+    if (vehicle.Spawned)
+      vehicle.DeSpawn();
+    innerContainer.TryAddOrTransfer(vehicle);
+    Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle, Position, Rotation);
+    // Needs updating if spawning full colonist list into generated map with no targeter
+    Find.GameEnder.CheckOrUpdateGameOver();
+  }
+
   public override void SpawnSetup(Map map, bool respawningAfterLoad)
   {
     base.SpawnSetup(map, respawningAfterLoad);
@@ -111,25 +132,32 @@ public abstract class VehicleSkyfaller : Thing, IRoofCollapseAlert, ISustainerTa
         }
       }
     }
-    Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(vehicle);
     vehicle.SetSustainerTarget(this);
     // Reset required for recaching handler lists. Loading save file will not recache these since
     // vehicle will be despawned initially
     vehicle.ResetRenderStatus();
-    // Needs updating if spawning full colonist list into generated map with no targeter
-    Find.GameEnder.CheckOrUpdateGameOver();
+    PackVehicle();
   }
 
   public override void ExposeData()
   {
     base.ExposeData();
 
-    Scribe_Values.Look(ref angle, "angle");
-    Scribe_Deep.Look(ref vehicle, "vehicle");
+    Scribe_Values.Look(ref angle, nameof(angle));
+    Scribe_Deep.Look(ref vehicle, nameof(vehicle));
   }
 
   RoofCollapseResponse IRoofCollapseAlert.Notify_OnBeforeRoofCollapse()
   {
     return RoofCollapseResponse.None;
+  }
+
+  void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
+  {
+  }
+
+  ThingOwner IThingHolder.GetDirectlyHeldThings()
+  {
+    return innerContainer;
   }
 }

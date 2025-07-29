@@ -191,7 +191,6 @@ internal sealed class UnitTest_AerialVehicle
     Assert.IsTrue(skyfaller.Spawned);
     CameraJumper.TryJump(skyfaller);
     Find.CameraDriver.SetRootSize(0);
-    Assert.AreEqual(skyfaller.UpdateRateTicks, 1);
     skyfaller.FinalizeLanding();
     Expect.IsTrue(skyfaller.Destroyed);
     Expect.IsTrue(group.vehicle.Spawned);

@@ -532,12 +532,11 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
   void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
   {
-    outChildren.AddRange(vehicle.handlers);
   }
 
   ThingOwner IThingHolder.GetDirectlyHeldThings()
   {
-    return vehicle.inventory.innerContainer;
+    return innerContainer;
   }
 
   public static AerialVehicleInFlight Create(VehiclePawn vehicle, PlanetTile tile)

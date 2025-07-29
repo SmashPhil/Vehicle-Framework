@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -21,6 +22,12 @@ public class VehicleSkyfaller_Strafe : VehicleSkyfaller_FlyOver
 
   private List<VehicleTurret> turretsTmp;
   private List<int> shotsTmp;
+
+  [UsedImplicitly]
+  [Obsolete("Implemented for Xml Deserialization only. Use VehicleSkyfallerMaker instead.", error: true)]
+  public VehicleSkyfaller_Strafe()
+  {
+  }
 
   protected float StrafeAreaDistance =>
     Vector3.Distance(start.ToVector3Shifted(), end.ToVector3Shifted());

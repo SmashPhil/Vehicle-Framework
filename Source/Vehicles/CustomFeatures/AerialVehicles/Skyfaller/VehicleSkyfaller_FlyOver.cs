@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -19,14 +20,16 @@ namespace Vehicles
 
     public AerialVehicleInFlight aerialVehicle;
 
+    [UsedImplicitly]
+    [Obsolete("Implemented for Xml Deserialization only. Use VehicleSkyfallerMaker instead.", error: true)]
     public VehicleSkyfaller_FlyOver()
     {
     }
 
-    public VehicleSkyfaller_FlyOver(AerialVehicleInFlight aerialVehicle)
-    {
-      this.aerialVehicle = aerialVehicle;
-    }
+    //public VehicleSkyfaller_FlyOver(AerialVehicleInFlight aerialVehicle)
+    //{
+    //  this.aerialVehicle = aerialVehicle;
+    //}
 
     public override Vector3 DrawPos
     {

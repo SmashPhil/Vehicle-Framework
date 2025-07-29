@@ -258,10 +258,10 @@ internal sealed class UnitTest_GameEnder
     });
     group.BoardAll();
     VehicleSkyfaller_Leaving skyfaller =
-      (VehicleSkyfaller_Leaving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerLeaving);
+      (VehicleSkyfaller_Leaving)VehicleSkyfallerMaker.MakeSkyfaller(
+        group.vehicle.CompVehicleLauncher.Props.skyfallerLeaving, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    skyfaller.vehicle = group.vehicle;
     GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
     gameEnder.CheckOrUpdateGameOver();
     Expect.IsFalse(gameEnder.gameEnding);
@@ -289,11 +289,10 @@ internal sealed class UnitTest_GameEnder
       comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.BoardAll();
-    VehicleSkyfaller_Arriving skyfaller =
-      (VehicleSkyfaller_Arriving)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerIncoming);
+    VehicleSkyfaller_Arriving skyfaller = (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(
+      group.vehicle.CompVehicleLauncher.Props.skyfallerIncoming, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    skyfaller.vehicle = group.vehicle;
     GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
     gameEnder.CheckOrUpdateGameOver();
     Expect.IsFalse(gameEnder.gameEnding);
@@ -322,10 +321,10 @@ internal sealed class UnitTest_GameEnder
     });
     group.BoardAll();
     VehicleSkyfaller_Crashing skyfaller =
-      (VehicleSkyfaller_Crashing)ThingMaker.MakeThing(group.vehicle.CompVehicleLauncher.Props.skyfallerCrashing);
+      (VehicleSkyfaller_Crashing)VehicleSkyfallerMaker.MakeSkyfaller(
+        group.vehicle.CompVehicleLauncher.Props.skyfallerCrashing, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    skyfaller.vehicle = group.vehicle;
     GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
     gameEnder.CheckOrUpdateGameOver();
     Expect.IsFalse(gameEnder.gameEnding);

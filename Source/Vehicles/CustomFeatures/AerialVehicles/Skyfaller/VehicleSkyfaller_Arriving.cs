@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using UnityEngine;
@@ -16,6 +18,12 @@ public class VehicleSkyfaller_Arriving : VehicleSkyfaller
   public Rot4 rotatePostLanding = Rot4.Invalid;
 
   private static CompProperties_VehicleLauncher vehicleLauncherProps;
+
+  [UsedImplicitly]
+  [Obsolete("Implemented for Xml Deserialization only. Use VehicleSkyfallerMaker instead.", error: true)]
+  public VehicleSkyfaller_Arriving()
+  {
+  }
 
   public bool LandingSpotOccupied { get; private set; }
 

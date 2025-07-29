@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
@@ -19,6 +21,13 @@ public class VehicleSkyfaller_Leaving : VehicleSkyfaller
   public bool createWorldObject = true;
 
   private int delayLaunchingTicks;
+
+  [UsedImplicitly]
+  [Obsolete("Implemented for Xml Deserialization only. Use VehicleSkyfallerMaker instead.", error: true)]
+  public VehicleSkyfaller_Leaving()
+  {
+  }
+
 
   protected override void DrawAt(Vector3 drawLoc, bool flip = false)
   {

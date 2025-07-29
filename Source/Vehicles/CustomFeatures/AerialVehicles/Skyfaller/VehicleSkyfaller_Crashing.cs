@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
-using RimWorld.Planet;
+using UnityEngine;
 using Verse;
 using Verse.Sound;
-using UnityEngine;
-using SmashTools;
-using SmashTools.Rendering;
 
 namespace Vehicles
 {
@@ -22,6 +19,12 @@ namespace Vehicles
     public float shrapnelDirection;
 
     public int ticksToImpact = LeaveMapAfterTicks;
+
+    [UsedImplicitly]
+    [Obsolete("Implemented for Xml Deserialization only. Use VehicleSkyfallerMaker instead.", error: true)]
+    public VehicleSkyfaller_Crashing()
+    {
+    }
 
     private bool SpawnTimedMotes
     {

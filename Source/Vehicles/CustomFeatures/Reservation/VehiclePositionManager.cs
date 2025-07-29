@@ -37,18 +37,26 @@ public class VehiclePositionManager : DetachedMapComponent
 
   public void ClaimPosition(VehiclePawn vehicle)
   {
+    ClaimPosition(vehicle, vehicle.Position, vehicle.Rotation);
+  }
+
+  public void ClaimPosition(VehiclePawn vehicle, IntVec3 cell, Rot4 rot)
+  {
     ReleaseClaimed(vehicle);
-    CellRect occupiedRect = vehicle.VehicleRect();
+    CellRect occupiedRect = vehicle.VehicleRect(cell, rot);
     occupiedRects[vehicle] = occupiedRect;
-    foreach (IntVec3 cell in occupiedRect)
+    foreach (IntVec3 occupiedCell in occupiedRect)
     {
-      occupiedCells[cell] = vehicle;
+      occupiedCells[occupiedCell] = vehicle;
     }
 
-    vehicle.RecalculateFollowerCell();
-    if (ClaimedBy(vehicle.FollowerCell) is { } blockedVehicle)
+    if (vehicle.Spawned)
     {
-      blockedVehicle.RecalculateFollowerCell();
+      vehicle.RecalculateFollowerCell();
+      if (ClaimedBy(vehicle.FollowerCell) is { } blockedVehicle)
+      {
+        blockedVehicle.RecalculateFollowerCell();
+      }
     }
   }
 
