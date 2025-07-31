@@ -89,9 +89,7 @@ public static class GenGridVehicles
     foreach (Thing t in list)
     {
       if (t.def.passability != Traversability.Standable)
-      {
         return false;
-      }
     }
     return true;
   }

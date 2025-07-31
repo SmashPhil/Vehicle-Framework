@@ -717,12 +717,16 @@ public static class Ext_Vehicles
   /// Ensures the cellrect inhabited by the vehicle contains no Things that will block pathing and movement.
   /// </summary>
   [Pure]
-  public static bool CellRectStandable(this VehiclePawn vehicle, Map map, IntVec3? c = null,
-    Rot4? rot = null)
+  public static bool CellRectStandable(this VehiclePawn vehicle, Map map, IntVec3? c = null, Rot4? rot = null)
   {
-    IntVec3 loc = c ?? vehicle.Position;
+    IntVec3 position = c ?? vehicle.Position;
     Rot4 facing = rot ?? vehicle.Rotation;
-    return vehicle.VehicleDef.CellRectStandable(map, loc, facing);
+    foreach (IntVec3 cell in vehicle.VehicleDef.VehicleRect(position, facing))
+    {
+      if (!cell.Standable(vehicle, map))
+        return false;
+    }
+    return true;
   }
 
   /// <summary>

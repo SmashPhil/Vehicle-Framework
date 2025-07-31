@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using RimWorld.Planet;
+﻿using System;
+using System.Collections.Generic;
 using SmashTools;
 using Vehicles.World;
 using Verse;
@@ -45,16 +45,15 @@ public static class MapHelper
   /// <summary>
   /// Active skyfallers in a map should prevent the map from being closed
   /// </summary>
+  [Obsolete("Will be removed in 1.7")] // TODO 1.7 - Remove
   public static bool AnyVehicleSkyfallersBlockingMap(Map map)
   {
-    //VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
-    //foreach (Thing thing in positionMgr.AllSkyfallers)
-    //{
-    //  if (thing is VehicleSkyfaller)
-    //  {
-    //    return true;
-    //  }
-    //}
+    VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
+    foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
+    {
+      if (vehicle.ParentHolder is VehicleSkyfaller)
+        return true;
+    }
     return false;
   }
 
@@ -83,15 +82,17 @@ public static class MapHelper
   public static bool NonStandableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell,
     Rot4 rot)
   {
-    return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot),
-      map) || !vehicle.CellRectStandable(map, cell, rot);
+    return VehicleReservationManager.VehicleInhabitingCells(
+        vehicle.PawnOccupiedCells(cell, rot), map) is { } otherVehicle && otherVehicle != vehicle ||
+      !vehicle.CellRectStandable(map, cell, rot);
   }
 
   public static bool ImpassableOrVehicleBlocked(VehiclePawn vehicle, Map map, IntVec3 cell,
     Rot4 rot)
   {
-    return VehicleReservationManager.AnyVehicleInhabitingCells(vehicle.PawnOccupiedCells(cell, rot),
-      map) || vehicle.LocationRestrictedBySize(map, cell, rot);
+    return VehicleReservationManager.VehicleInhabitingCells(
+        vehicle.PawnOccupiedCells(cell, rot), map) is { } otherVehicle && otherVehicle != vehicle ||
+      vehicle.LocationRestrictedBySize(map, cell, rot);
   }
 
   /// <summary>

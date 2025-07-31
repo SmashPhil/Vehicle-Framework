@@ -210,13 +210,20 @@ internal class Patch_Construction : IPatchCategory
         rot = vehicle.VehicleDef.defaultPlacingRot;
       }
 
+      static bool VehicleCanSpawnAt(VehiclePawn vehicle, VehiclePositionManager positionManager, Map map,
+        in IntVec3 cell)
+      {
+        return !cell.InBounds(map) || !cell.Walkable(vehicle.VehicleDef, map) ||
+          positionManager.ClaimedBy(cell) is { } claimantVehicle && claimantVehicle != vehicle;
+      }
+
+      // Validate current position
       VehiclePositionManager positionManager =
         map.GetDetachedMapComponent<VehiclePositionManager>();
       bool standable = true;
       foreach (IntVec3 cell in vehicle.PawnOccupiedCells(loc, rot))
       {
-        if (!cell.InBounds(map) || !cell.Walkable(vehicle.VehicleDef, map) ||
-          positionManager.PositionClaimed(cell))
+        if (VehicleCanSpawnAt(vehicle, positionManager, map, cell))
         {
           standable = false;
           break;
@@ -230,14 +237,17 @@ internal class Patch_Construction : IPatchCategory
         return true; // If location is still valid, skip to spawning
       }
 
+      const int CloseRadialCheck = 30;
+      const int FarRadialCheck = 100;
+
+      // Check for close adjust
       Rot4 lambdaRot = rot;
-      if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 30, (cell) =>
+      if (!CellFinderExtended.TryRadialSearchForCell(loc, map, CloseRadialCheck,
+        delegate(IntVec3 cell)
         {
           foreach (IntVec3 occupiedCell in vehicle.PawnOccupiedCells(cell, lambdaRot))
           {
-            if (!occupiedCell.InBounds(map) ||
-              !occupiedCell.Walkable(vehicle.VehicleDef, map) ||
-              positionManager.PositionClaimed(occupiedCell))
+            if (VehicleCanSpawnAt(vehicle, positionManager, map, occupiedCell))
             {
               return false;
             }
@@ -249,7 +259,7 @@ internal class Patch_Construction : IPatchCategory
         // This is easier to handle than lost vehicles needing to be recovered from world pawns.
         Log.Error(
           $"Unable to find location to spawn {vehicle.LabelShort}. Performing wider search.");
-        if (!CellFinderExtended.TryRadialSearchForCell(loc, map, 100, (cell) =>
+        if (!CellFinderExtended.TryRadialSearchForCell(loc, map, FarRadialCheck, (cell) =>
           {
             foreach (IntVec3 occupiedCell in vehicle.PawnOccupiedCells(cell, lambdaRot))
             {
