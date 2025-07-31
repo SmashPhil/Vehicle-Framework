@@ -53,6 +53,7 @@
             <IncludeAssets>compile; build</IncludeAssets>
             <ExcludeAssets>runtime</ExcludeAssets>
         </PackageReference>
+
         <PackageReference Include="PolySharp" Version="1.15.0">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -62,6 +63,7 @@
         <Reference Include="DevTools">
             <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
         </Reference>
+
         <Reference Include="SmashTools">
             <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
             <Private>False</Private>

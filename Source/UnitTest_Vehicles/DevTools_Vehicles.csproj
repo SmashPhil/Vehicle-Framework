@@ -60,9 +60,11 @@
         <Reference Include="DevTools">
             <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
         </Reference>
+
         <Reference Include="SmashTools">
             <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
         </Reference>
+
         <Reference Include="Vehicles">
             <HintPath>..\..\1.6\Assemblies\Vehicles.dll</HintPath>
         </Reference>
