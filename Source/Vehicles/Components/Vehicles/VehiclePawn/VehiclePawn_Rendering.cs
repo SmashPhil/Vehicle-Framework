@@ -650,14 +650,14 @@ public partial class VehiclePawn
           {
             VehicleRoleHandler handler = pawn.IsColonistPlayerControlled ?
               GetAnyAvailableHandler() :
-              GetNextAvailableHandler(HandlingType.None);
+              GetNextAvailableHandler(pawn, HandlingType.None);
             PromptToBoardVehicle(pawn, handler);
             return;
           }
 
-          TransferableOneWay transferable = new TransferableOneWay()
+          TransferableOneWay transferable = new()
           {
-            things = new List<Thing>() { target.Thing },
+            things = [target.Thing],
           };
           transferable.AdjustTo(1);
           cargoToLoad.Add(transferable);
@@ -991,6 +991,7 @@ public partial class VehiclePawn
 
   public void PromptToBoardVehicle(Pawn pawn, VehicleRoleHandler handler)
   {
+    // TODO 1.7 - Switch to ArgumentNullException
     if (handler == null)
     {
       Messages.Message("VF_HandlerNotEnoughRoom".Translate(pawn, this),
@@ -1003,9 +1004,7 @@ public partial class VehiclePawn
     GiveLoadJob(pawn, handler);
     pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
     if (!pawn.Spawned)
-    {
       return;
-    }
 
     Map.GetCachedMapComponent<VehicleReservationManager>()
      .Reserve<VehicleRoleHandler, VehicleHandlerReservation>(this, pawn, pawn.CurJob, handler);

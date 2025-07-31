@@ -1041,7 +1041,7 @@ internal class Patch_CaravanHandling : IPatchCategory
       thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, ___settlement);
       if (thing is Pawn pawn && pawn.RaceProps.Humanlike)
       {
-        VehicleRoleHandler handler = aerial.Vehicle.GetNextAvailableHandler(HandlingType.None);
+        VehicleRoleHandler handler = aerial.Vehicle.GetNextAvailableHandler(pawn, HandlingType.None);
         if (handler == null)
         {
           Log.Error(

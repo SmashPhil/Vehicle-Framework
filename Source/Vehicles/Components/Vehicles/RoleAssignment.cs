@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
-using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -23,6 +22,8 @@ public class RoleAssignment
 
     foreach (Pawn pawn in pawns)
     {
+      // TODO - needs faction check for prisoners
+
       // Add pawn to best candidate role, turrets take priority but drivers will pull first
       if (VehicleRoleHandler.CanOperateRole(pawn, HandlingType.Turret))
       {

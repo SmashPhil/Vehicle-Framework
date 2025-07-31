@@ -6,6 +6,7 @@ using SmashTools.Animations;
 using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 
@@ -269,24 +270,6 @@ namespace Vehicles
       RecachePawnCount();
       RecacheMovementPermissions();
 
-      foreach (Pawn pawn in AllPawnsAboard)
-      {
-        if (pawn.IsWorldPawn())
-        {
-          // Remove internal pawns from WorldPawns
-          Find.WorldPawns.RemovePawn(pawn);
-        }
-      }
-
-      foreach (Thing thing in inventory.innerContainer)
-      {
-        if (thing is Pawn pawn)
-        {
-          // Remove inventory pawns in case some were transfered here (like animals)
-          Find.WorldPawns.RemovePawn(pawn);
-        }
-      }
-
       UpdateRotationAndAngle();
 
       DrawTracker.Notify_Spawned();
@@ -295,6 +278,12 @@ namespace Vehicles
       ReclaimPosition();
       Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
       ResetRenderStatus();
+
+      // Enforce that no pawn inside a vehicle is ever cached as a world pawn.
+      // This has implications on both ticking and serialization.
+      Assert.IsFalse(AllPawnsAboard.Exists(WorldPawnsUtility.IsWorldPawn));
+      Assert.IsFalse(
+        inventory.innerContainer.InnerListForReading.Exists(thing => thing is Pawn pawn && pawn.IsWorldPawn()));
     }
 
     public override void ExposeData()

@@ -192,7 +192,7 @@ public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan
       if (vehicleAssigned.ContainsKey(pawn))
         continue;
 
-      VehicleRoleHandler handler = vehicle.GetNextAvailableHandler(HandlingType.Movement);
+      VehicleRoleHandler handler = vehicle.GetNextAvailableHandler(pawn, HandlingType.Movement);
       Assert.IsNotNull(handler);
       vehicleAssigned.Add(pawn, new AssignedSeat(pawn, handler));
     }

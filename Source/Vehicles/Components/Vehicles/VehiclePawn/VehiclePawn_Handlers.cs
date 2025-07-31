@@ -246,11 +246,35 @@ public partial class VehiclePawn
     return null;
   }
 
-  [Pure]
+  [Pure] // TODO 1.7 - Remove, pawn is required for permissions check
   public VehicleRoleHandler GetNextAvailableHandler(HandlingType handlingTypeFlag)
   {
     foreach (VehicleRoleHandler handler in handlers)
     {
+      // None has an explicit check for no handling types, otherwise HasFlag would
+      // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
+      if (handlingTypeFlag == HandlingType.None)
+      {
+        if (handler.role.HandlingTypes == HandlingType.None ||
+          handler.AreSlotsAvailableAndReservable)
+          return handler;
+        continue;
+      }
+      if (handler.role.HandlingTypes.HasFlag(handlingTypeFlag) &&
+        handler.AreSlotsAvailableAndReservable)
+        return handler;
+    }
+    return null;
+  }
+
+  [Pure]
+  public VehicleRoleHandler GetNextAvailableHandler(Pawn pawn, HandlingType handlingTypeFlag)
+  {
+    foreach (VehicleRoleHandler handler in handlers)
+    {
+      if (!handler.CanOperateRole(pawn))
+        continue;
+
       // None has an explicit check for no handling types, otherwise HasFlag would
       // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
       if (handlingTypeFlag == HandlingType.None)
