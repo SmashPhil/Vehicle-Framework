@@ -85,13 +85,15 @@ public sealed class GraphicOverlayRenderer
 
   // Right now this is strictly for the old animation system which has applies the same
   // rotation rates for all Graphic_Rotator overlays. The new animator will remove the necessity
-  // for all of this and directly right to the transform / acceleration rate of the overlay.
+  // for all of this and directly write to the transform / acceleration rate of the overlay.
   public void SetAcceleration(float rotation)
   {
     foreach (GraphicOverlay graphicOverlay in RotatorOverlays)
     {
       graphicOverlay.acceleration =
         ((Graphic_Rotator)graphicOverlay.Graphic).ModifyIncomingRotation(rotation);
+      graphicOverlay.Transform.rotation =
+        (graphicOverlay.Transform.rotation + graphicOverlay.acceleration).ClampAngle();
     }
   }
 }

@@ -185,11 +185,6 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
     if (Graphic is Graphic_Rgb)
     {
       Graphics.DrawMesh(results.mesh, results.position, results.quaternion, results.material, 0);
-
-      if (Graphic is Graphic_Rotator)
-      {
-        transform.rotation = (transform.rotation + acceleration).ClampAngle();
-      }
     }
     else
     {
