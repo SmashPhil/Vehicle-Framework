@@ -817,7 +817,7 @@ public partial class VehiclePawn
       yield return new Command_Action
       {
         defaultLabel = "Heal All Components",
-        action = delegate()
+        action = delegate
         {
           statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
           Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleRepaired(this);
@@ -826,12 +826,12 @@ public partial class VehiclePawn
       yield return new Command_Action
       {
         defaultLabel = "Recache All Stats",
-        action = delegate() { statHandler.MarkAllDirty(); }
+        action = statHandler.MarkAllDirty
       };
       yield return new Command_Action()
       {
         defaultLabel = "Give Random Pawn MentalState",
-        action = delegate()
+        action = delegate
         {
           if (AllPawnsAboard.TryRandomElement(out Pawn result))
           {
@@ -850,19 +850,28 @@ public partial class VehiclePawn
           }
         }
       };
-      yield return new Command_Action()
+      yield return new Command_Action
+      {
+        defaultLabel = "Down Random Pawn",
+        action = delegate
+        {
+          Pawn pawn = AllPawnsAboard.RandomElementWithFallback();
+          pawn?.health.GetOrAddHediff(HediffDefOf.RegenerationComa);
+        }
+      };
+      yield return new Command_Action
       {
         defaultLabel = "Kill Random Pawn",
-        action = delegate()
+        action = delegate
         {
           Pawn pawn = AllPawnsAboard.RandomElementWithFallback();
           pawn?.Kill(null);
         }
       };
-      yield return new Command_Action()
+      yield return new Command_Action
       {
         defaultLabel = "Flash OccupiedRect",
-        action = delegate()
+        action = delegate
         {
           if (vehiclePather.Moving)
           {

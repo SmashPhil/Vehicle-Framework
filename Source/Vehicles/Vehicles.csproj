@@ -25,11 +25,19 @@
         <WarningLevel>4</WarningLevel>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <DebugType>embedded</DebugType>
+
+        <WriteVersion>true</WriteVersion>
     </PropertyGroup>
 
     <!-- Build Events -->
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Exec Command="Powershell.exe -ExecutionPolicy Bypass -file &quot;$(ProjectDir)UpdateVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(WriteVersion)' == 'true'">
+        <!-- Windows -->
+        <Exec Condition="'$(OS)' == 'Windows_NT'" 
+              Command="Powershell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
+        <!-- Unix-like OS -->
+        <Exec Condition="'$(OS)' != 'Windows_NT'"
+              Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
     </Target>
 
     <!-- AssemblyInfo -->

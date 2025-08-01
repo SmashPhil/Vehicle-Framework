@@ -1,0 +1,61 @@
+name: Vehicle Framework CI/CD
+
+on:
+  #push:
+    #branches: [ "develop" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set PROJECT_PATH alias
+        run: echo "PROJECT_PATH=Source/Vehicles/Vehicles.csproj" >> $GITHUB_ENV
+        
+      - name: Setup .Net
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Restore Packages
+        run: dotnet restore "$PROJECT_PATH"
+        
+      - name: Compile
+        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:WriteVersion=false
+
+      - name: Extract Localization Files
+        run: |
+          chmod +x Build/ExtractTranslations.sh
+          Build/ExtractTranslations.sh 1 6
+        shell: bash
+
+      - name: Get Build Version
+        run: |
+          VERSION=$(cat Version.txt)
+          ARTIFACT_NAME="Vehicle-Framework-v$VERSION"
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.ARTIFACT_NAME }}
+          path: |
+            1.4
+            1.5
+            1.6
+            About
+            LegacyTextures
+            Sounds
+            Updates
+            Version.txt
+            BuildDate.txt
+            TestConfig.xml
+            LICENSE
+            LoadFolders.xml

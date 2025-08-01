@@ -7,9 +7,4 @@
 	<member name="T:Verse.StaticConstructorOnStartup">
 		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
 	</member>
-  <member name="M:Verse.GenList.NullOrEmpty``1(System.Collections.Generic.IList{``0})">
-    <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">
-      <argument>list:null =&gt; true</argument>
-    </attribute>
-  </member>
 </assembly>

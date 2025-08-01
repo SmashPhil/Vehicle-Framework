@@ -189,10 +189,10 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
   {
     foreach (Gizmo gizmo in base.GetGizmos())
     {
+      // skip all vanilla caravan devmode commands
       if (gizmo is Command command && !command.icon)
-      {
-        continue; // skip all vanilla caravan devmode commands
-      }
+        continue;
+
       yield return gizmo;
     }
 
@@ -296,6 +296,24 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 
     if (DebugSettings.ShowDevGizmos)
     {
+      yield return new Command_Action
+      {
+        defaultLabel = "Down Random Pawn",
+        action = delegate
+        {
+          Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
+          pawn?.health.GetOrAddHediff(HediffDefOf.RegenerationComa);
+        }
+      };
+      yield return new Command_Action
+      {
+        defaultLabel = "Kill Random Pawn",
+        action = delegate
+        {
+          Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
+          pawn?.Kill(null);
+        }
+      };
       yield return new Command_Action
       {
         defaultLabel = "Vehicle Dev: Teleport to destination",

@@ -211,22 +211,15 @@ internal class Patch_Rendering : IPatchCategory
       if (!aerialVehicle.IsPlayerControlled)
         continue;
 
-      try
+      using ClearOnDispose<Pawn> cod = new(TmpPawns);
+      TmpPawns.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
+      PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
+      foreach (Pawn pawn in TmpPawns)
       {
-        Assert.IsTrue(TmpPawns.Count == 0);
-        TmpPawns.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
-        PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
-        foreach (Pawn pawn in TmpPawns)
-        {
-          if (pawn.IsColonist)
-            cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
-        }
-        group++;
+        if (pawn.IsColonist)
+          cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
       }
-      finally
-      {
-        TmpPawns.Clear();
-      }
+      group++;
     }
   }
 
