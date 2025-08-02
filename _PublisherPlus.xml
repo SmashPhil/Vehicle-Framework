@@ -2,17 +2,22 @@
 <Configuration>
   <Excluded>
     <exclude>.git</exclude>
+    <exclude>.github</exclude>
+    <exclude>.gitattributes</exclude>
+    <exclude>.gitmodules</exclude>
+    <exclude>.gitignore</exclude>
     <exclude>.vs</exclude>
     <exclude>1.4\Assemblies\0Harmony.dll</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
     <exclude>1.5\Assemblies\0Harmony.dll</exclude>
     <exclude>1.6\Defs\Ignore</exclude>
     <exclude>About\PreviewArt</exclude>
+    <exclude>Build</exclude>
     <exclude>DevTools</exclude>
     <exclude>SmashTools</exclude>
+    <exclude>UpdateLog</exclude>
     <exclude>Source</exclude>
     <exclude>Textures\Ignore</exclude>
-    <exclude>UpdateLog</exclude>
     <exclude>UpdateTodoList.txt</exclude>
   </Excluded>
 </Configuration>

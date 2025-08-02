@@ -9,6 +9,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
+    environment: develop
 
     steps:
       - name: Checkout
@@ -16,9 +17,6 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set PROJECT_PATH alias
-        run: echo "PROJECT_PATH=Source/Vehicles/Vehicles.csproj" >> $GITHUB_ENV
-        
       - name: Setup .Net
         uses: actions/setup-dotnet@v2
         with:
@@ -33,7 +31,7 @@ jobs:
       - name: Extract Localization Files
         run: |
           chmod +x Build/ExtractTranslations.sh
-          Build/ExtractTranslations.sh 1 6
+          Build/ExtractTranslations.sh ${{ env.CURRENT_VERSION }}
         shell: bash
 
       - name: Get Build Version

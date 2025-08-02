@@ -4,11 +4,10 @@
 
 set -euo pipefail
 
-MAJOR=$1
-MINOR=$2
+VERSION=$1
 ZIP_URL="https://script.google.com/macros/s/AKfycbyVEQ30eVxP-zVWqGXuiPfuVEZYtJp4PYWuArJZxNiSxthxX3FqYssAvUDsrVPQuHt6/exec"
 ZIP_PATH="translations.zip"
-FOLDER="${MAJOR}.${MINOR}/Languages/English/Keyed"
+FOLDER="${VERSION}/Languages/English/Keyed"
 
 cd "$(dirname "$0")/.."
 if [[ ! -d "$FOLDER" ]]; then

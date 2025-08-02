@@ -85,16 +85,18 @@
         <PackageReference Include="PolySharp" Version="1.*" />
 
         <!--Local -->
-        <Reference Include="SmashTools, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+        <Reference Include="SmashTools">
             <SpecificVersion>False</SpecificVersion>
             <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="UpdateLogTool, Version=1.3.9234.25910, Culture=neutral, processorArchitecture=MSIL">
+
+        <Reference Include="UpdateLogTool">
             <SpecificVersion>False</SpecificVersion>
             <HintPath>..\..\1.6\Assemblies\UpdateLogTool.dll</HintPath>
             <Private>False</Private>
         </Reference>
+
         <!-- Dependencies -->
         <!--
         <Reference Include="mscorlib">
