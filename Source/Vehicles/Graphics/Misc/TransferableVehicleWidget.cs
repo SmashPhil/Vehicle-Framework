@@ -229,7 +229,7 @@ public sealed class TransferableVehicleWidget
       if (checkOn)
       {
         if (vehicle != null)
-          Find.WindowStack.Add(new Dialog_AssignSeats(pawns, transferable));
+          Find.WindowStack.Add(new Dialog_AssignSeats(CaravanFormation.Current, pawns, transferable));
         else
           transferable.ForceTo(transferable.GetMaximumToTransfer());
       }
@@ -254,7 +254,7 @@ public sealed class TransferableVehicleWidget
             pawnTransferable.ForceTo(0);
           }
           CaravanHelper.assignedSeats.RemoveAssignments(vehicle);
-          CaravanFormation.formation.NotifyTransferablesChanged();
+          CaravanFormation.Current.NotifyTransferablesChanged();
         }
       }
     }

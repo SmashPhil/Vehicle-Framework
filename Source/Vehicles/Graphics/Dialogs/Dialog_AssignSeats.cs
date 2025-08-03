@@ -19,6 +19,7 @@ public class Dialog_AssignSeats : Window
   private const float RowHeight = 30f;
   private const float RowPadding = 5f;
 
+  private readonly ICaravanInfo parent;
   private readonly VehiclePawn vehicle;
 
   private Pawn draggedPawn;
@@ -38,8 +39,10 @@ public class Dialog_AssignSeats : Window
 
   private readonly RoleAssignment prioritizer = new();
 
-  public Dialog_AssignSeats(List<TransferableOneWay> pawns, TransferableOneWay vehicleTransferable)
+  public Dialog_AssignSeats(ICaravanInfo parent, List<TransferableOneWay> pawns,
+    TransferableOneWay vehicleTransferable)
   {
+    this.parent = parent;
     vehicle = vehicleTransferable.AnyThing as VehiclePawn;
     Assert.IsNotNull(vehicle);
     insideVehicle = vehicle.AllPawnsAboard.ToHashSet();
@@ -413,11 +416,11 @@ public class Dialog_AssignSeats : Window
       int transferCount = Assignments.Count > 0 ? vehicleTransferable.GetMaximumToTransfer() : 0;
       vehicleTransferable.AdjustTo(transferCount);
       Dialog_FormVehicleCaravan.MarkDirty();
-      CaravanFormation.formation.NotifyTransferablesChanged();
+      parent.NotifyTransferablesChanged();
     }
     catch (Exception ex)
     {
-      Log.Error($"Failed to finalize assigning vehicle seats. Message: {ex}");
+      Log.Error($"Failed to finalize assigning vehicle seats.\n{ex}");
       failReason = ex.Message;
       return false;
     }

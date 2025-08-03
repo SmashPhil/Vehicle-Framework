@@ -673,9 +673,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   /// Create vehicle tab and inject into tabs list without the need for a new enum value.
   /// Also disables initial route planning since vehicle selection may occur and invalidate the route.
   /// </summary>
-  private static void SplitCaravanPostOpen(List<TabRecord> ___tabsList)
+  private static void SplitCaravanPostOpen(Dialog_SplitCaravan __instance, List<TabRecord> ___tabsList,
+    Caravan ___caravan)
   {
     selectedTab = TabVehicles;
+    CaravanFormation.splitter = new SplitInfo(__instance, ___caravan);
     ___tabsList.Clear();
     ___tabsList.Add(new TabRecord(VehiclesTabLabelKey.Translate(),
       delegate { selectedTab = TabVehicles; },
