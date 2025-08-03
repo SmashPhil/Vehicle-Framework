@@ -895,22 +895,22 @@ public class VehicleStatHandler : IExposable, ITweakFields
       return Rot4.Invalid;
     }
 
-    if (angle >= 45 && angle <= 135)
+    if (angle > 45 && angle <= 135)
     {
       return Rot4.East;
     }
 
-    if (angle >= 135 && angle <= 225)
+    if (angle > 135 && angle <= 225)
     {
       return Rot4.South;
     }
 
-    if (angle >= 225 && angle <= 335)
+    if (angle > 225 && angle <= 315)
     {
       return Rot4.West;
     }
 
-    if (angle >= 335 || angle <= 45)
+    if (angle > 315 || angle <= 45)
     {
       return Rot4.North;
     }
