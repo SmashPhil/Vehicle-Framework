@@ -23,10 +23,10 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore Packages
-        run: dotnet restore "$PROJECT_PATH"
+        run: dotnet restore "${{ env.PROJECT_PATH }}"
         
       - name: Compile
-        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:WriteVersion=false
+        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Debug --no-restore -p:WriteVersion=false
 
       - name: Extract Localization Files
         run: |
