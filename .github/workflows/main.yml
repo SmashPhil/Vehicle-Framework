@@ -1,9 +1,13 @@
-name: Vehicle Framework CI/CD
+name: Build
 
 on:
   push:
     branches: [ "develop" ]
   workflow_dispatch:
+
+env:
+  PROJECT_PATH: "Source/Vehicles/Vehicles.csproj"
+  VERSION: "1.6"
 
 jobs:
   build:
@@ -23,15 +27,15 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore Packages
-        run: dotnet restore "${{ env.PROJECT_PATH }}"
+        run: dotnet restore "$PROJECT_PATH"
         
       - name: Compile
-        run: dotnet build "${{ env.PROJECT_PATH }}" --configuration Debug --no-restore -p:WriteVersion=false
+        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:WriteVersion=false
 
       - name: Extract Localization Files
         run: |
           chmod +x Build/ExtractTranslations.sh
-          Build/ExtractTranslations.sh ${{ env.CURRENT_VERSION }}
+          Build/ExtractTranslations.sh "$VERSION"
         shell: bash
 
       - name: Get Build Version
