@@ -164,7 +164,6 @@ public class VehiclePathFinder : VehicleGridManager
     CellRect cellRect = CalculateDestinationRect(dest, peMode);
     bool singleRect = cellRect is { Width: 1, Height: 1 };
     int[] pathGrid = vehiclePathGrid.innerArray;
-    TerrainDef[] topGrid = mapping.map.terrainGrid.topGrid;
     int searchCount = 0;
     int nodesOpened = 0;
     bool drawPaths = VehicleMod.settings.debug.debugDrawPathfinderSearch;
@@ -364,9 +363,6 @@ public class VehiclePathFinder : VehicleGridManager
           }
 
           tickCost += Mathf.RoundToInt(rootCost);
-          tickCost += drafted ?
-            topGrid[cellIndex].extraDraftedPerceivedPathCost :
-            topGrid[cellIndex].extraNonDraftedPerceivedPathCost;
           if (avoidGrid != null)
           {
             tickCost += avoidGrid.Grid[cellIndex] * 8;
