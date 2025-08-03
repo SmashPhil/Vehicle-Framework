@@ -55,7 +55,8 @@ public partial class VehiclePawn
 
   public float GetStatValue(VehicleStatDef statDef)
   {
-    //Cached in VehicleStatHandler, can fetch fresh calculation from VehicleStatDef.Worker if necessary, or mark statDef dirty in cache before retrieving
+    // Cached in VehicleStatHandler, can fetch fresh calculation from VehicleStatDef.Worker if necessary,
+    // or mark statDef dirty in cache before retrieving
     return statHandler.GetStatValue(statDef);
   }
 

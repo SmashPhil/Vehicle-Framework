@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using SmashTools;
 using Verse;
 
@@ -17,6 +18,11 @@ public class StatCache
     int cacheSize = DefDatabase<VehicleStatDef>.DefCount;
     cachedValues = new float[cacheSize];
     dirty = new bool[cacheSize].Populate(true);
+  }
+
+  public bool IsDirty(VehicleStatDef statDef)
+  {
+    return dirty[statDef.DefIndex];
   }
 
   public float this[VehicleStatDef statDef]
@@ -53,6 +59,7 @@ public class StatCache
     dirty[statDef.DefIndex] = false;
   }
 
+  [PublicAPI]
   public class EventLister
   {
     public VehicleStatDef statDef;

@@ -7,7 +7,7 @@ namespace Vehicles.UnitTesting;
 
 [UnitTest(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn, TestCategoryNames.Events)]
-[TestDescription("VehiclePawn damage mechanics.")]
+[TestDescription("VehiclePawn reactor mechanics.")]
 internal sealed class UnitTest_VehiclePawn_Reactors
 {
   [Test]

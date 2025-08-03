@@ -42,8 +42,7 @@
 				<statDef>BodyIntegrity</statDef>
 				
 				<eventDefs>
-					<li>DamageTaken</li>
-					<li>Repaired</li>
+					<li>HealthChanged</li>
 				</eventDefs>
 			</li>
 			<li>

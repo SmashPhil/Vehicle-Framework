@@ -125,6 +125,7 @@ public class VehicleComponent : IExposable, ITweakFields
 
       if (vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) <= 0.1f)
         vehicle.ignition.Drafted = false;
+      // TODO - should destroy the vehicle even unspawned, and eject to caravan or 'lose' pawns if in aerial vehicle
       if (vehicle.Spawned && vehicle.GetStatValue(VehicleStatDefOf.BodyIntegrity) < 0.01f)
         vehicle.Kill(dinfo);
     }

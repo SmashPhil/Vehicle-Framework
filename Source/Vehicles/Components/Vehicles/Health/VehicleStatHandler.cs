@@ -21,40 +21,35 @@ public class VehicleStatHandler : IExposable, ITweakFields
   private const float ChanceMinorDeflectHit = 0.75f;
   private const float ChanceMajorDeflectHit = 0.75f;
 
-  private static readonly FieldInfo StunFromEMP =
+  private static readonly FieldInfo StunFromEmp =
     AccessTools.Field(typeof(StunHandler), "stunFromEMP");
 
   private static readonly FieldInfo AdaptationTicksLeft =
     AccessTools.Field(typeof(StunHandler), "adaptationTicksLeft");
 
+  private static readonly List<IntVec3> HitboxHighlightCells = [];
+
   private int adaptTicks;
+
 
   //Debugging only
   private readonly List<Pair<IntVec2, int>> debugCellHighlight = [];
 
   //Caching lookup
   private readonly Dictionary<string, VehicleComponent> componentsByKeys = [];
-
   private readonly Dictionary<IntVec2, List<VehicleComponent>> componentLocations = [];
-
   private readonly Dictionary<VehicleStatDef, List<VehicleComponent>> statComponents = [];
-
-  //Caching values
-  private readonly StatCache statCache;
-
-  //Registry
-  private readonly Dictionary<Thing, IntVec3> impacter = [];
-
-  [TweakField]
-  public List<VehicleComponent> components = [];
-
   private readonly Dictionary<StatUpgradeCategoryDef, StatOffset> categoryOffsets = [];
   private readonly Dictionary<StatDef, StatOffset> baseStatOffsets = [];
   private readonly Dictionary<VehicleStatDef, StatOffset> statOffsets = [];
 
-  private static readonly List<IntVec3> hitboxHighlightCells = [];
+  public readonly StatCache statCache;
+
+  [TweakField]
+  public List<VehicleComponent> components = [];
 
   private VehiclePawn vehicle;
+  private readonly Dictionary<Thing, IntVec3> impacter = [];
 
   public VehicleStatHandler(VehiclePawn vehicle)
   {
@@ -207,10 +202,8 @@ public class VehicleStatHandler : IExposable, ITweakFields
       {
         return setValue;
       }
-
       return value + statOffset.Offset;
     }
-
     return value;
   }
 
@@ -781,7 +774,7 @@ public class VehicleStatHandler : IExposable, ITweakFields
 
       if (!adapted && maxStunTicks > 0)
       {
-        StunFromEMP.SetValue(vehicle.stances.stunner, true);
+        StunFromEmp.SetValue(vehicle.stances.stunner, true);
         vehicle.stances.stunner.StunFor(maxStunTicks, dinfo.Instigator);
       }
 
@@ -922,31 +915,28 @@ public class VehicleStatHandler : IExposable, ITweakFields
   {
     if (component != null)
     {
-      hitboxHighlightCells.Clear();
+      using ClearOnDispose<IntVec3> cod = new(HitboxHighlightCells);
+      if (!component.props.hitbox.Empty)
       {
-        if (!component.props.hitbox.Empty)
+        foreach (IntVec2 cell in component.props.hitbox.Hitbox)
         {
-          foreach (IntVec2 cell in component.props.hitbox.Hitbox)
-          {
-            IntVec2 rotatedCell = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size,
-              reverseRotate: true);
-            hitboxHighlightCells.Add(new IntVec3(vehicle.Position.x + rotatedCell.x, 0,
-              vehicle.Position.z + rotatedCell.z));
-          }
-        }
-        else if (component.Depth ==
-          VehicleComponent.VehiclePartDepth
-           .External) //Dont render Internal components without a hitbox
-        {
-          hitboxHighlightCells.AddRange(vehicle.OccupiedRect());
-        }
-
-        if (hitboxHighlightCells.Count > 0)
-        {
-          GenDraw.DrawFieldEdges(hitboxHighlightCells, component.highlightColor);
+          IntVec2 rotatedCell = cell.RotatedBy(vehicle.Rotation, vehicle.VehicleDef.Size,
+            reverseRotate: true);
+          HitboxHighlightCells.Add(new IntVec3(vehicle.Position.x + rotatedCell.x, 0,
+            vehicle.Position.z + rotatedCell.z));
         }
       }
-      hitboxHighlightCells.Clear();
+      else if (component.Depth ==
+        VehicleComponent.VehiclePartDepth
+         .External) //Dont render Internal components without a hitbox
+      {
+        HitboxHighlightCells.AddRange(vehicle.OccupiedRect());
+      }
+
+      if (HitboxHighlightCells.Count > 0)
+      {
+        GenDraw.DrawFieldEdges(HitboxHighlightCells, component.highlightColor);
+      }
     }
 
     if (VehicleMod.settings.debug.debugDrawHitbox)
@@ -954,11 +944,10 @@ public class VehicleStatHandler : IExposable, ITweakFields
       for (int i = debugCellHighlight.Count - 1; i >= 0; i--)
       {
         GenDraw.DrawFieldEdges(
-          new List<IntVec3>()
-          {
-            new IntVec3(vehicle.Position.x + debugCellHighlight[i].First.x, 0,
-              vehicle.Position.z + debugCellHighlight[i].First.z)
-          }, Color.red);
+        [
+          new IntVec3(vehicle.Position.x + debugCellHighlight[i].First.x, 0,
+            vehicle.Position.z + debugCellHighlight[i].First.z)
+        ], Color.red);
         if (!Find.TickManager.Paused)
         {
           int tickCount = debugCellHighlight[i].Second - 1;
