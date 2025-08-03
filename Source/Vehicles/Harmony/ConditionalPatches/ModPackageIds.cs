@@ -26,6 +26,7 @@ public static class ModPackageIds
   public const string BulkCarrier = "Vanya.Tools.BulkCarrier";
   public const string VanillaExpandedFishing = "VanillaExpanded.VCEF";
   public const string RimHUD = "Jaxe.RimHUD";
+  public const string DamageIndicators = "CaesarV6.DamageIndicators";
 
   // None
   public const string VanillaVehiclesExpanded = "OskarPotocki.VanillaVehiclesExpanded";

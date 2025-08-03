@@ -8,6 +8,7 @@ using RimWorld;
 using SmashTools;
 using System.Reflection;
 using HarmonyLib;
+using Vehicles.Compatibility;
 
 namespace Vehicles;
 
@@ -697,12 +698,16 @@ public class VehicleStatHandler : IExposable, ITweakFields
 
         report?.AppendLine(
           $"Applying Damage = {dinfo.Amount} to {component.props.key} at {hitCell}");
+
         VehicleComponent.Penetration result = component.TakeDamage(vehicle, ref dinfo);
-        //Effecters and sounds only for first hit
+        // Effecters and sounds only for first hit
         if (i == 0)
         {
           IntVec3 impactCell = new IntVec3(vehicle.Position.x + hitCell.x, 0,
             vehicle.Position.z + hitCell.z);
+          if (vehicle.Spawned && Compatibility_DamageIndicators.ModLoaded)
+            ThrowDamageMote(dinfo.Amount, vehicle.Map, impactCell.ToVector3Shifted(), dinfo.Amount.ToString("F0"));
+
           vehicle.Notify_DamageImpact(new VehicleComponent.DamageResult()
           {
             penetration = result,
@@ -718,6 +723,26 @@ public class VehicleStatHandler : IExposable, ITweakFields
     {
       RecalculateHealthPercent();
     }
+  }
+
+  private static void ThrowDamageMote(float damage, Map map, Vector3 loc, string text)
+  {
+    if (Compatibility_DamageIndicators.ModLoaded && Compatibility_DamageIndicators.throwDamageMote != null)
+    {
+      Compatibility_DamageIndicators.throwDamageMote(damage, map, loc, text);
+      return;
+    }
+    // fallback
+    Color color = damage switch
+    {
+      >= 90 => Color.cyan,
+      >= 70 => Color.magenta,
+      >= 50 => Color.red,
+      >= 30 => Color.Lerp(Color.red, Color.yellow, 0.5f),
+      >= 10 => Color.yellow,
+      _     => Color.white
+    };
+    MoteMaker.ThrowText(loc, map, text, color, 3.65f);
   }
 
   // Takes in damage def even though we know it's EMP, may need to add support for modded damage types to stun vehicles.
