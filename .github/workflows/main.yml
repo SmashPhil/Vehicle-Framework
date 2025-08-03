@@ -1,8 +1,8 @@
 name: Vehicle Framework CI/CD
 
 on:
-  #push:
-    #branches: [ "develop" ]
+  push:
+    branches: [ "develop" ]
   workflow_dispatch:
 
 jobs:

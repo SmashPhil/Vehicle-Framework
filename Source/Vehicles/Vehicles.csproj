@@ -25,17 +25,21 @@
         <WarningLevel>4</WarningLevel>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <DebugType>embedded</DebugType>
-
-        <WriteVersion>true</WriteVersion>
     </PropertyGroup>
 
     <!-- Build Events -->
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(WriteVersion)' == 'true'">
-        <!-- Windows -->
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+        <!-- Localization Files -->
+        <!--
+        <Exec Condition="'$(OS)' == 'Windows_NT'"
+              Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/ExtractTranslations.ps1&quot; &quot;1.6&quot;" />
+        <Exec Condition="'$(OS)' != 'Windows_NT'"
+              Command="bash &quot;../../Build/ExtractTranslations.sh&quot; &quot;1.6&quot;" />
+        -->
+        <!-- Version Increment -->
         <Exec Condition="'$(OS)' == 'Windows_NT'" 
-              Command="Powershell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
-        <!-- Unix-like OS -->
+              Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
         <Exec Condition="'$(OS)' != 'Windows_NT'"
               Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
     </Target>

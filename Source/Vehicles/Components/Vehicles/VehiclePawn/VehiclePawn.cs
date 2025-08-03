@@ -202,6 +202,7 @@ namespace Vehicles
       RecacheComponents();
       RecachePawnCount();
       RecacheMovementPermissions();
+      statHandler.MarkAllDirty();
       animator?.PostLoad();
       UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
 
@@ -294,8 +295,34 @@ namespace Vehicles
 
       base.ExposeData();
 
+      Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
+      Scribe_Deep.Look(ref ignition, nameof(ignition), this);
+      Scribe_Deep.Look(ref statHandler, nameof(statHandler), this);
+      Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
+      Scribe_Deep.Look(ref animator, nameof(animator), this, VehicleDef.drawProperties.controller);
+
+      Scribe_Values.Look(ref angle, nameof(angle));
+      Scribe_Values.Look(ref reverse, nameof(reverse));
+      Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
+
+      Scribe_Deep.Look(ref patternData, nameof(patternData));
+      Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
+      Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
+      Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
+      //Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
+      Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing));
+      Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
+
+      Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
+
+      Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
+      Scribe_Collections.Look(ref boardingAssignments, nameof(boardingAssignments), LookMode.Deep);
+
       if (Scribe.mode == LoadSaveMode.LoadingVars)
       {
+        // statHandler won't be fully initialized until post-load, statHandler will be marked 'all dirty'
+        // post load so we only need to make sure upgrades have been applied.
+        using StatDirtyDisabler sdd = new(this);
         RecacheComponents();
         CompUpgradeTree?.ReloadUnlocks();
         // Execute after comp list has called PostExposeData so activated comps don't accidentally run
@@ -312,20 +339,6 @@ namespace Vehicles
         }
       }
 
-      Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
-      Scribe_Deep.Look(ref ignition, nameof(ignition), this);
-      Scribe_Deep.Look(ref statHandler, nameof(statHandler), this);
-      Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
-      Scribe_Deep.Look(ref animator, nameof(animator), this, VehicleDef.drawProperties.controller);
-
-      Scribe_Values.Look(ref angle, nameof(angle));
-      Scribe_Values.Look(ref reverse, nameof(reverse));
-      Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
-
-      Scribe_Deep.Look(ref patternData, nameof(patternData));
-      Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
-      Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
-
       if (!VehicleMod.settings.main.useCustomShaders)
       {
         patternData = new PatternData(VehicleDef.graphicData.color,
@@ -335,16 +348,6 @@ namespace Vehicles
         retextureDef = null;
         patternToPaint = null;
       }
-
-      Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
-      //Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
-      Scribe_Values.Look(ref currentlyFishing, nameof(currentlyFishing));
-      Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
-
-      Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
-
-      Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
-      Scribe_Collections.Look(ref boardingAssignments, nameof(boardingAssignments), LookMode.Deep);
     }
   }
 }

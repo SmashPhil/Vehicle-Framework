@@ -67,6 +67,8 @@ public class VehicleStatHandler : IExposable, ITweakFields
         c.props.categories.Min(ctg => ctg.displayPriorityInCategory) :
         9999).ThenBy(c => c.HealthPercent).ToList();
 
+  public bool CanDirty { get; internal set; }
+
   public bool NeedsRepairs => components.Any(c => c.HealthPercent < 1);
 
   public float HealthPercent { get; private set; }
@@ -272,11 +274,15 @@ public class VehicleStatHandler : IExposable, ITweakFields
 
   public void MarkStatDirty(VehicleStatDef statDef)
   {
+    if (!CanDirty)
+      return;
     statCache.MarkDirty(statDef);
   }
 
   public void MarkAllDirty()
   {
+    if (!CanDirty)
+      return;
     statCache.Reset();
     RecalculateHealthPercent();
   }
