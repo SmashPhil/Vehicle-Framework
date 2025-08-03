@@ -1348,6 +1348,11 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
   public bool ContainsAmmoDefOrShell(ThingDef ammoDef)
   {
+    if (def.ammunition is null)
+    {
+      return false;
+    }
+
     ThingDef projectile = null;
     if (ammoDef.projectileWhenLoaded != null)
     {
