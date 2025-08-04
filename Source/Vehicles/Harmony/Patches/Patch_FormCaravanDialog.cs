@@ -37,6 +37,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 
   private static readonly List<Pawn> TmpPawns = [];
 
+  private static Type displayClassType;
+  private static Type gizmoStateMachineType;
+
   private static TransferableVehicleWidget vehiclesTransfer;
   private static int selectedTab;
 
@@ -129,18 +132,20 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(SplitCaravanTabsTranspiler)));
 
-    //const string TypeName = "<GetGizmos>d__18";
-    //const string GetGizmosDelName = "MoveNext";
-    //Type formCaravanCompTypes =
-    //  typeof(FormCaravanComp).GetNestedTypes(AccessTools.all)
-    //   .FirstOrDefault(type => type.Name == TypeName);
-    //// Compiler generated methods from FormCaravanComp::<GetGizmos>d__18
-    //List<MethodInfo> gotoMethods = formCaravanCompTypes.GetDeclaredMethods();
-    //MethodInfo getGizmosDelegate0 =
-    //  gotoMethods.FirstOrDefault(method => method.Name == GetGizmosDelName);
-    //HarmonyPatcher.Patch(original: getGizmosDelegate0,
-    //  transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
-    //    nameof(ReformCaravanWithVehiclesGizmoTranspiler)));
+    const string DisplayClassName = "<>c__DisplayClass18_0";
+    const string GetGizmosName = "<GetGizmos>d__18";
+    const string GetGizmosDelName = "MoveNext";
+
+    Type[] types = typeof(FormCaravanComp).GetNestedTypes(AccessTools.all);
+    displayClassType = types.FirstOrDefault(type => type.Name == DisplayClassName);
+    gizmoStateMachineType = types.FirstOrDefault(type => type.Name == GetGizmosName);
+    // Compiler generated methods from FormCaravanComp::<GetGizmos>d__18
+    List<MethodInfo> gotoMethods = gizmoStateMachineType.GetDeclaredMethods();
+    MethodInfo getGizmosDelegate0 =
+      gotoMethods.FirstOrDefault(method => method.Name == GetGizmosDelName);
+    HarmonyPatcher.Patch(original: getGizmosDelegate0,
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(ReformCaravanWithVehiclesGizmoTranspiler)));
   }
 
   /// <summary>
@@ -771,28 +776,46 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     // ReSharper restore ExtractCommonBranchingCode
   }
 
-  // TODO - Waiting for Sam's changes
   private static IEnumerable<CodeInstruction> ReformCaravanWithVehiclesGizmoTranspiler(
     IEnumerable<CodeInstruction> instructions)
   {
     List<CodeInstruction> instructionList = instructions.ToList();
     FieldInfo mapPawnsField =
       AccessTools.Field(typeof(Map), nameof(Map.mapPawns));
+    FieldInfo delContainer = AccessTools.Field(gizmoStateMachineType, "<>8__1");
     for (int i = 0; i < instructionList.Count; i++)
     {
       CodeInstruction instruction = instructionList[i];
 
-      //if (instruction.LoadsField(mapPawnsField))
-      //{
-      //  // ReSharper disable once RedundantAssignment
-      //  instruction = instructionList[++i]; // ldfld Map::mapPawns
-      //  instruction = instructionList[++i]; // callvirt MapPawns::get_FreeColonistsSpawnedCount
-      //  yield return new CodeInstruction(opcode: OpCodes.Call,
-      //    operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
-      //      nameof()));
-      //}
+      if (instruction.LoadsField(mapPawnsField))
+      {
+        // ReSharper disable once RedundantAssignment
+        yield return instruction;
+        instruction = instructionList[++i]; // ldfld Map::mapPawns
+        yield return instruction;
+        instruction = instructionList[++i]; // callvirt MapPawns::get_FreeColonistsSpawnedCount
 
+        // this.stateMachine.container.mapParent
+        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: delContainer);
+        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
+          operand: AccessTools.Field(displayClassType, "mapParent"));
+        // count += AppendMapPawnsInVehicles(count, mapParent)
+        yield return new CodeInstruction(opcode: OpCodes.Call,
+          operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
+            nameof(AppendMapPawnsInVehicles)));
+      }
       yield return instruction;
     }
+  }
+
+  private static int AppendMapPawnsInVehicles(int count, MapParent mapParent)
+  {
+    if (count == 0)
+    {
+      VehiclePositionManager positionManager = mapParent.Map.GetDetachedMapComponent<VehiclePositionManager>();
+      count = positionManager.AllClaimants.Sum(vehicle => vehicle.AllPawnsAboard.Count);
+    }
+    return count;
   }
 }
