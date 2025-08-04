@@ -6,31 +6,16 @@
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Another round of fixes, thank you all for being patient. There was more breakage from the 1.6 update than anticipated but progress has been moving along at a steady pace. As usual, please drop by the discord and report any bugs you encounter.
+Small hotfix for upgrades and stat caching.
 &lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added setting to adjust settlements toward rivers during world generation.
-- Added experience gain for construction skill when repairing vehicles.
-- Added additional restrictions to mechanoids when assigning them to vehicles.
+- Removed 'Haul X' gizmo from pawns and other non-haulables.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Caravans and Aerial Vehicles were unable to trade without first dismounting the colonists.
-- Aerial Vehicles failed to resume the flight path post load, or would teleport halfway across the world.
-- Certain upgrades would cause the vehicle to break when loading from the save file. (eg. Highwayman)
-- Stashed vehicles didn't re-add the pawns to the world in some situations, resulting in the caravan being lost.
-- Refuel from inventory gizmo was still enabled despite the vehicle having no fuel in the inventory.
-- Deployment gizmo would permanently disable after construction.
-- Vehicle turrets stopped the vehicle before shooting.
-- Launch targeter showed discounted fuel cost.
-- Aerial Vehicles in-transit on local maps would be ticked multiple times, resulting in rapid needs depletion.
-- Aerial Vehicles were unable to enter defeated settlements and camps.
-- Aerial Vehicles with rotors would continue to spin when creating a new camp or settlement.
-- Fully loaded aerial vehicle would warn the player about leaving pawns behind.
-- Game Over would trigger when entering a map via aerial vehicle with no pawns outside the vehicle.
-- Aerial vehicles in-transit and on the world map would not show colonists in the colonist bar.
-- Missing translation keys
-- Translation error with launch targeter and settlements.
+- Stats would not dirty, leaving the vehicle at default values and unkillable.
+- Splitting caravan error when assigning seats.
+- Vehicle would still add top grid terrain cost for pathing, despite having overridden values.
+- Reform button would not show if all pawns were inside vehicles.
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Aerial vehicles were unable to travel to any Odyssey space objects.
-- Update Log will show after Character Editor freezes the game for 3 seconds, meaning no more lag when closing this popup if you have character editor.
+- Added damage indicators for vehicles when Damage Indicators mod is active.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
