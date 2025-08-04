@@ -9,7 +9,7 @@ public class CompUpgrade : Upgrade
   public List<CompProperties> activate;
   public List<CompProperties> deactivate;
 
-  public override bool UnlockOnLoad => true;
+  public override bool UnlockOnLoad => false;
 
   public override void Unlock(VehiclePawn vehicle, bool unlockingPostLoad)
   {

@@ -311,8 +311,34 @@ namespace Vehicles
       Vehicle.DisembarkAll();
     }
 
-    // TODO - Should be refactored into something less messy, but this needs to be called after all comps
-    // finish calling PostExposeData or activated comps will re-activate and add during iteration.
+    internal void ReactivateComps()
+    {
+      if (upgrades.NullOrEmpty())
+        return;
+
+      foreach (string key in upgrades)
+      {
+        UpgradeNode node = Props.def.GetNode(key);
+        if (node == null || node.upgrades.NullOrEmpty())
+          continue;
+
+        foreach (Upgrade nodeUpgrade in node.upgrades)
+        {
+          if (nodeUpgrade is not CompUpgrade compUpgrade)
+            continue;
+          try
+          {
+            compUpgrade.Unlock(Vehicle, unlockingPostLoad: true);
+          }
+          catch (Exception ex)
+          {
+            Log.Error(
+              $"{VehicleHarmony.LogLabel} Unable to unlock {GetType()} post-load for {Vehicle.LabelShort}. \nException: {ex}");
+          }
+        }
+      }
+    }
+
     internal void ReloadUnlocks()
     {
       if (upgrades.NullOrEmpty())
@@ -328,14 +354,14 @@ namespace Vehicles
         if (node.upgrades.NullOrEmpty())
           continue;
 
-        foreach (Upgrade upgrade in node.upgrades)
+        foreach (Upgrade nodeUpgrade in node.upgrades)
         {
-          if (!upgrade.UnlockOnLoad)
+          if (!nodeUpgrade.UnlockOnLoad)
             continue;
 
           try
           {
-            upgrade.Unlock(Vehicle, true);
+            nodeUpgrade.Unlock(Vehicle, unlockingPostLoad: true);
           }
           catch (Exception ex)
           {

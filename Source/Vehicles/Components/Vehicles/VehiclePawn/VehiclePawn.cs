@@ -318,25 +318,31 @@ namespace Vehicles
       Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
       Scribe_Collections.Look(ref boardingAssignments, nameof(boardingAssignments), LookMode.Deep);
 
-      if (Scribe.mode == LoadSaveMode.LoadingVars)
-      {
-        // statHandler won't be fully initialized until post-load, statHandler will be marked 'all dirty'
-        // post load so we only need to make sure upgrades have been applied.
-        using StatDirtyDisabler sdd = new(this);
-        RecacheComponents();
-        CompUpgradeTree?.ReloadUnlocks();
-        // Execute after comp list has called PostExposeData so activated comps don't accidentally run
-        // twice, registering duplicates to cross refs.
-        LoadVarsActivatableComps();
-      }
       activatableComps ??= [];
+
+      switch (Scribe.mode)
+      {
+        case LoadSaveMode.LoadingVars:
+        {
+          // statHandler won't be fully initialized until post-load, statHandler will be marked 'all dirty'
+          // post load so we only need to make sure upgrades have been applied.
+          using StatDirtyDisabler sdd = new(this);
+          RecacheComponents();
+          CompUpgradeTree?.ReactivateComps();
+          // Execute after comp list has called PostExposeData so activated comps don't accidentally run
+          // twice, registering duplicates to cross refs.
+          LoadVarsActivatableComps();
+        }
+        break;
+        case LoadSaveMode.PostLoadInit:
+          CompUpgradeTree?.ReloadUnlocks();
+        break;
+      }
 
       if (!deactivatedComps.NullOrEmpty())
       {
         foreach (ThingComp comp in deactivatedComps)
-        {
           comp.PostExposeData();
-        }
       }
 
       if (!VehicleMod.settings.main.useCustomShaders)
