@@ -5,7 +5,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("TypeByName"), SampleSize(10000)]
+[BenchmarkClass("TypeByName")]
 internal class Benchmark_TypeByName
 {
   [Benchmark(Label = "AccessTools::TypeByName")]

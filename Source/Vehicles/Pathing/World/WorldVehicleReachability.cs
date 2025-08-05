@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using LudeonTK;
 using RimWorld;
 using RimWorld.Planet;
@@ -52,17 +52,17 @@ public class WorldVehicleReachability
     }
   }
 
-  private void RegenerateAllRegions()
+  private void RegenerateAllRegions(CancellationToken token)
   {
     foreach (VehicleDef ownerDef in GridOwners.World.AllOwners)
     {
-      RegenerateRegionsFor(ownerDef);
+      RegenerateRegionsFor(ownerDef, token);
     }
   }
 
-  private void RegenerateRegionsFor(VehicleDef vehicleDef)
+  private void RegenerateRegionsFor(VehicleDef vehicleDef, CancellationToken token)
   {
-    regionGrids[GridOwners.World.GetOwner(vehicleDef).DefIndex].GenerateRegions();
+    regionGrids[GridOwners.World.GetOwner(vehicleDef).DefIndex].GenerateRegions(token);
   }
 
   /// <summary>
@@ -91,21 +91,6 @@ public class WorldVehicleReachability
     }
     VehicleDef ownerDef = GridOwners.World.GetOwner(vehicleDef);
     return regionGrids[ownerDef.DefIndex].CanReach(startTile, destTile);
-  }
-
-  [DebugAction(VehicleHarmony.VehiclesLabel, name = "Regen WorldReachability",
-    allowedGameStates = AllowedGameStates.PlayingOnWorld)]
-  private static void RecalculateReachabilityGrid()
-  {
-    TaskManager.RunAsync(WorldVehiclePathGrid.Instance.reachability.RegenerateAllRegions,
-      ExceptionHandler);
-    return;
-
-    void ExceptionHandler(Exception ex)
-    {
-      Trace.Fail(
-        $"Exception thrown while generating reachability grid on world map.\n{ex}");
-    }
   }
 
   [DebugAction(VehicleHarmony.VehiclesLabel, name = "Flash Region Grid",
@@ -176,7 +161,7 @@ public class WorldVehicleReachability
       return (fromId > 0 && toId > 0) && fromId == toId;
     }
 
-    public void GenerateRegions()
+    public void GenerateRegions(CancellationToken token)
     {
       BFS<PlanetTile> floodfiller = new();
       int[] tilesToId = new int[Find.WorldGrid.TilesCount];
@@ -184,7 +169,11 @@ public class WorldVehicleReachability
 
       for (int tile = 0; tile < Find.WorldGrid.TilesCount; tile++)
       {
-        if (tilesToId[tile] != 0) continue;
+        if (token.IsCancellationRequested)
+          return;
+        if (tilesToId[tile] != 0)
+          continue;
+
         if (!pathGrid.PassableFast(tile, owner))
         {
           tilesToId[tile] = -1;
@@ -193,7 +182,7 @@ public class WorldVehicleReachability
 
         int id = totalRegions;
         floodfiller.FloodFill(tile, Ext_World.GetTileNeighbors, null, onEntered: OnEnter,
-          onSkipped: null, canEnter: CanEnter);
+          onSkipped: null, token, canEnter: CanEnter);
 
         totalRegions++;
         continue;

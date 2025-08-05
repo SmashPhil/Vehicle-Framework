@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
@@ -27,6 +28,9 @@ public class VehiclePathFollower : IExposable
 
   public const int CheckAheadNodesForCollisions = 3;
   public const int MaxCheckAheadNodesForCollisions = 8;
+
+  private static readonly HashSet<IntVec3> CollisionCells = [];
+
   protected VehiclePawn vehicle;
 
   private List<IntVec3> bumperCells;
@@ -52,9 +56,8 @@ public class VehiclePathFollower : IExposable
   private Rot8 endRot = Rot8.Invalid;
 
   private CancellationTokenSource pathCancellationTokenSource = new();
+  private Task curPathTask;
   private bool shouldStopClipping;
-
-  private static readonly HashSet<IntVec3> collisionCells = [];
 
   public VehiclePathFollower(VehiclePawn vehicle)
   {
@@ -630,13 +633,22 @@ public class VehiclePathFollower : IExposable
 
   private void RequestNewPath()
   {
+    if (curPathTask is { Status: TaskStatus.Running })
+    {
+      const int MaxCancelWaitTime = 1000;
+
+      Trace.Fail("Restarting task while it is ongoing. Cancelling before continuing.");
+      pathCancellationTokenSource.Cancel();
+      Task.WaitAll([curPathTask], MaxCancelWaitTime);
+    }
+
     if (pathCancellationTokenSource is null or { IsCancellationRequested: true })
       pathCancellationTokenSource = new CancellationTokenSource();
 
     RequestStatus = PathRequestStatus.Calculating;
     AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
     asyncAction.Set(vehicle, pathCancellationTokenSource.Token);
-    TaskManager.RunAsync(asyncAction);
+    curPathTask = TaskManager.Run(asyncAction.Invoke, pathCancellationTokenSource.Token);
   }
 
   private PathRequest NeedNewPath()
@@ -741,7 +753,7 @@ public class VehiclePathFollower : IExposable
     if (curPath == null)
       return;
 
-    collisionCells.Clear();
+    using ClearOnDispose<IntVec3> cod = new(CollisionCells);
     IntVec3 previous = IntVec3.Invalid;
     int nodeIndex = CollisionsLookAheadStartingIndex;
     while (nodeIndex < CollisionsLookAheadStartingIndex + MaxCheckAheadNodesForCollisions &&
@@ -753,7 +765,7 @@ public class VehiclePathFollower : IExposable
       CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
       foreach (IntVec3 cell in vehicleRect)
       {
-        if (!cell.InBounds(vehicle.Map) || !collisionCells.Add(cell)) continue;
+        if (!cell.InBounds(vehicle.Map) || !CollisionCells.Add(cell)) continue;
 
         List<Thing> thingList = cell.GetThingList(vehicle.Map);
         // Reverse iterate in case a thing or pawn is destroyed from being run over
@@ -776,8 +788,6 @@ public class VehiclePathFollower : IExposable
       previous = next;
       nodeIndex++;
     }
-
-    collisionCells.Clear();
   }
 
   public enum PathRequest

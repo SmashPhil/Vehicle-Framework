@@ -12,7 +12,7 @@ using Verse;
 // ReSharper disable all
 namespace Vehicles.Benchmarking;
 
-[BenchmarkClass("LoadableXmlAsset"), SampleSize(1_000)]
+[BenchmarkClass("LoadableXmlAsset")]
 internal class Benchmark_LoadableXmlAsset
 {
   [Benchmark(Label = "Sequentially")]

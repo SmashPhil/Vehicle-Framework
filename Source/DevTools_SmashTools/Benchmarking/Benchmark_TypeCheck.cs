@@ -3,7 +3,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("TypeCheck"), SampleSize(1_000_000)]
+[BenchmarkClass("TypeCheck")]
 internal class Benchmark_TypeCheck
 {
   [Benchmark(Label = "IsSubclass")]

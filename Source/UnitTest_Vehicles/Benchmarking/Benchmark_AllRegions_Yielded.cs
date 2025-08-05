@@ -13,7 +13,6 @@ using Verse;
 namespace Vehicles.Benchmarking;
 
 [BenchmarkClass("yield_AllRegions", AllowedGameStates = AllowedGameStates.PlayingOnMap)]
-[SampleSize(1000)]
 internal class Benchmark_AllRegions_Yielded
 {
   [Benchmark(Label = "Parallel")]

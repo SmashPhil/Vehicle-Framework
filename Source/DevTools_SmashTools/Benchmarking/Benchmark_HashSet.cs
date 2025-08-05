@@ -5,7 +5,7 @@ using DevTools.Benchmarking;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("HashSet"), SampleSize(100000)]
+[BenchmarkClass("HashSet")]
 internal class Benchmark_HashSet
 {
   [Benchmark(Label = "StringContainsTrue")]

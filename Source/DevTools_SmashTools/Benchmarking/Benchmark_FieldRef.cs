@@ -8,7 +8,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("FieldRef"), SampleSize(1_000_000)]
+[BenchmarkClass("FieldRef")]
 [Measurement(Benchmark.Measurement.Microseconds)]
 internal class Benchmark_FieldRef
 {

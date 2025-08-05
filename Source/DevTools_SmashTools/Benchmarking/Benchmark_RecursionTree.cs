@@ -5,7 +5,7 @@ using DevTools.Benchmarking;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("Recursion Tree"), SampleSize(100_000)]
+[BenchmarkClass("Recursion Tree")]
 internal class Benchmark_RecursionTree
 {
   [Benchmark(Label = "Recursion")]

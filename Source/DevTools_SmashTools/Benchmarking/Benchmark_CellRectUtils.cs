@@ -5,7 +5,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("CellRectUtils"), SampleSize(100_000)]
+[BenchmarkClass("CellRectUtils")]
 internal class Benchmark_CellRectUtils
 {
   [Benchmark(Label = "HashSet")]

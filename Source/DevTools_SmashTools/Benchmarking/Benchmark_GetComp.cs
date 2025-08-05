@@ -8,7 +8,7 @@ using Verse;
 // ReSharper disable ForCanBeConvertedToForeach
 namespace SmashTools.Performance;
 
-[BenchmarkClass("GetComp"), SampleSize(1_000_000)]
+[BenchmarkClass("GetComp")]
 [Measurement(Benchmark.Measurement.Nanoseconds)]
 internal class Benchmark_GetComp
 {
@@ -154,7 +154,7 @@ internal class Benchmark_GetComp
 
 
   // 8 Items - Average time to search every item in the list
-  [Benchmark(Label = "List 8 Average"), DivideBy(8)]
+  [Benchmark(Label = "List 8 Average")]
   private static void GetComp_List_8_AVERAGE(ref GetCompContext context)
   {
     _ = GetList<CompForbiddable>(context.listMany);

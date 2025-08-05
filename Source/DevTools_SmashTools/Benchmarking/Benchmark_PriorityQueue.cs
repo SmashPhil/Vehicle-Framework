@@ -7,7 +7,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("PriorityQueue"), SampleSize(10000)]
+[BenchmarkClass("PriorityQueue")]
 internal class Benchmark_PriorityQueue
 {
   [Benchmark(Label = ".Net PriorityQueue")]

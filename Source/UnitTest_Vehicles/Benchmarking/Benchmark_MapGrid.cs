@@ -8,7 +8,6 @@ using DevTools.Benchmarking;
 namespace Vehicles.Benchmarking;
 
 [BenchmarkClass("Clear PathFind Nodes")]
-[SampleSize(10_000)]
 internal class Benchmark_MapGrid
 {
   [Benchmark(Label = "Parallel")]

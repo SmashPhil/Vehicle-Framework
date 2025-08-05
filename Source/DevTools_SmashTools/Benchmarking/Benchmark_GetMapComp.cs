@@ -3,7 +3,7 @@ using DevTools.Benchmarking;
 
 namespace SmashTools.Benchmarking;
 
-[BenchmarkClass("ComponentCache Collection"), SampleSize(1_000_000)]
+[BenchmarkClass("ComponentCache Collection")]
 [Measurement(Benchmark.Measurement.Nanoseconds)]
 internal class Benchmark_GetMapComp
 {

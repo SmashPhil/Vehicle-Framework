@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -9,6 +11,7 @@ namespace Vehicles.World;
 /// <summary>
 /// Extension methods for <see cref="Caravan"/> and related world vehicle functionality.
 /// </summary>
+[PublicAPI]
 public static class Ext_Caravan
 {
   /// <summary>
@@ -142,7 +145,7 @@ public static class Ext_Caravan
   {
     WorldVehiclePathGrid pathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
     if (!pathGrid[vehicleDef].Enabled)
-      pathGrid.RecalculateAllPerceivedPathCostsFor(vehicleDef);
+      pathGrid.RecalculateAllPerceivedPathCostsFor(vehicleDef, CancellationToken.None);
   }
 
   /// <summary>

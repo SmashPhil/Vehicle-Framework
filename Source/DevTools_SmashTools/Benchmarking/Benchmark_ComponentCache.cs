@@ -4,7 +4,7 @@ using Verse;
 
 namespace SmashTools.Benchmarking;
 
-[BenchmarkClass("ComponentCache"), SampleSize(100_000)]
+[BenchmarkClass("ComponentCache")]
 [Measurement(Benchmark.Measurement.Nanoseconds)]
 internal class Benchmark_ComponentCache
 {

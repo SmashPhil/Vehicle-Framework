@@ -9,7 +9,7 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("GenTypes"), SampleSize(10000)]
+[BenchmarkClass("GenTypes")]
 internal class Benchmark_GenTypes
 {
   [Benchmark(Label = "Parallel")]

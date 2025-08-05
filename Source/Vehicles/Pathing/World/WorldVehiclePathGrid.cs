@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using HarmonyLib;
 using JetBrains.Annotations;
 using LudeonTK;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles.World;
@@ -22,7 +26,7 @@ public class WorldVehiclePathGrid : WorldComponent
 
   private static readonly Func<Hilliness, float> HillinessMovementDifficultyOffset;
 
-  public event Action<VehicleDef> OnReachabilityDirty;
+  public event ReachabilityGridDirtyed OnReachabilityDirty;
 
   /// <summary>
   /// Store entire pathGrid for each <see cref="VehicleDef"/>
@@ -34,12 +38,18 @@ public class WorldVehiclePathGrid : WorldComponent
   private readonly float[] winter;
 
   private int allPathCostsRecalculatedDayOfYear = -1;
+  private CancellationTokenSource cts;
+  private Task curTask;
+
+  public delegate void ReachabilityGridDirtyed(VehicleDef def, CancellationToken token);
 
   static WorldVehiclePathGrid()
   {
-    // Remove singleton reference, we shouldn't rely on reference being overwritten on
+    // Removes singleton references, we shouldn't rely on reference being overwritten on
     // subsequent playthroughs.
+    // TODO - This should be cleaned up and not reference a static property at some point.
     GameEvent.OnWorldRemoved += () => Instance = null;
+    GameEvent.OnGameDisposing += CancelGridRequests;
 
     MethodInfo hillinessMethod =
       AccessTools.Method(typeof(WorldPathGrid), "HillinessMovementDifficultyOffset");
@@ -93,13 +103,12 @@ public class WorldVehiclePathGrid : WorldComponent
     if (!Recalculating && allPathCostsRecalculatedDayOfYear != DayOfYearAt0Long)
     {
 #if DEV_TOOLS
-      if (!TestWatcher.RunningUnitTests)
-        RunTaskRecalculateAllPathCosts();
+      // Run synchronously if conducting unit tests, as inconsistent timing can invalidate test results.
+      if (TestWatcher.RunningUnitTests)
+        RecalculateAllPerceivedPathCosts(CancellationToken.None);
       else
-        RecalculateAllPerceivedPathCosts();
-#else
-        RunTaskRecalculateAllPathCosts();
 #endif
+        RecalculateAllPathCostsAsync();
     }
 
     if (Prefs.DevMode)
@@ -259,7 +268,7 @@ public class WorldVehiclePathGrid : WorldComponent
   /// <summary>
   /// Recalculate all path costs for all VehicleDefs
   /// </summary>
-  private void RunTaskRecalculateAllPathCosts()
+  private void RecalculateAllPathCostsAsync()
   {
     if (Recalculating)
     {
@@ -268,27 +277,43 @@ public class WorldVehiclePathGrid : WorldComponent
       return;
     }
     allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
-    TaskManager.RunAsync(RecalculateAllAsync);
-  }
 
-  // Shorthand method for async task on method with 1 optional parameter
-  private void RecalculateAllAsync()
-  {
-    RecalculateAllPerceivedPathCosts(ticksAbs: null);
+    if (curTask is { Status: TaskStatus.Running })
+    {
+      const int MaxCancelWaitTime = 1000;
+
+      Trace.Fail("Restarting task while it is ongoing. Cancelling before continuing.");
+      cts.Cancel();
+      Task.WaitAll([curTask], MaxCancelWaitTime);
+    }
+
+    cts = new CancellationTokenSource();
+    curTask = TaskManager.Run(delegate
+    {
+      try
+      {
+        RecalculateAllPerceivedPathCosts(cts.Token);
+      }
+      finally
+      {
+        cts.Dispose();
+        cts = null;
+        curTask = null;
+      }
+    }, cts.Token);
   }
 
   /// <summary>
   /// Recalculate all path costs for all VehicleDefs
   /// </summary>
-  /// <param name="ticksAbs"></param>
-  private void RecalculateAllPerceivedPathCosts(int? ticksAbs = null)
+  private void RecalculateAllPerceivedPathCosts(CancellationToken token, int? ticksAbs = null)
   {
     allPathCostsRecalculatedDayOfYear = DayOfYearAt0Long;
 
     using GridInitializerState gis = new(this);
     foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
     {
-      RecalculateAllPerceivedPathCostsFor(vehicleDef);
+      RecalculateAllPerceivedPathCostsFor(vehicleDef, token);
     }
 
     // Only needs to be done once and not for every grid owner
@@ -298,21 +323,41 @@ public class WorldVehiclePathGrid : WorldComponent
     }
   }
 
-  internal void RecalculateAllPerceivedPathCostsFor(VehicleDef vehicleDef)
+  internal void RecalculateAllPerceivedPathCostsFor(VehicleDef vehicleDef, CancellationToken token)
   {
     bool dirty = false;
     for (int i = 0; i < Find.WorldGrid.TilesCount; i++)
     {
+      if (token.IsCancellationRequested)
+        return;
+
       GridState state = RecalculatePerceivedMovementDifficultyAt(i, vehicleDef);
       dirty |= state == GridState.RegionsDirty;
     }
     if (dirty)
-      OnReachabilityDirty?.Invoke(vehicleDef);
+      OnReachabilityDirty?.Invoke(vehicleDef, token);
   }
 
   private void RecalculateWinterPercentAt(PlanetTile tile, int? ticksAbs = null)
   {
     winter[tile] = WinterPathingHelper.GetWinterPercent(tile, ticksAbs: ticksAbs);
+  }
+
+  // NOTE - If we use an instance event listener we would have to deregister it every time the world is removed
+  private static void CancelGridRequests()
+  {
+    WorldVehiclePathGrid pathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
+    if (pathGrid.curTask == null || pathGrid.curTask.IsCompleted || pathGrid.curTask is
+      { Status: TaskStatus.Canceled or TaskStatus.Faulted })
+      return;
+
+    const int MaxCancelWaitTime = 5000;
+
+    // We need to explicitly await on the thread exiting to main menu / desktop or it will still race against
+    // the cancellation request.
+    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+    pathGrid.cts.Cancel();
+    Task.WaitAll([pathGrid.curTask], MaxCancelWaitTime);
   }
 
   /// <summary>
@@ -442,7 +487,20 @@ public class WorldVehiclePathGrid : WorldComponent
     allowedGameStates = AllowedGameStates.PlayingOnWorld)]
   private static void RecalculatePathGrid()
   {
-    Instance.RunTaskRecalculateAllPathCosts();
+    Find.World.GetComponent<WorldVehiclePathGrid>().RecalculateAllPerceivedPathCosts(CancellationToken.None);
+  }
+
+  [DebugAction(VehicleHarmony.VehiclesLabel, name = "Regen WorldReachability",
+    allowedGameStates = AllowedGameStates.PlayingOnWorld)]
+  private static void RecalculateReachabilityGrid()
+  {
+    WorldVehiclePathGrid pathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
+    pathGrid.cts = new CancellationTokenSource();
+    pathGrid.curTask = TaskManager.Run(delegate
+    {
+      foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+        pathGrid.OnReachabilityDirty?.Invoke(vehicleDef, pathGrid.cts.Token);
+    }, pathGrid.cts.Token);
   }
 
   [PublicAPI]

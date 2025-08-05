@@ -4,7 +4,7 @@
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("Recursion Linear"), SampleSize(100_000)]
+[BenchmarkClass("Recursion Linear")]
 internal class Benchmark_RecursionLinear
 {
   [Benchmark(Label = "Recursion")]
