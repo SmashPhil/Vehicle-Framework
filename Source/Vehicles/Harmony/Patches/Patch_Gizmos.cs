@@ -30,12 +30,6 @@ internal class Patch_Gizmos : IPatchCategory
       prefix: null,
       postfix: new HarmonyMethod(typeof(Patch_Gizmos),
         nameof(AddVehicleCaravanGizmoPassthrough)));
-    // TODO 
-    //HarmonyPatcher.Patch(
-    //  original: AccessTools.Method(typeof(FormCaravanComp), nameof(FormCaravanComp.GetGizmos)),
-    //  prefix: null,
-    //  postfix: new HarmonyMethod(typeof(Patch_Gizmos),
-    //    nameof(AddVehicleGizmosPassthrough)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanFormingUtility),
         nameof(CaravanFormingUtility.GetGizmos)), prefix: null,
@@ -50,6 +44,7 @@ internal class Patch_Gizmos : IPatchCategory
         nameof(BuildCopyCommandUtility.BuildCopyCommand)),
       prefix: new HarmonyMethod(typeof(Patch_Gizmos),
         nameof(VehicleMaterialOnCopyBuildGizmo)));
+    // TODO - Reevaluate
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Thing), nameof(Thing.GetGizmos)),
       prefix: null,
       postfix: new HarmonyMethod(typeof(Patch_Gizmos),
@@ -124,51 +119,6 @@ internal class Patch_Gizmos : IPatchCategory
       //          Find.WindowStack.Add(new Dialog_FormVehicleCaravan(__instance.Map));
       //      }
       //  };
-    }
-    while (enumerator.MoveNext())
-    {
-      var element = enumerator.Current;
-      yield return element;
-    }
-  }
-
-  /// <summary>
-  /// Adds FormVehicleCaravan gizmo to FormCaravanComp, allowing 
-  /// </summary>
-  /// <param name="__result"></param>
-  /// <param name="__instance"></param>
-  private static IEnumerable<Gizmo> AddVehicleGizmosPassthrough(IEnumerable<Gizmo> __result,
-    FormCaravanComp __instance)
-  {
-    IEnumerator<Gizmo> enumerator = __result.GetEnumerator();
-    if (__instance.parent is MapParent mapParent && __instance.ParentHasMap)
-    {
-      if (!__instance.Reform)
-      {
-        yield return new Command_Action()
-        {
-          defaultLabel = "VF_CommandFormVehicleCaravan".Translate(),
-          defaultDesc = "VF_CommandFormVehicleCaravanDesc".Translate(),
-          icon = VehicleTex.FormCaravanVehicle,
-          action = delegate() { Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map)); }
-        };
-      }
-      else if (mapParent.Map.mapPawns.AllPawnsSpawned.Any(pawn => pawn is VehiclePawn))
-      {
-        Command_Action command_Action = new Command_Action
-        {
-          defaultLabel = "VF_CommandReformVehicleCaravan".Translate(),
-          defaultDesc = "VF_CommandReformVehicleCaravanDesc".Translate(),
-          icon = VehicleTex.FormCaravanVehicle,
-          hotKey = KeyBindingDefOf.Misc2,
-          action = delegate() { Find.WindowStack.Add(new Dialog_FormVehicleCaravan(mapParent.Map, true)); }
-        };
-        if (GenHostility.AnyHostileActiveThreatToPlayer(mapParent.Map))
-        {
-          command_Action.Disable("CommandReformCaravanFailHostilePawns".Translate());
-        }
-        yield return command_Action;
-      }
     }
     while (enumerator.MoveNext())
     {
@@ -355,13 +305,15 @@ internal class Patch_Gizmos : IPatchCategory
       yield return gizmo;
     }
 
+    if (__instance.Map.GetDetachedMapComponent<VehiclePositionManager>().AllClaimants.NullOrEmpty())
+      yield break;
+
     if (__instance.CanBeTransferredToVehiclesCargo())
     {
-      yield return Command_TransferToVehicle_Order.Command;
       if (__instance.IsOrderedToBeTransferredToAnyVehicle())
-      {
         yield return Command_TransferToVehicle_Cancel.Command;
-      }
+      else
+        yield return Command_TransferToVehicle_Order.Command;
     }
   }
 }

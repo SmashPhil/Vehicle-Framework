@@ -20,13 +20,19 @@ public class Command_TransferToVehicle_Order : Command_Target
     hotKey = KeyBindingDefOf.Misc2;
     action = Action;
     targetingParams = TargetingParameters.ForPawns();
-    targetingParams.validator = IsVehicle;
+    targetingParams.validator = IsValidVehicle;
     onUpdate = DrawLineTo;
   }
 
-  private static bool IsVehicle(TargetInfo target)
+  private static bool IsValidVehicle(TargetInfo target)
   {
-    return target.Thing is VehiclePawn;
+    if (target.Thing is not VehiclePawn vehicle)
+      return false;
+
+    if (vehicle.CompUpgradeTree is { Upgrading: true })
+      return false;
+
+    return vehicle.Faction == Faction.OfPlayer;
   }
 
   private static bool TransferableObject(object obj, out Thing thing)
@@ -39,6 +45,7 @@ public class Command_TransferToVehicle_Order : Command_Target
   {
     if (!Find.Targeter.IsTargeting)
       return;
+
     foreach (object obj in Find.Selector.SelectedObjects)
     {
       if (!TransferableObject(obj, out Thing thing))

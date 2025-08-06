@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using RimWorld;
 using SmashTools;
 using Verse;
 using Verse.AI;
@@ -10,6 +11,15 @@ public static class Ext_Thing
 {
   public static bool CanBeTransferredToVehiclesCargo(this Thing thing)
   {
+    if (thing is Pawn { Downed: true } pawn && pawn.Faction == Faction.OfPlayer)
+      return true;
+
+    if (!thing.Spawned)
+      return false;
+
+    if (thing.Map.IsPlayerHome && !thing.Map.areaManager.Home[thing.Position])
+      return false;
+
     return thing.def.EverHaulable;
   }
 
@@ -18,9 +28,7 @@ public static class Ext_Thing
     Map map = thing.MapHeld;
 
     if (map == null)
-    {
       yield break;
-    }
 
     IEnumerable<VehiclePawn> vehicles = map.GetCachedMapComponent<VehicleReservationManager>()
      .VehicleListers(ReservationType.LoadVehicle);
@@ -90,7 +98,7 @@ public static class Ext_Thing
       thing.MapHeld?.reservationManager.ReservationsReadOnly.FirstOrFallback(res =>
         res?.Target.Thing == thing);
 
-    if (reservation?.Job.def == jobType)
+    if (reservation != null && reservation.Job.def == jobType)
     {
       reservation.Job.GetCachedDriver(reservation.Claimant).EndJobWith(cancelCondition);
     }

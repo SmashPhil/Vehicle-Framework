@@ -524,7 +524,7 @@ public partial class VehiclePawn
         defaultLabel = "Teleport",
         action = delegate
         {
-          Find.Targeter.BeginTargeting(new TargetingParameters()
+          Find.Targeter.BeginTargeting(new TargetingParameters
           {
             canTargetLocations = true,
             canTargetPawns = false,
@@ -533,14 +533,14 @@ public partial class VehiclePawn
           {
             Position = target.Cell;
             Notify_Teleported();
-          }, highlightAction: (target) =>
+          }, highlightAction: target =>
           {
             Color color = LandingTargeter.GhostDrawerColor(Validator(target.Cell) ?
               LandingTargeter.PositionState.Valid :
               LandingTargeter.PositionState.Invalid);
             GhostDrawer.DrawGhostThing(target.Cell, FullRotation, VehicleDef.buildDef,
               VehicleDef.buildDef.graphic, color, AltitudeLayer.Blueprint);
-          }, (LocalTargetInfo target) => Validator(target.Cell));
+          }, target => Validator(target.Cell));
         }
       };
 
@@ -550,7 +550,7 @@ public partial class VehiclePawn
           Map.GetDetachedMapComponent<VehiclePositionManager>();
         foreach (IntVec3 cell2 in this.PawnOccupiedCells(cell, Rotation))
         {
-          if (!cell2.InBounds(Map) || !GenGridVehicles.Walkable(cell2, VehicleDef, Map) ||
+          if (!cell2.InBounds(Map) || !cell2.Walkable(VehicleDef, Map) ||
             positionManager.PositionClaimed(cell2))
           {
             return false;
@@ -561,15 +561,15 @@ public partial class VehiclePawn
       }
     }
 
-    bool upgrading = CompUpgradeTree != null && CompUpgradeTree.Upgrading;
+    bool upgrading = CompUpgradeTree is { Upgrading: true };
 
     if (!cargoToLoad.NullOrEmpty())
     {
-      Command_Action cancelLoad = new Command_Action
+      Command_Action cancelLoad = new()
       {
         defaultLabel = "DesignatorCancel".Translate(),
         icon = VehicleDef.CancelCargoIcon,
-        action = delegate()
+        action = delegate
         {
           Map.GetCachedMapComponent<VehicleReservationManager>()
            .RemoveLister(this, ReservationType.LoadVehicle);
@@ -580,12 +580,12 @@ public partial class VehiclePawn
     }
     else
     {
-      Command_Action loadVehicle = new Command_Action
+      Command_Action loadVehicle = new()
       {
         defaultLabel = "VF_LoadCargo".Translate(),
         icon = VehicleDef.LoadCargoIcon,
         hotKey = KeyBindingDefOf.Misc2,
-        action = delegate() { Find.WindowStack.Add(new Dialog_LoadCargo(this)); }
+        action = delegate { Find.WindowStack.Add(new Dialog_LoadCargo(this)); }
       };
       if (upgrading)
       {
@@ -595,11 +595,12 @@ public partial class VehiclePawn
       yield return loadVehicle;
     }
 
+#if FISHING
     if (FishingCompatibility.Active && SettingsCache.TryGetValue(VehicleDef,
       typeof(VehicleProperties),
       nameof(VehicleProperties.fishing), VehicleDef.properties.fishing))
     {
-      Command_Toggle fishing = new Command_Toggle
+      Command_Toggle fishing = new()
       {
         defaultLabel = "VF_StartFishing".Translate(),
         defaultDesc = "VF_StartFishingDesc".Translate(),
@@ -609,15 +610,17 @@ public partial class VehiclePawn
       };
       yield return fishing;
     }
+#endif
 
-    Command_Action flagForLoading = new Command_Action
+    /*
+    Command_Action flagForLoading = new()
     {
       defaultLabel = "VF_HaulPawnToVehicle".Translate(),
       icon = VehicleTex.HaulPawnToVehicle,
-      action = delegate()
+      action = delegate
       {
         SoundDefOf.Click.PlayOneShotOnCamera();
-        HaulTargeter.BeginTargeting(new TargetingParameters()
+        HaulTargeter.BeginTargeting(new TargetingParameters
         {
           canTargetPawns = true,
           canTargetBuildings = false,
@@ -641,7 +644,6 @@ public partial class VehiclePawn
               return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech ||
                 pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
             }
-
             return false;
           }
         }, delegate(LocalTargetInfo target)
@@ -655,11 +657,14 @@ public partial class VehiclePawn
             return;
           }
 
+          Thing thing = target.Thing;
+          thing.CancelTransferToAnyOtherVehicle(this);
+          thing.TransferToVehicle(this);
           TransferableOneWay transferable = new()
           {
-            things = [target.Thing],
+            things = [thing],
           };
-          transferable.AdjustTo(1);
+          transferable.AdjustTo(thing.stackCount);
           cargoToLoad.Add(transferable);
           Map.GetCachedMapComponent<VehicleReservationManager>()
            .RegisterLister(this, ReservationType.LoadVehicle);
@@ -670,12 +675,12 @@ public partial class VehiclePawn
     {
       flagForLoading.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
     }
-
     yield return flagForLoading;
+    */
 
     if (!Drafted)
     {
-      Command_Action unloadAll = new Command_Action
+      Command_Action unloadAll = new()
       {
         defaultLabel = "VF_DisembarkAllPawns".Translate(),
         icon = VehicleTex.UnloadAll,

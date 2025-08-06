@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using RimWorld;
+using Verse;
 
 namespace Vehicles;
 
@@ -15,6 +16,7 @@ public class Command_TransferToVehicle_Cancel : Command_Action
     defaultDesc = "VF_TransferToVehicle_Cancel_Desc".Translate();
     icon = VehicleTex.CancelPackCargoIcon[(uint)VehicleType.Land];
     action = Action;
+    hotKey = KeyBindingDefOf.Cancel;
   }
 
   private static void Action()
