@@ -358,12 +358,13 @@ namespace Vehicles
 		private static float DrawHyperlinks(Rect rect, VehicleStatDrawEntry statDrawEntry, float textHeight)
 		{
 			float heightTaken = 0;
-			Rect hyperlinkRect = new Rect(rect.x, rect.y + textHeight, rect.width, textHeight);
+			Rect hyperlinkRect = new Rect(rect.x, rect.y + textHeight, rect.width, Text.LineHeight);
 			Color color = GUI.color;
 			GUI.color = Widgets.NormalOptionColor;
 			foreach (Dialog_InfoCard.Hyperlink hyperlink in statDrawEntry.GetHyperlinks(vehicle))
 			{
-				float hyperlinkHeight = Text.CalcHeight(hyperlink.Label, hyperlinkRect.width);
+				float hyperlinkHeight = Mathf.Max(Text.LineHeight, Text.CalcHeight(hyperlink.Label, hyperlinkRect.width));
+				hyperlinkRect.height = hyperlinkHeight;
 				Widgets.HyperlinkWithIcon(hyperlinkRect, hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, null, false, null);
 				hyperlinkRect.y += hyperlinkHeight;
 				heightTaken += hyperlinkHeight;
