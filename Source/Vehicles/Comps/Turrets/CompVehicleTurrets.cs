@@ -197,6 +197,10 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
   {
     turrets ??= [];
     RecacheTurretPermissions();
+    foreach (VehicleTurret turret in turrets)
+    {
+      turret.PostPostLoadInit();
+    }
   }
 
   private void RecacheGizmos()

@@ -1403,6 +1403,25 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     }
   }
 
+  /// <summary>
+  /// PostLoad method after vehicle's PostLoadInit load step is finished.
+  /// </summary>
+  /// <remarks>
+  /// RimWorld executes LoadingVars and ResolvingCrossRefs in order (Vehicle -> CompVehicleTurrets -> VehicleTurret)
+  /// but PostLoadInit is executed backwards. (VehicleTurret | Vehicle -> CompVehicleTurrets) resulting in bad ordering
+  /// when vehicle turrets rely on unsaved components being instantiated at the time of post load.
+  /// </remarks>
+  public virtual void PostPostLoadInit()
+  {
+    parentRotCached = vehicle.Rotation;
+    parentAngleCached = vehicle.Angle;
+    if (targetInfo.IsValid)
+    {
+      AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
+    }
+    InitRecoilTrackers();
+  }
+
   public virtual void ExposeData()
   {
     Scribe_Values.Look(ref autoTargetingActive, nameof(autoTargetingActive));
@@ -1438,16 +1457,5 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
     Scribe_TargetInfo.Look(ref targetInfo, nameof(targetInfo),
       defaultValue: LocalTargetInfo.Invalid);
-
-    if (Scribe.mode == LoadSaveMode.PostLoadInit)
-    {
-      parentRotCached = vehicle.Rotation;
-      parentAngleCached = vehicle.Angle;
-      if (targetInfo.IsValid)
-      {
-        AlignToTargetRestricted(); //reassigns rotationTargeted for turrets currently turning
-      }
-      InitRecoilTrackers();
-    }
   }
 }
