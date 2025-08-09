@@ -62,7 +62,7 @@ internal sealed class UnitTest_VehiclePawn_Pathing
     Assert.IsTrue(group.vehicle.Drafted);
     Assert.IsTrue(group.vehicle.CanMoveFinal);
     CellRect testArea = GetGotoArea(group.vehicle, out IntVec3 gotoLoc);
-    //using DebugHelper.DestroyAreaScope das = new(group.vehicle.Map, testArea);
+    using DebugHelper.DestroyAreaScope das = new(group.vehicle.Map, testArea);
     DebugHelper.FillArea(testArea, group.vehicle.Map, ThingDefOf.Wall);
     CellRect corridor = CellRect.CenteredOn(gotoLoc, group.vehicle.def.size.x, testArea.Height);
     DebugHelper.DestroyArea(corridor, group.vehicle.Map);
