@@ -11,13 +11,15 @@ namespace Vehicles.UnitTesting;
 [UnitTest(TestType.Playing)]
 internal sealed class UnitTest_Regions : UnitTest_MapTest
 {
+  private const int MaxTestPadding = 4;
+
   private readonly HashSet<VehicleRegion> regions = [];
 
   protected override bool ShouldTest(VehicleDef vehicleDef)
   {
     // SizePadding will rarely be above 4, but there are mods out there adding incredibly large
     // vehicles, and region testing would be too expensive. Validating 4 and below should suffice.
-    return vehicleDef.SizePadding <= 4 && PathingHelper.ShouldCreateRegions(vehicleDef);
+    return vehicleDef.SizePadding <= MaxTestPadding && PathingHelper.ShouldCreateRegions(vehicleDef);
   }
 
   protected override CellRect TestArea(VehicleDef vehicleDef)
@@ -28,6 +30,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
   [Test]
   private void Generation()
   {
+    using SetTerrainOnDispose stod = new(Find.CurrentMap, TerrainDefOf.PackedDirt, VehicleRegion.ChunkAt(root));
     foreach (VehiclePawn vehicle in vehicles)
     {
       using VehicleTestCase vtc = new(vehicle, this);
@@ -38,7 +41,8 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       CellRect testArea = TestArea(vehicleDef);
       IntVec3 center = testArea.CenterCell;
       //CellRect chunk = VehicleRegion.ChunkAt(root);
-
+      TerrainDef terrainDef = DefDatabase<TerrainDef>.AllDefsListForReading
+       .FirstOrDefault(def => VehiclePathGrid.PassableTerrainCost(vehicleDef, def, out _));
       ThingDef testDef = ThingDefOf.Wall;
       if (!PathingHelper.IsRegionEffector(vehicleDef, testDef))
       {
@@ -53,15 +57,20 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       Assert.IsNotNull(testDef);
 
       VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-      VehicleRegionGrid regionGrid = mapping[vehicleDef].VehicleRegionGrid;
-      VehicleRegionMaker regionMaker = mapping[vehicleDef].VehicleRegionMaker;
-      VehicleRegionDirtyer regionDirtyer = mapping[vehicleDef].VehicleRegionDirtyer;
+      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
+      VehicleRegionGrid regionGrid = pathData.VehicleRegionGrid;
+      VehicleRegionMaker regionMaker = pathData.VehicleRegionMaker;
+      VehicleRegionDirtyer regionDirtyer = pathData.VehicleRegionDirtyer;
       Assert.IsFalse(mapping.ThreadAvailable);
 
       // Clear area region generation. The chunk should be completely empty, meaning
       // 1 region spanning the entirety of the chunk and there should be no neighboring
       // entities that might pad into the chunk we're testing.
-      DebugHelper.DestroyArea(testArea.ExpandedBy(padding * 2), map);
+
+      // NOTE - some even size vehicles will 'clip' corner regions, padding by 2 will remove that
+      // edge case from needing to be accounted for.  We're only testing region dirtying / updating
+      // here, edge cases should be tested for separately.
+      DebugHelper.DestroyArea(testArea.ExpandedBy(padding + 2), map, replaceTerrain: terrainDef);
       Assert.AreEqual(RegionsInArea(regionGrid, testArea), 1);
 
       // Prewarm object pools, if spans change without invalidating the links, it will
@@ -79,13 +88,14 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       using ObjectCountWatcher<VehicleRegionLink> ocwLinks = new();
 
       // Full chunk filled with impassable entities leaves no invalid regions afterward
-      FillArea(testArea);
+      FillArea(testArea, terrainDef);
       Expect.AreEqual(RegionsInArea(regionGrid, testArea), 0, "Set Impassable");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
       Expect.IsTrue(mapping[vehicleDef].VehiclePathGrid.Enabled, "PathGrid Enabled");
 
       // Clear
-      ClearArea();
+      ClearArea(terrainDef);
+      Assert.IsTrue(regionDirtyer.AnyDirty);
       Expect.IsTrue(ValidateArea(regionGrid, testArea, true), "Clear Impassable");
       Expect.AreEqual(RegionsInArea(regionGrid, testArea), 1, "Unified Region");
       // TODO VF-58: link validation needs fixing, verified this is working in-game but the test fails.
@@ -93,16 +103,32 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
 
       // 1 Block
-      ClearArea();
+      ClearArea(terrainDef);
       VehicleRegion region = regionGrid.GetValidRegionAt(center);
       Assert.IsNotNull(region);
       CellRect singleCell = CellRect.SingleCell(center);
-      FillArea(singleCell);
+      FillArea(singleCell, terrainDef);
       if (vehicleDef.SizePadding == 0)
       {
         // If there's no padding, then test valid edge cells instead
         Expect.IsTrue(ValidateArea(regionGrid, singleCell, false), "1 Cell Removed From Region");
-        Expect.All(singleCell.ExpandedBy(1).EdgeCells, ValidRegionAt, "No Padding Applied");
+        if (vehicleDef.size.x % 2 == 0)
+        {
+          // Even-width vehicles will have 0 padding but impassable on top left corners (West, NorthWest, and North)
+          // since the position of the vehicle will be 1 cell up from the impassable corner.
+          Expect.IsFalse(ValidRegionAt(singleCell.CenterCell + new IntVec3(-1, 0, 0)));
+          Expect.IsFalse(ValidRegionAt(singleCell.CenterCell + new IntVec3(-1, 0, 1)));
+          Expect.IsFalse(ValidRegionAt(singleCell.CenterCell + new IntVec3(0, 0, 1)));
+          Expect.IsTrue(ValidRegionAt(singleCell.CenterCell + new IntVec3(1, 0, 1)));
+          Expect.IsTrue(ValidRegionAt(singleCell.CenterCell + new IntVec3(1, 0, 0)));
+          Expect.IsTrue(ValidRegionAt(singleCell.CenterCell + new IntVec3(1, 0, -1)));
+          Expect.IsTrue(ValidRegionAt(singleCell.CenterCell + new IntVec3(0, 0, -1)));
+          Expect.IsTrue(ValidRegionAt(singleCell.CenterCell + new IntVec3(-1, 0, -1)));
+        }
+        else
+        {
+          Expect.All(singleCell.ExpandedBy(1).EdgeCells, ValidRegionAt, "No Padding Applied");
+        }
       }
       else
       {
@@ -113,7 +139,7 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       Expect.IsFalse(regionDirtyer.AnyDirty);
 
       // Region Reused
-      ClearArea();
+      ClearArea(terrainDef);
       Expect.IsTrue(regionDirtyer.AnyDirty);
       Expect.ReferencesAreEqual(region, regionGrid.GetValidRegionAt(center), "Region Recycled");
       Expect.IsFalse(regionGrid.AnyInvalidRegions, "No Invalid Regions");
@@ -124,15 +150,15 @@ internal sealed class UnitTest_Regions : UnitTest_MapTest
       Expect.AreEqual(ocwLinks.Count, 0, "No RegionLinks Instantiated");
       continue;
 
-      void ClearArea()
+      void ClearArea(TerrainDef terrain)
       {
-        DebugHelper.DestroyArea(testArea, map);
+        DebugHelper.DestroyArea(testArea, map, replaceTerrain: terrain);
       }
 
-      void FillArea(CellRect cellRect)
+      void FillArea(CellRect cellRect, TerrainDef terrain)
       {
         ThingDef stuffDef = testDef.MadeFromStuff ? GenStuff.DefaultStuffFor(testDef) : null;
-        ClearArea();
+        ClearArea(terrain);
         foreach (IntVec3 cell in cellRect)
         {
           GenSpawn.Spawn(ThingMaker.MakeThing(testDef, stuffDef), cell, map);

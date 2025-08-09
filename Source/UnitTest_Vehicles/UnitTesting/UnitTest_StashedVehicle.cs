@@ -106,7 +106,7 @@ internal sealed class UnitTest_StashedVehicle
     group.DisembarkOne();
 
     StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
-    using ScopeWorldObject swc = new(caravan);
+    using ScopeWorldObject swc = new(stashedVehicle);
     Expect.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle));
     CheckAnyNonWorldPawns.Invoke(caravan, null);
     Expect.AreEqual(caravan.PawnsListForReading.Count, 5);
@@ -128,7 +128,7 @@ internal sealed class UnitTest_StashedVehicle
     vehicleCaravan.Tile = map.Tile;
 
     StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
-
+    using ScopeWorldObject swc = new(stashedVehicle);
     Expect.IsTrue(stashedVehicle.Vehicles.Contains(vehicle), "Vehicle Stashed");
 
     Assert.IsNotNull(caravan);
@@ -246,9 +246,11 @@ internal sealed class UnitTest_StashedVehicle
 
     VehicleCaravan vehicleCaravan =
       CaravanHelper.MakeVehicleCaravan([vehicle], Faction.OfPlayer, map.Tile, true);
+    using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
     vehicleCaravan.Tile = map.Tile;
 
     StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    using ScopeWorldObject scopeStash = new(stashedVehicle);
 
     Expect.IsTrue(stashedVehicle.Vehicles.Contains(vehicle), "Vehicle Stashed");
 
@@ -268,6 +270,7 @@ internal sealed class UnitTest_StashedVehicle
     }
 
     VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
+    using ScopeWorldObject scopeMergeCaravan = new(mergedVehicleCaravan);
     Assert.IsNotNull(mergedVehicleCaravan);
     Assert.IsTrue(mergedVehicleCaravan.ContainsPawn(vehicle), "Vehicle Merged Into Caravan");
 
@@ -284,7 +287,5 @@ internal sealed class UnitTest_StashedVehicle
       Expect.IsFalse(pawn.Destroyed, "Passenger GC Destroyed");
       Expect.IsFalse(pawn.Discarded, "Passenger GC Discarded");
     }
-
-    mergedVehicleCaravan.Destroy();
   }
 }

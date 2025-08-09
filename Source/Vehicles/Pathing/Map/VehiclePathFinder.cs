@@ -24,7 +24,9 @@ public class VehiclePathFinder : VehicleGridManager
   private const int SearchLimit = 160000;
   private const int TurnCostTicks = 3;
   private const float RootPosWeight = 0.75f;
+  private const int CostWallBlocker = 50;
 
+  private readonly Map map;
   private readonly ObjectPool<PathFinderContext> contextPool;
   private VehiclePathGrid vehiclePathGrid;
   private readonly VehicleRegionCostCalculatorWrapper regionCostCalculator;
@@ -89,11 +91,12 @@ public class VehiclePathFinder : VehicleGridManager
   public VehiclePathFinder(VehiclePathingSystem mapping, VehicleDef vehicleDef) : base(mapping,
     vehicleDef)
   {
-    roadGrid = mapping.map.areaManager.Get<Area_Road>();
-    roadAvoidalGrid = mapping.map.areaManager.Get<Area_RoadAvoidal>();
-    edificeGrid = mapping.map.edificeGrid;
-    blueprintGrid = mapping.map.blueprintGrid;
-    cellIndices = mapping.map.cellIndices;
+    this.map = mapping.map;
+    roadGrid = map.areaManager.Get<Area_Road>();
+    roadAvoidalGrid = map.areaManager.Get<Area_RoadAvoidal>();
+    edificeGrid = map.edificeGrid;
+    blueprintGrid = map.blueprintGrid;
+    cellIndices = map.cellIndices;
     contextPool = new ObjectPool<PathFinderContext>(10, preWarm: 5);
     regionCostCalculator = new VehicleRegionCostCalculatorWrapper(mapping, vehicleDef);
   }
@@ -114,7 +117,7 @@ public class VehiclePathFinder : VehicleGridManager
   public VehiclePath FindPath(IntVec3 start, LocalTargetInfo dest, VehiclePawn vehicle,
     CancellationToken token, PathEndMode peMode = PathEndMode.OnCell)
   {
-    if (!vehicle.FitsOnCell(dest.Cell))
+    if (!vehicle.DrivableRectOnCell(dest.Cell, hitboxReq: Ext_Vehicles.DestinationHitboxReq.AnyRotation))
     {
       Messages.Message("VF_CannotFit".Translate(), MessageTypeDefOf.RejectInput);
       return VehiclePath.NotFound;
@@ -147,16 +150,17 @@ public class VehiclePathFinder : VehicleGridManager
     int x = dest.Cell.x;
     int z = dest.Cell.z;
     int vehicleSize = createdFor.Size.x * createdFor.Size.z;
-    int startIndex = cellIndices.CellToIndex(start);
+    int curIndex = cellIndices.CellToIndex(start);
     int destIndex = cellIndices.CellToIndex(dest.Cell);
     vehicle.TryGetAvoidGrid(out AvoidGrid avoidGrid);
 
     PathFinderContext context = contextPool.Get();
     context.Init(mapping);
 
-    roadGrid ??= mapping.map.areaManager.Get<Area_Road>();
-    roadAvoidalGrid ??= mapping.map.areaManager.Get<Area_RoadAvoidal>();
+    roadGrid ??= map.areaManager.Get<Area_Road>();
+    roadAvoidalGrid ??= map.areaManager.Get<Area_RoadAvoidal>();
 
+    int mapSizeX = map.Size.x;
     bool passAllDestroyableThings = traverseParms.mode is TraverseMode.PassAllDestroyableThings
       or TraverseMode.PassAllDestroyableThingsNotWater;
     bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater &&
@@ -203,7 +207,7 @@ public class VehiclePathFinder : VehicleGridManager
       !chunks.NullOrEmpty();
 #endif
 
-    context.InitStatusesAndPushStartNode(startIndex);
+    context.InitStatusesAndPushStartNode(curIndex);
     while (context.openList.Count > 0)
     {
       if (token.IsCancellationRequested)
@@ -213,33 +217,33 @@ public class VehiclePathFinder : VehicleGridManager
       }
 
       CostNode costNode = context.openList.Dequeue();
-      startIndex = costNode.index;
+      curIndex = costNode.index;
 
-      if (!Mathf.Approximately(costNode.cost, context.calcGrid[startIndex].costNodeCost) ||
-        context.calcGrid[startIndex].status == context.statusClosedValue)
+      if (!Mathf.Approximately(costNode.cost, context.calcGrid[curIndex].costNodeCost) ||
+        context.calcGrid[curIndex].status == context.statusClosedValue)
       {
         continue;
       }
 
-      IntVec3 prevCell = cellIndices.IndexToCell(startIndex);
+      IntVec3 prevCell = cellIndices.IndexToCell(curIndex);
       int x2 = prevCell.x;
       int z2 = prevCell.z;
 
       if (drawPaths)
       {
         float colorWeight = Mathf.Lerp(5000, 15000, vehicleSize / 15f);
-        DebugFlash(mapping, prevCell, context.calcGrid[startIndex].knownCost / colorWeight,
-          context.calcGrid[startIndex].knownCost.ToString("0"));
+        DebugFlash(mapping, prevCell, context.calcGrid[curIndex].knownCost / colorWeight,
+          context.calcGrid[curIndex].knownCost.ToString("0"));
       }
 
-      if (singleRect && startIndex == destIndex) //Single cell vehicles
+      if (singleRect && curIndex == destIndex) //Single cell vehicles
       {
-        return FinalizedPath(context, startIndex, weightedHeuristics);
+        return FinalizedPath(context, curIndex, weightedHeuristics);
       }
-      else if (!singleRect && cellRect.Contains(prevCell) &&
-        !disallowedCornerIndices.Contains(startIndex)) //Multi-cell vehicles
+      if (!singleRect && cellRect.Contains(prevCell) &&
+        !disallowedCornerIndices.Contains(curIndex)) //Multi-cell vehicles
       {
-        return FinalizedPath(context, startIndex, weightedHeuristics);
+        return FinalizedPath(context, curIndex, weightedHeuristics);
       }
 
       if (searchCount > SearchLimit)
@@ -255,8 +259,8 @@ public class VehiclePathFinder : VehicleGridManager
         int cellIntX = x2 + neighborOffsets[i];
         int cellIntZ = z2 + neighborOffsets[i + 8];
 
-        if (cellIntX < 0 || cellIntX >= mapping.map.Size.x || cellIntZ < 0 ||
-          cellIntZ >= mapping.map.Size.z)
+        if (cellIntX < 0 || cellIntX >= map.Size.x || cellIntZ < 0 ||
+          cellIntZ >= map.Size.z)
         {
           goto SkipNode; //skip out of bounds
         }
@@ -285,21 +289,36 @@ public class VehiclePathFinder : VehicleGridManager
 
             initialCost += 70;
             Building building = edificeGrid[cellIndex];
-            if (building is null)
+            if (building is null || !IsDestroyable(building))
             {
               if (drawPaths)
                 DebugFlash(mapping, cellToCheck, 0.22f, "impass");
               goto SkipNode;
             }
-
-            if (!IsDestroyable(building))
-            {
-              if (drawPaths)
-                DebugFlash(mapping, cellToCheck, 0.22f, "impass");
-              goto SkipNode;
-            }
-
             initialCost += (int)(building.HitPoints * 0.2f);
+          }
+
+          // Check diagonal movement
+          if (i is >= 4 and <= 7)
+          {
+            int diagIndex1 = i switch
+            {
+              4 or 7 => curIndex - mapSizeX,
+              5 or 6 => curIndex + mapSizeX,
+              _      => throw new InvalidOperationException()
+            };
+            int diagIndex2 = i switch
+            {
+              4 or 5 => curIndex + 1,
+              6 or 7 => curIndex - 1,
+              _      => throw new InvalidOperationException()
+            };
+            if (BlocksDiagonalMovement(vehicle, map, diagIndex1) || BlocksDiagonalMovement(vehicle, map, diagIndex2))
+            {
+              if (!passAllDestroyableThings)
+                continue;
+              initialCost += CostWallBlocker;
+            }
           }
 
           float tickCost = ((i <= 3) ? ticksCardinal : ticksDiagonal) + initialCost;
@@ -373,7 +392,7 @@ public class VehiclePathFinder : VehicleGridManager
             tickCost += 1000;
           }
 
-          float calculatedCost = tickCost + context.calcGrid[startIndex].knownCost;
+          float calculatedCost = tickCost + context.calcGrid[curIndex].knownCost;
           ushort status = context.calcGrid[cellIndex].status;
 
           if (status == context.statusClosedValue || status == context.statusOpenValue)
@@ -431,7 +450,7 @@ public class VehiclePathFinder : VehicleGridManager
             costWithHeuristic = 0;
           }
 
-          context.calcGrid[cellIndex].parentIndex = startIndex;
+          context.calcGrid[cellIndex].parentIndex = curIndex;
           context.calcGrid[cellIndex].knownCost = calculatedCost;
           context.calcGrid[cellIndex].status = context.statusOpenValue;
           context.calcGrid[cellIndex].costNodeCost = costWithHeuristic;
@@ -444,7 +463,7 @@ public class VehiclePathFinder : VehicleGridManager
       }
 
       searchCount++;
-      context.calcGrid[startIndex].status = context.statusClosedValue;
+      context.calcGrid[curIndex].status = context.statusClosedValue;
       if (nodesOpened >= NodesToOpenBeforeRegionBasedPathing && allowedRegionTraversal &&
         !weightedHeuristics)
       {
@@ -452,7 +471,7 @@ public class VehiclePathFinder : VehicleGridManager
         regionCostCalculator.Init(cellRect, traverseParms, ticksCardinal, ticksDiagonal,
           avoidGrid,
           drafted, disallowedCornerIndices);
-        context.InitStatusesAndPushStartNode(startIndex);
+        context.InitStatusesAndPushStartNode(curIndex);
         nodesOpened = 0;
         searchCount = 0;
       }
@@ -475,10 +494,10 @@ public class VehiclePathFinder : VehicleGridManager
       Log.Error("Tried to find Vehicle path for null vehicle.");
       return false;
     }
-    else if (vehicle.Map != mapping.map)
+    else if (vehicle.Map != map)
     {
       Log.Error(
-        $"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={mapping.map}");
+        $"Tried to FindVehiclePath for vehicle which is spawned in another map. Their map PathFinder should  have been used, not this one. vehicle={vehicle} vehicle's map={vehicle.Map} map={map}");
       return false;
     }
 
@@ -538,17 +557,15 @@ public class VehiclePathFinder : VehicleGridManager
   /// </summary>
   public static bool BlocksDiagonalMovement(VehiclePawn vehicle, int x, int z)
   {
-    return BlocksDiagonalMovement(vehicle, vehicle.Map.cellIndices.CellToIndex(x, z));
+    return BlocksDiagonalMovement(vehicle, vehicle.Map, vehicle.Map.cellIndices.CellToIndex(x, z));
   }
 
   /// <summary>
   /// Diagonal movement is blocked
   /// </summary>
-  /// <param name="vehicle"></param>
-  /// <param name="index"></param>
-  private static bool BlocksDiagonalMovement(VehiclePawn vehicle, int index)
+  private static bool BlocksDiagonalMovement(VehiclePawn vehicle, Map map, int index)
   {
-    return !vehicle.DrivableFast(index) || vehicle.Map.edificeGrid[index] is Building_Door;
+    return !vehicle.DrivableFast(index) || map.edificeGrid[index] is Building_Door;
   }
 
   /// <summary>

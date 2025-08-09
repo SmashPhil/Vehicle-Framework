@@ -11,6 +11,14 @@ namespace Vehicles.UnitTesting;
 [PublicAPI]
 public static class TestUtils
 {
+  public const int TestAreaExpansion = 5;
+
+  public static CellRect GetTestArea(IntVec3 center, IntVec2 size)
+  {
+    int maxSize = Mathf.Max(size.x, size.z);
+    return CellRect.CenteredOn(center, maxSize).ExpandedBy(TestAreaExpansion);
+  }
+
   public static PlanetTile FindValidTile(PlanetLayerDef layerDef, Faction faction)
   {
     PlanetLayer layer = Find.WorldGrid.FirstLayerOfDef(layerDef);
@@ -25,9 +33,7 @@ public static class TestUtils
 
   public static void PrepareArea(Map map, IntVec3 center, VehicleDef vehicleDef)
   {
-    int maxSize = Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z);
-    CellRect testArea = CellRect.CenteredOn(center, maxSize).ExpandedBy(5);
-    PrepareArea(map, testArea, vehicleDef);
+    PrepareArea(map, GetTestArea(center, vehicleDef.Size), vehicleDef);
   }
 
   public static void PrepareArea(Map map, CellRect areaRect, VehicleDef vehicleDef)

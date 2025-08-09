@@ -34,16 +34,18 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
         return null;
 
       option = new FloatMenuOption("GoHere".Translate(),
-        delegate
-        {
-          VehicleOrientationController.StartOrienting(MultiSelectVehicles, clickCell, clickCell);
-        }, MenuOptionPriority.GoHere);
+        delegate { VehicleOrientationController.StartOrienting(MultiSelectVehicles, clickCell, clickCell); },
+        MenuOptionPriority.GoHere);
     }
     else
     {
       Pawn pawn = context.FirstSelectedPawn;
       if (pawn is not VehiclePawn vehicle)
         return null;
+
+      if (!PathingHelper.TryFindNearestStandableCell(vehicle, clickCell, out IntVec3 result))
+        return null;
+
       foreach (ThingComp comp in vehicle.AllComps)
       {
         if (comp is VehicleComp vehicleComp)
@@ -56,34 +58,25 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
           }
         }
       }
-      if (PathingHelper.TryFindNearestStandableCell(vehicle, clickCell, out IntVec3 result))
-      {
-        option = new FloatMenuOption("GoHere".Translate(),
-          delegate { VehicleOrientationController.StartOrienting(vehicle, result, clickCell); },
-          MenuOptionPriority.GoHere);
-      }
-      else
-      {
-        AcceptanceReport gotoReport = VehicleCanGoto(vehicle, clickCell);
-        if (!gotoReport.Accepted)
-        {
-          option = new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
-        }
-      }
+      AcceptanceReport gotoReport = VehicleCanGoto(vehicle, result);
+      if (!gotoReport.Accepted)
+        return new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
+
+      option = new FloatMenuOption("GoHere".Translate(),
+        delegate { VehicleOrientationController.StartOrienting(vehicle, result, clickCell); },
+        MenuOptionPriority.GoHere);
     }
-    if (option != null)
-    {
-      option.isGoto = true;
-      option.autoTakeable = true;
-      option.autoTakeablePriority = 10f;
-    }
+
+    option.isGoto = true;
+    option.autoTakeable = true;
+    option.autoTakeablePriority = 10f;
     return option;
   }
 
-  private static AcceptanceReport VehicleCanGoto(VehiclePawn vehicle, IntVec3 gotoLoc)
+  public static AcceptanceReport VehicleCanGoto(VehiclePawn vehicle, IntVec3 gotoLoc)
   {
     return vehicle.CanReachVehicle(gotoLoc, PathEndMode.OnCell, Danger.Deadly) ?
-      true :
+      AcceptanceReport.WasAccepted :
       "VF_CannotMoveToCell".Translate(vehicle.LabelCap);
   }
 

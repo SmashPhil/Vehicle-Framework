@@ -13,6 +13,8 @@ internal static class TestCategoryNames
   public const string VehiclePawn = "VehiclePawn";
   public const string VehiclePermissions = "VehiclePermissions";
 
+  public const string Pathing = "Pathing";
+
   // Rendering
   public const string ParallelRenderer = "ParallelRenderer";
 

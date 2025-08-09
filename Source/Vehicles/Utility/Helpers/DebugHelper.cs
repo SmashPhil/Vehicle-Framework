@@ -25,6 +25,26 @@ public static class DebugHelper
     GameEvent.OnWorldRemoved += debugLines.Clear;
   }
 
+  public static void FillArea(CellRect rect, Map map, ThingDef thingDef)
+  {
+    ThingDef stuffDef = thingDef.MadeFromStuff ? GenStuff.DefaultStuffFor(thingDef) : null;
+    rect.ClipInsideMap(map);
+    foreach (IntVec3 cell in rect)
+    {
+      GenSpawn.Spawn(ThingMaker.MakeThing(thingDef, stuffDef), cell, map);
+    }
+  }
+
+  public static void FillEdge(CellRect rect, Map map, ThingDef thingDef)
+  {
+    ThingDef stuffDef = thingDef.MadeFromStuff ? GenStuff.DefaultStuffFor(thingDef) : null;
+    rect.ClipInsideMap(map);
+    foreach (IntVec3 cell in rect.EdgeCells)
+    {
+      GenSpawn.Spawn(ThingMaker.MakeThing(thingDef, stuffDef), cell, map);
+    }
+  }
+
   /// <summary>
   /// Indiscriminately destroys all entities and roofs from area.
   /// </summary>
@@ -37,7 +57,14 @@ public static class DebugHelper
       rect.ClipInsideMap(map);
       foreach (IntVec3 cell in rect)
       {
-        DestroyCell(cell, map, replaceTerrain: replaceTerrain);
+        DestroyCell(cell, map);
+      }
+      if (replaceTerrain != null)
+      {
+        foreach (IntVec3 cell in rect)
+        {
+          map.terrainGrid.SetTerrain(cell, replaceTerrain);
+        }
       }
     }
     finally
@@ -162,5 +189,13 @@ public static class DebugHelper
     public VehicleDef VehicleDef { get; set; }
 
     public T DebugType { get; set; }
+  }
+
+  public readonly struct DestroyAreaScope(Map map, CellRect rect) : IDisposable
+  {
+    void IDisposable.Dispose()
+    {
+      DestroyArea(rect, map);
+    }
   }
 }

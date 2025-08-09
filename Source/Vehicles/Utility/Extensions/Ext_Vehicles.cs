@@ -16,6 +16,7 @@ using Verse.Sound;
 
 namespace Vehicles;
 
+// TODO 1.7 - Clean up all of the extension methods for Drivable and Standable
 [PublicAPI]
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
@@ -636,8 +637,7 @@ public static class Ext_Vehicles
      .ClaimedBy(vehicle.Map.cellIndices.IndexToCell(index));
     bool passable = (claimedBy is null || claimedBy == vehicle) &&
       vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
-       .VehiclePathGrid
-       .WalkableFast(index);
+       .VehiclePathGrid.WalkableFast(index);
     return passable;
   }
 
@@ -688,14 +688,26 @@ public static class Ext_Vehicles
   /// <remarks>DOES take other vehicles into account</remarks>
   [Pure]
   public static bool DrivableRectOnCell(this VehiclePawn vehicle, IntVec3 cell,
-    bool maxPossibleSize = false)
+    DestinationHitboxReq hitboxReq = DestinationHitboxReq.MinSize)
   {
-    if (maxPossibleSize)
+    if (hitboxReq == DestinationHitboxReq.MinSize)
+      return MinRect(vehicle, cell).Cells.All(vehicle.Drivable);
+
+    bool rectNorth = DrivableRect(vehicle, cell, Rot8.North);
+    if (hitboxReq == DestinationHitboxReq.AnyRotation)
+      return rectNorth || DrivableRect(vehicle, cell, Rot8.East);
+
+    return rectNorth && DrivableRect(vehicle, cell, Rot8.East);
+
+    static bool DrivableRect(VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
     {
-      return vehicle.VehicleRect(cell, Rot8.North).All(vehicle.Drivable) &&
-        vehicle.VehicleRect(cell, Rot8.East).All(vehicle.Drivable);
+      foreach (IntVec3 rectCell in vehicle.VehicleRect(cell, rot))
+      {
+        if (!vehicle.Drivable(rectCell))
+          return false;
+      }
+      return true;
     }
-    return MinRect(vehicle, cell).Cells.All(vehicle.Drivable);
   }
 
   /// <summary>
@@ -749,12 +761,25 @@ public static class Ext_Vehicles
   /// Determine if <paramref name="cell"/> is able to fit the width of <paramref name="vehicleDef"/>
   /// </summary>
   [Pure]
+  [Obsolete("Use VehicleDef->FullRectWalkable extension method instead.", error: true)] // TODO 1.7 - Remove
   public static bool WidthStandable(this VehicleDef vehicleDef, Map map, IntVec3 cell)
   {
     CellRect cellRect = CellRect.CenteredOn(cell, vehicleDef.SizePadding);
     foreach (IntVec3 cellCheck in cellRect)
     {
-      if (!cellCheck.InBounds(map) || !cellCheck.Walkable(vehicleDef, map))
+      if (!cellCheck.Walkable(vehicleDef, map))
+        return false;
+    }
+    return true;
+  }
+
+  [Pure]
+  public static bool FullRectWalkable(this VehicleDef vehicleDef, VehiclePathingSystem pathing, IntVec3 cell, Rot4 rot)
+  {
+    VehiclePathingSystem.VehiclePathData pathData = pathing[vehicleDef];
+    foreach (IntVec3 hitboxCell in vehicleDef.VehicleRect(cell, rot))
+    {
+      if (!pathData.VehiclePathGrid.Walkable(hitboxCell))
         return false;
     }
     return true;
@@ -809,5 +834,12 @@ public static class Ext_Vehicles
   public static float GetStatValueAbstract(this VehicleDef vehicleDef, VehicleStatDef statDef)
   {
     return statDef.Worker.GetValueAbstract(vehicleDef);
+  }
+
+  public enum DestinationHitboxReq
+  {
+    MinSize,
+    AnyRotation,
+    AllRotations
   }
 }

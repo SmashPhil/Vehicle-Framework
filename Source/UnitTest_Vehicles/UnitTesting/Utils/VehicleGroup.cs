@@ -207,6 +207,13 @@ public class VehicleGroup : IDisposable
   {
     public VehicleDef vehicleDef;
     public string debugLabel;
+    public IntVec2 size = IntVec2.One;
+    public VehicleProperties properties;
+    public VehicleDrawProperties drawProperties;
+
+    public List<VehicleComponentProperties> components;
+    public List<VehicleStatModifier> statModifiers;
+    public List<CompProperties> comps;
 
     // Reverse mapping permissions to def restrictions for easy configuration
     public VehicleType type = VehicleType.Land;
@@ -216,12 +223,6 @@ public class VehicleGroup : IDisposable
     public int animals;
     public int extraSlots;
 
-    public VehicleProperties properties;
-    public VehicleDrawProperties drawProperties;
     public Faction faction = Faction.OfPlayer;
-
-    public List<VehicleComponentProperties> components;
-    public List<VehicleStatModifier> statModifiers;
-    public List<CompProperties> comps;
   }
 }

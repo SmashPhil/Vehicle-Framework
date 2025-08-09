@@ -36,6 +36,7 @@ internal static class TestDefGenerator
       rotatable = true,
       blockWind = true,
       useHitPoints = true,
+      size = settings?.size ?? IntVec2.One,
       graphicData = new GraphicDataRGB
       {
         graphicClass = typeof(Graphic_Single),
@@ -59,6 +60,7 @@ internal static class TestDefGenerator
       useHitPoints = false,
       properties = settings?.properties ?? new VehicleProperties(),
       drawProperties = settings?.drawProperties ?? new VehicleDrawProperties(),
+      size = buildDef.size,
       graphicData = new GraphicDataRGB
       {
         graphicClass = typeof(Graphic_Vehicle),

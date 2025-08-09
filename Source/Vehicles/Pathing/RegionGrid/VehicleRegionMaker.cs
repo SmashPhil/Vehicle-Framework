@@ -61,7 +61,8 @@ public class VehicleRegionMaker : VehicleGridManager
     RegionType expectedRegionType =
       VehicleRegionTypeUtility.GetExpectedRegionType(root, mapping, createdFor);
 
-    if (expectedRegionType == RegionType.None) return RegionResult.NoRegion;
+    if (expectedRegionType == RegionType.None)
+      return RegionResult.NoRegion;
 
     if (CreatingRegions)
     {

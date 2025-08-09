@@ -112,7 +112,8 @@ namespace Vehicles
     /// </summary>
     public void TryRebuildVehicleRegions()
     {
-      if (UpdatingRegion || !Enabled) return;
+      if (UpdatingRegion || !Enabled)
+        return;
 
       UpdatingRegion = true;
       if (!Initialized)
@@ -171,17 +172,15 @@ namespace Vehicles
             {
               newRegions.Add(region);
             }
-              break;
+            break;
             case RegionResult.NoRegion:
             {
               // Clean immediately rather than following RimWorld convention of delayed
               // Update-based clean.
               if (region != null)
-              {
                 regionGrid.SetRegionAt(cell, null);
-              }
             }
-              break;
+            break;
           }
         }
       }

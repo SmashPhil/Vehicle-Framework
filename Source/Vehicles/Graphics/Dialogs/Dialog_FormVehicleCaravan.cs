@@ -1072,8 +1072,8 @@ public class Dialog_FormVehicleCaravan : Window
   private static bool ValidVehicleExitSpot(IntVec3 cell, VehiclePawn vehicle, Map map)
   {
     return !cell.Fogged(map) &&
-      VehicleReachabilityUtility.CanReachVehicle(vehicle, cell, PathEndMode.OnCell,
-        Danger.Deadly) && vehicle.DrivableRectOnCell(cell, maxPossibleSize: true);
+      vehicle.CanReachVehicle(cell, PathEndMode.OnCell,
+        Danger.Deadly) && vehicle.DrivableRectOnCell(cell, Ext_Vehicles.DestinationHitboxReq.AnyRotation);
   }
 
   public bool TryFindExitSpotOnWater(List<Pawn> pawns, bool reachableForEveryColonist,

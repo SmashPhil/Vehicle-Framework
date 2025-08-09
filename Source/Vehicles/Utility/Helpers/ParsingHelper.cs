@@ -50,8 +50,8 @@ public static class ParsingHelper
     }
     catch (Exception ex)
     {
-      SmashLog.Error(
-        $"{entry} is not a valid <struct>Pair<VehicleEventDef, VehicleEventDef></struct> format. Exception: {ex}");
+      Log.Error(
+        $"{entry} is not a valid Pair<VehicleEventDef, VehicleEventDef> format. Exception: {ex}");
       return new Pair<VehicleEventDef, VehicleEventDef>();
     }
   }
@@ -74,14 +74,14 @@ public static class ParsingHelper
       string defName = BackSearchDefName(node);
       if (string.IsNullOrEmpty(defName))
       {
-        SmashLog.Error(
-          $"Cannot use <attribute>LockSetting</attribute> on {field.Name} since it is not nested within a Def.");
+        Log.Error(
+          $"Cannot use LockSetting on {field.Name} since it is not nested within a Def.");
         return;
       }
       if (!field.HasAttribute<PostToSettingsAttribute>())
       {
-        SmashLog.Error(
-          $"Cannot use <attribute>LockSetting</attribute> on <field>{field.Name}</field> since related field does not have PostToSettings attribute in <type>{field.DeclaringType}</type>");
+        Log.Error(
+          $"Cannot use LockSetting on {field.Name} since related field does not have PostToSettings attribute in {field.DeclaringType}");
       }
       if (!lockedFields.ContainsKey(defName))
       {
@@ -96,8 +96,8 @@ public static class ParsingHelper
     string defName = BackSearchDefName(node);
     if (string.IsNullOrEmpty(defName))
     {
-      SmashLog.Error(
-        $"Cannot use <attribute>AssignAllDefault</attribute> on {field.Name}. This attribute cannot be used in abstract defs.");
+      Log.Error(
+        $"Cannot use AssignAllDefault on {field.Name}. This attribute cannot be used in abstract defs.");
       return;
     }
     if (!setDefaultValues.ContainsKey(defName))
@@ -114,8 +114,8 @@ public static class ParsingHelper
       XmlNode defNode = node.SelectSingleNode("defName");
       if (defNode is null)
       {
-        SmashLog.Error(
-          "Cannot use <attribute>DisableSetting</attribute> on non-VehicleDef XmlNodes.");
+        Log.Error(
+          "Cannot use DisableSetting on non-VehicleDef XmlNodes.");
         return;
       }
       string defName = defNode.InnerText;
@@ -128,7 +128,7 @@ public static class ParsingHelper
     string defName = BackSearchDefName(node);
     if (string.IsNullOrEmpty(defName))
     {
-      SmashLog.Error($"Could not find <xml>defName</xml> node for {node.Name}.");
+      Log.Error($"Could not find defName node for {node.Name}.");
       return;
     }
     int pathCost = 1;
@@ -136,7 +136,7 @@ public static class ParsingHelper
     {
       if (!int.TryParse(pathCostAttribute.Value, out pathCost))
       {
-        Log.Warning($"Unable to parse <attribute>PathCost</attribute> attribute for {defName}");
+        Log.Warning($"Unable to parse PathCost attribute for {defName}");
         pathCost = 1;
       }
     }
@@ -154,7 +154,7 @@ public static class ParsingHelper
     string defName = BackSearchDefName(node);
     if (string.IsNullOrEmpty(defName))
     {
-      SmashLog.Error($"Could not find <xml>defName</xml> node for {node.Name}.");
+      Log.Error($"Could not find defName node for {node.Name}.");
       return;
     }
     if (!PathingHelper.allTerrainCostsByTag.TryGetValue(defName,

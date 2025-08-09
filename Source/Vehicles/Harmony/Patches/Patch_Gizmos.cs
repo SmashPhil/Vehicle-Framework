@@ -305,6 +305,8 @@ internal class Patch_Gizmos : IPatchCategory
       yield return gizmo;
     }
 
+    if (!__instance.Spawned)
+      yield break;
     if (__instance.Map.GetDetachedMapComponent<VehiclePositionManager>().AllClaimants.NullOrEmpty())
       yield break;
 

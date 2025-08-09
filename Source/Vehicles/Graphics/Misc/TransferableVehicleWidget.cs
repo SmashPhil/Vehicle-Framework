@@ -269,7 +269,7 @@ public sealed class TransferableVehicleWidget
 
     Widgets.BeginGroup(iconRect);
     Rect textureRect = iconRect.AtZero();
-    if (section.texturesDirty)
+    if (buffer == null || section.texturesDirty)
     {
       BlitRequest blitRequest = vehicle != null ?
         BlitRequest.For(vehicle) :

@@ -60,11 +60,11 @@ public class Listing_Settings : Listing_SplitColumns
       case SettingsPage.Vehicles:
         VehicleMod.settings.vehicles.fieldSettings[def.defName][field] =
           new SavedField<object>(value1, value2);
-        break;
+      break;
       case SettingsPage.Upgrades:
         VehicleMod.settings.upgrades.upgradeSettings[def.defName][field] =
           new SavedField<object>(value1, value2);
-        break;
+      break;
       case SettingsPage.MainSettings:
       case SettingsPage.DevMode:
       default:
@@ -81,11 +81,11 @@ public class Listing_Settings : Listing_SplitColumns
       case SettingsPage.Vehicles:
         VehicleMod.settings.vehicles.fieldSettings[def.defName][field] =
           new SavedField<object>(value);
-        break;
+      break;
       case SettingsPage.Upgrades:
         VehicleMod.settings.upgrades.upgradeSettings[def.defName][field] =
           new SavedField<object>(value);
-        break;
+      break;
       default:
         throw new NotSupportedException(
           $"Cannot use Listing_SplitColumns with settings set to {settings}");

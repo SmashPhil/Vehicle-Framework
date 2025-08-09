@@ -433,7 +433,7 @@ public static class CaravanFormation
   {
     return !cell.Fogged(map) &&
       vehicle.CanReachVehicle(cell, PathEndMode.OnCell, Danger.Deadly) &&
-      vehicle.DrivableRectOnCell(cell, maxPossibleSize: true);
+      vehicle.DrivableRectOnCell(cell, Ext_Vehicles.DestinationHitboxReq.AnyRotation);
   }
 
   private static bool TryFindRandomPackingSpot(IntVec3 exitSpot, out IntVec3 packingSpot)

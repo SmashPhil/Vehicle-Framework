@@ -401,7 +401,8 @@ public sealed class VehiclePathingSystem : MapComponent
 
   private void UpdateRegions()
   {
-    if (!GridOwners.AnyOwners) return;
+    if (!GridOwners.AnyOwners)
+      return;
 
     if (ownerCleanIndex < GridOwners.AllOwners.Length)
     {
