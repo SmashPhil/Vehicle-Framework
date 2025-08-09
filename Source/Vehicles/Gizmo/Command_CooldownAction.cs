@@ -368,17 +368,17 @@ public class Command_CooldownAction : Command_Turret
       }
       if (Widgets.ButtonImageFitted(configureRect, VehicleTex.Settings))
       {
-        const int min = 0;
+        const int Min = 0;
 
         ThingDef ammoDef = turret.loadedAmmo ??
           turret.def.ammunition.AllowedThingDefs.FirstOrDefault();
         int max = Mathf.RoundToInt(
           vehicle.VehicleDef.GetStatValueAbstract(VehicleStatDefOf.CargoCapacity) /
           ammoDef.GetStatValueAbstract(StatDefOf.Mass));
-        Dialog_Slider dialog_Slider = new(TextLabel, min, max,
+        Dialog_Slider dlgSlider = new(TextLabel, Min, max,
           delegate(int value) { vehicle.CompVehicleTurrets.SetQuotaLevel(turret, value); },
           vehicle.CompVehicleTurrets.GetQuotaLevel(turret), 5);
-        Find.WindowStack.Add(dialog_Slider);
+        Find.WindowStack.Add(dlgSlider);
       }
     }
     return;

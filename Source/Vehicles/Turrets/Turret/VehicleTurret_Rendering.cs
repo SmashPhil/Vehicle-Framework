@@ -271,9 +271,7 @@ public partial class VehicleTurret
       if (def.magazineCapacity > 0)
       {
         if (def.ammunition != null)
-        {
           yield return SubGizmo_RemoveAmmo(this);
-        }
 
         yield return SubGizmo_ReloadFromInventory(this);
       }
@@ -281,9 +279,7 @@ public partial class VehicleTurret
       yield return SubGizmo_FireMode(this);
 
       if (autoTargeting)
-      {
         yield return SubGizmo_AutoTarget(this);
-      }
     }
   }
 

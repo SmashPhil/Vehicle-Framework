@@ -873,9 +873,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
       else
       {
         if (!TryFindShootLineFromTo(TurretLocation.ToIntVec3(), targetInfo, out ShootLine line))
-        {
           return;
-        }
+
         TurretShotReport report =
           TurretShotReport.HitReportFor(vehicle, this, targetInfo, caster: null /* TODO */);
         hitCover = report.GetRandomCoverToMissInto();
@@ -946,7 +945,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     {
       foreach (Turret_RecoilTracker rTracker in recoilTrackers)
       {
-        rTracker.Notify_TurretRecoil(Ext_Math.RotateAngle(TurretRotation, 180));
+        rTracker?.Notify_TurretRecoil(Ext_Math.RotateAngle(TurretRotation, 180));
       }
     }
 
@@ -1026,8 +1025,9 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
   public void ReloadIfEmpty()
   {
-    if (shellCount > 0 && loadedAmmo != null)
+    if (shellCount > 0 && loadedAmmo != null || def.ammunition == null)
       return;
+
     // Get any available ammo for auto-reloading
     ThingDef ammoDef = savedAmmoType;
     ammoDef ??= vehicle.inventory.innerContainer
@@ -1035,6 +1035,20 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
     if (ammoDef == null)
       return;
     Reload(ammoDef);
+  }
+
+  // TODO - Needs to be cleaned up, all of the lambdas and vague checks for reloading is exhausting.
+  public bool ContainsAmmoDefOrShell(ThingDef ammoDef)
+  {
+    if (def.ammunition == null)
+      return false;
+
+    ThingDef projectile = null;
+    if (ammoDef.projectileWhenLoaded != null)
+    {
+      projectile = ammoDef.projectileWhenLoaded;
+    }
+    return def.ammunition.Allows(ammoDef) || def.ammunition.Allows(projectile);
   }
 
   public void Reload()
@@ -1082,18 +1096,27 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   /// <returns>True if Cannon has been successfully reloaded.</returns>
   public virtual bool AutoReload()
   {
-    if (!IsManned || ComponentDisabled)
+    if (!IsManned || ComponentDisabled || def.ammunition == null)
       return false;
 
-    ThingDef ammoType = vehicle.inventory.innerContainer.FirstOrDefault(t =>
-        def.ammunition.Allows(t) || def.ammunition.Allows(t.def.projectileWhenLoaded))
-    ?.def;
-    if (ammoType != null)
+    ThingDef ammoType = GetFirstAmmoType(this)?.def;
+    if (ammoType == null)
     {
-      return ReloadInternal(ammoType);
+      Debug.Warning($"Failed to auto-reload {def.label}");
+      return false;
     }
-    Debug.Warning($"Failed to auto-reload {def.label}");
-    return false;
+    return ReloadInternal(ammoType);
+
+    static Thing GetFirstAmmoType(VehicleTurret turret)
+    {
+      Assert.IsNotNull(turret.def.ammunition);
+      foreach (Thing thing in turret.vehicle.inventory.innerContainer)
+      {
+        if (turret.def.ammunition.Allows(thing) || turret.def.ammunition.Allows(thing.def.projectileWhenLoaded))
+          return thing;
+      }
+      return null;
+    }
   }
 
   public void SetMagazineCount(int count)
@@ -1140,7 +1163,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
       // Execute cargo event once at the end of reloading to avoid repeated permissions recaching
       // and potentially infinite reload attempts.
-      using (EventDisabler<VehicleEventDef> ed = new(vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved]))
+      using (new EventDisabler<VehicleEventDef>(vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved]))
       {
         // Take items from inventory without going over the amount required
         for (int i = ThingsToTakeReloading.Count - 1; i >= 0; i--)
@@ -1344,17 +1367,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
   public override string ToString()
   {
     return $"{def}_{GetUniqueLoadID()}";
-  }
-
-  public bool ContainsAmmoDefOrShell(ThingDef ammoDef)
-  {
-    ThingDef projectile = null;
-    if (ammoDef.projectileWhenLoaded != null)
-    {
-      projectile = ammoDef.projectileWhenLoaded;
-    }
-
-    return def.ammunition.Allows(ammoDef) || def.ammunition.Allows(projectile);
   }
 
   public virtual IEnumerable<string> ConfigErrors(VehicleDef vehicleDef)
