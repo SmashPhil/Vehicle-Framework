@@ -612,7 +612,7 @@ public partial class VehiclePawn
     }
 #endif
 
-    /*
+#if LOAD_PAWN_GIZMO
     Command_Action flagForLoading = new()
     {
       defaultLabel = "VF_HaulPawnToVehicle".Translate(),
@@ -676,7 +676,7 @@ public partial class VehiclePawn
       flagForLoading.Disable("VF_DisabledByVehicleUpgrading".Translate(LabelCap));
     }
     yield return flagForLoading;
-    */
+#endif
 
     if (!Drafted)
     {

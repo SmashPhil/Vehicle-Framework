@@ -63,12 +63,10 @@ internal class Patch_Debug : IPatchCategory
     //	nameof(TestModPatch)));
   }
 
-  private static void TestPrefix(Pawn __instance)
+  private static void TestPrefix(TradeRequestComp __instance)
   {
     try
     {
-      if (__instance.IsColonist && __instance.Faction == Faction.OfPlayer)
-        Log.Message($"{__instance} tick");
     }
     catch (Exception ex)
     {

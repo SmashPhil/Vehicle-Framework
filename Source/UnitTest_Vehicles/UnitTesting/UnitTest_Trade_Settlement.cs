@@ -62,7 +62,7 @@ internal sealed class UnitTest_Trade_Settlement
   }
 
   [Test]
-  private void VehicleCaravan()
+  private void VehicleCaravanInventory()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
@@ -96,7 +96,7 @@ internal sealed class UnitTest_Trade_Settlement
   }
 
   [Test]
-  private void AerialVehicle()
+  private void AerialVehicleInventory()
   {
     const int DestTile = 1;
 

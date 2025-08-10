@@ -272,9 +272,6 @@ public partial class VehiclePawn
   {
     foreach (VehicleRoleHandler handler in handlers)
     {
-      if (!handler.CanOperateRole(pawn))
-        continue;
-
       // None has an explicit check for no handling types, otherwise HasFlag would
       // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
       if (handlingTypeFlag == HandlingType.None)
@@ -284,7 +281,8 @@ public partial class VehiclePawn
           return handler;
         continue;
       }
-      if (handler.role.HandlingTypes.HasFlag(handlingTypeFlag) &&
+
+      if (handler.CanOperateRole(pawn) && handler.role.HandlingTypes.HasFlag(handlingTypeFlag) &&
         handler.AreSlotsAvailableAndReservable)
         return handler;
     }

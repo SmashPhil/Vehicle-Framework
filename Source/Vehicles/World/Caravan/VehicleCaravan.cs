@@ -267,17 +267,6 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
         }
         yield return disembark;
       }
-      foreach (Gizmo gizmo2 in forage.GetGizmos())
-      {
-        yield return gizmo2;
-      }
-      foreach (WorldObject worldObject in Find.WorldObjects.ObjectsAt(Tile))
-      {
-        foreach (Gizmo gizmo3 in worldObject.GetCaravanGizmos(this))
-        {
-          yield return gizmo3;
-        }
-      }
     }
 
     foreach (VehiclePawn vehicle in VehiclesListForReading)
