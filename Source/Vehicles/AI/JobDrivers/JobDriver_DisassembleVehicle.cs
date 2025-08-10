@@ -83,7 +83,7 @@ namespace Vehicles
 		{
 			if (Vehicle.VehicleDef.buildDef.CostListAdjusted(Vehicle.Stuff, true).Count > 0)
 			{
-				pawn.skills.Learn(SkillDefOf.Construction, 0.25f, false);
+				pawn.skills?.Learn(SkillDefOf.Construction, 0.25f, false);
 			}
 		}
 	}
