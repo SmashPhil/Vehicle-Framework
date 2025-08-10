@@ -11,7 +11,8 @@ namespace Vehicles;
 [PublicAPI]
 public class VehicleComponent : IExposable, ITweakFields
 {
-  public VehiclePawn vehicle;
+  [Unsaved]
+  public readonly VehiclePawn vehicle;
 
   [TweakField]
   public VehicleComponentProperties props;
@@ -300,7 +301,6 @@ public class VehicleComponent : IExposable, ITweakFields
   public virtual void ExposeData()
   {
     Scribe_Values.Look(ref health, nameof(health));
-    Scribe_References.Look(ref vehicle, nameof(vehicle));
   }
 
   void ITweakFields.OnFieldChanged()

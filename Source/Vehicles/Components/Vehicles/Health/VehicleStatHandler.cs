@@ -48,7 +48,9 @@ public class VehicleStatHandler : IExposable, ITweakFields
   [TweakField]
   public List<VehicleComponent> components = [];
 
-  private VehiclePawn vehicle;
+  [Unsaved]
+  private readonly VehiclePawn vehicle;
+
   private readonly Dictionary<Thing, IntVec3> impacter = [];
 
   public VehicleStatHandler(VehiclePawn vehicle)
@@ -967,7 +969,6 @@ public class VehicleStatHandler : IExposable, ITweakFields
 
   public void ExposeData()
   {
-    Scribe_References.Look(ref vehicle, nameof(vehicle), true);
     Scribe_Collections.Look(ref components, nameof(components), LookMode.Deep, vehicle);
 
     if (Scribe.mode == LoadSaveMode.PostLoadInit)
