@@ -21,7 +21,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
   private const int RepairMothballTicks = 300;
 
   private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
-  private static readonly Color PlayerCaravanColor = new Color(1f, 0.863f, 0.33f);
+  private static readonly Color PlayerCaravanColor = new(1f, 0.863f, 0.33f);
   private static readonly MaterialPropertyBlock PropertyBlock = new();
   private static readonly Dictionary<ThingDef, Material> Materials = [];
 

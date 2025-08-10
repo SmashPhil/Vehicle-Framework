@@ -7,7 +7,7 @@ set -euo pipefail
 VERSION=$1
 ZIP_URL="https://script.google.com/macros/s/AKfycbyVEQ30eVxP-zVWqGXuiPfuVEZYtJp4PYWuArJZxNiSxthxX3FqYssAvUDsrVPQuHt6/exec"
 ZIP_PATH="translations.zip"
-SYNC_FILE=".localization-synced.txt"
+SYNC_FILE=".localization
 FOLDER="${VERSION}/Languages/English/Keyed"
 
 if [[ ! -d "$FOLDER" ]]; then

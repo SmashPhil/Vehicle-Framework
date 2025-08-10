@@ -5,12 +5,11 @@ param (
 
 $ErrorActionPreference = 'Stop'
 Set-Location -Path (Resolve-Path "$($PSScriptRoot)/..")
-Write-Output "$(Get-Location)"
 
 $zipUrl = "https://script.google.com/macros/s/AKfycbyVEQ30eVxP-zVWqGXuiPfuVEZYtJp4PYWuArJZxNiSxthxX3FqYssAvUDsrVPQuHt6/exec"
 $zipPath = "translations.zip"
 $folder = Join-Path -Path $Version -ChildPath "Languages\English\Keyed"
-$syncFile = ".localization-synced.txt"
+$syncFile = ".localization"
 
 if (-not (Test-Path -Path $folder -PathType Container)) {
     Write-Error "Folder $($folder) not found"

@@ -24,15 +24,10 @@
 ########## Definitions ##########
 
 param(
-    [Parameter(Mandatory = $true, Position = 0)]
-    [Int32]$major = 1,
-    [Parameter(Mandatory = $true, Position = 1)]
-    [Int32]$minor = 0,
-    [Parameter(Position = 2)]
-    [DateTime]$startDate = "01-JAN-2000",
-    [Parameter(Position = 3)]
+    [Parameter(Mandatory = $true, Position = 0)][Int32]$major = 1,
+    [Parameter(Mandatory = $true, Position = 1)][Int32]$minor = 0,
+    [Parameter(Position = 2)][DateTime]$startDate = "01-JAN-2000",
     [string]$useRevision = "false",
-    [Parameter(Position = 4)]
     [string]$versionFile = "false"
 )
 
