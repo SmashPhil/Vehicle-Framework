@@ -19,7 +19,7 @@
         <LangVersion>preview</LangVersion>
         <FileAlignment>512</FileAlignment>
         <OutDir>..\..\1.6\Assemblies\</OutDir>
-        <ManagedDirectory>..\..\..\..\RimWorldWin64_Data\Managed</ManagedDirectory>
+        <!--<ManagedDirectory>..\..\..\..\RimWorldWin64_Data\Managed</ManagedDirectory>-->
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>
@@ -71,7 +71,7 @@
         <DefineConstants>TRACE;RELEASE</DefineConstants>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDbInfo|AnyCPU'">
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'RelWithDbInfo|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
         <DefineConstants>TRACE;RELEASE;</DefineConstants>
@@ -80,7 +80,7 @@
     <!-- Dependencies -->
     <ItemGroup>
         <!-- Nuget -->
-        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4523" />
+        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
         <PackageReference Include="Lib.Harmony" Version="2.3.*">
             <IncludeAssets>compile; build</IncludeAssets>
             <ExcludeAssets>runtime</ExcludeAssets>

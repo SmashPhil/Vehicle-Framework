@@ -17,7 +17,6 @@
         <LangVersion>preview</LangVersion>
         <OutDir>..\..\1.6\Assemblies\</OutDir>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <LangVersion>preview</LangVersion>
         <DebugType>embedded</DebugType>
         <ErrorReport>prompt</ErrorReport>
         <WarningLevel>4</WarningLevel>

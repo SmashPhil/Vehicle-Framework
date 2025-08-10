@@ -95,7 +95,7 @@ namespace Vehicles
       foreach (Pawn p in claimants.Keys)
       {
         p.jobs.EndCurrentJob(JobCondition.InterruptForced);
-        p.ClearMind();
+        p.ClearMind_NewTemp();
       }
     }
 

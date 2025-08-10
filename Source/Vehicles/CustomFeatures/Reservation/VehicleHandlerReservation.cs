@@ -90,7 +90,7 @@ namespace Vehicles
         if (pawn?.jobs != null)
         {
           pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
-          pawn.ClearMind();
+          pawn.ClearMind_NewTemp();
         }
       }
     }
