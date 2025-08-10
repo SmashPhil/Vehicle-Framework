@@ -39,7 +39,7 @@
         -->
         <!-- Version Increment -->
         <Exec Condition="'$(OS)' == 'Windows_NT'" 
-              Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;2019-12-07&quot; -VersionFile true" />
+              Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
         <Exec Condition="'$(OS)' != 'Windows_NT'"
               Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
     </Target>
