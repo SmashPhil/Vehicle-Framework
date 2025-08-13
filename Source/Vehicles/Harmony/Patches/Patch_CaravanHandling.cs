@@ -890,14 +890,14 @@ internal class Patch_CaravanHandling : IPatchCategory
     CaravanHelper.CountPawnsBeingTraded(___cachedTradeables);
   }
 
-  public static bool FindVehicleToMoveInventoryTo(ref Pawn __result, List<Pawn> candidates,
+  public static bool FindVehicleToMoveInventoryTo(ref Pawn __result, Thing item, List<Pawn> candidates,
     List<Pawn> ignoreCandidates, Pawn currentItemOwner = null)
   {
     if (candidates.HasVehicle())
     {
       if (candidates.Where(pawn => pawn is VehiclePawn &&
           (ignoreCandidates == null || !ignoreCandidates.Contains(pawn))
-          && currentItemOwner != pawn && !MassUtility.IsOverEncumbered(pawn))
+          && currentItemOwner != pawn && !MassUtility.WillBeOverEncumberedAfterPickingUp(pawn, item, item.stackCount))
        .TryRandomElement(out __result))
       {
         return false;
