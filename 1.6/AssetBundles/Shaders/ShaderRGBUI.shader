@@ -1,4 +1,4 @@
-﻿Shader "VehicleFramework/ShaderRGB"
+﻿Shader "VehicleFramework/ShaderRGBUI"
 {
   Properties
   {
@@ -19,10 +19,30 @@
 	Pass
 	{
 	  Blend SrcAlpha OneMinusSrcAlpha
+	  ZClip On 
+	  ZTest Always 
+	  ZWrite Off
+      Cull Off
 	  CGPROGRAM
+
 	  #pragma vertex vert
 	  #pragma fragment frag
 	  #include "UnityCG.cginc"
+
+	  sampler2D _GUIClipTexture;
+      float4x4 unity_GUIClipTextureMatrix;
+
+	  sampler2D _MainTex;
+	  sampler2D _MaskTex;
+
+	  uniform float4 _MainTexColor;
+	  uniform float4 _MaskTexColor;
+
+	  uniform float4 _ColorOne : _ColorOne;
+	  uniform float4 _ColorTwo : _ColorTwo;
+	  uniform float4 _ColorThree : _ColorThree;
+
+	  float4 finalColor;
 
 	  struct appdata
 	  {
@@ -34,6 +54,7 @@
 	  {
 		float2 uv : TEXCOORD0;
 		float4 vertex : SV_POSITION;
+		float2 clipUV : TEXCOORD1;
 	  };
 
 	  v2f vert(appdata v)
@@ -41,20 +62,10 @@
 		v2f o;
 		o.vertex = UnityObjectToClipPos(v.vertex);
 		o.uv = v.uv;
+		float3 eyePos = UnityObjectToViewPos(v.vertex);
+		o.clipUV = mul(unity_GUIClipTextureMatrix, float4(eyePos.xy, 0, 1.0));
 		return o;
 	  }
-
-	  sampler2D _MainTex;
-	  sampler2D _MaskTex;
-
-	  float4 _MainTexColor;
-	  float4 _MaskTexColor;
-
-	  float4 finalColor;
-
-	  float4 _ColorOne : _ColorOne;
-	  float4 _ColorTwo : _ColorTwo;
-	  float4 _ColorThree : _ColorThree;
 
 	  fixed4 frag(v2f i) : SV_Target
 	  {
@@ -68,12 +79,12 @@
 		float x = 1 - u - v - w;
 
 		finalColor *= _ColorOne * u + _ColorTwo * v + _ColorThree * w + float4(1,1,1,1) * x;
-
+		finalColor.a *= tex2D(_GUIClipTexture, i.clipUV).a;
 		clip(finalColor.a - 0.1f);
 		return finalColor;
 	  }
 	  ENDCG
 	}
   }
-  Fallback Off
+  Fallback "VehicleFramework/ShaderRGB"
 }
