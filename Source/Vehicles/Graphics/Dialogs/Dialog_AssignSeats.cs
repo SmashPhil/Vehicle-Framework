@@ -49,7 +49,8 @@ public class Dialog_AssignSeats : Window
 
     this.vehicleTransferable = vehicleTransferable;
     GetTransferablePawns(pawns, vehicle, transferablePawns);
-    this.pawns = transferablePawns.Select(pawn => pawn.AnyThing as Pawn).ToList();
+    this.pawns = transferablePawns.Select(pawn => pawn.AnyThing as Pawn).OrderBy(p => p, new TransferablePawnComparer())
+      .ToList();
 
     absorbInputAroundWindow = true;
     closeOnCancel = true;
@@ -451,6 +452,23 @@ public class Dialog_AssignSeats : Window
           break;
         }
       }
+    }
+  }
+
+  private class TransferablePawnComparer : Comparer<Pawn>
+  {
+    public override int Compare(Pawn x, Pawn y)
+    {
+      if (x == y)
+        return 0;
+      if (x == null)
+        return -1;
+      if (y == null)
+        return 1;
+
+      if (x.IsColonist != y.IsColonist)
+        return x.IsColonist ? -1 : 1;
+      return string.Compare(x.Name.ToString(), y.Name.ToString(), StringComparison.Ordinal);
     }
   }
 }
