@@ -1,215 +1,212 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
-using Verse;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
+using UnityEngine;
 using Vehicles.Rendering;
+using Verse;
 
 namespace Vehicles.World;
 
 public class Dialog_VehicleSelector : Window
 {
-  private List<VehiclePawn> availableVehicles = new List<VehiclePawn>();
-  private List<VehicleDef> availableVehicleDefs = new List<VehicleDef>();
+	private const int Columns = 4; // TODO VF-194 - Rework this dialog
+	private const float ButtonPadding = 10f;
+	private const float RowHeight = 90;
 
-  private HashSet<VehicleDef> storedVehicleDefs = new HashSet<VehicleDef>();
+	private static readonly Vector2 BottomButtonSize = new(160f, 40f);
 
-  private readonly Vector2 BottomButtonSize = new Vector2(160f, 40f);
+	private readonly List<VehiclePawn> availableVehicles;
+	private readonly List<VehicleDef> availableVehicleDefs;
 
-  private Vector2 scrollPosition = new Vector2();
+	private readonly HashSet<VehicleDef> selectedDefs = [];
+	private readonly HashSet<VehiclePawn> selectedVehicles = [];
 
-  private static float ButtonPadding = 10f;
+	private Vector2 scrollPosition;
+	private bool showVehicleDefs;
 
-  private static bool showVehicleDefs = Prefs.DevMode;
+	public Dialog_VehicleSelector()
+	{
+		absorbInputAroundWindow = true;
+		doCloseX = true;
+		forcePause = true;
+		availableVehicles = Find.Maps.Select(map => map.GetDetachedMapComponent<VehiclePositionManager>())
+		 .SelectMany(positionManager => positionManager.AllClaimants.Where(vehicle => vehicle.VehicleDef.canCaravan))
+		 .ToList();
+		availableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading
+		 .Where(vehicleDef => vehicleDef.canCaravan)
+		 .ToList();
+		RecalculateHeight();
+	}
 
-  public Dialog_VehicleSelector()
-  {
-    absorbInputAroundWindow = true;
-    doCloseX = true;
-    forcePause = true;
-    availableVehicles = Find.Maps.Select(m => m.mapPawns).SelectMany(v =>
-        v.AllPawnsSpawned.Where(p =>
-          p is VehiclePawn vehicle && vehicle.VehicleDef.type != VehicleType.Air))
-     .Cast<VehiclePawn>().ToList();
-    availableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading;
-  }
+	public override Vector2 InitialSize => new(UI.screenWidth / 2f, UI.screenHeight / 1.5f);
 
-  public override Vector2 InitialSize =>
-    new Vector2(Verse.UI.screenWidth / 2, Verse.UI.screenHeight / 1.5f);
+	private VehicleType SelectedType => showVehicleDefs ?
+		selectedDefs.FirstOrDefault()?.type ?? VehicleType.Universal :
+		selectedVehicles.FirstOrDefault()?.VehicleDef.type ?? VehicleType.Universal;
 
-  public override void DoWindowContents(Rect inRect)
-  {
-    Rect labelRect = new Rect(0f, 0f, inRect.width, 35f);
-    Text.Font = GameFont.Medium;
-    Text.Anchor = TextAnchor.MiddleCenter;
-    Widgets.Label(labelRect, "VF_SelectVehiclesForPlanner".Translate());
+	private float ViewRectHeight { get; set; }
 
-    Text.Font = GameFont.Small;
-    Text.Anchor = TextAnchor.UpperLeft;
+	private void RecalculateHeight()
+	{
+		int count = showVehicleDefs ? availableVehicleDefs.Count : availableVehicles.Count;
+		ViewRectHeight = Mathf.CeilToInt((float)count / Columns) * RowHeight;
+	}
 
-    Rect toggleRect = new Rect(labelRect);
-    if (UIElements.ClickableLabel(toggleRect,
-      showVehicleDefs ?
-        "VF_RoutePlannerToggleVehicleDefs".Translate() :
-        "VF_RoutePlannerToggleVehicles".Translate(), Color.grey, Color.white))
-    {
-      showVehicleDefs = !showVehicleDefs;
-    }
+	public override void DoWindowContents(Rect inRect)
+	{
+		Rect labelRect = new(0f, 0f, inRect.width, 35f);
+		Text.Font = GameFont.Medium;
+		Text.Anchor = TextAnchor.MiddleCenter;
+		Widgets.Label(labelRect, "VF_SelectVehiclesForPlanner".Translate());
 
-    inRect.yMin += labelRect.height;
-    Widgets.DrawMenuSection(inRect);
+		Text.Font = GameFont.Small;
+		Text.Anchor = TextAnchor.UpperLeft;
 
-    Rect windowRect = new Rect(inRect).ContractedBy(1);
-    windowRect.yMax = inRect.height - ButtonPadding - 5;
-    DrawVehicleSelect(windowRect);
+		Rect toggleRect = new(labelRect);
+		if (UIElements.ClickableLabel(toggleRect,
+			showVehicleDefs ?
+				"VF_RoutePlannerToggleVehicleDefs".Translate() :
+				"VF_RoutePlannerToggleVehicles".Translate(), Color.grey, Color.white))
+		{
+			showVehicleDefs = !showVehicleDefs;
+			selectedDefs.Clear();
+			selectedVehicles.Clear();
+			RecalculateHeight();
+		}
 
-    Rect rectBottom = inRect.AtZero();
-    DoBottomButtons(rectBottom);
-  }
+		inRect.yMin += labelRect.height;
+		Widgets.DrawMenuSection(inRect);
 
-  private void DrawVehicleSelect(Rect rect)
-  {
-    Text.Anchor = TextAnchor.MiddleLeft;
+		Rect innerRect = new Rect(inRect).ContractedBy(1);
+		innerRect.yMax = inRect.height - ButtonPadding - 5;
+		DrawVehicleSelect(innerRect);
 
-    Rect viewRect = new Rect(0f, rect.yMin, rect.width - ButtonPadding * 2, rect.yMax);
+		Rect rectBottom = inRect.AtZero();
+		DoBottomButtons(rectBottom);
+	}
 
-    Widgets.BeginScrollView(rect, ref scrollPosition, viewRect, true);
-    if (showVehicleDefs)
-    {
-      DrawVehicleDefs(rect);
-    }
-    else
-    {
-      DrawVehicles(rect);
-    }
+	private void DrawVehicleSelect(Rect rect)
+	{
+		using TextBlock anchorBlock = new(TextAnchor.MiddleLeft);
 
-    Widgets.EndScrollView();
-    Text.Anchor = TextAnchor.UpperLeft;
-  }
+		Rect viewRect = new(0f, rect.yMin, rect.width - 16, ViewRectHeight);
+		Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
+		DrawVehicles(rect);
+		Widgets.EndScrollView();
+	}
 
-  private void DrawVehicles(Rect rect)
-  {
-    float num3 = 30f;
-    for (int i = 0; i < availableVehicles.Count; i++)
-    {
-      VehiclePawn vehicle = availableVehicles[i];
+	private void DrawVehicles(Rect rect)
+	{
+		const float IconPadding = 5;
+		const float SliderPadding = 16;
+		const float TopPadding = 30;
 
-      Rect iconRect = new Rect(5f, num3 + 5f, 30f, 30f);
-      Rect rowRect = new Rect(iconRect.x, iconRect.y, rect.width, 30f);
+		int vehicleCount = showVehicleDefs ? availableVehicleDefs.Count : availableVehicles.Count;
 
-      if (i % 2 == 1)
-      {
-        Widgets.DrawLightHighlight(rowRect);
-      }
-      rowRect.x = iconRect.width + 10f;
+		float rowWidth = rect.width - SliderPadding - IconPadding;
+		float columnWidth = rowWidth / Columns;
+		float curY = TopPadding;
+		int curVehicle = 0;
+		while (curVehicle < vehicleCount)
+		{
+			float curX = IconPadding;
+			Rect rowRect = new(curX, curY, rowWidth, RowHeight);
+			for (int j = 0; j < Columns && curVehicle < vehicleCount; j++)
+			{
+				Rect iconRect = new(curX, rowRect.y + IconPadding, RowHeight, RowHeight);
+				Rect labelRect = new(iconRect.xMax, iconRect.y, columnWidth - iconRect.width, RowHeight);
+				labelRect.xMin += IconPadding;
+				if (showVehicleDefs)
+				{
+					VehicleDef vehicleDef = availableVehicleDefs[curVehicle];
+					DrawVehicleDef(labelRect, iconRect, vehicleDef);
+				}
+				else
+				{
+					VehiclePawn vehicle = availableVehicles[curVehicle];
+					DrawVehicle(labelRect, iconRect, vehicle);
+				}
+				curX = labelRect.xMax;
+				curVehicle++;
+			}
+			curY += RowHeight;
+		}
+	}
 
-      if (vehicle.VehicleDef.properties.generateThingIcon)
-      {
-        Rect texCoords = new Rect(0, 0, 1, 1);
-        Vector2 texProportions = vehicle.VehicleDef.graphicData.drawSize;
-        float x = texProportions.x;
-        texProportions.x = texProportions.y;
-        texProportions.y = x;
-        VehicleGui.DrawVehicleDefOnGUI(iconRect, vehicle.VehicleDef);
-      }
-      else
-      {
-        Widgets.ButtonImageFitted(iconRect, VehicleTex.CachedTextureIcons[vehicle.VehicleDef]);
-      }
+	private void DrawVehicle(Rect rowRect, Rect iconRect, VehiclePawn vehicle)
+	{
+		const float CheckboxSize = 24;
 
-      Widgets.Label(rowRect, vehicle.LabelShortCap);
+		Vector2 texProportions = vehicle.VehicleDef.graphicData.drawSize;
+		(texProportions.x, texProportions.y) = (texProportions.y, texProportions.x);
+		VehicleGui.DrawVehicleOnGUI(iconRect, BlitRequest.For(vehicle));
+		Widgets.Label(rowRect, vehicle.LabelShortCap);
 
-      bool flag = storedVehicleDefs.Contains(vehicle.VehicleDef);
+		bool checkOn = selectedVehicles.Contains(vehicle);
+		Vector2 checkposition = new(rowRect.xMax - CheckboxSize, rowRect.y + 5f);
+		bool disabled = SelectedType != VehicleType.Universal && vehicle.VehicleDef.type != SelectedType;
+		Widgets.Checkbox(checkposition, ref checkOn, disabled: disabled);
+		if (checkOn != selectedVehicles.Contains(vehicle))
+		{
+			if (checkOn)
+				selectedVehicles.Add(vehicle);
+			else
+				selectedVehicles.Remove(vehicle);
+		}
+	}
 
-      Vector2 checkposition = new Vector2(rect.width - iconRect.width * 1.5f, rowRect.y + 5f);
-      Widgets.Checkbox(checkposition, ref flag);
-      if (flag && !storedVehicleDefs.Contains(vehicle.VehicleDef))
-      {
-        storedVehicleDefs.Add(vehicle.VehicleDef);
-      }
-      else if (!flag && storedVehicleDefs.Contains(vehicle.VehicleDef))
-      {
-        storedVehicleDefs.Remove(vehicle.VehicleDef);
-      }
+	private void DrawVehicleDef(Rect rowRect, Rect iconRect, VehicleDef vehicleDef)
+	{
+		const float CheckboxSize = 24;
 
-      num3 += rowRect.height;
-    }
-  }
+		Vector2 texProportions = vehicleDef.graphicData.drawSize;
+		(texProportions.x, texProportions.y) = (texProportions.y, texProportions.x);
+		VehicleGui.DrawVehicleOnGUI(iconRect, BlitRequest.For(vehicleDef));
+		Widgets.Label(rowRect, vehicleDef.LabelCap);
 
-  private void DrawVehicleDefs(Rect rect)
-  {
-    float num3 = 30f;
-    for (int i = 0; i < availableVehicleDefs.Count; i++)
-    {
-      VehicleDef vehicleDef = availableVehicleDefs[i];
+		bool checkOn = selectedDefs.Contains(vehicleDef);
+		Vector2 checkposition = new(rowRect.xMax - CheckboxSize, rowRect.y + 5f);
+		bool disabled = SelectedType != VehicleType.Universal && vehicleDef.type != SelectedType;
+		Widgets.Checkbox(checkposition, ref checkOn, disabled: disabled);
+		if (checkOn != selectedDefs.Contains(vehicleDef))
+		{
+			if (checkOn)
+				selectedDefs.Add(vehicleDef);
+			else
+				selectedDefs.Remove(vehicleDef);
+		}
+	}
 
-      Rect iconRect = new Rect(5f, num3 + 5f, 30f, 30f);
-      Rect rowRect = new Rect(iconRect.x, iconRect.y, rect.width, 30f);
+	private void DoBottomButtons(Rect rect)
+	{
+		Rect buttonRect = new(rect.width - BottomButtonSize.x - ButtonPadding - 15f, rect.height - ButtonPadding,
+			BottomButtonSize.x, BottomButtonSize.y);
 
-      if (i % 2 == 1)
-      {
-        Widgets.DrawLightHighlight(rowRect);
-      }
-      rowRect.x = iconRect.width + 10f;
+		if (Widgets.ButtonText(buttonRect, "VF_StartVehicleRoutePlanner".Translate()))
+		{
+			VehicleRoutePlanner planner = Find.World.GetComponent<VehicleRoutePlanner>();
 
-      if (vehicleDef.properties.generateThingIcon)
-      {
-        Rect texCoords = new Rect(0, 0, 1, 1);
-        Vector2 texProportions = vehicleDef.graphicData.drawSize;
-        float x = texProportions.x;
-        texProportions.x = texProportions.y;
-        texProportions.y = x;
-        VehicleGui.DrawVehicleDefOnGUI(iconRect, vehicleDef);
-      }
-      else
-      {
-        Widgets.ButtonImageFitted(iconRect, VehicleTex.CachedTextureIcons[vehicleDef]);
-      }
-
-      Widgets.Label(rowRect, vehicleDef.defName);
-
-      bool flag = storedVehicleDefs.Contains(vehicleDef);
-
-      Vector2 checkposition = new Vector2(rect.width - iconRect.width * 1.5f, rowRect.y + 5f);
-      Widgets.Checkbox(checkposition, ref flag);
-      if (flag && !storedVehicleDefs.Contains(vehicleDef))
-      {
-        storedVehicleDefs.Add(vehicleDef);
-      }
-      else if (!flag && storedVehicleDefs.Contains(vehicleDef))
-      {
-        storedVehicleDefs.Remove(vehicleDef);
-      }
-
-      num3 += rowRect.height;
-    }
-  }
-
-  private void DoBottomButtons(Rect rect)
-  {
-    Rect rect2 = new Rect(rect.width - BottomButtonSize.x - ButtonPadding - 15f,
-      rect.height - ButtonPadding, BottomButtonSize.x, BottomButtonSize.y);
-
-    if (Widgets.ButtonText(rect2, "VF_StartVehicleRoutePlanner".Translate()))
-    {
-      if (storedVehicleDefs.NotNullAndAny(v => v.type == VehicleType.Sea) &&
-        storedVehicleDefs.NotNullAndAny(v => v.type == VehicleType.Land))
-      {
-        Messages.Message("VF_LandAndSeaRoutePlannerRestriction".Translate(),
-          MessageTypeDefOf.RejectInput);
-        return;
-      }
-      VehicleRoutePlanner planner = Find.World.GetComponent<VehicleRoutePlanner>();
-      planner.StartWithSelector();
-      Close();
-    }
-    Rect rect3 = new Rect(rect2.x - BottomButtonSize.x - ButtonPadding, rect2.y,
-      BottomButtonSize.x, BottomButtonSize.y);
-    if (Widgets.ButtonText(rect3, "CancelButton".Translate()))
-    {
-      Find.World.GetComponent<VehicleRoutePlanner>().Stop();
-      Close();
-    }
-  }
+			if (showVehicleDefs)
+			{
+				planner.Start(selectedDefs.ToList());
+			}
+			else
+			{
+				List<Pawn> vehicles = selectedVehicles.Cast<Pawn>().ToList();
+				planner.Start(new VehicleCaravanInfo(vehicles,
+					CollectionsMassCalculator.MassUsage(vehicles, IgnorePawnsInventoryMode.DontIgnore),
+					selectedVehicles.Sum(vehicle => vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity)), PlanetTile.Invalid));
+			}
+			Close();
+		}
+		Rect cancelBtnRect = new(buttonRect.x - BottomButtonSize.x - ButtonPadding, buttonRect.y,
+			BottomButtonSize.x, BottomButtonSize.y);
+		if (Widgets.ButtonText(cancelBtnRect, "CancelButton".Translate()))
+		{
+			Find.World.GetComponent<VehicleRoutePlanner>().Stop();
+			Close();
+		}
+	}
 }

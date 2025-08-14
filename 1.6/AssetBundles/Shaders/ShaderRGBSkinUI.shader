@@ -1,4 +1,4 @@
-﻿Shader "VehicleFramework/ShaderRGBSkin"
+﻿Shader "VehicleFramework/ShaderRGBSkinUI"
 {
   Properties
   {
@@ -22,47 +22,58 @@
 	Pass
 	{
 	  Blend SrcAlpha OneMinusSrcAlpha
+	  ZClip On 
+	  ZTest Always 
+	  ZWrite Off
+      Cull Off
 	  CGPROGRAM
+
 	  #pragma vertex vert
 	  #pragma fragment frag
 	  #include "UnityCG.cginc"
 
-	  struct appdata 
-	  {
-		float4 vertex : POSITION;
-		float2 uv : TEXCOORD0;
-	  };
-
-	  struct v2f 
-	  {
-		float2 uv : TEXCOORD0;
-		float4 vertex : SV_POSITION;
-	  };
-
-	  v2f vert(appdata v) 
-	  {
-		v2f o;
-		o.vertex = UnityObjectToClipPos(v.vertex);
-		o.uv = v.uv;
-		return o;
-	  }
+	  sampler2D _GUIClipTexture;
+      uniform float4x4 unity_GUIClipTextureMatrix;
 
 	  sampler2D _MainTex;
 	  sampler2D _MaskTex;
 	  sampler2D _SkinTex;
-	  float4 _SkinTex_ST;
+	  uniform float4 _SkinTex_ST;
 
-	  float _TileNum;
-	  float _ScaleX;
-	  float _ScaleY;
-	  float _DisplacementX;
-	  float _DisplacementY;
+	  uniform float _TileNum;
+	  uniform float _ScaleX;
+	  uniform float _ScaleY;
+	  uniform float _DisplacementX;
+	  uniform float _DisplacementY;
 
-	  float4 _MainTexColor;
-	  float4 _MaskTexColor;
-	  float4 _SkinTexColor;
+	  uniform float4 _MainTexColor;
+	  uniform float4 _MaskTexColor;
+	  uniform float4 _SkinTexColor;
 
 	  float4 finalColor;
+
+	  struct appdata 
+      {
+        float2 uv : TEXCOORD0;
+        float4 vertex : POSITION;
+      };
+
+      struct v2f 
+      {
+        float4 vertex : SV_POSITION;
+        float2 uv : TEXCOORD0;
+        float2 clipUV : TEXCOORD1;
+      };
+
+	  v2f vert(appdata v) 
+      {
+        v2f o;
+        o.vertex = UnityObjectToClipPos(v.vertex);
+        float3 eyePos = UnityObjectToViewPos(v.vertex);
+        o.clipUV = mul(unity_GUIClipTextureMatrix, float4(eyePos.xy, 0, 1.0));
+        o.uv = v.uv;
+        return o;
+      }
 
 	  fixed4 frag(v2f i) : SV_Target 
 	  {
@@ -79,12 +90,12 @@
 		float x = 1 - u - v - w;
 
 		finalColor *= _SkinTexColor * u + _SkinTexColor * v + _SkinTexColor * w + float4(1,1,1,1) * x;
-
+		finalColor.a *= tex2D(_GUIClipTexture, i.clipUV).a;
 		clip(finalColor.a - 0.1f);
 		return finalColor;
 	  }
 	  ENDCG
 	}
   }
-  Fallback "VehicleFramework/ShaderRGB"
+  Fallback "VehicleFramework/ShaderRGBSkin"
 }

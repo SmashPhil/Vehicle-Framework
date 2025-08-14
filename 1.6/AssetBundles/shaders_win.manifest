@@ -1,22 +1,25 @@
 ManifestFileVersion: 0
-CRC: 4016888958
+CRC: 1876799994
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 541b3dee7ef3104b5e2b142a80a48927
+    Hash: 4a01b511fb1ca4c9a3a8bfd22a916ead
   TypeTreeHash:
     serializedVersion: 2
     Hash: 0df1dec30b5d061d422d3e6493d27647
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 541b3dee7ef3104b5e2b142a80a48927
+    Hash: 4a01b511fb1ca4c9a3a8bfd22a916ead
 HashAppended: 0
 ClassTypes:
 - Class: 48
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
+- Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGBSkinUI.shader
 - Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGBSkin.shader
 - Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGB.shader
+- Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGBUI.shader
 - Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGBPattern.shader
+- Assets/Data/SmashPhil.VehicleFramework/Materials/ShaderRGBPatternUI.shader
 Dependencies: []

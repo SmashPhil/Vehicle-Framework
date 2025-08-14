@@ -1,29 +1,29 @@
 ﻿using UnityEngine;
 
-namespace Vehicles
+namespace Vehicles;
+
+public static class AdditionalShaderPropertyIDs
 {
-  public static class AdditionalShaderPropertyIDs
-  {
-    private static readonly string PatternTexName = "_PatternTex";
+	private const string PatternTexName = "_PatternTex";
 
-    // TODO - just use _Color default property name
-    private static readonly string ColorOneName = "_ColorOne";
-    private static readonly string ColorThreeName = "_ColorThree";
-    private static readonly string SkinTexName = "_SkinTex";
-    private static readonly string TileNumName = "_TileNum";
-    private static readonly string DisplacementXName = "_DisplacementX";
-    private static readonly string DisplacementYName = "_DisplacementY";
-    private static readonly string ScaleXName = "_ScaleX";
-    private static readonly string ScaleYName = "_ScaleY";
+	private const string MainTexName = "_MainTex";
+	private const string ColorOneName = "_ColorOne";
+	private const string ColorThreeName = "_ColorThree";
+	private const string SkinTexName = "_SkinTex";
+	private const string TileNumName = "_TileNum";
+	private const string DisplacementXName = "_DisplacementX";
+	private const string DisplacementYName = "_DisplacementY";
+	private const string ScaleXName = "_ScaleX";
+	private const string ScaleYName = "_ScaleY";
 
-    public static int PatternTex = Shader.PropertyToID(PatternTexName);
-    public static int ColorOne = Shader.PropertyToID(ColorOneName);
-    public static int ColorThree = Shader.PropertyToID(ColorThreeName);
-    public static int SkinTex = Shader.PropertyToID(SkinTexName);
-    public static int TileNum = Shader.PropertyToID(TileNumName);
-    public static int DisplacementX = Shader.PropertyToID(DisplacementXName);
-    public static int DisplacementY = Shader.PropertyToID(DisplacementYName);
-    public static int ScaleX = Shader.PropertyToID(ScaleXName);
-    public static int ScaleY = Shader.PropertyToID(ScaleYName);
-  }
+	public static readonly int MainTex = Shader.PropertyToID(MainTexName);
+	public static readonly int PatternTex = Shader.PropertyToID(PatternTexName);
+	public static readonly int ColorOne = Shader.PropertyToID(ColorOneName);
+	public static readonly int ColorThree = Shader.PropertyToID(ColorThreeName);
+	public static readonly int SkinTex = Shader.PropertyToID(SkinTexName);
+	public static readonly int TileNum = Shader.PropertyToID(TileNumName);
+	public static readonly int DisplacementX = Shader.PropertyToID(DisplacementXName);
+	public static readonly int DisplacementY = Shader.PropertyToID(DisplacementYName);
+	public static readonly int ScaleX = Shader.PropertyToID(ScaleXName);
+	public static readonly int ScaleY = Shader.PropertyToID(ScaleYName);
 }

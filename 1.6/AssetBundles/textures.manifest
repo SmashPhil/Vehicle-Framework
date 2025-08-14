@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2320443904
+CRC: 1905192555
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 67b08b4dbaccf84a045dba2fbc3777fa
+    Hash: 53a8018b67b1b66ec6ea3c6a3e556ec2
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2d8df09e698f722ada1caa03d3413830
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 67b08b4dbaccf84a045dba2fbc3777fa
+    Hash: 53a8018b67b1b66ec6ea3c6a3e556ec2
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -31,8 +31,6 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Abstract/Abstract_Medium.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/Square.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FishingGizmo.png
-- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/RangeField_Close.png
-- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/RangeField_Wide.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/Fishing/FishingNetMote.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoPlay.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Cursors/MouseHandOpen.png
@@ -95,7 +93,6 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/AutoTarget.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/SwapColors.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Abstract/Abstract_Large.png
-- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/RangeField_Mid.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FireRate_Single.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_G.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/AddKeyFrame.png
@@ -108,7 +105,6 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_F.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoPause.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/CancelLoadAerial.png
-- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/RangeField_ExtraWide.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/ZigZag/ZigZag.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Parachute/Parachute.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoReturnToPrevious.png
