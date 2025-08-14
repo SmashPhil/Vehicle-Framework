@@ -3,6 +3,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using Vehicles.Compatibility;
 using Verse;
 
 namespace Vehicles;
@@ -12,9 +13,9 @@ namespace Vehicles;
 public class VehicleProperties
 {
 #if FISHING
-		[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate =
- true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
-		[DisableSettingConditional(MayRequireAny = new string[] { CompatibilityPackageIds.VE_Fishing })]
+	[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate =
+		true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
+	[DisableSettingConditional(MayRequireAny = [ModPackageIds.VanillaExpandedFishing])]
 #endif
 	public bool fishing;
 
