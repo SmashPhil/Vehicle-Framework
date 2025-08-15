@@ -582,8 +582,7 @@ public partial class VehicleTurret
 		yield break;
 
 		static RenderData GetRenderDataFor(VehicleTurret turret, IMaterialCacheTarget target, Rect turretRect,
-			BlitRequest request,
-			Graphic_Turret graphic)
+			BlitRequest request, Graphic_Turret graphic)
 		{
 			bool canMask = graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex();
 			Material material = canMask ? graphic.MatAtFull(Rot8.North) : null;
@@ -594,7 +593,8 @@ public partial class VehicleTurret
 				RGBMaterialPool.SetProperties(target, request.patternData, graphic.TexAt, graphic.MaskAt);
 			}
 			RenderData turretRenderData = new(turretRect, graphic.TexAt(Rot8.North), material,
-				target.PropertyBlock, graphic.DataRgb.drawOffset.y, turret.defaultAngleRotated + request.rot.AsAngle);
+				target.PropertyBlock, graphic.DrawOffset(Rot4.North).y + turret.DrawLayerOffset,
+				turret.defaultAngleRotated + request.rot.AsAngle);
 			return turretRenderData;
 		}
 	}
@@ -909,6 +909,7 @@ public partial class VehicleTurret
 
 	public static SubGizmo SubGizmo_RemoveAmmo(VehicleTurret turret)
 	{
+		Assert.IsNotNull(turret.def.ammunition);
 		return new SubGizmo(
 			drawGizmo: delegate(Rect rect)
 			{
@@ -990,7 +991,7 @@ public partial class VehicleTurret
 							delegate { turret.Reload(ammo); }));
 					}
 
-					if (options.NullOrEmpty())
+					if (options.Count == 0)
 					{
 						FloatMenuOption noAmmoOption =
 							new("VF_VehicleTurrets_NoAmmoToReload".Translate(), null)
@@ -999,7 +1000,6 @@ public partial class VehicleTurret
 							};
 						options.Add(noAmmoOption);
 					}
-
 					Find.WindowStack.Add(new FloatMenu(options));
 				}
 			},
