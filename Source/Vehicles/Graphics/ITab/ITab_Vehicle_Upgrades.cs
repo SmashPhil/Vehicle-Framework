@@ -339,28 +339,60 @@ public class ITab_Vehicle_Upgrades : ITab
 		}
 	}
 
-	private void DrawGrid(Rect rect)
+	private static void DrawBackgroundGridTop()
 	{
-		if (DebugSettings.ShowDevGizmos && VehicleMod.settings.debug.debugDrawNodeGrid)
+		for (int i = 0; i <= MaxLinesAcross; i++)
 		{
-			DrawBackgroundGridTop();
-			DrawBackgroundGridLeft();
+			using TextBlock lineColor = new(GridLineColor);
+			Widgets.DrawLineVertical(GridSpacing.x + GridSpacing.x * i, TopPadding + GridSpacing.y,
+				MaxLinesDown * GridSpacing.y);
+			if (i % 5 == 0)
+			{
+				GUI.color = Color.white;
+				Widgets.Label(
+					new Rect(GridSpacing.x + GridSpacing.x * i - 5f, TopPadding, GridSpacing.x,
+						GridSpacing.y),
+					i.ToString());
+			}
 		}
+	}
 
-		if (SelectedNode != null && !Vehicle.CompUpgradeTree.Upgrading)
+	private static void DrawBackgroundGridLeft()
+	{
+		for (int i = 0; i <= MaxLinesDown; i++)
 		{
-			Vector2 selectedRectPos =
-				GridCoordinateToScreenPosAdjusted(SelectedNode.GridCoordinate, SelectedNode.drawSize);
-			Rect selectedRect = new(selectedRectPos, SelectedNode.drawSize);
-			selectedRect = selectedRect.ExpandedBy(2f);
-			GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
+			using TextBlock lineColor = new(GridLineColor);
+			Widgets.DrawLineHorizontal(GridSpacing.x, TopPadding + GridSpacing.y * (i + 1),
+				MaxLinesAcross * GridSpacing.x);
+			if (i % 5 == 0)
+			{
+				GUI.color = Color.white;
+				Widgets.Label(
+					new Rect(GridSpacing.x - 20f, TopPadding + GridSpacing.y * (i + 1) - GridSpacing.y / 2, GridSpacing.x,
+						GridSpacing.y), i.ToString());
+			}
 		}
+	}
+
+	private void DrawNodeSelection()
+	{
+		if (SelectedNode == null || Vehicle.CompUpgradeTree.Upgrading)
+			return;
+
+		Vector2 selectedRectPos =
+			GridCoordinateToScreenPosAdjusted(SelectedNode.GridCoordinate, SelectedNode.drawSize);
+		Rect selectedRect = new(selectedRectPos, SelectedNode.drawSize);
+		selectedRect = selectedRect.ExpandedBy(2f);
+		GUI.DrawTexture(selectedRect, BaseContent.WhiteTex);
+	}
+
+	private void DrawPrerequisites()
+	{
+		using TextBlock colorBlock = new(Color.white);
 		foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
 		{
 			if (upgradeNode.prerequisiteNodes.NullOrEmpty() || upgradeNode.hidden)
-			{
 				continue;
-			}
 
 			foreach (UpgradeNode prerequisite in
 				Vehicle.CompUpgradeTree.Props.def.nodes.FindAll(prereqNode =>
@@ -369,17 +401,11 @@ public class ITab_Vehicle_Upgrades : ITab
 				Vector2 start = GridCoordinateToScreenPos(upgradeNode.GridCoordinate);
 				Vector2 end = GridCoordinateToScreenPos(prerequisite.GridCoordinate);
 
-				Color color = DisabledLineColor;
-
-				if (Vehicle.CompUpgradeTree.NodeUnlocked(upgradeNode))
-				{
-					color = Color.white;
-				}
+				Color color = Vehicle.CompUpgradeTree.NodeUnlocked(upgradeNode) ? Color.white : DisabledLineColor;
 				foreach (UpgradeNode disabledNode in GetDisablerNodes(upgradeNode))
 				{
 					Rect prerequisiteRect =
-						new(
-							GridCoordinateToScreenPosAdjusted(disabledNode.GridCoordinate, disabledNode.drawSize),
+						new(GridCoordinateToScreenPosAdjusted(disabledNode.GridCoordinate, disabledNode.drawSize),
 							prerequisite.drawSize);
 					if (!Vehicle.CompUpgradeTree.Upgrading && Mouse.IsOver(prerequisiteRect))
 					{
@@ -389,16 +415,17 @@ public class ITab_Vehicle_Upgrades : ITab
 				Widgets.DrawLine(start, end, color, 2f);
 			}
 		}
+	}
 
-		Rect detailRect = Rect.zero;
-
+	private void DrawUpgradeNodes(Rect rect)
+	{
+		Rect detailRect = InfoNode != null ? GetDetailRect(rect) : Rect.zero;
 		foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
 		{
 			if (upgradeNode.hidden)
-			{
 				continue;
-			}
 
+			using TextBlock colorBlock = new(Color.white);
 			Vector2 upgradeRectPos =
 				GridCoordinateToScreenPosAdjusted(upgradeNode.GridCoordinate, upgradeNode.drawSize);
 			Rect upgradeRect = new(upgradeRectPos, upgradeNode.drawSize);
@@ -432,12 +459,7 @@ public class ITab_Vehicle_Upgrades : ITab
 				}
 			}
 
-			if (InfoNode != null)
-			{
-				detailRect = GetDetailRect(rect);
-			}
-
-			if (!Mouse.IsOver(detailRect) && Widgets.ButtonInvisible(upgradeRect))
+			if (InfoNode != null && !Mouse.IsOver(detailRect) && Widgets.ButtonInvisible(upgradeRect))
 			{
 				if (SelectedNode != upgradeNode)
 				{
@@ -451,17 +473,26 @@ public class ITab_Vehicle_Upgrades : ITab
 				}
 			}
 		}
-
 		if (InfoNode != null)
 		{
-			detailRect = GetDetailRect(rect);
 			Widgets.BeginGroup(detailRect);
 			{
-				Rect infoPanelRect = detailRect.AtZero();
-				DrawInfoPanel(infoPanelRect);
+				DrawInfoPanel(detailRect.AtZero());
 			}
 			Widgets.EndGroup();
 		}
+	}
+
+	private void DrawGrid(Rect rect)
+	{
+		if (DebugSettings.ShowDevGizmos && VehicleMod.settings.debug.debugDrawNodeGrid)
+		{
+			DrawBackgroundGridTop();
+			DrawBackgroundGridLeft();
+		}
+		DrawNodeSelection();
+		DrawPrerequisites();
+		DrawUpgradeNodes(rect);
 	}
 
 	private Rect GetDetailRect(Rect rect, float padding = 5)
@@ -477,10 +508,6 @@ public class ITab_Vehicle_Upgrades : ITab
 		}
 
 		float detailWidth = InfoScreenWidth - padding * 2;
-		if (SelectedNode != null)
-		{
-			//detailWidth = InfoScreenWidth - padding * 2;
-		}
 
 		using TextBlock textFont = new(GameFont.Medium);
 
@@ -653,40 +680,6 @@ public class ITab_Vehicle_Upgrades : ITab
 			!Mathf.Approximately(size.y, ScreenHeight))
 		{
 			size = new Vector2(ScreenWidth, ScreenHeight);
-		}
-	}
-
-	private void DrawBackgroundGridTop()
-	{
-		for (int i = 0; i <= MaxLinesAcross; i++)
-		{
-			using var lineColor = new TextBlock(GridLineColor);
-			Widgets.DrawLineVertical(GridSpacing.x + GridSpacing.x * i, TopPadding + GridSpacing.y,
-				MaxLinesDown * GridSpacing.y);
-			if (i % 5 == 0)
-			{
-				GUI.color = Color.white;
-				Widgets.Label(
-					new Rect(GridSpacing.x + GridSpacing.x * i - 5f, TopPadding + GridSpacing.y - 20f, 20f,
-						20f), i.ToString());
-			}
-		}
-	}
-
-	private void DrawBackgroundGridLeft()
-	{
-		for (int i = 0; i <= MaxLinesDown; i++)
-		{
-			using var lineColor = new TextBlock(GridLineColor);
-			Widgets.DrawLineHorizontal(GridSpacing.x, TopPadding + GridSpacing.y + GridSpacing.y * i,
-				MaxLinesAcross * GridSpacing.x);
-			if (i % 5 == 0)
-			{
-				GUI.color = Color.white;
-				Widgets.Label(
-					new Rect(GridSpacing.x - 20f, TopPadding + GridSpacing.y + GridSpacing.y * i - 10f, 20f,
-						20f), i.ToString());
-			}
 		}
 	}
 
