@@ -71,7 +71,7 @@ public partial class VehiclePawn
 
 		foreach (VehicleRoleHandler handler in handlers)
 		{
-			if (handler.role.HandlingTypes.HasFlag(HandlingType.Movement))
+			if ((handler.role.HandlingTypes & HandlingType.Movement) != 0)
 			{
 				MovementPermissions &= ~VehiclePermissions.Autonomous;
 				break;

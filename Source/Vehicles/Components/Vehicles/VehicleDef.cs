@@ -288,7 +288,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		}
 	}
 
-	private void RecacheMovementPermissions()
+	public void RecacheMovementPermissions()
 	{
 		// Assume everything is mobile and autonomous unless restrictions are defined
 		MovementPermissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous;
