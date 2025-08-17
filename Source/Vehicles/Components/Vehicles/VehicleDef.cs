@@ -101,6 +101,8 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	[Unsaved]
 	private Texture2D resolvedCancelCargoTexture;
 
+	public VehiclePermissions MovementPermissions { get; private set; }
+
 	/// <summary>
 	/// Index based caching for various vehicle arrays. Provides faster lookup than Def dictionary lookup.
 	/// </summary>
@@ -286,6 +288,25 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		}
 	}
 
+	private void RecacheMovementPermissions()
+	{
+		// Assume everything is mobile and autonomous unless restrictions are defined
+		MovementPermissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous;
+		if (Mathf.Approximately(this.GetStatValueAbstract(VehicleStatDefOf.MoveSpeed), 0))
+		{
+			MovementPermissions &= ~VehiclePermissions.Mobile;
+		}
+
+		foreach (VehicleRole role in properties.roles)
+		{
+			if ((role.HandlingTypes & HandlingType.Movement) != 0)
+			{
+				MovementPermissions &= ~VehiclePermissions.Autonomous;
+				break;
+			}
+		}
+	}
+
 	/// <summary>
 	/// Initialize fields or properties that are reliant on the entire <see cref="DefDatabase{T}"/> being populated
 	/// </summary>
@@ -295,6 +316,8 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		drawProperties.PostDefDatabase(this);
 		if (graphicData != null)
 			graphicData.pattern ??= PatternDefOf.Default;
+
+		RecacheMovementPermissions();
 	}
 
 	private void CacheCompProperties()

@@ -1,9 +1,8 @@
-﻿namespace Vehicles
+﻿namespace Vehicles;
+
+public enum NavigationCategory
 {
-	public enum NavigationCategory 
-	{ 
-		Manual, 
-		Opportunistic, 
-		Automatic 
-	}
+	Manual,
+	Opportunistic,
+	Automatic
 }

@@ -10,520 +10,519 @@ namespace Vehicles.World;
 
 public class VehicleCaravan_PathFollower : IExposable
 {
-  private const int MaxMoveTicks = 30000;
-  private const int MaxCheckAheadNodes = 20;
+	private const int MaxMoveTicks = 30000;
+	private const int MaxCheckAheadNodes = 20;
 
-  public const float DefaultPathCostToPayPerTick = 1f;
-  public const int FinalNoRestPushMaxDurationTicks = 10000;
+	public const float DefaultPathCostToPayPerTick = 1f;
+	public const int FinalNoRestPushMaxDurationTicks = 10000;
 
-  private readonly VehicleCaravan caravan;
+	private readonly VehicleCaravan caravan;
 
-  private bool moving;
-  private bool paused;
-  public PlanetTile nextTile = -1;
-  public int previousTileForDrawingIfInDoubt = -1;
-  public float nextTileCostLeft;
-  public float nextTileCostTotal = 1f;
-  private PlanetTile destTile;
-  private CaravanArrivalAction arrivalAction;
-  public WorldPath curPath;
+	private bool moving;
+	private bool paused;
+	private PlanetTile nextTile = PlanetTile.Invalid;
+	public int previousTileForDrawingIfInDoubt = -1;
+	public float nextTileCostLeft;
+	public float nextTileCostTotal = 1f;
+	private PlanetTile destTile;
+	private CaravanArrivalAction arrivalAction;
+	public WorldPath curPath;
 
-  public VehicleCaravan_PathFollower(VehicleCaravan caravan)
-  {
-    this.caravan = caravan;
-  }
+	public VehicleCaravan_PathFollower(VehicleCaravan caravan)
+	{
+		this.caravan = caravan;
+	}
 
-  public int Destination
-  {
-    get { return destTile; }
-  }
+	public PlanetTile Destination => destTile;
 
-  public bool Moving
-  {
-    get { return moving && caravan.Spawned; }
-  }
+	public PlanetTile NextTile => nextTile;
 
-  public bool MovingNow
-  {
-    get
-    {
-      return Moving && !Paused && !caravan.CantMove && !caravan.OutOfFuel &&
-        !caravan.VehicleCantMove;
-    }
-  }
+	public bool Moving
+	{
+		get { return moving && caravan.Spawned; }
+	}
 
-  public CaravanArrivalAction ArrivalAction
-  {
-    get
-    {
-      if (!Moving)
-      {
-        return null;
-      }
-      return arrivalAction;
-    }
-  }
+	public bool MovingNow
+	{
+		get
+		{
+			return Moving && !Paused && !caravan.CantMove && !caravan.OutOfFuel &&
+				!caravan.VehicleCantMove;
+		}
+	}
 
-  public bool Paused
-  {
-    get { return Moving && paused; }
-    set
-    {
-      if (value == paused)
-      {
-        return;
-      }
-      if (!value)
-      {
-        paused = false;
-      }
-      else if (!Moving)
-      {
-        Log.Error("Tried to pause caravan movement of " + caravan.ToStringSafe<Caravan>() +
-          " but it's not moving.");
-      }
-      else
-      {
-        paused = true;
-      }
-      caravan.Notify_DestinationOrPauseStatusChanged();
-    }
-  }
+	public CaravanArrivalAction ArrivalAction
+	{
+		get
+		{
+			if (!Moving)
+			{
+				return null;
+			}
+			return arrivalAction;
+		}
+	}
 
-  public bool StartPath(PlanetTile destTile, CaravanArrivalAction arrivalAction,
-    bool repathImmediately = false, bool resetPauseStatus = true)
-  {
-    caravan.EnsureWorldGridInitialized();
-    caravan.autoJoinable = false;
-    if (resetPauseStatus)
-    {
-      paused = false;
-    }
-    if (arrivalAction != null && !arrivalAction.StillValid(caravan, destTile))
-    {
-      return false;
-    }
-    if (!IsPassable(caravan.Tile) && !TryRecoverFromUnwalkablePosition())
-    {
-      return false;
-    }
-    if (moving && curPath != null && this.destTile == destTile)
-    {
-      this.arrivalAction = arrivalAction;
-      return true;
-    }
-    if (!WorldVehiclePathGrid.Instance.reachability.CanReach(caravan, destTile))
-    {
-      PatherFailed();
-      return false;
-    }
-    this.destTile = destTile;
-    this.arrivalAction = arrivalAction;
-    caravan.Notify_DestinationOrPauseStatusChanged();
-    if (nextTile < 0 || !IsNextTilePassable())
-    {
-      nextTile = caravan.Tile;
-      nextTileCostLeft = 0f;
-      previousTileForDrawingIfInDoubt = -1;
-    }
-    if (AtDestinationPosition())
-    {
-      PatherArrived();
-      return true;
-    }
-    if (curPath != null)
-    {
-      curPath.ReleaseToPool();
-    }
-    curPath = null;
-    moving = true;
-    if (repathImmediately && TrySetNewPath() && nextTileCostLeft <= 0f && moving)
-    {
-      TryEnterNextPathTile();
-    }
-    return true;
-  }
+	public bool Paused
+	{
+		get { return Moving && paused; }
+		set
+		{
+			if (value == paused)
+			{
+				return;
+			}
+			if (!value)
+			{
+				paused = false;
+			}
+			else if (!Moving)
+			{
+				Log.Error("Tried to pause caravan movement of " + caravan.ToStringSafe<Caravan>() +
+					" but it's not moving.");
+			}
+			else
+			{
+				paused = true;
+			}
+			caravan.Notify_DestinationOrPauseStatusChanged();
+		}
+	}
 
-  public void StopDead()
-  {
-    if (curPath != null)
-    {
-      curPath.ReleaseToPool();
-    }
-    curPath = null;
-    moving = false;
-    paused = false;
-    nextTile = caravan.Tile;
-    previousTileForDrawingIfInDoubt = -1;
-    arrivalAction = null;
-    nextTileCostLeft = 0f;
-    caravan.Notify_DestinationOrPauseStatusChanged();
-  }
+	public bool StartPath(PlanetTile destTile, CaravanArrivalAction arrivalAction,
+		bool repathImmediately = false, bool resetPauseStatus = true)
+	{
+		caravan.EnsureWorldGridInitialized();
+		caravan.autoJoinable = false;
+		if (resetPauseStatus)
+		{
+			paused = false;
+		}
+		if (arrivalAction != null && !arrivalAction.StillValid(caravan, destTile))
+		{
+			return false;
+		}
+		if (!IsPassable(caravan.Tile) && !TryRecoverFromUnwalkablePosition())
+		{
+			return false;
+		}
+		if (moving && curPath != null && this.destTile == destTile)
+		{
+			this.arrivalAction = arrivalAction;
+			return true;
+		}
+		if (!WorldVehiclePathGrid.Instance.reachability.CanReach(caravan, destTile))
+		{
+			PatherFailed();
+			return false;
+		}
+		this.destTile = destTile;
+		this.arrivalAction = arrivalAction;
+		caravan.Notify_DestinationOrPauseStatusChanged();
+		if (nextTile < 0 || !IsNextTilePassable())
+		{
+			nextTile = caravan.Tile;
+			nextTileCostLeft = 0f;
+			previousTileForDrawingIfInDoubt = -1;
+		}
+		if (AtDestinationPosition())
+		{
+			PatherArrived();
+			return true;
+		}
+		if (curPath != null)
+		{
+			curPath.ReleaseToPool();
+		}
+		curPath = null;
+		moving = true;
+		if (repathImmediately && TrySetNewPath() && nextTileCostLeft <= 0f && moving)
+		{
+			TryEnterNextPathTile();
+		}
+		return true;
+	}
 
-  public void PatherTick()
-  {
-    if (moving && arrivalAction != null && !arrivalAction.StillValid(caravan, Destination))
-    {
-      string failMessage = arrivalAction.StillValid(caravan, Destination).FailMessage;
-      Messages.Message(
-        "MessageCaravanArrivalActionNoLongerValid".Translate(caravan.Name).CapitalizeFirst() +
-        (failMessage != null ? " " + failMessage : ""), caravan,
-        MessageTypeDefOf.NegativeEvent);
-      StopDead();
-    }
-    if (caravan.CantMove || caravan.VehicleCantMove || caravan.OutOfFuel || paused)
-    {
-      return;
-    }
-    if (nextTileCostLeft > 0f)
-    {
-      nextTileCostLeft -= CostToPayThisTick();
-      return;
-    }
-    if (moving)
-    {
-      TryEnterNextPathTile();
-    }
-  }
+	public void StopDead()
+	{
+		if (curPath != null)
+		{
+			curPath.ReleaseToPool();
+		}
+		curPath = null;
+		moving = false;
+		paused = false;
+		nextTile = caravan.Tile;
+		previousTileForDrawingIfInDoubt = -1;
+		arrivalAction = null;
+		nextTileCostLeft = 0f;
+		caravan.Notify_DestinationOrPauseStatusChanged();
+	}
 
-  public void Notify_Teleported_Int()
-  {
-    StopDead();
-  }
+	public void PatherTick()
+	{
+		if (moving && arrivalAction != null && !arrivalAction.StillValid(caravan, Destination))
+		{
+			string failMessage = arrivalAction.StillValid(caravan, Destination).FailMessage;
+			Messages.Message(
+				"MessageCaravanArrivalActionNoLongerValid".Translate(caravan.Name).CapitalizeFirst() +
+				(failMessage != null ? " " + failMessage : ""), caravan,
+				MessageTypeDefOf.NegativeEvent);
+			StopDead();
+		}
+		if (caravan.CantMove || caravan.VehicleCantMove || caravan.OutOfFuel || paused)
+		{
+			return;
+		}
+		if (nextTileCostLeft > 0f)
+		{
+			nextTileCostLeft -= CostToPayThisTick();
+			return;
+		}
+		if (moving)
+		{
+			TryEnterNextPathTile();
+		}
+	}
 
-  public bool IsPassable(PlanetTile tile)
-  {
-    return caravan.UniqueVehicleDefsInCaravan()
-     .All(v => WorldVehiclePathGrid.Instance.Passable(tile, v));
-  }
+	public void Notify_Teleported_Int()
+	{
+		StopDead();
+	}
 
-  public bool IsNextTilePassable()
-  {
-    return caravan.UniqueVehicleDefsInCaravan()
-     .All(v => WorldVehiclePathGrid.Instance.Passable(nextTile, v));
-  }
+	public bool IsPassable(PlanetTile tile)
+	{
+		return caravan.UniqueVehicleDefsInCaravan()
+		 .All(v => WorldVehiclePathGrid.Instance.Passable(tile, v));
+	}
 
-  private bool TryRecoverFromUnwalkablePosition()
-  {
-    if (caravan.VehiclesListForReading.All(vehicle =>
-      vehicle.VehicleDef.type == VehicleType.Air))
-    {
-      return false;
-    }
-    if (GenWorldClosest.TryFindClosestTile(caravan.Tile,
-      planetTile => IsPassable(planetTile) &&
-        WorldVehiclePathGrid.Instance.reachability.CanReach(caravan, planetTile),
-      out PlanetTile tile))
-    {
-      Log.Warning($"{caravan} on impassable tile: {caravan.Tile}. Teleporting to {tile}");
-      caravan.Tile = tile;
-      caravan.Notify_VehicleTeleported();
-      return true;
-    }
-    Log.Error(
-      $"{caravan} on impassable tile: {caravan.Tile}. Could not find moveable position nearby. Destroying caravan.");
-    caravan.Destroy();
-    return false;
-  }
+	public bool IsNextTilePassable()
+	{
+		return caravan.UniqueVehicleDefsInCaravan()
+		 .All(v => WorldVehiclePathGrid.Instance.Passable(nextTile, v));
+	}
 
-  private void PatherArrived()
-  {
-    CaravanArrivalAction caravanArrivalAction = arrivalAction;
-    StopDead();
-    if (caravanArrivalAction != null && caravanArrivalAction.StillValid(caravan, caravan.Tile))
-    {
-      caravanArrivalAction.Arrived(caravan);
-      return;
-    }
-    if (caravan.IsPlayerControlled && !caravan.VisibleToCameraNow())
-    {
-      Messages.Message("MessageCaravanArrivedAtDestination".Translate(caravan.Label), caravan,
-        MessageTypeDefOf.TaskCompletion);
-    }
-  }
+	private bool TryRecoverFromUnwalkablePosition()
+	{
+		if (caravan.VehiclesListForReading.All(vehicle =>
+			vehicle.VehicleDef.type == VehicleType.Air))
+		{
+			return false;
+		}
+		if (GenWorldClosest.TryFindClosestTile(caravan.Tile,
+			planetTile => IsPassable(planetTile) &&
+				WorldVehiclePathGrid.Instance.reachability.CanReach(caravan, planetTile),
+			out PlanetTile tile))
+		{
+			Log.Warning($"{caravan} on impassable tile: {caravan.Tile}. Teleporting to {tile}");
+			caravan.Tile = tile;
+			caravan.Notify_VehicleTeleported();
+			return true;
+		}
+		Log.Error(
+			$"{caravan} on impassable tile: {caravan.Tile}. Could not find moveable position nearby. Destroying caravan.");
+		caravan.Destroy();
+		return false;
+	}
 
-  private void PatherFailed()
-  {
-    StopDead();
-  }
+	private void PatherArrived()
+	{
+		CaravanArrivalAction caravanArrivalAction = arrivalAction;
+		StopDead();
+		if (caravanArrivalAction != null && caravanArrivalAction.StillValid(caravan, caravan.Tile))
+		{
+			caravanArrivalAction.Arrived(caravan);
+			return;
+		}
+		if (caravan.IsPlayerControlled && !caravan.VisibleToCameraNow())
+		{
+			Messages.Message("MessageCaravanArrivedAtDestination".Translate(caravan.Label), caravan,
+				MessageTypeDefOf.TaskCompletion);
+		}
+	}
 
-  private void TryEnterNextPathTile()
-  {
-    if (!IsNextTilePassable())
-    {
-      PatherFailed();
-      return;
-    }
-    caravan.Tile = nextTile;
-    if (NeedNewPath() && !TrySetNewPath())
-    {
-      return;
-    }
-    if (AtDestinationPosition())
-    {
-      PatherArrived();
-      return;
-    }
-    if (curPath.NodesLeftCount == 0)
-    {
-      Log.Error(caravan + " ran out of path nodes. Force-arriving.");
-      PatherArrived();
-      return;
-    }
-    SetupMoveIntoNextTile();
-  }
+	private void PatherFailed()
+	{
+		StopDead();
+	}
 
-  private void SetupMoveIntoNextTile()
-  {
-    if (curPath.NodesLeftCount < 2)
-    {
-      Log.Error(string.Concat(new object[]
-      {
-        caravan,
-        " at ",
-        caravan.Tile,
-        " ran out of path nodes while pathing to ",
-        destTile,
-        "."
-      }));
-      PatherFailed();
-      return;
-    }
-    nextTile = curPath.ConsumeNextNode();
-    previousTileForDrawingIfInDoubt = -1;
-    if (!IsPassable(nextTile))
-    {
-      Log.Error($"{caravan} entering {nextTile} which is impassable");
-    }
-    int num = CostToMove(caravan.Tile, nextTile);
-    nextTileCostTotal = num;
-    nextTileCostLeft = num;
-  }
+	private void TryEnterNextPathTile()
+	{
+		if (!IsNextTilePassable())
+		{
+			PatherFailed();
+			return;
+		}
+		caravan.Tile = nextTile;
+		if (NeedNewPath() && !TrySetNewPath())
+		{
+			return;
+		}
+		if (AtDestinationPosition())
+		{
+			PatherArrived();
+			return;
+		}
+		if (curPath.NodesLeftCount == 0)
+		{
+			Log.Error(caravan + " ran out of path nodes. Force-arriving.");
+			PatherArrived();
+			return;
+		}
+		SetupMoveIntoNextTile();
+	}
 
-  private int CostToMove(PlanetTile start, PlanetTile end)
-  {
-    return CostToMove(caravan, start, end);
-  }
+	private void SetupMoveIntoNextTile()
+	{
+		if (curPath.NodesLeftCount < 2)
+		{
+			Log.Error(string.Concat(new object[]
+			{
+				caravan,
+				" at ",
+				caravan.Tile,
+				" ran out of path nodes while pathing to ",
+				destTile,
+				"."
+			}));
+			PatherFailed();
+			return;
+		}
+		nextTile = curPath.ConsumeNextNode();
+		previousTileForDrawingIfInDoubt = -1;
+		if (!IsPassable(nextTile))
+		{
+			Log.Error($"{caravan} entering {nextTile} which is impassable");
+		}
+		int num = CostToMove(caravan.Tile, nextTile);
+		nextTileCostTotal = num;
+		nextTileCostLeft = num;
+	}
 
-  public static int CostToMove(VehicleCaravan caravan, PlanetTile start, PlanetTile end,
-    int? ticksAbs = null)
-  {
-    return CostToMove(caravan.VehiclesListForReading, caravan.TicksPerMove, start, end,
-      ticksAbs: ticksAbs);
-  }
+	private int CostToMove(PlanetTile start, PlanetTile end)
+	{
+		return CostToMove(caravan, start, end);
+	}
 
-  public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, PlanetTile start,
-    PlanetTile end,
-    int? ticksAbs = null, StringBuilder explanation = null,
-    string caravanTicksPerMoveExplanation = null)
-  {
-    if (start == end)
-    {
-      return 0;
-    }
-    explanation?.AppendLine(caravanTicksPerMoveExplanation);
-    StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
-    float cost = float.MaxValue;
+	public static int CostToMove(VehicleCaravan caravan, PlanetTile start, PlanetTile end,
+		int? ticksAbs = null)
+	{
+		return CostToMove(caravan.VehiclesListForReading, caravan.TicksPerMove, start, end,
+			ticksAbs: ticksAbs);
+	}
 
-    foreach (VehicleDef vehicleDef in vehicleDefs)
-    {
-      float newCost =
-        WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicleDef, stringBuilder);
-      if (newCost < cost)
-      {
-        cost = newCost;
-      }
-    }
+	public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, PlanetTile start,
+		PlanetTile end,
+		int? ticksAbs = null, StringBuilder explanation = null,
+		string caravanTicksPerMoveExplanation = null)
+	{
+		if (start == end)
+		{
+			return 0;
+		}
+		explanation?.AppendLine(caravanTicksPerMoveExplanation);
+		StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
+		float cost = float.MaxValue;
 
-    float winterOffset =
-      WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, end,
-        stringBuilder);
-    cost += winterOffset;
+		foreach (VehicleDef vehicleDef in vehicleDefs)
+		{
+			float newCost =
+				WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicleDef, stringBuilder);
+			if (newCost < cost)
+			{
+				cost = newCost;
+			}
+		}
 
-    float roadMovementDifficultyMultiplier =
-      RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
-    if (explanation != null)
-    {
-      explanation.AppendLine();
-      explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
-      explanation.AppendLine(stringBuilder.ToString().Indented("  "));
-      explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
-    }
+		float winterOffset =
+			WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicleDefs, end,
+				stringBuilder);
+		cost += winterOffset;
 
-    int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
-    finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
-    if (explanation != null)
-    {
-      explanation.AppendLine();
-      explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
-      int num3 = Mathf.CeilToInt(finalCost / 1f);
-      explanation.Append(
-        $"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
-    }
-    return finalCost;
-  }
+		float roadMovementDifficultyMultiplier =
+			RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, start, end, stringBuilder);
+		if (explanation != null)
+		{
+			explanation.AppendLine();
+			explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
+			explanation.AppendLine(stringBuilder.ToString().Indented("  "));
+			explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
+		}
 
-  public static int CostToMove(List<VehiclePawn> vehicles, int ticksPerMove, PlanetTile start,
-    PlanetTile end,
-    int? ticksAbs = null, StringBuilder explanation = null,
-    string caravanTicksPerMoveExplanation = null)
-  {
-    if (start == end)
-      return 0;
-    explanation?.AppendLine(caravanTicksPerMoveExplanation);
-    StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
-    float cost = float.MaxValue;
+		int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
+		finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
+		if (explanation != null)
+		{
+			explanation.AppendLine();
+			explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
+			int num3 = Mathf.CeilToInt(finalCost / 1f);
+			explanation.Append(
+				$"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
+		}
+		return finalCost;
+	}
 
-    foreach (VehiclePawn vehicle in vehicles)
-    {
-      float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle.VehicleDef, stringBuilder);
-      if (newCost < cost)
-      {
-        cost = newCost;
-      }
-    }
+	public static int CostToMove(List<VehiclePawn> vehicles, int ticksPerMove, PlanetTile start,
+		PlanetTile end,
+		int? ticksAbs = null, StringBuilder explanation = null,
+		string caravanTicksPerMoveExplanation = null)
+	{
+		if (start == end)
+			return 0;
+		explanation?.AppendLine(caravanTicksPerMoveExplanation);
+		StringBuilder stringBuilder = (explanation != null) ? new StringBuilder() : null;
+		float cost = float.MaxValue;
 
-    float winterOffset =
-      WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicles, end, stringBuilder);
-    cost += winterOffset;
+		foreach (VehiclePawn vehicle in vehicles)
+		{
+			float newCost = WorldVehiclePathGrid.CalculatedMovementDifficultyAt(end, vehicle.VehicleDef, stringBuilder);
+			if (newCost < cost)
+			{
+				cost = newCost;
+			}
+		}
 
-    float roadMovementDifficultyMultiplier =
-      RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicles, start, end, stringBuilder);
-    if (explanation != null)
-    {
-      explanation.AppendLine();
-      explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
-      explanation.AppendLine(stringBuilder.ToString().Indented("  "));
-      explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
-    }
+		float winterOffset =
+			WinterPathingHelper.GetCurrentWinterMovementDifficultyOffset(vehicles, end, stringBuilder);
+		cost += winterOffset;
 
-    int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
-    finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
-    if (explanation != null)
-    {
-      explanation.AppendLine();
-      explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
-      int num3 = Mathf.CeilToInt(finalCost / 1f);
-      explanation.Append(
-        $"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
-    }
-    return finalCost;
-  }
+		float roadMovementDifficultyMultiplier =
+			RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicles, start, end, stringBuilder);
+		if (explanation != null)
+		{
+			explanation.AppendLine();
+			explanation.AppendLine("TileMovementDifficulty".Translate() + ":");
+			explanation.AppendLine(stringBuilder.ToString().Indented("  "));
+			explanation.AppendLine($"  = {cost * roadMovementDifficultyMultiplier:0.#}");
+		}
 
-  public static bool IsValidFinalPushDestination(PlanetTile tile)
-  {
-    List<WorldObject> allWorldObjects = Find.WorldObjects.AllWorldObjects;
-    for (int i = 0; i < allWorldObjects.Count; i++)
-    {
-      if (allWorldObjects[i].Tile == tile && !(allWorldObjects[i] is Caravan))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
+		int finalCost = (int)(ticksPerMove * cost * roadMovementDifficultyMultiplier);
+		finalCost = Mathf.Clamp(finalCost, 1, MaxMoveTicks);
+		if (explanation != null)
+		{
+			explanation.AppendLine();
+			explanation.AppendLine("FinalCaravanMovementSpeed".Translate() + ":");
+			int num3 = Mathf.CeilToInt(finalCost / 1f);
+			explanation.Append(
+				$"  {GenDate.TicksPerDay / ticksPerMove:0.#} / {cost * roadMovementDifficultyMultiplier:0.#} = {GenDate.TicksPerDay / num3:0.#} {"TilesPerDay".Translate()}");
+		}
+		return finalCost;
+	}
 
-  private float CostToPayThisTick()
-  {
-    float num = 1f;
-    if (DebugSettings.fastCaravans)
-    {
-      num = 100f;
-    }
-    if (num < nextTileCostTotal / MaxMoveTicks)
-    {
-      num = nextTileCostTotal / MaxMoveTicks;
-    }
-    return num;
-  }
+	public static bool IsValidFinalPushDestination(PlanetTile tile)
+	{
+		List<WorldObject> allWorldObjects = Find.WorldObjects.AllWorldObjects;
+		for (int i = 0; i < allWorldObjects.Count; i++)
+		{
+			if (allWorldObjects[i].Tile == tile && !(allWorldObjects[i] is Caravan))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 
-  private bool TrySetNewPath()
-  {
-    WorldPath worldPath = GenerateNewPath();
-    if (!worldPath.Found)
-    {
-      PatherFailed();
-      return false;
-    }
-    if (curPath != null)
-    {
-      curPath.ReleaseToPool();
-    }
-    curPath = worldPath;
-    return true;
-  }
+	private float CostToPayThisTick()
+	{
+		float num = 1f;
+		if (DebugSettings.fastCaravans)
+		{
+			num = 100f;
+		}
+		if (num < nextTileCostTotal / MaxMoveTicks)
+		{
+			num = nextTileCostTotal / MaxMoveTicks;
+		}
+		return num;
+	}
 
-  private WorldPath GenerateNewPath()
-  {
-    int num = moving && nextTile.Valid && IsNextTilePassable() ? nextTile : caravan.Tile;
-    WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(num, destTile, caravan);
+	private bool TrySetNewPath()
+	{
+		WorldPath worldPath = GenerateNewPath();
+		if (!worldPath.Found)
+		{
+			PatherFailed();
+			return false;
+		}
+		if (curPath != null)
+		{
+			curPath.ReleaseToPool();
+		}
+		curPath = worldPath;
+		return true;
+	}
 
-    if (worldPath.Found && num != caravan.Tile)
-    {
-      if (worldPath.NodesLeftCount >= 2 && worldPath.Peek(1) == caravan.Tile)
-      {
-        worldPath.ConsumeNextNode();
-        if (moving)
-        {
-          previousTileForDrawingIfInDoubt = nextTile;
-          nextTile = caravan.Tile;
-          nextTileCostLeft = nextTileCostTotal - nextTileCostLeft;
-        }
-      }
-      else
-      {
-        worldPath.AddNodeAtStart(caravan.Tile);
-      }
-    }
-    return worldPath;
-  }
+	private WorldPath GenerateNewPath()
+	{
+		int num = moving && nextTile.Valid && IsNextTilePassable() ? nextTile : caravan.Tile;
+		WorldPath worldPath = WorldVehiclePathfinder.Instance.FindPath(num, destTile, caravan);
 
-  private bool AtDestinationPosition()
-  {
-    return caravan.Tile == destTile;
-  }
+		if (worldPath.Found && num != caravan.Tile)
+		{
+			if (worldPath.NodesLeftCount >= 2 && worldPath.Peek(1) == caravan.Tile)
+			{
+				worldPath.ConsumeNextNode();
+				if (moving)
+				{
+					previousTileForDrawingIfInDoubt = nextTile;
+					nextTile = caravan.Tile;
+					nextTileCostLeft = nextTileCostTotal - nextTileCostLeft;
+				}
+			}
+			else
+			{
+				worldPath.AddNodeAtStart(caravan.Tile);
+			}
+		}
+		return worldPath;
+	}
 
-  private bool NeedNewPath()
-  {
-    if (!moving)
-    {
-      return false;
-    }
-    if (curPath == null || !curPath.Found || curPath.NodesLeftCount == 0)
-    {
-      return true;
-    }
-    for (int i = 0; i < MaxCheckAheadNodes && i < curPath.NodesLeftCount; i++)
-    {
-      int tileID = curPath.Peek(i);
-      if (!IsPassable(tileID))
-      {
-        return true;
-      }
-    }
-    return false;
-  }
+	private bool AtDestinationPosition()
+	{
+		return caravan.Tile == destTile;
+	}
 
-  public void ExposeData()
-  {
-    Scribe_Values.Look(ref moving, nameof(moving), true);
-    Scribe_Values.Look(ref paused, nameof(paused));
-    Scribe_Values.Look(ref nextTile, nameof(nextTile));
-    Scribe_Values.Look(ref previousTileForDrawingIfInDoubt,
-      nameof(previousTileForDrawingIfInDoubt));
-    Scribe_Values.Look(ref nextTileCostLeft, nameof(nextTileCostLeft));
-    Scribe_Values.Look(ref nextTileCostTotal, nameof(nextTileCostTotal));
-    Scribe_Values.Look(ref destTile, nameof(destTile));
-    Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
-    if (Scribe.mode == LoadSaveMode.PostLoadInit)
-    {
-      // If vehicles failed to load, it may no longer be a valid VehicleCaravan
-      caravan.RecacheVehiclesOrConvertCaravan();
-      if (Current.ProgramState != ProgramState.Entry && moving &&
-        !StartPath(destTile, arrivalAction, true, false))
-      {
-        StopDead();
-      }
-    }
-  }
+	private bool NeedNewPath()
+	{
+		if (!moving)
+		{
+			return false;
+		}
+		if (curPath == null || !curPath.Found || curPath.NodesLeftCount == 0)
+		{
+			return true;
+		}
+		for (int i = 0; i < MaxCheckAheadNodes && i < curPath.NodesLeftCount; i++)
+		{
+			int tileID = curPath.Peek(i);
+			if (!IsPassable(tileID))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public void ExposeData()
+	{
+		Scribe_Values.Look(ref moving, nameof(moving), true);
+		Scribe_Values.Look(ref paused, nameof(paused));
+		Scribe_Values.Look(ref nextTile, nameof(nextTile));
+		Scribe_Values.Look(ref previousTileForDrawingIfInDoubt,
+			nameof(previousTileForDrawingIfInDoubt));
+		Scribe_Values.Look(ref nextTileCostLeft, nameof(nextTileCostLeft));
+		Scribe_Values.Look(ref nextTileCostTotal, nameof(nextTileCostTotal));
+		Scribe_Values.Look(ref destTile, nameof(destTile));
+		Scribe_Deep.Look(ref arrivalAction, nameof(arrivalAction));
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		{
+			// If vehicles failed to load, it may no longer be a valid VehicleCaravan
+			caravan.RecacheVehiclesOrConvertCaravan();
+			if (Current.ProgramState != ProgramState.Entry && moving &&
+				!StartPath(destTile, arrivalAction, true, false))
+			{
+				StopDead();
+			}
+		}
+	}
 }

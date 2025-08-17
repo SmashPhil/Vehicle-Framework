@@ -13,458 +13,458 @@ namespace Vehicles;
 
 public partial class VehiclePawn
 {
-  public bool beached;
+	public bool beached;
 
-  [TweakField]
-  public VehicleStatHandler statHandler;
+	[TweakField]
+	public VehicleStatHandler statHandler;
 
-  public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
-  //public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
+	public VehicleMovementStatus movementStatus = VehicleMovementStatus.Online;
+	//public NavigationCategory navigationCategory = NavigationCategory.Opportunistic;
 
-  internal VehicleComponent HighlightedComponent { get; set; }
+	internal VehicleComponent HighlightedComponent { get; set; }
 
-  public VehiclePermissions MovementPermissions { get; private set; }
+	public VehiclePermissions MovementPermissions { get; private set; }
 
-  public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f &&
-    MovementPermissions.HasFlag(VehiclePermissions.Mobile) &&
-    movementStatus == VehicleMovementStatus.Online;
+	public bool CanMove => GetStatValue(VehicleStatDefOf.MoveSpeed) > 0.1f &&
+		(MovementPermissions & VehiclePermissions.Mobile) != 0 &&
+		movementStatus == VehicleMovementStatus.Online;
 
-  public bool CanMoveFinal =>
-    CanMove && (HasEnoughOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
+	public bool CanMoveFinal =>
+		CanMove && (HasEnoughOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
 
-  public CellRect Hitbox { get; private set; }
+	public CellRect Hitbox { get; private set; }
 
-  public float WorldSpeedMultiplier
-  {
-    get
-    {
-      float worldSpeedMultiplier = SettingsCache.TryGetValue(VehicleDef,
-        typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier),
-        VehicleDef.properties.worldSpeedMultiplier);
-      worldSpeedMultiplier =
-        statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.WorldSpeedMultiplier,
-          worldSpeedMultiplier);
-      return worldSpeedMultiplier;
-    }
-  }
+	public float WorldSpeedMultiplier
+	{
+		get
+		{
+			float worldSpeedMultiplier = SettingsCache.TryGetValue(VehicleDef,
+				typeof(VehicleProperties), nameof(VehicleProperties.worldSpeedMultiplier),
+				VehicleDef.properties.worldSpeedMultiplier);
+			worldSpeedMultiplier =
+				statHandler.GetStatOffset(VehicleStatUpgradeCategoryDefOf.WorldSpeedMultiplier,
+					worldSpeedMultiplier);
+			return worldSpeedMultiplier;
+		}
+	}
 
-  public IEnumerable<IntVec3> SurroundingCells
-  {
-    get { return this.OccupiedRect().ExpandedBy(1).EdgeCells; }
-  }
+	public IEnumerable<IntVec3> SurroundingCells
+	{
+		get { return this.OccupiedRect().ExpandedBy(1).EdgeCells; }
+	}
 
-  public float GetStatValue(VehicleStatDef statDef)
-  {
-    // Cached in VehicleStatHandler, can fetch fresh calculation from VehicleStatDef.Worker if necessary,
-    // or mark statDef dirty in cache before retrieving
-    return statHandler.GetStatValue(statDef);
-  }
+	public float GetStatValue(VehicleStatDef statDef)
+	{
+		// Cached in VehicleStatHandler, can fetch fresh calculation from VehicleStatDef.Worker if necessary,
+		// or mark statDef dirty in cache before retrieving
+		return statHandler.GetStatValue(statDef);
+	}
 
-  private void RecacheMovementPermissions()
-  {
-    // Assume everything is mobile and autonomous unless restrictions are defined
-    MovementPermissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous;
-    if (Mathf.Approximately(VehicleDef.GetStatValueAbstract(VehicleStatDefOf.MoveSpeed), 0))
-    {
-      MovementPermissions &= ~VehiclePermissions.Mobile;
-    }
+	private void RecacheMovementPermissions()
+	{
+		// Assume everything is mobile and autonomous unless restrictions are defined
+		MovementPermissions = VehiclePermissions.Mobile | VehiclePermissions.Autonomous;
+		if (Mathf.Approximately(VehicleDef.GetStatValueAbstract(VehicleStatDefOf.MoveSpeed), 0))
+		{
+			MovementPermissions &= ~VehiclePermissions.Mobile;
+		}
 
-    foreach (VehicleRoleHandler handler in handlers)
-    {
-      if (handler.role.HandlingTypes.HasFlag(HandlingType.Movement))
-      {
-        MovementPermissions &= ~VehiclePermissions.Autonomous;
-        break;
-      }
-    }
-  }
+		foreach (VehicleRoleHandler handler in handlers)
+		{
+			if (handler.role.HandlingTypes.HasFlag(HandlingType.Movement))
+			{
+				MovementPermissions &= ~VehiclePermissions.Autonomous;
+				break;
+			}
+		}
+	}
 
-  public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
-  {
-    return InhabitedCellsProjected(Position, FullRotation, expandedBy);
-  }
+	public IEnumerable<IntVec3> InhabitedCells(int expandedBy = 0)
+	{
+		return InhabitedCellsProjected(Position, FullRotation, expandedBy);
+	}
 
-  public IEnumerable<IntVec3> InhabitedCellsProjected(IntVec3 projectedCell, Rot8 rot,
-    int expandedBy = 0)
-  {
-    bool maxSizePossible = !rot.IsValid;
-    return this.VehicleRect(projectedCell, rot, maxSizePossible: maxSizePossible)
-     .ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
-  }
+	public IEnumerable<IntVec3> InhabitedCellsProjected(IntVec3 projectedCell, Rot8 rot,
+		int expandedBy = 0)
+	{
+		bool maxSizePossible = !rot.IsValid;
+		return this.VehicleRect(projectedCell, rot, maxSizePossible: maxSizePossible)
+		 .ExpandedBy(expandedBy).Cells; //REDO FOR DIAGONALS
+	}
 
-  private void InitializeHitbox()
-  {
-    Hitbox = this.VehicleRect(IntVec3.Zero, Rot4.North);
-    statHandler.InitializeHitboxCells();
-  }
+	private void InitializeHitbox()
+	{
+		Hitbox = this.VehicleRect(IntVec3.Zero, Rot4.North);
+		statHandler.InitializeHitboxCells();
+	}
 
-  public virtual void Notify_TookDamage()
-  {
-    if (Spawned)
-    {
-      animator?.SetBool(PropertyIds.Disabled, CanMove);
-      Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleTookDamage(this);
-    }
-  }
+	public virtual void Notify_TookDamage()
+	{
+		if (Spawned)
+		{
+			animator?.SetBool(PropertyIds.Disabled, CanMove);
+			Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleTookDamage(this);
+		}
+	}
 
-  public bool TryTakeDamage(DamageInfo dinfo, IntVec3 position,
-    out DamageWorker.DamageResult result)
-  {
-    result = new DamageWorker.DamageResult();
-    if (this.OccupiedRect().Contains(position))
-    {
-      IntVec2 hitCell = new(position.x - Position.x, position.z - Position.z);
-      result = TakeDamage(dinfo, hitCell);
-      return true;
-    }
-    return false;
-  }
+	public bool TryTakeDamage(DamageInfo dinfo, IntVec3 position,
+		out DamageWorker.DamageResult result)
+	{
+		result = new DamageWorker.DamageResult();
+		if (this.OccupiedRect().Contains(position))
+		{
+			IntVec2 hitCell = new(position.x - Position.x, position.z - Position.z);
+			result = TakeDamage(dinfo, hitCell);
+			return true;
+		}
+		return false;
+	}
 
-  public virtual DamageWorker.DamageResult TakeDamage(DamageInfo dinfo, IntVec2 cell)
-  {
-    statHandler.TakeDamage(dinfo, cell);
-    var damageResult =
-      new DamageWorker.DamageResult(); //Add relevant data (total damage dealt, filth spawning, etc.)
-    return damageResult;
-  }
+	public virtual DamageWorker.DamageResult TakeDamage(DamageInfo dinfo, IntVec2 cell)
+	{
+		statHandler.TakeDamage(dinfo, cell);
+		var damageResult =
+			new DamageWorker.DamageResult(); //Add relevant data (total damage dealt, filth spawning, etc.)
+		return damageResult;
+	}
 
-  ///Divert damage calculations to <see cref="VehicleStatHandler"/>
-  public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
-  {
-    statHandler.TakeDamage(dinfo);
-    absorbed = true;
-  }
+	///Divert damage calculations to <see cref="VehicleStatHandler"/>
+	public override void PreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
+	{
+		statHandler.TakeDamage(dinfo);
+		absorbed = true;
+	}
 
-  public bool TryDamageObstructions()
-  {
-    if (!this.CellRectStandable(Map, Position, Rotation))
-    {
-      List<Thing> things = SimplePool<List<Thing>>.Get();
-      {
-        foreach (IntVec3 cell in this.OccupiedRect())
-        {
-          things.AddRange(Map.thingGrid.ThingsListAt(cell));
-          foreach (Thing thing in things)
-          {
-            if (thing.def.useHitPoints && thing.def.fillPercent > 0.15f)
-            {
-              float damage = thing.HitPoints / 10f;
-              IntVec3 damageCell = Position - thing.Position;
-              TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage), damageCell.ToIntVec2);
-              thing.Destroy(DestroyMode.KillFinalize);
-            }
-          }
-          things.Clear();
-        }
-      }
-      things.Clear();
-      SimplePool<List<Thing>>.Return(things);
+	public bool TryDamageObstructions()
+	{
+		if (!this.CellRectStandable(Map, Position, Rotation))
+		{
+			List<Thing> things = SimplePool<List<Thing>>.Get();
+			{
+				foreach (IntVec3 cell in this.OccupiedRect())
+				{
+					things.AddRange(Map.thingGrid.ThingsListAt(cell));
+					foreach (Thing thing in things)
+					{
+						if (thing.def.useHitPoints && thing.def.fillPercent > 0.15f)
+						{
+							float damage = thing.HitPoints / 10f;
+							IntVec3 damageCell = Position - thing.Position;
+							TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage), damageCell.ToIntVec2);
+							thing.Destroy(DestroyMode.KillFinalize);
+						}
+					}
+					things.Clear();
+				}
+			}
+			things.Clear();
+			SimplePool<List<Thing>>.Return(things);
 
-      return true;
-    }
-    return false;
-  }
+			return true;
+		}
+		return false;
+	}
 
-  public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-  {
-    vehiclePather.StopDead();
-    Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
-    VehicleReservationManager reservationManager =
-      Map.GetCachedMapComponent<VehicleReservationManager>();
-    reservationManager.ClearReservedFor(this);
-    reservationManager.RemoveAllListerFor(this);
-    // Clear cargo list when leaving map, otherwise pawns may attempt to access those items from another map
-    cargoToLoad.Clear();
-    Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleDespawned(this);
-    EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
+	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
+	{
+		vehiclePather.StopDead();
+		Map.GetDetachedMapComponent<VehiclePositionManager>().ReleaseClaimed(this);
+		VehicleReservationManager reservationManager =
+			Map.GetCachedMapComponent<VehicleReservationManager>();
+		reservationManager.ClearReservedFor(this);
+		reservationManager.RemoveAllListerFor(this);
+		// Clear cargo list when leaving map, otherwise pawns may attempt to access those items from another map
+		cargoToLoad.Clear();
+		Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleDespawned(this);
+		EventRegistry[VehicleEventDefOf.Despawned].ExecuteEvents();
 
-    if (!cachedComps.NullOrEmpty())
-    {
-      for (int i = 0; i < cachedComps.Count; i++)
-      {
-        if (cachedComps[i] is VehicleComp vehicleComp)
-          vehicleComp.OnDeSpawn();
-      }
-    }
+		if (!cachedComps.NullOrEmpty())
+		{
+			for (int i = 0; i < cachedComps.Count; i++)
+			{
+				if (cachedComps[i] is VehicleComp vehicleComp)
+					vehicleComp.OnDeSpawn();
+			}
+		}
 
-    base.DeSpawn(mode);
-    SoundCleanup();
-  }
+		base.DeSpawn(mode);
+		SoundCleanup();
+	}
 
-  public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
-  {
-    // Transfer all pawns to map or world by removing them from vehicles or else
-    // they'll be lost forever.
-    if (AllPawnsAboard.Count > 0)
-      DisembarkAll();
-    sustainers.EndAll();
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		// Transfer all pawns to map or world by removing them from vehicles or else
+		// they'll be lost forever.
+		if (AllPawnsAboard.Count > 0)
+			DisembarkAll();
+		sustainers.EndAll();
 
-    // Null check in the event that this vehicle is a world pawn but not in any
-    // AerialVehicleInFlight, VehicleCaravan, or spawned on map
-    EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents();
+		// Null check in the event that this vehicle is a world pawn but not in any
+		// AerialVehicleInFlight, VehicleCaravan, or spawned on map
+		EventRegistry?[VehicleEventDefOf.Destroyed].ExecuteEvents();
 
-    RGBMaterialPool.Release(this);
-    graphic = null;
+		RGBMaterialPool.Release(this);
+		graphic = null;
 
-    if (!cachedComps.NullOrEmpty())
-    {
-      for (int i = 0; i < cachedComps.Count; i++)
-      {
-        if (cachedComps[i] is VehicleComp vehicleComp)
-        {
-          vehicleComp.OnDestroy();
-        }
-      }
-    }
+		if (!cachedComps.NullOrEmpty())
+		{
+			for (int i = 0; i < cachedComps.Count; i++)
+			{
+				if (cachedComps[i] is VehicleComp vehicleComp)
+				{
+					vehicleComp.OnDestroy();
+				}
+			}
+		}
 
-    base.Destroy(mode);
+		base.Destroy(mode);
 
-    if (Find.WorldPawns.Contains(this))
-    {
-      Find.WorldPawns.RemoveAndDiscardPawnViaGC(this);
-      Assert.IsFalse(Find.WorldPawns.Contains(this));
-    }
-  }
+		if (Find.WorldPawns.Contains(this))
+		{
+			Find.WorldPawns.RemoveAndDiscardPawnViaGC(this);
+			Assert.IsFalse(Find.WorldPawns.Contains(this));
+		}
+	}
 
-  public virtual void DestroyPawns(DestroyMode mode = DestroyMode.Vanish)
-  {
-    for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
-    {
-      Pawn pawn = AllPawnsAboard[i];
-      AllPawnsAboard.RemoveAt(i);
-      pawn.Destroy(mode);
-    }
-    for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
-    {
-      Thing thing = inventory.innerContainer[i];
-      if (thing is Pawn pawn)
-      {
-        inventory.innerContainer.RemoveAt(i);
-        pawn.Destroy(mode);
-      }
-    }
-  }
+	public virtual void DestroyPawns(DestroyMode mode = DestroyMode.Vanish)
+	{
+		for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
+		{
+			Pawn pawn = AllPawnsAboard[i];
+			AllPawnsAboard.RemoveAt(i);
+			pawn.Destroy(mode);
+		}
+		for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
+		{
+			Thing thing = inventory.innerContainer[i];
+			if (thing is Pawn pawn)
+			{
+				inventory.innerContainer.RemoveAt(i);
+				pawn.Destroy(mode);
+			}
+		}
+	}
 
-  public virtual void DestroyVehicleAndPawns(DestroyMode mode = DestroyMode.Vanish)
-  {
-    DestroyPawns(mode);
-    // Only destroy vehicle after all contained pawns have been dealt with, otherwise they will
-    // try to be disembarked first to save them from permanent deletion.
-    Destroy(mode);
-  }
+	public virtual void DestroyVehicleAndPawns(DestroyMode mode = DestroyMode.Vanish)
+	{
+		DestroyPawns(mode);
+		// Only destroy vehicle after all contained pawns have been dealt with, otherwise they will
+		// try to be disembarked first to save them from permanent deletion.
+		Destroy(mode);
+	}
 
-  public override void Kill(DamageInfo? dinfo, Hediff exactCulprit = null)
-  {
-    Kill(dinfo, spawnWreckage: false);
-  }
+	public override void Kill(DamageInfo? dinfo, Hediff exactCulprit = null)
+	{
+		Kill(dinfo, spawnWreckage: false);
+	}
 
-  public virtual void Kill(DamageInfo? dinfo, DestroyMode destroyMode = DestroyMode.KillFinalize,
-    bool spawnWreckage = false)
-  {
-    IntVec3 position = PositionHeld;
-    Rot4 rotation = Rotation;
+	public virtual void Kill(DamageInfo? dinfo, DestroyMode destroyMode = DestroyMode.KillFinalize,
+		bool spawnWreckage = false)
+	{
+		IntVec3 position = PositionHeld;
+		Rot4 rotation = Rotation;
 
-    Map map = Map;
-    bool spawned = Spawned;
-    ThingDef vehicleDef = VehicleDef.buildDef;
+		Map map = Map;
+		bool spawned = Spawned;
+		ThingDef vehicleDef = VehicleDef.buildDef;
 
-    if (Current.ProgramState == ProgramState.Playing)
-    {
-      Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died);
-    }
-    if (dinfo is { Instigator: Pawn instigator })
-    {
-      RecordsUtility.Notify_PawnKilled(this, instigator);
-    }
+		if (Current.ProgramState == ProgramState.Playing)
+		{
+			Find.Storyteller.Notify_PawnEvent(this, AdaptationEvent.Died);
+		}
+		if (dinfo is { Instigator: Pawn instigator })
+		{
+			RecordsUtility.Notify_PawnKilled(this, instigator);
+		}
 
-    if (this.GetLord() != null)
-    {
-      this.GetLord().Notify_PawnLost(this, PawnLostCondition.Killed, dinfo);
-    }
-    if (spawned)
-    {
-      DropAndForbidEverything();
-      switch (destroyMode)
-      {
-        case DestroyMode.Deconstruct:
-          SoundDefOf.Building_Deconstructed.PlayOneShot(new TargetInfo(Position, map));
-        break;
-        case DestroyMode.KillFinalize:
-          DoDestroyEffects(map);
-        break;
-      }
-    }
+		if (this.GetLord() != null)
+		{
+			this.GetLord().Notify_PawnLost(this, PawnLostCondition.Killed, dinfo);
+		}
+		if (spawned)
+		{
+			DropAndForbidEverything();
+			switch (destroyMode)
+			{
+				case DestroyMode.Deconstruct:
+					SoundDefOf.Building_Deconstructed.PlayOneShot(new TargetInfo(Position, map));
+				break;
+				case DestroyMode.KillFinalize:
+					DoDestroyEffects(map);
+				break;
+			}
+		}
 
-    VehicleBuilding wreckage = (VehicleBuilding)ThingMaker.MakeThing(vehicleDef);
-    wreckage.SetFactionDirect(Faction);
-    wreckage.vehicle = this;
-    wreckage.HitPoints = wreckage.MaxHitPoints / 10;
+		VehicleBuilding wreckage = (VehicleBuilding)ThingMaker.MakeThing(vehicleDef);
+		wreckage.SetFactionDirect(Faction);
+		wreckage.vehicle = this;
+		wreckage.HitPoints = wreckage.MaxHitPoints / 10;
 
-    meleeVerbs.Notify_PawnKilled();
-    if (spawned)
-    {
-      if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep ||
-        map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
-      {
-        StringBuilder downWithShipString = new();
-        bool pawnsLostAtSea = false;
-        foreach (Pawn pawn in AllPawnsAboard)
-        {
-          if (HealthHelper.AttemptToDrown(pawn))
-          {
-            pawnsLostAtSea = true;
-            downWithShipString.AppendLine(pawn.LabelCap);
-          }
-          else
-          {
-            DisembarkPawn(pawn);
-          }
-        }
-        string desc = pawnsLostAtSea ?
-          "VF_BoatSunkDesc".Translate(LabelShort) :
-          "VF_BoatSunkWithPawnsDesc".Translate(LabelShort, downWithShipString.ToString());
-        Find.LetterStack.ReceiveLetter("VF_BoatSunk".Translate(), desc, LetterDefOf.NegativeEvent,
-          new TargetInfo(Position, map));
-        Destroy(DestroyMode.KillFinalize);
-        return;
-      }
-      else
-      {
-        Destroy(DestroyMode.KillFinalize);
-      }
+		meleeVerbs.Notify_PawnKilled();
+		if (spawned)
+		{
+			if (map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterOceanDeep ||
+				map.terrainGrid.TerrainAt(position) == TerrainDefOf.WaterDeep)
+			{
+				StringBuilder downWithShipString = new();
+				bool pawnsLostAtSea = false;
+				foreach (Pawn pawn in AllPawnsAboard)
+				{
+					if (HealthHelper.AttemptToDrown(pawn))
+					{
+						pawnsLostAtSea = true;
+						downWithShipString.AppendLine(pawn.LabelCap);
+					}
+					else
+					{
+						DisembarkPawn(pawn);
+					}
+				}
+				string desc = pawnsLostAtSea ?
+					"VF_BoatSunkDesc".Translate(LabelShort) :
+					"VF_BoatSunkWithPawnsDesc".Translate(LabelShort, downWithShipString.ToString());
+				Find.LetterStack.ReceiveLetter("VF_BoatSunk".Translate(), desc, LetterDefOf.NegativeEvent,
+					new TargetInfo(Position, map));
+				Destroy(DestroyMode.KillFinalize);
+				return;
+			}
+			else
+			{
+				Destroy(DestroyMode.KillFinalize);
+			}
 
-      if (spawnWreckage)
-        GenSpawn.Spawn(wreckage, position, map, rotation, WipeMode.FullRefund);
-    }
-  }
+			if (spawnWreckage)
+				GenSpawn.Spawn(wreckage, position, map, rotation, WipeMode.FullRefund);
+		}
+	}
 
-  public virtual void Notify_DamageImpact(VehicleComponent.DamageResult damageResult)
-  {
-    if (Spawned)
-    {
-      EffecterDef effecterDef = damageResult.penetration switch
-      {
-        VehicleComponent.Penetration.NonPenetrated => VehicleDef.BodyType.nonPenetrationEffect,
-        VehicleComponent.Penetration.Deflected =>
-          damageResult.damageInfo.Def == DamageDefOf.Bullet ?
-            VehicleDef.BodyType.deflectionEffectBullet :
-            VehicleDef.BodyType.deflectionEffect,
-        VehicleComponent.Penetration.Diminished  => VehicleDef.BodyType.diminishedEffect,
-        VehicleComponent.Penetration.Penetrated  => VehicleDef.BodyType.damageEffecter,
-        VehicleComponent.Penetration.Electrified => VehicleDef.BodyType.electrifiedEffect,
-        _                                        => throw new NotImplementedException("Unhandled Penetration result.")
-      };
+	public virtual void Notify_DamageImpact(VehicleComponent.DamageResult damageResult)
+	{
+		if (Spawned)
+		{
+			EffecterDef effecterDef = damageResult.penetration switch
+			{
+				VehicleComponent.Penetration.NonPenetrated => VehicleDef.BodyType.nonPenetrationEffect,
+				VehicleComponent.Penetration.Deflected =>
+					damageResult.damageInfo.Def == DamageDefOf.Bullet ?
+						VehicleDef.BodyType.deflectionEffectBullet :
+						VehicleDef.BodyType.deflectionEffect,
+				VehicleComponent.Penetration.Diminished  => VehicleDef.BodyType.diminishedEffect,
+				VehicleComponent.Penetration.Penetrated  => VehicleDef.BodyType.damageEffecter,
+				VehicleComponent.Penetration.Electrified => VehicleDef.BodyType.electrifiedEffect,
+				_                                        => throw new NotImplementedException("Unhandled Penetration result.")
+			};
 
-      if (effecterDef != null && (health.deflectionEffecter == null ||
-        health.deflectionEffecter.def != effecterDef))
-      {
-        if (health.deflectionEffecter != null)
-        {
-          health.deflectionEffecter.Cleanup();
-          health.deflectionEffecter = null;
-        }
-        health.deflectionEffecter = effecterDef.Spawn();
-      }
-      IntVec2 effectCell =
-        damageResult.cell.RotatedBy(Rotation, VehicleDef.Size, reverseRotate: true);
-      IntVec3 onMapCell = new(Position.x + effectCell.x, 0, Position.z + effectCell.z);
-      health.deflectionEffecter?.Trigger(new TargetInfo(onMapCell, Map),
-        damageResult.damageInfo.Instigator ?? new TargetInfo(onMapCell, Map));
-      this.PlayImpactSound(damageResult);
-    }
-  }
+			if (effecterDef != null && (health.deflectionEffecter == null ||
+				health.deflectionEffecter.def != effecterDef))
+			{
+				if (health.deflectionEffecter != null)
+				{
+					health.deflectionEffecter.Cleanup();
+					health.deflectionEffecter = null;
+				}
+				health.deflectionEffecter = effecterDef.Spawn();
+			}
+			IntVec2 effectCell =
+				damageResult.cell.RotatedBy(Rotation, VehicleDef.Size, reverseRotate: true);
+			IntVec3 onMapCell = new(Position.x + effectCell.x, 0, Position.z + effectCell.z);
+			health.deflectionEffecter?.Trigger(new TargetInfo(onMapCell, Map),
+				damageResult.damageInfo.Instigator ?? new TargetInfo(onMapCell, Map));
+			this.PlayImpactSound(damageResult);
+		}
+	}
 
-  protected virtual void DoDestroyEffects(Map map)
-  {
-    if (VehicleDef.buildDef.building.destroyEffecter != null)
-    {
-      Effecter effecter = VehicleDef.buildDef.building.destroyEffecter.Spawn(Position, map);
-      effecter.Trigger(new TargetInfo(Position, map), TargetInfo.Invalid);
-      effecter.Cleanup();
-      return;
-    }
+	protected virtual void DoDestroyEffects(Map map)
+	{
+		if (VehicleDef.buildDef.building.destroyEffecter != null)
+		{
+			Effecter effecter = VehicleDef.buildDef.building.destroyEffecter.Spawn(Position, map);
+			effecter.Trigger(new TargetInfo(Position, map), TargetInfo.Invalid);
+			effecter.Cleanup();
+			return;
+		}
 
-    GetDestroySound()?.PlayOneShot(new TargetInfo(Position, map));
+		GetDestroySound()?.PlayOneShot(new TargetInfo(Position, map));
 
-    foreach (IntVec3 intVec in this.OccupiedRect())
-    {
-      int num = VehicleDef.buildDef.building.isNaturalRock ? 1 : Rand.RangeInclusive(3, 5);
-      for (int i = 0; i < num; i++)
-      {
-        FleckMaker.ThrowDustPuffThick(intVec.ToVector3Shifted(), map, Rand.Range(1.5f, 2f),
-          Color.white);
-      }
-    }
-    if (Find.CurrentMap == map)
-    {
-      float num2 = VehicleDef.buildDef.building.destroyShakeAmount;
-      if (num2 < 0f)
-      {
-        num2 = VehicleDef.buildDef.shakeAmountPerAreaCurve?.Evaluate(
-          VehicleDef.buildDef.Size.Area) ?? 0;
-      }
-      CompLifespan compLifespan = GetCachedComp<CompLifespan>();
-      if (compLifespan == null || compLifespan.age < compLifespan.Props.lifespanTicks)
-      {
-        Find.CameraDriver.shaker.DoShake(num2);
-      }
-    }
-  }
+		foreach (IntVec3 intVec in this.OccupiedRect())
+		{
+			int num = VehicleDef.buildDef.building.isNaturalRock ? 1 : Rand.RangeInclusive(3, 5);
+			for (int i = 0; i < num; i++)
+			{
+				FleckMaker.ThrowDustPuffThick(intVec.ToVector3Shifted(), map, Rand.Range(1.5f, 2f),
+					Color.white);
+			}
+		}
+		if (Find.CurrentMap == map)
+		{
+			float num2 = VehicleDef.buildDef.building.destroyShakeAmount;
+			if (num2 < 0f)
+			{
+				num2 = VehicleDef.buildDef.shakeAmountPerAreaCurve?.Evaluate(
+					VehicleDef.buildDef.Size.Area) ?? 0;
+			}
+			CompLifespan compLifespan = GetCachedComp<CompLifespan>();
+			if (compLifespan == null || compLifespan.age < compLifespan.Props.lifespanTicks)
+			{
+				Find.CameraDriver.shaker.DoShake(num2);
+			}
+		}
+	}
 
-  public virtual SoundDef GetDestroySound()
-  {
-    if (!VehicleDef.buildDef.building.destroySound.NullOrUndefined())
-    {
-      return VehicleDef.buildDef.building.destroySound;
-    }
+	public virtual SoundDef GetDestroySound()
+	{
+		if (!VehicleDef.buildDef.building.destroySound.NullOrUndefined())
+		{
+			return VehicleDef.buildDef.building.destroySound;
+		}
 
-    if (VehicleDef.buildDef.CostList.NullOrEmpty() ||
-      !VehicleDef.buildDef.CostList[0].thingDef.IsStuff || VehicleDef.buildDef.CostList[0]
-       .thingDef.stuffProps.categories.NullOrEmpty())
-    {
-      return null;
-    }
-    StuffCategoryDef stuffCategoryDef =
-      VehicleDef.buildDef.CostList[0].thingDef.stuffProps.categories[0];
+		if (VehicleDef.buildDef.CostList.NullOrEmpty() ||
+			!VehicleDef.buildDef.CostList[0].thingDef.IsStuff || VehicleDef.buildDef.CostList[0]
+			 .thingDef.stuffProps.categories.NullOrEmpty())
+		{
+			return null;
+		}
+		StuffCategoryDef stuffCategoryDef =
+			VehicleDef.buildDef.CostList[0].thingDef.stuffProps.categories[0];
 
-    switch (VehicleDef.buildDef.building.buildingSizeCategory)
-    {
-      case BuildingSizeCategory.None:
-      {
-        int area = VehicleDef.buildDef.Size.Area;
-        if (area <= 1 && !stuffCategoryDef.destroySoundSmall.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundSmall;
-        }
-        if (area <= 4 && !stuffCategoryDef.destroySoundMedium.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundMedium;
-        }
-        if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundLarge;
-        }
-        break;
-      }
-      case BuildingSizeCategory.Small:
-        if (!stuffCategoryDef.destroySoundSmall.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundSmall;
-        }
-      break;
-      case BuildingSizeCategory.Medium:
-        if (!stuffCategoryDef.destroySoundMedium.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundMedium;
-        }
-      break;
-      case BuildingSizeCategory.Large:
-        if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
-        {
-          return stuffCategoryDef.destroySoundLarge;
-        }
-      break;
-    }
-    return null;
-  }
+		switch (VehicleDef.buildDef.building.buildingSizeCategory)
+		{
+			case BuildingSizeCategory.None:
+			{
+				int area = VehicleDef.buildDef.Size.Area;
+				if (area <= 1 && !stuffCategoryDef.destroySoundSmall.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundSmall;
+				}
+				if (area <= 4 && !stuffCategoryDef.destroySoundMedium.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundMedium;
+				}
+				if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundLarge;
+				}
+				break;
+			}
+			case BuildingSizeCategory.Small:
+				if (!stuffCategoryDef.destroySoundSmall.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundSmall;
+				}
+			break;
+			case BuildingSizeCategory.Medium:
+				if (!stuffCategoryDef.destroySoundMedium.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundMedium;
+				}
+			break;
+			case BuildingSizeCategory.Large:
+				if (!stuffCategoryDef.destroySoundLarge.NullOrUndefined())
+				{
+					return stuffCategoryDef.destroySoundLarge;
+				}
+			break;
+		}
+		return null;
+	}
 }

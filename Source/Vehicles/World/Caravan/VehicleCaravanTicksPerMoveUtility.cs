@@ -188,7 +188,7 @@ public static class VehicleCaravanTicksPerMoveUtility
 			return 0;
 		}
 		return ApproxTilesPerDay(caravan.UniqueVehicleDefsInCaravan().ToList(), caravan.TicksPerMove,
-			caravan.Tile, caravan.vehiclePather.Moving ? caravan.vehiclePather.nextTile : -1,
+			caravan.Tile, caravan.vehiclePather.Moving ? caravan.vehiclePather.NextTile : -1,
 			explanation, explanation != null ? caravan.TicksPerMoveExplanation : null);
 	}
 
