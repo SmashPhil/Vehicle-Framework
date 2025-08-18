@@ -47,7 +47,9 @@ public partial class VehiclePawn
 
 	private bool crashLanded;
 
+#if FISHING
 	private Command_Toggle fishToggle;
+#endif
 
 	public float CachedAngle { get; set; }
 

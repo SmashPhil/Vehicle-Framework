@@ -59,7 +59,7 @@
     <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
         <DebugSymbols>true</DebugSymbols>
         <Optimize>true</Optimize>
-        <DefineConstants>TRACE;UNSTABLE;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+        <DefineConstants>TRACE;UNSTABLE;RAIDERS;FISHING;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

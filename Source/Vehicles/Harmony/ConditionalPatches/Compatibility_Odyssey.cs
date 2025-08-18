@@ -8,7 +8,12 @@ internal class Compatibility_Odyssey : ConditionalVehiclePatch
 {
 	public override string PackageId => ModPackageIds.Odyssey;
 
-	public override PatchSequence PatchAt => PatchSequence.PostDefDatabase;
+	public override PatchSequence PatchAt =>
+#if FISHING
+		PatchSequence.PostDefDatabase;
+#else
+		PatchSequence.Disabled;
+#endif
 
 	public override void PatchAll(ModMetaData mod)
 	{
