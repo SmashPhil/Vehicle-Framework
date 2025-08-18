@@ -1,8 +1,16 @@
-﻿using SmashTools.Patching;
+﻿using HarmonyLib;
+using SmashTools.Patching;
+using Verse;
 
 namespace Vehicles.Compatibility;
 
-public abstract class ConditionalVehiclePatch : ConditionalPatch
+public abstract class ConditionalVehiclePatch : IConditionalPatch
 {
-  public override string SourceId => VehicleHarmony.VehiclesUniqueId;
+	string IConditionalPatch.SourceId => VehicleHarmony.VehiclesUniqueId;
+
+	public abstract string PackageId { get; }
+
+	public abstract PatchSequence PatchAt { get; }
+
+	public abstract void PatchAll(ModMetaData mod);
 }

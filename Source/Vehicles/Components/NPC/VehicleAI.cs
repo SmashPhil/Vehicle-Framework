@@ -4,28 +4,29 @@ using System.Linq;
 using Verse;
 using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class VehicleAI : IExposable
 {
-	public class VehicleAI : IExposable
+	private VehiclePawn vehicle;
+
+	public VehicleAI(VehiclePawn vehicle)
 	{
-		private VehiclePawn vehicle;
+		this.vehicle = vehicle;
+	}
 
-		public VehicleAI(VehiclePawn vehicle) 
+	// TODO Raiders - Should be implemented with interface for VehicleAIComp
+	public void AITick()
+	{
+		foreach (ThingComp comp in vehicle.AllComps)
 		{
-			this.vehicle = vehicle;
+			if (comp is VehicleAIComp vehicleComp)
+				vehicleComp.AITick();
 		}
+	}
 
-		public void AITick()
-		{
-			foreach (VehicleAIComp comp in vehicle.GetAllAIComps())
-			{
-				comp.AITick();
-			}
-		}
-
-		public void ExposeData()
-		{
-			Scribe_References.Look(ref vehicle, "vehicle", true);
-		}
+	public void ExposeData()
+	{
+		Scribe_References.Look(ref vehicle, "vehicle", true);
 	}
 }

@@ -1,22 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class ThingDefOf_VehicleMotes
 {
-  [DefOf]
-  public static class ThingDefOf_VehicleMotes
-  {
-    static ThingDefOf_VehicleMotes()
-    {
-      DefOfHelper.EnsureInitializedInCtor(typeof(ThingDefOf_VehicleMotes));
-    }
+	static ThingDefOf_VehicleMotes()
+	{
+		DefOfHelper.EnsureInitializedInCtor(typeof(ThingDefOf_VehicleMotes));
+	}
 
-    public static ThingDef Mote_FishingNet;
+	public static ThingDef MoteFishingNet;
 
-    public static ThingDef MoteLaunchedTurret;
-  }
+	public static ThingDef MoteLaunchedTurret;
 }

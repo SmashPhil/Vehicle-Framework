@@ -59,12 +59,8 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
   <VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>
   <VF_FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</VF_FishingMultiplierTooltip>
-  <VF_FishingDelay>Fishing Delay</VF_FishingDelay>
-  <VF_FishingDelayTooltip>Base amount of ticks it takes to gather fish on a fishing boat.</VF_FishingDelayTooltip>
   <VF_FishingSkill>Fishing Skill</VF_FishingSkill>
   <VF_FishingSkillTooltip>How much exp is given by fishing on a boat</VF_FishingSkillTooltip>
-  <VF_FishingPersists>Fishing Persists</VF_FishingPersists>
-  <VF_FishingPersistsTooltip>The Fishing Boat fishing selection will not reset upon drafting.</VF_FishingPersistsTooltip>
   
   <VF_AerialVehicles>Air</VF_AerialVehicles>
   <VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>

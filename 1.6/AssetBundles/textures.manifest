@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1905192555
+CRC: 1534575988
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 53a8018b67b1b66ec6ea3c6a3e556ec2
+    Hash: 57b11b48defd31a17b7199b090a245bd
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2d8df09e698f722ada1caa03d3413830
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 53a8018b67b1b66ec6ea3c6a3e556ec2
+    Hash: 57b11b48defd31a17b7199b090a245bd
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -55,6 +55,7 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Parachute/AirDropCrate2x2.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Skins/Jungle/Jungle.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Polygon/Polygon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/GearReverse.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/UnloadArrow.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeB.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeD.png
@@ -82,6 +83,7 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/HaltVehicle.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_B.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/VehicleRoutePlanner.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/GearDrive.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_E.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FormCaravanVehicle.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoSkipToNext.png

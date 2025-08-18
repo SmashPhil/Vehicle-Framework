@@ -7,155 +7,158 @@ namespace Vehicles;
 
 public partial class VehiclePawn
 {
-  public const int MaxTickInterval = GenTicks.TickRareInterval;
+	public const int MaxTickInterval = GenTicks.TickRareInterval;
 
-  [Unsaved]
-  public VehicleSustainers sustainers;
+	[Unsaved]
+	public VehicleSustainers sustainers;
 
-  private List<TimedExplosion> explosives = [];
+	private List<TimedExplosion> explosives = [];
 
-  // Vehicles should never be suspended since there is no logic for handling passengers in a
-  // suspended vehicle. Suspending the vehicle would also suspend all passengers by proxy.
-  public override bool Suspended => false;
+	// Vehicles should never be suspended since there is no logic for handling passengers in a
+	// suspended vehicle. Suspending the vehicle would also suspend all passengers by proxy.
+	public override bool Suspended => false;
 
-  public int AttachedExplosives => explosives.Count;
+	public int AttachedExplosives => explosives.Count;
 
-  // Pawn has null held things
-  bool IThingHolderTickable.ShouldTickContents => false;
+	// Pawn has null held things
+	bool IThingHolderTickable.ShouldTickContents => false;
 
-  protected override int MaxTickIntervalRate => MaxTickInterval;
+	protected override int MaxTickIntervalRate => MaxTickInterval;
 
-  public override int UpdateRateTicks
-  {
-    get
-    {
-      if (AllPawnsAboard.Count == 0 && compTickers.Count == 0)
-        return MaxTickInterval;
-      return base.UpdateRateTicks;
-    }
-  }
+	public override int UpdateRateTicks
+	{
+		get
+		{
+			if (AllPawnsAboard.Count == 0 && compTickers.Count == 0)
+				return MaxTickInterval;
+			return base.UpdateRateTicks;
+		}
+	}
 
-  public void AddTimedExplosion(TimedExplosion exploder)
-  {
-    explosives.Add(exploder);
-    DrawTracker.AddRenderer(exploder);
-  }
+	public void AddTimedExplosion(TimedExplosion exploder)
+	{
+		explosives.Add(exploder);
+		DrawTracker.AddRenderer(exploder);
+	}
 
-  public TimedExplosion AddTimedExplosion(TimedExplosion.Data explosionData,
-    DrawOffsets drawOffsets = null)
-  {
-    TimedExplosion exploder = new(this, explosionData, drawOffsets: drawOffsets);
-    AddTimedExplosion(exploder);
-    return exploder;
-  }
+	public TimedExplosion AddTimedExplosion(TimedExplosion.Data explosionData,
+		DrawOffsets drawOffsets = null)
+	{
+		TimedExplosion exploder = new(this, explosionData, drawOffsets: drawOffsets);
+		AddTimedExplosion(exploder);
+		return exploder;
+	}
 
-  protected override void Tick()
-  {
-    BaseTickOptimized();
-    TickAllComps();
-    if (Faction != Faction.OfPlayer)
-    {
-      vehicleAI?.AITick();
-    }
-  }
+	protected override void Tick()
+	{
+		BaseTickOptimized();
+		TickAllComps();
+		if (Faction != Faction.OfPlayer)
+		{
+			vehicleAI?.AITick();
+		}
+	}
 
-  public bool RequestTickStart<T>(T comp) where T : ThingComp
-  {
-    if (!compTickers.Contains(comp))
-    {
-      compTickers.Add(comp);
-      return true;
-    }
-    return false;
-  }
+	public bool RequestTickStart<T>(T comp) where T : ThingComp
+	{
+		if (!compTickers.Contains(comp))
+		{
+			compTickers.Add(comp);
+			return true;
+		}
+		return false;
+	}
 
-  public bool RequestTickStop<T>(T comp) where T : ThingComp
-  {
-    return compTickers.Remove(comp);
-  }
+	public bool RequestTickStop<T>(T comp) where T : ThingComp
+	{
+		return compTickers.Remove(comp);
+	}
 
-  private void TickExplosives()
-  {
-    for (int i = explosives.Count - 1; i >= 0; i--)
-    {
-      TimedExplosion timedExplosion = explosives[i];
-      if (!timedExplosion.Tick())
-      {
-        explosives.Remove(timedExplosion);
-        DrawTracker.RemoveRenderer(timedExplosion);
-      }
-    }
-  }
+	private void TickExplosives()
+	{
+		for (int i = explosives.Count - 1; i >= 0; i--)
+		{
+			TimedExplosion timedExplosion = explosives[i];
+			if (!timedExplosion.Tick())
+			{
+				explosives.Remove(timedExplosion);
+				DrawTracker.RemoveRenderer(timedExplosion);
+			}
+		}
+	}
 
-  protected virtual void TickAllComps()
-  {
-    for (int i = compTickers.Count - 1; i >= 0; i--)
-    {
-      // Must run back to front in case CompTick methods trigger their own removal
-      compTickers[i].CompTick();
-    }
-  }
+	protected virtual void TickAllComps()
+	{
+		for (int i = compTickers.Count - 1; i >= 0; i--)
+		{
+			// Must run back to front in case CompTick methods trigger their own removal
+			compTickers[i].CompTick();
+		}
+	}
 
-  public override void TickRare()
-  {
-    base.TickRare();
-    EventRegistry[VehicleEventDefOf.ScanRare].ExecuteEvents();
-  }
+	public override void TickRare()
+	{
+		base.TickRare();
+		EventRegistry[VehicleEventDefOf.ScanRare].ExecuteEvents();
+	}
 
-  private void TickShort()
-  {
-    EventRegistry[VehicleEventDefOf.ScanShort].ExecuteEvents();
-  }
+	private void TickShort()
+	{
+		EventRegistry[VehicleEventDefOf.ScanShort].ExecuteEvents();
+	}
 
-  protected override void TickInterval(int delta)
-  {
-    ageTracker.AgeTickInterval(delta);
-    records.RecordsTickInterval(delta);
-    if (!this.IsWorldPawn())
-      jobs.JobTrackerTickInterval(delta);
+	protected override void TickInterval(int delta)
+	{
+		ageTracker.AgeTickInterval(delta);
+		records.RecordsTickInterval(delta);
+		if (!this.IsWorldPawn())
+			jobs.JobTrackerTickInterval(delta);
 
-    // TODO
-    //if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
-    //{
-    //  if (AllPawnsAboard.Count == 0)
-    //  {
-    //    currentlyFishing = false;
-    //  }
-    //  else
-    //  {
-    //    IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
-    //    MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
-    //  }
-    //}
-  }
+		// TODO
+		//if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
+		//{
+		//  if (AllPawnsAboard.Count == 0)
+		//  {
+		//    currentlyFishing = false;
+		//  }
+		//  else
+		//  {
+		//    IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
+		//    MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
+		//  }
+		//}
+	}
 
-  protected virtual void BaseTickOptimized()
-  {
-    const int ScanShortTicks = 60;
-    const int ScanRareTicks = GenTicks.TickRareInterval;
+	protected virtual void BaseTickOptimized()
+	{
+		const int ScanShortTicks = 60;
+		const int ScanRareTicks = GenTicks.TickRareInterval;
 
-    if (this.IsHashIntervalTick(ScanShortTicks))
-      TickShort();
-    if (this.IsHashIntervalTick(ScanRareTicks))
-      TickRare();
+		if (this.IsHashIntervalTick(ScanShortTicks))
+			TickShort();
+		if (this.IsHashIntervalTick(ScanRareTicks))
+			TickRare();
 
-    sustainers.Tick();
-    TickHandlers();
+		sustainers.Tick();
+		TickHandlers();
 
-    if (Spawned)
-    {
-      //animator?.AnimationTick();
-      vehiclePather.PatherTick();
-      stances.StanceTrackerTick();
-      if (Drafted || CompVehicleTurrets is { Deploying: true })
-      {
-        jobs.JobTrackerTick();
-      }
-      TickExplosives();
-    }
+		if (Spawned)
+		{
+			//animator?.AnimationTick();
+			vehiclePather.PatherTick();
+			stances.StanceTrackerTick();
+			if (Drafted || fishing || CompVehicleTurrets is { Deploying: true })
+			{
+				jobs.JobTrackerTick();
 
-    //abilities?.AbilitiesTick();
-    inventory.innerContainer.DoTick();
-    inventory.InventoryTrackerTick();
-  }
+				if (vehiclePather.Moving)
+					fishing = false;
+			}
+			TickExplosives();
+		}
+
+		//abilities?.AbilitiesTick();
+		inventory.innerContainer.DoTick();
+		inventory.InventoryTrackerTick();
+	}
 }

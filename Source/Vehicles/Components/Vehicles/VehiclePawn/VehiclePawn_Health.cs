@@ -34,6 +34,27 @@ public partial class VehiclePawn
 
 	public CellRect Hitbox { get; private set; }
 
+	public bool CanFish
+	{
+		get
+		{
+			// TODO Fishing - I can't decide if autonomous fishing is a good idea or not.  This seems like it would be
+			// incredibly broken for food gathering.
+			//if ((MovementPermissions & VehiclePermissions.Autonomous) != 0)
+			//	return true;
+
+			foreach (VehicleRoleHandler handler in handlers)
+			{
+				foreach (Pawn pawn in handler.thingOwner)
+				{
+					if (pawn.skills.GetSkill(SkillDefOf.Animals) is { TotallyDisabled: false })
+						return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	public float WorldSpeedMultiplier
 	{
 		get
@@ -366,7 +387,7 @@ public partial class VehiclePawn
 				health.deflectionEffecter = effecterDef.Spawn();
 			}
 			IntVec2 effectCell =
-				damageResult.cell.RotatedBy(Rotation, VehicleDef.Size, reverseRotate: true);
+				damageResult.cell.MirrorRotatedBy(Rotation, VehicleDef.Size);
 			IntVec3 onMapCell = new(Position.x + effectCell.x, 0, Position.z + effectCell.z);
 			health.deflectionEffecter?.Trigger(new TargetInfo(onMapCell, Map),
 				damageResult.damageInfo.Instigator ?? new TargetInfo(onMapCell, Map));

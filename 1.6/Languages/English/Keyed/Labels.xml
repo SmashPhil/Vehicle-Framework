@@ -9,6 +9,8 @@
   <VF_HaulPawnToVehicle>Load Pawn</VF_HaulPawnToVehicle>
   <VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+  <VF_GearForward>Forward</VF_GearForward>
+  <VF_GearReverse>Reverse</VF_GearReverse>
   <VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
   <VF_DisabledByVehicleUpgrading>{0} is being upgraded.</VF_DisabledByVehicleUpgrading>
   
@@ -70,7 +72,9 @@
   <VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
   <VF_SwapColors>Cycle colors between each other.\n\nColorOne &gt; ColorTwo &gt; ColorThree</VF_SwapColors>
   <VF_StartFishing>Fish</VF_StartFishing>
-  <VF_StartFishingDesc>Gather fish. Depth of water affects fishing chances.</VF_StartFishingDesc>
+  <VF_StartFishingDesc>Gather fish from the water.</VF_StartFishingDesc>
+  <VF_NoFishermenTooltip>No colonists onboard that are capable of fishing.</VF_NoFishermenTooltip>
+  <VF_NoFishAtSpot>No fish at this location.</VF_NoFishAtSpot>
   <VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
   <VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
   <VF_ComponentClickMoreInfoTooltip>Click for detailed information.</VF_ComponentClickMoreInfoTooltip>

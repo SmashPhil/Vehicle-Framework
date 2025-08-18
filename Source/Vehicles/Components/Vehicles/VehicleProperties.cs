@@ -15,9 +15,10 @@ public class VehicleProperties
 #if FISHING
 	[PostToSettings(Label = "VF_FishingEnabled", Tooltip = "VF_FishingEnabledTooltip", Translate =
 		true, UISettingsType = UISettingsType.Checkbox, VehicleType = VehicleType.Sea)]
-	[DisableSettingConditional(MayRequireAny = [ModPackageIds.VanillaExpandedFishing])]
+	[DisableSettingConditional(MayRequireAny = [ModPackageIds.Odyssey, ModPackageIds.VanillaExpandedFishing])]
 #endif
-	public bool fishing;
+	[LoadAlias("fishing")]
+	public bool canFish;
 
 	public VehicleTrack track;
 

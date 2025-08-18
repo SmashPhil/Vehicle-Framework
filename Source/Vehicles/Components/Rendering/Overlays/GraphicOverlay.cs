@@ -105,7 +105,7 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 				GraphicDataRGB graphicData = new();
 				graphicData.CopyFrom(data.graphicData);
 
-				if (graphicData.graphicClass.SameOrSubclass(typeof(Graphic_Rgb)) && graphicData.shaderType
+				if (graphicData.graphicClass.SameOrSubclassOf(typeof(Graphic_Rgb)) && graphicData.shaderType
 				 .Shader
 				 .SupportsRGBMaskTex())
 				{

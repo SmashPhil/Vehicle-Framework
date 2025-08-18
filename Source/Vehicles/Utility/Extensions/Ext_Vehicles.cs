@@ -81,6 +81,38 @@ public static class Ext_Vehicles
 		return pawns.Count <= (totalRoom - reserved);
 	}
 
+	[Pure]
+	public static IntVec2 MirrorRotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size)
+	{
+		if (size is { x: 1, z: 1 })
+			return cell;
+		IntVec2 result = cell.RotatedBy(rot, size);
+		switch (rot.AsInt)
+		{
+			case 1:
+				result.x *= -1;
+				result.z *= -1;
+			break;
+			case 3:
+				if (size.x.IsEven())
+				{
+					result.z++;
+					result.x--;
+				}
+
+				if (size.z.IsEven())
+				{
+					result.z--;
+					result.x--;
+				}
+
+				result.x *= -1;
+				result.z *= -1;
+			break;
+		}
+		return result;
+	}
+
 	/// <summary>
 	/// Rotates <paramref name="cell"/> for vehicle rect.
 	/// </summary>
@@ -89,8 +121,7 @@ public static class Ext_Vehicles
 	/// the cell were rotated counter-clockwise (or rotating based on the vehicle facing east). 
 	///</remarks>
 	[Pure]
-	public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size,
-		bool reverseRotate = false)
+	public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size)
 	{
 		if (size is { x: 1, z: 1 })
 			return cell;
@@ -101,12 +132,6 @@ public static class Ext_Vehicles
 				return cell;
 			case 1:
 				IntVec2 east = new(-cell.z, cell.x);
-				if (reverseRotate)
-				{
-					east.x *= -1;
-					east.z *= -1;
-				}
-
 				return east;
 			case 2:
 				IntVec2 south = new(-cell.x, -cell.z);
@@ -114,12 +139,10 @@ public static class Ext_Vehicles
 				{
 					south.x++;
 				}
-
 				if (size.z.IsEven())
 				{
 					south.z++;
 				}
-
 				return south;
 			case 3:
 				IntVec2 west = new(cell.z, -cell.x);
@@ -127,30 +150,10 @@ public static class Ext_Vehicles
 				{
 					west.x++;
 				}
-
 				if (size.z.IsEven())
 				{
 					west.z++;
 				}
-
-				if (reverseRotate)
-				{
-					if (size.x.IsEven())
-					{
-						west.z++;
-						west.x--;
-					}
-
-					if (size.z.IsEven())
-					{
-						west.z--;
-						west.x--;
-					}
-
-					west.x *= -1;
-					west.z *= -1;
-				}
-
 				return west;
 			default:
 				return cell;

@@ -21,6 +21,14 @@ public class SectionMain : SettingsSection
 	public const float RiverMultMin = 0;
 	public const float RiverMultMax = 2;
 
+	private const float MinFishingMultiplier = 1;
+	private const float MaxFishingMultiplier = 5;
+	private const float DefaultFishingMultiplier = 1;
+
+	private const float MinFishingSkillGain = 0;
+	private const float MaxFishingSkillGain = 0.25f;
+	private const float DefaultFishingSkillGain = 0.025f; // Matches hardcoded Odyssey value in fishing job
+
 	private const int DefaultSettlementAdjustRadius = 1;
 	private const float DefaultCoastWeight = 1;
 	private const float DefaultRiverWeight = 1;
@@ -52,9 +60,7 @@ public class SectionMain : SettingsSection
 
 	// Fishing
 	public float fishingMultiplier = 1f;
-	public int fishingDelay = 1000;
-	public int fishingSkillIncrease = 5;
-	public bool fishingPersists = true;
+	public float fishingSkillIncrease = 0.05f;
 
 	// Aerial
 	public bool drawLandingGhost = false;
@@ -114,9 +120,7 @@ public class SectionMain : SettingsSection
 
 		// Fishing
 		fishingMultiplier = 1f;
-		fishingDelay = 1000;
-		fishingSkillIncrease = 5;
-		fishingPersists = true;
+		fishingSkillIncrease = 0.05f;
 
 		// Aerial
 		drawLandingGhost = false;
@@ -160,10 +164,8 @@ public class SectionMain : SettingsSection
 		Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
 		Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
 
-		Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: 1f);
-		Scribe_Values.Look(ref fishingDelay, nameof(fishingDelay), defaultValue: 1000);
-		Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: 5);
-		Scribe_Values.Look(ref fishingPersists, nameof(fishingPersists), defaultValue: true);
+		Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: DefaultFishingMultiplier);
+		Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: DefaultFishingSkillGain);
 
 		Scribe_Values.Look(ref drawLandingGhost, nameof(drawLandingGhost), defaultValue: false);
 		Scribe_Values.Look(ref burnRadiusOnRockets, nameof(burnRadiusOnRockets), defaultValue: true);
@@ -266,18 +268,12 @@ public class SectionMain : SettingsSection
 			}
 			// Fishing
 			listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-			//listingStandard.Gap(4);
 			listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%",
-				ref fishingMultiplier, 0.1f, 3, 100, 1);
+				ref fishingMultiplier, min: MinFishingMultiplier, max: MaxFishingMultiplier, multiplier: 100, decimalPlaces: 2);
 			listingStandard.Gap(8);
-			listingStandard.IntegerBox("VF_FishingDelay".Translate(), "VF_FishingDelayTooltip".Translate(), ref fishingDelay,
-				listingStandard.ColumnWidth * 0.5f, 0, min: 120);
-			listingStandard.Gap(8);
-			listingStandard.IntegerBox("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(),
-				ref fishingSkillIncrease, listingStandard.ColumnWidth * 0.5f, 0, 0);
-			listingStandard.Gap(8);
-			listingStandard.CheckboxLabeled("VF_FishingPersists".Translate(), ref fishingPersists,
-				"VF_FishingPersistsTooltip".Translate());
+			listingStandard.SliderLabeled("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), "%",
+				ref fishingSkillIncrease, min: MinFishingSkillGain, max: MaxFishingSkillGain, multiplier: 100,
+				decimalPlaces: 2);
 
 			listingStandard.Gap(8);
 

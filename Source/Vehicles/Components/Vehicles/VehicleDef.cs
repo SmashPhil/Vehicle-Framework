@@ -65,6 +65,9 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	[TweakField]
 	public VehicleDrawProperties drawProperties;
 
+	[MayRequireAnyOf($"{ModPackageIds.Odyssey},{ModPackageIds.VanillaExpandedFishing}")]
+	public FishingProperties fishingProperties;
+
 	public List<StatCache.EventLister> statEvents;
 
 	// Event : SoundDef
