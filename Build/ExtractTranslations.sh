@@ -17,13 +17,13 @@ fi
 
 echo "Checking localization for updates."
 URL="$ZIP_URL"
-if [[ -f "$SYNC_FILE" ]]; then
-  echo "Sync file found. Checking for out of date translations."
-  LAST_SYNCED=$(<"$SYNC_FILE")
-  ENCODED=$(printf '%s' "$LAST_SYNCED" | sed -e 's/:/%3A/g' -e 's/+/%2B/g' -e 's/ /%20/g')
-  URL="${ZIP_URL}?lastSynced=${ENCODED}"
-  echo "ZipUrl=${URL}"
-fi
+# if [[ -f "$SYNC_FILE" ]]; then
+#   echo "Sync file found. Checking for out of date translations."
+#   LAST_SYNCED=$(<"$SYNC_FILE")
+#   ENCODED=$(printf '%s' "$LAST_SYNCED" | sed -e 's/:/%3A/g' -e 's/+/%2B/g' -e 's/ /%20/g')
+#   URL="${ZIP_URL}?lastSynced=${ENCODED}"
+#   echo "ZipUrl=${URL}"
+# fi
 
 RESPONSE=$(curl -sL --fail "$URL")
 ZIP_FILE_URL=$(echo "$RESPONSE" | sed -E 's/.*"url"[[:space:]]*:[[:space:]]*"([^"]*)".*/\1/')

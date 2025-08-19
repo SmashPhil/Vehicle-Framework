@@ -18,10 +18,10 @@ if (-not (Test-Path -Path $folder -PathType Container)) {
 
 Write-Output "Checking localization for updates."
 $url = $zipUrl
-if (Test-Path $syncFile){
-  $lastSynced = Get-Content $syncFile -Raw
-  $url += "?lastSynced=$([uri]::EscapeDataString($lastSynced))"
-}
+# if (Test-Path $syncFile){
+#   $lastSynced = Get-Content $syncFile -Raw
+#   $url += "?lastSynced=$([uri]::EscapeDataString($lastSynced))"
+# }
 $response = Invoke-WebRequest -Uri $url -UseBasicParsing
 
 try {
