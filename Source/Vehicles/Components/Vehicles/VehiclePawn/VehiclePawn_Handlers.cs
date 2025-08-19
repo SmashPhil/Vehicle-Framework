@@ -347,6 +347,9 @@ public partial class VehiclePawn
 
 		foreach (VehicleRoleHandler handler in handlers)
 		{
+			if (handler.role.HandlingTypes != HandlingType.None && !handler.CanOperateRole(pawn))
+				continue;
+
 			if (TryAddPawn(pawn, handler))
 				return true;
 		}
