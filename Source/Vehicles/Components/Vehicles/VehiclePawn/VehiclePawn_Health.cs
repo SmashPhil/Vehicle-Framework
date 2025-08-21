@@ -29,8 +29,7 @@ public partial class VehiclePawn
 		(MovementPermissions & VehiclePermissions.Mobile) != 0 &&
 		movementStatus == VehicleMovementStatus.Online;
 
-	public bool CanMoveFinal =>
-		CanMove && (HasEnoughOperators || VehicleMod.settings.debug.debugDraftAnyVehicle);
+	public bool CanMoveFinal => CanMove && HasEnoughOperators;
 
 	public CellRect Hitbox { get; private set; }
 

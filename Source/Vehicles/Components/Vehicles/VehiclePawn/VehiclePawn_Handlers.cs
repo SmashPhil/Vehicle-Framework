@@ -15,9 +15,13 @@ public partial class VehiclePawn
 {
 	// Assigned seat for to boarding role
 	private List<AssignedSeat> boardingAssignments = [];
+
+	// TODO 1.7 - Chance access modifier
 	public List<VehicleRoleHandler> handlers = [];
 
 	/* ----- Caches for VehicleHandlers ----- */
+
+	public List<VehicleRoleHandler> Handlers => handlers;
 
 	public List<VehicleRoleHandler> OccupiedHandlers { get; private set; } = [];
 
@@ -68,6 +72,8 @@ public partial class VehiclePawn
 		get
 		{
 			if ((MovementPermissions & VehiclePermissions.Autonomous) != 0)
+				return true;
+			if (VehicleMod.settings.debug.debugDraftAnyVehicle)
 				return true;
 
 			foreach (VehicleRoleHandler handler in handlers)
@@ -491,9 +497,9 @@ public partial class VehiclePawn
 				{
 					Pawn pawn = handler.thingOwner[i];
 					handler.thingOwner.Remove(pawn);
+					caravan.AddPawn(pawn, true);
 					if (!pawn.IsWorldPawn())
 						Find.WorldPawns.PassToWorld(pawn);
-					caravan.AddPawn(pawn, true);
 					EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 				}
 			}

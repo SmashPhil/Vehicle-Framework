@@ -50,6 +50,8 @@ namespace Vehicles
 					handlers.Add(new VehicleRoleHandler(this, role));
 				}
 			}
+			handlers.Sort();
+
 			RecacheComponents();
 			RecacheMovementPermissions();
 		}

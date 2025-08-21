@@ -152,7 +152,7 @@ public class VehicleGroup : IDisposable
 		TestDefGenerator.ClearStatWorkerCaches(vehicleDef);
 		vehicleDef.RecacheMovementPermissions();
 
-		int totalSlots = settings.passengers + settings.animals + settings.extraSlots;
+		int totalSlots = settings.passengers + settings.prisoners + settings.animals + settings.extraSlots;
 		if (totalSlots > 0)
 		{
 			vehicleDef.properties.roles =
@@ -201,6 +201,14 @@ public class VehicleGroup : IDisposable
 			}
 			group.pawns.Add(colonist);
 		}
+		for (int i = 0; i < settings.prisoners; i++)
+		{
+			Faction faction = Find.World.factionManager.RandomEnemyFaction();
+			Pawn prisoner = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
+				faction, fixedBiologicalAge: 30, forceNoBackstory: true));
+			prisoner.guest?.CapturedBy(Faction.OfPlayer);
+			group.pawns.Add(prisoner);
+		}
 		for (int i = 0; i < settings.animals; i++)
 		{
 			Pawn animal = PawnGenerator.GeneratePawn(PawnKindDefOf.Alphabeaver, settings.faction);
@@ -228,6 +236,7 @@ public class VehicleGroup : IDisposable
 		public VehiclePermissions permissions = VehiclePermissions.Mobile;
 		public int drivers;
 		public int passengers;
+		public int prisoners;
 		public int animals;
 		public int extraSlots;
 

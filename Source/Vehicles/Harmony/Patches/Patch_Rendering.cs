@@ -197,7 +197,13 @@ internal class Patch_Rendering : IPatchCategory
 				continue;
 
 			if (vehicle.AllPawnsAboard.Count > 0)
-				tmpPawns.AddRange(vehicle.AllPawnsAboard);
+			{
+				foreach (Pawn pawn in vehicle.AllPawnsAboard)
+				{
+					if (pawn is { IsColonist: true })
+						tmpPawns.Add(pawn);
+				}
+			}
 		}
 	}
 
@@ -211,12 +217,15 @@ internal class Patch_Rendering : IPatchCategory
 				continue;
 
 			using ClearOnDispose<Pawn> cod = new(TmpPawns);
-			TmpPawns.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
+			foreach (Pawn pawn in aerialVehicle.Vehicle.AllPawnsAboard)
+			{
+				if (pawn is { IsColonist: true })
+					TmpPawns.Add(pawn);
+			}
 			PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
 			foreach (Pawn pawn in TmpPawns)
 			{
-				if (pawn.IsColonist)
-					cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
+				cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
 			}
 			group++;
 		}

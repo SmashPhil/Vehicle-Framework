@@ -62,6 +62,81 @@ internal sealed class UnitTest_VehicleCaravan
 	}
 
 	[Test]
+	private void BoardToCaravan()
+	{
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = 1,
+			passengers = 1,
+			prisoners = 1
+		});
+		Dictionary<Pawn, Faction> factions = group.pawns.ToDictionary(pawn => pawn, pawn => pawn.Faction);
+
+		VehicleCaravan caravan =
+			CaravanHelper.MakeVehicleCaravan([group.vehicle, .. group.pawns], Faction.OfPlayer, 1, true);
+		using ScopeWorldObject swo = new(caravan);
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		group.BoardOne();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		group.BoardAll();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		return;
+
+		bool FactionDidNotChange(Pawn pawn)
+		{
+			return pawn.Faction == factions[pawn];
+		}
+	}
+
+	[Test]
+	private void DisembarkToCaravan()
+	{
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = 1,
+			passengers = 1,
+			prisoners = 1
+		});
+		Dictionary<Pawn, Faction> factions = group.pawns.ToDictionary(pawn => pawn, pawn => pawn.Faction);
+
+		group.BoardOne();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		group.BoardAll();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		VehicleCaravan caravan =
+			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+		using ScopeWorldObject swo = new(caravan);
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		group.DisembarkOne();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+
+		group.DisembarkAll();
+		Assert.IsTrue(group.pawns.All(FactionDidNotChange));
+		Expect.All(group.pawns, FactionDidNotChange);
+		return;
+
+		bool FactionDidNotChange(Pawn pawn)
+		{
+			return pawn.Faction == factions[pawn];
+		}
+	}
+
+	[Test]
 	private void AllInventoryItems()
 	{
 		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
