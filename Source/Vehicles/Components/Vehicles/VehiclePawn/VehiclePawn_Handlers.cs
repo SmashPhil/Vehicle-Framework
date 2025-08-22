@@ -235,7 +235,7 @@ public partial class VehiclePawn
 	{
 		if (handlingTypeFlag == HandlingType.None)
 			return handlers.Where(handler => handler.role.HandlingTypes == HandlingType.None);
-		return handlers.Where(handler => handler.role.HandlingTypes.HasFlag(handlingTypeFlag));
+		return handlers.Where(handler => (handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag);
 	}
 
 	[Pure]
@@ -250,6 +250,7 @@ public partial class VehiclePawn
 	}
 
 	[Pure] // TODO 1.7 - Remove, pawn is required for permissions check
+	[Obsolete("Use overload with pawn for permissions check.")]
 	public VehicleRoleHandler GetNextAvailableHandler(HandlingType handlingTypeFlag)
 	{
 		foreach (VehicleRoleHandler handler in handlers)
@@ -263,7 +264,7 @@ public partial class VehiclePawn
 					return handler;
 				continue;
 			}
-			if (handler.role.HandlingTypes.HasFlag(handlingTypeFlag) &&
+			if ((handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
 				handler.AreSlotsAvailableAndReservable)
 				return handler;
 		}
@@ -285,7 +286,7 @@ public partial class VehiclePawn
 				continue;
 			}
 
-			if (handler.CanOperateRole(pawn) && handler.role.HandlingTypes.HasFlag(handlingTypeFlag) &&
+			if (handler.CanOperateRole(pawn) && (handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
 				handler.AreSlotsAvailableAndReservable)
 				return handler;
 		}
