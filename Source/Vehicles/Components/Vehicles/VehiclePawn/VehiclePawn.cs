@@ -93,6 +93,11 @@ namespace Vehicles
 			}
 		}
 
+		private void RecacheAlerts()
+		{
+			// TODO - alert for pawns inside vehicle
+		}
+
 		public void RegisterEvents()
 		{
 			if (EventRegistry != null && EventRegistry.Initialized())
@@ -102,11 +107,11 @@ namespace Vehicles
 
 			this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
 			this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
-			this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount);
+			this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, RecacheAlerts);
 			this.AddEvent(VehicleEventDefOf.PawnExited, vehiclePather.RecalculatePermissions,
-				RecachePawnCount);
+				RecachePawnCount, RecacheAlerts);
 			this.AddEvent(VehicleEventDefOf.PawnRemoved, vehiclePather.RecalculatePermissions,
-				RecachePawnCount);
+				RecachePawnCount, RecacheAlerts);
 			this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions,
 				RecachePawnCount);
 			this.AddEvent(VehicleEventDefOf.PawnKilled, vehiclePather.RecalculatePermissions,
@@ -313,7 +318,6 @@ namespace Vehicles
 			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
 			//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
 			Scribe_Values.Look(ref fishing, nameof(fishing));
-			Scribe_Values.Look(ref showAllItemsOnMap, nameof(showAllItemsOnMap));
 
 			Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
 

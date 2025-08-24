@@ -97,6 +97,7 @@ public class VehicleGroup : IDisposable
 	public void DisembarkAll()
 	{
 		vehicle.DisembarkAll();
+		vehicle.DisembarkAllFromInventory();
 		foreach (Pawn pawn in pawns)
 		{
 			// ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
@@ -152,7 +153,7 @@ public class VehicleGroup : IDisposable
 		TestDefGenerator.ClearStatWorkerCaches(vehicleDef);
 		vehicleDef.RecacheMovementPermissions();
 
-		int totalSlots = settings.passengers + settings.prisoners + settings.animals + settings.extraSlots;
+		int totalSlots = settings.passengers + settings.prisoners + settings.extraSlots;
 		if (totalSlots > 0)
 		{
 			vehicleDef.properties.roles =
@@ -211,7 +212,15 @@ public class VehicleGroup : IDisposable
 		}
 		for (int i = 0; i < settings.animals; i++)
 		{
-			Pawn animal = PawnGenerator.GeneratePawn(PawnKindDefOf.Alphabeaver, settings.faction);
+			Pawn animal = PawnGenerator.GeneratePawn(PawnKindDefOf.Muffalo, settings.faction);
+			Assert.IsNotNull(animal);
+			Assert.AreEqual(animal.Faction, settings.faction);
+			group.pawns.Add(animal);
+		}
+		Assert.IsTrue(settings.mechanoids == 0 || ModsConfig.BiotechActive);
+		for (int i = 0; i < settings.mechanoids; i++)
+		{
+			Pawn animal = PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, settings.faction);
 			Assert.IsNotNull(animal);
 			Assert.AreEqual(animal.Faction, settings.faction);
 			group.pawns.Add(animal);
@@ -238,6 +247,7 @@ public class VehicleGroup : IDisposable
 		public int passengers;
 		public int prisoners;
 		public int animals;
+		public int mechanoids;
 		public int extraSlots;
 
 		public bool destroyInventory;

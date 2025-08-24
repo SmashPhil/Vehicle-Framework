@@ -113,20 +113,15 @@ public partial class VehiclePawn
 		records.RecordsTickInterval(delta);
 		if (!this.IsWorldPawn())
 			jobs.JobTrackerTickInterval(delta);
+	}
 
-		// TODO
-		//if (currentlyFishing && Find.TickManager.TicksGame % 240 == 0)
-		//{
-		//  if (AllPawnsAboard.Count == 0)
-		//  {
-		//    currentlyFishing = false;
-		//  }
-		//  else
-		//  {
-		//    IntVec3 cell = this.OccupiedRect().ExpandedBy(1).EdgeCells.RandomElement();
-		//    MoteMaker.MakeStaticMote(cell, Map, ThingDefOf_VehicleMotes.Mote_FishingNet);
-		//  }
-		//}
+	private void TickHandlers()
+	{
+		// Only need to tick VehicleHandlers with pawns inside them
+		foreach (VehicleRoleHandler handler in OccupiedHandlers)
+		{
+			handler.DoTick();
+		}
 	}
 
 	protected virtual void BaseTickOptimized()

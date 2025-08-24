@@ -373,6 +373,71 @@ internal sealed class UnitTest_VehicleCaravan
 	}
 
 	[Test]
+	[TestDescription("Adding vehicle to normal caravan should create VehicleCaravan and move all pawns.")]
+	private void UpgradeToVehicleCaravan()
+	{
+		const int Drivers = 1;
+		const int Passengers = 1;
+
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = Drivers,
+			passengers = Passengers
+		});
+		Caravan caravan = CaravanMaker.MakeCaravan(group.pawns, Faction.OfPlayer, 1, true);
+		Assert.IsNotNull(caravan);
+		using ScopeWorldObject sc = new(caravan);
+		Assert.IsFalse(caravan.pawns.InnerListForReading.Exists(pawn => pawn is VehiclePawn));
+
+		caravan.AddPawn(group.vehicle, addCarriedPawnToWorldPawnsIfAny: true);
+		Assert.IsTrue(caravan.Destroyed);
+		VehicleCaravan vehicleCaravan = group.vehicle.GetVehicleCaravan();
+		Assert.IsNotNull(vehicleCaravan);
+		using ScopeWorldObject svc = new(vehicleCaravan);
+
+		Expect.ReferencesAreEqual(vehicleCaravan, Find.WorldObjects.PlayerControlledCaravanAt(1) as VehicleCaravan);
+		// Caravan transition automatically boards as many pawns as possible.
+		Expect.AreEqual(vehicleCaravan.VehiclesListForReading.Count, 1);
+		Expect.AreEqual(vehicleCaravan.DismountedPawnsListForReading.Count, 0);
+		Expect.AreEqual(vehicleCaravan.PawnsListForReading.Count, Drivers + Passengers + 1 /* for Vehicle */);
+	}
+
+	[Test]
+	[TestDescription("Removing vehicle from VehicleCaravan should create vanilla Caravan and move all pawns.")]
+	private void DowngradeToVehicleCaravan()
+	{
+		const int Drivers = 1;
+		const int Passengers = 1;
+
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = Drivers,
+			passengers = Passengers
+		});
+		group.BoardAll();
+
+		VehicleCaravan vehicleCaravan = CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+		Assert.IsNotNull(vehicleCaravan);
+		using ScopeWorldObject svc = new(vehicleCaravan);
+		Assert.IsTrue(vehicleCaravan.VehiclesListForReading.Count == 1);
+		group.vehicle.DisembarkAll();
+		Assert.AreEqual(vehicleCaravan.DismountedPawnsListForReading.Count, group.pawns.Count);
+		vehicleCaravan.RemovePawn(group.vehicle);
+
+		Assert.IsTrue(vehicleCaravan.Destroyed);
+		Caravan caravan = group.pawns[0].GetCaravan();
+		Assert.IsNotNull(caravan);
+		using ScopeWorldObject sc = new(caravan);
+
+		Expect.ReferencesAreEqual(caravan, Find.WorldObjects.PlayerControlledCaravanAt(1));
+		Expect.IsTrue(caravan is not VehicleCaravan);
+		// Caravan transition automatically boards as many pawns as possible.
+		Expect.AreEqual(caravan.PawnsListForReading.Count, Drivers + Passengers);
+	}
+
+	[Test]
 	private void SplitIntoVanillaCaravans()
 	{
 		const int PawnCount = 5;
@@ -646,8 +711,7 @@ internal sealed class UnitTest_VehicleCaravan
 		using VehicleGroup group1 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
 		{
 			permissions = VehiclePermissions.Mobile,
-			drivers = 1,
-			passengers = 1
+			drivers = 1
 		});
 		using VehicleGroup group2 = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
 		{
@@ -683,9 +747,14 @@ internal sealed class UnitTest_VehicleCaravan
 		VehicleCaravan mergedCaravan =
 			Find.WorldObjects.WorldObjectAt(1, WorldObjectDefOfVehicles.VehicleCaravan) as VehicleCaravan;
 		Assert.IsNotNull(mergedCaravan);
-
-		mergedCaravan.RemoveAllPawns();
-		Assert.IsTrue(mergedCaravan.Destroyed);
+		using ScopeWorldObject swoMerged = new(mergedCaravan);
+		Expect.AreEqual(mergedCaravan.PawnsListForReading.Count,
+			group1.pawns.Count + group2.pawns.Count + group3.pawns.Count + 3 /* for vehicles */);
+		// Caravan3 was used as merge target since it has the most pawns
+		Expect.IsTrue(vehicleCaravan1.Destroyed);
+		Expect.IsTrue(vehicleCaravan2.Destroyed);
+		Expect.IsFalse(vehicleCaravan3.Destroyed);
+		Expect.ReferencesAreEqual(mergedCaravan, vehicleCaravan3);
 	}
 
 	[Test]
@@ -705,12 +774,10 @@ internal sealed class UnitTest_VehicleCaravan
 		{
 			permissions = VehiclePermissions.Mobile,
 			drivers = 1,
-			passengers = PawnsInVanillaCaravan
+			passengers = 3
 		});
 
-		group1.BoardAll();
-		group2.BoardOne();
-
+		// Vanilla
 		List<Pawn> pawns = [];
 		for (int j = 0; j < PawnsInVanillaCaravan; j++)
 		{
@@ -723,13 +790,24 @@ internal sealed class UnitTest_VehicleCaravan
 		Caravan caravan = CaravanMaker.MakeCaravan(pawns, Faction.OfPlayer, 1, true);
 		using ScopeWorldObject swo = new(caravan);
 
-		// Testing all boarded, some boarded, and vanilla
+		// All boarded
+		group1.BoardAll();
 		VehicleCaravan vehicleCaravan1 =
 			CaravanHelper.MakeVehicleCaravan([group1.vehicle], Faction.OfPlayer, 1, true);
+		Assert.IsNotNull(vehicleCaravan1);
 		using ScopeWorldObject swo1 = new(vehicleCaravan1);
+		Expect.AreEqual(vehicleCaravan1.PawnsListForReading.Count, group1.pawns.Count + 1);
+
+		// Some Boarded, some disembarked
+		group2.BoardOne();
 		VehicleCaravan vehicleCaravan2 =
-			CaravanHelper.MakeVehicleCaravan([group2.vehicle], Faction.OfPlayer, 1, true);
+			CaravanHelper.MakeVehicleCaravan([group2.vehicle, .. group2.pawns], Faction.OfPlayer, 1, true);
+		Assert.IsNotNull(vehicleCaravan2);
 		using ScopeWorldObject swo2 = new(vehicleCaravan2);
+		Expect.AreEqual(vehicleCaravan2.PawnsListForReading.Count, group2.pawns.Count + 1);
+
+		// Verify merge chooses caravan with the most pawns and correctly merges into VehicleCaravan object
+		Expect.IsTrue(vehicleCaravan1.PawnsListForReading.Count < vehicleCaravan2.PawnsListForReading.Count);
 		List<Caravan> caravanList = [vehicleCaravan1, vehicleCaravan2, caravan];
 		MergeCaravansMethod.Invoke(null, [caravanList]);
 
@@ -737,7 +815,12 @@ internal sealed class UnitTest_VehicleCaravan
 			Find.WorldObjects.WorldObjectAt(1, WorldObjectDefOfVehicles.VehicleCaravan) as VehicleCaravan;
 		Assert.IsNotNull(mergedCaravan);
 
-		mergedCaravan.RemoveAllPawns();
-		Assert.IsTrue(mergedCaravan.Destroyed);
+		Expect.AreEqual(mergedCaravan.PawnsListForReading.Count,
+			group1.pawns.Count + group2.pawns.Count + PawnsInVanillaCaravan + 2 /* for vehicles */);
+		// Caravan2 was used as merge target since it has the most pawns
+		Expect.IsTrue(caravan.Destroyed);
+		Expect.IsTrue(vehicleCaravan1.Destroyed);
+		Expect.IsFalse(vehicleCaravan2.Destroyed);
+		Expect.ReferencesAreEqual(mergedCaravan, vehicleCaravan2);
 	}
 }

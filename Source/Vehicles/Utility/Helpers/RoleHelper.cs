@@ -10,6 +10,11 @@ public static class RoleHelper
 	// TODO - use RoleAssignment
 	public static void Distribute(List<VehiclePawn> vehicles, List<Pawn> pawns)
 	{
+		if (vehicles.NullOrEmpty())
+		{
+			Trace.Fail("Trying to distribute to pawns with no vehicles listed.");
+			return;
+		}
 		pawns.RemoveAll(Ext_Vehicles.InVehicle);
 		RotatingList<VehiclePawn> vehicleRotator = vehicles.ToRotatingList();
 		DistributeOnPriority(vehicleRotator, pawns, HandlingType.Movement);
@@ -23,6 +28,13 @@ public static class RoleHelper
 		for (int i = pawns.Count - 1; i >= 0; i--)
 		{
 			Pawn pawn = pawns[i];
+			if (pawn.ShouldAlwaysTransferToVehiclesCargo())
+			{
+				vehicles.Next.AddOrTransfer(pawn);
+				pawns.RemoveAt(i);
+				continue;
+			}
+
 			VehicleRoleHandler handler = GetAvailableHandler(pawn, vehicles, handlingType);
 			if (handler != null && handler.vehicle.TryAddPawn(pawn, handler))
 			{

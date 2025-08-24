@@ -7,7 +7,6 @@ using RimWorld.Planet;
 using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
-using Verse.AI.Group;
 
 namespace Vehicles;
 
@@ -349,6 +348,12 @@ public partial class VehiclePawn
 
 	public bool TryAddPawn(Pawn pawn)
 	{
+		if (pawn.ShouldAlwaysTransferToVehiclesCargo())
+		{
+			AddOrTransfer(pawn);
+			return true;
+		}
+
 		if (handlers.NullOrEmpty())
 			return false;
 
@@ -401,7 +406,7 @@ public partial class VehiclePawn
 		reservationManager?.ReleaseAllClaimedBy(pawn);
 
 		if (result)
-			EventRegistry?[VehicleEventDefOf.PawnEntered].ExecuteEvents();
+			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 
 		// NOTE - VehicleCaravans need to recache the pawn lists, this is especially crucial for ticking
 		// behavior like caravan needs. This MUST occur after the PawnEntered event so the vehicle manifest
@@ -412,13 +417,14 @@ public partial class VehiclePawn
 		return result;
 	}
 
-	public void RemovePawn(Pawn pawn)
+	public bool RemovePawn(Pawn pawn)
 	{
 		foreach (VehicleRoleHandler handler in handlers)
 		{
 			if (TryRemovePawn(pawn, handler))
-				break;
+				return true;
 		}
+		return inventory.innerContainer.Remove(pawn);
 	}
 
 	public bool TryRemovePawn(Pawn pawn, VehicleRoleHandler handler)
@@ -441,50 +447,71 @@ public partial class VehiclePawn
 
 	public void DisembarkPawn(Pawn pawn)
 	{
-		Assert.IsTrue(pawn.ParentHolder is VehicleRoleHandler);
+		Assert.IsTrue(pawn.InVehicle());
 		// In Caravan
 		if (this.GetVehicleCaravan() is { } caravan)
 		{
 			RemovePawn(pawn);
 			caravan.AddPawn(pawn, true);
-			Assert.IsFalse(pawn.IsWorldPawn());
 			Find.WorldPawns.PassToWorld(pawn);
 			return;
 		}
 
 		Assert.IsTrue(Spawned,
-			$"Trying to disembark pawn from unspawned vehicle that is not in a caravan. {pawn} would be lost forever.");
-		// On Map
-		if (!pawn.Spawned)
+			$"Trying to disembark pawn from unspawned vehicle that is not in a caravan. {pawn} will be lost forever.");
+
+		if (RemovePawn(pawn))
 		{
-			CellRect occupiedRect = this.OccupiedRect().ExpandedBy(1);
-			IntVec3 loc = Position;
-			if (occupiedRect.EdgeCells
-			 .Where(cell => cell.InBounds(Map) && cell.Standable(Map) &&
-					!cell.GetThingList(Map).NotNullAndAny(thing => thing is Pawn))
-			 .TryRandomElement(out IntVec3 newLoc))
-			{
-				loc = newLoc;
-			}
+			this.SpawnPawnNearVehicle(pawn);
+			EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+		}
+	}
 
-			GenSpawn.Spawn(pawn, loc, MapHeld);
-			if (!loc.Standable(Map))
+	/// <summary>
+	/// Disembark all pawns from the vehicle's inventory. Certain pawns are loaded into cargo rather than
+	/// taking up valuable seats inside the vehicle that colonists would otherwise occupy.
+	/// </summary>
+	public void DisembarkAllFromInventory()
+	{
+		if (this.GetVehicleCaravan() is { } caravan)
+		{
+			for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
 			{
-				pawn.pather.TryRecoverFromUnwalkablePosition(false);
-			}
-
-			if (lord is not null)
-			{
-				pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ForcedToJoinOtherLord);
-				lord.AddPawn(pawn);
+				if (inventory.innerContainer[i] is Pawn pawn)
+				{
+					inventory.innerContainer.RemoveAt(i);
+					caravan.AddPawn(pawn, true);
+					Find.WorldPawns.PassToWorld(pawn);
+					EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+				}
 			}
 		}
-
-		RemovePawn(pawn);
-		EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
-		if (!AllPawnsAboard.NotNullAndAny() && outOfFoodNotified)
+		else if (Spawned)
 		{
-			outOfFoodNotified = false;
+			using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
+			{
+				for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
+				{
+					if (inventory.innerContainer[i] is Pawn pawn)
+						DisembarkPawn(pawn);
+				}
+			}
+			EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+		}
+		else
+		{
+			// Invalid operation but better to send the pawns to world and let the game decide how to
+			// handle them
+			Trace.Fail("Disembarking from vehicle when it is not spawned or in a caravan.");
+			for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
+			{
+				if (inventory.innerContainer[i] is Pawn pawn)
+				{
+					inventory.innerContainer.RemoveAt(i);
+					Find.WorldPawns.PassToWorld(pawn);
+					EventRegistry[VehicleEventDefOf.PawnRemoved].ExecuteEvents();
+				}
+			}
 		}
 	}
 
@@ -499,8 +526,7 @@ public partial class VehiclePawn
 					Pawn pawn = handler.thingOwner[i];
 					handler.thingOwner.Remove(pawn);
 					caravan.AddPawn(pawn, true);
-					if (!pawn.IsWorldPawn())
-						Find.WorldPawns.PassToWorld(pawn);
+					Find.WorldPawns.PassToWorld(pawn);
 					EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
 				}
 			}
@@ -521,7 +547,7 @@ public partial class VehiclePawn
 		{
 			// Invalid operation but better to send the pawns to world and let the game decide how to
 			// handle them
-			Log.Warning("Disembarking from vehicle when it is not spawned or in a caravan.");
+			Trace.Fail("Disembarking from vehicle when it is not spawned or in a caravan.");
 			foreach (VehicleRoleHandler handler in handlers)
 			{
 				for (int i = handler.thingOwner.Count; --i >= 0;)
@@ -531,15 +557,6 @@ public partial class VehiclePawn
 					Find.WorldPawns.PassToWorld(pawn);
 				}
 			}
-		}
-	}
-
-	internal void TickHandlers()
-	{
-		// Only need to tick VehicleHandlers with pawns inside them
-		foreach (VehicleRoleHandler handler in OccupiedHandlers)
-		{
-			handler.DoTick();
 		}
 	}
 }

@@ -89,6 +89,10 @@ internal sealed class UnitTest_StashedVehicle
 	[Test, ExecutionPriority(Priority.AboveNormal)]
 	private void Create()
 	{
+		const int Drivers = 2;
+		const int Passengers = 2;
+		const int Animals = 1;
+
 		Map map = Find.CurrentMap;
 		Assert.IsNotNull(map);
 		RimWorld.Planet.World world = Find.World;
@@ -96,9 +100,9 @@ internal sealed class UnitTest_StashedVehicle
 
 		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
 		{
-			drivers = 2,
-			passengers = 2,
-			animals = 1
+			drivers = Drivers,
+			passengers = Passengers,
+			animals = Animals
 		});
 		group.BoardAll();
 		VehicleCaravan vehicleCaravan =
@@ -111,7 +115,7 @@ internal sealed class UnitTest_StashedVehicle
 		using ScopeWorldObject swc = new(stashedVehicle);
 		Expect.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle));
 		CheckAnyNonWorldPawns.Invoke(caravan, null);
-		Expect.AreEqual(caravan.PawnsListForReading.Count, 5);
+		Expect.AreEqual(caravan.PawnsListForReading.Count, Drivers + Passengers + Animals);
 	}
 
 	[Test]
@@ -205,7 +209,7 @@ internal sealed class UnitTest_StashedVehicle
 		mergedVehicleCaravan.RecacheVehicles();
 		Expect.AreEqual(mergedVehicleCaravan.PawnsListForReading.Count, 1 + group.pawns.Count);
 		Expect.All(excessPawns, pawn => mergedVehicleCaravan.PawnsListForReading.Contains(pawn));
-		Expect.AreEqual(mergedVehicleCaravan.DismountedPawns.Count(), ExcessPawnCount);
+		Expect.AreEqual(mergedVehicleCaravan.DismountedPawnsListForReading.Count, ExcessPawnCount);
 	}
 
 	[Test]

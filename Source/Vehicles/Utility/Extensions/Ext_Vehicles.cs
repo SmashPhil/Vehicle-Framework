@@ -23,6 +23,34 @@ public static class Ext_Vehicles
 {
 	private static readonly HashSet<VehicleDef> UniqueVehicleDefsSet = [];
 
+	public static void SpawnPawnNearVehicle(this VehiclePawn vehicle, Pawn pawn)
+	{
+		if (pawn.Spawned)
+			return;
+
+		CellRect occupiedRect = vehicle.OccupiedRect().ExpandedBy(1);
+		IntVec3 loc = vehicle.Position;
+		if (occupiedRect.EdgeCells
+		 .Where(cell => cell.InBounds(vehicle.Map) && cell.Standable(vehicle.Map) &&
+				!cell.GetThingList(vehicle.Map).NotNullAndAny(thing => thing is Pawn))
+		 .TryRandomElement(out IntVec3 newLoc))
+		{
+			loc = newLoc;
+		}
+
+		GenSpawn.Spawn(pawn, loc, vehicle.MapHeld);
+		if (!loc.Standable(vehicle.Map))
+		{
+			pawn.pather.TryRecoverFromUnwalkablePosition(false);
+		}
+
+		if (vehicle.lord is not null)
+		{
+			pawn.GetLord()?.Notify_PawnLost(pawn, PawnLostCondition.ForcedToJoinOtherLord);
+			vehicle.lord.AddPawn(pawn);
+		}
+	}
+
 	// NOTE - Separated method hook for SOS2 to patch. This is intentionally redundant.
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool IsRoofed(IntVec3 cell, Map map)
@@ -566,10 +594,10 @@ public static class Ext_Vehicles
 	public static VehicleCaravan GetVehicleCaravan(this Pawn pawn)
 	{
 		IThingHolder current = pawn.ParentHolder;
-		while (current is VehicleRoleHandler handler)
+		while (current.GetVehicle() is { } vehicle)
 		{
-			Assert.AreNotEqual(current, handler.vehicle.ParentHolder);
-			current = handler.vehicle.ParentHolder;
+			Assert.AreNotEqual(current, vehicle.ParentHolder);
+			current = vehicle.ParentHolder;
 		}
 		return current as VehicleCaravan;
 	}
@@ -804,9 +832,17 @@ public static class Ext_Vehicles
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static VehiclePawn GetVehicle(this Pawn pawn)
 	{
-		return (pawn.ParentHolder as VehicleRoleHandler)?.vehicle;
+		return pawn.ParentHolder.GetVehicle();
 	}
 
+	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static VehiclePawn GetVehicle(this IThingHolder thingHolder)
+	{
+		return (thingHolder as VehicleRoleHandler)?.vehicle ??
+			(thingHolder as Pawn_InventoryTracker)?.pawn as VehiclePawn;
+	}
+
+	// TODO 1.7 - Remove
 	/// <summary>
 	/// Check if <paramref name="pawn"/> is in a vehicle.
 	/// </summary>
@@ -815,7 +851,7 @@ public static class Ext_Vehicles
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InVehicle(this Pawn pawn)
 	{
-		return pawn.ParentHolder is VehicleRoleHandler;
+		return pawn.ParentHolder is VehicleRoleHandler or Pawn_InventoryTracker { pawn: VehiclePawn };
 	}
 
 	/// <summary>
@@ -826,9 +862,7 @@ public static class Ext_Vehicles
 	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static bool InVehicle(this Thing thing)
 	{
-		if (thing is Pawn pawn)
-			return InVehicle(pawn: pawn);
-		return thing.ParentHolder is Pawn_InventoryTracker { pawn: VehiclePawn };
+		return thing.ParentHolder is VehicleRoleHandler or Pawn_InventoryTracker { pawn: VehiclePawn };
 	}
 
 	[MustUseReturnValue]
