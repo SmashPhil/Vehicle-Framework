@@ -28,8 +28,11 @@
     </PropertyGroup>
 
     <!-- Build Events -->
+    <Target Name="PostClean" AfterTargets="Clean">
+	    <RemoveDir Directories="$(OutDir)"/>
+    </Target>
 
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
         <!-- Localization Files -->
 	    <!--
         <Exec Condition="'$(OS)' == 'Windows_NT'"

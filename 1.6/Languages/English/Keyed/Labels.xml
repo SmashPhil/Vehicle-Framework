@@ -47,7 +47,7 @@
   <VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
   <!-- Info Card -->
   
-  <VF_StatsReport_CargoWeight>Cargo: {0} = {1}</VF_StatsReport_CargoWeight>
+  <VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
   <VF_StatsReport_Deployed>Deployed</VF_StatsReport_Deployed>
   
   <VF_CrewCount>Crew</VF_CrewCount>
