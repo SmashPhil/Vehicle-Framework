@@ -64,6 +64,20 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 		}
 	}
 
+	/// <summary>
+	/// Vehicle this overlay is currently attached to.
+	/// </summary>
+	/// <remarks>
+	/// Can be <see langword="null"/> if the GraphicOverlay belongs to a <see cref="Vehicles.VehicleDef"/>. Overlays are copied when a vehicle is
+	/// created so for def-overlays (eg. drawing in the <see cref="MainTabWindow_Architect"/> menu) <see cref="VehicleDef"/> should be used instead.
+	/// </remarks>
+	public VehiclePawn Vehicle => vehicle;
+
+	/// <summary>
+	/// VehicleDef this overlay is defined from.
+	/// </summary>
+	public VehicleDef VehicleDef => vehicleDef;
+
 	public int MaterialCount => vehicle?.MaterialCount ?? vehicleDef.MaterialCount;
 
 	public PatternDef PatternDef => PatternDefOf.Default;
@@ -278,7 +292,8 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 
 	(int width, int height) IBlitTarget.TextureSize(in BlitRequest request)
 	{
-		Texture texture = Graphic.MatAt(request.rot)?.mainTexture;
+		Material material = Graphic.MatAt(request.rot);
+		Texture texture = material ? material.mainTexture : null;
 		return texture != null ? (texture.width, texture.height) : (0, 0);
 	}
 

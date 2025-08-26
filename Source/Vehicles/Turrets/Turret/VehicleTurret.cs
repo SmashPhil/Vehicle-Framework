@@ -182,7 +182,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
 	public int CurrentTurretFiring { get; set; }
 
-	public bool IsManned { get; private set; }
+	// NOTE - VehicleMapFramework accesses the setter via reflection.
+	public bool IsManned { get; [UsedImplicitly] private set; }
 
 	public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
 
@@ -504,9 +505,13 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 	public void RecacheMannedStatus()
 	{
 		IsManned = true;
+
+		if (VehicleMod.settings.debug.debugShootAnyTurret)
+			return;
+
 		foreach (VehicleRoleHandler handler in vehicle.handlers)
 		{
-			if (handler.role.HandlingTypes.HasFlag(HandlingType.Turret) &&
+			if ((handler.role.HandlingTypes & HandlingType.Turret) == HandlingType.Turret &&
 				(handler.role.TurretIds.Contains(key) || handler.role.TurretIds.Contains(groupKey)))
 			{
 				if (!handler.RoleFulfilled)
@@ -516,8 +521,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 				}
 			}
 		}
-		// Only if debug shoot any turret = true do we set satisfied to true anyways.
-		IsManned |= VehicleMod.settings.debug.debugShootAnyTurret;
 	}
 
 	public bool GroupsWith(VehicleTurret turret)
