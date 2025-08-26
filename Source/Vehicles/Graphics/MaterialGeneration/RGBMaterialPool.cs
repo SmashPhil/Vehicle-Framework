@@ -338,6 +338,7 @@ public static class RGBMaterialPool
 			}
 
 			Cache.Remove(target);
+			UiCache.Remove(target);
 			OnTargetRemoved?.Invoke(target);
 			GraphicDatabaseRGB.Remove(target);
 			Debug.Message($"Removed {target} from RGBMaterialPool and cleared all entries.");
@@ -355,6 +356,7 @@ public static class RGBMaterialPool
 		}
 
 		Cache.Clear();
+		UiCache.Clear();
 	}
 
 	[DebugOutput(VehicleHarmony.VehiclesLabel)]

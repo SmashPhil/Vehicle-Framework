@@ -137,9 +137,13 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	{
 		get
 		{
-			resolvedLoadCargoTexture ??=
-				ContentFinder<Texture2D>.Get(drawProperties.loadCargoTexPath, false)
-				?? VehicleTex.PackCargoIcon[(uint)type];
+			if (!resolvedLoadCargoTexture)
+			{
+				resolvedLoadCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.loadCargoTexPath, false);
+				if (!resolvedLoadCargoTexture)
+					resolvedLoadCargoTexture = VehicleTex.PackCargoIcon[(uint)type];
+				Trace.IsTrue(resolvedLoadCargoTexture, "Unable to load LoadCargo icon.");
+			}
 			return resolvedLoadCargoTexture;
 		}
 	}
@@ -151,9 +155,13 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	{
 		get
 		{
-			resolvedCancelCargoTexture ??=
-				ContentFinder<Texture2D>.Get(drawProperties.cancelCargoTexPath, false)
-				?? VehicleTex.CancelPackCargoIcon[(uint)type];
+			if (!resolvedCancelCargoTexture)
+			{
+				resolvedCancelCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.cancelCargoTexPath, false);
+				if (!resolvedCancelCargoTexture)
+					resolvedCancelCargoTexture = VehicleTex.CancelPackCargoIcon[(uint)type];
+				Trace.IsTrue(resolvedCancelCargoTexture, "Unable to load CancelCargo icon.");
+			}
 			return resolvedCancelCargoTexture;
 		}
 	}
@@ -707,7 +715,10 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
 		Texture2D mainTex = graphicVehicle.TexAt(request.rot);
 		Material material = null;
-		Shader shader = request.patternData.patternDef?.ShaderTypeDef?.Shader ?? graphicVehicle.Shader;
+		Shader shader = request.patternData.patternDef?.ShaderTypeDef?.Shader;
+		if (!shader)
+			shader = graphicVehicle.Shader;
+
 		if (shader.SupportsRGBMaskTex())
 		{
 			RGBMaterialPool.SetProperties(this, request.patternData, graphicVehicle.TexAt,

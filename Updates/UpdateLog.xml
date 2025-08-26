@@ -8,7 +8,9 @@
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
 Another round of fixes.  This latest update should be fairly stable now, so I will be transitioning slowly over to working on features.  
 &lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added restrictions to when Load Pawn gizmo should show on an entity.
+- Added restrictions to when "Transfer to Vehicle" gizmo should show on an entity.
+
+- Disabled "Load Pawn" gizmo.
 
 - Disabled feature where vehicles could travel at nighttime. Colonists will stop to rest like vanilla caravans.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
@@ -61,11 +63,6 @@ Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyf
       <url>https://github.com/SmashPhil/Vehicles</url>
     </li>
     <li>
-      <name>Discord</name>
-      <icon>discordIcon</icon>
-      <url>https://discord.gg/zXDyfWQ</url>
-    </li>
-    <li>
       <name>Steam</name>
       <icon>steamIcon</icon>
       <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
@@ -79,9 +76,9 @@ Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyf
       <url>https://www.patreon.com/smashphil</url>
     </li>
     <li>
-      <name>Cursed Crew</name>
-      <icon>cursedCrewIcon</icon>
-      <url>https://discord.gg/NNe2VxAU7Z</url>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
     </li>
   </leftIconBar>
 </UpdateLog>

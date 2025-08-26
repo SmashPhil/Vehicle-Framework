@@ -152,25 +152,25 @@ public class ITab_Vehicle_Upgrades : ITab
 
 	private void RecacheTurretRenderers()
 	{
-		if (!SelectedNode.upgrades.NullOrEmpty())
+		if (SelectedNode.upgrades.NullOrEmpty())
+			return;
+
+		foreach (Upgrade upgrade in InfoNode.upgrades)
 		{
-			foreach (Upgrade upgrade in InfoNode.upgrades)
+			if (upgrade is not TurretUpgrade turretUpgrade)
+				continue;
+
+			if (!turretUpgrade.turrets.NullOrEmpty())
 			{
-				if (upgrade is TurretUpgrade turretUpgrade)
+				foreach (VehicleTurret turret in turretUpgrade.turrets)
 				{
-					if (!turretUpgrade.turrets.NullOrEmpty())
-					{
-						foreach (VehicleTurret turret in turretUpgrade.turrets)
-						{
-							turret.ResolveGraphics(Vehicle.VehicleDef, forceRegen: true);
-							renderTurrets.Add(turret);
-						}
-					}
-					if (!turretUpgrade.removeTurrets.NullOrEmpty())
-					{
-						excludeTurrets.AddRange(turretUpgrade.removeTurrets);
-					}
+					turret.ResolveGraphics(Vehicle.VehicleDef, forceRegen: true);
+					renderTurrets.Add(turret);
 				}
+			}
+			if (!turretUpgrade.removeTurrets.NullOrEmpty())
+			{
+				excludeTurrets.AddRange(turretUpgrade.removeTurrets);
 			}
 		}
 	}

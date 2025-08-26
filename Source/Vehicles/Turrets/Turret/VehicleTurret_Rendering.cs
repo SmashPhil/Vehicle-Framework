@@ -356,7 +356,7 @@ public partial class VehicleTurret
 		ref readonly TransformData transformData, float rotation, float parentRotation,
 		bool forceDraw = false)
 	{
-		if (!ShouldDraw && !forceDraw)
+		if (NoGraphic || !ShouldDraw && !forceDraw)
 		{
 			// Skip rendering if health percent is below set amount for rendering
 			return new PreRenderResults { valid = true, draw = false };
@@ -403,6 +403,7 @@ public partial class VehicleTurret
 			// evaluating further, the main turret body and all subgraphics will not be drawn.
 			return;
 		}
+
 		if (TurretGraphics.NullOrEmpty())
 			return;
 
@@ -564,14 +565,14 @@ public partial class VehicleTurret
 
 	IEnumerable<RenderData> IBlitTarget.GetRenderData(Rect rect, BlitRequest request)
 	{
+		if (NoGraphic)
+			yield break;
+
 		VehicleDef graphicDef = vehicleDef ?? request.vehicleDef;
 		Assert.IsNotNull(graphicDef);
 
 		Rect turretRect = VehicleGraphics.TurretRect(rect, graphicDef, this, request.rot);
-		if (!NoGraphic)
-		{
-			yield return GetRenderDataFor(this, this, turretRect, request, Graphic);
-		}
+		yield return GetRenderDataFor(this, this, turretRect, request, Graphic);
 		if (!TurretGraphics.NullOrEmpty())
 		{
 			foreach (TurretDrawData turretDrawData in TurretGraphics)
@@ -740,7 +741,7 @@ public partial class VehicleTurret
 			this.SetDirty();
 		}
 
-		if (cachedMaterial is null || forceRegen)
+		if (!cachedMaterial || forceRegen)
 		{
 			cachedMaterial = cachedGraphic?.MatAt(Rot8.North, vehicle);
 		}
