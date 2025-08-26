@@ -19,6 +19,8 @@ namespace Vehicles;
 public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFields,
                           IBlitTarget
 {
+	private static readonly int NullShaderErrorCode = "NullShaderVehicleDef".GetHashCode();
+
 	[PostToSettings]
 	public VehicleEnabled.For enabled = VehicleEnabled.For.Everyone;
 
@@ -715,9 +717,13 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
 		Texture2D mainTex = graphicVehicle.TexAt(request.rot);
 		Material material = null;
-		Shader shader = request.patternData.patternDef?.ShaderTypeDef?.Shader;
-		if (!shader)
-			shader = graphicVehicle.Shader;
+		Shader shader = graphicVehicle.Shader;
+		if (!shader && RGBMaterialPool.TargetCached(this))
+		{
+			Log.ErrorOnce($"Null shader for {this} when requesting blit data. Defaulting to pattern shader.",
+				NullShaderErrorCode);
+			shader = request.patternData.patternDef?.ShaderTypeDef?.Shader;
+		}
 
 		if (shader.SupportsRGBMaskTex())
 		{

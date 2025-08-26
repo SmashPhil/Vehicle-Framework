@@ -64,6 +64,9 @@ internal sealed class UnitTest_HotReload
 			{
 				foreach (VehicleTurret turret in props.turrets)
 				{
+					if (turret.NoGraphic)
+						continue;
+
 					if (turret.GraphicData.shaderType.Shader.SupportsRGBMaskTex())
 						Expect.IsTrue(cacheTargets.Contains(turret));
 					if (!turret.TurretGraphics.NullOrEmpty())

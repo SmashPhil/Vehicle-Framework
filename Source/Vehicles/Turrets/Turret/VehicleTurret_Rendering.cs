@@ -585,7 +585,7 @@ public partial class VehicleTurret
 		static RenderData GetRenderDataFor(VehicleTurret turret, IMaterialCacheTarget target, Rect turretRect,
 			BlitRequest request, Graphic_Turret graphic)
 		{
-			bool canMask = graphic.Shader.SupportsRGBMaskTex() || graphic.Shader.SupportsMaskTex();
+			bool canMask = graphic.Shader.SupportsRGBMaskTex();
 			Material material = canMask ? graphic.MatAtFull(Rot8.North) : null;
 			if (graphic.Shader.SupportsRGBMaskTex())
 				material = RGBMaterialPool.GetUi(target, request.rot);

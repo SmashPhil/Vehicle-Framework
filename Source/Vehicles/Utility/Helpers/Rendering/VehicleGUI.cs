@@ -210,7 +210,7 @@ public static class VehicleGui
 	{
 		Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, graphicOverlay, rot);
 		Graphic graphic = graphicOverlay.Graphic;
-		bool canMask = graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex();
+		bool canMask = graphic.Shader.SupportsRGBMaskTex();
 
 		Material material = canMask ? RGBMaterialPool.GetUi(graphicOverlay, rot) : null;
 
@@ -254,7 +254,7 @@ public static class VehicleGui
 				{
 					Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot);
 					Graphic_Turret graphic = turretDrawData.graphic;
-					bool canMask = graphic.Shader.SupportsMaskTex() || graphic.Shader.SupportsRGBMaskTex();
+					bool canMask = graphic.Shader.SupportsRGBMaskTex();
 					Material material = canMask ? RGBMaterialPool.GetUi(turretDrawData, Rot4.North) : null;
 					if (canMask && turret.def.matchParentColor)
 					{
@@ -281,8 +281,7 @@ public static class VehicleGui
 		Rect turretRect =
 			VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot, iconScale: iconScale);
 		Graphic_Turret graphic = turret.Graphic;
-		bool canMask = turret.Graphic.Shader.SupportsMaskTex() ||
-			turret.Graphic.Shader.SupportsRGBMaskTex();
+		bool canMask = turret.Graphic.Shader.SupportsRGBMaskTex();
 		Material material = canMask ? RGBMaterialPool.GetUi(turret, Rot4.North) : null;
 		if (canMask && turret.def.matchParentColor)
 		{
