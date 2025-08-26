@@ -6,6 +6,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
+using SmashTools.Targeting;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Compatibility;
@@ -1157,7 +1158,7 @@ public partial class VehiclePawn
 			}
 		}
 
-		if (Prefs.DevMode)
+		if (DebugSettings.ShowDevGizmos)
 		{
 			rect.x -= rect.width;
 			usedWidth += rect.width;
@@ -1171,8 +1172,13 @@ public partial class VehiclePawn
 					{
 						options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
 					}
-#if DEBUG || ANIMATOR
+#if ANIMATOR
 					options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInNewAnimator));
+#endif
+
+#if RAIDERS
+					Editor.PathPreview previewer = new(this);
+					options.Add(new FloatMenuOption("Path Preview", previewer.Start));
 #endif
 					if (options.Count > 0)
 					{

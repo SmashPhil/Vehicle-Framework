@@ -1,52 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.6.2088</currentVersion>
+  <currentVersion>1.6.2089</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
-Another round of fixes.  This latest update should be fairly stable now, so I will be transitioning slowly over to working on features.  
+ 
 &lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Added restrictions to when "Transfer to Vehicle" gizmo should show on an entity.
 
-- Disabled "Load Pawn" gizmo.
-
-- Disabled feature where vehicles could travel at nighttime. Colonists will stop to rest like vanilla caravans.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Certain upgrades from mods like SOS2 would fail to load correctly from a save.
 
-- Trading animals would not remove them from the vehicle caravan, resulting in infinite trades.
-
-- Vehicles would be unable to path through tight corridors that were equal in width to the vehicle.
-
-- Recovering stashed vehicles with more pawns than roles would remove pawns from caravan and not reassign.
-
-- Exiting to main menu when world was still generating vehicle path chunks would fail to cancel the task.
-
-- Loading cargo would attempt to reload the turret even with no ammunition filter.
-
-- Some caravan actions like trade requests were duplicated, resulting in double acceptance / rewards.
-
-- Cargo distribution for caravan formation wouldn't prioritize available vehicles.
-
-- Vehicle icons would draw offset or scaled in various ways from render texture blit. Switched back to Graphics-based rendering and added shader clipping.
-
-- Vehicle turrets from upgrades didn't recache their root positions, resulting in projectiles launching from vehicle center.
-
-- Vehicle turret layering in icons not applied correctly.
-
-- Upgrade nodes would not reset color for the next node, resulting in batches of nodes being darkened after a disabled node.
-
-- Prisoners would be distributed to vehicle roles they cannot perform, breaking the colonist bar if downed.
-
-- Hyperlinks in vehicle info card would overlap.
 &lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Constructoids were unable to deconstruct vehicles.
 
-- Aerial vehicle flight animations started from surface tile position for SOS2 space objects.
-
-- Parties or other misc. gatherings with Orion's Hospitality enabled would attempt to invite vehicles to join in, throwing errors until the gathering ended.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->

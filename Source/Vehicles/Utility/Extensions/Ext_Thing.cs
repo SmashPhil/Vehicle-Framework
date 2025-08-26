@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using Verse;
@@ -7,6 +8,7 @@ using Verse.AI;
 
 namespace Vehicles;
 
+[PublicAPI]
 public static class Ext_Thing
 {
 	public static bool ShouldAlwaysTransferToVehiclesCargo(this Pawn pawn)
@@ -21,11 +23,17 @@ public static class Ext_Thing
 
 	public static bool CanBeHauledToVehicle(this Thing thing)
 	{
-		if (thing is Pawn pawn && pawn.Faction == Faction.OfPlayer && (pawn.Downed || pawn.IsAnimal))
-			return true;
-
 		if (!thing.Spawned)
 			return false;
+
+		if (thing is Pawn pawn)
+		{
+			if (pawn.Faction == Faction.OfPlayer && (pawn.Downed || pawn.IsAnimal || pawn.IsColonyMech))
+				return true;
+
+			if (pawn.IsPrisonerOfColony)
+				return true;
+		}
 
 		if (thing.Map.IsPlayerHome && !thing.Map.areaManager.Home[thing.Position])
 			return false;
