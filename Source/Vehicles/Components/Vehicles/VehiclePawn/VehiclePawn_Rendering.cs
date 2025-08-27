@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define LOAD_PAWN_GIZMO
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
@@ -582,7 +584,7 @@ public partial class VehiclePawn
 			{
 				defaultLabel = "DesignatorCancel".Translate(),
 				icon = VehicleDef.CancelCargoIcon,
-				hotKey = KeyBindingDefOf.Cancel,
+				hotKey = KeyBindingDefOf.Designator_Cancel,
 				action = delegate
 				{
 					Map.GetCachedMapComponent<VehicleReservationManager>()

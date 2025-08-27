@@ -77,7 +77,7 @@ public partial class VehiclePawn
 		TransferableOneWay transferable = JobDriver_LoadVehicle.GetTransferable(cargoToLoad, this, thing);
 		if (transferable != null)
 		{
-			CountToTransferFieldRef.Invoke(transferable) = transferable.CountToTransfer - stackCount;
+			CountToTransferFieldRef.Invoke(transferable) = transferable.CountToTransfer - count;
 			if (transferable.CountToTransfer <= 0)
 			{
 				cargoToLoad.Remove(transferable);
