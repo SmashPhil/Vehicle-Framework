@@ -27,7 +27,7 @@ internal sealed class UnitTest_GasGrid : UnitTest_MapTest
 			HitboxTester<bool> gasTester = new(vehicle, root,
 				gasGrid.AnyGasAt,
 				// Gas can only occupy if vehicle Fillage != Full
-				(gasAt) => gasAt == (!vehicle.Spawned || !blocksGas),
+				(gasAt, _) => gasAt == (!vehicle.Spawned || !blocksGas),
 				(_) => gasGrid.Debug_ClearAll());
 			gasTester.Start();
 

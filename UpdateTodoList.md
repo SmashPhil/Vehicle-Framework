@@ -1,6 +1,5 @@
-- Rebuild entire solution under RelWithDbInfo
-- Verify DevTools and test projects are removed
-- Repackage translation files from spreadsheet
-- Verify UpdateLog version, testing update flag, and text
-- Update via PublisherPlus (ensure Ignore/ folders, source code, and git files are excluded)
-- Archive UpdateLog and clear it for next version
+## Vehicle Mods
+The following need validation to ensure no api breaking changes were made.
+- Save Our Ship 2
+- Vehicle Map Framework
+- Trains of the Rim

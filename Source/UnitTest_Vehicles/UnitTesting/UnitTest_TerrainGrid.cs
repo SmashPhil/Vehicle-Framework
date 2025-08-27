@@ -95,10 +95,17 @@ internal sealed class UnitTest_TerrainGrid : UnitTest_MapTest
 	private static bool AreaCost(VehicleDef vehicleDef, VehiclePathGrid pathGrid,
 		ref readonly CellRect cellRect, TerrainDef terrainDef)
 	{
+		int weatherDusting = vehicleDef.properties.customWeatherCosts.TryGetValue(WeatherBuildupCategory.None);
 		int expected = VehiclePathGrid.TerrainCostAt(vehicleDef, terrainDef);
 		foreach (IntVec3 cell in cellRect)
 		{
-			if (pathGrid.CalculatedCostAt(cell) != expected)
+			// TODO - Fix when refactoring with mock vehicles. Lazy workaround since
+			// these tests should be using mock vehicles anyways.
+			int actualCost = pathGrid.CalculatedCostAt(cell);
+			if (actualCost != VehiclePathGrid.ImpassableCost)
+				actualCost -= weatherDusting;
+
+			if (actualCost != expected)
 				return false;
 		}
 		return true;

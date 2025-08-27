@@ -86,13 +86,13 @@ internal abstract class UnitTest_MapTest
 	{
 		private readonly VehiclePawn vehicle;
 		private readonly Func<IntVec3, T> valueGetter;
-		private readonly Func<T, bool> validator;
+		private readonly Func<T, IntVec3, bool> validator;
 		private readonly Action<IntVec3> reset;
 
 		private readonly CellRect rect;
 
 		public HitboxTester(VehiclePawn vehicle, IntVec3 root, Func<IntVec3, T> valueGetter,
-			Func<T, bool> validator, Action<IntVec3> reset = null)
+			Func<T, IntVec3, bool> validator, Action<IntVec3> reset = null)
 		{
 			this.vehicle = vehicle;
 			this.valueGetter = valueGetter;
@@ -146,7 +146,7 @@ internal abstract class UnitTest_MapTest
 		private bool Valid(IntVec3 cell, bool expected)
 		{
 			T current = valueGetter(cell);
-			bool value = validator(current);
+			bool value = validator(current, cell);
 			bool result = value == expected;
 			return result;
 		}

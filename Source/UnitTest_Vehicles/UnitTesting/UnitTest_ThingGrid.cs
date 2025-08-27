@@ -26,7 +26,7 @@ internal sealed class UnitTest_ThingGrid : UnitTest_MapTest
 			ThingGrid thingGrid = map.thingGrid;
 			HitboxTester<VehiclePawn> positionTester = new(vehicle, root,
 				(cell) => thingGrid.ThingAt(cell, ThingCategory.Pawn) as VehiclePawn,
-				(thing) => thing == vehicle);
+				(thing, _) => thing == vehicle);
 			positionTester.Start();
 
 			GenSpawn.Spawn(vehicle, root, map);

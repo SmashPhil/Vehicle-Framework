@@ -22,7 +22,7 @@ internal sealed class UnitTest_CoverGrid : UnitTest_MapTest
 			GenSpawn.Spawn(vehicle, root, map);
 			HitboxTester<Thing> coverTester = new(vehicle, root,
 				(cell) => coverGrid[cell],
-				(thing) => thing == vehicle);
+				(thing, _) => thing == vehicle);
 			coverTester.Start();
 
 			// Validate spawned vehicle shows up in cover grid

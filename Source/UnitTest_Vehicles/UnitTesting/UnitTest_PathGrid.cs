@@ -30,7 +30,7 @@ internal sealed class UnitTest_PathGrid : UnitTest_MapTest
 
 			HitboxTester<int> positionTester = new(vehicle, root,
 				(cell) => pathGrid.CalculatedCostAt(cell),
-				(cost) => cost == VehiclePathGrid.TerrainCostAt(vehicle.VehicleDef, terrainDef));
+				(cost, cell) => cost == VehiclePathGrid.CalculatePathCostFor(vehicle.VehicleDef, map, cell));
 			positionTester.Start();
 
 			// Spawn
@@ -54,7 +54,7 @@ internal sealed class UnitTest_PathGrid : UnitTest_MapTest
 			PathGrid vanillaPathGrid = map.pathing.Normal.pathGrid;
 			positionTester = new HitboxTester<int>(vehicle, root,
 				(cell) => vanillaPathGrid.CalculatedCostAt(cell, true, IntVec3.Invalid),
-				(cost) => cost == terrainDef.pathCost ||
+				(cost, _) => cost == terrainDef.pathCost ||
 					(cost == Verse.AI.PathGrid.ImpassableCost &&
 						terrainDef.passability == Traversability.Impassable));
 			positionTester.Start();

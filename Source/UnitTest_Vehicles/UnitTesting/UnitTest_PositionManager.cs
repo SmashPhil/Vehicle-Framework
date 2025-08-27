@@ -24,7 +24,7 @@ internal sealed class UnitTest_PositionManager : UnitTest_MapTest
 			GenSpawn.Spawn(vehicle, root, map);
 			HitboxTester<VehiclePawn> positionTester = new(vehicle, root,
 				positionManager.ClaimedBy,
-				(claimant) => claimant == vehicle);
+				(claimant, _) => claimant == vehicle);
 			positionTester.Start();
 
 			// Validate spawned vehicle claims rect in position manager
