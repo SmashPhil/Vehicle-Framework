@@ -31,6 +31,7 @@
   <VF_TransferToVehicle_Cancel_Desc>Cancel transfer of selected thing(s) to any vehicle's cargo.</VF_TransferToVehicle_Cancel_Desc>
   <!-- UI / Buttons -->
   
+  <VF_RandomVehicle>Random Vehicle</VF_RandomVehicle>
   <VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
   <VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
   <VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
