@@ -10,6 +10,7 @@ using Verse.Sound;
 
 namespace Vehicles.Editor;
 
+[StaticConstructorOnStartup]
 internal class PathPreview : ITargeter, IDisposable
 {
 	private static readonly Texture2D MouseAttachment =
