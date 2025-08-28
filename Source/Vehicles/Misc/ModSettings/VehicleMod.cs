@@ -186,7 +186,16 @@ public class VehicleMod : Mod
 	internal static void PopulateCachedFields()
 	{
 		using ProfilerBlock pb = new("Cache Settings Types");
-		QuickIter.EnumerateAllModTypes(CacheForType);
+		try
+		{
+			QuickIter.EnumerateAllModTypes(CacheForType);
+		}
+		catch (Exception ex)
+		{
+			Log.Error($"Exception thrown populating field cache for mod settings. Disable modifiable settings...\n{ex}");
+			settings.main.modifiableSettings = false;
+			CachedFields?.Clear();
+		}
 	}
 
 	private static void CacheForType(Type type)
