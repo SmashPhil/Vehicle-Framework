@@ -10,10 +10,9 @@ using Verse.Sound;
 
 namespace Vehicles.Editor;
 
-[StaticConstructorOnStartup]
 internal class PathPreview : ITargeter, IDisposable
 {
-	private static readonly Texture2D MouseAttachment =
+	private readonly Texture2D mouseAttachment =
 		ContentFinder<Texture2D>.Get("UI/Overlays/WaypointMouseAttachment");
 
 	private readonly VehiclePawn vehicle;
@@ -57,7 +56,7 @@ internal class PathPreview : ITargeter, IDisposable
 			Event.current.Use();
 			return;
 		}
-		GenUI.DrawMouseAttachment(MouseAttachment);
+		GenUI.DrawMouseAttachment(mouseAttachment);
 
 		IntVec3 mouseCell = UI.MouseCell();
 		if (!mouseCell.InBounds(vehicle.Map))

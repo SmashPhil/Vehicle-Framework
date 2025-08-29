@@ -1,18 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.6.2090</currentVersion>
+  <currentVersion>1.6.2091</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;Notes&lt;/title&gt;&lt;font&gt;Small&lt;/font&gt;
- 
+Hotfix for issues related to patch 2088.
 &lt;title&gt;Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
+- Re-enabled Load Pawn gizmo.  After some feedback regarding the lack of options for loading mechs and prisoners, I will temporarily be enabling the gizmo while the Load Cargo dialog undergoes its rework.  I have also added animals, mechs, and prisoners do the list of pawns the Transfer to Vehicle gizmo will show on.
+- Added scenario part for starting with vehicles.
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
-&lt;title&gt;Compatibility Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-
+- Default pattern for GUI rendering attempted to set pattern properties even when the vehicle did not use the appropriate shader.
+- Cargo loading would only subtract 1 count after loading a stack.
+- Assign Seat dialog would attempt to sort on unnamed pawns like those from AutoCleaner.
+- Deferred grid generation would get requests before initialization. This primarily applies to scenarios with starter vehicles.
+- Man in Black event would trigger if remaining pawns were inside vehicles.
+- VehicleTurret pre-render step not taking invisible turrets into account.
+- Vehicle collisions would not take friendly fire chance into account, being unable to run over non-hostile pawns.
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->
