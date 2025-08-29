@@ -18,5 +18,8 @@
 
 It has taken the following pawns down with it:
 {1}</VF_BoatSunkWithPawnsDesc>
+  <!-- Alerts -->
+  
+  <VF_IdleInVehicle>These colonists are sitting idly in a vehicle:\n{0}\n\nYou should probably find them something productive to do.</VF_IdleInVehicle>
 </LanguageData>
 

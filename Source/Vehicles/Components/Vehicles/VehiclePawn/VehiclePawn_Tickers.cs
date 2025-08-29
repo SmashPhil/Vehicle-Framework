@@ -7,12 +7,18 @@ namespace Vehicles;
 
 public partial class VehiclePawn
 {
+	public const int HoursIdleToAlert = 2;
+	public const int TicksTillAlert = GenDate.TicksPerHour * HoursIdleToAlert;
+
 	public const int MaxTickInterval = GenTicks.TickRareInterval;
 
 	[Unsaved]
 	public VehicleSustainers sustainers;
 
+	private int ticksSinceBoarded;
 	private List<TimedExplosion> explosives = [];
+
+	public bool IdlePawnsInVehicle => ticksSinceBoarded >= TicksTillAlert && AllPawnsAboard.Count > 0;
 
 	// Vehicles should never be suspended since there is no logic for handling passengers in a
 	// suspended vehicle. Suspending the vehicle would also suspend all passengers by proxy.
@@ -112,7 +118,14 @@ public partial class VehiclePawn
 		ageTracker.AgeTickInterval(delta);
 		records.RecordsTickInterval(delta);
 		if (!this.IsWorldPawn())
+		{
 			jobs.JobTrackerTickInterval(delta);
+		}
+
+		if (Spawned && !vehiclePather.Moving && ticksSinceBoarded < TicksTillAlert)
+		{
+			ticksSinceBoarded += delta;
+		}
 	}
 
 	private void TickHandlers()

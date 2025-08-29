@@ -15,7 +15,7 @@ public partial class VehiclePawn
 	// Assigned seat for to boarding role
 	private List<AssignedSeat> boardingAssignments = [];
 
-	// TODO 1.7 - Chance access modifier
+	// TODO 1.7 - Change access modifier
 	public List<VehicleRoleHandler> handlers = [];
 
 	/* ----- Caches for VehicleHandlers ----- */
@@ -25,6 +25,7 @@ public partial class VehiclePawn
 	public List<VehicleRoleHandler> OccupiedHandlers { get; private set; } = [];
 
 	public List<Pawn> AllPawnsAboard { get; private set; } = [];
+
 	public List<Pawn> AllColonistsAboard { get; private set; } = [];
 
 	public Dictionary<HandlingType, List<Pawn>> PawnsByHandlingType { get; private set; } = new()

@@ -10,228 +10,227 @@ using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
+                                   IAnimationTarget, IAnimator, ITransformable,
+                                   IEventManager<VehicleEventDef>, IMaterialCacheTarget
 {
-	public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
-	                                   IAnimationTarget, IAnimator, ITransformable,
-	                                   IEventManager<VehicleEventDef>, IMaterialCacheTarget
+	public EventManager<VehicleEventDef> EventRegistry { get; set; }
+
+	public VehicleDef VehicleDef => def as VehicleDef;
+
+	public int AverageSkillOfCapablePawns(SkillDef skill)
 	{
-		public EventManager<VehicleEventDef> EventRegistry { get; set; }
+		if (AllCapablePawns.Count == 0)
+			return 0;
 
-		public VehicleDef VehicleDef => def as VehicleDef;
-
-		public int AverageSkillOfCapablePawns(SkillDef skill)
+		int value = 0;
+		foreach (Pawn pawn in AllCapablePawns)
 		{
-			if (AllCapablePawns.Count == 0)
-				return 0;
-
-			int value = 0;
-			foreach (Pawn pawn in AllCapablePawns)
-			{
-				if (pawn.skills.GetSkill(skill) is { } record)
-					value += record.Level;
-			}
-			value /= AllCapablePawns.Count;
-			return value;
+			if (pawn.skills.GetSkill(skill) is { } record)
+				value += record.Level;
 		}
+		value /= AllCapablePawns.Count;
+		return value;
+	}
 
-		private void InitializeVehicle()
+	private void InitializeVehicle()
+	{
+		if (handlers is { Count: > 0 })
+			return;
+
+		cargoToLoad ??= [];
+		boardingAssignments ??= [];
+
+		if (!VehicleDef.properties.roles.NullOrEmpty())
 		{
-			if (handlers is { Count: > 0 })
-				return;
-
-			cargoToLoad ??= [];
-			boardingAssignments ??= [];
-
-			if (!VehicleDef.properties.roles.NullOrEmpty())
+			foreach (VehicleRole role in VehicleDef.properties.roles)
 			{
-				foreach (VehicleRole role in VehicleDef.properties.roles)
+				handlers.Add(new VehicleRoleHandler(this, role));
+			}
+		}
+		handlers.Sort();
+
+		RecacheComponents();
+		RecacheMovementPermissions();
+	}
+
+	public override void PostMapInit()
+	{
+		vehiclePather.TryResumePathingAfterLoading();
+	}
+
+	public virtual void PostGenerationSetup()
+	{
+		ageTracker.AgeBiologicalTicks = 0;
+		ageTracker.AgeChronologicalTicks = 0;
+		ageTracker.BirthAbsTicks = 0;
+		statHandler.InitializeComponents();
+		this.RegisterEvents();
+		InitializeVehicle();
+		RegenerateUnsavedComponents();
+		UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
+
+		if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
+		{
+			GenerateInventory();
+		}
+	}
+
+	private void GenerateInventory()
+	{
+		if (VehicleDef.npcProperties?.raidParams?.inventory != null)
+		{
+			foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.raidParams
+			 .inventory)
+			{
+				foreach (Thing thing in inventoryOption.GenerateThings())
 				{
-					handlers.Add(new VehicleRoleHandler(this, role));
+					inventory.innerContainer.TryAdd(thing);
 				}
 			}
-			handlers.Sort();
-
-			RecacheComponents();
-			RecacheMovementPermissions();
 		}
+	}
 
-		public override void PostMapInit()
+	private void RecacheAlerts()
+	{
+		ticksSinceBoarded = 0;
+	}
+
+	public void RegisterEvents()
+	{
+		if (EventRegistry != null && EventRegistry.Initialized())
+			return; // Disallow re-registering events
+
+		this.FillEventsDef();
+
+		this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
+		this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
+		this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, RecacheAlerts);
+		this.AddEvent(VehicleEventDefOf.PawnExited, vehiclePather.RecalculatePermissions, RecachePawnCount);
+		this.AddEvent(VehicleEventDefOf.PawnRemoved, vehiclePather.RecalculatePermissions, RecachePawnCount);
+		this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions, RecachePawnCount);
+		this.AddEvent(VehicleEventDefOf.PawnKilled, vehiclePather.RecalculatePermissions, RecachePawnCount);
+		this.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehiclePather.RecalculatePermissions);
+		this.AddEvent(VehicleEventDefOf.MoveStart, RecacheAlerts);
+		this.AddEvent(VehicleEventDefOf.MoveStop, RecacheAlerts);
+		this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, RecacheAlerts);
+		this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions);
+		this.AddEvent(VehicleEventDefOf.HealthChanged, vehiclePather.RecalculatePermissions);
+		this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage);
+		this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
+		this.AddEvent(VehicleEventDefOf.OutOfFuel, delegate
 		{
-			vehiclePather.TryResumePathingAfterLoading();
-		}
-
-		public virtual void PostGenerationSetup()
-		{
-			ageTracker.AgeBiologicalTicks = 0;
-			ageTracker.AgeChronologicalTicks = 0;
-			ageTracker.BirthAbsTicks = 0;
-			statHandler.InitializeComponents();
-			this.RegisterEvents();
-			InitializeVehicle();
-			RegenerateUnsavedComponents();
-			UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
-
-			if (Faction != Faction.OfPlayer && VehicleDef.npcProperties != null)
+			if (Spawned)
 			{
-				GenerateInventory();
+				vehiclePather.PatherFailed();
+				ignition.Drafted = false;
 			}
-		}
-
-		private void GenerateInventory()
+		});
+		this.AddEvent(VehicleEventDefOf.ScanRare, statHandler.MarkAllDirty);
+		this.AddEvent(VehicleEventDefOf.UpgradeCompleted, ResetRenderStatus,
+			RecacheMovementPermissions);
+		this.AddEvent(VehicleEventDefOf.UpgradeRefundCompleted, ResetRenderStatus,
+			RecacheMovementPermissions);
+		if (!VehicleDef.events.NullOrEmpty())
 		{
-			if (VehicleDef.npcProperties?.raidParams?.inventory != null)
+			foreach ((VehicleEventDef vehicleEventDef, List<DynamicDelegate<VehiclePawn>> methods) in
+				VehicleDef.events)
 			{
-				foreach (PawnInventoryOption inventoryOption in VehicleDef.npcProperties.raidParams
-				 .inventory)
+				if (!methods.NullOrEmpty())
 				{
-					foreach (Thing thing in inventoryOption.GenerateThings())
+					foreach (DynamicDelegate<VehiclePawn> method in methods)
 					{
-						inventory.innerContainer.TryAdd(thing);
+						this.AddEvent(vehicleEventDef, () => method.Invoke(null, this));
 					}
 				}
 			}
 		}
 
-		private void RecacheAlerts()
+		if (!VehicleDef.statEvents.NullOrEmpty())
 		{
-			// TODO - alert for pawns inside vehicle
-		}
-
-		public void RegisterEvents()
-		{
-			if (EventRegistry != null && EventRegistry.Initialized())
-				return; //Disallow re-registering events
-
-			this.FillEventsDef();
-
-			this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
-			this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
-			this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, RecacheAlerts);
-			this.AddEvent(VehicleEventDefOf.PawnExited, vehiclePather.RecalculatePermissions,
-				RecachePawnCount, RecacheAlerts);
-			this.AddEvent(VehicleEventDefOf.PawnRemoved, vehiclePather.RecalculatePermissions,
-				RecachePawnCount, RecacheAlerts);
-			this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions,
-				RecachePawnCount);
-			this.AddEvent(VehicleEventDefOf.PawnKilled, vehiclePather.RecalculatePermissions,
-				RecachePawnCount);
-			this.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehiclePather.RecalculatePermissions);
-			this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions);
-			this.AddEvent(VehicleEventDefOf.HealthChanged, vehiclePather.RecalculatePermissions);
-			this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage);
-			this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
-			this.AddEvent(VehicleEventDefOf.OutOfFuel, delegate
+			foreach (StatCache.EventLister eventLister in VehicleDef.statEvents)
 			{
-				if (Spawned)
+				foreach (VehicleEventDef eventDef in eventLister.eventDefs)
 				{
-					vehiclePather.PatherFailed();
-					ignition.Drafted = false;
-				}
-			});
-			this.AddEvent(VehicleEventDefOf.ScanRare, statHandler.MarkAllDirty);
-			this.AddEvent(VehicleEventDefOf.UpgradeCompleted, ResetRenderStatus,
-				RecacheMovementPermissions);
-			this.AddEvent(VehicleEventDefOf.UpgradeRefundCompleted, ResetRenderStatus,
-				RecacheMovementPermissions);
-			if (!VehicleDef.events.NullOrEmpty())
-			{
-				foreach ((VehicleEventDef vehicleEventDef, List<DynamicDelegate<VehiclePawn>> methods) in
-					VehicleDef.events)
-				{
-					if (!methods.NullOrEmpty())
-					{
-						foreach (DynamicDelegate<VehiclePawn> method in methods)
-						{
-							this.AddEvent(vehicleEventDef, () => method.Invoke(null, this));
-						}
-					}
-				}
-			}
-
-			if (!VehicleDef.statEvents.NullOrEmpty())
-			{
-				foreach (StatCache.EventLister eventLister in VehicleDef.statEvents)
-				{
-					foreach (VehicleEventDef eventDef in eventLister.eventDefs)
-					{
-						this.AddEvent(eventDef,
-							() => statHandler.MarkStatDirty(eventLister.statDef));
-					}
-				}
-			}
-
-			//One Shots
-			if (!VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
-			{
-				foreach (VehicleSoundEventEntry<VehicleEventDef> soundEventEntry in VehicleDef
-				 .soundOneShotsOnEvent)
-				{
-					this.AddEvent(soundEventEntry.key, () => this.PlayOneShotOnVehicle(soundEventEntry),
-						soundEventEntry.removalKey);
-				}
-			}
-
-			//Sustainers
-			if (!VehicleDef.soundSustainersOnEvent.NullOrEmpty())
-			{
-				foreach (VehicleSustainerEventEntry<VehicleEventDef> soundEventEntry in VehicleDef
-				 .soundSustainersOnEvent)
-				{
-					this.AddEvent(soundEventEntry.start, () => this.StartSustainerOnVehicle(soundEventEntry),
-						soundEventEntry.removalKey);
-					this.AddEvent(soundEventEntry.stop, () => this.StopSustainerOnVehicle(soundEventEntry),
-						soundEventEntry.removalKey);
-				}
-			}
-
-			foreach (ThingComp comp in AllComps)
-			{
-				if (comp is VehicleComp vehicleComp)
-				{
-					vehicleComp.EventRegistration();
+					this.AddEvent(eventDef,
+						() => statHandler.MarkStatDirty(eventLister.statDef));
 				}
 			}
 		}
 
-		/// <summary>
-		/// Executes after vehicle has been loaded into the game
-		/// </summary>
-		/// <remarks>
-		/// Called regardless if vehicle is spawned or unspawned. Responsible for important
-		/// variables being set that may be called even for unspawned vehicles.
-		/// </remarks>
-		protected virtual void PostLoad()
+		//One Shots
+		if (!VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 		{
-			// Events must be registered before comp post loads, SpawnSetup won't trigger register in this case
-			this.RegisterEvents();
-			RegenerateUnsavedComponents();
-			RecacheComponents();
-			RecachePawnCount();
-			RecacheMovementPermissions();
-			statHandler.MarkAllDirty();
-			animator?.PostLoad();
-			UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
-
-			foreach (ThingComp comp in AllComps)
+			foreach (VehicleSoundEventEntry<VehicleEventDef> soundEventEntry in VehicleDef
+			 .soundOneShotsOnEvent)
 			{
-				if (comp is VehicleComp vehicleComp)
-					vehicleComp.PostLoad();
+				this.AddEvent(soundEventEntry.key, () => this.PlayOneShotOnVehicle(soundEventEntry),
+					soundEventEntry.removalKey);
 			}
 		}
 
-		protected virtual void RegenerateUnsavedComponents()
+		//Sustainers
+		if (!VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 		{
-			vehicleAI = new VehicleAI(this);
-			drawTracker = new VehicleDrawTracker(this);
-			sustainers ??= new VehicleSustainers(this);
+			foreach (VehicleSustainerEventEntry<VehicleEventDef> soundEventEntry in VehicleDef
+			 .soundSustainersOnEvent)
+			{
+				this.AddEvent(soundEventEntry.start, () => this.StartSustainerOnVehicle(soundEventEntry),
+					soundEventEntry.removalKey);
+				this.AddEvent(soundEventEntry.stop, () => this.StopSustainerOnVehicle(soundEventEntry),
+					soundEventEntry.removalKey);
+			}
 		}
 
-		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		foreach (ThingComp comp in AllComps)
 		{
-			// Must register before comps call SpawnSetup to allow comps to access Registry
-			this.RegisterEvents();
-			base.SpawnSetup(map, respawningAfterLoad);
+			if (comp is VehicleComp vehicleComp)
+			{
+				vehicleComp.EventRegistration();
+			}
+		}
+	}
+
+	/// <summary>
+	/// Executes after vehicle has been loaded into the game
+	/// </summary>
+	/// <remarks>
+	/// Called regardless if vehicle is spawned or unspawned. Responsible for important
+	/// variables being set that may be called even for unspawned vehicles.
+	/// </remarks>
+	protected virtual void PostLoad()
+	{
+		// Events must be registered before comp post loads, SpawnSetup won't trigger register in this case
+		RegisterEvents();
+		RegenerateUnsavedComponents();
+		RecacheComponents();
+		RecachePawnCount();
+		RecacheMovementPermissions();
+		statHandler.MarkAllDirty();
+		animator?.PostLoad();
+		UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
+
+		foreach (ThingComp comp in AllComps)
+		{
+			if (comp is VehicleComp vehicleComp)
+				vehicleComp.PostLoad();
+		}
+	}
+
+	protected virtual void RegenerateUnsavedComponents()
+	{
+		vehicleAI = new VehicleAI(this);
+		drawTracker = new VehicleDrawTracker(this);
+		sustainers ??= new VehicleSustainers(this);
+	}
+
+	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	{
+		// Must register before comps call SpawnSetup to allow comps to access Registry
+		RegisterEvents();
+		base.SpawnSetup(map, respawningAfterLoad);
 
 #if ANIMATOR
       if (VehicleDef.drawProperties.controller != null)
@@ -242,124 +241,123 @@ namespace Vehicles
       }
 #endif
 
-			if (PropertyBlock == null)
-				LongEventHandler.ExecuteWhenFinished(() => PropertyBlock = new MaterialPropertyBlock());
+		if (PropertyBlock == null)
+			LongEventHandler.ExecuteWhenFinished(() => PropertyBlock = new MaterialPropertyBlock());
 
-			// Ensure SustainerTarget and sustainer manager is given a clean slate to work with
-			ReleaseSustainerTarget();
-			EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
-			if (Drafted)
-			{
-				// Trigger draft event if spawned with draft status On
-				// This is important for sustainers and tick requests.
-				EventRegistry[VehicleEventDefOf.IgnitionOn].ExecuteEvents();
-			}
-
-			sharedJob ??= new SharedJob();
-			if (!respawningAfterLoad)
-			{
-				vehiclePather.ResetToCurrentPosition();
-			}
-
-			if (Faction != Faction.OfPlayer)
-			{
-				ignition.Drafted = true;
-				CompVehicleTurrets turretComp = CompVehicleTurrets;
-				if (turretComp != null)
-				{
-					foreach (VehicleTurret turret in turretComp.Turrets)
-					{
-						turret.autoTargeting = true;
-						turret.AutoTarget = true;
-					}
-				}
-			}
-
-			RecachePawnCount();
-			RecacheMovementPermissions();
-
-			UpdateRotationAndAngle();
-
-			DrawTracker.Notify_Spawned();
-			InitializeHitbox();
-			Map.GetCachedMapComponent<VehiclePathingSystem>().RequestGridsFor(this);
-			ReclaimPosition();
-			Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
-			ResetRenderStatus();
-
-			// Enforce that no pawn inside a vehicle is ever cached as a world pawn.
-			// This has implications on both ticking and serialization.
-			Assert.IsFalse(AllPawnsAboard.Exists(WorldPawnsUtility.IsWorldPawn));
-			Assert.IsFalse(
-				inventory.innerContainer.InnerListForReading.Exists(thing => thing is Pawn pawn && pawn.IsWorldPawn()));
+		// Ensure SustainerTarget and sustainer manager is given a clean slate to work with
+		ReleaseSustainerTarget();
+		EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();
+		if (Drafted)
+		{
+			// Trigger draft event if spawned with draft status On
+			// This is important for sustainers and tick requests.
+			EventRegistry[VehicleEventDefOf.IgnitionOn].ExecuteEvents();
 		}
 
-		public override void ExposeData()
+		sharedJob ??= new SharedJob();
+		if (!respawningAfterLoad)
 		{
-			// Needs to occur before comps so vehicle can initialize managers before comps access them
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-				PostLoad();
+			vehiclePather.ResetToCurrentPosition();
+		}
 
-			base.ExposeData();
-
-			Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
-			Scribe_Deep.Look(ref ignition, nameof(ignition), this);
-			Scribe_Deep.Look(ref statHandler, nameof(statHandler), this);
-			Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
-			Scribe_Deep.Look(ref animator, nameof(animator), this, VehicleDef.drawProperties.controller);
-
-			Scribe_Values.Look(ref angle, nameof(angle));
-			Scribe_Values.Look(ref reverse, nameof(reverse));
-			Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
-
-			Scribe_Deep.Look(ref patternData, nameof(patternData));
-			Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
-			Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
-			Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
-			//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
-			Scribe_Values.Look(ref fishing, nameof(fishing));
-
-			Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
-
-			Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
-			Scribe_Collections.Look(ref boardingAssignments, nameof(boardingAssignments), LookMode.Deep);
-
-			activatableComps ??= [];
-
-			switch (Scribe.mode)
+		if (Faction != Faction.OfPlayer)
+		{
+			ignition.Drafted = true;
+			CompVehicleTurrets turretComp = CompVehicleTurrets;
+			if (turretComp != null)
 			{
-				case LoadSaveMode.LoadingVars:
+				foreach (VehicleTurret turret in turretComp.Turrets)
 				{
-					// statHandler won't be fully initialized until post-load, statHandler will be marked 'all dirty'
-					// post load so we only need to make sure upgrades have been applied.
-					using StatDirtyDisabler sdd = new(this);
-					RecacheComponents();
-					CompUpgradeTree?.ReactivateComps();
-					// Execute after comp list has called PostExposeData so activated comps don't accidentally run
-					// twice, registering duplicates to cross refs.
-					LoadVarsActivatableComps();
+					turret.autoTargeting = true;
+					turret.AutoTarget = true;
 				}
-				break;
-				case LoadSaveMode.PostLoadInit:
-					CompUpgradeTree?.ReloadUnlocks();
-				break;
 			}
+		}
 
-			if (!deactivatedComps.NullOrEmpty())
-			{
-				foreach (ThingComp comp in deactivatedComps)
-					comp.PostExposeData();
-			}
+		RecachePawnCount();
+		RecacheMovementPermissions();
 
-			if (!VehicleMod.settings.main.useCustomShaders)
+		UpdateRotationAndAngle();
+
+		DrawTracker.Notify_Spawned();
+		InitializeHitbox();
+		Map.GetCachedMapComponent<VehiclePathingSystem>().RequestGridsFor(this);
+		ReclaimPosition();
+		Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
+		ResetRenderStatus();
+
+		// Enforce that no pawn inside a vehicle is ever cached as a world pawn.
+		// This has implications on both ticking and serialization.
+		Assert.IsFalse(AllPawnsAboard.Exists(WorldPawnsUtility.IsWorldPawn));
+		Assert.IsFalse(
+			inventory.innerContainer.InnerListForReading.Exists(thing => thing is Pawn pawn && pawn.IsWorldPawn()));
+	}
+
+	public override void ExposeData()
+	{
+		// Needs to occur before comps so vehicle can initialize managers before comps access them
+		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			PostLoad();
+
+		base.ExposeData();
+
+		Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
+		Scribe_Deep.Look(ref ignition, nameof(ignition), this);
+		Scribe_Deep.Look(ref statHandler, nameof(statHandler), this);
+		Scribe_Deep.Look(ref sharedJob, nameof(sharedJob));
+		Scribe_Deep.Look(ref animator, nameof(animator), this, VehicleDef.drawProperties.controller);
+
+		Scribe_Values.Look(ref angle, nameof(angle));
+		Scribe_Values.Look(ref reverse, nameof(reverse));
+		Scribe_Values.Look(ref crashLanded, nameof(crashLanded));
+
+		Scribe_Deep.Look(ref patternData, nameof(patternData));
+		Scribe_Defs.Look(ref retextureDef, nameof(retextureDef));
+		Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
+		Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
+		//Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
+		Scribe_Values.Look(ref fishing, nameof(fishing));
+
+		Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
+
+		Scribe_Collections.Look(ref handlers, nameof(handlers), LookMode.Deep);
+		Scribe_Collections.Look(ref boardingAssignments, nameof(boardingAssignments), LookMode.Deep);
+
+		activatableComps ??= [];
+
+		switch (Scribe.mode)
+		{
+			case LoadSaveMode.LoadingVars:
 			{
-				patternData = new PatternData(VehicleDef.graphicData.color,
-					VehicleDef.graphicData.colorTwo,
-					VehicleDef.graphicData.colorThree,
-					PatternDefOf.Default, Vector2.zero, 0);
-				retextureDef = null;
-				patternToPaint = null;
+				// statHandler won't be fully initialized until post-load, statHandler will be marked 'all dirty'
+				// post load so we only need to make sure upgrades have been applied.
+				using StatDirtyDisabler sdd = new(this);
+				RecacheComponents();
+				CompUpgradeTree?.ReactivateComps();
+				// Execute after comp list has called PostExposeData so activated comps don't accidentally run
+				// twice, registering duplicates to cross refs.
+				LoadVarsActivatableComps();
 			}
+			break;
+			case LoadSaveMode.PostLoadInit:
+				CompUpgradeTree?.ReloadUnlocks();
+			break;
+		}
+
+		if (!deactivatedComps.NullOrEmpty())
+		{
+			foreach (ThingComp comp in deactivatedComps)
+				comp.PostExposeData();
+		}
+
+		if (!VehicleMod.settings.main.useCustomShaders)
+		{
+			patternData = new PatternData(VehicleDef.graphicData.color,
+				VehicleDef.graphicData.colorTwo,
+				VehicleDef.graphicData.colorThree,
+				PatternDefOf.Default, Vector2.zero, 0);
+			retextureDef = null;
+			patternToPaint = null;
 		}
 	}
 }
