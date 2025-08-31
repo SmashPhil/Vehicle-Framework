@@ -1,5 +1,5 @@
 ﻿using System.Collections;
-using DevTools.UnitTesting;
+using DevTools.Testing;
 using SmashTools.Performance;
 
 namespace SmashTools.UnitTesting;

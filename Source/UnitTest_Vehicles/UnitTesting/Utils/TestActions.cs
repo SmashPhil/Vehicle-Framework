@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DevTools.UnitTesting;
+using DevTools.Testing;
 using HarmonyLib;
 using JetBrains.Annotations;
 using SmashTools;

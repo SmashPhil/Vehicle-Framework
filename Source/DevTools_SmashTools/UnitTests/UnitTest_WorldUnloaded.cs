@@ -1,4 +1,4 @@
-﻿using DevTools.UnitTesting;
+﻿using DevTools.Testing;
 
 namespace SmashTools.UnitTesting;
 

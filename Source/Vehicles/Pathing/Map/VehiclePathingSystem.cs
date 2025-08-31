@@ -148,7 +148,7 @@ public sealed class VehiclePathingSystem : MapComponent
 		// getting suspended sporadically during unit testing so using deferred grid generation would
 		// lead to inconsistent results.
 #if DEV_TOOLS
-		if (TestWatcher.RunningUnitTests)
+		if (TestWatcher.RunningTests)
 			deferment = GridDeferment.Forced;
 #endif
 

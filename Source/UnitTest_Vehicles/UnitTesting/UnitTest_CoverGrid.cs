@@ -1,7 +1,7 @@
-﻿using DevTools.UnitTesting;
+﻿using DevTools.Testing;
 using UnityEngine;
 using Verse;
-using TestType = DevTools.UnitTesting.TestType;
+using TestType = DevTools.Testing.TestType;
 
 namespace Vehicles.UnitTesting;
 

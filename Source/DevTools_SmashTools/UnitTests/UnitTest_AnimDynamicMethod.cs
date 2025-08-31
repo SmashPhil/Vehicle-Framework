@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using DevTools.UnitTesting;
+using DevTools.Testing;
 using HarmonyLib;
 using SmashTools.Animations;
 using UnityEngine;

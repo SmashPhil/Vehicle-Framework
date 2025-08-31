@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using DevTools.UnitTesting;
+using DevTools.Testing;
 using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
-using TestType = DevTools.UnitTesting.TestType;
+using TestType = DevTools.Testing.TestType;
 
 namespace Vehicles.UnitTesting;
 

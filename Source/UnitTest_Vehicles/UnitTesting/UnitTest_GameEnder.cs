@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Reflection;
-using DevTools.UnitTesting;
+using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
@@ -9,7 +9,7 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
-using Priority = DevTools.UnitTesting.Priority;
+using Priority = DevTools.Testing.Priority;
 
 namespace Vehicles.UnitTesting;
 

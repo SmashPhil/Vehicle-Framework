@@ -78,7 +78,7 @@ internal class Patch_MapHandling : IPatchCategory
 	/// </summary>
 	public static void AdjustSettlement(ref PlanetTile __result)
 	{
-		if (TestWatcher.RunningUnitTests)
+		if (TestWatcher.RunningTests)
 			return;
 		if (VehicleMod.settings.main.adjustSettlementRadius == 0)
 			return;

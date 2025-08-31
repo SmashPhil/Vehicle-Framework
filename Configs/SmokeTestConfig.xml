@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Config>
+  <stopOnFailure>false</stopOnFailure>
+  
+  <log>
+    <verboseLogging>true</verboseLogging>
+  </log>
+
+  <warningsAllowed>
+    <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
+  </warningsAllowed>
+
+  <map>
+    <size>100</size>
+  </map>
+</Config>
