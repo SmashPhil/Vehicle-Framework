@@ -250,8 +250,8 @@ internal class Patch_Rendering : IPatchCategory
 			for (int i = 0; i < 4; i++)
 			{
 				Quaternion rotation = Quaternion.AngleAxis(num, Vector3.up);
-				Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation,
-					overrideMat ?? MaterialPresets.SelectionBracketMat, 0);
+				Material material = overrideMat ? overrideMat : MaterialPresets.SelectionBracketMat;
+				Graphics.DrawMesh(MeshPool.plane10, brackets[i], rotation, material, 0);
 				num -= 90;
 			}
 			return false;

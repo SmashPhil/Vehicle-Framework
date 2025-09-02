@@ -1,6 +1,7 @@
 ﻿//#define UPGRADES_TAB
 
 using System;
+using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,7 @@ public class VehicleMod : Mod
 {
 	public const float ResetImageSize = 22;
 
-	internal static readonly Dictionary<Type, List<FieldInfo>> CachedFields = [];
+	internal static readonly ConcurrentDictionary<Type, List<FieldInfo>> CachedFields = [];
 	internal static readonly HashSet<string> SettingsDisabledFor = [];
 
 	public static VehiclesModSettings settings;

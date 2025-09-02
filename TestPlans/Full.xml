@@ -1,15 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 
 <TestPlan>
-  <name>Release</name>
-  <continueOnFailure>true</continueOnFailure>
-  <timeOut>1800</timeOut> <!-- 30 minutes -->
-  <steps>
+  <name>Full</name>
+  <jobs>
     <li>
       <name>Unit Tests</name>
       <commandLineArgs>--test</commandLineArgs>
       <loadWithMods>
-        <li>brrainz.harmony_steam</li>
+        <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
         <li>ludeon.rimworld.royalty</li>
         <li>ludeon.rimworld.ideology</li>
@@ -24,9 +22,9 @@
     </li>
     <li>
       <name>Save Our Ship 2</name>
-      <commandLineArgs>--smoke-test</commandLineArgs>
+      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
       <loadWithMods>
-        <li>brrainz.harmony_steam</li>
+        <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
         <li>ludeon.rimworld.royalty</li>
         <li>ludeon.rimworld.ideology</li>
@@ -37,5 +35,20 @@
         <li>kentington.saveourship2</li>
       </loadWithMods>
     </li>
-  </steps>
+    <li>
+      <name>Vehicle Map Framework</name>
+      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <loadWithMods>
+        <li>brrainz.harmony</li>
+        <li>ludeon.rimworld</li>
+        <li>ludeon.rimworld.royalty</li>
+        <li>ludeon.rimworld.ideology</li>
+        <li>ludeon.rimworld.biotech</li>
+        <li>ludeon.rimworld.anomaly</li>
+        <li>ludeon.rimworld.odyssey</li>
+        <li>smashphil.vehicleframework</li>
+        <li>oels.vehiclemapframework</li>
+      </loadWithMods>
+    </li>
+  </jobs>
 </TestPlan>

@@ -313,10 +313,8 @@ public sealed class VehiclePathingSystem : MapComponent
 		}
 	}
 
-	public override void MapComponentUpdate()
+	public override void MapComponentDraw()
 	{
-		UpdateRegions();
-
 		FlashGridType flashGridType = SectionDebug.debugDrawFlashGrid;
 		if (flashGridType > FlashGridType.None)
 		{
@@ -342,6 +340,11 @@ public sealed class VehiclePathingSystem : MapComponent
 				break;
 			}
 		}
+	}
+
+	public override void MapComponentUpdate()
+	{
+		UpdateRegions();
 	}
 
 	private void FlashCoverGrid()

@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Patching;
 using UnityEngine.Assertions;
 using UpdateLogTool;
 using Verse;
