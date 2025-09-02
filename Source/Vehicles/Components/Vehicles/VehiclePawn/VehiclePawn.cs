@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
+using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -16,7 +18,15 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
                                    IAnimationTarget, IAnimator, ITransformable,
                                    IEventManager<VehicleEventDef>, IMaterialCacheTarget
 {
+	private static readonly AccessTools.FieldRef<Pawn_DraftController, bool> DraftedIntFieldRef =
+		AccessTools.FieldRefAccess<Pawn_DraftController, bool>(
+			AccessTools.Field(typeof(Pawn_DraftController), "draftedInt"));
+
 	public EventManager<VehicleEventDef> EventRegistry { get; set; }
+
+	// NOTE - vanilla drafter will be null when despawned, for vehicle logic it should prefer  to check directly
+	// with the ignition controller. Masking base property to reduce accidental references to it.
+	public new bool Drafted => ignition.Drafted;
 
 	public VehicleDef VehicleDef => def as VehicleDef;
 
@@ -63,6 +73,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 
 	public virtual void PostGenerationSetup()
 	{
+		ignition = new VehicleIgnitionController(this);
 		ageTracker.AgeBiologicalTicks = 0;
 		ageTracker.AgeChronologicalTicks = 0;
 		ageTracker.BirthAbsTicks = 0;
@@ -98,6 +109,22 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		ticksSinceBoarded = 0;
 	}
 
+	private void UpdateDraftController()
+	{
+		// drafter might be null if vehicle was despawned. Ludeon sets 'dynamic' components to null when pawns are
+		// despawned or passed to world. Why? Who knows... cause it certainly wasn't for performance reasons.
+		if (drafter != null && ignition != null)
+		{
+			DraftedIntFieldRef.Invoke(drafter) = ignition.Drafted;
+		}
+	}
+
+	[Conditional("ANIMATOR")]
+	private void UpdateDraftAnimationProperty()
+	{
+		animator?.SetBool(PropertyIds.IgnitionOn, ignition.Drafted);
+	}
+
 	public void RegisterEvents()
 	{
 		if (EventRegistry != null && EventRegistry.Initialized())
@@ -115,8 +142,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		this.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehiclePather.RecalculatePermissions);
 		this.AddEvent(VehicleEventDefOf.MoveStart, RecacheAlerts);
 		this.AddEvent(VehicleEventDefOf.MoveStop, RecacheAlerts);
-		this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, RecacheAlerts);
-		this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions);
+		this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, RecacheAlerts,
+			UpdateDraftController);
+		this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions, UpdateDraftController);
 		this.AddEvent(VehicleEventDefOf.HealthChanged, vehiclePather.RecalculatePermissions);
 		this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage);
 		this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
@@ -233,12 +261,14 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		base.SpawnSetup(map, respawningAfterLoad);
 
 #if ANIMATOR
-      if (VehicleDef.drawProperties.controller != null)
-      {
-        animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
-        animator.SetBool(PropertyIds.Disabled, CanMove);
-        animator.PostLoad();
-      }
+		if (VehicleDef.drawProperties.controller != null)
+		{
+			animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
+			animator.SetBool(PropertyIds.Disabled, CanMove);
+			animator.PostLoad();
+			this.AddEvent(VehicleEventDefOf.IgnitionOn, UpdateDraftAnimationProperty);
+			this.AddEvent(VehicleEventDefOf.IgnitionOff, UpdateDraftAnimationProperty);
+		}
 #endif
 
 		if (PropertyBlock == null)
@@ -278,6 +308,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		RecacheMovementPermissions();
 
 		UpdateRotationAndAngle();
+		UpdateDraftController();
 
 		DrawTracker.Notify_Spawned();
 		InitializeHitbox();
@@ -341,6 +372,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 			break;
 			case LoadSaveMode.PostLoadInit:
 				CompUpgradeTree?.ReloadUnlocks();
+				UpdateDraftController();
 			break;
 		}
 

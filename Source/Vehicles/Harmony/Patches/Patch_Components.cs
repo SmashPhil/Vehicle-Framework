@@ -1,6 +1,5 @@
 ﻿using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
 using SmashTools.Patching;
 using UnityEngine;
 using Verse;
@@ -13,9 +12,6 @@ internal class Patch_Components : IPatchCategory
 
 	void IPatchCategory.PatchMethods()
 	{
-		HarmonyPatcher.Patch(original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.Drafted)),
-			postfix: new HarmonyMethod(typeof(Patch_Components),
-				nameof(VehicleIsDrafted)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.PropertyGetter(typeof(Pawn), nameof(Pawn.CanTakeOrder)),
 			postfix: new HarmonyMethod(typeof(Patch_Components),
@@ -42,18 +38,6 @@ internal class Patch_Components : IPatchCategory
 			original: AccessTools.Method(typeof(Pawn_InventoryTracker), nameof(Pawn_InventoryTracker.Notify_ItemRemoved)),
 			postfix: new HarmonyMethod(typeof(Patch_Components),
 				nameof(RemovePawnFromInventory)));
-	}
-
-	/// <summary>
-	/// Divert draft status check to <see cref="VehicleIgnitionController"/>
-	/// </summary>
-	private static void VehicleIsDrafted(Pawn __instance, ref bool __result)
-	{
-		if (__instance is VehiclePawn vehicle)
-		{
-			// May trigger prematurely from PrepareCarefully
-			__result = vehicle.ignition?.Drafted ?? false;
-		}
 	}
 
 	/// <summary>
@@ -119,13 +103,13 @@ internal class Patch_Components : IPatchCategory
 	/// <param name="actAsIfSpawned"></param>
 	private static void AddAndRemoveVehicleComponents(Pawn pawn, bool actAsIfSpawned = false)
 	{
-		if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned) &&
-			vehicle.ignition is null)
+		if (pawn is VehiclePawn vehicle && (vehicle.Spawned || actAsIfSpawned))
 		{
-			vehicle.ignition = new VehicleIgnitionController(vehicle);
+			vehicle.drafter ??= new Pawn_DraftController(vehicle);
+			vehicle.story ??= new Pawn_StoryTracker(vehicle);
+			vehicle.playerSettings ??= new Pawn_PlayerSettings(vehicle);
+
 			vehicle.trader = null; // new Pawn_TraderTracker(vehicle);
-			vehicle.story = new Pawn_StoryTracker(vehicle);
-			vehicle.playerSettings = new Pawn_PlayerSettings(vehicle);
 			vehicle.training = null;
 		}
 	}
