@@ -355,8 +355,7 @@ public class Command_CooldownAction : Command_Turret
 
 				ThingDef ammoDef = turret.loadedAmmo ??
 					turret.def.ammunition.AllowedThingDefs.FirstOrDefault();
-				int max = Mathf.RoundToInt(
-					vehicle.VehicleDef.GetStatValueAbstract(VehicleStatDefOf.CargoCapacity) /
+				int max = Mathf.RoundToInt(vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) /
 					ammoDef.GetStatValueAbstract(StatDefOf.Mass));
 				Dialog_Slider dlgSlider = new(TextLabel, Min, max,
 					delegate(int value) { vehicle.CompVehicleTurrets.SetQuotaLevel(turret, value); },
