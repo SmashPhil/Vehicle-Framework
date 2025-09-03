@@ -194,7 +194,7 @@ namespace Vehicles
 				ThingGrid thingGrid = map.thingGrid;
 				lock (thingGrid)
 				{
-					List<Thing> thingList = thingGrid.ThingsListAt(cell);
+					Thing[] thingList = thingGrid.ThingsListAt(cell).ToArray();
 					stringBuilder?.AppendLine("Starting ThingList check.");
 					if (!thingList.NullOrEmpty())
 					{
