@@ -313,7 +313,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		DrawTracker.Notify_Spawned();
 		InitializeHitbox();
 		Map.GetCachedMapComponent<VehiclePathingSystem>().RequestGridsFor(this);
-		ReclaimPosition();
+		UnityThread.ExecuteOnMainThread(ReclaimPosition);
 		Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
 		ResetRenderStatus();
 

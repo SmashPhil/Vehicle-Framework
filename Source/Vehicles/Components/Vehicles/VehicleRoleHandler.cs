@@ -186,14 +186,14 @@ namespace Vehicles
 			}
 			Scribe_Deep.Look(ref thingOwner, nameof(thingOwner), this);
 
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
 			{
 				role = vehicle.VehicleDef.CreateRole(roleKey);
 				if (role is null)
 				{
 					Log.Error(
 						$"Unable to load role={roleKey}. Creating empty role to avoid game-breaking issues.");
-					role ??= new VehicleRole()
+					role ??= new VehicleRole
 					{
 						key = $"{roleKey}_INVALID",
 						label = $"{roleKey} (INVALID)",
