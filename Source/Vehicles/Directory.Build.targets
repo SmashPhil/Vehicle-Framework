@@ -1,0 +1,143 @@
+<!--
+    Use Krafs.Rimworld.Ref in mod projects while letting the IDE display real method bodies
+    instead of stubs when navigating or decompiling.
+
+    Copy this file as Directory.Build.targets next to your .csproj or in any parent directory.
+    SDK-style projects auto-import the first Directory.Build.targets they find - place accordingly.
+    
+    Example uses:
+    - Place in root folder of all your mod projects, and every one will import this.
+    - Set RimWorldDirectory in your .csproj pointing to different RimWorld installs for different versions.
+
+    If Krafs.Rimworld.Ref is referenced, these targets compare its version to the locally installed
+    RimWorld version. If they match, the NuGet reference is removed and local assemblies are used.
+
+    To ignore patch version differences, set UseStrictRimWorldVersionComparison to false
+    (equivalent to e.g. 1.6.*), allowing local assemblies even if the patch number differs.
+
+    The RimWorld directory is detected from standard Steam install paths, but can be set manually
+    via RimWorldDirectory.
+
+    To see logs from these targets, build with detailed verbosity or higher:
+        dotnet build -v:detailed
+-->
+
+<Project>
+
+    <!-- User settings -->
+    <PropertyGroup>
+        <!-- Path to RimWorld root folder (optional, overrides auto-detection) -->
+        <RimWorldDirectory>D:\SteamLibrary\steamapps\common\RimWorld</RimWorldDirectory>
+
+        <!-- Require exact patch match? Set to false for wildcard match -->
+        <UseStrictRimWorldVersionComparison>true</UseStrictRimWorldVersionComparison>
+
+        <!-- Run this logic? Example: only enable in Debug builds -->
+        <EnableLocalRimWorldReferences Condition="'$(Configuration)' == 'Debug'">true</EnableLocalRimWorldReferences>
+    </PropertyGroup>
+
+    <!-- Auto-detect RimWorld directory from known install locations -->
+    <PropertyGroup>
+        <!-- Windows: per-user install -->
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(USERPROFILE)\AppData\Local\Steam\steamapps\common\RimWorld')">
+            $(USERPROFILE)\AppData\Local\Steam\steamapps\common\RimWorld
+        </RimWorldDirectory>
+
+        <!-- Windows: all users -->
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(ProgramFiles(x86))\Steam\steamapps\common\RimWorld')">
+            $(ProgramFiles(x86))\Steam\steamapps\common\RimWorld
+        </RimWorldDirectory>
+
+        <!-- Linux: default -->
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/.local/share/Steam/steamapps/common/RimWorld')">
+            $(HOME)/.local/share/Steam/steamapps/common/RimWorld
+        </RimWorldDirectory>
+
+        <!-- Linux: legacy -->
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/.steam/steam/steamapps/common/RimWorld')">
+            $(HOME)/.steam/steam/steamapps/common/RimWorld
+        </RimWorldDirectory>
+
+        <!-- macOS -->
+        <RimWorldDirectory Condition="'$(RimWorldDirectory)'=='' AND Exists('$(HOME)/Library/Application Support/Steam/steamapps/common/RimWorld')">
+            $(HOME)/Library/Application Support/Steam/steamapps/common/RimWorld
+        </RimWorldDirectory>
+    </PropertyGroup>
+
+    <!-- Normalize path + set version file path -->
+    <PropertyGroup Condition="'$(RimWorldDirectory)' != ''">
+        <RimWorldDirectory>$([System.String]::Copy('$(RimWorldDirectory)').Trim())</RimWorldDirectory>
+        <RimWorldDirectory>$([MSBuild]::NormalizeDirectory('$(RimWorldDirectory)'))</RimWorldDirectory>
+        <RimWorldVersionFile Condition="Exists('$(RimWorldDirectory)Version.txt')">$(RimWorldDirectory)Version.txt</RimWorldVersionFile>
+    </PropertyGroup>
+
+    <Target Name="LogRimWorldScriptSettings" BeforeTargets="ResolveLocalRimWorldVersion">
+        <Message Text="RimWorld directory: $(RimWorldDirectory)" Importance="high"/>
+        <Message Text="Strict version comparison: $(UseStrictRimWorldVersionComparison)" Importance="high"/>
+    </Target>
+
+    <ItemGroup>
+        <LocalRimWorldAssembly Include="$(RimWorldDirectory)*/Managed/*.dll" Visible="false"/>
+    </ItemGroup>
+
+    <!-- Capture Krafs.Rimworld.Ref package reference -->
+    <Target Name="GetRimRef" AfterTargets="ResolvePackageReferences" Condition="'@(PackageReference->WithMetadataValue('Identity','Krafs.Rimworld.Ref'))' != ''">
+        <ItemGroup>
+            <RimRefPackageReference Include="@(PackageReference)" Condition="'%(PackageReference.Identity)' == 'Krafs.Rimworld.Ref'"/>
+        </ItemGroup>
+    </Target>
+
+    <Target Name="ResolveLocalRimWorldVersion" Condition="'$(RimWorldVersionFile)' != ''">
+        <ReadLinesFromFile File="$(RimWorldVersionFile)">
+            <Output TaskParameter="Lines" ItemName="VersionFileLine"/>
+        </ReadLinesFromFile>
+
+        <PropertyGroup>
+            <RimWorldVersion>$([System.String]::Copy('%(VersionFileLine.Identity)').Split(' ')[0])</RimWorldVersion>
+            <RimWorldVersionMinor>$([System.String]::Copy('$(RimWorldVersion)').Split('.')[1])</RimWorldVersionMinor>
+            <RimWorldVersionPatch>$([System.String]::Copy('$(RimWorldVersion)').Split('.')[2])</RimWorldVersionPatch>
+        </PropertyGroup>
+
+        <Message Text="RimWorld version: $(RimWorldVersion)" Importance="high"/>
+    </Target>
+
+    <Target Name="ResolveRimRefVersion" DependsOnTargets="GetRimRef">
+        <PropertyGroup>
+            <RimRefVersion>%(RimRefPackageReference.Version)</RimRefVersion>
+            <RimRefVersionMinor>$([System.String]::Copy('$(RimRefVersion)').Split('.')[1])</RimRefVersionMinor>
+            <RimRefVersionPatch>$([System.String]::Copy('$(RimRefVersion)').Split('.')[2])</RimRefVersionPatch>
+            <RimRefVersionPatchComparable>$([System.String]::Copy('$(RimRefVersionPatch)').Split('-')[0])</RimRefVersionPatchComparable>
+        </PropertyGroup>
+
+        <Message Text="Krafs.Rimworld.Ref version: $(RimRefVersion)" Importance="high"/>
+    </Target>
+
+    <!-- Compare versions + decide whether to remove NuGet reference -->
+    <Target Name="RemoveRimRef" DependsOnTargets="ResolveLocalRimWorldVersion;ResolveRimRefVersion">
+        <PropertyGroup>
+            <MinorVersionsMatch Condition="'$(RimWorldVersionMinor)' == '$(RimRefVersionMinor)'">true</MinorVersionsMatch>
+            <IgnorePatchVersion Condition="'$(RimRefVersionPatchComparable)' == '*' OR '$(UseStrictRimWorldVersionComparison)' != 'true'">true</IgnorePatchVersion>
+            <PatchVersionsMatch Condition="'$(RimWorldVersionPatch)' == '$(RimRefVersionPatchComparable)' OR '$(IgnorePatchVersion)' == 'true'">true</PatchVersionsMatch>
+            <ShouldRemoveRimRef Condition="'$(MinorVersionsMatch)' == 'true' AND '$(PatchVersionsMatch)' == 'true'">true</ShouldRemoveRimRef>
+            <ShouldRemoveRimRef Condition="'$(ShouldRemoveRimRef)' != 'true'">false</ShouldRemoveRimRef>
+        </PropertyGroup>
+
+        <ItemGroup Condition="'$(ShouldRemoveRimRef)' == 'true'">
+            <PackageReference Remove="@(RimRefPackageReference)"/>
+        </ItemGroup>
+    </Target>
+
+    <!-- Swap in local RimWorld assemblies before assembly resolution -->
+    <Target Name="RemoveConflictingFrameworkReferenceAssemblies"
+            AfterTargets="GetReferenceAssemblyPaths"
+            BeforeTargets="ResolveAssemblyReferences"
+            DependsOnTargets="RemoveRimRef"
+            Condition="'$(EnableLocalRimWorldReferences)' == 'true'">
+        <ItemGroup Condition="'$(ShouldRemoveRimRef)' == 'true'">
+            <Reference Remove="@(LocalRimWorldAssembly->'%(Filename)')"/>
+            <Reference Include="@(LocalRimWorldAssembly)" Private="false"/>
+        </ItemGroup>
+        <Message Text="Local RimWorld referenced: $(ShouldRemoveRimRef)" Importance="high"/>
+    </Target>
+
+</Project>

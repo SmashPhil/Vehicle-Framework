@@ -1,5 +1,4 @@
-﻿using HarmonyLib;
-using SmashTools.Patching;
+﻿using SmashTools.Patching;
 using Verse;
 
 namespace Vehicles.Compatibility;
