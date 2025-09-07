@@ -23,8 +23,10 @@ public class VehicleGroup : IDisposable
 	public void Spawn()
 	{
 		DeSpawn();
-		TestUtils.ForceSpawn(vehicle);
+		// Boarding must happen BEFORE the vehicle spawns so that any events in SpawnSetup will have the pawn list
+		// primed and ready for reading, otherwise that list will be stale.
 		BoardAll();
+		TestUtils.ForceSpawn(vehicle);
 	}
 
 	public void SpawnPawns()

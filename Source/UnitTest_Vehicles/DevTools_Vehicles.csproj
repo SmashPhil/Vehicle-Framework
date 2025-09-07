@@ -61,7 +61,7 @@
         <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4523" />
 
         <Reference Include="DevTools">
-            <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
+	        <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
         </Reference>
 
         <Reference Include="SmashTools">

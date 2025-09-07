@@ -86,6 +86,50 @@ internal sealed class UnitTest_GameEnder
 	}
 
 	[Test]
+	[TestDescription("Verify spawning vehicle automatically checks game ender condition.")]
+	private void Spawn()
+	{
+		using MockGameTicks gameTicks = new(GameTicksBuffer);
+		GameEnder gameEnder = Current.Game.gameEnder;
+		using GameEnderBlock endBlock = new(gameEnder);
+
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = 1,
+			passengers = 1
+		});
+
+		gameEnder.CheckOrUpdateGameOver();
+		Expect.IsTrue(gameEnder.gameEnding);
+
+		group.Spawn();
+		Expect.IsFalse(gameEnder.gameEnding);
+	}
+
+	[Test]
+	[TestDescription("Verify despawning vehicle automatically checks game ender condition.")]
+	private void Destroy()
+	{
+		using MockGameTicks gameTicks = new(GameTicksBuffer);
+		GameEnder gameEnder = Current.Game.gameEnder;
+		using GameEnderBlock endBlock = new(gameEnder);
+
+		VehicleGroup.MockSettings settings = new()
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = 1
+		};
+		using (VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(settings))
+		{
+			group.Spawn();
+			gameEnder.CheckOrUpdateGameOver();
+			Expect.IsFalse(gameEnder.gameEnding);
+		}
+		Expect.IsTrue(gameEnder.gameEnding);
+	}
+
+	[Test]
 	[TestDescription("Verify vehicle with passengers prevents game ender event.")]
 	private void Manual()
 	{

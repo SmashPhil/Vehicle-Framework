@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -238,6 +239,9 @@ public partial class VehiclePawn
 		}
 
 		base.Destroy(mode);
+
+		// Pawn::Destroy checks game over condition but we need to redo this after deregistering from the position manager.
+		Find.GameEnder.CheckOrUpdateGameOver();
 
 		if (Find.WorldPawns.Contains(this))
 		{

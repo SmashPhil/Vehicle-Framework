@@ -808,7 +808,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 		return true;
 	}
 
-	//REDO - Need better transpiler to retrieve all map pawns
+	// TODO - Need better transpiler to retrieve all map pawns
 	private static IEnumerable<CodeInstruction> CheckDefeatedWithVehiclesTranspiler(
 		IEnumerable<CodeInstruction> instructions)
 	{

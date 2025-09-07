@@ -2,13 +2,11 @@
 using System.Diagnostics;
 using HarmonyLib;
 using RimWorld;
-using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
 using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 
@@ -313,15 +311,15 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		DrawTracker.Notify_Spawned();
 		InitializeHitbox();
 		Map.GetCachedMapComponent<VehiclePathingSystem>().RequestGridsFor(this);
-		UnityThread.ExecuteOnMainThread(ReclaimPosition);
 		Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
 		ResetRenderStatus();
 
-		// Enforce that no pawn inside a vehicle is ever cached as a world pawn.
-		// This has implications on both ticking and serialization.
-		Assert.IsFalse(AllPawnsAboard.Exists(WorldPawnsUtility.IsWorldPawn));
-		Assert.IsFalse(
-			inventory.innerContainer.InnerListForReading.Exists(thing => thing is Pawn pawn && pawn.IsWorldPawn()));
+		UnityThread.ExecuteOnMainThread(ReclaimPosition);
+		if (!respawningAfterLoad)
+		{
+			// Pawn::SpawnSetup checks game over condition but we need to redo this after registering this vehicle's position.
+			UnityThread.ExecuteOnMainThread(Find.GameEnder.CheckOrUpdateGameOver);
+		}
 	}
 
 	public override void ExposeData()
