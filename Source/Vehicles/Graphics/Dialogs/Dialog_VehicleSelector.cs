@@ -6,6 +6,7 @@ using SmashTools;
 using UnityEngine;
 using Vehicles.Rendering;
 using Verse;
+using Verse.Sound;
 
 namespace Vehicles.World;
 
@@ -47,6 +48,8 @@ public class Dialog_VehicleSelector : Window
 		selectedVehicles.FirstOrDefault()?.VehicleDef.type ?? VehicleType.Universal;
 
 	private float ViewRectHeight { get; set; }
+
+	private bool NoVehiclesSelected => showVehicleDefs ? selectedDefs.Count == 0 : selectedVehicles.Count == 0;
 
 	private void RecalculateHeight()
 	{
@@ -186,8 +189,13 @@ public class Dialog_VehicleSelector : Window
 
 		if (Widgets.ButtonText(buttonRect, "VF_StartVehicleRoutePlanner".Translate()))
 		{
-			VehicleRoutePlanner planner = Find.World.GetComponent<VehicleRoutePlanner>();
+			if (NoVehiclesSelected)
+			{
+				SoundDefOf.ClickReject.PlayOneShotOnCamera();
+				return;
+			}
 
+			VehicleRoutePlanner planner = Find.World.GetComponent<VehicleRoutePlanner>();
 			if (showVehicleDefs)
 			{
 				planner.Start(selectedDefs.ToList());
