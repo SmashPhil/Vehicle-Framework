@@ -1,18 +1,21 @@
 ﻿using RimWorld;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class SoundDefOf_Vehicles
 {
-	[DefOf]
-	public static class SoundDefOf_Vehicles
+	// AerialVehicles
+	public static SoundDef AerialVehicle_Paratroopers_FlyOver;
+
+	// Misc
+	public static SoundDef Explode_BombWater;
+	//public static SoundDef VF_ApplyingPaint;
+
+	static SoundDefOf_Vehicles()
 	{
-		static SoundDefOf_Vehicles()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(SoundDefOf_Vehicles));
-		}
-
-		public static SoundDef Explode_BombWater;
-
-		//public static SoundDef VF_ApplyingPaint;
+		DefOfHelper.EnsureInitializedInCtor(typeof(SoundDefOf_Vehicles));
 	}
 }

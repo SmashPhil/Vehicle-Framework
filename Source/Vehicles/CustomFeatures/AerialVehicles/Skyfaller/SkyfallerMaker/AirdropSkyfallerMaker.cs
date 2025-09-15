@@ -1,73 +1,84 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using Verse;
-using UnityEngine;
 
-namespace Vehicles
+namespace Vehicles;
+
+[PublicAPI]
+public struct AirdropProperties
 {
-	public static class AirdropSkyfallerMaker
+	public required float angle;
+
+	public bool packIntoContainer = false;
+
+	public AirdropProperties()
 	{
-		public static AirdropSkyfaller MakeAirdrop(AirdropDef airdropDef, bool packIntoContainer = true, params Thing[] contents)
+	}
+
+	public static AirdropProperties Default => new() { angle = Rand.Range(-30, 30) };
+}
+
+[PublicAPI]
+public static class AirdropSkyfallerMaker
+{
+	public static Skyfaller MakeAirdrop(IAirDroppable airDroppable, float angle)
+	{
+		Skyfaller skyfaller = (Skyfaller)ThingMaker.MakeThing(airDroppable.SkyfallerDef);
+		skyfaller.innerContainer.TryAddOrTransfer(airDroppable.Thing);
+		skyfaller.angle = angle;
+		return skyfaller;
+	}
+
+	public static AirdropSkyfaller MakeAirdrop(AirdropDef airdropDef, [NotNull] Thing thing,
+		in AirdropProperties props)
+	{
+		return MakeAirdrop(airdropDef, [thing], in props);
+	}
+
+	public static AirdropSkyfaller MakeAirdrop(AirdropDef airdropDef, [NotNull] List<Thing> contents,
+		in AirdropProperties props)
+	{
+		AirdropSkyfaller skyfaller = (AirdropSkyfaller)ThingMaker.MakeThing(airdropDef);
+
+		if (contents.Count > 0 && !props.packIntoContainer)
 		{
-			try
+			Thing thing = contents[0];
+			if (thing.Spawned)
 			{
-				AirdropSkyfaller skyfaller = (AirdropSkyfaller)ThingMaker.MakeThing(airdropDef);
-				
-				if (contents.Length == 1 && !packIntoContainer)
-				{
-					Thing thing = contents[0];
-					if (thing.Spawned)
-					{
-						thing.DeSpawn();
-					}
-					skyfaller.innerContainer.TryAddOrTransfer(thing);
-				}
-				else
-				{
-					Airdrop airdrop = null;
-					if (packIntoContainer)
-					{
-						airdrop = (Airdrop)ThingMaker.MakeThing(ThingDefOf_Vehicles.Airdrop);
-					}
-
-					foreach (Thing thing in contents)
-					{
-						if (packIntoContainer)
-						{
-							TryPackInto(thing, airdrop.innerContainer);
-						}
-						else
-						{
-							TryPackInto(thing, skyfaller.innerContainer);
-						}
-					}
-
-					if (packIntoContainer)
-					{
-						skyfaller.innerContainer.TryAdd(airdrop);
-					}
-				}
-				
-				return skyfaller;
+				thing.DeSpawn();
 			}
-			catch (Exception ex)
-			{
-				Log.Error($"Unable to generate AirdropSkyfaller. Exception=\"{ex}\"");
-			}
-			return null;
+			skyfaller.innerContainer.TryAddOrTransfer(thing);
 		}
-
-		private static bool TryPackInto(Thing thing, ThingOwner container)
+		else
 		{
-			if (thing != null && !container.TryAddOrTransfer(thing))
+			Airdrop airdrop = null;
+			if (props.packIntoContainer)
 			{
-				Log.Error($"Could not add {thing} to Airdrop.");
-				thing.Destroy();
-				return false;
+				airdrop = (Airdrop)ThingMaker.MakeThing(ThingDefOf_Vehicles.Airdrop);
 			}
-			return true;
+
+			foreach (Thing thing in contents)
+			{
+				TryPackInto(thing, props.packIntoContainer ? airdrop.innerContainer : skyfaller.innerContainer);
+			}
+
+			if (props.packIntoContainer)
+			{
+				skyfaller.innerContainer.TryAdd(airdrop);
+			}
 		}
+		return skyfaller;
+	}
+
+	private static bool TryPackInto(Thing thing, ThingOwner container)
+	{
+		if (thing != null && !container.TryAddOrTransfer(thing))
+		{
+			Log.Error($"Could not add {thing} to Airdrop.");
+			thing.Destroy();
+			return false;
+		}
+		return true;
 	}
 }

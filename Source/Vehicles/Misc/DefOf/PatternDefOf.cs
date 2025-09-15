@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
-using Verse;
+﻿using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class PatternDefOf
 {
-	[DefOf]
-	public static class PatternDefOf
-	{
-		public static PatternDef Default;
+	public static PatternDef Default;
 
-		static PatternDefOf()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(PatternDefOf));
-		}
+	static PatternDefOf()
+	{
+		DefOfHelper.EnsureInitializedInCtor(typeof(PatternDefOf));
 	}
 }

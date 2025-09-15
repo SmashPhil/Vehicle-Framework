@@ -93,7 +93,7 @@
 		<label>Paratrooper</label>
 		
 		<skyfaller>
-			<ticksToImpactRange>1200~1400</ticksToImpactRange>
+			<ticksToImpactRange>180~240</ticksToImpactRange>
 			<impactSound>Longjump_Land</impactSound>
 		</skyfaller>
 		

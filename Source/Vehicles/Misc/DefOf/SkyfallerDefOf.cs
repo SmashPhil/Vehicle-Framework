@@ -1,24 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
+﻿using RimWorld;
 using Verse;
-using UnityEngine;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class SkyfallerDefOf
 {
-	[DefOf]
-	public static class SkyfallerDefOf
+	// Paratroopers
+	public static AirdropDef AirdropParatrooper;
+	public static AirdropDef AirdropPackage;
+
+	// Misc
+	public static ThingDef ProjectileSkyfaller;
+
+	static SkyfallerDefOf()
 	{
-		static SkyfallerDefOf()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(SkyfallerDefOf));
-		}
-
-		public static ThingDef ProjectileSkyfaller;
-
-		public static AirdropDef AirdropPackage;
-
-		public static AirdropDef AirdropParatrooper;
+		DefOfHelper.EnsureInitializedInCtor(typeof(SkyfallerDefOf));
 	}
 }

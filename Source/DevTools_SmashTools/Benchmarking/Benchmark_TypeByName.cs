@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using DevTools.Benchmarking;
 using HarmonyLib;
 using Verse;
@@ -8,43 +10,46 @@ namespace SmashTools.Performance;
 [BenchmarkClass("TypeByName")]
 internal class Benchmark_TypeByName
 {
-	[Benchmark(Label = "AccessTools::TypeByName")]
-	private static void TypeByName_AccessTools(ref TypeContext context)
+	[Benchmark(Label = "AccessTools")]
+	private static void TypeByName_AccessTools()
 	{
-		GenTypes.ClearCache();
-		foreach (string typeName in context.typesToFind)
-		{
-			_ = AccessTools.TypeByName(typeName);
-		}
+		AccessTools.TypeByName(TypeContext.Verse);
+		AccessTools.TypeByName(TypeContext.MsCorLib);
+		AccessTools.TypeByName(TypeContext.Current);
+		AccessTools.TypeByName(TypeContext.Harmony);
 	}
 
-	[Benchmark(Label = "GenTypes::GetTypeInAnyAssembly")]
-	private static void GenTypes_GetTypeInAnyAssembly(ref TypeContext context)
+	[Benchmark(Label = "GenTypes")]
+	private static void GenTypes_GetTypeInAnyAssembly()
 	{
-		GenTypes.ClearCache();
-		foreach (string typeName in context.typesToFind)
+		GenTypeWrapper.Invoke(TypeContext.Verse);
+		GenTypeWrapper.Invoke(TypeContext.MsCorLib);
+		GenTypeWrapper.Invoke(TypeContext.Current);
+		GenTypeWrapper.Invoke(TypeContext.Harmony);
+	}
+
+	private static unsafe class GenTypeWrapper
+	{
+		private static readonly delegate*<string, string, Type> GetTypeByName;
+
+		static GenTypeWrapper()
 		{
-			_ = GenTypes.GetTypeInAnyAssembly(typeName);
+			MethodInfo method = AccessTools.Method(typeof(GenTypes), "GetTypeInAnyAssemblyInt");
+			GetTypeByName = (delegate*<string, string, Type>)method.MethodHandle.GetFunctionPointer();
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static void Invoke(string typeName, string namespaceIfAmbiguous = null)
+		{
+			GetTypeByName(typeName, namespaceIfAmbiguous);
 		}
 	}
 
 	private readonly struct TypeContext
 	{
-		public readonly List<string> typesToFind;
-
-		public TypeContext()
-		{
-			typesToFind =
-			[
-				// Verse
-				"Verse.GenTypes",
-				// mscorlib
-				"System.String",
-				// Current executing assembly
-				"SmashTools.Performance.Benchmark_TypeByName",
-				// Harmony
-				"HarmonyLib.AccessTools",
-			];
-		}
+		public const string Verse = "Verse.GenTypes";
+		public const string MsCorLib = "System.String";
+		public const string Current = "SmashTools.Performance.Benchmark_TypeByName";
+		public const string Harmony = "HarmonyLib.AccessTools";
 	}
 }

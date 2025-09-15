@@ -542,8 +542,8 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		{
 			CaravanFormation.formation.DestinationTile = tile;
 			List<VehicleDef> vehicleDefs = TransferableUtility
-			   .GetPawnsFromTransferables(formCaravan.transferables)
-			   .UniqueVehicleDefsInList();
+			 .GetPawnsFromTransferables(formCaravan.transferables)
+			 .UniqueVehicleDefsInList();
 			CaravanFormation.formation.StartingTile =
 				CaravanHelper.BestExitTileToGoTo(vehicleDefs, tile, map);
 			CaravanFormation.formation.TicksToArriveDirty = true;
@@ -587,7 +587,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 
 		if (CaravanFormation.formation.vehicles.Exists(vehicle =>
 			!Find.World.GetComponent<WorldVehiclePathGrid>()
-			   .PassableFast(___map.Tile, vehicle.VehicleDef)))
+			 .PassableFast(___map.Tile, vehicle.VehicleDef)))
 		{
 			Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 			return false;
@@ -600,7 +600,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		}
 		CaravanHelper.BoardAllAssignedPawns();
 		CaravanFormation.formation.AddItemsFromTransferablesToRandomInventories(CaravanFormation.formation
-		   .pawnsAndVehicles);
+		 .pawnsAndVehicles);
 
 		PlanetTile exitTile = ___startingTile;
 		if (!exitTile.Valid)
@@ -718,9 +718,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		MethodInfo clearTabList =
 			AccessTools.Method(typeof(List<TabRecord>), nameof(List<TabRecord>.Clear));
 		MethodInfo drawTabs = typeof(TabDrawer).GetMethods(BindingFlags.Static | BindingFlags.Public)
-		   .Where(method => method.Name == nameof(TabDrawer.DrawTabs))
-		   .FirstOrDefault(method => method.GetParameters().Length == 3)?
-		   .MakeGenericMethod(typeof(TabRecord));
+		 .Where(method => method.Name == nameof(TabDrawer.DrawTabs))
+		 .FirstOrDefault(method => method.GetParameters().Length == 3)?
+		 .MakeGenericMethod(typeof(TabRecord));
 		bool tabClearing = false;
 		bool switchBlockClearing = false;
 		for (int i = 0; i < instructionList.Count; i++)

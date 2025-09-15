@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<SoundDef>
+		<defName>AerialVehicle_Paratroopers_FlyOver</defName>
+		<context>MapOnly</context>
+		<eventNames />
+		<maxSimultaneous>3</maxSimultaneous>
+    <sustain>true</sustain>
+    <priorityMode>PrioritizeNearest</priorityMode>
+		<subSounds>
+			<li>
+        <onCamera>true</onCamera>
+				<muteWhenPaused>true</muteWhenPaused>
+				<grains>
+					<li Class = "AudioGrain_Clip">
+						<clipPath>Paratrooper_FlyOver</clipPath>
+					</li>				
+				</grains>
+				<volumeRange>
+					<min>40</min>
+					<max>55</max>
+				</volumeRange>
+        <pitchRange>0.85~1.05</pitchRange>
+			</li>
+		</subSounds>
+	</SoundDef>
+</Defs>

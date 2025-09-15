@@ -1,27 +1,27 @@
 ﻿using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class VehicleStatDefOf
 {
-  [DefOf]
-  public static class VehicleStatDefOf
-  {
-    static VehicleStatDefOf()
-    {
-      DefOfHelper.EnsureInitializedInCtor(typeof(VehicleStatDefOf));
-    }
+	// General
+	public static VehicleStatDef MoveSpeed;
+	public static VehicleStatDef Mass;
+	public static VehicleStatDef CargoCapacity;
+	public static VehicleStatDef RepairRate;
+	public static VehicleStatDef BodyIntegrity;
 
-    // General
-    public static VehicleStatDef MoveSpeed;
-    public static VehicleStatDef Mass;
-    public static VehicleStatDef CargoCapacity;
-    public static VehicleStatDef RepairRate;
-    public static VehicleStatDef BodyIntegrity;
+	// Combat
+	public static VehicleStatDef WorkToSabotage;
 
-    // Combat
-    public static VehicleStatDef WorkToSabotage;
+	// Aerial
+	public static VehicleStatDef FlightSpeed;
+	public static VehicleStatDef FlightControl;
 
-    // Aerial
-    public static VehicleStatDef FlightSpeed;
-    public static VehicleStatDef FlightControl;
-  }
+	static VehicleStatDefOf()
+	{
+		DefOfHelper.EnsureInitializedInCtor(typeof(VehicleStatDefOf));
+	}
 }

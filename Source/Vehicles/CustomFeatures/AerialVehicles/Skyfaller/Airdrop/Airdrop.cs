@@ -1,68 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
+﻿using System.Collections.Generic;
 using RimWorld;
+using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class Airdrop : Building, IThingHolder, IOpenable
 {
-	public class Airdrop : Building, IThingHolder, IOpenable
+	public ThingOwner<Thing> innerContainer = [];
+
+	bool IOpenable.CanOpen => true;
+
+	int IOpenable.OpenTicks => 180;
+
+	void IOpenable.Open()
 	{
-		private static readonly List<Thing> tmpInventoryDropper = new List<Thing>();
+		Destroy();
+	}
 
-		public ThingOwner<Thing> innerContainer = new ThingOwner<Thing>();
+	void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
+	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, innerContainer);
+	}
 
-		public bool CanOpen => true;
+	ThingOwner IThingHolder.GetDirectlyHeldThings()
+	{
+		return innerContainer;
+	}
 
-		public int OpenTicks => 180;
-
-		public void GetChildHolders(List<IThingHolder> outChildren)
+	private void DropAllContents()
+	{
+		if (!innerContainer.NullOrEmpty())
 		{
-			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
-		}
-
-		public ThingOwner GetDirectlyHeldThings()
-		{
-			return innerContainer;
-		}
-
-		private void DropAllContents()
-		{
-			if (!innerContainer.NullOrEmpty())
+			for (int i = innerContainer.InnerListForReading.Count - 1; i >= 0; i--)
 			{
-				tmpInventoryDropper.AddRange(innerContainer);
-				{
-					for (int i = 0; i < tmpInventoryDropper.Count; i++)
-					{
-						Thing thing = tmpInventoryDropper[i];
-						innerContainer.TryDrop(thing, Position, Map, ThingPlaceMode.Near, out _, delegate (Thing droppedThing, int unused)
-						{
-							if (droppedThing.def.IsPleasureDrug)
-							{
-								droppedThing.SetForbiddenIfOutsideHomeArea();
-							}
-						});
-					}
-				}
-				tmpInventoryDropper.Clear();
+				Thing thing = innerContainer[i];
+				innerContainer.TryDrop(thing, Position, Map, ThingPlaceMode.Near, out _, ItemDropped);
 			}
 		}
+		return;
 
-		public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+		static void ItemDropped(Thing droppedThing, int _)
 		{
-			DropAllContents();
-			base.Destroy(mode);
+			if (droppedThing.def.IsPleasureDrug)
+				droppedThing.SetForbiddenIfOutsideHomeArea();
 		}
+	}
 
-		public override void ExposeData()
-		{
-			base.ExposeData();
-			Scribe_Deep.Look(ref innerContainer, nameof(innerContainer), new object[] { this });
-		}
+	public override void Destroy(DestroyMode mode = DestroyMode.Vanish)
+	{
+		DropAllContents();
+		base.Destroy(mode);
+	}
 
-		public void Open()
-		{
-			Destroy();
-		}
+	public override void ExposeData()
+	{
+		base.ExposeData();
+		Scribe_Deep.Look(ref innerContainer, nameof(innerContainer), this);
 	}
 }
