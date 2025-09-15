@@ -52,8 +52,8 @@ public partial class VehicleTurret
     float spread = swayAndSpread * 0.16f;
     // recoil should be taken from the def mod extension, this is just an arbitrary default based
     // on the backward recoil for the turret animation, and not related to CE's vertical recoil
-    // accuracy factor.
-    float recoil = def.recoil.distanceTotal;
+    // accuracy factor, defaulting to 0 if turret has no recoil
+    float recoil = (def.recoil != null) ? def.recoil.distanceTotal : 0.0f;
     float shotHeight = 1f;
 
     CETurretDataDefModExtension turretData =
