@@ -75,12 +75,7 @@ public static class ParsingHelper
 		if (value.NullOrEmpty())
 			return true;
 
-		return value switch
-		{
-			FeatureFlags.Raiders      => FeatureFlags.RaidersEnabled,
-			FeatureFlags.Paratroopers => FeatureFlags.ParatroopersEnabled,
-			_                         => true,
-		};
+		return FeatureFlags.IsEnabled(value);
 	}
 
 	private static void CheckFieldLocked(XmlNode node, string value, FieldInfo field)

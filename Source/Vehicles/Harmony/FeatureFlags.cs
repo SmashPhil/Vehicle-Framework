@@ -16,6 +16,7 @@ public class FeatureFlags : Mod
 {
 	public const string Raiders = "Raiders";
 	public const string Paratroopers = "Paratroopers";
+	public const string Fishing = "Fishing";
 
 	private static ModContentPack mod;
 	private static Data data;
@@ -32,6 +33,8 @@ public class FeatureFlags : Mod
 
 	public static bool ParatroopersEnabled => IsEnabled(Paratroopers);
 
+	public static bool FishingEnabled => IsEnabled(Fishing);
+
 	public static bool IsEnabled(string featureName)
 	{
 		if (data is null || data.enabled.NullOrEmpty())
@@ -42,7 +45,7 @@ public class FeatureFlags : Mod
 			if (feature.name == featureName)
 				return feature.Enabled;
 		}
-		return false;
+		return true;
 	}
 
 	internal static void Save()

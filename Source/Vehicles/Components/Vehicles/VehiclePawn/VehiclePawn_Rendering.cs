@@ -50,9 +50,7 @@ public partial class VehiclePawn
 
 	private bool crashLanded;
 
-#if FISHING
 	private Command_Toggle fishToggle;
-#endif
 
 	public float CachedAngle { get; set; }
 
@@ -610,7 +608,6 @@ public partial class VehiclePawn
 			yield return loadVehicle;
 		}
 
-#if FISHING
 		if (FishingCompatibility.Active && SettingsCache.TryGetValue(VehicleDef,
 			typeof(VehicleProperties), nameof(VehicleProperties.canFish), VehicleDef.properties.canFish))
 		{
@@ -641,7 +638,6 @@ public partial class VehiclePawn
 			}
 			yield return fishToggle;
 		}
-#endif
 
 #if LOAD_PAWN_GIZMO
 		Command_Action flagForLoading = new()

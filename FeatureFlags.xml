@@ -4,5 +4,6 @@
   <enabled>
     <Raiders>Debug | Unstable</Raiders>
     <Paratroopers>Debug | Unstable</Paratroopers>
+    <Fishing>Debug | Unstable</Fishing>
   </enabled>
 </FeatureFlags>

@@ -6,6 +6,7 @@ using HarmonyLib;
 using RimWorld;
 using SmashTools.Patching;
 using UnityEngine.Assertions;
+using Vehicles.Config;
 using Verse;
 
 namespace Vehicles.Compatibility;
@@ -14,15 +15,12 @@ internal class Compatibility_VanillaExpandedFishing : ConditionalVehiclePatch
 {
 	public override string PackageId => ModPackageIds.VanillaExpandedFishing;
 
-	public override PatchSequence PatchAt =>
-#if FISHING
-		PatchSequence.PostDefDatabase;
-#else
-		PatchSequence.Disabled;
-#endif
+	public override PatchSequence PatchAt => PatchSequence.PostDefDatabase;
 
 	public override void PatchAll(ModMetaData mod)
 	{
+		if (!FeatureFlags.FishingEnabled)
+			return;
 		if (ModsConfig.OdysseyActive)
 			return;
 

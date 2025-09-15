@@ -2,6 +2,7 @@
 using SmashTools;
 using UnityEngine;
 using Vehicles.Compatibility;
+using Vehicles.Config;
 using Verse;
 
 // ReSharper disable RedundantDefaultMemberInitializer
@@ -259,26 +260,30 @@ public class SectionMain : SettingsSection
 
 			listingStandard.NewColumn();
 
-#if FISHING
-			string fishingHeader = "VF_Fishing".Translate();
-			if (!FishingCompatibility.Active)
+			if (FeatureFlags.FishingEnabled)
 			{
-				GUIState.Disable();
-				fishingHeader = "VF_FishingInactive".Translate();
+				string fishingHeader = "VF_Fishing".Translate();
+				if (!FishingCompatibility.Active)
+				{
+					GUIState.Disable();
+					fishingHeader = "VF_FishingInactive".Translate();
+				}
+				// Fishing
+				listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
+				listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(),
+					"%",
+					ref fishingMultiplier, min: MinFishingMultiplier, max: MaxFishingMultiplier, multiplier: 100,
+					decimalPlaces: 2);
+				listingStandard.Gap(8);
+				listingStandard.SliderLabeled("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), "%",
+					ref fishingSkillIncrease, min: MinFishingSkillGain, max: MaxFishingSkillGain, multiplier: 100,
+					decimalPlaces: 2);
+
+				listingStandard.Gap(8);
+
+				GUIState.Enable();
 			}
-			// Fishing
-			listingStandard.Header(fishingHeader, ListingExtension.BannerColor, GameFont.Small, TextAnchor.MiddleCenter);
-			listingStandard.SliderLabeled("VF_FishingMultiplier".Translate(), "VF_FishingMultiplierTooltip".Translate(), "%",
-				ref fishingMultiplier, min: MinFishingMultiplier, max: MaxFishingMultiplier, multiplier: 100, decimalPlaces: 2);
-			listingStandard.Gap(8);
-			listingStandard.SliderLabeled("VF_FishingSkill".Translate(), "VF_FishingSkillTooltip".Translate(), "%",
-				ref fishingSkillIncrease, min: MinFishingSkillGain, max: MaxFishingSkillGain, multiplier: 100,
-				decimalPlaces: 2);
 
-			listingStandard.Gap(8);
-
-			GUIState.Enable();
-#endif
 			// Aerial Vehicles
 			listingStandard.Header("VF_AerialVehicles".Translate(), ListingExtension.BannerColor,
 				GameFont.Small, TextAnchor.MiddleCenter);

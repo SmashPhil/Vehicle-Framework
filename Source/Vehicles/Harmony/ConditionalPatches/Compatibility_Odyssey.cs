@@ -1,5 +1,6 @@
 ﻿using RimWorld;
 using SmashTools.Patching;
+using Vehicles.Config;
 using Verse;
 
 namespace Vehicles.Compatibility;
@@ -8,15 +9,13 @@ internal class Compatibility_Odyssey : ConditionalVehiclePatch
 {
 	public override string PackageId => ModPackageIds.Odyssey;
 
-	public override PatchSequence PatchAt =>
-#if FISHING
-		PatchSequence.PostDefDatabase;
-#else
-		PatchSequence.Disabled;
-#endif
+	public override PatchSequence PatchAt => PatchSequence.PostDefDatabase;
 
 	public override void PatchAll(ModMetaData mod)
 	{
+		if (!FeatureFlags.FishingEnabled)
+			return;
+
 		// Odyssey fishing has hardcoded weights, and all common / uncommon fish are treated equally
 		const float WeightCommon = 1;
 		const float WeightUncommon = 0.05f;

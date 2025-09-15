@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Verse;
 using SmashTools;
+using Vehicles.Config;
 
 namespace Vehicles
 {
@@ -71,6 +72,12 @@ namespace Vehicles
 			string label = ResolvedLabel();
 			string tooltip = ResolvedTooltip();
 			string disabledTooltip = string.Empty;
+
+			if (field.TryGetAttribute(out FeatureEnabledAttribute featureAttr) &&
+				!FeatureFlags.IsEnabled(featureAttr.FeatureName))
+			{
+				return;
+			}
 
 			if (field.TryGetAttribute(out DisableSettingConditionalAttribute disableSetting))
 			{
