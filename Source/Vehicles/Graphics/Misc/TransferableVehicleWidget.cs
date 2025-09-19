@@ -58,8 +58,7 @@ public sealed class TransferableVehicleWidget
 	}
 
 	public TransferableVehicleWidget(string title, List<TransferableOneWay> vehicles,
-		List<TransferableOneWay> pawns,
-		PlanetTile tile = default)
+		List<TransferableOneWay> pawns, PlanetTile tile = default)
 	{
 		vehicleSection = new Section
 		{
@@ -139,15 +138,18 @@ public sealed class TransferableVehicleWidget
 			disableReason = "VF_ImpassableBiome";
 			return false;
 		}
-		if (!vehicleDef.canCaravan)
+		if (CaravanFormation.Current is not { AllowSelectionOfAllVehicles: true })
 		{
-			disableReason = "VF_CaravanDisabled";
-			return false;
-		}
-		if (transferable.AnyThing is VehiclePawn { CanMove: false })
-		{
-			disableReason = "VF_CaravanCantMove";
-			return false;
+			if (!vehicleDef.canCaravan)
+			{
+				disableReason = "VF_CaravanDisabled";
+				return false;
+			}
+			if (transferable.AnyThing is VehiclePawn { CanMove: false })
+			{
+				disableReason = "VF_CaravanCantMove";
+				return false;
+			}
 		}
 		disableReason = null;
 		return true;

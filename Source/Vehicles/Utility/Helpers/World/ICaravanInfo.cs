@@ -2,5 +2,6 @@
 
 public interface ICaravanInfo
 {
-  void NotifyTransferablesChanged();
+	bool AllowSelectionOfAllVehicles { get; }
+	void NotifyTransferablesChanged();
 }
