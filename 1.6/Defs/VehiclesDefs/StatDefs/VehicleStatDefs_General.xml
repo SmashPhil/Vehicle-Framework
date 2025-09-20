@@ -133,7 +133,7 @@
     <defaultBaseValue>50</defaultBaseValue>
     <minValue>0</minValue>
     <toStringStyle>WorkAmount</toStringStyle>
-    <showIfUndefined>true</showIfUndefined>
+    <alwaysHide>true</alwaysHide>
     <displayPriorityInCategory>0</displayPriorityInCategory>
 
     <modSettingsInfo>
