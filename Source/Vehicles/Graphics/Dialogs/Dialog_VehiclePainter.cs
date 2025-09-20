@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using SmashTools;
-using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Rendering;
 using Verse;
@@ -28,12 +27,6 @@ public class Dialog_VehiclePainter : Window
 	private const int GridDimensionColumns = 2;
 	private const int GridDimensionRows = 2;
 	private const int SampleCount = GridDimensionColumns * GridDimensionRows;
-
-	private static readonly Texture2D MouseOpenCursor =
-		ContentFinder<Texture2D>.Get("UI/Cursors/MouseHandOpen");
-
-	private static readonly Texture2D MouseClosedCursor =
-		ContentFinder<Texture2D>.Get("UI/Cursors/MouseHandClosed");
 
 	private int pageNumber;
 	private int pageCount;
@@ -277,7 +270,7 @@ public class Dialog_VehiclePainter : Window
 		// For some reason, OnGUI can still end up executing for 1 more frame after PostClose is called,
 		// which results in null textures being accessed. We can just skip this last frame.
 		IsClosing = true;
-		CustomCursor.Deactivate();
+		CursorSettings.Reset();
 	}
 
 	public override void PostOpen()
@@ -383,12 +376,12 @@ public class Dialog_VehiclePainter : Window
 	{
 		if (selectedPattern.properties.dynamicTiling && Mouse.IsOver(rect))
 		{
-			if (!mouseOver && MouseOpenCursor)
+			if (!mouseOver)
 			{
 				mouseOver = true;
-				Cursor.SetCursor(MouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
+				CursorSettings.SetCursor(CursorSettings.Type.OpenHand);
 			}
-			if (Input.GetMouseButtonDown(0) && !draggingDisplacement && MouseClosedCursor)
+			if (Input.GetMouseButtonDown(0) && !draggingDisplacement)
 			{
 				draggingDisplacement = true;
 				initialDragDifferenceX =
@@ -397,7 +390,7 @@ public class Dialog_VehiclePainter : Window
 				initialDragDifferenceY =
 					Mathf.InverseLerp(rect.height, 0f, Event.current.mousePosition.y - rect.y) * 2 - 1 -
 					displacementY;
-				Cursor.SetCursor(MouseClosedCursor, new Vector2(3, 3), CursorMode.Auto);
+				CursorSettings.SetCursor(CursorSettings.Type.CloseHand);
 			}
 			if (draggingDisplacement && Event.current.isMouse)
 			{
@@ -417,10 +410,10 @@ public class Dialog_VehiclePainter : Window
 					SoundDefOf.DragSlider.PlayOneShotOnCamera();
 				}
 			}
-			if (Input.GetMouseButtonUp(0) && MouseOpenCursor)
+			if (Input.GetMouseButtonUp(0))
 			{
 				draggingDisplacement = false;
-				Cursor.SetCursor(MouseOpenCursor, new Vector2(3, 3), CursorMode.Auto);
+				CursorSettings.SetCursor(CursorSettings.Type.OpenHand);
 			}
 		}
 		else
@@ -429,7 +422,7 @@ public class Dialog_VehiclePainter : Window
 			{
 				mouseOver = false;
 				draggingDisplacement = false;
-				CustomCursor.Activate();
+				CursorSettings.Reset();
 			}
 		}
 	}

@@ -41,8 +41,8 @@ public static class CaravanFormation
 					if (!CheckForErrors())
 						return;
 
-					formation.AddItemsFromTransferablesToRandomInventories(formation.pawnsAndVehicles);
-					VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(formation.pawnsAndVehicles,
+					formation.AddItemsFromTransferablesToRandomInventories(formation.AllPawnsAndVehicles);
+					VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(formation.AllPawnsAndVehicles,
 						Faction.OfPlayer, formCaravan.CurrentTile, formCaravan.CurrentTile,
 						formation.DestinationTile, false);
 					formation.Map.Parent.CheckRemoveMapNow();
@@ -193,11 +193,11 @@ public static class CaravanFormation
 			return;
 		}
 		CaravanHelper.BoardAllAssignedPawns();
+		formation.AddItemsFromTransferablesToRandomInventories(formation.AllPawnsAndVehicles);
 		RoleHelper.Distribute(formation.vehicles, formation.pawns);
-		formation.AddItemsFromTransferablesToRandomInventories(formation.pawnsAndVehicles);
 
 		List<CaravanGrouper.Group> vehicles =
-			CaravanGrouper.ExtractIncompatibleVehicles(formation.vehicles, formation.pawns);
+			CaravanGrouper.ExtractIncompatibleCaravanGroups(formation.vehicles, formation.pawns);
 		foreach (CaravanGrouper.Group group in vehicles)
 		{
 			VehicleCaravan caravan = CaravanHelper.ExitMapAndCreateVehicleCaravan(group.AllPawns,

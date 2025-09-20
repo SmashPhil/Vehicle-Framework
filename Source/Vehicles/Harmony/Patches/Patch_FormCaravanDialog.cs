@@ -592,7 +592,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 			Messages.Message("MessageNoValidExitTile".Translate(), MessageTypeDefOf.RejectInput, false);
 			return false;
 		}
-		if (!CaravanFormation.formation.pawnsAndVehicles.Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer)))
+		if (!CaravanFormation.formation.AllPawnsAndVehicles.Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer)))
 		{
 			Messages.Message("CaravanMustHaveAtLeastOneColonist".Translate(),
 				MessageTypeDefOf.RejectInput, false);
@@ -600,7 +600,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		}
 		CaravanHelper.BoardAllAssignedPawns();
 		CaravanFormation.formation.AddItemsFromTransferablesToRandomInventories(CaravanFormation.formation
-		 .pawnsAndVehicles);
+		 .AllPawnsAndVehicles);
 
 		PlanetTile exitTile = ___startingTile;
 		if (!exitTile.Valid)
@@ -608,7 +608,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		if (!exitTile.Valid)
 			exitTile = __instance.CurrentTile;
 
-		CaravanHelper.ExitMapAndCreateVehicleCaravan(CaravanFormation.formation.pawnsAndVehicles, Faction.OfPlayer,
+		CaravanHelper.ExitMapAndCreateVehicleCaravan(CaravanFormation.formation.AllPawnsAndVehicles, Faction.OfPlayer,
 			__instance.CurrentTile, exitTile, ___destinationTile);
 		SoundDefOf.Tick_High.PlayOneShotOnCamera();
 		__instance.Close(doCloseSound: false);

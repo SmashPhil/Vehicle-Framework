@@ -40,6 +40,7 @@
         <Exec Condition="'$(OS)' != 'Windows_NT'"
               Command="bash &quot;../../Build/ExtractTranslations.sh&quot; &quot;1.6&quot;" />
 	-->
+
 	<!-- Version Increment -->
 	<Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
 	<Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />

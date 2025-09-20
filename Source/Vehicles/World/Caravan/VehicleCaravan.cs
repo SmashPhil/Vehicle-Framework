@@ -332,7 +332,16 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 		Assert.IsTrue(vehicles.Count == 1);
 		VehiclePawn vehicle = vehicles[0];
 
-		int pawnCount = PawnsListForReading.CountWhere(pawn => pawn is not VehiclePawn);
+		using (new RecacheDisabler(this))
+		{
+			foreach (Pawn pawn in DismountedPawnsListForReading)
+			{
+				vehicle.TryAddPawn(pawn);
+			}
+		}
+		RecacheVehicles();
+
+		int pawnCount = PawnsListForReading.Count(CountNonCargoPawns);
 		if (pawnCount > vehicle.TotalSeats)
 		{
 			Find.WindowStack.Add(new Dialog_Confirm(
@@ -345,6 +354,14 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 			LaunchAction();
 		}
 		return;
+
+		static bool CountNonCargoPawns(Pawn pawn)
+		{
+			if (pawn is VehiclePawn)
+				return false;
+
+			return !pawn.CanBeTransferredToVehiclesCargo();
+		}
 
 		void LaunchAction()
 		{
@@ -472,7 +489,9 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 				foreach (Thing thing in vehicle.inventory.innerContainer)
 				{
 					if (thing is Pawn inventoryPawn)
+					{
 						allPawns.Add(inventoryPawn);
+					}
 				}
 			}
 			else

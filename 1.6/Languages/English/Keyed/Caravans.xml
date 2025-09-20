@@ -3,6 +3,7 @@
   <VF_Caravan_MoveSpeed>Amount of tiles traveled in 1 day.</VF_Caravan_MoveSpeed>
   
   <VF_Caravan_Dismounted>Dismounted</VF_Caravan_Dismounted>
+  <VF_Caravan_Cargo>Cargo</VF_Caravan_Cargo>
   <VF_Sailing>Sailing</VF_Sailing>
   
   <VF_DockToCaravan>Items to Take</VF_DockToCaravan>

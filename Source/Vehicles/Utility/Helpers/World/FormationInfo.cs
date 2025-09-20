@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -61,7 +62,6 @@ public class FormationInfo : ICaravanInfo
 	public readonly List<Pawn> pawns = [];
 	public readonly List<VehiclePawn> vehicles = [];
 	public readonly List<Thing> things = [];
-	public readonly List<Pawn> pawnsAndVehicles = [];
 	public readonly List<VehiclePawn> unselectedVehicles = [];
 
 	private readonly Map map;
@@ -140,6 +140,8 @@ public class FormationInfo : ICaravanInfo
 
 	public VehiclePawn LeadVehicle => leadVehicle;
 
+	public List<Pawn> AllPawnsAndVehicles => pawns.Concat(vehicles).ToList();
+
 	public bool Reform => ReformFieldRef.Invoke(formCaravan);
 
 	bool ICaravanInfo.AllowSelectionOfAllVehicles => Reform;
@@ -216,7 +218,6 @@ public class FormationInfo : ICaravanInfo
 		pawns.Clear();
 		vehicles.Clear();
 		things.Clear();
-		pawnsAndVehicles.Clear();
 		unselectedVehicles.Clear();
 
 		int largestMagnitude = -1;
@@ -252,7 +253,5 @@ public class FormationInfo : ICaravanInfo
 				}
 			}
 		}
-		pawnsAndVehicles.AddRange(pawns);
-		pawnsAndVehicles.AddRange(vehicles);
 	}
 }

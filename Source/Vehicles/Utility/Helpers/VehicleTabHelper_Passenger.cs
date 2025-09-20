@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
@@ -26,10 +27,26 @@ public static class VehicleTabHelper_Passenger
 	private static Pawn hoveringOverPawn;
 
 	private static bool overDropSpot;
+	private static bool pawnSeatChanged;
+
+	private static bool drawing;
+	private static MouseState mouseState;
+	private static MouseState desiredMouseState;
+
+	public static bool PawnSeatChanged => pawnSeatChanged;
 
 	public static void Start()
 	{
+		if (drawing)
+		{
+			Trace.Fail(
+				$"{nameof(VehicleTabHelper_Passenger)} is not re-entrant and can only be called after the previous draw cycle has finished.");
+			return;
+		}
+		drawing = true;
 		overDropSpot = false;
+		pawnSeatChanged = false;
+		desiredMouseState = MouseState.None;
 	}
 
 	public static void End()
@@ -40,6 +57,30 @@ public static class VehicleTabHelper_Passenger
 		{
 			transferToHolder = null;
 		}
+
+		if (desiredMouseState != mouseState)
+		{
+			mouseState = desiredMouseState;
+			switch (mouseState)
+			{
+				case MouseState.HoverOver:
+					CursorSettings.SetCursor(CursorSettings.Type.OpenHand);
+				break;
+				case MouseState.Dragging:
+					CursorSettings.SetCursor(CursorSettings.Type.CloseHand);
+				break;
+				case MouseState.None:
+					CursorSettings.Reset();
+				break;
+			}
+		}
+
+		drawing = false;
+	}
+
+	public static void Clear()
+	{
+		draggedPawn = null;
 	}
 
 	/// <summary>
@@ -125,63 +166,68 @@ public static class VehicleTabHelper_Passenger
 			0;
 		Rect pawnRect = new(nonRefX, nonRefY, viewRect.width, PawnRowHeight);
 
-		bool mouseOver;
 		Widgets.BeginGroup(pawnRect);
-		{
-			Rect fullRect = pawnRect.AtZero();
+		Rect fullRect = pawnRect.AtZero();
 
-			Rect dragRect = new(0, 0, LabelWidth + ThingIconSize + PawnRowPadding, PawnRowHeight);
-			mouseOver = Mouse.IsOver(dragRect);
-			if (draggedPawn == null && mouseOver && Event.current.type == EventType.MouseDown &&
-				Event.current.button == 0)
+		Rect dragRect = new(0, 0, LabelWidth + ThingIconSize + PawnRowPadding, PawnRowHeight);
+		bool mouseOver = Mouse.IsOver(dragRect);
+		if (draggedPawn == null && mouseOver)
+		{
+			desiredMouseState = Ext_Enum.Max(desiredMouseState, MouseState.HoverOver);
+			if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
 			{
 				draggedPawn = pawn;
 				Event.current.Use();
 				SoundDefOf.Click.PlayOneShotOnCamera();
 			}
+		}
 
-			Widgets.InfoCardButton(fullRect.width - PawnExtraButtonSize,
-				(pawnRect.height - PawnExtraButtonSize) / 2f, pawn);
+		if (draggedPawn != null)
+		{
+			desiredMouseState = Ext_Enum.Max(desiredMouseState, MouseState.Dragging);
+		}
+
+		Widgets.InfoCardButton(fullRect.width - PawnExtraButtonSize,
+			(pawnRect.height - PawnExtraButtonSize) / 2f, pawn);
+		fullRect.width -= PawnExtraButtonSize;
+		if (!pawn.Dead)
+		{
+			OpenSpecificTabButton(fullRect, pawn, ref moreDetailsForPawn);
 			fullRect.width -= PawnExtraButtonSize;
-			if (!pawn.Dead)
-			{
-				OpenSpecificTabButton(fullRect, pawn, ref moreDetailsForPawn);
-				fullRect.width -= PawnExtraButtonSize;
-			}
+		}
 
-			if (highlight)
-			{
-				Widgets.DrawHighlightIfMouseover(dragRect);
-			}
-			Rect iconRect = new(PawnRowPadding, (pawnRect.height - ThingIconSize) / 2f,
-				ThingIconSize, ThingIconSize);
-			Widgets.ThingIcon(iconRect, pawn);
-			Rect bgRect = new(iconRect.xMax + PawnRowPadding, 16f, LabelWidth, 18f);
-			GenMapUI.DrawPawnLabel(pawn, bgRect, 1f, LabelWidth, null, GameFont.Small, false, false);
+		if (highlight)
+		{
+			Widgets.DrawHighlightIfMouseover(dragRect);
+		}
+		Rect iconRect = new(PawnRowPadding, (pawnRect.height - ThingIconSize) / 2f,
+			ThingIconSize, ThingIconSize);
+		Widgets.ThingIcon(iconRect, pawn);
+		Rect bgRect = new(iconRect.xMax + PawnRowPadding, 16f, LabelWidth, 18f);
+		GenMapUI.DrawPawnLabel(pawn, bgRect, 1f, LabelWidth, null, GameFont.Small, false, false);
 
-			using ClearOnDispose<Need> cod = new(TmpNeeds);
-			List<Need> allNeeds = pawn.needs.AllNeeds;
-			foreach (Need need in allNeeds)
-			{
-				// Change for all needs?
-				if (need.def.showForCaravanMembers)
-					TmpNeeds.Add(need);
-			}
-			PawnNeedsUIUtility.SortInDisplayOrder(TmpNeeds);
+		using ClearOnDispose<Need> cod = new(TmpNeeds);
+		List<Need> allNeeds = pawn.needs.AllNeeds;
+		foreach (Need need in allNeeds)
+		{
+			// Change for all needs?
+			if (need.def.showForCaravanMembers)
+				TmpNeeds.Add(need);
+		}
+		PawnNeedsUIUtility.SortInDisplayOrder(TmpNeeds);
 
-			float xMax = bgRect.xMax;
-			foreach (Need need in TmpNeeds)
-			{
-				Rect needRect = new(xMax, 0f, LabelWidth, PawnRowHeight);
-				need.DrawOnGUI(needRect, customMargin: 10, drawArrows: false, doTooltip: true);
-				xMax = needRect.xMax;
-			}
+		float xMax = bgRect.xMax;
+		foreach (Need need in TmpNeeds)
+		{
+			Rect needRect = new(xMax, 0f, LabelWidth, PawnRowHeight);
+			need.DrawOnGUI(needRect, customMargin: 10, drawArrows: false, doTooltip: true);
+			xMax = needRect.xMax;
+		}
 
-			if (pawn.Downed)
-			{
-				using TextBlock guiColor = new(new Color(1f, 0f, 0f, 0.5f));
-				Widgets.DrawLineHorizontal(0f, pawnRect.height / 2f, pawnRect.width);
-			}
+		if (pawn.Downed)
+		{
+			using TextBlock guiColor = new(new Color(1f, 0f, 0f, 0.5f));
+			Widgets.DrawLineHorizontal(0f, pawnRect.height / 2f, pawnRect.width);
 		}
 		Widgets.EndGroup();
 
@@ -216,14 +262,19 @@ public static class VehicleTabHelper_Passenger
 
 	public static void HandleDragEvent()
 	{
+		if (draggedPawn == null)
+			return;
 		if (Event.current.type != EventType.MouseUp || Event.current.button != 0)
 			return;
 
+		if (transferToHolder == null)
+		{
+			Clear();
+			SoundDefOf.ClickReject.PlayOneShotOnCamera();
+			return;
+		}
 		try
 		{
-			if (draggedPawn == null || transferToHolder == null)
-				return;
-
 			if (transferToHolder is VehicleRoleHandler { AreSlotsAvailable: false } transferToHandler)
 			{
 				if (hoveringOverPawn != null &&
@@ -234,8 +285,7 @@ public static class VehicleTabHelper_Passenger
 					curHandler.thingOwner.Swap(transferToHandler.thingOwner, draggedPawn,
 						hoveringOverPawn);
 					SoundDefOf.Click.PlayOneShotOnCamera();
-					transferToHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats]
-					 .ExecuteEvents();
+					transferToHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
 				}
 				else
 				{
@@ -245,59 +295,89 @@ public static class VehicleTabHelper_Passenger
 			}
 			else if (draggedPawn.ParentHolder != transferToHolder)
 			{
-				IThingHolder previousHolder = draggedPawn.ParentHolder;
-
-				VehicleRoleHandler targetHandler = transferToHolder as VehicleRoleHandler;
-				if (targetHandler != null && !targetHandler.CanOperateRole(draggedPawn))
+				switch (transferToHolder)
 				{
-					bool canAssign = !targetHandler.role.HandlingTypes.HasFlag(HandlingType.Movement);
-					MessageTypeDef msgTypeDef = canAssign ?
-						MessageTypeDefOf.CautionInput :
-						MessageTypeDefOf.RejectInput;
-					Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap),
-						msgTypeDef);
+					case VehicleRoleHandler targetHandler:
+						if (!targetHandler.CanOperateRole(draggedPawn))
+						{
+							bool canAssign = (targetHandler.role.HandlingTypes & HandlingType.Movement) == 0;
+							MessageTypeDef msgTypeDef = canAssign ?
+								MessageTypeDefOf.CautionInput :
+								MessageTypeDefOf.RejectInput;
+							Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), msgTypeDef);
 
-					if (!canAssign)
-						return;
+							if (!canAssign)
+								return;
+						}
+					break;
+					case Pawn_InventoryTracker:
+						if (!draggedPawn.CanBeTransferredToVehiclesCargo())
+						{
+							Messages.Message("VF_CannotAddToCargo".Translate(draggedPawn.LabelShortCap),
+								MessageTypeDefOf.RejectInput);
+							return;
+						}
+					break;
 				}
 
+				IThingHolder previousHolder = draggedPawn.ParentHolder;
 				if (!transferToHolder.GetDirectlyHeldThings()
 				 .TryAddOrTransfer(draggedPawn, canMergeWithExistingStacks: false))
 				{
 					Log.Warning($"Unable to add {draggedPawn} to {transferToHolder}.");
 					return;
 				}
-
 				SoundDefOf.Click.PlayOneShotOnCamera();
-				if (targetHandler != null)
-				{
-					if (previousHolder is VehicleRoleHandler)
-					{
-						targetHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats]
-						 .ExecuteEvents();
-					}
-					else
-					{
-						if (!draggedPawn.Spawned && draggedPawn.IsWorldPawn())
-						{
-							Find.WorldPawns.RemovePawn(draggedPawn);
-						}
-						targetHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
-					}
-				}
-				else if (previousHolder is VehicleRoleHandler previousHandler)
-				{
-					if (!draggedPawn.Spawned && !draggedPawn.IsWorldPawn())
-					{
-						Find.WorldPawns.PassToWorld(draggedPawn);
-					}
-					previousHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
-				}
+				OnPawnChangedSeats(previousHolder);
 			}
 		}
 		finally
 		{
 			draggedPawn = null;
+		}
+	}
+
+	private static void OnPawnChangedSeats(IThingHolder previousHolder)
+	{
+		VehiclePawn fromVehicle = GetVehicle(previousHolder);
+		VehiclePawn toVehicle = GetVehicle(transferToHolder);
+
+		pawnSeatChanged = true;
+		if (fromVehicle != null && toVehicle == null)
+		{
+			if (!draggedPawn.Spawned && !draggedPawn.IsWorldPawn())
+			{
+				Find.WorldPawns.PassToWorld(draggedPawn);
+			}
+			fromVehicle.EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+		}
+		if (toVehicle != null)
+		{
+			if (fromVehicle == toVehicle)
+			{
+				toVehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+			}
+			else
+			{
+				if (!draggedPawn.Spawned && draggedPawn.IsWorldPawn())
+				{
+					Find.WorldPawns.RemovePawn(draggedPawn);
+				}
+				fromVehicle?.EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+				toVehicle.EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
+			}
+		}
+
+		return;
+
+		static VehiclePawn GetVehicle(IThingHolder holder)
+		{
+			return holder switch
+			{
+				VehicleRoleHandler handler      => handler.vehicle,
+				Pawn_InventoryTracker inventory => inventory.pawn as VehiclePawn,
+				_                               => null
+			};
 		}
 	}
 
@@ -335,5 +415,25 @@ public static class VehicleTabHelper_Passenger
 			}
 		}
 		return maxNeeds;
+	}
+
+	private enum MouseState
+	{
+		None,
+		HoverOver,
+		Dragging
+	}
+
+	public readonly struct DrawBlock : IDisposable
+	{
+		public DrawBlock()
+		{
+			Start();
+		}
+
+		void IDisposable.Dispose()
+		{
+			End();
+		}
 	}
 }

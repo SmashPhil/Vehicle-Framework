@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
+using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
 using Verse;
@@ -66,10 +67,19 @@ public partial class VehiclePawn
 	/// </remarks>
 	public int AddOrTransfer([NotNull] Thing thing, int count)
 	{
-		int result = inventory.innerContainer.TryAddOrTransfer(thing, count);
-		EventRegistry[VehicleEventDefOf.CargoAdded].ExecuteEvents();
+		Pawn pawn = thing as Pawn;
+		if (pawn != null)
+		{
+			if (pawn.Spawned)
+				pawn.DeSpawn();
+			if (pawn.IsWorldPawn())
+				Find.WorldPawns.RemovePawn(pawn);
+		}
 
-		if (thing is Pawn)
+		int result = inventory.innerContainer.TryAddOrTransfer(thing, count);
+
+		EventRegistry[VehicleEventDefOf.CargoAdded].ExecuteEvents();
+		if (pawn != null)
 		{
 			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}

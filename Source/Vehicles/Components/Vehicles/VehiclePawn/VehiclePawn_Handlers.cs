@@ -28,6 +28,8 @@ public partial class VehiclePawn
 
 	public List<Pawn> AllColonistsAboard { get; private set; } = [];
 
+	public List<Pawn> AllInventoryPawns { get; private set; } = [];
+
 	public Dictionary<HandlingType, List<Pawn>> PawnsByHandlingType { get; private set; } = new()
 	{
 		[HandlingType.None] = [],
@@ -134,6 +136,18 @@ public partial class VehiclePawn
 			}
 
 			return x;
+		}
+	}
+
+	private void RecacheInventoryPawns()
+	{
+		AllInventoryPawns.Clear();
+		foreach (Thing thing in inventory.innerContainer)
+		{
+			if (thing is Pawn pawn)
+			{
+				AllInventoryPawns.Add(pawn);
+			}
 		}
 	}
 

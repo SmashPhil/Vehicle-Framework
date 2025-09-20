@@ -6,7 +6,7 @@ namespace Vehicles.World;
 
 internal static class CaravanGrouper
 {
-	public static List<Group> ExtractIncompatibleVehicles(List<VehiclePawn> vehicles, List<Pawn> pawns)
+	public static List<Group> ExtractIncompatibleCaravanGroups(List<VehiclePawn> vehicles, List<Pawn> pawns)
 	{
 		List<Group> groups = [];
 		foreach (VehiclePawn vehicle in vehicles)

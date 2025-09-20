@@ -130,6 +130,8 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 
 		this.FillEventsDef();
 
+		inventory.innerContainer.OnContentsChanged += RecacheInventoryPawns;
+
 		this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
 		this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
 		this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, RecacheAlerts);

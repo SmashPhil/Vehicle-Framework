@@ -13,6 +13,7 @@
   <VF_CannotFit>Not enough space.</VF_CannotFit>
   <VF_NoPathForVehicle>Cannot path here.</VF_NoPathForVehicle>
   <VF_IncapableStatusForRole>{0} is incapable of fulfilling this role.</VF_IncapableStatusForRole>
+  <VF_CannotAddToCargo>{0} cannot be added to cargo.</VF_CannotAddToCargo>
   
   <VF_InvalidName>Name invalid for Vehicle.</VF_InvalidName>
   <VF_OutOfFood>No food in {0} with Pawns onboard.</VF_OutOfFood>
