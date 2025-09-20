@@ -19,6 +19,8 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public partial class VehicleTurret
 {
+	private static readonly StringBuilder TooltipBuilder = new();
+
 	/* --- Parsed --- */
 
 	[TweakField]
@@ -1036,17 +1038,16 @@ public partial class VehicleTurret
 
 		string AutoTargetingTooltip()
 		{
-			StringBuilder tooltip = UIHelper.tooltipBuilder;
-			tooltip.Clear();
-			tooltip.AppendLine("VF_ToggleAutoTargeting".Translate());
-			tooltip.AppendLine();
-			tooltip.AppendLine();
-			tooltip.AppendLine("VF_ToggleAutoTargetingDesc"
+			TooltipBuilder.Clear();
+			TooltipBuilder.AppendLine("VF_ToggleAutoTargeting".Translate());
+			TooltipBuilder.AppendLine();
+			TooltipBuilder.AppendLine();
+			TooltipBuilder.AppendLine("VF_ToggleAutoTargetingDesc"
 			 .Translate((turret.AutoTarget ? "On".TranslateSimple() : "Off".TranslateSimple())
 				 .UncapitalizeFirst().Named("ONOFF"))
 			 .Resolve());
-			string text = tooltip.ToString();
-			tooltip.Clear();
+			string text = TooltipBuilder.ToString();
+			TooltipBuilder.Clear();
 			return text;
 		}
 	}

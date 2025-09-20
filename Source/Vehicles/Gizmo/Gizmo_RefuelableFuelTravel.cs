@@ -2,7 +2,6 @@
 using RimWorld;
 using SmashTools;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
 using Verse.Steam;
@@ -12,253 +11,252 @@ namespace Vehicles.Rendering;
 [StaticConstructorOnStartup]
 public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 {
-  private const float FuelIconSize = 24;
+	private const float FuelIconSize = 24;
 
-  private readonly CompFueledTravel refuelable;
-  private readonly bool showVehicleLabel;
+	private static readonly StringBuilder TooltipBuilder = new();
 
-  private float fuelAvailable;
-  private bool refuelFromInventoryDisabled;
-  private string refuelFromInventoryDisabledReason;
+	private readonly CompFueledTravel refuelable;
+	private readonly bool showVehicleLabel;
 
-  public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showVehicleLabel)
-  {
-    this.refuelable = refuelable;
-    this.showVehicleLabel = showVehicleLabel;
-    Order = -100f;
-  }
+	private float fuelAvailable;
+	private bool refuelFromInventoryDisabled;
+	private string refuelFromInventoryDisabledReason;
 
-  protected override float Target
-  {
-    get { return refuelable.TargetFuelPercent; }
-    set { refuelable.TargetFuelPercent = value; }
-  }
+	public Gizmo_RefuelableFuelTravel(CompFueledTravel refuelable, bool showVehicleLabel)
+	{
+		this.refuelable = refuelable;
+		this.showVehicleLabel = showVehicleLabel;
+		Order = -100f;
+	}
 
-  protected override float ValuePercent => refuelable.FuelPercent;
+	protected override float Target
+	{
+		get { return refuelable.TargetFuelPercent; }
+		set { refuelable.TargetFuelPercent = value; }
+	}
 
-  protected override string Title =>
-    showVehicleLabel ? refuelable.Vehicle.LabelCap : refuelable.Props.GizmoLabel;
+	protected override float ValuePercent => refuelable.FuelPercent;
 
-  protected override bool IsDraggable => !refuelable.Props.ElectricPowered;
+	protected override string Title =>
+		showVehicleLabel ? refuelable.Vehicle.LabelCap : refuelable.Props.GizmoLabel;
 
-  protected override string BarLabel
-  {
-    get
-    {
-      return
-        $"{refuelable.Fuel.ToStringDecimalIfSmall()} / {refuelable.FuelCapacity.ToStringDecimalIfSmall()}";
-    }
-  }
+	protected override bool IsDraggable => !refuelable.Props.ElectricPowered;
 
-  private KeyBindingDef KeyBindDef
-  {
-    get
-    {
-      if (refuelable.Props.ElectricPowered)
-        return KeyBindingDefOf.Command_TogglePower;
-      return KeyBindingDefOf.Command_ItemForbid;
-    }
-  }
+	protected override string BarLabel
+	{
+		get
+		{
+			return
+				$"{refuelable.Fuel.ToStringDecimalIfSmall()} / {refuelable.FuelCapacity.ToStringDecimalIfSmall()}";
+		}
+	}
 
-  protected override bool DraggingBar { get; set; }
+	private KeyBindingDef KeyBindDef
+	{
+		get
+		{
+			if (refuelable.Props.ElectricPowered)
+				return KeyBindingDefOf.Command_TogglePower;
+			return KeyBindingDefOf.Command_ItemForbid;
+		}
+	}
 
-  protected override string GetTooltip()
-  {
-    return $"{refuelable.TargetFuelLevel:F0} {refuelable.Props.fuelType.LabelCap}";
-  }
+	protected override bool DraggingBar { get; set; }
 
-  private void UpdateDisableStatus()
-  {
-    refuelFromInventoryDisabled = false;
-    refuelFromInventoryDisabledReason = null;
-    fuelAvailable = 0;
-    if (Mathf.Approximately(refuelable.FuelPercent, 1))
-    {
-      refuelFromInventoryDisabled = true;
-      refuelFromInventoryDisabledReason = "VF_VehicleFullyFueled".Translate(refuelable.Vehicle.LabelCap);
-      return;
-    }
-    fuelAvailable = FuelInVehicle(refuelable.Vehicle);
-    if (fuelAvailable == 0)
-    {
-      refuelFromInventoryDisabled = true;
-      refuelFromInventoryDisabledReason = "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap);
-    }
-    if (refuelable.Vehicle.InAerialVehicle())
-    {
-      refuelFromInventoryDisabled = true;
-      refuelFromInventoryDisabledReason = "VF_CantRefuelWhileFlying".Translate(refuelable.Vehicle.LabelCap);
-    }
-    return;
+	protected override string GetTooltip()
+	{
+		return $"{refuelable.TargetFuelLevel:F0} {refuelable.Props.fuelType.LabelCap}";
+	}
 
-    static float FuelInVehicle(VehiclePawn vehicle)
-    {
-      float fuel = 0;
-      foreach (Thing thing in CompFueledTravel.AllFuelFromInventory(vehicle))
-        fuel += thing.stackCount;
-      return fuel;
-    }
-  }
+	private void UpdateDisableStatus()
+	{
+		refuelFromInventoryDisabled = false;
+		refuelFromInventoryDisabledReason = null;
+		fuelAvailable = 0;
+		if (Mathf.Approximately(refuelable.FuelPercent, 1))
+		{
+			refuelFromInventoryDisabled = true;
+			refuelFromInventoryDisabledReason = "VF_VehicleFullyFueled".Translate(refuelable.Vehicle.LabelCap);
+			return;
+		}
+		fuelAvailable = FuelInVehicle(refuelable.Vehicle);
+		if (fuelAvailable == 0)
+		{
+			refuelFromInventoryDisabled = true;
+			refuelFromInventoryDisabledReason = "VF_NoFuelInVehicle".Translate(refuelable.Vehicle.LabelCap);
+		}
+		if (refuelable.Vehicle.InAerialVehicle())
+		{
+			refuelFromInventoryDisabled = true;
+			refuelFromInventoryDisabledReason = "VF_CantRefuelWhileFlying".Translate(refuelable.Vehicle.LabelCap);
+		}
+		return;
 
-  public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
-  {
-    if (SteamDeck.IsSteamDeckInNonKeyboardMode)
-      return base.GizmoOnGUI(topLeft, maxWidth, parms);
+		static float FuelInVehicle(VehiclePawn vehicle)
+		{
+			float fuel = 0;
+			foreach (Thing thing in CompFueledTravel.AllFuelFromInventory(vehicle))
+				fuel += thing.stackCount;
+			return fuel;
+		}
+	}
 
-    UpdateDisableStatus();
+	public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
+	{
+		if (SteamDeck.IsSteamDeckInNonKeyboardMode)
+			return base.GizmoOnGUI(topLeft, maxWidth, parms);
 
-    KeyCode hotKeyCode = KeyBindDef.MainKey;
-    if (hotKeyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(hotKeyCode))
-    {
-      if (KeyBindDef.KeyDownEvent)
-      {
-        ToggleSwitch();
-        Event.current.Use();
-      }
-    }
-    return base.GizmoOnGUI(topLeft, maxWidth, parms);
-  }
+		UpdateDisableStatus();
 
-  protected override void DrawHeader(Rect headerRect, ref bool mouseOverElement)
-  {
-    const float IconBarPadding = 4;
+		KeyCode hotKeyCode = KeyBindDef.MainKey;
+		if (hotKeyCode != KeyCode.None && !GizmoGridDrawer.drawnHotKeys.Contains(hotKeyCode))
+		{
+			if (KeyBindDef.KeyDownEvent)
+			{
+				ToggleSwitch();
+				Event.current.Use();
+			}
+		}
+		return base.GizmoOnGUI(topLeft, maxWidth, parms);
+	}
 
-    headerRect.xMax -= FuelIconSize;
-    Rect iconRect = new(headerRect.xMax, headerRect.y, FuelIconSize, FuelIconSize);
+	protected override void DrawHeader(Rect headerRect, ref bool mouseOverElement)
+	{
+		const float IconBarPadding = 4;
 
-    bool electric = refuelable.Props.ElectricPowered;
+		headerRect.xMax -= FuelIconSize;
+		Rect iconRect = new(headerRect.xMax, headerRect.y, FuelIconSize, FuelIconSize);
 
-    Texture fuelTexture = electric ? TexData.FlickerIcon : ThingDefOf.Chemfuel.uiIcon;
-    GUI.DrawTexture(iconRect, fuelTexture);
-    Rect subIconRect =
-      new(iconRect.center.x, iconRect.y, iconRect.width / 2f, iconRect.height / 2f);
-    bool checkOn = electric ? refuelable.Charging : refuelable.allowAutoRefuel;
-    GUI.DrawTexture(subIconRect, checkOn ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex);
+		bool electric = refuelable.Props.ElectricPowered;
 
-    if (Widgets.ButtonInvisible(iconRect))
-    {
-      ToggleAutoRefuel();
-    }
+		Texture fuelTexture = electric ? TexData.FlickerIcon : ThingDefOf.Chemfuel.uiIcon;
+		GUI.DrawTexture(iconRect, fuelTexture);
+		Rect subIconRect =
+			new(iconRect.center.x, iconRect.y, iconRect.width / 2f, iconRect.height / 2f);
+		bool checkOn = electric ? refuelable.Charging : refuelable.allowAutoRefuel;
+		GUI.DrawTexture(subIconRect, checkOn ? Widgets.CheckboxOnTex : Widgets.CheckboxOffTex);
 
-    if (Mouse.IsOver(iconRect))
-    {
-      Widgets.DrawHighlight(iconRect);
-      TooltipHandler.TipRegion(iconRect,
-        electric ? PowerNetTip : RefuelTip,
-        electric ? "PowerNetTip".GetHashCode() : "RefuelTip".GetHashCode());
-      mouseOverElement = true;
-    }
+		if (Widgets.ButtonInvisible(iconRect))
+		{
+			ToggleAutoRefuel();
+		}
 
-    if (!electric)
-    {
-      iconRect.x -= iconRect.width + IconBarPadding;
-      GenUI.DrawTextureWithMaterial(iconRect, fuelTexture,
-        refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
-      GenUI.DrawTextureWithMaterial(iconRect, VehicleTex.UnloadIcon,
-        refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
-      if (Widgets.ButtonInvisible(iconRect))
-      {
-        if (refuelFromInventoryDisabled)
-        {
-          Messages.Message(refuelFromInventoryDisabledReason, MessageTypeDefOf.RejectInput);
-          return;
-        }
-        const int MinRefuelCount = 1;
-        int maxRefuel = Mathf.FloorToInt(Mathf.Min(fuelAvailable, refuelable.FuelCapacity - refuelable.Fuel));
-        if (maxRefuel < MinRefuelCount)
-          maxRefuel = MinRefuelCount;
-        Dialog_Slider slider = new(
-          count => "VF_RefuelFromInventoryCount".Translate(count, refuelable.Props.fuelType.label),
-          MinRefuelCount, maxRefuel, refuelable.ConsumeFuelFromInventory);
-        Find.WindowStack.Add(slider);
-      }
-      if (Mouse.IsOver(iconRect))
-      {
-        Widgets.DrawHighlight(iconRect);
-        TooltipHandler.TipRegion(iconRect, RefuelFromInventoryTip, "RefuelFromInventoryTip".GetHashCode());
-        mouseOverElement = true;
-      }
-    }
-    base.DrawHeader(headerRect, ref mouseOverElement);
-  }
+		if (Mouse.IsOver(iconRect))
+		{
+			Widgets.DrawHighlight(iconRect);
+			TooltipHandler.TipRegion(iconRect,
+				electric ? PowerNetTip : RefuelTip,
+				electric ? "PowerNetTip".GetHashCode() : "RefuelTip".GetHashCode());
+			mouseOverElement = true;
+		}
 
-  private void ToggleSwitch()
-  {
-    if (refuelable.Props.ElectricPowered)
-      ToggleCharging();
-    else
-      ToggleAutoRefuel();
-  }
+		if (!electric)
+		{
+			iconRect.x -= iconRect.width + IconBarPadding;
+			Rect refuelCargoRect = iconRect.ExpandedBy(3);
+			refuelCargoRect.y += 2;
+			GenUI.DrawTextureWithMaterial(refuelCargoRect, VehicleTex.RefuelFromCargo,
+				refuelFromInventoryDisabled ? TexUI.GrayscaleGUI : null);
+			if (Widgets.ButtonInvisible(iconRect))
+			{
+				if (refuelFromInventoryDisabled)
+				{
+					Messages.Message(refuelFromInventoryDisabledReason, MessageTypeDefOf.RejectInput);
+					return;
+				}
+				const int MinRefuelCount = 1;
+				int maxRefuel = Mathf.FloorToInt(Mathf.Min(fuelAvailable, refuelable.FuelCapacity - refuelable.Fuel));
+				if (maxRefuel < MinRefuelCount)
+					maxRefuel = MinRefuelCount;
+				Dialog_Slider slider = new(
+					count => "VF_RefuelFromInventoryCount".Translate(count, refuelable.Props.fuelType.label),
+					MinRefuelCount, maxRefuel, refuelable.ConsumeFuelFromInventory);
+				Find.WindowStack.Add(slider);
+			}
+			if (Mouse.IsOver(iconRect))
+			{
+				Widgets.DrawHighlight(iconRect);
+				TooltipHandler.TipRegion(iconRect, RefuelFromInventoryTip, "RefuelFromInventoryTip".GetHashCode());
+				mouseOverElement = true;
+			}
+		}
+		base.DrawHeader(headerRect, ref mouseOverElement);
+	}
 
-  private void ToggleAutoRefuel()
-  {
-    refuelable.allowAutoRefuel = !refuelable.allowAutoRefuel;
+	private void ToggleSwitch()
+	{
+		if (refuelable.Props.ElectricPowered)
+			ToggleCharging();
+		else
+			ToggleAutoRefuel();
+	}
 
-    if (refuelable.allowAutoRefuel)
-      SoundDefOf.Tick_High.PlayOneShotOnCamera();
-    else
-      SoundDefOf.Tick_Low.PlayOneShotOnCamera();
-  }
+	private void ToggleAutoRefuel()
+	{
+		refuelable.allowAutoRefuel = !refuelable.allowAutoRefuel;
 
-  private void ToggleCharging()
-  {
-    if (!refuelable.Charging)
-    {
-      if (refuelable.TryConnectPower())
-        SoundDefOf.Tick_High.PlayOneShotOnCamera();
-      else
-        SoundDefOf.ClickReject.PlayOneShotOnCamera();
-    }
-    else
-    {
-      refuelable.DisconnectPower();
-      SoundDefOf.Tick_Low.PlayOneShotOnCamera();
-    }
-  }
+		if (refuelable.allowAutoRefuel)
+			SoundDefOf.Tick_High.PlayOneShotOnCamera();
+		else
+			SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+	}
 
-  private string PowerNetTip()
-  {
-    StringBuilder tooltip = UIHelper.tooltipBuilder;
-    using ClearStringOnDispose csod = new(tooltip);
-    tooltip.AppendLine("VF_ElectricFlick".Translate());
-    tooltip.AppendLine();
-    tooltip.AppendLine();
-    tooltip.AppendLine(
-      "VF_ElectricFlickDesc".Translate(refuelable.Charging.ToStringYesNo().UncapitalizeFirst()));
-    tooltip.AppendLine();
-    tooltip.AppendLine();
-    tooltip.AppendLine(
-      $"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_TogglePower, KeyPrefs.BindingSlot.A).ToStringReadable()}");
-    return tooltip.ToString();
-  }
+	private void ToggleCharging()
+	{
+		if (!refuelable.Charging)
+		{
+			if (refuelable.TryConnectPower())
+				SoundDefOf.Tick_High.PlayOneShotOnCamera();
+			else
+				SoundDefOf.ClickReject.PlayOneShotOnCamera();
+		}
+		else
+		{
+			refuelable.DisconnectPower();
+			SoundDefOf.Tick_Low.PlayOneShotOnCamera();
+		}
+	}
 
-  private string RefuelTip()
-  {
-    StringBuilder tooltip = UIHelper.tooltipBuilder;
-    using ClearStringOnDispose csod = new(tooltip);
-    tooltip.AppendLine("CommandToggleAllowAutoRefuel".Translate());
-    tooltip.AppendLine();
-    tooltip.AppendLine();
-    tooltip.AppendLine("CommandToggleAllowAutoRefuelDesc".Translate(refuelable.TargetFuelLevel
-         .ToString("F0")
-         .Colorize(ColoredText.TipSectionTitleColor),
-        (refuelable.allowAutoRefuel ? "On".TranslateSimple() : "Off".TranslateSimple())
-       .UncapitalizeFirst()
-       .Named("ONOFF")
-      )
-     .Resolve());
-    tooltip.AppendLine();
-    tooltip.AppendLine();
-    tooltip.AppendLine(
-      $"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_ItemForbid, KeyPrefs.BindingSlot.A).ToStringReadable()}");
-    return tooltip.ToString();
-  }
+	private string PowerNetTip()
+	{
+		using ClearStringOnDispose csod = new(TooltipBuilder);
+		TooltipBuilder.AppendLine("VF_ElectricFlick".Translate());
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine(
+			"VF_ElectricFlickDesc".Translate(refuelable.Charging.ToStringYesNo().UncapitalizeFirst()));
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine(
+			$"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_TogglePower, KeyPrefs.BindingSlot.A).ToStringReadable()}");
+		return TooltipBuilder.ToString();
+	}
 
-  private string RefuelFromInventoryTip()
-  {
-    StringBuilder tooltip = UIHelper.tooltipBuilder;
-    using ClearStringOnDispose csod = new(tooltip);
-    tooltip.AppendLine("VF_RefuelFromInventoryDesc".Translate(refuelable.Vehicle.LabelCap));
-    return tooltip.ToString();
-  }
+	private string RefuelTip()
+	{
+		using ClearStringOnDispose csod = new(TooltipBuilder);
+		TooltipBuilder.AppendLine("CommandToggleAllowAutoRefuel".Translate());
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine("CommandToggleAllowAutoRefuelDesc".Translate(refuelable.TargetFuelLevel
+				 .ToString("F0")
+				 .Colorize(ColoredText.TipSectionTitleColor),
+				(refuelable.allowAutoRefuel ? "On".TranslateSimple() : "Off".TranslateSimple())
+			 .UncapitalizeFirst()
+			 .Named("ONOFF")
+			)
+		 .Resolve());
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine();
+		TooltipBuilder.AppendLine(
+			$"{"HotKeyTip".Translate()}: {KeyPrefs.KeyPrefsData.GetBoundKeyCode(KeyBindingDefOf.Command_ItemForbid, KeyPrefs.BindingSlot.A).ToStringReadable()}");
+		return TooltipBuilder.ToString();
+	}
+
+	private string RefuelFromInventoryTip()
+	{
+		using ClearStringOnDispose csod = new(TooltipBuilder);
+		TooltipBuilder.AppendLine("VF_RefuelFromInventoryDesc".Translate(refuelable.Vehicle.LabelCap));
+		return TooltipBuilder.ToString();
+	}
 }

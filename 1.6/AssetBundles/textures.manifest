@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 1534575988
+CRC: 316869764
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 57b11b48defd31a17b7199b090a245bd
+    Hash: 22c0ece747125efebac4c67040bbd0e1
   TypeTreeHash:
     serializedVersion: 2
     Hash: 2d8df09e698f722ada1caa03d3413830
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 57b11b48defd31a17b7199b090a245bd
+    Hash: 22c0ece747125efebac4c67040bbd0e1
 HashAppended: 0
 ClassTypes:
 - Class: 28
@@ -46,7 +46,9 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/ColorHue.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Default/Default.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/HaulPawnToVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyHills.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/DefaultBoatIcon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyRoads.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/CancelLoadBoat.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Hexagon/Hexagon.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeF.png
@@ -74,6 +76,7 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeE.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_I.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeG.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/Rotate.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/AnimationEvent.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_A.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Tiger/TigerStripes.png
@@ -84,6 +87,8 @@ Assets:
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_B.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/VehicleRoutePlanner.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/GearDrive.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyRiver.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/RefuelFromCargo.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_E.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FormCaravanVehicle.png
 - Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoSkipToNext.png

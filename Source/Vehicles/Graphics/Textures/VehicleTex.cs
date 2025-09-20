@@ -74,6 +74,8 @@ public static class VehicleTex
 	public static readonly Texture2D RepairVehicles =
 		ContentFinder<Texture2D>.Get("UI/Gizmos/Gizmo_RepairVehicles");
 
+	public static readonly Texture2D RefuelFromCargo = ContentFinder<Texture2D>.Get("UI/Gizmos/RefuelFromCargo");
+
 	public static readonly Texture2D ReloadIcon = ContentFinder<Texture2D>.Get("UI/Gizmos/Reload");
 
 	public static readonly Texture2D AutoTargetIcon =
@@ -83,7 +85,6 @@ public static class VehicleTex
 
 #endregion Gizmos
 
-
 #region ColorTools
 
 	public static readonly Texture2D SwitchLeft =
@@ -92,7 +93,7 @@ public static class VehicleTex
 	public static readonly Texture2D SwitchRight =
 		ContentFinder<Texture2D>.Get("UI/ColorTools/SwitchRight");
 
-	public static readonly Texture2D ReverseIcon =
+	public static readonly Texture2D SwapColors =
 		ContentFinder<Texture2D>.Get("UI/ColorTools/SwapColors");
 
 	public static readonly Texture2D Recolor =
@@ -104,11 +105,17 @@ public static class VehicleTex
 	public static readonly Texture2D ColorHue =
 		ContentFinder<Texture2D>.Get("UI/ColorTools/ColorHue");
 
-	public static readonly Texture2D LeftArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowLeft");
-	public static readonly Texture2D RightArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowRight");
-
 #endregion ColorTools
 
+#region Icons
+
+	public static readonly Texture2D Rotate = ContentFinder<Texture2D>.Get("UI/Icons/Rotate");
+
+	public static readonly Texture2D LeftArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowLeft");
+
+	public static readonly Texture2D RightArrow = ContentFinder<Texture2D>.Get("UI/Icons/ArrowRight");
+
+#endregion
 
 #region Settings
 

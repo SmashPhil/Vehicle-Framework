@@ -271,7 +271,7 @@ public class SectionVehicles : SettingsSection
 		if (VehicleMod.selectedDef.graphicData.drawRotated &&
 			VehicleMod.selectedDef.graphicData.Graphic is Graphic_Vehicle graphicVehicle)
 		{
-			if (VehicleShowcaseButton(showcaseIconRect, VehicleTex.ReverseIcon))
+			if (VehicleShowcaseButton(showcaseIconRect, VehicleTex.Rotate))
 			{
 				List<Rot8> validRotations = graphicVehicle.RotationsRenderableByUI.ToList();
 				for (int i = 0; i < 4; i++)

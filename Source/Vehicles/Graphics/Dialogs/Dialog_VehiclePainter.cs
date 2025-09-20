@@ -301,7 +301,7 @@ public class Dialog_VehiclePainter : Window
 				ButtonHeight);
 			Widgets.DrawHighlightIfMouseover(rotateVehicleRect);
 			TooltipHandler.TipRegionByKey(rotateVehicleRect, "VF_RotateVehicleRendering");
-			Widgets.DrawTextureFitted(rotateVehicleRect, VehicleTex.ReverseIcon, 1);
+			Widgets.DrawTextureFitted(rotateVehicleRect, VehicleTex.Rotate, 1);
 			if (Widgets.ButtonInvisible(rotateVehicleRect))
 			{
 				SoundDefOf.Click.PlayOneShotOnCamera();
@@ -544,7 +544,7 @@ public class Dialog_VehiclePainter : Window
 		};
 
 		Rect reverseRect = new(colorContainerRect.x + 11f, 20, SwitchSize / 2.75f, SwitchSize / 2.75f);
-		if (Widgets.ButtonImage(reverseRect, VehicleTex.ReverseIcon))
+		if (Widgets.ButtonImage(reverseRect, VehicleTex.SwapColors))
 		{
 			SetColors(currentColorTwo, currentColorThree, currentColorOne);
 			SoundDefOf.Click.PlayOneShotOnCamera();
