@@ -248,6 +248,7 @@ public class WITab_Vehicle_Manifest : WITab
 		preferredSize.x = Mathf.Max(preferredSize.x, sizeForDismounts.x);
 		preferredSize.y += sizeForDismounts.y;
 
+		size.x = preferredSize.x;
 		size.y = Mathf.Max(size.y, NeedsCardUtility.FullSize.y);
 	}
 
