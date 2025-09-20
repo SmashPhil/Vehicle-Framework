@@ -208,11 +208,14 @@ public sealed class TransferableVehicleWidget
 
 		VehiclePawn vehicle = transferable.AnyThing as VehiclePawn;
 		VehicleDef vehicleDef = transferable.ThingDef as VehicleDef;
+
 		Assert.IsNotNull(vehicleDef);
 		bool canCaravan = CanCaravan(transferable, out string disableReason);
 
 		Rect iconBar = rect with { height = CardIconSize };
 		Rect iconRect = iconBar.ToSquare();
+
+		string label = vehicle?.LabelCap ?? vehicleDef.LabelCap;
 
 		// Assign seats checkbox
 		bool checkOn = transferable.CountToTransfer > 0;
@@ -269,6 +272,12 @@ public sealed class TransferableVehicleWidget
 			BlitRequest.For(vehicleDef);
 		VehicleGui.DrawVehicleOnGUI(iconRect, request);
 
+		float textHeight = Text.CalcHeight(label, iconBar.width);
+		Rect labelRect = new(iconBar.x, iconRect.yMax - textHeight, iconBar.width, textHeight);
+		using (new TextBlock(GameFont.Small, TextAnchor.UpperCenter, true))
+		{
+			Widgets.Label(labelRect, label);
+		}
 		Widgets.DrawLineHorizontal(rect.x, iconRect.yMax, rect.width, Widgets.SeparatorLineColor);
 
 		Rect infoRect = (rect with { yMin = iconRect.yMax }).ContractedBy(Margin, 0);
