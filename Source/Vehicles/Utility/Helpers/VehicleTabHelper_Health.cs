@@ -60,14 +60,21 @@ public static class VehicleTabHelper_Health
 		RecacheWindowWidth();
 	}
 
-	public static Vector2 Start(VehiclePawn vehicle, bool compressed = false)
+	public static void Clear()
 	{
+		componentTabScrollPos = Vector2.zero;
+		selectedComponent = null;
+		moreInfo = false;
+	}
+
+	public static Vector2 Start(VehiclePawn vehicle, bool compressed = false, float height = WindowHeight)
+	{
+		size.y = height;
 		if (vehicle != inspectingVehicle)
 		{
-			//Not captured by OnOpen when switching between vehicles with ITab already open
+			// Not captured by OnOpen when switching between vehicles with ITab already open
 			inspectingVehicle = vehicle;
 			VehicleTabHelper_Health.compressed = compressed;
-			//+ 2x ColumnWidth for Health and Efficiency columns
 			RecacheWindowWidth();
 			RecacheComponentListHeight();
 		}
@@ -230,12 +237,12 @@ public static class VehicleTabHelper_Health
 			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
 		}
 
-		rect.y += textHeight / 1.25f + 1; //+1 for H. line
+		rect.yMin += textHeight / 1.25f + 1; //+1 for H. line
 		rect.x += 2.5f;
 		rect.width -= 5;
 
 		// Begin ScrollView
-		Rect scrollView = new(rect.x, rect.y + topLabelRect.height * 2, rect.width,
+		Rect scrollView = new(rect.x, rect.y + topLabelRect.height * 2, rect.width - UIData.ScrollbarSize,
 			componentListHeight);
 		bool alternatingRow = false;
 		Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);
@@ -368,10 +375,8 @@ public static class VehicleTabHelper_Health
 
 	private static void RecacheWindowWidth()
 	{
-		size = new Vector2(
-			LeftWindowWidth + LabelColumnWidth + ColumnCount * ColumnWidth +
-			ComponentIndicatorIconSize + 20, WindowHeight);
-
+		size.x = LeftWindowWidth + LabelColumnWidth + ColumnCount * ColumnWidth +
+			ComponentIndicatorIconSize + 20;
 		if (!compressed && moreInfo)
 		{
 			size.x += ColumnWidth * ArmorRatingDefs.Count;
@@ -398,5 +403,18 @@ public static class VehicleTabHelper_Health
 			>= 0.7f and < 0.999f => HealthUtility.SlightlyImpairedColor,
 			_                    => HealthUtility.GoodConditionColor
 		};
+	}
+
+	public readonly struct DrawBlock : IDisposable
+	{
+		public DrawBlock(VehiclePawn vehicle, bool compressed)
+		{
+			Start(vehicle, compressed);
+		}
+
+		void IDisposable.Dispose()
+		{
+			End();
+		}
 	}
 }

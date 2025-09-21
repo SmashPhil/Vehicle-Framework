@@ -16,6 +16,7 @@ public class WITab_Vehicle_Manifest : WITab
 {
 	private Vector2 scrollPosition;
 	private Vector2 thoughtScrollPosition;
+	private Vector2 vehicleHealthPanelSize;
 	private float scrollViewHeight;
 
 	private Pawn moreDetailsForPawn;
@@ -43,7 +44,7 @@ public class WITab_Vehicle_Manifest : WITab
 			}
 			if (moreDetailsForPawn is VehiclePawn)
 			{
-				return VehicleTabHelper_Health.Size.x;
+				return vehicleHealthPanelSize.x;
 			}
 			return NeedsCardUtility.GetSize(moreDetailsForPawn).x;
 		}
@@ -83,6 +84,7 @@ public class WITab_Vehicle_Manifest : WITab
 	{
 		base.CloseTab();
 		CursorSettings.Reset();
+		moreDetailsForPawn = null;
 	}
 
 	protected override void FillTab()
@@ -95,13 +97,11 @@ public class WITab_Vehicle_Manifest : WITab
 
 		using TextBlock textFont = new(GameFont.Small);
 		Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
-		Rect viewRect = new(0f, 0f, rect.width - 16f, scrollViewHeight);
+		Rect viewRect = new(0f, 0f, rect.width - UIData.ScrollbarSize, scrollViewHeight);
 
-		// Begin ScrollView
 		Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
 		float yMax = DrawTab(viewRect);
 		Widgets.EndScrollView();
-		// End ScrollView
 
 		if (!Mouse.IsOver(rect) && !Input.GetMouseButton(0))
 		{
@@ -174,9 +174,10 @@ public class WITab_Vehicle_Manifest : WITab
 				if (moreDetailsForPawn.DestroyedOrNull())
 					return;
 
-				DrawMoreDetailsWindow(rect.AtZero());
+				Rect moreDetailsRect = rect.AtZero();
+				DrawMoreDetailsWindow(moreDetailsRect);
 
-				if (Widgets.CloseButtonFor(rect.AtZero()))
+				if (Widgets.CloseButtonFor(moreDetailsRect))
 				{
 					moreDetailsForPawn = null;
 					SoundDefOf.TabClose.PlayOneShotOnCamera();
@@ -189,10 +190,8 @@ public class WITab_Vehicle_Manifest : WITab
 	{
 		if (moreDetailsForPawn is VehiclePawn vehicle)
 		{
-			VehicleTabHelper_Health.Start(vehicle, compressed: true);
-			{
-				VehicleTabHelper_Health.DrawHealthPanel(vehicle);
-			}
+			vehicleHealthPanelSize = VehicleTabHelper_Health.Start(vehicle, height: rect.height);
+			VehicleTabHelper_Health.DrawHealthPanel(vehicle);
 			VehicleTabHelper_Health.End();
 		}
 		else
