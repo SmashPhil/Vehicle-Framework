@@ -138,6 +138,8 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   <VF_Depth_Internal>Internal</VF_Depth_Internal>
   <VF_Depth_External>External</VF_Depth_External>
   <VF_Depth_Undefined>Undefined</VF_Depth_Undefined>
+  <VF_EfficiencyEffector>Stats Effected</VF_EfficiencyEffector>
+  <VF_BaseArmorRating>Base armor rating: {0}</VF_BaseArmorRating>
   
   <VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
   <VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
