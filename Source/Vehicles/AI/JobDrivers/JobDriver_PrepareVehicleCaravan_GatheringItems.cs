@@ -21,7 +21,7 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriver
 
 	public Thing ToHaul => job.GetTarget(TargetIndex.A).Thing;
 
-	public VehiclePawn Carrier => job.GetTarget(TargetIndex.B).Thing as VehiclePawn;
+	public Pawn Carrier => job.GetTarget(TargetIndex.B).Thing as Pawn;
 
 	private List<TransferableOneWay> Transferables => ((LordJob_FormAndSendVehicles)job.lord.LordJob).transferables;
 
@@ -299,12 +299,17 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriver
 		return toil;
 	}
 
-	public static bool IsUsableCarrier(VehiclePawn vehicle, Pawn forPawn)
+	public static bool IsUsableCarrier(Pawn carrier, Pawn forPawn, bool allowColonists = true)
 	{
-		return vehicle.IsFormingVehicleCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) &&
-			vehicle.Faction == forPawn.Faction
-			&& !vehicle.IsBurning() && vehicle.movementStatus != VehicleMovementStatus.Offline
-			&& !MassUtility.IsOverEncumbered(vehicle);
+		if (carrier is VehiclePawn vehicle)
+		{
+			return vehicle.IsFormingVehicleCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) &&
+				vehicle.Faction == forPawn.Faction
+				&& !vehicle.IsBurning() && vehicle.movementStatus != VehicleMovementStatus.Offline
+				&& !MassUtility.IsOverEncumbered(vehicle);
+		}
+		return !CaravanHelper.assignedSeats.IsAssigned(carrier) &&
+			JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(carrier, forPawn, allowColonists: allowColonists);
 	}
 
 	private float GetCarrierScore(Pawn pawn)
@@ -347,7 +352,7 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriver
 		foreach (Pawn ownedPawn in job.lord.ownedPawns)
 		{
 			if (ownedPawn != pawn && (!onlyAnimals || ownedPawn.RaceProps.Animal) &&
-				JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(ownedPawn, pawn, allowColonists: false))
+				IsUsableCarrier(ownedPawn, pawn, allowColonists: false))
 			{
 				float carrierScore = GetCarrierScore(ownedPawn);
 				if (carrier == null || carrierScore > highestScore)
