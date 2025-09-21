@@ -28,9 +28,9 @@
   </PropertyGroup>
 
   <!-- Build Events -->
-  <Target Name="PostClean" AfterTargets="Clean">
-	<RemoveDir Directories="$(OutDir)"/>
-  </Target>
+	<Target Name="PostClean" AfterTargets="Clean" Condition="'!$(BuildingInsideVisualStudio)' == 'true'">
+		<RemoveDir Directories="$(OutDir)" />
+	</Target>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
 	<!-- Localization Files -->
@@ -41,9 +41,9 @@
               Command="bash &quot;../../Build/ExtractTranslations.sh&quot; &quot;1.6&quot;" />
 	-->
 
-	<!-- Version Increment -->
-	<Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
-	<Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
+		<!-- Version Increment -->
+		<Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
+		<Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
   </Target>
 
   <!-- AssemblyInfo -->
@@ -82,7 +82,7 @@
   <ItemGroup>
 	<!-- Nuget -->
 	<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-	<PackageReference Include="Lib.Harmony" Version="2.3.6">
+	<PackageReference Include="Lib.Harmony" Version="2.4.1">
 	  <IncludeAssets>compile; build</IncludeAssets>
 	  <ExcludeAssets>runtime</ExcludeAssets>
 	</PackageReference>
