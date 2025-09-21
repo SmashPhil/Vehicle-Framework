@@ -10,12 +10,14 @@ using Vehicles.Rendering;
 using Verse;
 using Verse.Sound;
 using TransferableOneWay = RimWorld.TransferableOneWay;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles.World;
 
 [StaticConstructorOnStartup]
 public sealed class TransferableVehicleWidget
 {
+	private const float TopAreaHeight = 37f;
 	private const int ColumnCount = 4;
 	private const float CardHeight = 300;
 	private const float LabelHeight = 30;
@@ -30,10 +32,16 @@ public sealed class TransferableVehicleWidget
 	private static readonly Texture2D PawnIcon =
 		ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Flee");
 
+	private static readonly Texture2D EfficiencyHillsIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyHills");
+	private static readonly Texture2D EfficiencyRiverIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyRiver");
+	private static readonly Texture2D EfficiencyRoadsIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyRoads");
+
 	private static readonly Rect SortersRect = new(0f, 0f, 350f, 27f);
 	private static readonly Color CardColor = new(1f, 1f, 1f, 0.04f);
 
 	private static readonly List<TransferableSorterDef> AllSorterDefs = [];
+
+	private static bool showVehicleProps = true;
 
 	private readonly Section vehicleSection;
 	private readonly List<TransferableOneWay> pawns;
@@ -135,8 +143,16 @@ public sealed class TransferableVehicleWidget
 		DoTransferableSorters(sortPrimary.sorterDef, sortSecondary.sorterDef, sortPrimary.Sort,
 			sortSecondary.Sort);
 
-		Rect mainRect = new(inRect.x, inRect.y + 37f, inRect.width,
-			inRect.height - 37f);
+		Rect mainRect = new(inRect.x, inRect.y + TopAreaHeight, inRect.width, inRect.height - TopAreaHeight);
+
+		if (IsEnabled(VehicleCaravanProps))
+		{
+			string checkboxLabel = "VF_ShowVehicleProperties".Translate();
+			float labelWidth = Text.CalcSize(checkboxLabel).x;
+			Rect checkboxRect = new(mainRect.xMax - labelWidth - UIElements.CheckboxSize, mainRect.y, labelWidth,
+				TopAreaHeight);
+			UIElements.CheckboxLabeled(checkboxRect, checkboxLabel, ref showVehicleProps);
+		}
 		FillMainRect(mainRect);
 	}
 
@@ -180,7 +196,7 @@ public sealed class TransferableVehicleWidget
 		float bottomLimit = scrollPosition.y - CardHeight;
 		float topLimit = scrollPosition.y + mainRect.height;
 
-		Rect viewRect = new(0f, 0f, mainRect.width - 16f, Height);
+		Rect viewRect = new(0f, 0f, mainRect.width - UIData.ScrollbarSize, Height);
 		Widgets.BeginScrollView(mainRect, ref scrollPosition, viewRect);
 		float cardWidth = viewRect.width / ColumnCount;
 
@@ -272,11 +288,10 @@ public sealed class TransferableVehicleWidget
 			}
 		}
 
-		//Rect specialPropsRect = iconBar with
-		//{
-		//  y = iconBar.yMax - SpecialPropIconSize, height = SpecialPropIconSize
-		//};
-		//DrawSpecialProperties(specialPropsRect, vehicleDef, vehicle);
+		if (showVehicleProps && IsEnabled(VehicleCaravanProps))
+		{
+			DrawSpecialProperties(rect, vehicleDef, vehicle);
+		}
 
 		BlitRequest request = vehicle != null ?
 			BlitRequest.For(vehicle) :
@@ -335,27 +350,31 @@ public sealed class TransferableVehicleWidget
 
 	private static void DrawSpecialProperties(Rect rect, VehicleDef vehicleDef, VehiclePawn vehicle)
 	{
+		const float SpecialPropOffset = 5;
+		const float SpecialPropIconSize = 32;
+
+		Rect iconRect = new(rect.x + SpecialPropOffset, rect.y + SpecialPropOffset, SpecialPropIconSize,
+			SpecialPropIconSize);
 		if (vehicle != null)
 		{
-			DrawIcon(ref rect, VehicleTex.DraftVehicle, vehicle.PawnCountToOperate.ToString());
-			DrawIcon(ref rect, PawnIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
+			DrawIcon(ref iconRect, EfficiencyHillsIcon, vehicle.PawnCountToOperate.ToString());
+			DrawIcon(ref iconRect, EfficiencyRiverIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
+			DrawIcon(ref iconRect, EfficiencyRoadsIcon, vehicle.PawnsByHandlingType[HandlingType.None].Count.ToString());
 		}
 		else
 		{
 			int movementSlots = vehicleDef.properties.RoleSeats(HandlingType.Movement);
 			int nonMovementSlots = vehicleDef.properties.TotalSeats - movementSlots;
-			DrawIcon(ref rect, VehicleTex.DraftVehicle, movementSlots.ToString());
-			DrawIcon(ref rect, PawnIcon, nonMovementSlots.ToString());
+			DrawIcon(ref iconRect, VehicleTex.DraftVehicle, movementSlots.ToString());
+			DrawIcon(ref iconRect, PawnIcon, nonMovementSlots.ToString());
 		}
 		return;
 
-		static void DrawIcon(ref Rect rect, Texture2D icon, string label)
+		static void DrawIcon(ref Rect rect, Texture2D icon, string tooltip)
 		{
-			Rect iconRect = new(rect.x, rect.y, rect.height, rect.height);
-			rect.xMin += iconRect.width;
-			GUI.DrawTexture(iconRect, icon);
-			Widgets.Label(rect, label);
-			rect.xMin += Text.CalcSize(label).x;
+			GUI.DrawTexture(rect, icon);
+			TooltipHandler.TipRegion(rect, tooltip);
+			rect.y += SpecialPropIconSize + SpecialPropOffset;
 		}
 	}
 
@@ -460,19 +479,24 @@ public sealed class TransferableVehicleWidget
 	private static void DoTransferableSorters(TransferableSorterDef sorterPrimary, TransferableSorterDef sorterSecondary,
 		Action<TransferableSorterDef> primarySetter, Action<TransferableSorterDef> secondarySetter)
 	{
+		const float TopBarHeight = 27;
+		const float LabelWidth = 60;
+		const float ButtonWidth = 130;
+		const float ButtonGap = 10;
+
 		Widgets.BeginGroup(SortersRect);
 		using TextBlock fontBlock = new(GameFont.Tiny);
-		Rect labelRect = new(0f, 0f, 60f, 27f);
+		Rect labelRect = new(0f, 0f, LabelWidth, TopBarHeight);
 		using (new TextBlock(TextAnchor.MiddleLeft))
 		{
 			Widgets.Label(labelRect, "SortBy".Translate());
 		}
-		Rect buttonRect = new(labelRect.xMax + 10f, 0f, 130f, 27f);
+		Rect buttonRect = new(labelRect.xMax + ButtonGap, 0f, ButtonWidth, TopBarHeight);
 		if (Widgets.ButtonText(buttonRect, sorterPrimary.LabelCap.Truncate(buttonRect.width - 2f)))
 		{
 			OpenSorterChangeFloatMenu(primarySetter);
 		}
-		buttonRect.x += buttonRect.width + 10;
+		buttonRect.x += buttonRect.width + ButtonGap;
 		if (Widgets.ButtonText(buttonRect, sorterSecondary.LabelCap.Truncate(buttonRect.width - 2f)))
 		{
 			OpenSorterChangeFloatMenu(secondarySetter);

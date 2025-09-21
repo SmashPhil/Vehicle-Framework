@@ -232,7 +232,7 @@ public static class VehicleTabHelper_Health
 			}
 		}
 
-		using (new TextBlock(UIElements.menuSectionBGBorderColor))
+		using (new TextBlock(UIElements.MenuSectionBgBorderColor))
 		{
 			Widgets.DrawLineHorizontal(rect.x, topLabelRect.y + textHeight / 1.25f, rect.width);
 		}

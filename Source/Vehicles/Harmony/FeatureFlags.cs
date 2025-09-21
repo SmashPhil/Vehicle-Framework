@@ -17,6 +17,7 @@ public class FeatureFlags : Mod
 	public const string Raiders = "Raiders";
 	public const string Paratroopers = "Paratroopers";
 	public const string Fishing = "Fishing";
+	public const string VehicleCaravanProps = "VehicleCaravanProps";
 
 	private static ModContentPack mod;
 	private static Data data;

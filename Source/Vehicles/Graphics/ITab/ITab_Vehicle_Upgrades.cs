@@ -583,7 +583,7 @@ public class ITab_Vehicle_Upgrades : ITab
 			if (hasGraphics || showUpgradeList)
 			{
 				Widgets.DrawLineHorizontal(rect.x, descriptionRect.yMax + 5, rect.width,
-					UIElements.menuSectionBGBorderColor);
+					UIElements.MenuSectionBgBorderColor);
 			}
 
 			Rect textEntryRect = new(innerInfoRect.x, descriptionRect.yMax + 10, innerInfoRect.width,
