@@ -6,7 +6,7 @@ namespace Vehicles;
 
 public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle<TransferableOneWay>
 {
-	protected override bool JobAvailable(VehiclePawn vehicle)
+	protected override bool JobAvailable(Pawn pawn, VehiclePawn vehicle)
 	{
 		return vehicle.cargoToLoad.Count > 0;
 	}

@@ -26,7 +26,7 @@ public abstract class WorkGiver_CarryToVehicle<T> : WorkGiver_Scanner
 		 .VehicleListers(ReservationName);
 	}
 
-	protected virtual bool JobAvailable(VehiclePawn vehicle)
+	protected virtual bool JobAvailable(Pawn pawn, VehiclePawn vehicle)
 	{
 		return true;
 	}
@@ -37,13 +37,15 @@ public abstract class WorkGiver_CarryToVehicle<T> : WorkGiver_Scanner
 			return null;
 		if (vehicle.IsForbidden(pawn))
 			return null;
-		if (!JobAvailable(vehicle))
+		// Vehicle itself must be on passable terrain, otherwise BFS search for turret and upgrade loading
+		// will be unable to start (from the vehicle root position).
+		if (!pawn.CanReach(vehicle.Position, PathEndMode.OnCell, Danger.Deadly))
+			return null;
+		if (!JobAvailable(pawn, vehicle))
 			return null;
 
 		List<T> things = GetThingsToLoad(vehicle, pawn);
 		if (things.NullOrEmpty())
-			return null;
-		if (!pawn.CanReach(vehicle.Position, PathEndMode.Touch, Danger.Deadly))
 			return null;
 
 		Thing thing = FindThingToPack(vehicle, pawn, things);

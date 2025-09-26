@@ -24,7 +24,7 @@ public class WorkGiver_RefuelVehicleTurret : WorkGiver_CarryToVehicle<ThingDefCo
 		return base.JobOnThing(pawn, thing, forced);
 	}
 
-	protected override bool JobAvailable(VehiclePawn vehicle)
+	protected override bool JobAvailable(Pawn pawn, VehiclePawn vehicle)
 	{
 		if (vehicle.CompVehicleTurrets == null)
 			return false;

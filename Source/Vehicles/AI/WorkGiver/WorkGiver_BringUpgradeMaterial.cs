@@ -11,7 +11,7 @@ public class WorkGiver_BringUpgradeMaterial : WorkGiver_CarryToVehicle<ThingDefC
 
 	public override JobDef JobDef => JobDefOf_Vehicles.LoadUpgradeMaterials;
 
-	protected override bool JobAvailable(VehiclePawn vehicle)
+	protected override bool JobAvailable(Pawn pawn, VehiclePawn vehicle)
 	{
 		if (!vehicle.Spawned)
 			return false;
