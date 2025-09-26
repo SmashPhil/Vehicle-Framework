@@ -1087,12 +1087,10 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
 		if (loadedAmmo is null || shellCount < def.magazineCapacity || shellCount <= 0)
 		{
-			if (!ReloadInternal(ammoDef))
+			if (ReloadInternal(ammoDef))
 			{
-				Messages.Message("VF_NoAmmoAvailable".Translate(), MessageTypeDefOf.RejectInput);
-				return;
+				ActivateTimer(ignoreTimer);
 			}
-			ActivateTimer(ignoreTimer);
 		}
 	}
 

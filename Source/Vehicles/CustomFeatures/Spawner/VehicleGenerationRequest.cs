@@ -1,92 +1,125 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
+using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine;
+using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+[PublicAPI]
+public struct VehicleGenerationRequest
 {
-  public struct VehicleGenerationRequest
-  {
-    public VehicleDef VehicleDef { get; set; }
-    public Faction Faction { get; set; }
-    public Color ColorOne { get; set; }
-    public Color ColorTwo { get; set; }
-    public Color ColorThree { get; set; }
-    public float Tiling { get; set; }
-    public Vector2 Displacement { get; set; }
-    public bool RandomizeMask { get; set; }
-    public int Upgrades { get; set; }
-    public bool CleanSlate { get; set; }
+	public readonly VehicleDef vehicleDef;
+	public Faction faction;
 
-    public VehicleGenerationRequest(VehicleDef vehicleDef, Faction faction,
-      bool randomizeColors = false, bool randomizeMask = false, bool cleanSlate = true)
-    {
-      Rand.PushState();
+	public bool cleanSlate;
 
-      VehicleDef = vehicleDef;
-      Faction = faction;
+	public bool randomizeColors;
+	public Color colorOne;
+	public Color colorTwo;
+	public Color colorThree;
+	public float tiling;
+	public Vector2 displacement;
 
-      if (randomizeColors)
-      {
-        if (Rand.Chance(0.1f))
-        {
-          (ColorOne, ColorTwo, ColorThree) = GetCompletelyRandomColors();
-        }
-        else
-        {
-          (ColorOne, ColorTwo, ColorThree) = VehicleMod.settings.colorStorage.GetRandomPalette();
-        }
-        Vector2 displacement = new Vector2(Rand.Range(-1.5f, 1.5f), Rand.Range(-1.5f, 1.5f));
-        Displacement = displacement;
-        float tiling = Rand.Range(0.25f, 1.5f);
-        Tiling = tiling;
-      }
-      else
-      {
-        GraphicDataRGB graphicData = VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(
-          vehicleDef.defName,
-          vehicleDef.graphicData ?? new PatternData(Color.white, Color.white, Color.white,
-            PatternDefOf.Default, Vector2.zero, 0));
-        PatternData defaultPatternData = graphicData;
-        ColorOne = defaultPatternData.color;
-        ColorTwo = defaultPatternData.colorTwo;
-        ColorThree = defaultPatternData.colorThree;
-        Displacement = defaultPatternData.displacement;
-        Tiling = defaultPatternData.tiles;
-      }
+	public VehicleGenerationRequest(VehicleDef vehicleDef)
+	{
+		this.vehicleDef = vehicleDef;
+	}
 
-      Upgrades = 0;
-      CleanSlate = cleanSlate;
-      if (!CleanSlate &&
-        vehicleDef.GetSortedCompProperties<CompProperties_UpgradeTree>() is
-          CompProperties_UpgradeTree compProperties_UpgradeTree)
-      {
-        Upgrades = Rand.Range(0, compProperties_UpgradeTree.def.nodes.Count);
-      }
+	public VehicleGenerationRequest(VehicleDef vehicleDef, Faction faction) : this(vehicleDef)
+	{
+		this.faction = faction;
+	}
 
-      RandomizeMask = randomizeMask;
+	public VehicleGenerationRequest(VehicleDef vehicleDef, Faction faction,
+		bool randomizeColors = false, bool randomizeMask = false, bool cleanSlate = true) : this(vehicleDef, faction)
+	{
+		this.randomizeColors = randomizeColors;
+		this.randomizeColors |= randomizeMask;
+		this.cleanSlate = cleanSlate;
 
-      Rand.PopState();
-    }
+		AssignForBackCompatibility();
+	}
 
-    public static (Color colorOne, Color colorTwo, Color colorThree) GetCompletelyRandomColors()
-    {
-      float r1 = Rand.Range(0.25f, .75f);
-      float g1 = Rand.Range(0.25f, .75f);
-      float b1 = Rand.Range(0.25f, .75f);
-      Color colorOne = new Color(r1, g1, b1, 1);
-      float r2 = Rand.Range(0.25f, .75f);
-      float g2 = Rand.Range(0.25f, .75f);
-      float b2 = Rand.Range(0.25f, .75f);
-      Color colorTwo = new Color(r2, g2, b2, 1);
-      float r3 = Rand.Range(0.25f, .75f);
-      float g3 = Rand.Range(0.25f, .75f);
-      float b3 = Rand.Range(0.25f, .75f);
-      Color colorThree = new Color(r3, g3, b3, 1);
+	public VehicleGenerationRequest(VehicleDef vehicleDef, Faction faction, Color colorOne, Color colorTwo,
+		Color colorThree, float tiling, Vector2 displacement) : this(vehicleDef, faction)
+	{
+		this.colorOne = colorOne;
+		this.colorTwo = colorTwo;
+		this.colorThree = colorThree;
+		this.tiling = tiling;
+		this.displacement = displacement;
+	}
 
-      return (colorOne, colorTwo, colorThree);
-    }
-  }
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use constructor instead.", error: true)]
+	public VehicleDef VehicleDef { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use constructor instead.")]
+	public Faction Faction { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public bool RandomizeMask { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public int Upgrades { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public bool CleanSlate { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public Color ColorOne { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public Color ColorTwo { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public Color ColorThree { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public float Tiling { get; set; }
+
+	// TODO 1.6.2091
+	[Obsolete("Deprecated - Use field or constructor instead.")]
+	public Vector2 Displacement { get; set; }
+
+	private void AssignForBackCompatibility()
+	{
+		// TODO 1.6.2091
+		#pragma warning disable CS0618
+		faction ??= Faction;
+		randomizeColors |= RandomizeMask;
+		colorOne = ColorOne != Color.clear ? ColorOne : colorOne;
+		colorTwo = ColorTwo != Color.clear ? ColorTwo : colorTwo;
+		colorThree = ColorThree != Color.clear ? ColorThree : colorThree;
+		tiling = Tiling != 0 ? Tiling : 0;
+		displacement = Displacement != Vector2.zero ? Displacement : Vector2.zero;
+		#pragma warning restore CS0618
+	}
+
+	public static (Color colorOne, Color colorTwo, Color colorThree) GetCompletelyRandomColors()
+	{
+		float r1 = Rand.Range(0.25f, .75f);
+		float g1 = Rand.Range(0.25f, .75f);
+		float b1 = Rand.Range(0.25f, .75f);
+		Color colorOne = new(r1, g1, b1, 1);
+		float r2 = Rand.Range(0.25f, .75f);
+		float g2 = Rand.Range(0.25f, .75f);
+		float b2 = Rand.Range(0.25f, .75f);
+		Color colorTwo = new(r2, g2, b2, 1);
+		float r3 = Rand.Range(0.25f, .75f);
+		float g3 = Rand.Range(0.25f, .75f);
+		float b3 = Rand.Range(0.25f, .75f);
+		Color colorThree = new(r3, g3, b3, 1);
+
+		return (colorOne, colorTwo, colorThree);
+	}
 }

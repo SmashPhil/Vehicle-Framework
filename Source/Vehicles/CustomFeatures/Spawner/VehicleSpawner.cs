@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
+using SmashTools;
 using UnityEngine;
 using Verse;
 
@@ -30,37 +31,29 @@ namespace Vehicles
 
 		public static VehiclePawn GenerateVehicle(VehicleGenerationRequest request)
 		{
-			if (request.VehicleDef == null)
-				throw new ArgumentNullException(nameof(request.VehicleDef), "Cannot generate vehicle with null def.");
+			if (request.vehicleDef == null)
+				throw new ArgumentNullException(nameof(request.vehicleDef), "Cannot generate vehicle with null def.");
 
 			VehiclePawn result = null;
 			try
 			{
-				result = (VehiclePawn)ThingMaker.MakeThing(request.VehicleDef);
-				result.kindDef = request.VehicleDef.kindDef;
+				result = (VehiclePawn)ThingMaker.MakeThing(request.vehicleDef);
+				result.kindDef = request.vehicleDef.kindDef;
 
 				PawnComponentsUtility.CreateInitialComponents(result);
 
 				result.sustainers = new VehicleSustainers(result);
 
-				result.kindDef = request.VehicleDef.kindDef;
-				result.SetFactionDirect(request.Faction);
+				result.kindDef = request.vehicleDef.kindDef;
+				result.SetFactionDirect(request.faction);
 
-				PatternDef pattern =
-					VehicleMod.settings.vehicles.defaultGraphics
-					 .TryGetValue(result.VehicleDef.defName, result.VehicleDef.graphicData)?.patternDef ??
-					PatternDefOf.Default;
+				PatternData patternData = GetColors(request.vehicleDef, randomize: request.randomizeColors);
 
-				result.Pattern = request.RandomizeMask ?
-					DefDatabase<PatternDef>.AllDefsListForReading.RandomElementWithFallback(
-						fallback: PatternDefOf.Default) :
-					pattern;
-
-				result.DrawColor = request.ColorOne;
-				result.DrawColorTwo = request.ColorTwo;
-				result.DrawColorThree = request.ColorThree;
-				result.Displacement = request.Displacement;
-				result.Tiles = request.Tiling;
+				result.DrawColor = patternData.color;
+				result.DrawColorTwo = patternData.colorTwo;
+				result.DrawColorThree = patternData.colorThree;
+				result.Displacement = patternData.displacement;
+				result.Tiles = patternData.tiles;
 
 				result.PostGenerationSetup();
 				foreach (ThingComp comp in result.AllComps)
@@ -70,9 +63,9 @@ namespace Vehicles
 				}
 
 				//REDO - Allow other modders to add setup for non clean-slate items
-				if (!request.CleanSlate)
+				if (!request.cleanSlate)
 				{
-					UpgradeAtRandom(result, request.Upgrades);
+					//UpgradeAtRandom(result, request.Upgrades);
 					DistributeAmmunition(result);
 				}
 
@@ -84,9 +77,45 @@ namespace Vehicles
 			catch (Exception ex)
 			{
 				Log.Error(
-					$"{VehicleHarmony.LogLabel} Exception thrown while generating {request.VehicleDef}. Exception: {ex}");
+					$"{VehicleHarmony.LogLabel} Exception thrown while generating {request.vehicleDef}. Exception: {ex}");
 			}
 			return result;
+
+			static PatternData GetColors(VehicleDef vehicleDef, bool randomize)
+			{
+				using RandStateBlock rsb = new();
+
+				PatternData patternData = new();
+
+				if (!randomize)
+				{
+					PatternData fallback = vehicleDef.graphicData;
+					fallback ??= new PatternData(Color.white, Color.white, Color.white,
+						PatternDefOf.Default, displacement: Vector2.zero, tiles: 0);
+					GraphicDataRGB graphicData =
+						VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, fallback: fallback);
+					patternData.Copy(graphicData);
+					return patternData;
+				}
+
+				patternData.patternDef = DefDatabase<PatternDef>.AllDefsListForReading.RandomElementWithFallback(
+					fallback: PatternDefOf.Default);
+				if (Rand.Chance(0.1f))
+				{
+					(patternData.color, patternData.colorTwo, patternData.colorThree) =
+						VehicleGenerationRequest.GetCompletelyRandomColors();
+				}
+				else
+				{
+					(patternData.color, patternData.colorTwo, patternData.colorThree) =
+						VehicleMod.settings.colorStorage.GetRandomPalette();
+				}
+				Vector2 displacement = new(Rand.Range(-1.5f, 1.5f), Rand.Range(-1.5f, 1.5f));
+				patternData.displacement = displacement;
+				float tiling = Rand.Range(0.25f, 1.5f);
+				patternData.tiles = tiling;
+				return patternData;
+			}
 		}
 
 		public static VehiclePawn SpawnVehicleRandomized(VehicleDef vehicleDef, IntVec3 cell, Map map,
