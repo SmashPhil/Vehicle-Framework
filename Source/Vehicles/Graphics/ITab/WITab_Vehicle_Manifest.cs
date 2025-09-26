@@ -97,7 +97,7 @@ public class WITab_Vehicle_Manifest : WITab
 
 		using TextBlock textFont = new(GameFont.Small);
 		Rect rect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
-		Rect viewRect = new(0f, 0f, rect.width - UIData.ScrollbarSize, scrollViewHeight);
+		Rect viewRect = new(0f, 0f, rect.width - GenUI.ScrollBarWidth, scrollViewHeight);
 
 		Widgets.BeginScrollView(rect, ref scrollPosition, viewRect);
 		float yMax = DrawTab(viewRect);

@@ -196,7 +196,7 @@ public sealed class TransferableVehicleWidget
 		float bottomLimit = scrollPosition.y - CardHeight;
 		float topLimit = scrollPosition.y + mainRect.height;
 
-		Rect viewRect = new(0f, 0f, mainRect.width - UIData.ScrollbarSize, Height);
+		Rect viewRect = new(0f, 0f, mainRect.width - GenUI.ScrollBarWidth, Height);
 		Widgets.BeginScrollView(mainRect, ref scrollPosition, viewRect);
 		float cardWidth = viewRect.width / ColumnCount;
 

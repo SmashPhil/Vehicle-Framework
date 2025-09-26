@@ -41,6 +41,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 	[LoadAlias("turretDef")]
 	public VehicleTurretDef def;
 
+	public AutoLoadConfig loadConfig;
+
 	public TargetLock targeting = TargetLock.Pawn | TargetLock.Thing;
 
 	[TweakField(SettingsType = UISettingsType.Checkbox)]
@@ -414,6 +416,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		this.reference = reference;
 		groupKey = reference.groupKey;
 		parentKey = reference.parentKey;
+		loadConfig ??= new AutoLoadConfig(this);
 
 		renderProperties = new VehicleTurretRender(reference.renderProperties);
 		if (reference.component != null)
@@ -1442,6 +1445,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		Scribe_Values.Look(ref targetPersists, nameof(targetPersists));
 		Scribe_Values.Look(ref autoTargeting, nameof(autoTargeting));
 		Scribe_Values.Look(ref manualTargeting, nameof(manualTargeting));
+		Scribe_Deep.Look(ref loadConfig, nameof(loadConfig), this);
 
 		Scribe_Values.Look(ref queuedToFire, nameof(queuedToFire));
 		Scribe_Values.Look(ref currentFireMode, nameof(currentFireMode));

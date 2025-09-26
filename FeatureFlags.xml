@@ -6,5 +6,6 @@
     <Paratroopers>Debug | Unstable</Paratroopers>
     <Fishing>Debug | Unstable</Fishing>
     <VehicleCaravanProps>Debug</VehicleCaravanProps>
+    <TradeableVehicles>Debug | Unstable</TradeableVehicles>
   </enabled>
 </FeatureFlags>

@@ -75,7 +75,7 @@ public class WITab_AerialVehicle_Health : WITab_AerialVehicle
 		EnsureSpecificHealthTabForPawnValid();
 		Text.Font = GameFont.Small;
 		Rect outRect = new Rect(0f, 0f, size.x, size.y).ContractedBy(10f);
-		Rect viewRect = new(0f, 0f, outRect.width - UIData.ScrollbarSize, scrollViewHeight);
+		Rect viewRect = new(0f, 0f, outRect.width - GenUI.ScrollBarWidth, scrollViewHeight);
 		float curY = 0f;
 		Widgets.BeginScrollView(outRect, ref scrollPosition, viewRect);
 		DoColumnHeaders();
@@ -195,7 +195,7 @@ public class WITab_AerialVehicle_Health : WITab_AerialVehicle
 			width += RowHeight;
 		}
 		Vector2 result;
-		result.x = 127f + width + UIData.ScrollbarSize;
+		result.x = 127f + width + GenUI.ScrollBarWidth;
 		result.y = Mathf.Min(550f, PaneTopY - 30f);
 		return result;
 	}

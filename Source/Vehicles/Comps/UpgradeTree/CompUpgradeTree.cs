@@ -353,9 +353,9 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 		}
 	}
 
-	public void AddToContainer(ThingOwner<Thing> holder, Thing thing, int count)
+	public void AddToContainer(Thing thing, int count)
 	{
-		holder.TryTransferToContainer(thing, upgradeContainer, count);
+		upgradeContainer.TryAddOrTransfer(thing, count);
 		ValidateListers();
 	}
 

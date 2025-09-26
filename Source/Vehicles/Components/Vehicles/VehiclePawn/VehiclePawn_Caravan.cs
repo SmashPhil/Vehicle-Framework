@@ -53,7 +53,7 @@ public partial class VehiclePawn
 	/// <param name="thing">The entity to add or transfer.</param>
 	/// <param name="count">The maximum number of units to add. Must be a positive integer.</param>
 	/// <returns>
-	/// The number of units actually added or transferred into this vehicle's inventory.
+	/// The stack count added or transferred into the vehicle's inventory.
 	/// </returns>
 	/// <remarks>
 	/// <para>
@@ -84,7 +84,8 @@ public partial class VehiclePawn
 			EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
 		}
 
-		TransferableOneWay transferable = JobDriver_LoadVehicle.GetTransferable(cargoToLoad, this, thing);
+		TransferableOneWay transferable =
+			TransferableUtility.TransferableMatchingDesperate(thing, cargoToLoad, TransferAsOneMode.Normal);
 		if (transferable != null)
 		{
 			CountToTransferFieldRef.Invoke(transferable) = transferable.CountToTransfer - count;

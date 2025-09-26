@@ -1,23 +1,23 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using RimWorld;
 using Verse;
-using Verse.AI;
-using SmashTools;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle<TransferableOneWay>
 {
-	public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle
+	protected override bool JobAvailable(VehiclePawn vehicle)
 	{
-		public override ThingOwner<Thing> ThingOwner(VehiclePawn vehicle)
-		{
-			return vehicle.inventory.innerContainer;
-		}
+		return vehicle.cargoToLoad.Count > 0;
+	}
 
-		public override List<TransferableOneWay> Transferables(VehiclePawn vehicle)
-		{
-			return vehicle.cargoToLoad;
-		}
+	protected override List<TransferableOneWay> GetThingsToLoad(VehiclePawn vehicle, Pawn pawn)
+	{
+		return vehicle.cargoToLoad;
+	}
+
+	protected override Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn, List<TransferableOneWay> things)
+	{
+		return JobDriver_LoadVehicle.FindThingToPack(vehicle, pawn, things);
 	}
 }

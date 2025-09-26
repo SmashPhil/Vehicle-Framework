@@ -1,13 +1,15 @@
 ﻿using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
-using SmashTools.Rendering;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles.Rendering;
 
+[PublicAPI]
 public class Command_CooldownAction : Command_Turret
 {
 	private const float IdlerTimeExpiry = 5; // seconds
@@ -351,16 +353,23 @@ public class Command_CooldownAction : Command_Turret
 			}
 			if (Widgets.ButtonImageFitted(configureRect, VehicleTex.Settings))
 			{
-				const int Min = 0;
+				if (IsEnabled(BetterAutoLoadConfig))
+				{
+					Find.WindowStack.Add(new Dialog_ConfigureTurret(turret));
+				}
+				else
+				{
+					const int Min = 0;
 
-				ThingDef ammoDef = turret.loadedAmmo ??
-					turret.def.ammunition.AllowedThingDefs.FirstOrDefault();
-				int max = Mathf.RoundToInt(vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) /
-					ammoDef.GetStatValueAbstract(StatDefOf.Mass));
-				Dialog_Slider dlgSlider = new(TextLabel, Min, max,
-					delegate(int value) { vehicle.CompVehicleTurrets.SetQuotaLevel(turret, value); },
-					vehicle.CompVehicleTurrets.GetQuotaLevel(turret), 5);
-				Find.WindowStack.Add(dlgSlider);
+					ThingDef ammoDef = turret.loadedAmmo ??
+						turret.def.ammunition.AllowedThingDefs.FirstOrDefault();
+					int max = Mathf.RoundToInt(vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) /
+						ammoDef.GetStatValueAbstract(StatDefOf.Mass));
+					Dialog_Slider dlgSlider = new(TextLabel, Min, max,
+						delegate(int value) { vehicle.CompVehicleTurrets.SetQuotaLevel(turret, value); },
+						vehicle.CompVehicleTurrets.GetQuotaLevel(turret), 5);
+					Find.WindowStack.Add(dlgSlider);
+				}
 			}
 		}
 		return;

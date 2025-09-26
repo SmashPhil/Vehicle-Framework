@@ -242,7 +242,7 @@ public static class VehicleTabHelper_Health
 		rect.width -= 5;
 
 		// Begin ScrollView
-		Rect scrollView = new(rect.x, rect.y + topLabelRect.height * 2, rect.width - UIData.ScrollbarSize,
+		Rect scrollView = new(rect.x, rect.y + topLabelRect.height * 2, rect.width - GenUI.ScrollBarWidth,
 			componentListHeight);
 		bool alternatingRow = false;
 		Widgets.BeginScrollView(rect, ref componentTabScrollPos, scrollView);

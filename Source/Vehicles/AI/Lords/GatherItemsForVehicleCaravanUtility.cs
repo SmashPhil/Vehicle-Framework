@@ -1,78 +1,99 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using RimWorld;
+using SmashTools;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace Vehicles
+namespace Vehicles;
+
+public static class GatherItemsForVehicleCaravanUtility
 {
-	public static class GatherItemsForVehicleCaravanUtility
+	private static readonly HashSet<Thing> NeededItems = [];
+
+	public static List<TransferableOneWay> GetCaravanTransferables(Lord lord)
 	{
-		private static HashSet<Thing> neededItems = new HashSet<Thing>();
+		var caravanLordJob = lord.LordJob as LordJob_FormAndSendVehicles;
+		Assert.IsNotNull(caravanLordJob,
+			$"{nameof(JobDriver_PrepareCaravan_GatherItems)} can only be used with {nameof(LordJob_FormAndSendVehicles)} as a duty assignment.");
+		return caravanLordJob.transferables;
+	}
 
-		public static Thing FindThingToHaul(Pawn p, Lord lord)
+	public static bool IsUsableCarrier(Pawn carrier, Pawn forPawn, bool allowColonists = true)
+	{
+		if (carrier is VehiclePawn vehicle)
 		{
-			neededItems.Clear();
-			List<TransferableOneWay> transferables = ((LordJob_FormAndSendVehicles)lord.LordJob).transferables;
-			for (int i = 0; i < transferables.Count; i++)
+			return vehicle.IsFormingVehicleCaravan() && (!vehicle.DestroyedOrNull() && vehicle.Spawned) &&
+				vehicle.Faction == forPawn.Faction
+				&& !vehicle.IsBurning() && vehicle.movementStatus != VehicleMovementStatus.Offline
+				&& !MassUtility.IsOverEncumbered(vehicle);
+		}
+		return !CaravanHelper.assignedSeats.IsAssigned(carrier) &&
+			JobDriver_PrepareCaravan_GatherItems.IsUsableCarrier(carrier, forPawn, allowColonists: allowColonists);
+	}
+
+	public static Thing FindThingToHaul(Pawn pawn, Lord lord)
+	{
+		using ClearOnDispose<Thing> cod = new(NeededItems);
+		List<TransferableOneWay> transferables = GetCaravanTransferables(lord);
+		foreach (TransferableOneWay transferable in transferables)
+		{
+			if (CountLeftToTransfer(pawn, transferable, lord) <= 0)
+				continue;
+
+			foreach (Thing thing in transferable.things)
 			{
-				TransferableOneWay transferableOneWay = transferables[i];
-				if (CountLeftToTransfer(p, transferableOneWay, lord) > 0)
-				{
-					for (int j = 0; j < transferableOneWay.things.Count; j++)
-					{
-						neededItems.Add(transferableOneWay.things[j]);
-					}
-				}
+				NeededItems.Add(thing);
 			}
-			if (!neededItems.Any())
-			{
-				return null;
-			}
-			Thing result = GenClosest.ClosestThingReachable(p.Position, p.Map, ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), 
-				PathEndMode.Touch, TraverseParms.For(p, Danger.Deadly, TraverseMode.ByPawn, false), 9999f, (Thing x) => 
-				neededItems.Contains(x) && p.CanReserve(x, 1, -1, null, false), null, 0, -1, false, RegionType.Set_Passable, false);
-			neededItems.Clear();
-			return result;
 		}
 
-		public static int CountLeftToTransfer(Pawn pawn, TransferableOneWay transferable, Lord lord)
+		if (NeededItems.Count == 0)
+			return null;
+
+		Thing result = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map,
+			ThingRequest.ForGroup(ThingRequestGroup.HaulableEver), PathEndMode.Touch, TraverseParms.For(pawn),
+			validator: thing => NeededItems.Contains(thing) && pawn.CanReserve(thing));
+		return result;
+	}
+
+	public static int CountLeftToTransfer(Pawn pawn, TransferableOneWay transferable, Lord lord)
+	{
+		if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
 		{
-			if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
-			{
-				return 0;
-			}
-			int x = Mathf.Max(transferable.CountToTransfer - TransferableCountHauledByOthers(pawn, transferable, lord), 0);
-			return x;
+			return 0;
+		}
+		int x = Mathf.Max(transferable.CountToTransfer - TransferableCountHauledByOthers(pawn, transferable, lord), 0);
+		return x;
+	}
+
+	private static int TransferableCountHauledByOthers(Pawn pawn, TransferableOneWay transferable, Lord lord)
+	{
+		if (!transferable.HasAnyThing)
+		{
+			Log.Warning("Can't determine transferable count hauled by others because transferable has 0 things.");
+			return 0;
 		}
 
-		private static int TransferableCountHauledByOthers(Pawn pawn, TransferableOneWay transferable, Lord lord)
+		int count = 0;
+		foreach (Pawn spawnedPawn in lord.Map.mapPawns.AllPawnsSpawned)
 		{
-			if (!transferable.HasAnyThing)
+			if (spawnedPawn == pawn)
+				continue;
+			if (spawnedPawn.CurJob == null || spawnedPawn.CurJob.def != JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle)
+				continue;
+			if (spawnedPawn.CurJob.lord != lord)
+				continue;
+
+			var driver = (JobDriver_PrepareVehicleCaravan_GatheringItems)spawnedPawn.jobs.curDriver;
+			Thing toHaul = driver.ToHaul;
+			if (transferable.things.Contains(toHaul) ||
+				TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))
 			{
-				Log.Warning("Can't determine transferable count hauled by others because transferable has 0 things.");
-				return 0;
+				count += toHaul.stackCount;
 			}
-			IReadOnlyList<Pawn> allPawnsSpawned = lord.Map.mapPawns.AllPawnsSpawned;
-			int num = 0;
-			for (int i = 0; i < allPawnsSpawned.Count; i++)
-			{
-				Pawn pawn2 = allPawnsSpawned[i];
-				if (pawn2 != pawn)
-				{
-					if (pawn2.CurJob != null && pawn2.CurJob.def == JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle && pawn2.CurJob.lord == lord)
-					{
-						Thing toHaul = ((JobDriver_PrepareVehicleCaravan_GatheringItems)pawn2.jobs.curDriver).ToHaul;
-						if (transferable.things.Contains(toHaul) || TransferableUtility.TransferAsOne(transferable.AnyThing, toHaul, TransferAsOneMode.PodsOrCaravanPacking))
-						{
-							num += toHaul.stackCount;
-						}
-					}
-				}
-			}
-			return num;
 		}
+		return count;
 	}
 }

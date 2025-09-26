@@ -18,6 +18,7 @@ public class FeatureFlags : Mod
 	public const string Paratroopers = "Paratroopers";
 	public const string Fishing = "Fishing";
 	public const string VehicleCaravanProps = "VehicleCaravanProps";
+	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
 	private static ModContentPack mod;
 	private static Data data;
@@ -46,7 +47,7 @@ public class FeatureFlags : Mod
 			if (feature.name == featureName)
 				return feature.Enabled;
 		}
-		return true;
+		return false;
 	}
 
 	internal static void Save()

@@ -140,7 +140,6 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 				turret.def.magazineCapacity *
 				turret.def.chargePerAmmoCount);
 		}
-
 		return count;
 	}
 
@@ -172,7 +171,6 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 				}
 			}
 		}
-
 		return false;
 	}
 
@@ -685,6 +683,9 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 		if (Vehicle.Spawned)
 			LongEventHandler.ExecuteWhenFinished(RecacheGizmos);
 
+		turret.loadConfig ??= new AutoLoadConfig(turret);
+
+		// TODO 1.7 - Remove deprecated method of saving quota levels.
 		if (!backupQuotas.NullOrEmpty())
 		{
 			for (int i = 0; i < backupQuotas.Count; i++)
