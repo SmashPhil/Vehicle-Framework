@@ -7,6 +7,7 @@ using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Config;
 using Vehicles.Rendering;
 using Verse;
 using Verse.AI;
@@ -1443,7 +1444,11 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		Scribe_Values.Look(ref targetPersists, nameof(targetPersists));
 		Scribe_Values.Look(ref autoTargeting, nameof(autoTargeting));
 		Scribe_Values.Look(ref manualTargeting, nameof(manualTargeting));
-		Scribe_Deep.Look(ref loadConfig, nameof(loadConfig), this);
+
+		if (FeatureFlags.IsEnabled(FeatureFlags.BetterAutoLoadConfig))
+		{
+			Scribe_Deep.Look(ref loadConfig, nameof(loadConfig), this);
+		}
 
 		Scribe_Values.Look(ref queuedToFire, nameof(queuedToFire));
 		Scribe_Values.Look(ref currentFireMode, nameof(currentFireMode));
