@@ -15,6 +15,7 @@ public struct BlitRequest
 	public Rot8 rot;
 	public PatternData patternData;
 	public List<IBlitTarget> blitTargets = [];
+	public bool iconFrame;
 
 	public BlitRequest(Rot8 rot, PatternData patternData)
 	{
@@ -35,7 +36,7 @@ public struct BlitRequest
 	public BlitRequest(VehiclePawn vehicle) : this(vehicle.VehicleDef.drawProperties.displayRotation,
 		vehicle.patternData)
 	{
-		this.vehicleDef = vehicle.VehicleDef;
+		vehicleDef = vehicle.VehicleDef;
 	}
 
 	public static BlitRequest For(VehiclePawn vehicle)

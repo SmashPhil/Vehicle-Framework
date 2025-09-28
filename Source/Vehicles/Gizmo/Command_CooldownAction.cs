@@ -243,8 +243,11 @@ public class Command_CooldownAction : Command_Turret
 		else
 		{
 			BlitRequest request = new(vehicle)
-				{ rot = Rot8.North };
+				{ rot = Rot8.North, iconFrame = true };
 			request.blitTargets.Add(turret);
+
+			IntVec2 size = vehicle.VehicleDef.size;
+			float scale = size.x > size.z ? size.x : size.z;
 			VehicleGui.DrawVehicleOnGUI(turretRect, request,
 				iconScale: turret.def.gizmoIconScale * iconDrawScale,
 				forceCentering: true);

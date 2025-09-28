@@ -196,7 +196,11 @@ public partial class VehicleTurret
 		{
 			if (GraphicData.texPath.NullOrEmpty())
 				return null;
-			cachedTexture ??= ContentFinder<Texture2D>.Get(GraphicData.texPath);
+
+			if (!cachedTexture)
+			{
+				cachedTexture = ContentFinder<Texture2D>.Get(GraphicData.texPath);
+			}
 			return cachedTexture;
 		}
 	}
@@ -208,8 +212,10 @@ public partial class VehicleTurret
 			if (GraphicData.texPath.NullOrEmpty())
 				return null;
 
-			mainMaskTex ??=
-				ContentFinder<Texture2D>.Get(GraphicData.texPath + Graphic_Turret.TurretMaskSuffix);
+			if (!mainMaskTex)
+			{
+				mainMaskTex = ContentFinder<Texture2D>.Get(GraphicData.texPath + Graphic_Turret.TurretMaskSuffix);
+			}
 			return mainMaskTex;
 		}
 	}
@@ -243,7 +249,7 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (gizmoIcon is null)
+			if (!gizmoIcon)
 			{
 				if (!string.IsNullOrEmpty(def.gizmoIconTexPath))
 				{
@@ -255,10 +261,11 @@ public partial class VehicleTurret
 				}
 				else
 				{
-					gizmoIcon = Texture ?? BaseContent.BadTex;
+					gizmoIcon = Texture;
+					if (!gizmoIcon)
+						gizmoIcon = BaseContent.BadTex;
 				}
 			}
-
 			return gizmoIcon;
 		}
 	}
@@ -573,7 +580,7 @@ public partial class VehicleTurret
 		VehicleDef graphicDef = vehicleDef ?? request.vehicleDef;
 		Assert.IsNotNull(graphicDef);
 
-		Rect turretRect = VehicleGraphics.TurretRect(rect, graphicDef, this, request.rot);
+		Rect turretRect = request.iconFrame ? rect : VehicleGraphics.TurretRect(rect, graphicDef, this, request.rot);
 		yield return GetRenderDataFor(this, this, turretRect, request, Graphic);
 		if (!TurretGraphics.NullOrEmpty())
 		{
@@ -595,9 +602,13 @@ public partial class VehicleTurret
 			{
 				RGBMaterialPool.SetProperties(target, request.patternData, graphic.TexAt, graphic.MaskAt);
 			}
-			RenderData turretRenderData = new(turretRect, graphic.TexAt(Rot8.North), material,
-				target.PropertyBlock, graphic.DrawOffset(Rot4.North).y + turret.DrawLayerOffset,
-				turret.defaultAngleRotated + request.rot.AsAngle);
+			float rotation = request.rot.AsAngle;
+			if (!request.iconFrame)
+			{
+				rotation += turret.defaultAngleRotated;
+			}
+			RenderData turretRenderData = new(turretRect, graphic.TexAt(Rot8.North), material, target.PropertyBlock,
+				graphic.DrawOffset(Rot4.North).y + turret.DrawLayerOffset, rotation);
 			return turretRenderData;
 		}
 	}
@@ -774,8 +785,8 @@ public partial class VehicleTurret
 		cachedGraphicData = new GraphicDataRGB();
 		cachedGraphicData.CopyFrom(copyGraphicData);
 		Graphic_Turret graphic;
-		if ((cachedGraphicData.shaderType.Shader.SupportsMaskTex() ||
-			cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex()))
+		if (cachedGraphicData.shaderType.Shader.SupportsMaskTex() ||
+			cachedGraphicData.shaderType.Shader.SupportsRGBMaskTex())
 		{
 			if (turret.def.matchParentColor)
 			{
@@ -792,15 +803,13 @@ public partial class VehicleTurret
 		{
 			RGBMaterialPool.CacheMaterialsFor(cacheTarget, patternData.patternDef);
 			cachedGraphicData.Init(cacheTarget);
-			graphic = cachedGraphicData.Graphic as Graphic_Turret;
-			Assert.IsNotNull(graphic);
+			graphic = (Graphic_Turret)cachedGraphicData.Graphic;
 			RGBMaterialPool.SetProperties(cacheTarget, cachedGraphicData, graphic.TexAt, graphic.MaskAt);
 		}
 		else
 		{
-			graphic = ((GraphicData)cachedGraphicData).Graphic as Graphic_Turret;
+			graphic = (Graphic_Turret)((GraphicData)cachedGraphicData).Graphic;
 		}
-
 		return graphic;
 	}
 
@@ -933,7 +942,7 @@ public partial class VehicleTurret
 					ammoCountRect.x += ammoCountRect.width - Text.CalcSize(ammoCount).x;
 					Widgets.Label(ammoCountRect, ammoCount);
 				}
-				else if (turret.def.genericAmmo && turret.def.ammunition.AllowedDefCount > 0)
+				else if (turret.def.genericAmmo && turret.def.ammunition is { AllowedDefCount: > 0 })
 				{
 					ThingDef ammoDef = turret.def.ammunition.AllowedThingDefs.FirstOrDefault();
 					Assert.IsNotNull(ammoDef);
