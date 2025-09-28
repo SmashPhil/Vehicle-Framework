@@ -120,16 +120,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	public void SetQuotaLevel(VehicleTurret turret, int level)
 	{
 		turretQuotas[turret] = level;
-		if (turretQuotas[turret] <= 0)
-		{
-			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle,
-				ReservationType.LoadTurret);
-		}
-		else
-		{
-			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle,
-				ReservationType.LoadTurret);
-		}
+		RecacheTurretAutoLoading(turret);
 	}
 
 	public int GetQuotaLevel(VehicleTurret turret)
@@ -141,37 +132,6 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 				turret.def.chargePerAmmoCount);
 		}
 		return count;
-	}
-
-	public bool GetTurretToFill(out VehicleTurret turretToFill, out int quota)
-	{
-		turretToFill = null;
-		quota = 0;
-		if (!turrets.NullOrEmpty())
-		{
-			int massAvailable = Mathf.RoundToInt(Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) -
-				MassUtility.InventoryMass(Vehicle));
-			foreach (VehicleTurret turret in turrets)
-			{
-				ThingDef reloadDef = turret.loadedAmmo;
-				reloadDef ??= turret.def.ammunition?.AllowedThingDefs.FirstOrDefault();
-				if (reloadDef != null)
-				{
-					int desiredCount = GetQuotaLevel(turret);
-					int maxCount = Mathf.RoundToInt(massAvailable /
-						Mathf.Max(reloadDef.GetStatValueAbstract(StatDefOf.Mass), 0.1f));
-					int existingCount = Vehicle.inventory.Count(reloadDef);
-					int availableCount = desiredCount - existingCount;
-					if (availableCount > 0)
-					{
-						turretToFill = turret;
-						quota = Mathf.Min(maxCount, availableCount);
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	public VehicleTurret GetTurret(string key)
@@ -603,6 +563,8 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 		Vehicle.AddEvent(VehicleEventDefOf.PawnKilled, RecacheTurretPermissions);
 		Vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, RecacheTurretPermissions);
 
+		Vehicle.inventory.innerContainer.OnContentsChanged += RecacheAllTurretAutoLoading;
+
 		foreach (VehicleTurret turret in turrets)
 		{
 			RegisterEventsFor(turret);
@@ -972,6 +934,47 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 		}
 	}
 
+	private void RecacheAllTurretAutoLoading()
+	{
+		foreach (VehicleTurret turret in turrets)
+		{
+			RecacheTurretAutoLoading(turret);
+		}
+	}
+
+	private void RecacheTurretAutoLoading(VehicleTurret turret)
+	{
+		if (!Vehicle.Spawned)
+			return;
+
+		int quota = turretQuotas.TryGetValue(turret);
+		if (quota <= 0 || QuotaInCargo(Vehicle, turret) >= quota)
+		{
+			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RemoveLister(Vehicle,
+				ReservationType.LoadTurret);
+		}
+		else
+		{
+			Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(Vehicle,
+				ReservationType.LoadTurret);
+		}
+		return;
+
+		static int QuotaInCargo(VehiclePawn vehicle, VehicleTurret turret)
+		{
+			int count = 0;
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (turret.def.ammunition != null && turret.def.ammunition.Allows(thing) ||
+					turret.def.genericAmmo && turret.def.projectile == thing.def)
+				{
+					count += thing.stackCount;
+				}
+			}
+			return count;
+		}
+	}
+
 	public override void PostSpawnSetup(bool respawningAfterLoad)
 	{
 		base.PostSpawnSetup(respawningAfterLoad);
@@ -1021,6 +1024,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 		if (Scribe.mode == LoadSaveMode.PostLoadInit)
 		{
 			InitTurrets();
+			LongEventHandler.ExecuteWhenFinished(RecacheAllTurretAutoLoading);
 		}
 	}
 

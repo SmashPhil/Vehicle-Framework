@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 
@@ -12,7 +14,8 @@ namespace Vehicles;
 [PublicAPI]
 public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 {
-	private static readonly HashSet<Thing> NeededThings = [];
+	private static readonly ObjectPool<ThingSet> SetPool = new(5);
+	private static readonly ObjectPool<TransferableSearch> SearchPool = new(5);
 
 	protected virtual List<TransferableOneWay> ThingsToLoad => Vehicle.cargoToLoad;
 
@@ -65,7 +68,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 	protected override int CountLeftToTransfer()
 	{
-		return CountLeftToPack(Vehicle, pawn, Transferable);
+		return CountLeftToPack(Vehicle, pawn, job.def, Transferable);
 	}
 
 	protected override Thing FindThingToHaul()
@@ -105,44 +108,111 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		return carrier is not VehiclePawn { movementStatus: VehicleMovementStatus.Offline };
 	}
 
+	/// <summary>
+	/// Search for item to pack given the list of required items in <paramref name="transferables"/>.
+	/// </summary>
+	/// <remarks>
+	/// Assumes the pawn is currently operating the job. If the pawn has not yet started, you must specify
+	/// which JobDef to filter when searching for other colonists hauling for the same job.
+	/// </remarks>
 	public static Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn,
+		[CanBeNull] List<TransferableOneWay> transferables)
+	{
+		return FindThingToPack(vehicle, pawn, pawn.CurJobDef, transferables);
+	}
+
+	/// <summary>
+	/// Search for item to pack given the list of required items in <paramref name="transferables"/>.
+	/// </summary>
+	public static Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef,
 		[CanBeNull] List<TransferableOneWay> transferables)
 	{
 		if (transferables.NullOrEmpty())
 			return null;
 
-		using ClearOnDispose<Thing> cod = new(NeededThings);
+		Assert.IsNotNull(jobDef);
+		using ObjectPool<ThingSet>.Scope ap = SetPool.GetTemporary(out ThingSet thingSet);
 		foreach (TransferableOneWay transferableOneWay in transferables)
 		{
-			int countLeftToTransfer = CountLeftToPack(vehicle, pawn, transferableOneWay);
+			int countLeftToTransfer = CountLeftToPack(vehicle, pawn, jobDef, transferableOneWay);
 			if (countLeftToTransfer <= 0)
 				continue;
 
 			foreach (Thing thing in transferableOneWay.things)
 			{
-				NeededThings.Add(thing);
+				thingSet.Add(thing);
 			}
 		}
-		if (NeededThings.Count == 0)
+		if (thingSet.Count == 0)
 			return null;
 
-		return Search.FindNearestThing(pawn, HasThing);
-
-		static bool HasThing(Thing thing)
-		{
-			return NeededThings.Contains(thing);
-		}
+		return Search.FindNearestThing(pawn, thingSet.IsValid);
 	}
 
-	public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, TransferableOneWay transferable)
+	public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef, TransferableOneWay transferable)
 	{
 		if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
 			return 0;
 
+		using ObjectPool<TransferableSearch>.Scope ap = SearchPool.GetTemporary(out TransferableSearch transSearch);
+		transSearch.Init(jobDef, transferable);
 		int hauledByOthers =
-			Search.TransferableCountHauledByOthersForPacking(vehicle, pawn, transferable.AnyThing,
-				transferable.things.Contains);
+			Search.CountHauledByOthersForPacking(vehicle, pawn, transferable.AnyThing, transSearch);
 		int remaining = transferable.CountToTransfer - hauledByOthers;
 		return Mathf.Clamp(remaining, 0, int.MaxValue);
+	}
+
+	private sealed class ThingSet : IPoolable
+	{
+		private readonly HashSet<Thing> neededThings = [];
+
+		public int Count => neededThings.Count;
+
+		bool IPoolable.InPool { get; set; }
+
+		public void Add(Thing thing)
+		{
+			neededThings.Add(thing);
+		}
+
+		public bool IsValid(Thing thing)
+		{
+			return neededThings.Contains(thing);
+		}
+
+		void IPoolable.Reset()
+		{
+			neededThings.Clear();
+		}
+	}
+
+	protected sealed class TransferableSearch : ISharedJobSearch, IPoolable
+	{
+		private JobDef jobDef;
+		private TransferableOneWay transferable;
+
+		bool IPoolable.InPool { get; set; }
+
+		public void Init(JobDef jobDef, TransferableOneWay transferable)
+		{
+			this.jobDef = jobDef;
+			this.transferable = transferable;
+		}
+
+		bool ISharedJobSearch.IsMatchingThing(Thing thing)
+		{
+			return transferable.things.Contains(thing);
+		}
+
+		bool ISharedJobSearch.ShouldConsiderPawn(Pawn otherPawn)
+		{
+			return otherPawn.CurJobDef == jobDef;
+		}
+
+		void IPoolable.Reset()
+		{
+			jobDef = null;
+			transferable = null;
+		}
 	}
 }

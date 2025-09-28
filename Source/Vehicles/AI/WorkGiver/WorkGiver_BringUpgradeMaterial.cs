@@ -38,6 +38,6 @@ public class WorkGiver_BringUpgradeMaterial : WorkGiver_CarryToVehicle<ThingDefC
 
 	protected override Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn, List<ThingDefCountClass> things)
 	{
-		return JobDriverGetItemForVehicleBase.FindThingToPack(vehicle, pawn, things);
+		return JobDriverGetItemForVehicleBase.FindThingToPack(vehicle, pawn, JobDef, things);
 	}
 }
