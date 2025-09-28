@@ -58,6 +58,7 @@
   <VF_UpgradeableDesc>Vehicle can be modifed through an upgrade tree</VF_UpgradeableDesc>
   <VF_FuelType>Fuel Type</VF_FuelType>
   <VF_FuelTypeDesc>What resource this vehicle consumes in order to operate.</VF_FuelTypeDesc>
+  <VF_CancelUpgrade>Cancel the upgrade that is in progress for {0}.</VF_CancelUpgrade>
   <!-- Designators -->
   
   <VF_RoadZoneExpand>Road area</VF_RoadZoneExpand>

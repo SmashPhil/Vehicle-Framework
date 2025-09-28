@@ -12,7 +12,7 @@ public struct VehicleGenerationRequest
 	public readonly VehicleDef vehicleDef;
 	public Faction faction;
 
-	public bool cleanSlate;
+	public bool cleanSlate = true;
 
 	public bool randomizeColors;
 	public Color colorOne;

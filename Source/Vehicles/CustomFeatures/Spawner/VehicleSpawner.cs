@@ -163,34 +163,33 @@ namespace Vehicles
 
 		private static void DistributeAmmunition(VehiclePawn vehicle)
 		{
-			if (vehicle.CompVehicleTurrets != null)
+			if (vehicle.CompVehicleTurrets == null)
+				return;
+
+			using RandStateBlock rsb = new();
+			foreach (VehicleTurret cannon in vehicle.CompVehicleTurrets.Turrets)
 			{
-				Rand.PushState();
-				foreach (VehicleTurret cannon in vehicle.CompVehicleTurrets.Turrets)
+				if (cannon.def.ammunition != null)
 				{
-					if (cannon.def.ammunition != null)
+					int variation = Rand.RangeInclusive(1, cannon.def.ammunition.AllowedDefCount);
+					for (int i = 0; i < variation; i++)
 					{
-						int variation = Rand.RangeInclusive(1, cannon.def.ammunition.AllowedDefCount);
-						for (int i = 0; i < variation; i++)
-						{
-							ThingDef ammoType = cannon.def.ammunition.AllowedThingDefs.ElementAt(i);
+						ThingDef ammoType = cannon.def.ammunition.AllowedThingDefs.ElementAt(i);
 
-							int startingWeight = Rand.RangeInclusive(10, 25);
-							int exponentialDecay = Rand.RangeInclusive(10, 50);
-							int minReloads = Rand.RangeInclusive(2, 5);
+						int startingWeight = Rand.RangeInclusive(10, 25);
+						int exponentialDecay = Rand.RangeInclusive(10, 50);
+						int minReloads = Rand.RangeInclusive(2, 5);
 
-							// {weight}e^(-{magCapacity}/{expDecay}) + {bottomLimit}
-							float reloadsAvailable =
-								startingWeight * Mathf.Exp((float)-cannon.def.magazineCapacity / exponentialDecay) +
-								minReloads;
-							Thing ammo = ThingMaker.MakeThing(ammoType);
-							ammo.stackCount = Mathf.RoundToInt(cannon.def.magazineCapacity * reloadsAvailable);
-							vehicle.AddOrTransfer(ammo);
-						}
-						cannon.AutoReload();
+						// {weight}e^(-{magCapacity}/{expDecay}) + {bottomLimit}
+						float reloadsAvailable =
+							startingWeight * Mathf.Exp((float)-cannon.def.magazineCapacity / exponentialDecay) +
+							minReloads;
+						Thing ammo = ThingMaker.MakeThing(ammoType);
+						ammo.stackCount = Mathf.RoundToInt(cannon.def.magazineCapacity * reloadsAvailable);
+						vehicle.AddOrTransfer(ammo);
 					}
+					cannon.AutoReload();
 				}
-				Rand.PopState();
 			}
 		}
 	}

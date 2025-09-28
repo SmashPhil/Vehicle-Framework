@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Verse;
@@ -20,6 +21,8 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 
 	private static readonly Texture2D TileTex =
 		ContentFinder<Texture2D>.Get("Things/Building/BuildingFrame/Tile");
+
+	private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
 
 	private static readonly StringBuilder InspectStringBuilder = new();
 	private static readonly Color FrameColor = new(0.6f, 0.6f, 0.6f);
@@ -289,7 +292,10 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 	{
 		Vehicle.ignition.Drafted = false;
 		Vehicle.Angle = 0;
-		Vehicle.DisembarkAll();
+		if (Vehicle.AllPawnsAboard.Count > 0)
+		{
+			Vehicle.DisembarkAll();
+		}
 	}
 
 	internal void ReactivateComps()
@@ -491,6 +497,23 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 		base.EventRegistration();
 		Vehicle.AddEvent(VehicleEventDefOf.UpgradeEnqueued, PrepVehicleForWork);
 		Vehicle.AddEvent(VehicleEventDefOf.UpgradeRefundEnqueued, PrepVehicleForWork);
+	}
+
+	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	{
+		if (Upgrading)
+		{
+			Command_Action cancelLoad = new()
+			{
+				defaultLabel = "DesignatorCancel".Translate(),
+				defaultDesc = "VF_CancelUpgrade".Translate(Vehicle.LabelCap),
+				icon = CancelIcon,
+				activateSound = SoundDefOf.Tick_Low,
+				hotKey = KeyBindingDefOf.Designator_Cancel,
+				action = ClearUpgrade
+			};
+			yield return cancelLoad;
+		}
 	}
 
 	public override string CompInspectStringExtra()
