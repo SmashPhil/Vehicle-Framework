@@ -185,8 +185,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
 	public int CurrentTurretFiring { get; set; }
 
-	// NOTE - VehicleMapFramework accesses the setter via reflection.
-	public bool IsManned { get; [UsedImplicitly] private set; }
+	public bool IsManned { get; [UsedImplicitly] protected set; }
 
 	public PawnStatusOnTarget CachedPawnTargetStatus { get; set; }
 
@@ -506,7 +505,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		RecacheRootDrawPos();
 	}
 
-	public void RecacheMannedStatus()
+	public virtual void RecacheMannedStatus()
 	{
 		IsManned = true;
 
