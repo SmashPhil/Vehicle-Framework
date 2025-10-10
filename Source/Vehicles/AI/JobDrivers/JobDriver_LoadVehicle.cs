@@ -73,7 +73,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 	protected override Thing FindThingToHaul()
 	{
-		return FindThingToPack(Vehicle, pawn, ThingsToLoad);
+		return FindThingToPack(Vehicle, pawn, job.def, ThingsToLoad);
 	}
 
 	protected override Toil StartedCarryingThing()
@@ -106,19 +106,6 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 			return false;
 
 		return carrier is not VehiclePawn { movementStatus: VehicleMovementStatus.Offline };
-	}
-
-	/// <summary>
-	/// Search for item to pack given the list of required items in <paramref name="transferables"/>.
-	/// </summary>
-	/// <remarks>
-	/// Assumes the pawn is currently operating the job. If the pawn has not yet started, you must specify
-	/// which JobDef to filter when searching for other colonists hauling for the same job.
-	/// </remarks>
-	public static Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn,
-		[CanBeNull] List<TransferableOneWay> transferables)
-	{
-		return FindThingToPack(vehicle, pawn, pawn.CurJobDef, transferables);
 	}
 
 	/// <summary>
