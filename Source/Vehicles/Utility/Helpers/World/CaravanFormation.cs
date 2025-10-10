@@ -155,9 +155,9 @@ public static class CaravanFormation
 			}
 			Direction8Way direction8WayFromTo =
 				Find.WorldGrid.GetDirection8WayFromTo(formation.Dialog.CurrentTile, formation.StartingTile);
-			if (!TryFindExitSpot(formation.pawns, true, out IntVec3 intVec))
+			if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: true, out IntVec3 intVec))
 			{
-				if (!TryFindExitSpot(formation.pawns, false, out intVec))
+				if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: false, out intVec))
 				{
 					Messages.Message(
 						"CaravanCouldNotFindExitSpot".Translate(direction8WayFromTo.LabelShort()),
@@ -167,7 +167,6 @@ public static class CaravanFormation
 				Messages.Message(
 					"CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()),
 					new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.CautionInput, false);
-				return false;
 			}
 			if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
 			{
@@ -355,35 +354,12 @@ public static class CaravanFormation
 
 	private static bool TryFindExitSpot(Map map, List<Pawn> pawns,
 		bool reachableForEveryColonist,
-		Rot4 exitDirection, out IntVec3 spot, bool debug = false)
+		Rot4 exitDirection, out IntVec3 spot)
 	{
-		IntVec3 root = formation.LeadVehicle.Position;
 		if (reachableForEveryColonist)
 		{
-			return CellFinderExtended.TryFindRandomEdgeCellWith(delegate(IntVec3 cell)
-				{
-					if (formation.vehicles.Any(vehicle => !ValidVehicleExitSpot(cell, vehicle, map)))
-					{
-						if (debug)
-						{
-							DebugDrawCell(root, cell, false);
-						}
-						return false;
-					}
-					foreach (Pawn pawn in pawns)
-					{
-						if (pawn.IsColonist && !pawn.Downed &&
-							!pawn.CanReach(cell, PathEndMode.Touch, Danger.Deadly))
-						{
-							if (debug)
-								DebugDrawCell(root, cell, false);
-							return false;
-						}
-					}
-					if (debug)
-						DebugDrawCell(root, cell, true);
-					return true;
-				}, map, exitDirection, formation.LeadVehicle.VehicleDef, CellFinder.EdgeRoadChance_Always,
+			return CellFinderExtended.TryFindRandomEdgeCellWith(CellValidator, map, exitDirection,
+				formation.LeadVehicle.VehicleDef, CellFinder.EdgeRoadChance_Always,
 				out spot);
 		}
 		// Finding exit point that might not reachable for everyone
@@ -392,53 +368,65 @@ public static class CaravanFormation
 		foreach (IntVec3 edgeCell in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder())
 		{
 			IntVec3 paddedCell = edgeCell.PadForHitbox(map, formation.LeadVehicle);
-			if (formation.vehicles.All(vehicle => ValidVehicleExitSpot(paddedCell, vehicle, map)))
+			if (!ValidForAllVehicles(map, paddedCell))
+				continue;
+
+			int currentCount = 0;
+			foreach (Pawn pawn in pawns)
 			{
-				int currentCount = 0;
-				foreach (Pawn pawn in pawns)
+				if (pawn.IsColonist && !pawn.Downed &&
+					pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly))
 				{
-					if (pawn.IsColonist && !pawn.Downed &&
-						pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly))
-					{
-						currentCount++;
-					}
+					currentCount++;
 				}
-				if (currentCount > numberCanReach)
-				{
-					numberCanReach = currentCount;
-					cell = paddedCell;
-				}
-				if (debug)
-					DebugDrawCell(root, paddedCell, true);
 			}
-			else
+			if (currentCount > numberCanReach)
 			{
-				if (debug)
-					DebugDrawCell(root, paddedCell, false);
+				numberCanReach = currentCount;
+				cell = paddedCell;
 			}
 		}
 		spot = cell;
 		return cell.IsValid;
 
-		void DebugDrawCell(IntVec3 debugRoot, IntVec3 debugCell, bool reachable)
+		bool CellValidator(IntVec3 exitSpot)
 		{
-			float colorPct = 0.5f;
-			SimpleColor lineColor = SimpleColor.Green;
-			if (!reachable)
+			foreach (VehiclePawn vehicle in formation.vehicles)
 			{
-				colorPct = 0;
-				lineColor = SimpleColor.Red;
+				if (!ValidVehicleExitSpot(exitSpot, vehicle, map))
+					return false;
 			}
-			map.debugDrawer.FlashCell(debugCell, colorPct, duration: 360);
-			map.debugDrawer.FlashLine(debugCell, debugRoot, duration: 360, color: lineColor);
-		}
-	}
+			foreach (Pawn pawn in pawns)
+			{
+				if (!pawn.IsColonist)
+					continue;
+				if (CaravanHelper.assignedSeats.IsAssigned(pawn))
+					continue;
 
-	private static bool ValidVehicleExitSpot(IntVec3 cell, VehiclePawn vehicle, Map map)
-	{
-		return !cell.Fogged(map) &&
-			vehicle.CanReachVehicle(cell, PathEndMode.OnCell, Danger.Deadly) &&
-			vehicle.DrivableRectOnCell(cell, Ext_Vehicles.DestinationHitboxReq.AnyRotation);
+				if (!pawn.CanReach(exitSpot, PathEndMode.Touch, Danger.Deadly))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		static bool ValidForAllVehicles(Map map, IntVec3 cell)
+		{
+			foreach (VehiclePawn vehicle in formation.vehicles)
+			{
+				if (!ValidVehicleExitSpot(cell, vehicle, map))
+					return false;
+			}
+			return true;
+		}
+
+		static bool ValidVehicleExitSpot(IntVec3 cell, VehiclePawn vehicle, Map map)
+		{
+			return !cell.Fogged(map) &&
+				vehicle.CanReachVehicle(cell, PathEndMode.OnCell, Danger.Deadly) &&
+				vehicle.DrivableRectOnCell(cell, Ext_Vehicles.DestinationHitboxReq.AnyRotation);
+		}
 	}
 
 	private static bool TryFindRandomPackingSpot(IntVec3 exitSpot, out IntVec3 packingSpot)
