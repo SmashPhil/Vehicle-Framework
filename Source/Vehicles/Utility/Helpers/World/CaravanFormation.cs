@@ -4,6 +4,7 @@ using System.Text;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
@@ -13,8 +14,6 @@ namespace Vehicles.World;
 
 public static class CaravanFormation
 {
-	private static readonly List<Thing> TmpPackingSpots = [];
-
 	// Having globals like this is ugly but much of the vanilla logic shared across patches is a result of RimWorld
 	// duplicating logic between Dialog_SplitCaravan and Dialog_FormCaravan. It's easier to access from here than it
 	// is trying to pass around proper data structures between all the patches.
@@ -365,7 +364,8 @@ public static class CaravanFormation
 		// Finding exit point that might not reachable for everyone
 		IntVec3 cell = IntVec3.Invalid;
 		int numberCanReach = -1;
-		foreach (IntVec3 edgeCell in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder())
+		using var cps = CollectionPool.GetList(out List<IntVec3> workingList);
+		foreach (IntVec3 edgeCell in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(workingList))
 		{
 			IntVec3 paddedCell = edgeCell.PadForHitbox(map, formation.LeadVehicle);
 			if (!ValidForAllVehicles(map, paddedCell))
@@ -374,8 +374,12 @@ public static class CaravanFormation
 			int currentCount = 0;
 			foreach (Pawn pawn in pawns)
 			{
-				if (pawn.IsColonist && !pawn.Downed &&
-					pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly))
+				if (!pawn.IsColonist || pawn.Downed)
+					continue;
+				if (CaravanHelper.assignedSeats.IsAssigned(pawn))
+					continue;
+
+				if (pawn.CanReach(paddedCell, PathEndMode.Touch, Danger.Deadly))
 				{
 					currentCount++;
 				}
@@ -434,7 +438,7 @@ public static class CaravanFormation
 		const int SqrRadiusSmall = 15;
 		const int SqrRadiusMed = 25;
 
-		TmpPackingSpots.Clear();
+		using var cps = CollectionPool.GetList(out List<Thing> tmpPackingSpots);
 		List<Thing> packingSpots =
 			formation.Map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
 		if (formation.Dialog.transferables.NotNullAndAny(x =>
@@ -448,13 +452,12 @@ public static class CaravanFormation
 					if (formation.Map.reachability.CanReach(vehicle.Position, packingSpotThing,
 						PathEndMode.OnCell,
 						traverseParms))
-						TmpPackingSpots.Add(packingSpotThing);
+						tmpPackingSpots.Add(packingSpotThing);
 				}
 			}
-			if (TmpPackingSpots.Count > 0)
+			if (tmpPackingSpots.Count > 0)
 			{
-				Thing thing = TmpPackingSpots.RandomElement();
-				TmpPackingSpots.Clear();
+				Thing thing = tmpPackingSpots.RandomElement();
 				packingSpot = thing.Position;
 				return true;
 			}
@@ -482,13 +485,12 @@ public static class CaravanFormation
 			if (formation.Map.reachability.CanReach(exitSpot, packingSpotThing, PathEndMode.OnCell,
 				traverseParams))
 			{
-				TmpPackingSpots.Add(packingSpotThing);
+				tmpPackingSpots.Add(packingSpotThing);
 			}
 		}
-		if (TmpPackingSpots.Count > 0)
+		if (tmpPackingSpots.Count > 0)
 		{
-			Thing packingSpotThing = TmpPackingSpots.RandomElement();
-			TmpPackingSpots.Clear();
+			Thing packingSpotThing = tmpPackingSpots.RandomElement();
 			packingSpot = packingSpotThing.Position;
 			return true;
 		}

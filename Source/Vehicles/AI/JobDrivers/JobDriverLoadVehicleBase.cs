@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
+using SmashTools.Performance;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -432,6 +433,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 
 	protected static class Search
 	{
+		[Profile]
 		public static Thing FindNearestThing(Pawn pawn, Predicate<Thing> extraValidator)
 		{
 			Thing result = ClosestHaulable(pawn, ThingRequestGroup.Pawn, validator: ValidThing);
@@ -451,6 +453,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 			}
 		}
 
+		[Profile]
 		public static int CountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, ISharedJobSearch jobSearcher)
 		{
 			int mechCount = 0;

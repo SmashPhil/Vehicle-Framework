@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -574,6 +575,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		vehicle.CompVehicleTurrets.DequeueTicker(this);
 	}
 
+	[Profile]
 	public virtual bool Tick()
 	{
 		bool cooldownTicked = TurretCooldownTick();
@@ -599,6 +601,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 			recoilTicked;
 	}
 
+	[Profile]
 	protected virtual bool TurretCooldownTick()
 	{
 		if (CanOverheat)
@@ -658,6 +661,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		return false;
 	}
 
+	[Profile]
 	protected virtual void ScanForTarget()
 	{
 		if (!AutoTarget)
@@ -683,6 +687,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		}
 	}
 
+	[Profile]
 	protected virtual bool TurretRotationTick()
 	{
 		if (ComponentDisabled)
@@ -731,6 +736,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		return true;
 	}
 
+	[Profile]
 	protected virtual bool TurretTargeterTick()
 	{
 		if (TurretTargetValid)

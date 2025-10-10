@@ -7,6 +7,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using Vehicles.Rendering;
 using Vehicles.World;
@@ -518,6 +519,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 		changeStoredEnergy?.Invoke(extra);
 	}
 
+	[Profile]
 	public override void CompTick()
 	{
 		if (FuelLeaking)

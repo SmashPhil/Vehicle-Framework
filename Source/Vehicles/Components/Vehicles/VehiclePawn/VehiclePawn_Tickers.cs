@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools.Performance;
 using Verse;
 
 namespace Vehicles;
@@ -55,6 +56,7 @@ public partial class VehiclePawn
 		return exploder;
 	}
 
+	[Profile]
 	protected override void Tick()
 	{
 		BaseTickOptimized();
@@ -113,6 +115,7 @@ public partial class VehiclePawn
 		EventRegistry[VehicleEventDefOf.ScanShort].ExecuteEvents();
 	}
 
+	[Profile]
 	protected override void TickInterval(int delta)
 	{
 		ageTracker.AgeTickInterval(delta);
@@ -128,6 +131,7 @@ public partial class VehiclePawn
 		}
 	}
 
+	[Profile]
 	private void TickHandlers()
 	{
 		// Only need to tick VehicleHandlers with pawns inside them
@@ -137,6 +141,7 @@ public partial class VehiclePawn
 		}
 	}
 
+	[Profile]
 	protected virtual void BaseTickOptimized()
 	{
 		const int ScanShortTicks = 60;

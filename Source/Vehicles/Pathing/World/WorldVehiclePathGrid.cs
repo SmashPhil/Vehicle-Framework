@@ -323,6 +323,7 @@ public class WorldVehiclePathGrid : WorldComponent
 		}
 	}
 
+	[Profile]
 	internal void RecalculateAllPerceivedPathCostsFor(VehicleDef vehicleDef, CancellationToken token)
 	{
 		bool dirty = false;
@@ -363,6 +364,7 @@ public class WorldVehiclePathGrid : WorldComponent
 	/// <summary>
 	/// Calculate path cost for <paramref name="vehicleDef"/> at <paramref name="tile"/>
 	/// </summary>
+	[Profile]
 	public static float CalculatedMovementDifficultyAt(PlanetTile tile, VehicleDef vehicleDef,
 		StringBuilder explanation = null, bool coastalTravel = true)
 	{

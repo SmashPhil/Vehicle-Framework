@@ -57,6 +57,7 @@ public class VehicleRegionMaker : VehicleGridManager
 	/// <summary>
 	/// Generate region at <paramref name="root"/>
 	/// </summary>
+	[Profile]
 	public RegionResult TryGenerateRegionFrom(IntVec3 root, ref VehicleRegion region)
 	{
 		RegionType expectedRegionType =
@@ -72,12 +73,11 @@ public class VehicleRegionMaker : VehicleGridManager
 			return RegionResult.Failed;
 		}
 
-		CreatingRegions = true;
-		regionCells.Clear();
-
-		region = GetRegion(root);
+		using ClearOnDispose<IntVec3> cod = new(regionCells);
 		try
 		{
+			CreatingRegions = true;
+			region = GetRegion(root);
 			region.type = expectedRegionType;
 
 			FloodFillAndAddCells(region, root);
@@ -93,7 +93,6 @@ public class VehicleRegionMaker : VehicleGridManager
 		finally
 		{
 			CreatingRegions = false;
-			regionCells.Clear();
 		}
 
 		return RegionResult.Success;
@@ -110,6 +109,7 @@ public class VehicleRegionMaker : VehicleGridManager
 	/// <summary>
 	/// Floodfill from <paramref name="root"/> and calculate valid neighboring cells to form a new region
 	/// </summary>
+	[Profile]
 	private void FloodFillAndAddCells(VehicleRegion region, IntVec3 root)
 	{
 		regionCells.Clear();
@@ -201,6 +201,7 @@ public class VehicleRegionMaker : VehicleGridManager
 	/// <summary>
 	/// Generate region links for region currently being created
 	/// </summary>
+	[Profile]
 	private void CreateLinks(VehicleRegion region)
 	{
 		Assert.IsTrue(linksProcessedAt.All(set => set.Count == 0));

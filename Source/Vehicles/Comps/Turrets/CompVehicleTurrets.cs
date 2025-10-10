@@ -4,6 +4,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using Vehicles.Rendering;
 using Verse;
@@ -459,6 +460,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 		}
 	}
 
+	[Profile]
 	public override void CompTick()
 	{
 		base.CompTick();

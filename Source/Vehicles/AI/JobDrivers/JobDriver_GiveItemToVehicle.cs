@@ -15,6 +15,7 @@ public sealed class JobDriver_GiveItemToVehicle : JobDriverGetItemForVehicleBase
 
 	protected override IEnumerable<ThingDefCountClass> ThingsToLoad => FindThingDefsToPack(Vehicle, pawn);
 
+	[Profile]
 	public static List<ThingDefCountClass> FindThingDefsToPack(VehiclePawn vehicle, Pawn pawn)
 	{
 		int massAvailable = Mathf.RoundToInt(vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity) -
@@ -42,6 +43,7 @@ public sealed class JobDriver_GiveItemToVehicle : JobDriverGetItemForVehicleBase
 		return countList.InnerListForReading;
 	}
 
+	[Profile]
 	private static void AddThingDefsToPackForTurret(VehiclePawn vehicle, Pawn pawn, VehicleTurret turret,
 		int quota, ThingDefCountList countList)
 	{
@@ -66,6 +68,7 @@ public sealed class JobDriver_GiveItemToVehicle : JobDriverGetItemForVehicleBase
 		}
 	}
 
+	[Profile]
 	private static List<Thing> FindThingsToPack(VehiclePawn vehicle, Pawn pawn, VehicleTurret turret, int count)
 	{
 		return RefuelWorkGiverUtility.FindEnoughReservableThings(pawn, vehicle.Position, new IntRange(1, count),
