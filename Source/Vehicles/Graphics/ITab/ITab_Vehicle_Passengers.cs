@@ -143,9 +143,11 @@ public class ITab_Vehicle_Passengers : ITab
 
 	private void EnsureSpecificNeedsTabForPawnValid()
 	{
-		if (specificNeedsTabForPawn != null && (specificNeedsTabForPawn.Destroyed ||
-			!Vehicle.AllPawnsAboard.Contains(specificNeedsTabForPawn) &&
-			!Vehicle.AllInventoryPawns.Contains(specificNeedsTabForPawn)))
+		if (specificNeedsTabForPawn is not { Destroyed: false })
+			return;
+
+		if (!Vehicle.AllPawnsAboard.Contains(specificNeedsTabForPawn) &&
+			!Vehicle.AllInventoryPawns.Contains(specificNeedsTabForPawn))
 		{
 			specificNeedsTabForPawn = null;
 		}

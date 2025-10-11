@@ -253,20 +253,19 @@ public class WITab_Vehicle_Manifest : WITab
 
 	private void EnsureSpecificNeedsTabForPawnValid()
 	{
-		if (moreDetailsForPawn != null)
+		if (moreDetailsForPawn is not { Destroyed: false } or VehiclePawn)
+			return;
+
+		if (VehicleObject.DismountedPawns.Contains(moreDetailsForPawn))
+			return;
+		foreach (VehiclePawn vehicle in VehicleObject.Vehicles)
 		{
-			bool destroyed = moreDetailsForPawn.Destroyed;
-			//Destroyed or non-vehicle pawn
-			if (destroyed || !(moreDetailsForPawn is VehiclePawn))
-			{
-				//Pawn not in vehicle or dismounted pawn list
-				if (!VehicleObject.Vehicles.Any(vehicle =>
-						vehicle.AllPawnsAboard.Contains(moreDetailsForPawn)) &&
-					!VehicleObject.DismountedPawns.Contains(moreDetailsForPawn))
-				{
-					moreDetailsForPawn = null;
-				}
-			}
+			if (vehicle.AllPawnsAboard.Contains(moreDetailsForPawn))
+				return;
+			if (vehicle.AllInventoryPawns.Contains(moreDetailsForPawn))
+				return;
 		}
+		// Pawn not in any vehicles or dismounted pawn list, was likely moved.
+		moreDetailsForPawn = null;
 	}
 }
