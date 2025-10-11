@@ -9,6 +9,10 @@
 		<defName>UpgradeCompleted</defName>
 	</Vehicles.VehicleEventDef>
 
+  <Vehicles.VehicleEventDef>
+		<defName>UpgradeCanceled</defName>
+	</Vehicles.VehicleEventDef>
+
 	<Vehicles.VehicleEventDef>
 		<defName>UpgradeRefundEnqueued</defName>
 	</Vehicles.VehicleEventDef>

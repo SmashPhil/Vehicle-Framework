@@ -55,6 +55,7 @@ public static class VehicleEventDefOf
 	// Upgrades
 	public static VehicleEventDef UpgradeEnqueued;
 	public static VehicleEventDef UpgradeCompleted;
+	public static VehicleEventDef UpgradeCanceled;
 	public static VehicleEventDef UpgradeRefundEnqueued;
 	public static VehicleEventDef UpgradeRefundCompleted;
 

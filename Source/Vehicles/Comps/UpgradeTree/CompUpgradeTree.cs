@@ -266,6 +266,7 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 		Vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().ClearReservedFor(Vehicle);
 		upgradeContainer.TryDropAll(Vehicle.Position, Vehicle.Map, ThingPlaceMode.Near);
 		upgrade = null;
+		Vehicle.EventRegistry[VehicleEventDefOf.UpgradeCanceled].ExecuteEvents();
 	}
 
 	/// <summary>
@@ -466,7 +467,7 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 		if (!Vehicle.Spawned)
 			return;
 
-		if (NodeUnlocking != null)
+		if (Upgrading)
 		{
 			if (upgrade.Removal || StoredCostSatisfied)
 			{
@@ -495,8 +496,11 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 	public override void EventRegistration()
 	{
 		base.EventRegistration();
-		Vehicle.AddEvent(VehicleEventDefOf.UpgradeEnqueued, PrepVehicleForWork);
-		Vehicle.AddEvent(VehicleEventDefOf.UpgradeRefundEnqueued, PrepVehicleForWork);
+		Vehicle.AddEvent(VehicleEventDefOf.UpgradeEnqueued, PrepVehicleForWork, ValidateListers);
+		Vehicle.AddEvent(VehicleEventDefOf.UpgradeRefundEnqueued, PrepVehicleForWork, ValidateListers);
+		Vehicle.AddEvent(VehicleEventDefOf.UpgradeCanceled, ValidateListers);
+		Vehicle.AddEvent(VehicleEventDefOf.UpgradeCompleted, ValidateListers);
+		Vehicle.AddEvent(VehicleEventDefOf.UpgradeRefundCompleted, ValidateListers);
 	}
 
 	public override IEnumerable<Gizmo> CompGetGizmosExtra()
