@@ -238,7 +238,8 @@ public class WITab_Vehicle_Manifest : WITab
 		Vector2 preferredSize = new(ITab_Vehicle_Passengers.WindowWidth, 0);
 		foreach (VehiclePawn vehicle in VehicleObject.Vehicles)
 		{
-			Vector2 sizeForVehicle = VehicleTabHelper_Passenger.GetSize(vehicle.AllPawnsAboard, PaneTopY);
+			Vector2 sizeForVehicle =
+				VehicleTabHelper_Passenger.GetSize(vehicle.AllPawnsAboard.Concat(vehicle.AllInventoryPawns), PaneTopY);
 			preferredSize.x = Mathf.Max(preferredSize.x, sizeForVehicle.x);
 			preferredSize.y += sizeForVehicle.y;
 		}

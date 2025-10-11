@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using RimWorld;
 using UnityEngine;
 using Verse;
@@ -82,7 +83,7 @@ public class ITab_Vehicle_Passengers : ITab
 		EnsureSpecificNeedsTabForPawnValid();
 		base.UpdateSize();
 
-		size = VehicleTabHelper_Passenger.GetSize(Vehicle.AllPawnsAboard, PaneTopY);
+		size = VehicleTabHelper_Passenger.GetSize(Vehicle.AllPawnsAboard.Concat(Vehicle.AllInventoryPawns), PaneTopY);
 		size.y = Mathf.Max(size.y, NeedsCardUtility.FullSize.y);
 	}
 
