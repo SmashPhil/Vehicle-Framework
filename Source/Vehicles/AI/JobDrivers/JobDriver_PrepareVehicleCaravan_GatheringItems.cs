@@ -3,7 +3,6 @@ using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Verse;
-using Verse.AI.Group;
 
 namespace Vehicles;
 
@@ -11,8 +10,6 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriverLoadVehic
 {
 	private List<TransferableOneWay> ThingsToLoad =>
 		GatherItemsForVehicleCaravanUtility.GetCaravanTransferables(job.lord);
-
-	protected override bool ShouldGatherItems => !pawn.IsFormingVehicleCaravan() || base.ShouldGatherItems;
 
 	private TransferableOneWay Transferable
 	{
@@ -51,7 +48,7 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriverLoadVehic
 
 	protected override Thing FindThingToHaul()
 	{
-		return GatherItemsForVehicleCaravanUtility.FindThingToHaul(pawn, pawn.GetLord());
+		return GatherItemsForVehicleCaravanUtility.FindThingToHaul(pawn, job.lord);
 	}
 
 	protected override bool IsUsableCarrier(Pawn carrier, bool allowColonists = true)

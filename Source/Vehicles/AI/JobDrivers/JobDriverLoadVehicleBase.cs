@@ -29,7 +29,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 
 	protected Pawn Carrier => job.GetTarget(TargetIndex.B).Thing as Pawn;
 
-	protected virtual bool ShouldGatherItems =>
+	protected virtual bool ShouldHaulItems =>
 		MassUtility.IsOverEncumbered(pawn) && !pawn.inventory.HasAnyUnpackedCaravanItems;
 
 	protected abstract bool ShouldFailJob();
@@ -60,7 +60,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 	{
 		if (gatherState == PrepareCaravanGatherState.Unset)
 		{
-			gatherState = ShouldGatherItems ?
+			gatherState = ShouldHaulItems ?
 				PrepareCaravanGatherState.Carry :
 				PrepareCaravanGatherState.Haul;
 		}

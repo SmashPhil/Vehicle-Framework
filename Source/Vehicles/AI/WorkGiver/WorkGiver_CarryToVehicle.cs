@@ -37,8 +37,8 @@ public abstract class WorkGiver_CarryToVehicle<T> : WorkGiver_Scanner
 			return null;
 		if (vehicle.IsForbidden(pawn))
 			return null;
-		// Vehicle itself must be on passable terrain, otherwise BFS search for turret and upgrade loading
-		// will be unable to start (from the vehicle root position).
+		// Vehicle itself must be on passable terrain, otherwise BFS search for non-TransferableOneWay loading
+		// will be unable to floodfill from vehicle root position.
 		if (!pawn.CanReach(vehicle.Position, PathEndMode.OnCell, Danger.Deadly))
 			return null;
 		if (!JobAvailable(pawn, vehicle))
