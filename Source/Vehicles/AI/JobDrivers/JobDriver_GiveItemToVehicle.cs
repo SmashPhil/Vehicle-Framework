@@ -15,6 +15,14 @@ public sealed class JobDriver_GiveItemToVehicle : JobDriverGetItemForVehicleBase
 
 	protected override IEnumerable<ThingDefCountClass> ThingsToLoad => FindThingDefsToPack(Vehicle, pawn);
 
+	protected override bool ShouldFailJob()
+	{
+		if (MassUtility.IsOverEncumbered(Vehicle))
+			return true;
+
+		return base.ShouldFailJob();
+	}
+
 	[Profile]
 	public static List<ThingDefCountClass> FindThingDefsToPack(VehiclePawn vehicle, Pawn pawn)
 	{

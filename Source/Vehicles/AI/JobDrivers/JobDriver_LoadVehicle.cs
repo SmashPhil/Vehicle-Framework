@@ -62,6 +62,9 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 	protected override bool ShouldFailJob()
 	{
+		if (MassUtility.IsOverEncumbered(Vehicle))
+			return true;
+
 		return !MapComponentCache<VehicleReservationManager>.GetComponent(Map)
 		 .VehicleListed(Vehicle, ListerTag);
 	}

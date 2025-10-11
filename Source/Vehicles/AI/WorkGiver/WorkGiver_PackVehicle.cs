@@ -8,7 +8,10 @@ public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle<TransferableOneWay
 {
 	protected override bool JobAvailable(Pawn pawn, VehiclePawn vehicle)
 	{
-		return vehicle.cargoToLoad.Count > 0;
+		if (vehicle.cargoToLoad.Count == 0)
+			return false;
+
+		return !MassUtility.IsOverEncumbered(vehicle);
 	}
 
 	protected override List<TransferableOneWay> GetThingsToLoad(VehiclePawn vehicle, Pawn pawn)

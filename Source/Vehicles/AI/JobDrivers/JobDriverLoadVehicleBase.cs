@@ -358,9 +358,6 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 		for (int i = things.Count - 1; i >= 0; i--)
 		{
 			Thing thing = things[i];
-			if (MassUtility.IsOverEncumbered(vehicle))
-				break;
-
 			AddItemToVehicle(vehicle, thing);
 		}
 	}
