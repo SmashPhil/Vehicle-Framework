@@ -31,7 +31,7 @@ public sealed class JobDriver_GiveToUpgradeContainer : JobDriverGetItemForVehicl
 
 	protected override bool AddItemToVehicle(VehiclePawn vehicle, Thing thing)
 	{
-		ThingDefCountClass materialRequired = Vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(Vehicle)
+		ThingDefCountClass materialRequired = vehicle.CompUpgradeTree.NodeUnlocking.MaterialsRequired(vehicle)
 		 .FirstOrDefault(countClass => countClass.thingDef == thing.def);
 		if (materialRequired is null || materialRequired.count <= 0)
 		{
@@ -39,7 +39,7 @@ public sealed class JobDriver_GiveToUpgradeContainer : JobDriverGetItemForVehicl
 			return false;
 		}
 		int count = Mathf.Min(materialRequired.count, thing.stackCount);
-		Vehicle.CompUpgradeTree.AddToContainer(thing, count);
+		vehicle.CompUpgradeTree.AddToContainer(thing, count);
 		return true;
 	}
 }

@@ -141,7 +141,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 	public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef, TransferableOneWay transferable)
 	{
-		if (transferable.CountToTransfer <= 0 || !transferable.HasAnyThing)
+		if (transferable is not { HasAnyThing: true, CountToTransfer: > 0 })
 			return 0;
 
 		using ObjectPool<TransferableSearch>.Scope ap = SearchPool.GetTemporary(out TransferableSearch transSearch);

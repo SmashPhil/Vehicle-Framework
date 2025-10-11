@@ -64,6 +64,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 				PrepareCaravanGatherState.Carry :
 				PrepareCaravanGatherState.Haul;
 		}
+		AddFinishAction(DumpAllUnpackedItems);
 		if (gatherState == PrepareCaravanGatherState.Carry)
 		{
 			return MakeNewToilsCarry();
@@ -367,6 +368,13 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 		return vehicle.AddOrTransfer(thing, thing.stackCount) > 0;
 	}
 
+	private void DumpAllUnpackedItems(JobCondition condition)
+	{
+		if (pawn.inventory is not { HasAnyUnpackedCaravanItems: true })
+			return;
+		pawn.inventory.DropAllPackingCaravanThings();
+	}
+
 	// Same logic as base game, copied for matching behavior
 	private VehiclePawn FindBestCarrier()
 	{
@@ -467,6 +475,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 				HauledByOthers(pawn, target: null, jobSearcher, vehicle.Map.mapPawns.FreeColonistsSpawned);
 		}
 
+		[Profile]
 		public static int CountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, Thing target,
 			ISharedJobSearch jobSearcher)
 		{
