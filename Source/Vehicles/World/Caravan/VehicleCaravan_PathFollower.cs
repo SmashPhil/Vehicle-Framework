@@ -1,14 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools.Performance;
 using UnityEngine;
 using Verse;
 
 namespace Vehicles.World;
 
-public class VehicleCaravan_PathFollower : IExposable
+[PublicAPI]
+public sealed class VehicleCaravan_PathFollower : IExposable
 {
 	private const int MaxMoveTicks = 30000;
 	private const int MaxCheckAheadNodes = 20;
@@ -276,15 +279,7 @@ public class VehicleCaravan_PathFollower : IExposable
 	{
 		if (curPath.NodesLeftCount < 2)
 		{
-			Log.Error(string.Concat(new object[]
-			{
-				caravan,
-				" at ",
-				caravan.Tile,
-				" ran out of path nodes while pathing to ",
-				destTile,
-				"."
-			}));
+			Log.Error($"{caravan} at {caravan.Tile} ran out of path nodes while pathing to {destTile}.");
 			PatherFailed();
 			return;
 		}
@@ -311,9 +306,9 @@ public class VehicleCaravan_PathFollower : IExposable
 			ticksAbs: ticksAbs);
 	}
 
+	[Profile]
 	public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, PlanetTile start,
-		PlanetTile end,
-		int? ticksAbs = null, StringBuilder explanation = null,
+		PlanetTile end, int? ticksAbs = null, StringBuilder explanation = null,
 		string caravanTicksPerMoveExplanation = null)
 	{
 		if (start == end)
@@ -362,6 +357,7 @@ public class VehicleCaravan_PathFollower : IExposable
 		return finalCost;
 	}
 
+	[Profile]
 	public static int CostToMove(List<VehiclePawn> vehicles, int ticksPerMove, PlanetTile start,
 		PlanetTile end,
 		int? ticksAbs = null, StringBuilder explanation = null,
@@ -411,13 +407,10 @@ public class VehicleCaravan_PathFollower : IExposable
 
 	public static bool IsValidFinalPushDestination(PlanetTile tile)
 	{
-		List<WorldObject> allWorldObjects = Find.WorldObjects.AllWorldObjects;
-		for (int i = 0; i < allWorldObjects.Count; i++)
+		foreach (WorldObject worldObject in Find.WorldObjects.AllWorldObjects)
 		{
-			if (allWorldObjects[i].Tile == tile && !(allWorldObjects[i] is Caravan))
-			{
+			if (worldObject.Tile == tile && worldObject is not Caravan)
 				return true;
-			}
 		}
 		return false;
 	}

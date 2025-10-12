@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.World;
@@ -21,8 +22,6 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
 {
-	private static readonly HashSet<VehicleDef> UniqueVehicleDefsSet = [];
-
 	public static void SpawnPawnNearVehicle(this VehiclePawn vehicle, Pawn pawn)
 	{
 		if (pawn.Spawned)
@@ -499,12 +498,15 @@ public static class Ext_Vehicles
 	[MustUseReturnValue]
 	public static List<VehicleDef> UniqueVehicleDefs(this IEnumerable<VehiclePawn> vehicles)
 	{
-		using ClearOnDispose<VehicleDef> cod = new(UniqueVehicleDefsSet);
+		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
+		List<VehicleDef> vehicleDefs = [];
 		foreach (VehiclePawn vehicle in vehicles)
 		{
-			UniqueVehicleDefsSet.Add(vehicle.VehicleDef);
+			if (uniqueVehicleDefs.Add(vehicle.VehicleDef))
+			{
+				vehicleDefs.Add(vehicle.VehicleDef);
+			}
 		}
-		List<VehicleDef> vehicleDefs = UniqueVehicleDefsSet.ToList();
 		return vehicleDefs;
 	}
 
@@ -514,12 +516,15 @@ public static class Ext_Vehicles
 	[MustUseReturnValue]
 	public static List<VehicleDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
 	{
-		using ClearOnDispose<VehicleDef> cod = new(UniqueVehicleDefsSet);
+		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
+		List<VehicleDef> vehicleDefs = [];
 		foreach (VehiclePawn vehicle in vehicles)
 		{
-			UniqueVehicleDefsSet.Add(vehicle.VehicleDef);
+			if (uniqueVehicleDefs.Add(vehicle.VehicleDef))
+			{
+				vehicleDefs.Add(vehicle.VehicleDef);
+			}
 		}
-		List<VehicleDef> vehicleDefs = UniqueVehicleDefsSet.ToList();
 		return vehicleDefs;
 	}
 
@@ -529,13 +534,15 @@ public static class Ext_Vehicles
 	[MustUseReturnValue]
 	public static List<VehicleDef> UniqueVehicleDefsInList(this List<Pawn> pawns)
 	{
-		using ClearOnDispose<VehicleDef> cod = new(UniqueVehicleDefsSet);
+		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
+		List<VehicleDef> vehicleDefs = [];
 		foreach (Pawn pawn in pawns)
 		{
-			if (pawn is VehiclePawn vehicle)
-				UniqueVehicleDefsSet.Add(vehicle.VehicleDef);
+			if (pawn is VehiclePawn vehicle && uniqueVehicleDefs.Add(vehicle.VehicleDef))
+			{
+				vehicleDefs.Add(vehicle.VehicleDef);
+			}
 		}
-		List<VehicleDef> vehicleDefs = UniqueVehicleDefsSet.ToList();
 		return vehicleDefs;
 	}
 

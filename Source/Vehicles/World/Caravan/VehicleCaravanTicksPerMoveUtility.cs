@@ -41,7 +41,7 @@ public static class VehicleCaravanTicksPerMoveUtility
 	public static int GetTicksPerMove(VehicleCaravanInfo caravanInfo,
 		StringBuilder explanation = null)
 	{
-		return GetTicksPerMove(caravanInfo.pawns, caravanInfo.massUsage, caravanInfo.massCapacity,
+		return GetTicksPerMove(caravanInfo.vehiclesAndDismountedPawns, caravanInfo.massUsage, caravanInfo.massCapacity,
 			explanation);
 	}
 
@@ -203,8 +203,7 @@ public static class VehicleCaravanTicksPerMoveUtility
 			nextTile = Find.WorldGrid.FindMostReasonableAdjacentTileForDisplayedPathCost(tile);
 		}
 		int ticksPerDay = Mathf.CeilToInt(VehicleCaravan_PathFollower.CostToMove(vehicleDefs,
-			ticksPerMove,
-			tile, nextTile, ticksAbs: null, explanation: explanation,
+			ticksPerMove, tile, nextTile, ticksAbs: null, explanation: explanation,
 			caravanTicksPerMoveExplanation: caravanTicksPerMoveExplanation));
 		return ticksPerDay > 0 ? 60000f / ticksPerDay : 0;
 	}

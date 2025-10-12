@@ -357,27 +357,25 @@ public class Dialog_AssignSeats : Window
 		// Fill until operational, then fill by priority
 		foreach (VehicleRoleHandler handler in vehicle.handlers.OrderBy(handler => handler))
 		{
-			Assert.IsNotNull(handler);
 			int slotsToOperate = handler.role.SlotsToOperate - PreAssignedCount(handler);
 			for (int i = 0; i < slotsToOperate; i++)
 			{
 				if (!prioritizer.TryPull(handler, out Pawn bestPawn))
 					return;
 
-				if (bestPawn != null && handler.AreSlotsAvailableAndReservable)
+				if (bestPawn != null && handler.AreSlotsAvailable)
 					assigner.SetAssignment(new AssignedSeat(bestPawn, handler));
 			}
 		}
 		foreach (VehicleRoleHandler handler in vehicle.handlers.OrderBy(handler => handler))
 		{
-			Assert.IsNotNull(handler);
 			int slotsAvailable = handler.role.Slots - PreAssignedCount(handler);
 			for (int i = 0; i < slotsAvailable; i++)
 			{
 				if (!prioritizer.TryPull(handler, out Pawn bestPawn))
 					return;
 
-				if (bestPawn != null && handler.AreSlotsAvailableAndReservable)
+				if (bestPawn != null && handler.AreSlotsAvailable)
 					assigner.SetAssignment(new AssignedSeat(bestPawn, handler));
 			}
 		}

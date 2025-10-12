@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using Verse;
 
@@ -15,12 +16,12 @@ public static class VehicleCaravanPathingHelper
 	private const int CacheDuration = 100;
 	private const int MaxIterations = 10000;
 
+	private static readonly List<TileEstimate> TmpTicksToArrive = [];
+
 	private static int cacheTicks = -1;
 	private static VehicleCaravan cachedForCaravan;
 	private static int cachedForDest = -1;
 	private static int cachedResult = -1;
-
-	private static readonly List<(int, int)> TmpTicksToArrive = [];
 
 	/// <summary>
 	/// Replaces <see cref="Caravan.NightResting"/> with patch hook in <seealso cref="Patch_CaravanHandling.NoRestForVehicles(Caravan, ref bool)"/>
@@ -120,20 +121,21 @@ public static class VehicleCaravanPathingHelper
 	public static int EstimatedTicksToArrive(List<VehicleDef> vehicleDefs, in PlanetTile from, in PlanetTile to,
 		WorldPath path, float nextTileCostLeft, int caravanTicksPerMove, int curTicksAbs)
 	{
-		using ClearOnDispose<(int, int)> cod = new(TmpTicksToArrive);
+		using var cs = GlobalObjectPool.Get(out List<TileEstimate> estimates);
 		EstimatedTicksToArriveToEvery(vehicleDefs, from, to, path, nextTileCostLeft,
-			caravanTicksPerMove, curTicksAbs, TmpTicksToArrive);
-		return EstimatedTicksToArrive(to, TmpTicksToArrive);
+			caravanTicksPerMove, curTicksAbs, estimates);
+		return EstimatedTicksToArrive(to, estimates);
 	}
 
-	public static void EstimatedTicksToArriveToEvery(List<VehicleDef> vehicleDefs, in PlanetTile from, in PlanetTile to,
-		WorldPath path, float nextTileCostLeft, int caravanTicksPerMove, int curTicksAbs, List<(int, int)> outTicksToArrive)
+	private static void EstimatedTicksToArriveToEvery(List<VehicleDef> vehicleDefs, in PlanetTile from, in PlanetTile to,
+		WorldPath path, float nextTileCostLeft, int caravanTicksPerMove, int curTicksAbs,
+		List<TileEstimate> outTicksToArrive)
 	{
 		outTicksToArrive.Clear();
-		outTicksToArrive.Add((from, 0));
+		outTicksToArrive.Add(new TileEstimate(from, 0));
 		if (from == to)
 		{
-			outTicksToArrive.Add((to, 0));
+			outTicksToArrive.Add(new TileEstimate(to, 0));
 			return;
 		}
 		int result = 0;
@@ -154,7 +156,7 @@ public static class VehicleCaravanPathingHelper
 				if (num8 <= 10000)
 				{
 					result += num8;
-					outTicksToArrive.Add((to, result));
+					outTicksToArrive.Add(new TileEstimate(to, result));
 					return;
 				}
 			}
@@ -171,14 +173,14 @@ public static class VehicleCaravanPathingHelper
 			{
 				if (curTile == to)
 				{
-					outTicksToArrive.Add((to, result));
+					outTicksToArrive.Add(new TileEstimate(to, result));
 					return;
 				}
 				bool firstInPath = pathSteps == 0;
 				int nextTile = curTile;
 				curTile = path.Peek(pathSteps);
 				pathSteps++;
-				outTicksToArrive.Add((nextTile, result));
+				outTicksToArrive.Add(new TileEstimate(nextTile, result));
 				ticksToMove = Mathf.CeilToInt(GetCostToMove(vehicleDefs, nextTileCostLeft, firstInPath,
 					curTicksAbs, result, caravanTicksPerMove, nextTile, curTile));
 			}
@@ -190,7 +192,7 @@ public static class VehicleCaravanPathingHelper
 					Caravan_PathFollower.IsValidFinalPushDestination(to))
 				{
 					result += ticksToMove;
-					outTicksToArrive.Add((to, result));
+					outTicksToArrive.Add(new TileEstimate(to, result));
 					return;
 				}
 				result += restDuration;
@@ -204,7 +206,7 @@ public static class VehicleCaravanPathingHelper
 			}
 		}
 		Log.ErrorOnce("Could not calculate estimated ticks to arrive. Too many iterations.", 1837451324);
-		outTicksToArrive.Add((to, result));
+		outTicksToArrive.Add(new TileEstimate(to, result));
 	}
 
 	private static float GetCostToMove(List<VehicleDef> vehicleDefs, float initialNextTileCostLeft, bool firstInPath,
@@ -219,19 +221,23 @@ public static class VehicleCaravanPathingHelper
 			nextTile, ticksAbs: value);
 	}
 
-	public static int EstimatedTicksToArrive(int destinationTile, List<(int, int)> estimatedTicksToArriveToEvery)
+	private static int EstimatedTicksToArrive(PlanetTile destinationTile,
+		List<TileEstimate> estimatedTicksToArriveToEvery)
 	{
-		if (destinationTile == -1)
-		{
+		if (!destinationTile.Valid)
 			return 0;
-		}
-		for (int i = 0; i < estimatedTicksToArriveToEvery.Count; i++)
+
+		foreach (TileEstimate estimate in estimatedTicksToArriveToEvery)
 		{
-			if (destinationTile == estimatedTicksToArriveToEvery[i].Item1)
-			{
-				return estimatedTicksToArriveToEvery[i].Item2;
-			}
+			if (destinationTile == estimate.tile)
+				return estimate.ticksToArrive;
 		}
 		return 0;
+	}
+
+	private readonly struct TileEstimate(PlanetTile tile, int ticksToArrive)
+	{
+		public readonly PlanetTile tile = tile;
+		public readonly int ticksToArrive = ticksToArrive;
 	}
 }

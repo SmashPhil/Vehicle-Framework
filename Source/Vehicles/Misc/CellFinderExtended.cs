@@ -171,7 +171,7 @@ public static class CellFinderExtended
 			return false;
 		}
 
-		using var cps = CollectionPool.GetList(out List<VehicleRegion> workingRegions);
+		using var cps = GlobalObjectPool.Get(out List<VehicleRegion> workingRegions);
 		workingRegions.Clear();
 		float radSquared = radius * radius;
 		VehicleRegionTraverser.BreadthFirstTraverse(root, map, vehicleDef, EntryCondition, RegionProcessor, maxRegions);
@@ -224,7 +224,7 @@ public static class CellFinderExtended
 			}
 		}
 
-		using var cps = CollectionPool.GetList(out List<IntVec3> cells);
+		using var cps = GlobalObjectPool.Get(out List<IntVec3> cells);
 		cells.AddRange(region.Cells);
 		cells.Shuffle();
 		foreach (IntVec3 cell in cells)

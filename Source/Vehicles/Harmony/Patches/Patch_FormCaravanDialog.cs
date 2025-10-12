@@ -9,6 +9,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
+using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Compatibility;
@@ -35,8 +36,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 
 	private static readonly Type FormCaravanTabEnumType;
 	private static readonly Type SplitCaravanTabEnumType;
-
-	private static readonly List<Pawn> TmpPawns = [];
+	private static readonly MethodInfo IgnoreInventoryModeProp;
 
 	private static Type displayClassType;
 	private static Type gizmoStateMachineType;
@@ -48,9 +48,44 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 	{
 		FormCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_FormCaravan+Tab", "RimWorld");
 		SplitCaravanTabEnumType = GenTypes.GetTypeInAnyAssembly("Dialog_SplitCaravan+Tab", "RimWorld");
+		IgnoreInventoryModeProp = AccessTools.PropertyGetter(typeof(Dialog_FormCaravan), "IgnoreInventoryMode");
 	}
 
 	PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
+
+	private static bool HasVehiclesAvailable(Dialog_FormCaravan formCaravan)
+	{
+		foreach (TransferableOneWay transferable in formCaravan.transferables)
+		{
+			if (transferable is { AnyThing: VehiclePawn })
+				return true;
+		}
+		return false;
+	}
+
+	private static bool VehiclesSelected(List<TransferableOneWay> transferables)
+	{
+		foreach (TransferableOneWay transferable in transferables)
+		{
+			if (transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 })
+				return true;
+		}
+		return false;
+	}
+
+	private static GlobalObjectPool.CollectionReceipt<List<VehiclePawn>, VehiclePawn> GetVehiclesToTransfer(
+		List<TransferableOneWay> transferables, out List<VehiclePawn> vehicles)
+	{
+		var scope = GlobalObjectPool.Get(out vehicles);
+		foreach (TransferableOneWay transferable in transferables)
+		{
+			if (transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 })
+			{
+				vehicles.Add(transferable.AnyThing as VehiclePawn);
+			}
+		}
+		return scope;
+	}
 
 	void IPatchCategory.PatchMethods()
 	{
@@ -95,6 +130,10 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 				nameof(Dialog_FormCaravan.PostClose)),
 			postfix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
 				nameof(FormCaravanPostClose)));
+		HarmonyPatcher.Patch(original: AccessTools.PropertyGetter(typeof(Dialog_FormCaravan), "DaysWorthOfFood"),
+			prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog), nameof(DaysOfWorthOfFoodWithVehicles)));
+		HarmonyPatcher.Patch(original: AccessTools.PropertyGetter(typeof(Dialog_FormCaravan), "TicksToArrive"),
+			prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog), nameof(TicksToArriveWithVehicles)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"),
 			transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
@@ -122,6 +161,10 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 				nameof(Dialog_SplitCaravan.PostOpen)),
 			prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
 				nameof(SplitCaravanPostOpen)));
+		HarmonyPatcher.Patch(original: AccessTools.PropertyGetter(typeof(Dialog_SplitCaravan), "DestDaysWorthOfFood"),
+			prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog), nameof(SplitDaysOfWorthOfFoodWithVehicles)));
+		HarmonyPatcher.Patch(original: AccessTools.PropertyGetter(typeof(Dialog_SplitCaravan), "TicksToArrive"),
+			prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog), nameof(SplitTicksToArriveWithVehicles)));
 
 
 		if (!Ext_Mods.HasActiveMod(ModPackageIds.CaravanItemSelectionEnhanced))
@@ -184,23 +227,28 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		List<TransferableOneWay> transferables, float massUsage, float massCapacity,
 		PlanetTile tile, PlanetTile nextTile, StringBuilder explanation = null)
 	{
-		if (transferables.Exists(transferable =>
-			transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 }))
+		if (VehiclesSelected(transferables))
 		{
-			using ClearOnDispose<Pawn> slr = new(TmpPawns);
+			using var cps = GlobalObjectPool.Get(out List<Pawn> pawns);
 			foreach (TransferableOneWay transferable in transferables)
 			{
-				if (transferable.AnyThing is Pawn pawn && transferable.CountToTransfer > 0 &&
-					(pawn is VehiclePawn || !CaravanHelper.assignedSeats.IsAssigned(pawn)))
-					TmpPawns.Add(pawn);
+				if (transferable is not { AnyThing: Pawn, CountToTransfer: > 0 })
+					continue;
+
+				Pawn pawn = transferable.AnyThing as Pawn;
+				if (pawn is VehiclePawn || !CaravanHelper.assignedSeats.IsAssigned(pawn))
+				{
+					pawns.Add(pawn);
+				}
 			}
-			Assert.IsTrue(TmpPawns.Count > 0);
+			Assert.IsTrue(pawns.Count > 0);
 			// Ugly but this is how RimWorld is set up so the patch should just match the flow
 			StringBuilder stringBuilder = explanation != null ? new StringBuilder() : null;
-			int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(TmpPawns, massUsage,
+			int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(pawns, massUsage,
 				massCapacity, explanation: stringBuilder);
 			__result =
-				TilesPerDayCalculator.ApproxTilesPerDay(ticks, tile, nextTile, explanation: explanation,
+				VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(pawns.UniqueVehicleDefsInList(), ticks, tile, nextTile,
+					explanation: explanation,
 					caravanTicksPerMoveExplanation: stringBuilder?.ToString());
 			return false;
 		}
@@ -325,13 +373,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 	{
 		const int TabPawns = 0;
 
-		selectedTab = formCaravan.transferables.Exists(HasVehicleTransferable) ? TabVehicles : TabPawns;
-		return;
-
-		static bool HasVehicleTransferable(TransferableOneWay transferable)
-		{
-			return transferable.AnyThing is VehiclePawn;
-		}
+		selectedTab = HasVehiclesAvailable(formCaravan) ? TabVehicles : TabPawns;
 	}
 
 	/// <summary>
@@ -347,6 +389,71 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 			selectedTab = TabVehicles;
 			CaravanHelper.assignedSeats.Clear();
 		}
+	}
+
+	/// <summary>
+	/// Calculate days worth of food for vehicle caravan which may path differently (or on impassable terrain)
+	/// relative to normal caravans.
+	/// </summary>
+	private static bool DaysOfWorthOfFoodWithVehicles(Dialog_FormCaravan __instance,
+		ref (float days, float tillRot) ___cachedDaysWorthOfFood,
+		ref bool ___daysWorthOfFoodDirty, PlanetTile ___destinationTile)
+	{
+		using var cps = GetVehiclesToTransfer(__instance.transferables, out List<VehiclePawn> vehicles);
+		if (___daysWorthOfFoodDirty && vehicles.Count > 0)
+		{
+			float days;
+			float tillRot;
+			___daysWorthOfFoodDirty = false;
+			IgnorePawnsInventoryMode inventoryMode =
+				(IgnorePawnsInventoryMode)IgnoreInventoryModeProp.Invoke(__instance, null);
+
+			if (___destinationTile.Valid)
+			{
+				using WorldPath path = Find.World.GetComponent<WorldVehiclePathfinder>()
+				 .FindPath(__instance.CurrentTile, ___destinationTile, vehicles);
+				int ticksPerMove = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(new VehicleCaravanInfo(__instance));
+				days = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(__instance.transferables, __instance.CurrentTile,
+					inventoryMode, Faction.OfPlayer, path, nextTileCostLeft: 0f, ticksPerMove);
+				tillRot = DaysUntilRotCalculator.ApproxDaysUntilRot(__instance.transferables, __instance.CurrentTile,
+					inventoryMode, path, nextTileCostLeft: 0f, ticksPerMove);
+			}
+			else
+			{
+				days = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(__instance.transferables, __instance.CurrentTile,
+					inventoryMode, Faction.OfPlayer);
+				tillRot = DaysUntilRotCalculator.ApproxDaysUntilRot(__instance.transferables, __instance.CurrentTile,
+					inventoryMode);
+			}
+			___cachedDaysWorthOfFood = (days, tillRot);
+			return false;
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Calculate ticks to arrive at destination tile for vehicle caravan.
+	/// </summary>
+	private static bool TicksToArriveWithVehicles(Dialog_FormCaravan __instance,
+		ref int ___cachedTicksToArrive, ref bool ___ticksToArriveDirty, PlanetTile ___destinationTile)
+	{
+		if (!___destinationTile.Valid)
+			return true;
+
+		using var cps = GetVehiclesToTransfer(__instance.transferables, out List<VehiclePawn> vehicles);
+		if (___ticksToArriveDirty && vehicles.Count > 0)
+		{
+			___ticksToArriveDirty = false;
+			using WorldPath path = Find.World.GetComponent<WorldVehiclePathfinder>()
+			 .FindPath(__instance.CurrentTile, ___destinationTile, vehicles);
+			VehicleCaravanInfo caravanInfo = new(__instance);
+			int ticksPerMove = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(caravanInfo);
+			___cachedTicksToArrive = VehicleCaravanPathingHelper.EstimatedTicksToArrive(
+				caravanInfo.vehiclesAndDismountedPawns.UniqueVehicleDefsInList(), __instance.CurrentTile, ___destinationTile,
+				path, nextTileCostLeft: 0, caravanTicksPerMove: ticksPerMove, Find.TickManager.TicksAbs);
+			return false;
+		}
+		return true;
 	}
 
 	/// <summary>
@@ -516,8 +623,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 	private static void WorldRoutePannerReroute(WorldRoutePlanner routePlanner,
 		Dialog_FormCaravan formCaravan, Map map, bool autoSelectTravelSupplies)
 	{
-		if (formCaravan.transferables.Exists(transferable =>
-			transferable is { CountToTransfer: > 0, AnyThing: VehiclePawn }))
+		if (VehiclesSelected(formCaravan.transferables))
 		{
 			CaravanFormation.formation.ChoosingRoute = true;
 			Find.WindowStack.TryRemove(formCaravan, doCloseSound: false);
@@ -567,8 +673,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		{
 			return false;
 		}
-		if (__instance.transferables.Exists(transferable =>
-			transferable is { CountToTransfer: > 0, AnyThing: VehiclePawn }))
+		if (VehiclesSelected(__instance.transferables))
 		{
 			CaravanFormation.TrySendVehicleCaravan(__instance);
 			return false;
@@ -705,6 +810,62 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 			___tabsList.Add(new TabRecord(translationKey.Translate(), delegate { selectedTab = value; },
 				() => selectedTab == value));
 		}
+	}
+
+	/// <summary>
+	/// Calculate days worth of food for post vehicle caravan split which may path differently (or on impassable terrain)
+	/// relative to normal caravans.
+	/// </summary>
+	private static bool SplitDaysOfWorthOfFoodWithVehicles(List<TransferableOneWay> ___transferables, Caravan ___caravan,
+		ref (float days, float tillRot) ___cachedDestDaysWorthOfFood, ref bool ___destDaysWorthOfFoodDirty)
+	{
+		if (___destDaysWorthOfFoodDirty && ___caravan is VehicleCaravan vehicleCaravan)
+		{
+			const IgnorePawnsInventoryMode InventoryMode = IgnorePawnsInventoryMode.Ignore;
+
+			float days;
+			float tillRot;
+			___destDaysWorthOfFoodDirty = false;
+			if (vehicleCaravan.vehiclePather.Moving)
+			{
+				days = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(___transferables, vehicleCaravan.Tile,
+					InventoryMode, vehicleCaravan.Faction, vehicleCaravan.vehiclePather.curPath,
+					vehicleCaravan.vehiclePather.nextTileCostLeft, vehicleCaravan.TicksPerMove);
+				tillRot = DaysUntilRotCalculator.ApproxDaysUntilRot(___transferables, vehicleCaravan.Tile,
+					InventoryMode, vehicleCaravan.vehiclePather.curPath, vehicleCaravan.vehiclePather.nextTileCostLeft,
+					vehicleCaravan.TicksPerMove);
+			}
+			else
+			{
+				days = DaysWorthOfFoodCalculator.ApproxDaysWorthOfFood(___transferables, vehicleCaravan.Tile, InventoryMode,
+					vehicleCaravan.Faction);
+				tillRot = DaysUntilRotCalculator.ApproxDaysUntilRot(___transferables, vehicleCaravan.Tile, InventoryMode);
+			}
+			___cachedDestDaysWorthOfFood = (days, tillRot);
+			return false;
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Calculate ticks to arrive after splitting vehicle caravan.
+	/// </summary>
+	private static bool SplitTicksToArriveWithVehicles(Caravan ___caravan,
+		ref int __result, ref int ___cachedTicksToArrive, ref bool ___ticksToArriveDirty)
+	{
+		if (___caravan is not VehicleCaravan vehicleCaravan)
+			return true;
+		if (!vehicleCaravan.vehiclePather.Moving)
+		{
+			__result = 0;
+			return false;
+		}
+		if (___ticksToArriveDirty)
+		{
+			___ticksToArriveDirty = false;
+			___cachedTicksToArrive = VehicleCaravanPathingHelper.EstimatedTicksToArrive(vehicleCaravan, allowCaching: false);
+		}
+		return false;
 	}
 
 	private static IEnumerable<CodeInstruction> SplitCaravanTabsTranspiler(

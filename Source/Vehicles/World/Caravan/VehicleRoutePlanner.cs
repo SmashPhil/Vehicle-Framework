@@ -27,6 +27,7 @@ public class VehicleRoutePlanner : WorldComponent
 	private static readonly Vector2 BottomWindowSize = new(500f, 95f);
 	private static readonly Vector2 BottomButtonSize = new(160f, 40f);
 
+	private WorldVehiclePathfinder pathfinder;
 
 	private Action onFinishCallback;
 	private Action<PlanetTile> onChooseRouteCallback;
@@ -77,6 +78,12 @@ public class VehicleRoutePlanner : WorldComponent
 				Find.WorldObjects.PlayerControlledCaravanAt(waypoints[0].Tile) :
 				null;
 		}
+	}
+
+	public override void FinalizeInit(bool fromLoad)
+	{
+		base.FinalizeInit(fromLoad);
+		pathfinder = Find.World.GetComponent<WorldVehiclePathfinder>();
 	}
 
 	private void Start(Action onFinishCallback, Action<PlanetTile> onChooseRouteCallback)
@@ -464,25 +471,23 @@ public class VehicleRoutePlanner : WorldComponent
 
 		for (int i = 1; i < waypoints.Count; i++)
 		{
-			paths.Add(WorldVehiclePathfinder.Instance.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile,
+			paths.Add(pathfinder.FindPath(waypoints[i - 1].Tile, waypoints[i].Tile,
 				vehicleDefs));
 		}
 		cachedTicksToWaypoint.Clear();
-		int num = 0;
+		int ticksToArrive = 0;
 		int caravanTicksPerMove = CaravanTicksPerMove;
-		for (int j = 0; j < waypoints.Count; j++)
+
+		if (waypoints.Count == 0)
+			return;
+
+		cachedTicksToWaypoint.Add(0);
+		for (int j = 1; j < waypoints.Count; j++)
 		{
-			if (j == 0)
-			{
-				cachedTicksToWaypoint.Add(0);
-			}
-			else
-			{
-				num += VehicleCaravanPathingHelper.EstimatedTicksToArrive(vehicleDefs,
-					waypoints[j - 1].Tile, waypoints[j].Tile, paths[j - 1], 0f, caravanTicksPerMove,
-					GenTicks.TicksAbs + num);
-				cachedTicksToWaypoint.Add(num);
-			}
+			ticksToArrive += VehicleCaravanPathingHelper.EstimatedTicksToArrive(vehicleDefs,
+				waypoints[j - 1].Tile, waypoints[j].Tile, paths[j - 1], 0f, caravanTicksPerMove,
+				GenTicks.TicksAbs + ticksToArrive);
+			cachedTicksToWaypoint.Add(ticksToArrive);
 		}
 	}
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using RimWorld;
@@ -338,22 +339,28 @@ public static class CaravanFormation
 		return result;
 	}
 
-	private static bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist,
-		Rot4 exitDirection, out IntVec3 spot)
+	private static bool TryFindExitSpot(List<Pawn> pawns, bool reachableForEveryColonist, Rot4 exitDirection,
+		out IntVec3 spot)
 	{
 		spot = IntVec3.Invalid;
-		if (formation.StartingTile < 0)
+		if (!formation.StartingTile.Valid)
 		{
 			Log.Error("Can't find exit spot because startingTile is not set.");
 			return spot.IsValid;
 		}
 		return TryFindExitSpot(formation.Map, pawns, reachableForEveryColonist, exitDirection,
-			out spot);
+			out spot, false);
+	}
+
+	// TODO 1.6.2091 - stub to prevent breaking VehicleMapFramework patch.
+	private static bool TryFindExitSpot(Map map, List<Pawn> pawns,
+		bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot, bool _)
+	{
+		return TryFindExitSpot(map, pawns, reachableForEveryColonist, exitDirection, out spot);
 	}
 
 	private static bool TryFindExitSpot(Map map, List<Pawn> pawns,
-		bool reachableForEveryColonist,
-		Rot4 exitDirection, out IntVec3 spot)
+		bool reachableForEveryColonist, Rot4 exitDirection, out IntVec3 spot)
 	{
 		if (reachableForEveryColonist)
 		{
@@ -364,7 +371,7 @@ public static class CaravanFormation
 		// Finding exit point that might not reachable for everyone
 		IntVec3 cell = IntVec3.Invalid;
 		int numberCanReach = -1;
-		using var cps = CollectionPool.GetList(out List<IntVec3> workingList);
+		using var cps = GlobalObjectPool.Get(out List<IntVec3> workingList);
 		foreach (IntVec3 edgeCell in CellRect.WholeMap(map).GetEdgeCells(exitDirection).InRandomOrder(workingList))
 		{
 			IntVec3 paddedCell = edgeCell.PadForHitbox(map, formation.LeadVehicle);
@@ -438,7 +445,7 @@ public static class CaravanFormation
 		const int SqrRadiusSmall = 15;
 		const int SqrRadiusMed = 25;
 
-		using var cps = CollectionPool.GetList(out List<Thing> tmpPackingSpots);
+		using var cps = GlobalObjectPool.Get(out List<Thing> tmpPackingSpots);
 		List<Thing> packingSpots =
 			formation.Map.listerThings.ThingsOfDef(ThingDefOf.CaravanPackingSpot);
 		if (formation.Dialog.transferables.NotNullAndAny(x =>

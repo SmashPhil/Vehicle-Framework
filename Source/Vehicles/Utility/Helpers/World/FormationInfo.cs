@@ -210,6 +210,17 @@ public class FormationInfo : ICaravanInfo
 	public void NotifyTransferablesChanged()
 	{
 		notifyTransferablesChanged();
+		// Vehicle transferable count might've changed, verify destination tile is still valid so world path
+		// isn't evaluating on invalid destination, which will go out of bounds.
+		if (DestinationTile.Valid)
+		{
+			using WorldPath worldPath =
+				formCaravan.CurrentTile.Layer.Pather.FindPath(formCaravan.CurrentTile, DestinationTile, null);
+			if (!worldPath.Found)
+			{
+				DestinationTile = PlanetTile.Invalid;
+			}
+		}
 	}
 
 	internal void RecacheTransferables()
