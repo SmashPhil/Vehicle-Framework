@@ -1,10 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Patch>
-	<Operation FeatureFlag = "Paratroopers" Class = "PatchOperationAdd">
+	<Operation Class = "PatchOperationConditional">
+		<success>Always</success>
 		<xpath>Defs/RaidStrategyDef[defName = "ImmediateAttack" or defName = "ImmediateAttackSmart"]/arriveModes</xpath>
-		<value>
-			<li>ParatrooperDrop</li>
-		</value>
+		<match FeatureFlag = "Paratroopers" Class = "PatchOperationAdd">
+			<xpath>Defs/RaidStrategyDef[defName = "ImmediateAttack" or defName = "ImmediateAttackSmart"]/arriveModes</xpath>
+			<value>
+				<li>ParatrooperDrop</li>
+			</value>
+		</match>
 	</Operation>
 </Patch>
