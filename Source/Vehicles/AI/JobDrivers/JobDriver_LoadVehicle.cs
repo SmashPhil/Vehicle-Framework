@@ -148,7 +148,12 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		transSearch.Init(jobDef, transferable);
 		int hauledByOthers =
 			Search.CountHauledByOthersForPacking(vehicle, pawn, transferable.AnyThing, transSearch);
-		int remaining = transferable.CountToTransfer - hauledByOthers;
+		int hauledBySelf = 0;
+		foreach (Thing thing in UnpackedCaravanItems.Invoke(pawn.inventory))
+		{
+			hauledBySelf += thing.def == transferable.ThingDef ? thing.stackCount : 0;
+		}
+		int remaining = transferable.CountToTransfer - hauledByOthers - hauledBySelf;
 		return Mathf.Clamp(remaining, 0, int.MaxValue);
 	}
 
