@@ -1450,7 +1450,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		Scribe_Values.Look(ref autoTargeting, nameof(autoTargeting));
 		Scribe_Values.Look(ref manualTargeting, nameof(manualTargeting));
 
-		if (FeatureFlags.IsEnabled(FeatureFlags.BetterAutoLoadConfig))
+		if (FeatureFlags.IsFeatureEnabled(FeatureFlags.BetterAutoLoadConfig))
 		{
 			Scribe_Deep.Look(ref loadConfig, nameof(loadConfig), this);
 		}

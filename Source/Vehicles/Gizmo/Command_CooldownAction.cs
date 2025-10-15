@@ -356,7 +356,7 @@ public class Command_CooldownAction : Command_Turret
 			}
 			if (Widgets.ButtonImageFitted(configureRect, VehicleTex.Settings))
 			{
-				if (IsEnabled(BetterAutoLoadConfig))
+				if (IsFeatureEnabled(BetterAutoLoadConfig))
 				{
 					Find.WindowStack.Add(new Dialog_ConfigureTurret(turret));
 				}

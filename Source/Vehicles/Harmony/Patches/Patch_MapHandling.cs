@@ -102,7 +102,7 @@ internal class Patch_MapHandling : IPatchCategory
 			foreach (VehiclePawn vehicle in ___map.GetDetachedMapComponent<VehiclePositionManager>()
 			 .AllClaimants)
 			{
-				if (vehicle.MovementPermissions.HasFlag(VehiclePermissions.Autonomous))
+				if ((vehicle.MovementPermissions & VehiclePermissions.Autonomous) != 0)
 				{
 					__result = true;
 					return;

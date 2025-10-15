@@ -1,111 +1,87 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Xml;
+﻿using System.Collections.Generic;
 using JetBrains.Annotations;
-using SmashTools;
 using SmashTools.Xml;
 using Verse;
 
 namespace Vehicles.Config;
 
-#pragma warning disable CS8793
+#pragma warning disable CS8793, CS0649
 
-[PublicAPI]
-public class FeatureFlags : Mod
+[UsedImplicitly(ImplicitUseTargetFlags.Members)]
+internal class FeatureFlags
 {
 	public const string Raiders = "Raiders";
 	public const string Paratroopers = "Paratroopers";
 	public const string Fishing = "Fishing";
+	public const string TradeableVehicles = "TradeableVehicles";
 	public const string VehicleCaravanProps = "VehicleCaravanProps";
 	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
-	private static ModContentPack mod;
-	private static Data data;
+	[UsedImplicitly]
+	public List<IFeatureFlag> features;
 
-	public FeatureFlags(ModContentPack content) : base(content)
+	public static FeatureFlags Default => VehicleMod.mod.features;
+
+	public static bool RaidersEnabled => Default.IsEnabled(Raiders);
+
+	public static bool ParatroopersEnabled => Default.IsEnabled(Paratroopers);
+
+	public static bool FishingEnabled => Default.IsEnabled(Fishing);
+
+	public static FeatureFlags InitDefault()
 	{
-		mod = content;
-		Load();
+		FeatureFlags flags = new()
+		{
+			features =
+			[
+				Feature.Create(Raiders, Build.Configuration.Debug, Build.Configuration.Unstable),
+				Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
+				Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
+				Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
+			]
+		};
+		return flags;
 	}
 
-	private static string FilePath => Path.Combine(mod.RootDir, "FeatureFlags.xml");
-
-	public static bool RaidersEnabled => IsEnabled(Raiders);
-
-	public static bool ParatroopersEnabled => IsEnabled(Paratroopers);
-
-	public static bool FishingEnabled => IsEnabled(Fishing);
-
-	public static bool IsEnabled(string featureName)
+	public bool IsEnabled(string featureName)
 	{
-		if (data is null || data.enabled.NullOrEmpty())
+		if (features.NullOrEmpty())
 			return false;
 
-		foreach (Feature feature in data.enabled)
+		foreach (IFeatureFlag feature in features)
 		{
-			if (feature.name == featureName)
+			if (feature.Name == featureName)
 				return feature.Enabled;
 		}
 		return false;
 	}
 
-	internal static void Save()
+	public static bool IsFeatureEnabled(string featureName)
 	{
-		try
-		{
-			XmlExporter.StartDocument(FilePath);
-			XmlExporter.WriteElement(nameof(FeatureFlags), data);
-		}
-		catch (IOException ex)
-		{
-			Log.Error($"Unable to export feature flag data.\nException = {ex}");
-		}
-		finally
-		{
-			XmlExporter.Close();
-		}
+		return Default.IsEnabled(featureName);
 	}
 
-	private static void Load()
+	public class Feature : IFeatureFlag
 	{
-		data = DirectXmlLoader.ItemFromXmlFile<Data>(FilePath, resolveCrossRefs: false);
-	}
-
-	private class Data : IXmlExport
-	{
-		#pragma warning disable CS0649
-
-		[UsedImplicitly]
-		public List<Feature> enabled;
-
-		void IXmlExport.Export()
-		{
-			XmlExporter.WriteList(nameof(enabled), enabled, Feature.Write, Feature.Name);
-		}
-	}
-
-	private record Feature
-	{
-		public string name;
+		private string name;
 
 		private readonly HashSet<Build.Configuration> enabledFor = [];
 
-		public bool Enabled => enabledFor.Contains(Build.Config);
+		string IFeatureFlag.Name => name;
 
-		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+		bool IFeatureFlag.Enabled => enabledFor.Contains(Build.Config);
+
+		public static Feature Create(string name, params Build.Configuration[] config)
 		{
-			name = xmlRoot.Name;
-			string[] configStrs = xmlRoot.InnerText.Split('|');
-			foreach (string configStr in configStrs)
+			Feature feature = new()
 			{
-				if (!Enum.TryParse(configStr.Trim(), out Build.Configuration config))
-				{
-					Log.Error($"Unable to parse {configStr} config.");
-					continue;
-				}
-				enabledFor.Add(config);
+				name = name
+			};
+			if (!config.NullOrEmpty())
+			{
+				feature.enabledFor.AddRange(config);
 			}
+			return feature;
 		}
 
 		public static string Name(Feature feature)

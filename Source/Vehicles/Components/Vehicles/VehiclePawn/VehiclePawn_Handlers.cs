@@ -46,7 +46,7 @@ public partial class VehiclePawn
 			int pawnCount = 0;
 			foreach (VehicleRoleHandler handler in handlers)
 			{
-				if (handler.role.HandlingTypes.HasFlag(HandlingType.Movement))
+				if ((handler.role.HandlingTypes & HandlingType.Movement) != 0)
 				{
 					pawnCount += handler.role.SlotsToOperate;
 				}
@@ -188,8 +188,10 @@ public partial class VehiclePawn
 		static void TryAddToCache(Pawn pawn, HandlingType value, HandlingType mask,
 			Dictionary<HandlingType, List<Pawn>> cache)
 		{
-			if (value.HasFlag(mask))
+			if ((value & mask) == mask)
+			{
 				cache[mask].Add(pawn);
+			}
 		}
 	}
 
@@ -296,13 +298,17 @@ public partial class VehiclePawn
 			{
 				if (handler.role.HandlingTypes == HandlingType.None ||
 					handler.AreSlotsAvailableAndReservable)
+				{
 					return handler;
+				}
 				continue;
 			}
 
 			if (handler.CanOperateRole(pawn) && (handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
 				handler.AreSlotsAvailableAndReservable)
+			{
 				return handler;
+			}
 		}
 		return null;
 	}

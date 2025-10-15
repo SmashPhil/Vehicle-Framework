@@ -384,7 +384,7 @@ public class WorldVehiclePathGrid : WorldComponent
 			SurfaceTile.RiverLink riverLink = WorldHelper.BiggestRiverOnTile(rivers);
 			if (riverLink.river != null)
 			{
-				if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Rivers))
+				if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Rivers) != 0)
 				{
 					explanation?.Append($"{riverLink.river.LabelCap}: Impassable");
 					return ImpassableMovementDifficulty;
@@ -399,7 +399,7 @@ public class WorldVehiclePathGrid : WorldComponent
 		}
 
 		float defaultBiomeCost;
-		if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Biomes))
+		if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Biomes) != 0)
 		{
 			defaultBiomeCost = ImpassableMovementDifficulty;
 		}
@@ -423,8 +423,9 @@ public class WorldVehiclePathGrid : WorldComponent
 
 		if (!vehicleDef.properties.customHillinessCosts.TryGetValue(surfaceTile.hilliness, out float hillinessCost))
 		{
-			if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Roads))
+			if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Roads) != 0)
 				return ImpassableMovementDifficulty;
+
 			hillinessCost = HillinessMovementDifficultyOffset(surfaceTile.hilliness);
 		}
 
@@ -436,7 +437,7 @@ public class WorldVehiclePathGrid : WorldComponent
 
 		if (!surfaceTile.Roads.NullOrEmpty())
 		{
-			if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Roads) &&
+			if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Roads) != 0 &&
 				!surfaceTile.Roads.Exists(PassableRoad))
 			{
 				return ImpassableMovementDifficulty;

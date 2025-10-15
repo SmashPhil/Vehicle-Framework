@@ -75,7 +75,7 @@ public static class ParsingHelper
 		if (value.NullOrEmpty())
 			return true;
 
-		return FeatureFlags.IsEnabled(value);
+		return FeatureFlags.IsFeatureEnabled(value);
 	}
 
 	private static void CheckFieldLocked(XmlNode node, string value, FieldInfo field)

@@ -8,7 +8,8 @@ namespace Vehicles
 	/// </summary>
 	public static class VehicleRegionAndRoomQuery
 	{
-		public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef,
+			RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
 			return RegionAt(cell, map.GetCachedMapComponent<VehiclePathingSystem>(), vehicleDef, allowedRegionTypes);
 		}
@@ -16,14 +17,15 @@ namespace Vehicles
 		/// <summary>
 		/// Retrieve region at <paramref name="cell"/> for <paramref name="vehicleDef"/>
 		/// </summary>
-		public static VehicleRegion RegionAt(IntVec3 cell, VehiclePathingSystem mapping, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		public static VehicleRegion RegionAt(IntVec3 cell, VehiclePathingSystem mapping, VehicleDef vehicleDef,
+			RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
 			if (!cell.InBounds(mapping.map))
 			{
 				return null;
 			}
 			VehicleRegion validRegionAt = mapping[vehicleDef].VehicleRegionGrid.GetValidRegionAt(cell);
-			if (validRegionAt != null && allowedRegionTypes.HasFlag(validRegionAt.type))
+			if (validRegionAt != null && (allowedRegionTypes & validRegionAt.type) == validRegionAt.type)
 			{
 				return validRegionAt;
 			}
@@ -36,7 +38,8 @@ namespace Vehicles
 		/// <param name="thing"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="allowedRegiontypes"></param>
-		public static VehicleRegion GetRegion(this Thing thing, VehicleDef vehicleDef, RegionType allowedRegiontypes = RegionType.Set_Passable)
+		public static VehicleRegion GetRegion(this Thing thing, VehicleDef vehicleDef,
+			RegionType allowedRegiontypes = RegionType.Set_Passable)
 		{
 			if (!thing.Spawned)
 			{
@@ -52,7 +55,8 @@ namespace Vehicles
 		/// <param name="map"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="allowedRegionTypes"></param>
-		public static VehicleRoom RoomAt(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		public static VehicleRoom RoomAt(IntVec3 cell, Map map, VehicleDef vehicleDef,
+			RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
 			VehicleRegion region = RegionAt(cell, map, vehicleDef, allowedRegionTypes);
 			return region?.Room;
@@ -65,9 +69,11 @@ namespace Vehicles
 		/// <param name="map"></param>
 		/// <param name="vehicleDef"></param>
 		/// <param name="allowedRegionTypes"></param>
-		public static VehicleRoom RoomAtFast(IntVec3 cell, Map map, VehicleDef vehicleDef, RegionType allowedRegionTypes = RegionType.Set_Passable)
+		public static VehicleRoom RoomAtFast(IntVec3 cell, Map map, VehicleDef vehicleDef,
+			RegionType allowedRegionTypes = RegionType.Set_Passable)
 		{
-			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehicleRegionGrid?.GetValidRegionAt(cell);
+			VehicleRegion validRegionAt = map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef].VehicleRegionGrid
+			?.GetValidRegionAt(cell);
 			if (validRegionAt != null && (validRegionAt.type & allowedRegionTypes) != RegionType.None)
 			{
 				return validRegionAt.Room;

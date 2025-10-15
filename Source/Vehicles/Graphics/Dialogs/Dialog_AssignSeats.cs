@@ -200,7 +200,7 @@ public class Dialog_AssignSeats : Window
 					bool canAssign = true;
 					if (!firstHandler.CanOperateRole(pawn))
 					{
-						canAssign = !firstHandler.role.HandlingTypes.HasFlag(HandlingType.Movement);
+						canAssign = (firstHandler.role.HandlingTypes & HandlingType.Movement) == 0;
 						MessageTypeDef msgTypeDef = canAssign ?
 							MessageTypeDefOf.CautionInput :
 							MessageTypeDefOf.RejectInput;
@@ -208,7 +208,9 @@ public class Dialog_AssignSeats : Window
 							msgTypeDef);
 					}
 					if (canAssign)
+					{
 						assigner.SetAssignment(new AssignedSeat(pawn, firstHandler));
+					}
 				}
 			}
 			pawnRowRect.y += RowHeight + RowPadding;
@@ -270,7 +272,7 @@ public class Dialog_AssignSeats : Window
 					bool canAssign = true;
 					if (!handler.CanOperateRole(draggedPawn))
 					{
-						canAssign = !handler.role.HandlingTypes.HasFlag(HandlingType.Movement);
+						canAssign = (handler.role.HandlingTypes & HandlingType.Movement) == 0;
 						MessageTypeDef msgTypeDef = canAssign ?
 							MessageTypeDefOf.CautionInput :
 							MessageTypeDefOf.RejectInput;

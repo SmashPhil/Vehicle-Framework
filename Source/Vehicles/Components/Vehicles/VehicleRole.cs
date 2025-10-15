@@ -12,289 +12,288 @@ namespace Vehicles;
 [PublicAPI]
 public class VehicleRole : ITweakFields
 {
-  public string key;
-  public string label = "[MissingLabel]";
+	public string key;
+	public string label = "[MissingLabel]";
 
-  // Operating
-  public HandlingType handlingTypes = HandlingType.None;
-  public int slots;
-  public int slotsToOperate;
-  public float comfort = 0.5f;
-  public List<string> turretIds;
+	// Operating
+	public HandlingType handlingTypes = HandlingType.None;
+	public int slots;
+	public int slotsToOperate;
+	public float comfort = 0.5f;
+	public List<string> turretIds;
 
-  // Damaging
-  public ComponentHitbox hitbox = new();
-  public bool exposed;
-  public float chanceToHit = 0.3f;
+	// Damaging
+	public ComponentHitbox hitbox = new();
+	public bool exposed;
+	public float chanceToHit = 0.3f;
 
-  // Rendering
-  [TweakField]
-  public PawnOverlayRenderer pawnRenderer;
+	// Rendering
+	[TweakField]
+	public PawnOverlayRenderer pawnRenderer;
 
-  private readonly List<RoleUpgrade> upgrades = [];
+	private readonly List<RoleUpgrade> upgrades = [];
 
-  public VehicleRole()
-  {
-  }
+	public VehicleRole()
+	{
+	}
 
-  public VehicleRole(VehicleRoleHandler group) : this(group.role)
-  {
-  }
+	public VehicleRole(VehicleRoleHandler group) : this(group.role)
+	{
+	}
 
-  public VehicleRole(VehicleRole reference)
-  {
-    if (string.IsNullOrEmpty(reference.key))
-    {
-      Log.Error($"Missing Key on VehicleRole {reference.label}");
-    }
-    CopyFrom(reference);
-  }
+	public VehicleRole(VehicleRole reference)
+	{
+		if (string.IsNullOrEmpty(reference.key))
+		{
+			Log.Error($"Missing Key on VehicleRole {reference.label}");
+		}
+		CopyFrom(reference);
+	}
 
-  //Operating
-  public HandlingType HandlingTypes
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.handlingTypes != null)
-          {
-            return roleUpgrade.handlingTypes.Value;
-          }
-        }
-      }
-      return handlingTypes;
-    }
-  }
+	//Operating
+	public HandlingType HandlingTypes
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.handlingTypes != null)
+					{
+						return roleUpgrade.handlingTypes.Value;
+					}
+				}
+			}
+			return handlingTypes;
+		}
+	}
 
-  public int Slots
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.slots != null)
-          {
-            return roleUpgrade.slots.Value;
-          }
-        }
-      }
-      return slots;
-    }
-  }
+	public int Slots
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.slots != null)
+					{
+						return roleUpgrade.slots.Value;
+					}
+				}
+			}
+			return slots;
+		}
+	}
 
-  public int SlotsToOperate
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        foreach (RoleUpgrade roleUpgrade in upgrades)
-        {
-          if (roleUpgrade.slotsToOperate != null)
-          {
-            return roleUpgrade.slotsToOperate.Value;
-          }
-        }
-      }
-      return slotsToOperate;
-    }
-  }
+	public int SlotsToOperate
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (RoleUpgrade roleUpgrade in upgrades)
+				{
+					if (roleUpgrade.slotsToOperate != null)
+					{
+						return roleUpgrade.slotsToOperate.Value;
+					}
+				}
+			}
+			return slotsToOperate;
+		}
+	}
 
-  public float Comfort
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        foreach (RoleUpgrade roleUpgrade in upgrades)
-        {
-          if (roleUpgrade.comfort != null)
-          {
-            return roleUpgrade.comfort.Value;
-          }
-        }
-      }
-      return comfort;
-    }
-  }
+	public float Comfort
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				foreach (RoleUpgrade roleUpgrade in upgrades)
+				{
+					if (roleUpgrade.comfort != null)
+					{
+						return roleUpgrade.comfort.Value;
+					}
+				}
+			}
+			return comfort;
+		}
+	}
 
-  public List<string> TurretIds
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          // empty turret ids can be used to override role management of turret
-          if (roleUpgrade.turretIds != null)
-          {
-            return roleUpgrade.turretIds;
-          }
-        }
-      }
-      return turretIds;
-    }
-  }
+	public List<string> TurretIds
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					// empty turret ids can be used to override role management of turret
+					if (roleUpgrade.turretIds != null)
+					{
+						return roleUpgrade.turretIds;
+					}
+				}
+			}
+			return turretIds;
+		}
+	}
 
-  //Damaging
-  public ComponentHitbox Hitbox
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.hitbox !=
-            null) //empty turret ids can be used to override role management of turret
-          {
-            return roleUpgrade.hitbox;
-          }
-        }
-      }
-      return hitbox;
-    }
-  }
+	//Damaging
+	public ComponentHitbox Hitbox
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.hitbox !=
+						null) //empty turret ids can be used to override role management of turret
+					{
+						return roleUpgrade.hitbox;
+					}
+				}
+			}
+			return hitbox;
+		}
+	}
 
-  public bool Exposed
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.exposed != null)
-          {
-            return roleUpgrade.exposed.Value;
-          }
-        }
-      }
-      return exposed;
-    }
-  }
+	public bool Exposed
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.exposed != null)
+					{
+						return roleUpgrade.exposed.Value;
+					}
+				}
+			}
+			return exposed;
+		}
+	}
 
-  public float ChanceToHit
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.chanceToHit != null)
-          {
-            return roleUpgrade.chanceToHit.Value;
-          }
-        }
-      }
-      return chanceToHit;
-    }
-  }
+	public float ChanceToHit
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.chanceToHit != null)
+					{
+						return roleUpgrade.chanceToHit.Value;
+					}
+				}
+			}
+			return chanceToHit;
+		}
+	}
 
-  //Rendering
-  public PawnOverlayRenderer PawnRenderer
-  {
-    get
-    {
-      if (!upgrades.NullOrEmpty())
-      {
-        for (int i = upgrades.Count - 1; i >= 0; i--)
-        {
-          RoleUpgrade roleUpgrade = upgrades[i];
-          if (roleUpgrade.pawnRenderer != null)
-          {
-            return roleUpgrade.pawnRenderer;
-          }
-        }
-      }
-      return pawnRenderer;
-    }
-  }
+	public PawnOverlayRenderer PawnRenderer
+	{
+		get
+		{
+			if (!upgrades.NullOrEmpty())
+			{
+				for (int i = upgrades.Count - 1; i >= 0; i--)
+				{
+					RoleUpgrade roleUpgrade = upgrades[i];
+					if (roleUpgrade.pawnRenderer != null)
+					{
+						return roleUpgrade.pawnRenderer;
+					}
+				}
+			}
+			return pawnRenderer;
+		}
+	}
 
-  public bool RequiredForCaravan =>
-    slotsToOperate > 0 && handlingTypes.HasFlag(HandlingType.Movement);
+	public bool RequiredForCaravan =>
+		slotsToOperate > 0 && (handlingTypes & HandlingType.Movement) != 0;
 
-  string ITweakFields.Category => nameof(PawnOverlayRenderer);
+	string ITweakFields.Category => nameof(PawnOverlayRenderer);
 
-  string ITweakFields.Label => label;
+	string ITweakFields.Label => label;
 
-  public bool Resolved { get; private set; }
+	public bool Resolved { get; private set; }
 
-  public void AddUpgrade(RoleUpgrade roleUpgrade)
-  {
-    upgrades.Add(roleUpgrade);
-  }
+	public void AddUpgrade(RoleUpgrade roleUpgrade)
+	{
+		upgrades.Add(roleUpgrade);
+	}
 
-  public void RemoveUpgrade(RoleUpgrade roleUpgrade)
-  {
-    upgrades.Remove(roleUpgrade);
-  }
+	public void RemoveUpgrade(RoleUpgrade roleUpgrade)
+	{
+		upgrades.Remove(roleUpgrade);
+	}
 
-  public void CopyFrom(VehicleRole reference)
-  {
-    key = reference.key;
-    label = reference.label;
+	public void CopyFrom(VehicleRole reference)
+	{
+		key = reference.key;
+		label = reference.label;
 
-    handlingTypes = reference.handlingTypes;
-    slots = reference.slots;
-    slotsToOperate = reference.slotsToOperate;
+		handlingTypes = reference.handlingTypes;
+		slots = reference.slots;
+		slotsToOperate = reference.slotsToOperate;
 
-    turretIds = null;
-    if (!reference.turretIds.NullOrEmpty())
-    {
-      turretIds = new List<string>(reference.turretIds);
-    }
+		turretIds = null;
+		if (!reference.turretIds.NullOrEmpty())
+		{
+			turretIds = new List<string>(reference.turretIds);
+		}
 
-    hitbox = reference.hitbox;
-    exposed = reference.exposed;
-    chanceToHit = reference.chanceToHit;
+		hitbox = reference.hitbox;
+		exposed = reference.exposed;
+		chanceToHit = reference.chanceToHit;
 
-    pawnRenderer = reference.pawnRenderer;
-  }
+		pawnRenderer = reference.pawnRenderer;
+	}
 
-  public void CopyFrom(RoleUpgrade upgrade)
-  {
-    if (upgrade.handlingTypes != null)
-      handlingTypes = upgrade.handlingTypes.Value;
-    if (upgrade.slots != null)
-      slots = upgrade.slots.Value;
-    if (upgrade.slotsToOperate != null)
-      slotsToOperate = upgrade.slotsToOperate.Value;
-    if (!upgrade.turretIds.NullOrEmpty())
-      turretIds = [.. upgrade.turretIds];
-    if (upgrade.hitbox != null)
-      hitbox = upgrade.hitbox;
-    if (upgrade.exposed != null)
-      exposed = upgrade.exposed.Value;
-    if (upgrade.chanceToHit != null)
-      chanceToHit = upgrade.chanceToHit.Value;
+	public void CopyFrom(RoleUpgrade upgrade)
+	{
+		if (upgrade.handlingTypes != null)
+			handlingTypes = upgrade.handlingTypes.Value;
+		if (upgrade.slots != null)
+			slots = upgrade.slots.Value;
+		if (upgrade.slotsToOperate != null)
+			slotsToOperate = upgrade.slotsToOperate.Value;
+		if (!upgrade.turretIds.NullOrEmpty())
+			turretIds = [.. upgrade.turretIds];
+		if (upgrade.hitbox != null)
+			hitbox = upgrade.hitbox;
+		if (upgrade.exposed != null)
+			exposed = upgrade.exposed.Value;
+		if (upgrade.chanceToHit != null)
+			chanceToHit = upgrade.chanceToHit.Value;
 
-    pawnRenderer = upgrade.pawnRenderer;
-  }
+		pawnRenderer = upgrade.pawnRenderer;
+	}
 
-  public void ResolveReferences(VehicleDef vehicleDef)
-  {
-    if (Resolved)
-      return;
+	public void ResolveReferences(VehicleDef vehicleDef)
+	{
+		if (Resolved)
+			return;
 
-    hitbox.Initialize(vehicleDef);
-    Resolved = true;
-  }
+		hitbox.Initialize(vehicleDef);
+		Resolved = true;
+	}
 
-  void ITweakFields.OnFieldChanged()
-  {
-  }
+	void ITweakFields.OnFieldChanged()
+	{
+	}
 }

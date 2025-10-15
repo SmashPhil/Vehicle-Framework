@@ -249,7 +249,7 @@ public sealed class VehiclePathGrid : VehicleGridManager
 				return ImpassableCost;
 			}
 		}
-		else if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Things))
+		else if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Things) != 0)
 		{
 			stringBuilder?.AppendLine($"thingPathCost is impassable: {thingPathCost}");
 			return ImpassableCost;
@@ -288,7 +288,7 @@ public sealed class VehiclePathGrid : VehicleGridManager
 			stringBuilder?.AppendLine($"terrainDef impassable: {ImpassableCost}");
 			return ImpassableCost;
 		}
-		else if (vehicleDef.properties.defaultImpassable.HasFlag(DefaultImpassable.Terrain))
+		else if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Terrain) != 0)
 		{
 			stringBuilder?.AppendLine("defaultTerrain is impassable and no custom pathCost was found.");
 			return ImpassableCost;

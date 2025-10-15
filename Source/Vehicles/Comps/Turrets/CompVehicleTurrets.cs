@@ -394,16 +394,13 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 						{
 							if (turretData.turret.targetInfo.Thing is { } thing)
 							{
-								if (thing is Pawn && !turretData.turret.targeting.HasFlag(TargetLock.Pawn))
-								{
-									turretData.turret.SetTarget(LocalTargetInfo.Invalid);
-								}
-								else if (!turretData.turret.targeting.HasFlag(TargetLock.Thing))
+								if ((turretData.turret.targeting & TargetLock.Thing) == 0 ||
+									thing is Pawn && (turretData.turret.targeting & TargetLock.Pawn) == 0)
 								{
 									turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 								}
 							}
-							else if (!turretData.turret.targeting.HasFlag(TargetLock.Cell))
+							else if ((turretData.turret.targeting & TargetLock.Cell) == 0)
 							{
 								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
 							}

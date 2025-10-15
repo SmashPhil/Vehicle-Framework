@@ -142,8 +142,10 @@ public class VehicleProperties
 		int sum = 0;
 		foreach (VehicleRole role in roles)
 		{
-			if (role.HandlingTypes.HasFlag(handlingType))
+			if ((role.HandlingTypes & handlingType) == handlingType)
+			{
 				sum += role.Slots;
+			}
 		}
 		return sum;
 	}
@@ -153,8 +155,10 @@ public class VehicleProperties
 		int sum = 0;
 		foreach (VehicleRole role in roles)
 		{
-			if (role.HandlingTypes.HasFlag(handlingType))
+			if ((role.HandlingTypes & handlingType) == handlingType)
+			{
 				sum += role.SlotsToOperate;
+			}
 		}
 		return sum;
 	}

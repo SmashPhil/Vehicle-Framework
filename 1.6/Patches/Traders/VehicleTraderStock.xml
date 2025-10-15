@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Patch>
-	<Operation FeatureFlag = "TradeableVehicles" Class = "PatchOperationAdd">
-		<xpath>Defs/TraderKindDef[defName="Base_Outlander_Standard"]/stockGenerators</xpath>
-		<value>
-			<li Class="Vehicles.StockGenerator_Vehicles">
-        <category>Combat</category>
-        <countRange>1~2</countRange>
-      </li>
-		</value>
-	</Operation>
+  <Operation Class = "Vehicles.PatchOperationFeature">
+    <feature>TradeableVehicles</feature>
+    <patch Class = "PatchOperationAdd">
+      <xpath>Defs/TraderKindDef[defName="Base_Outlander_Standard"]/stockGenerators</xpath>
+      <value>
+        <li Class="Vehicles.StockGenerator_Vehicles">
+          <category>Combat</category>
+          <countRange>1~2</countRange>
+        </li>
+      </value>
+    </patch>
+  </Operation>
 </Patch>

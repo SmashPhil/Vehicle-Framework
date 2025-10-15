@@ -145,7 +145,7 @@ public sealed class TransferableVehicleWidget
 
 		Rect mainRect = new(inRect.x, inRect.y + TopAreaHeight, inRect.width, inRect.height - TopAreaHeight);
 
-		if (IsEnabled(VehicleCaravanProps))
+		if (IsFeatureEnabled(VehicleCaravanProps))
 		{
 			string checkboxLabel = "VF_ShowVehicleProperties".Translate();
 			float labelWidth = Text.CalcSize(checkboxLabel).x;
@@ -288,7 +288,7 @@ public sealed class TransferableVehicleWidget
 			}
 		}
 
-		if (showVehicleProps && IsEnabled(VehicleCaravanProps))
+		if (showVehicleProps && IsFeatureEnabled(VehicleCaravanProps))
 		{
 			DrawSpecialProperties(rect, vehicleDef, vehicle);
 		}

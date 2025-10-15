@@ -249,7 +249,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 	public virtual void SpendFuel()
 	{
 		if (vehicle.CompFueledTravel != null &&
-			vehicle.CompFueledTravel.FuelCondition.HasFlag(FuelConsumptionCondition.Flying))
+			(vehicle.CompFueledTravel.FuelCondition & FuelConsumptionCondition.Flying) != 0)
 		{
 			float amount = vehicle.CompFueledTravel.ConsumptionRatePerTick *
 				vehicle.CompVehicleLauncher.FuelConsumptionWorldMultiplier;

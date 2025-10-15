@@ -157,12 +157,12 @@ public sealed class VehiclePathingSystem : MapComponent
 			case GridDeferment.Lazy:
 			break;
 			case GridDeferment.Deferred:
-				if (grids.HasFlag(GridSelection.PathGrids))
+				if ((grids & GridSelection.PathGrids) != 0)
 				{
 					deferredGridGeneration.GenerateAllPathGrids();
 				}
 
-				if (grids.HasFlag(GridSelection.Regions))
+				if ((grids & GridSelection.Regions) != 0)
 				{
 					deferredGridGeneration.GenerateAllRegionGrids();
 				}

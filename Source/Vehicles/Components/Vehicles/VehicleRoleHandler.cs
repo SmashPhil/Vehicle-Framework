@@ -63,7 +63,7 @@ namespace Vehicles
 
 		bool IThingHolderPawnOverlayer.ShowBody => role.PawnRenderer.showBody;
 
-		public bool RequiredForMovement => role.HandlingTypes.HasFlag(HandlingType.Movement);
+		public bool RequiredForMovement => (role.HandlingTypes & HandlingType.Movement) != 0;
 
 		public bool RoleFulfilled
 		{
@@ -129,7 +129,7 @@ namespace Vehicles
 			if (handlingType == HandlingType.None)
 				return true;
 
-			if (handlingType.HasFlag(HandlingType.Turret) && pawn.WorkTagIsDisabled(WorkTags.Violent))
+			if ((handlingType & HandlingType.Turret) != 0 && pawn.WorkTagIsDisabled(WorkTags.Violent))
 				return false;
 
 			if (!pawn.RaceProps.ToolUser)
@@ -216,9 +216,9 @@ namespace Vehicles
 			static int GetPriority(HandlingType type)
 			{
 				int priority = 0;
-				if (type.HasFlag(HandlingType.Movement))
+				if ((type & HandlingType.Movement) != 0)
 					priority += 10;
-				if (type.HasFlag(HandlingType.Turret))
+				if ((type & HandlingType.Turret) != 0)
 					priority += 1;
 				return priority;
 			}

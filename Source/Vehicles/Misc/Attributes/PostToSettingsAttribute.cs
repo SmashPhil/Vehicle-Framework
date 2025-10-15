@@ -74,7 +74,7 @@ namespace Vehicles
 			string disabledTooltip = string.Empty;
 
 			if (field.TryGetAttribute(out FeatureEnabledAttribute featureAttr) &&
-				!FeatureFlags.IsEnabled(featureAttr.FeatureName))
+				!FeatureFlags.IsFeatureEnabled(featureAttr.FeatureName))
 			{
 				return;
 			}

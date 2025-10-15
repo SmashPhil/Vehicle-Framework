@@ -105,8 +105,8 @@ public class CompFueledTravel : VehicleComp, IRefundable
 			// Idle vehicles get a discount to consumption if they consume fuel both when 'drafted'
 			// and when moving. Drafted will discount to x%, and moving will resume max consumption.
 			if (Vehicle is { Spawned: true, vehiclePather.Moving: false } &&
-				FuelCondition.HasFlag(FuelConsumptionCondition.Drafted) &&
-				FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
+				(FuelCondition & FuelConsumptionCondition.Drafted) != 0 &&
+				(FuelCondition & FuelConsumptionCondition.Moving) != 0)
 			{
 				return ConsumptionRatePerTickRaw * EfficiencyIdleMultiplier;
 			}
@@ -203,16 +203,16 @@ public class CompFueledTravel : VehicleComp, IRefundable
 	private bool ShouldConsumeNow => !EmptyTank && Vehicle.Spawned && (ConsumeWhenDrafted ||
 		ConsumeWhenMoving || ConsumeAlways);
 
-	private bool ConsumeAlways => FuelCondition.HasFlag(FuelConsumptionCondition.Always);
+	private bool ConsumeAlways => (FuelCondition & FuelConsumptionCondition.Always) != 0;
 
 	private bool ConsumeWhenDrafted => Vehicle.Spawned &&
-		FuelCondition.HasFlag(FuelConsumptionCondition.Drafted) && Vehicle.Drafted;
+		(FuelCondition & FuelConsumptionCondition.Drafted) != 0 && Vehicle.Drafted;
 
 	private bool ConsumeWhenMoving
 	{
 		get
 		{
-			if (FuelCondition.HasFlag(FuelConsumptionCondition.Moving))
+			if ((FuelCondition & FuelConsumptionCondition.Moving) != 0)
 			{
 				if (Vehicle.Spawned && Vehicle.vehiclePather.Moving)
 					return true;

@@ -168,7 +168,7 @@ public class VehicleGroup : IDisposable
 			];
 		}
 
-		if (!settings.permissions.HasFlag(VehiclePermissions.Autonomous))
+		if ((settings.permissions & VehiclePermissions.Autonomous) == 0)
 		{
 			vehicleDef.properties.roles.Add(new VehicleRole
 			{

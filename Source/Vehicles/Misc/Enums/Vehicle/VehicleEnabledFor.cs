@@ -2,40 +2,40 @@
 using UnityEngine;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+public static class VehicleEnabled
 {
-	public static class VehicleEnabled
+	[Flags]
+	public enum For
 	{
-		public enum For
-		{
-			None,
-			Player,
-			Raiders,
-			Everyone,
-		}
+		None = 0,
+		Player = 1 << 0,
+		Raiders = 1 << 1,
+		Everyone = Player | Raiders
+	}
 
-		public static For Next(this For current)
+	public static For Next(this For current)
+	{
+		return current switch
 		{
-			return current switch
-			{
-				For.None => For.Player,
-				For.Player => For.Raiders,
-				For.Raiders => For.Everyone,
-				For.Everyone => For.None,
-				_ => throw new NotImplementedException()
-			};
-		}
+			For.None     => For.Player,
+			For.Player   => For.Raiders,
+			For.Raiders  => For.Everyone,
+			For.Everyone => For.None,
+			_            => throw new NotImplementedException()
+		};
+	}
 
-		public static (string text, Color color) GetStatus(For status)
+	public static (string text, Color color) GetStatus(For status)
+	{
+		return status switch
 		{
-			return status switch
-			{
-				For.None => ("VF_VehicleDisabled".Translate(), Color.red),
-				For.Player => ("VF_VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
-				For.Raiders => ("VF_VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
-				For.Everyone => ("VF_VehicleEnabled".Translate(), Color.green),
-				_ => ("[Err] Uncaught Status", Color.red)
-			};
-		}
+			For.None     => ("VF_VehicleDisabled".Translate(), Color.red),
+			For.Player   => ("VF_VehiclePlayerOnly".Translate(), new Color(0.1f, 0.85f, 0.85f)),
+			For.Raiders  => ("VF_VehicleRaiderOnly".Translate(), new Color(0.9f, 0.53f, 0.1f)),
+			For.Everyone => ("VF_VehicleEnabled".Translate(), Color.green),
+			_            => ("[Err] Uncaught Status", Color.red)
+		};
 	}
 }

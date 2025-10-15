@@ -4,6 +4,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using JetBrains.Annotations;
 using UnityEngine;
@@ -12,6 +13,7 @@ using Verse.Sound;
 using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
+using Vehicles.Config;
 
 namespace Vehicles;
 
@@ -42,6 +44,8 @@ public class VehicleMod : Mod
 	internal static List<FieldInfo> vehicleDefFields = [];
 	private static Dictionary<Type, List<FieldInfo>> vehicleCompFields = [];
 
+	internal readonly FeatureFlags features;
+
 	public VehicleMod(ModContentPack content) : base(content)
 	{
 		mod = this;
@@ -55,6 +59,8 @@ public class VehicleMod : Mod
 
 		VehicleMod.content = mod.Content;
 		metaData = content.ModMetaData;
+
+		features = FeatureFlags.InitDefault();
 
 		GameEvent.OnNewGame += GizmoHelper.ResetDesignatorStatuses;
 		GameEvent.OnLoadGame += GizmoHelper.ResetDesignatorStatuses;

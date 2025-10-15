@@ -652,7 +652,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		foreach (VehicleStatModifier statModifier in vehicleStats)
 		{
 			if (statModifier.statDef == VehicleStatDefOf.MoveSpeed &&
-				properties.roles.NotNullAndAny(role => role.HandlingTypes.HasFlag(HandlingType.Movement)))
+				properties.roles.NotNullAndAny(static role => (role.HandlingTypes & HandlingType.Movement) != 0))
 			{
 				continue;
 			}

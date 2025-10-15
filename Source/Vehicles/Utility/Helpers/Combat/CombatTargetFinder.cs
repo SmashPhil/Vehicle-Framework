@@ -11,15 +11,17 @@ namespace Vehicles
 {
 	public static class CombatTargetFinder
 	{
-		public static Thing FindAttackTarget(VehiclePawn vehicle, TargetScanFlags scanFlags, Func<Thing, bool> validator = null, 
-			float minDistance = 0f, float maxDistance = float.MaxValue, IntVec3? locus = null, 
+		public static Thing FindAttackTarget(VehiclePawn vehicle, TargetScanFlags scanFlags,
+			Func<Thing, bool> validator = null,
+			float minDistance = 0f, float maxDistance = float.MaxValue, IntVec3? locus = null,
 			float maxTravelRadiusFromLocus = float.MaxValue, bool onlyRanged = false)
 		{
 			// TODO - Use VehicleRegionTraverser for reachability search
 			Thing attackTarget = GenClosest.ClosestThingReachable(vehicle.Position, vehicle.Map,
-				ThingRequest.ForGroup(ThingRequestGroup.AttackTarget), PathEndMode.Touch, 
+				ThingRequest.ForGroup(ThingRequestGroup.AttackTarget), PathEndMode.Touch,
 				TraverseParms.For(vehicle, Danger.Deadly, TraverseMode.ByPawn), maxDistance: maxDistance,
-				validator: (Thing target) => (validator == null || validator(target)) && !ShouldIgnoreNonCombatant(vehicle, target, scanFlags), 
+				validator: (Thing target) =>
+					(validator == null || validator(target)) && !ShouldIgnoreNonCombatant(vehicle, target, scanFlags),
 				searchRegionsMax: maxDistance > 800 ? -1 : 40);
 
 			return attackTarget;
@@ -35,7 +37,7 @@ namespace Vehicles
 			{
 				return false;
 			}
-			if (scanFlags.HasFlag(TargetScanFlags.IgnoreNonCombatants))
+			if ((scanFlags & TargetScanFlags.IgnoreNonCombatants) != 0)
 			{
 				return true;
 			}
