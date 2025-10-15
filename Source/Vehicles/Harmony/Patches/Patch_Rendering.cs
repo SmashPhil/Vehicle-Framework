@@ -30,6 +30,14 @@ internal class Patch_Rendering : IPatchCategory
 
 	private static readonly List<Pawn> TmpPawns = [];
 
+	private static readonly FastInvokeHandler RenderPulsingOverlayInvoker;
+
+	static Patch_Rendering()
+	{
+		RenderPulsingOverlayInvoker = MethodInvoker.GetHandler(AccessTools.Method(typeof(OverlayDrawer),
+			"RenderPulsingOverlay", parameters: [typeof(Thing), typeof(Material), typeof(int), typeof(bool)]));
+	}
+
 	PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
 	void IPatchCategory.PatchMethods()
@@ -70,6 +78,8 @@ internal class Patch_Rendering : IPatchCategory
 			original: AccessTools.Method(typeof(PawnRenderer), "ParallelGetPreRenderResults"),
 			prefix: new HarmonyMethod(typeof(Patch_Rendering),
 				nameof(DisableCachingPawnOverlays)));
+		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(OverlayDrawer), "RenderOutOfFuelOverlay"),
+			prefix: new HarmonyMethod(typeof(Patch_Rendering), nameof(RenderVehicleOutOfFuelOverlay)));
 
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(Targeter), nameof(Targeter.TargeterOnGUI)),
@@ -326,6 +336,23 @@ internal class Patch_Rendering : IPatchCategory
 		{
 			disableCache = true;
 		}
+	}
+
+	// ReSharper disable once InconsistentNaming
+	private static bool RenderVehicleOutOfFuelOverlay(Thing t, OverlayDrawer __instance, Material ___OutOfFuelMat)
+	{
+		if (t is VehiclePawn { CompFueledTravel: not null } vehicle)
+		{
+			const int DrawIndex = 5;
+			const bool DoAtlasOffsetIncrement = true;
+			var props = vehicle.CompFueledTravel.Props;
+			Material fuelMat = MaterialPool.MatFrom(props.FuelIcon ? props.FuelIcon : ThingDefOf.Chemfuel.uiIcon,
+				ShaderDatabase.MetaOverlay, Color.white);
+			RenderPulsingOverlayInvoker.Invoke(__instance, t, fuelMat, DrawIndex, !DoAtlasOffsetIncrement);
+			RenderPulsingOverlayInvoker.Invoke(__instance, t, ___OutOfFuelMat, DrawIndex, DoAtlasOffsetIncrement);
+			return false;
+		}
+		return true;
 	}
 
 	/* ---------------- Hooks onto Targeter calls ---------------- */
