@@ -42,6 +42,8 @@ public class StockGenerator_Vehicles : StockGenerator
 			return false;
 		if (!excludedDefs.NullOrEmpty() && excludedDefs.Contains(vehicleDef))
 			return false;
+		if (thingDef.tradeability == Tradeability.None)
+			return false;
 
 		return (vehicleDef.vehicleCategory & category) == category;
 	}
