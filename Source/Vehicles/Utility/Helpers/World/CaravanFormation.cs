@@ -86,8 +86,8 @@ public static class CaravanFormation
 		{
 			warningBuilder.AppendLine("CaravanFoodWillRotSoonWarningDialog".Translate());
 		}
-		if (!Enumerable.Any(formation.pawns, pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) &&
-			!pawn.skills.GetSkill(SkillDefOf.Social).TotallyDisabled))
+		if (!formation.pawns.Any(pawn => CaravanUtility.IsOwner(pawn, Faction.OfPlayer) &&
+			pawn.skills?.GetSkill(SkillDefOf.Social) is not { TotallyDisabled: false }))
 		{
 			warningBuilder.AppendLine("CaravanIncapableOfSocial".Translate());
 		}

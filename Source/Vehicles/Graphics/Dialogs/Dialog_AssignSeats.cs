@@ -416,7 +416,6 @@ public class Dialog_AssignSeats : Window
 			CaravanHelper.assignedSeats.SetAssignments(vehicle, Assignments);
 			int transferCount = Assignments.Count > 0 ? vehicleTransferable.GetMaximumToTransfer() : 0;
 			vehicleTransferable.AdjustTo(transferCount);
-			Dialog_FormVehicleCaravan.MarkDirty();
 			parent.NotifyTransferablesChanged();
 		}
 		catch (Exception ex)

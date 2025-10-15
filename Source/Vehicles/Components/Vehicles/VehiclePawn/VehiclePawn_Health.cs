@@ -47,7 +47,7 @@ public partial class VehiclePawn
 			{
 				foreach (Pawn pawn in handler.thingOwner)
 				{
-					if (pawn.skills.GetSkill(SkillDefOf.Animals) is { TotallyDisabled: false })
+					if (pawn.skills?.GetSkill(SkillDefOf.Animals) is { TotallyDisabled: false })
 						return true;
 				}
 			}

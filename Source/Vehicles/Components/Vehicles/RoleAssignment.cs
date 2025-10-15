@@ -80,6 +80,6 @@ public class RoleAssignment
 		drivers.SortByDescending(pawn =>
 			pawn.health.capacities.GetLevel(PawnCapacityDefOf.Consciousness) * ConsciousnessWeight +
 			pawn.health.capacities.GetLevel(PawnCapacityDefOf.Consciousness));
-		turretOperators.SortByDescending(pawn => pawn.skills.GetSkill(SkillDefOf.Shooting).Aptitude);
+		turretOperators.SortByDescending(pawn => pawn.skills?.GetSkill(SkillDefOf.Shooting)?.Aptitude ?? -1);
 	}
 }

@@ -36,8 +36,10 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		int value = 0;
 		foreach (Pawn pawn in AllCapablePawns)
 		{
-			if (pawn.skills.GetSkill(skill) is { } record)
+			if (pawn.skills?.GetSkill(skill) is { } record)
+			{
 				value += record.Level;
+			}
 		}
 		value /= AllCapablePawns.Count;
 		return value;

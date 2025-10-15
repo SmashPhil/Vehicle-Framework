@@ -130,7 +130,7 @@ public class JobDriver_IdleVehicle : JobDriver
 
 			foreach (Pawn boardedPawn in Vehicle.AllPawnsAboard)
 			{
-				boardedPawn.skills.Learn(SkillDefOf.Animals, VehicleMod.FishingSkillValue);
+				boardedPawn.skills?.Learn(SkillDefOf.Animals, VehicleMod.FishingSkillValue);
 			}
 			if (ticksTillFish <= 0)
 			{
