@@ -3,6 +3,7 @@ using HarmonyLib;
 using RimWorld;
 using SmashTools;
 using SmashTools.Patching;
+using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
 
@@ -32,10 +33,13 @@ internal class Patch_MapPawns : IPatchCategory
 
 	private static void AllAerialVehicles_AliveOrDead(ref List<Pawn> __result)
 	{
-		if (VehicleWorldObjectsHolder.Instance == null)
+		var worldObjHolder = Find.World.GetComponent<VehicleWorldObjectsHolder>();
+		if (worldObjHolder == null)
+		{
+			Assert.IsTrue(false, "Null VehicleWorldObjectsHolder");
 			return;
-		foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
-		 .AerialVehicles)
+		}
+		foreach (AerialVehicleInFlight aerialVehicle in worldObjHolder.AerialVehicles)
 		{
 			__result.AddRange(aerialVehicle.Vehicle.AllPawnsAboard);
 		}

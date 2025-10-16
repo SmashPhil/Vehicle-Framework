@@ -205,7 +205,7 @@ internal class Patch_Debug : IPatchCategory
 		allowedGameStates = AllowedGameStates.Playing)]
 	private static void DebugGroundAllAerialVehicles()
 	{
-		foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
+		foreach (AerialVehicleInFlight aerialVehicle in Find.World.GetComponent<VehicleWorldObjectsHolder>()
 		 .AerialVehicles)
 		{
 			DebugLandAerialVehicle(aerialVehicle);

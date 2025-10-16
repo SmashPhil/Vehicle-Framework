@@ -220,7 +220,7 @@ internal class Patch_Rendering : IPatchCategory
 	private static void RecacheAerialVehicleEntries(List<ColonistBar.Entry> cachedEntries,
 		ref int group)
 	{
-		foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
+		foreach (AerialVehicleInFlight aerialVehicle in Find.World.GetComponent<VehicleWorldObjectsHolder>()
 		 .AerialVehicles)
 		{
 			if (!aerialVehicle.IsPlayerControlled)

@@ -571,7 +571,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 
 	public override void Destroy()
 	{
-		// Can destroy prematurely for vanilla methods removing / transfering pawns like with Caravan merging
+		// Can destroy prematurely for vanilla methods removing / transferring pawns like with Caravan merging
 		if (Destroyed)
 			return;
 

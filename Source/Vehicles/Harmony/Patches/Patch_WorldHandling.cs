@@ -145,17 +145,17 @@ internal class Patch_WorldHandling : IPatchCategory
 
 	private static void AddVehicleObjectToCache(WorldObject o)
 	{
-		VehicleWorldObjectsHolder.Instance.AddToCache(o);
+		Find.World.GetComponent<VehicleWorldObjectsHolder>().AddToCache(o);
 	}
 
 	private static void RemoveVehicleObjectToCache(WorldObject o)
 	{
-		VehicleWorldObjectsHolder.Instance.RemoveFromCache(o);
+		Find.World.GetComponent<VehicleWorldObjectsHolder>().RemoveFromCache(o);
 	}
 
 	private static void RecacheVehicleObjectCache()
 	{
-		VehicleWorldObjectsHolder.Instance.Recache();
+		Find.World.GetComponent<VehicleWorldObjectsHolder>().Recache();
 	}
 
 	private static bool ForcedTargetingDontShowWorld(ref bool __result)

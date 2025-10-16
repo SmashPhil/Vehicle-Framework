@@ -806,7 +806,7 @@ public static class CaravanHelper
 		{
 			return null;
 		}
-		List<AerialVehicleInFlight> aerialVehicles = VehicleWorldObjectsHolder.Instance.AerialVehicles
+		List<AerialVehicleInFlight> aerialVehicles = Find.World.GetComponent<VehicleWorldObjectsHolder>().AerialVehicles
 		 .Where(aerialVehicle => aerialVehicle.Tile == pawn.Map.Tile).ToList();
 
 		foreach (AerialVehicleInFlight aerialVehicle in aerialVehicles)

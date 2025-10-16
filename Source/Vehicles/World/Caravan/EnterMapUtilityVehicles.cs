@@ -34,33 +34,33 @@ public static class EnterMapUtilityVehicles
   private static void SpawnVehicles(VehicleCaravan caravan, List<Pawn> pawns, Map map,
     IntVec3 enterCell, Rot4 edge, bool draftColonists)
   {
-    bool coastalSpawn = caravan.HasBoat();
-    foreach (Pawn pawn in pawns)
-    {
-      IntVec3 cell = CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, pawn,
-        cell => cell.StandableUnknown(pawn, map), coastalSpawn);
-      IntVec3 loc = pawn.ClampToMap(cell, map, extraOffset: 2);
-      GenSpawn.Spawn(pawn, loc, map, edge.Opposite);
-      Trace.IsTrue(pawn.Spawned);
+		using (new VehicleCaravan.RecacheDisabler(caravan))
+		{
+			bool coastalSpawn = caravan.HasBoat();
+			foreach (Pawn pawn in pawns)
+			{
+				IntVec3 cell = CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, pawn,
+					cell => cell.StandableUnknown(pawn, map), coastalSpawn);
+				IntVec3 loc = pawn.ClampToMap(cell, map, extraOffset: 2);
+				GenSpawn.Spawn(pawn, loc, map, edge.Opposite);
+				Trace.IsTrue(pawn.Spawned);
 
-      if (pawn.IsColonist && !pawn.InMentalState)
-      {
-        pawn.drafter.Drafted = draftColonists;
-      }
+				if (pawn.IsColonist && !pawn.InMentalState)
+				{
+					pawn.drafter.Drafted = draftColonists;
+				}
 
-      if (pawn is VehiclePawn vehicle)
-      {
-        vehicle.Angle = 0;
-        vehicle.ignition.Drafted = draftColonists;
-      }
-    }
+				if (pawn is VehiclePawn vehicle)
+				{
+					vehicle.Angle = 0;
+					vehicle.ignition.Drafted = draftColonists;
+				}
+			}
+		}
 
     caravan.RemoveAllPawns();
-    if (caravan.Spawned)
-    {
-      Find.WorldObjects.Remove(caravan);
-    }
-  }
+		caravan.Destroy();
+	}
 
   private static Rot4 CalculateEdgeToSpawnBoatOn(Map map)
   {

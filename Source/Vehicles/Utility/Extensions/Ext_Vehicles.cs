@@ -482,10 +482,10 @@ public static class Ext_Vehicles
 	public static AerialVehicleInFlight GetAerialVehicle(this Pawn pawn)
 	{
 		// may get triggered prematurely from loading save
-		if (VehicleWorldObjectsHolder.Instance?.AerialVehicles is null)
+		if (Find.World.GetComponent<VehicleWorldObjectsHolder>()?.AerialVehicles is null)
 			return null;
 
-		foreach (AerialVehicleInFlight aerialVehicle in VehicleWorldObjectsHolder.Instance
+		foreach (AerialVehicleInFlight aerialVehicle in Find.World.GetComponent<VehicleWorldObjectsHolder>()
 		 .AerialVehicles)
 		{
 			Assert.IsNotNull(aerialVehicle);
