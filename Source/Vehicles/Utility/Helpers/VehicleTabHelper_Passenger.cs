@@ -329,6 +329,7 @@ public static class VehicleTabHelper_Passenger
 				}
 				SoundDefOf.Click.PlayOneShotOnCamera();
 				OnPawnChangedSeats(previousHolder);
+				draggedPawn.GetVehicleCaravan()?.RecacheVehicles();
 			}
 		}
 		finally
