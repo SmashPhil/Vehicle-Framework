@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using System.Collections.Generic;
+using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -7,6 +8,8 @@ namespace Vehicles;
 
 public class WorkGiver_HelpGatheringItemsForVehicleCaravan : WorkGiver
 {
+	private static JobDef JobDef => JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle;
+
 	public override Job NonScanJob(Pawn pawn)
 	{
 		foreach (Lord lord in pawn.Map.lordManager.lords)
@@ -14,10 +17,11 @@ public class WorkGiver_HelpGatheringItemsForVehicleCaravan : WorkGiver
 			if (lord.LordJob is not LordJob_FormAndSendVehicles { GatherItemsNow: true })
 				continue;
 
-			Thing thing = GatherItemsForVehicleCaravanUtility.FindThingToHaul(pawn, lord);
+			List<TransferableOneWay> transferables = GatherItemsForVehicleCaravanUtility.GetCaravanTransferables(lord);
+			Thing thing = JobDriver_LoadVehicle.FindThingToPack(pawn, JobDef, transferables, lord);
 			if (thing != null && AnyReachableCarrierOrColonist(pawn, lord))
 			{
-				Job job = JobMaker.MakeJob(JobDefOf_Vehicles.PrepareCaravan_GatheringVehicle, thing);
+				Job job = JobMaker.MakeJob(JobDef, thing);
 				job.lord = lord;
 				return job;
 			}

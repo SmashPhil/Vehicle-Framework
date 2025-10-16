@@ -5,6 +5,7 @@ using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools.Performance;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
@@ -18,13 +19,14 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 	private const int MaxTicksGatherItems = 7500;
 	private const int LoopBackstop = 500;
 
-	protected static readonly AccessTools.FieldRef<Pawn_InventoryTracker, List<Thing>> UnpackedCaravanItems =
+	internal static readonly AccessTools.FieldRef<Pawn_InventoryTracker, List<Thing>> UnpackedCaravanItems =
 		AccessTools.FieldRefAccess<List<Thing>>(typeof(Pawn_InventoryTracker), "unpackedCaravanItems");
 
 	private int toilLoops;
 	private int pickedUpFirstItemTicks = -1;
 	private PrepareCaravanGatherState gatherState;
 
+	[CanBeNull]
 	public Thing ToHaul => job.GetTarget(TargetIndex.A).Thing;
 
 	protected Pawn Carrier => job.GetTarget(TargetIndex.B).Thing as Pawn;
@@ -42,6 +44,10 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 
 	protected abstract bool HasDuplicateOpportunity(Thing thing);
 
+	/// <summary>
+	/// Event when thing is added to vehicle's inventory
+	/// </summary>
+	/// <param name="thing"></param>
 	protected virtual void OnThingAddedToInventory(Thing thing)
 	{
 	}
@@ -174,25 +180,44 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 				pawn.inventory.ClearHaulingCaravanCache();
 				return;
 			}
-			if (Carrier is VehiclePawn vehicle)
-			{
-				if (ToHaul is Pawn hauledPawn &&
-					(vehicle.TryAddPawn(hauledPawn) || !hauledPawn.CanBeTransferredToVehiclesCargo()))
-				{
-					return;
-				}
-				AddAllItemsToVehicle(vehicle, UnpackedCaravanItems(pawn.inventory));
-			}
-			else
-			{
-				pawn.inventory.TransferCaravanItemsToCarrier(Carrier.inventory);
-			}
+			TransferCaravanItemsToCarrier(pawn, Carrier);
 			if (pawn.inventory.HasAnyUnpackedCaravanItems && CheckToilLoopBackstop())
 			{
 				pawn.jobs.curDriver.JumpToToil(findCarrier);
 			}
 		};
 		return toil;
+
+		void TransferCaravanItemsToCarrier(Pawn pawn, Pawn carrier)
+		{
+			VehiclePawn vehicle = Carrier as VehiclePawn;
+			if (vehicle != null && ToHaul is Pawn hauledPawn)
+			{
+				// If hauling pawn, try to board through normal means via TryAddPawn. Only if hauled pawn is 
+				// able to be added to cargo do we fallthrough in the event that TryAddPawn fails.
+				if (vehicle.TryAddPawn(hauledPawn) || !hauledPawn.CanBeTransferredToVehiclesCargo())
+					return;
+			}
+			List<Thing> unpackedThings = UnpackedCaravanItems(pawn.inventory);
+			for (int i = unpackedThings.Count - 1; i >= 0; i--)
+			{
+				if (MassUtility.IsOverEncumbered(carrier))
+					return;
+
+				Thing thing = unpackedThings[i];
+				OnThingAddedToInventory(thing);
+				if (vehicle != null)
+				{
+					AddItemToVehicle(vehicle, thing);
+				}
+				else
+				{
+					pawn.inventory.innerContainer.TryTransferToContainer(thing, carrier.inventory.innerContainer,
+						thing.stackCount);
+				}
+				unpackedThings.Remove(thing);
+			}
+		}
 	}
 
 	private void SetNewHaulTargetAndJumpToReserve(Toil reserve)
@@ -322,6 +347,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 
 			Pawn_CarryTracker carryTracker = pawn.carryTracker;
 			Thing carriedThing = carryTracker.CarriedThing;
+			Assert.AreEqual(ToHaul, carriedThing);
 			if (carryTracker.innerContainer.Count == 0)
 			{
 				carryTracker.pawn.Drawer.renderer.SetAllGraphicsDirty();
@@ -331,7 +357,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 			Thing addedThing;
 			if (Carrier is VehiclePawn vehicle)
 			{
-				if (ToHaul is Pawn hauledPawn)
+				if (carriedThing is Pawn hauledPawn)
 				{
 					// Try to add pawns to vehicle roles first, otherwise allow them to be stuffed in the inventory if allowed.
 					// NOTE - TryAddPawn will add to inventory if pawn should always go to cargo, otherwise only add them to cargo
@@ -339,7 +365,7 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 					if (vehicle.TryAddPawn(hauledPawn) || !hauledPawn.CanBeTransferredToVehiclesCargo())
 						return;
 				}
-				addedThing = AddItemToVehicle(vehicle, ToHaul) ? ToHaul : null;
+				addedThing = AddItemToVehicle(vehicle, carriedThing) ? carriedThing : null;
 			}
 			else
 			{
@@ -352,15 +378,6 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 			}
 		};
 		return toil;
-	}
-
-	protected void AddAllItemsToVehicle(VehiclePawn vehicle, List<Thing> things)
-	{
-		for (int i = things.Count - 1; i >= 0; i--)
-		{
-			Thing thing = things[i];
-			AddItemToVehicle(vehicle, thing);
-		}
 	}
 
 	protected virtual bool AddItemToVehicle(VehiclePawn vehicle, Thing thing)
@@ -436,7 +453,17 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 		return availableSpacePct - (carrier.Position - hauler.Position).LengthHorizontal / 10f * 0.2f;
 	}
 
-	protected static class Search
+	private static int CountBeingCarried(Pawn pawn, ISharedJobSearch searcher)
+	{
+		int count = 0;
+		foreach (Thing thing in UnpackedCaravanItems.Invoke(pawn.inventory))
+		{
+			count += searcher.IsMatchingThing(thing) ? thing.stackCount : 0;
+		}
+		return count;
+	}
+
+	public static class Search
 	{
 		[Profile]
 		public static Thing FindNearestThing(Pawn pawn, Predicate<Thing> extraValidator)
@@ -459,52 +486,38 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 		}
 
 		[Profile]
-		public static int CountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, ISharedJobSearch jobSearcher)
+		public static int CountAlreadyBeingPacked(Pawn pawn, ISharedJobSearch jobSearcher)
 		{
 			int mechCount = 0;
 			if (ModsConfig.BiotechActive)
 			{
-				mechCount = HauledByOthers(pawn, target: null, jobSearcher, vehicle.Map.mapPawns.SpawnedColonyMechs);
+				mechCount = HauledByOthers(pawn, jobSearcher, pawn.Map.mapPawns.SpawnedColonyMechs);
 			}
 			int slaveCount = 0;
 			if (ModsConfig.IdeologyActive)
 			{
-				slaveCount = HauledByOthers(pawn, target: null, jobSearcher, vehicle.Map.mapPawns.SlavesOfColonySpawned);
+				slaveCount = HauledByOthers(pawn, jobSearcher, pawn.Map.mapPawns.SlavesOfColonySpawned);
 			}
-			return mechCount + slaveCount +
-				HauledByOthers(pawn, target: null, jobSearcher, vehicle.Map.mapPawns.FreeColonistsSpawned);
+			int hauledByOthers = HauledByOthers(pawn, jobSearcher, pawn.Map.mapPawns.FreeColonistsSpawned);
+			int hauledBySelf = 0;
+			foreach (Thing thing in UnpackedCaravanItems.Invoke(pawn.inventory))
+			{
+				hauledBySelf += thing.def == jobSearcher.ThingDef ? thing.stackCount : 0;
+			}
+			return mechCount + slaveCount + hauledBySelf + hauledByOthers;
 		}
 
-		[Profile]
-		public static int CountHauledByOthersForPacking(VehiclePawn vehicle, Pawn pawn, Thing target,
-			ISharedJobSearch jobSearcher)
-		{
-			int mechCount = 0;
-			if (ModsConfig.BiotechActive)
-			{
-				mechCount = HauledByOthers(pawn, target, jobSearcher, vehicle.Map.mapPawns.SpawnedColonyMechs);
-			}
-			int slaveCount = 0;
-			if (ModsConfig.IdeologyActive)
-			{
-				slaveCount = HauledByOthers(pawn, target, jobSearcher, vehicle.Map.mapPawns.SlavesOfColonySpawned);
-			}
-			return mechCount + slaveCount +
-				HauledByOthers(pawn, target, jobSearcher, vehicle.Map.mapPawns.FreeColonistsSpawned);
-		}
-
-		private static int HauledByOthers(Pawn pawn, [CanBeNull] Thing target, ISharedJobSearch jobSearcher,
-			List<Pawn> pawns)
+		private static int HauledByOthers(Pawn pawn, ISharedJobSearch jobSearcher, List<Pawn> pawns)
 		{
 			int count = 0;
 			foreach (Pawn otherPawn in pawns)
 			{
-				count += CountFromJob(pawn, otherPawn, target, jobSearcher);
+				count += CountFromJob(pawn, otherPawn, jobSearcher);
 			}
 			return count;
 		}
 
-		private static int CountFromJob(Pawn pawn, Pawn otherPawn, [CanBeNull] Thing target, ISharedJobSearch jobSearcher)
+		private static int CountFromJob(Pawn pawn, Pawn otherPawn, ISharedJobSearch jobSearcher)
 		{
 			if (pawn == otherPawn)
 				return 0;
@@ -515,14 +528,9 @@ public abstract class JobDriverLoadVehicleBase : JobDriver
 			if (otherPawn.jobs.curDriver is not JobDriverLoadVehicleBase otherDriver)
 				return 0;
 
-			Thing toHaul = otherDriver.ToHaul;
-			if (toHaul == null || !jobSearcher.IsMatchingThing(toHaul))
-				return 0;
-			if (target != null &&
-				!TransferableUtility.TransferAsOne(target, toHaul, TransferAsOneMode.PodsOrCaravanPacking))
-				return 0;
-
-			return toHaul.stackCount;
+			int targetCount = otherDriver.ToHaul?.stackCount ?? 0;
+			int countInInventory = CountBeingCarried(otherPawn, jobSearcher);
+			return targetCount + countInInventory;
 		}
 	}
 }

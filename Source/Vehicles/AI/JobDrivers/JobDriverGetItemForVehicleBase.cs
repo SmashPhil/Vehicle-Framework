@@ -35,7 +35,7 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 
 	protected override int CountLeftToTransfer()
 	{
-		return CountLeftToPack(Vehicle, pawn, job.def, GetMatchingThing(ToHaul));
+		return CountLeftToPack(pawn, job.def, GetMatchingThing(ToHaul));
 	}
 
 	protected override Thing FindThingToHaul()
@@ -55,14 +55,14 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 		return carrier == Vehicle;
 	}
 
-	public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef, ThingDefCountClass thingDefCount)
+	public static int CountLeftToPack(Pawn pawn, JobDef jobDef, ThingDefCountClass thingDefCount)
 	{
 		if (thingDefCount.count <= 0 || thingDefCount.thingDef == null)
 			return 0;
 
 		using var ops = SearchPool.GetTemporary(out ThingDefCountSearch thingDefSearch);
 		thingDefSearch.Init(jobDef, thingDefCount);
-		int hauledByOthers = Search.CountHauledByOthersForPacking(vehicle, pawn, thingDefSearch);
+		int hauledByOthers = Search.CountAlreadyBeingPacked(pawn, thingDefSearch);
 		int hauledBySelf = 0;
 		foreach (Thing thing in UnpackedCaravanItems.Invoke(pawn.inventory))
 		{
@@ -98,7 +98,7 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 		using var ops = SetPool.GetTemporary(out ThingDefSet thingDefSet);
 		foreach (ThingDefCountClass thingDefCount in thingDefCounts)
 		{
-			int countLeftToTransfer = CountLeftToPack(vehicle, pawn, jobDef, thingDefCount);
+			int countLeftToTransfer = CountLeftToPack(pawn, jobDef, thingDefCount);
 			if (countLeftToTransfer <= 0)
 				continue;
 			thingDefSet.Add(thingDefCount.thingDef);
@@ -149,6 +149,8 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 		private ThingDefCountClass thingDefCount;
 
 		bool IPoolable.InPool { get; set; }
+
+		ThingDef ISharedJobSearch.ThingDef => thingDefCount.thingDef;
 
 		public void Init(JobDef jobDef, ThingDefCountClass thingDefCount)
 		{

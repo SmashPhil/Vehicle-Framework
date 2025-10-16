@@ -3,6 +3,7 @@ using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Verse;
+using Verse.AI;
 
 namespace Vehicles;
 
@@ -28,7 +29,9 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriverLoadVehic
 
 	protected override void OnThingAddedToInventory(Thing thing)
 	{
-		Transferable.AdjustTo(Mathf.Max(Transferable.CountToTransfer - thing.stackCount, 0));
+		TransferableOneWay transferable = TransferableUtility.TransferableMatchingDesperate(thing, ThingsToLoad,
+			TransferAsOneMode.PodsOrCaravanPacking);
+		transferable.AdjustTo(Mathf.Max(transferable.CountToTransfer - thing.stackCount, 0));
 	}
 
 	protected override bool HasDuplicateOpportunity(Thing thing)
@@ -43,16 +46,34 @@ public class JobDriver_PrepareVehicleCaravan_GatheringItems : JobDriverLoadVehic
 
 	protected override int CountLeftToTransfer()
 	{
-		return GatherItemsForVehicleCaravanUtility.CountLeftToTransfer(pawn, Transferable, job.lord);
+		return JobDriver_LoadVehicle.CountLeftToPack(pawn, job.def, Transferable, job.lord);
 	}
 
 	protected override Thing FindThingToHaul()
 	{
-		return GatherItemsForVehicleCaravanUtility.FindThingToHaul(pawn, job.lord);
+		return JobDriver_LoadVehicle.FindThingToPack(pawn, job.def, ThingsToLoad, job.lord);
 	}
 
 	protected override bool IsUsableCarrier(Pawn carrier, bool allowColonists = true)
 	{
 		return GatherItemsForVehicleCaravanUtility.IsUsableCarrier(carrier, pawn, allowColonists: allowColonists);
+	}
+
+	protected override Toil StartedCarryingThing()
+	{
+		Toil toil = ToilMaker.MakeToil();
+		toil.initAction = AddToTransferable;
+		toil.defaultCompleteMode = ToilCompleteMode.Instant;
+		toil.atomicWithPrevious = true;
+		return toil;
+	}
+
+	private void AddToTransferable()
+	{
+		TransferableOneWay transferable = Transferable;
+		if (!transferable.things.Contains(pawn.carryTracker.CarriedThing))
+		{
+			transferable.things.Add(pawn.carryTracker.CarriedThing);
+		}
 	}
 }

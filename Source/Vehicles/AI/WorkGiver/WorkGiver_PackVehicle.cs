@@ -21,6 +21,6 @@ public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle<TransferableOneWay
 
 	protected override Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn, List<TransferableOneWay> things)
 	{
-		return JobDriver_LoadVehicle.FindThingToPack(vehicle, pawn, JobDef, things);
+		return JobDriver_LoadVehicle.FindThingToPack(pawn, JobDef, things);
 	}
 }

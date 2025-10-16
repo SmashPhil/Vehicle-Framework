@@ -85,7 +85,7 @@ public partial class VehiclePawn
 		}
 
 		TransferableOneWay transferable =
-			TransferableUtility.TransferableMatchingDesperate(thing, cargoToLoad, TransferAsOneMode.Normal);
+			TransferableUtility.TransferableMatchingDesperate(thing, cargoToLoad, TransferAsOneMode.PodsOrCaravanPacking);
 		if (transferable != null)
 		{
 			CountToTransferFieldRef.Invoke(transferable) = transferable.CountToTransfer - count;

@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
+using Verse.AI.Group;
 
 namespace Vehicles;
 
@@ -43,16 +44,6 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		return Transferable.things.Contains(thing);
 	}
 
-	protected override void OnThingAddedToInventory(Thing thing)
-	{
-		TransferableOneWay transferable = Transferable;
-		transferable.AdjustTo(Mathf.Max(transferable.CountToTransfer - thing.stackCount, 0));
-		if (transferable.CountToTransfer <= 0)
-		{
-			Vehicle.cargoToLoad.Remove(transferable);
-		}
-	}
-
 	// TODO 1.6.2091 - stub to prevent breaking VehicleMapFramework patch.
 	[UsedImplicitly, Obsolete("Deprecated. Call ShouldFailJob instead.", error: true)]
 	protected bool FailJob()
@@ -71,12 +62,12 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 	protected override int CountLeftToTransfer()
 	{
-		return CountLeftToPack(Vehicle, pawn, job.def, Transferable);
+		return CountLeftToPack(pawn, job.def, Transferable);
 	}
 
 	protected override Thing FindThingToHaul()
 	{
-		return FindThingToPack(Vehicle, pawn, job.def, ThingsToLoad);
+		return FindThingToPack(pawn, job.def, ThingsToLoad);
 	}
 
 	protected override Toil StartedCarryingThing()
@@ -114,8 +105,8 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 	/// <summary>
 	/// Search for item to pack given the list of required items in <paramref name="transferables"/>.
 	/// </summary>
-	public static Thing FindThingToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef,
-		[CanBeNull] List<TransferableOneWay> transferables)
+	public static Thing FindThingToPack(Pawn pawn, JobDef jobDef, List<TransferableOneWay> transferables,
+		Lord lord = null)
 	{
 		if (transferables.NullOrEmpty())
 			return null;
@@ -124,7 +115,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		using ObjectPool<ThingSet>.Scope ap = SetPool.GetTemporary(out ThingSet thingSet);
 		foreach (TransferableOneWay transferableOneWay in transferables)
 		{
-			int countLeftToTransfer = CountLeftToPack(vehicle, pawn, jobDef, transferableOneWay);
+			int countLeftToTransfer = CountLeftToPack(pawn, jobDef, transferableOneWay, lord);
 			if (countLeftToTransfer <= 0)
 				continue;
 
@@ -139,22 +130,16 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		return Search.FindNearestThing(pawn, thingSet.IsValid);
 	}
 
-	public static int CountLeftToPack(VehiclePawn vehicle, Pawn pawn, JobDef jobDef, TransferableOneWay transferable)
+	public static int CountLeftToPack(Pawn pawn, JobDef jobDef, TransferableOneWay transferable, Lord lord = null)
 	{
 		if (transferable is not { HasAnyThing: true, CountToTransfer: > 0 })
 			return 0;
 
 		using ObjectPool<TransferableSearch>.Scope ap = SearchPool.GetTemporary(out TransferableSearch transSearch);
-		transSearch.Init(jobDef, transferable);
-		int hauledByOthers =
-			Search.CountHauledByOthersForPacking(vehicle, pawn, transferable.AnyThing, transSearch);
-		int hauledBySelf = 0;
-		foreach (Thing thing in UnpackedCaravanItems.Invoke(pawn.inventory))
-		{
-			hauledBySelf += thing.def == transferable.ThingDef ? thing.stackCount : 0;
-		}
-		int remaining = transferable.CountToTransfer - hauledByOthers - hauledBySelf;
-		return Mathf.Clamp(remaining, 0, int.MaxValue);
+		transSearch.Init(jobDef, transferable, lord);
+		int countBeingPacked = Search.CountAlreadyBeingPacked(pawn, transSearch);
+		int remaining = transferable.CountToTransfer - countBeingPacked;
+		return Mathf.Max(remaining, 0);
 	}
 
 	private sealed class ThingSet : IPoolable
@@ -178,36 +163,6 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 		void IPoolable.Reset()
 		{
 			neededThings.Clear();
-		}
-	}
-
-	protected sealed class TransferableSearch : ISharedJobSearch, IPoolable
-	{
-		private JobDef jobDef;
-		private TransferableOneWay transferable;
-
-		bool IPoolable.InPool { get; set; }
-
-		public void Init(JobDef jobDef, TransferableOneWay transferable)
-		{
-			this.jobDef = jobDef;
-			this.transferable = transferable;
-		}
-
-		bool ISharedJobSearch.IsMatchingThing(Thing thing)
-		{
-			return transferable.things.Contains(thing);
-		}
-
-		bool ISharedJobSearch.ShouldConsiderPawn(Pawn otherPawn)
-		{
-			return otherPawn.CurJobDef == jobDef;
-		}
-
-		void IPoolable.Reset()
-		{
-			jobDef = null;
-			transferable = null;
 		}
 	}
 }
