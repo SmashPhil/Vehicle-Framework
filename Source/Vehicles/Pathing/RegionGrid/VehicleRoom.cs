@@ -21,6 +21,7 @@ namespace Vehicles
 
 		private readonly VehicleDef vehicleDef;
 
+		private int cellCount = -1;
 		public int lastChangeTick = -1;
 		private int numRegionsTouchingMapEdge;
 
@@ -72,6 +73,22 @@ namespace Vehicles
 			}
 		}
 
+		public int CellCount
+		{
+			get
+			{
+				if (cellCount < 0)
+				{
+					cellCount = 0;
+					foreach (VehicleRegion region in Regions.Keys)
+					{
+						cellCount += region.CellCount;
+					}
+				}
+				return cellCount;
+			}
+		}
+
 		/// <summary>
 		/// Create new room for <paramref name="vehicleDef"/>
 		/// </summary>
@@ -101,6 +118,7 @@ namespace Vehicles
 				return;
 			}
 			Regions.Add(region);
+			cellCount = -1;
 			if (region.touchesMapEdge)
 			{
 				numRegionsTouchingMapEdge++;
@@ -125,6 +143,7 @@ namespace Vehicles
 				return;
 			}
 			Regions.Remove(region);
+			cellCount = -1;
 			if (region.touchesMapEdge)
 			{
 				numRegionsTouchingMapEdge--;

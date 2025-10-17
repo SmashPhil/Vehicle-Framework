@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
@@ -179,7 +180,7 @@ public static class CellFinderExtended
 		while (workingRegions.Count > 0)
 		{
 			VehicleRegion currentRegion =
-				workingRegions.RandomElementByWeight(randomRegion => randomRegion.CellCount);
+				workingRegions.RandomElementByWeight(randomRegion => Mathf.Max(randomRegion.CellCount, 0));
 			if (currentRegion.TryFindRandomCellInRegion(Validator, out result))
 			{
 				workingRegions.Clear();

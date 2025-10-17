@@ -76,11 +76,11 @@ internal class Patch_CaravanHandling : IPatchCategory
 			postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
 				nameof(IdleVehicleCaravans)));
 
-		HarmonyPatcher.Patch(
-			original: AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter"),
-			prefix: null, postfix: null,
-			transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
-				nameof(DoEnterWithShipsTranspiler)));
+		//HarmonyPatcher.Patch(
+		//	original: AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter"),
+		//	prefix: null, postfix: null,
+		//	transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
+		//		nameof(DoEnterWithShipsTranspiler)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(CaravanEnterMapUtility),
 				nameof(CaravanEnterMapUtility.Enter),
@@ -676,8 +676,12 @@ internal class Patch_CaravanHandling : IPatchCategory
 	{
 		if (caravan is VehicleCaravan vehicleCaravan)
 		{
-			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, enterMode, dropInventoryMode,
-				draftColonists, extraCellValidator);
+			EnterMapUtilityVehicles.SpawnParams spawnParams = new(enterMode)
+			{
+				dropInventoryMode = dropInventoryMode,
+				draftColonists = draftColonists
+			};
+			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, in spawnParams);
 			return false;
 		}
 		return true;
@@ -689,8 +693,12 @@ internal class Patch_CaravanHandling : IPatchCategory
 	{
 		if (caravan is VehicleCaravan vehicleCaravan)
 		{
-			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, CaravanEnterMode.Edge,
-				dropInventoryMode, draftColonists);
+			EnterMapUtilityVehicles.SpawnParams spawnParams = new(CaravanEnterMode.Edge)
+			{
+				dropInventoryMode = dropInventoryMode,
+				draftColonists = draftColonists
+			};
+			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, in spawnParams);
 			return false;
 		}
 		return true;

@@ -9,8 +9,7 @@ using SmashTools.Performance;
 using Verse;
 using Verse.AI;
 
-namespace Vehicles
-{
+namespace Vehicles;
   /// <summary>
   /// Reachability calculator for quick result path finding before running the algorithm
   /// </summary>
@@ -593,14 +592,13 @@ namespace Vehicles
     /// <param name="vehicleDef"></param>
     public bool CanReachBase(IntVec3 cell, VehicleDef vehicleDef)
     {
-      if (Current.ProgramState != ProgramState.Playing)
+		TraverseParms traverseParms = TraverseParms.For(TraverseMode.ByPawn);
+		if (Current.ProgramState != ProgramState.Playing)
       {
-        return CanReachVehicle(cell, MapGenerator.PlayerStartSpot, PathEndMode.OnCell,
-          TraverseParms.For(TraverseMode.PassDoors,
-            Danger.Deadly, false));
+        return CanReachVehicle(cell, MapGenerator.PlayerStartSpot, PathEndMode.OnCell, traverseParms);
       }
 
-      if (!GenGridVehicles.Walkable(cell, vehicleDef, mapping))
+      if (!cell.Walkable(vehicleDef, mapping))
       {
         return false;
       }
@@ -615,7 +613,6 @@ namespace Vehicles
         }
       }
 
-      TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false);
       if (faction == Faction.OfPlayer)
       {
         List<Building> allBuildingsColonist = mapping.map.listerBuildings.allBuildingsColonist;
@@ -651,7 +648,8 @@ namespace Vehicles
     public bool CanReachBiggestMapEdgeRoom(IntVec3 c)
     {
       VehicleRoom usableRoom = null;
-      //ConcurrentDictionary.Keys snapshots, but ConcurrentDictionary.GetEnumerator does not. Must utilize Key or Value collections for thread safe enumeration
+      // ConcurrentDictionary.Keys snapshots, but ConcurrentDictionary.GetEnumerator does not.
+			// Must utilize Key or Value collections for thread safe enumeration
       foreach (VehicleRoom room in regionGrid.allRooms.Keys)
       {
         if (room.TouchesMapEdge)
@@ -1137,4 +1135,3 @@ namespace Vehicles
       }
     }
   }
-}

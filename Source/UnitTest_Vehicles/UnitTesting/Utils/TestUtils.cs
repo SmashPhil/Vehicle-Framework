@@ -1,4 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
