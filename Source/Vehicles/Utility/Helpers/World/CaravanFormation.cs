@@ -193,7 +193,6 @@ public static class CaravanFormation
 		}
 		CaravanHelper.BoardAllAssignedPawns();
 		formation.AddItemsFromTransferablesToRandomInventories(formation.AllPawnsAndVehicles);
-		RoleHelper.Distribute(formation.vehicles, formation.pawns);
 
 		List<CaravanGrouper.Group> vehicles =
 			CaravanGrouper.ExtractIncompatibleCaravanGroups(formation.vehicles, formation.pawns);

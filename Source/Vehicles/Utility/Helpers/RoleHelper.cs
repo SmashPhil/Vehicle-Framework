@@ -1,90 +1,180 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using RimWorld;
 using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
 
+// TODO - use RoleAssignment
 public static class RoleHelper
 {
-	// TODO - use RoleAssignment
-	public static void Distribute(List<VehiclePawn> vehicles, List<Pawn> pawns)
+	public static void Distribute(in List<VehiclePawn> vehicles, List<Pawn> pawns)
 	{
 		if (vehicles.NullOrEmpty())
 		{
 			Trace.Fail("Trying to distribute to pawns with no vehicles listed.");
 			return;
 		}
-		pawns.RemoveAll(Ext_Vehicles.InVehicle);
-		RotatingList<VehiclePawn> vehicleRotator = vehicles.ToRotatingList();
-		DistributeOnPriority(vehicleRotator, pawns, HandlingType.Movement);
-		DistributeOnPriority(vehicleRotator, pawns, HandlingType.Turret);
-		DistributeAll(vehicleRotator, pawns);
+		Distributor distributor = new(vehicles, pawns);
+		distributor.DistributeOnPriority(HandlingType.Movement);
+		distributor.DistributeOnPriority(HandlingType.Turret);
+		distributor.DistributeToAnyRole();
 	}
 
-	private static void DistributeOnPriority(RotatingList<VehiclePawn> vehicles, List<Pawn> pawns,
-		HandlingType handlingType)
+	public static void DistributeAll(in List<VehiclePawn> vehicles, List<Pawn> pawns)
 	{
-		for (int i = pawns.Count - 1; i >= 0; i--)
+		if (vehicles.NullOrEmpty())
 		{
-			Pawn pawn = pawns[i];
-			if (pawn.ShouldAlwaysTransferToVehiclesCargo())
-			{
-				vehicles.Next.AddOrTransfer(pawn);
-				pawns.RemoveAt(i);
-				continue;
-			}
-
-			VehicleRoleHandler handler = GetAvailableHandler(pawn, vehicles, handlingType);
-			if (handler != null && handler.vehicle.TryAddPawn(pawn, handler))
-			{
-				pawns.RemoveAt(i);
-			}
+			Trace.Fail("Trying to distribute to pawns with no vehicles listed.");
+			return;
 		}
-		return;
+		Distributor distributor = new(vehicles, pawns);
+		distributor.DistributeNonColonistsToCargo();
+		distributor.DistributeOnPriority(HandlingType.Movement);
+		distributor.DistributeOnPriority(HandlingType.Turret);
+		distributor.DistributeToAnyRole();
+		distributor.DistributeFallbackToCargo();
+	}
 
-		static VehicleRoleHandler GetAvailableHandler(Pawn pawn, List<VehiclePawn> vehicles, HandlingType handlingType)
+	private class Distributor
+	{
+		private readonly RotatingList<VehiclePawn> vehicles;
+		private readonly List<Pawn> pawns;
+
+		public Distributor(List<VehiclePawn> vehicles, List<Pawn> pawns)
 		{
-			foreach (VehiclePawn vehicle in vehicles)
+			pawns.RemoveAll(Ext_Vehicles.InVehicle);
+			this.pawns = pawns;
+			this.vehicles = [.. vehicles];
+		}
+
+		private VehiclePawn GetNextAvailableVehicle(Pawn pawn, Func<VehiclePawn, Pawn, bool> predicate)
+		{
+			int index = vehicles.Index;
+			do
 			{
-				VehicleRoleHandler handler = vehicle.GetNextAvailableHandler(pawn, handlingType);
-				if (handler != null)
-					return handler;
+				VehiclePawn vehicle = vehicles.Next;
+				if (predicate(vehicle, pawn))
+					return vehicle;
 			}
+			while (vehicles.Index != index);
+
 			return null;
 		}
-	}
 
-	private static void DistributeAll(RotatingList<VehiclePawn> vehicles, List<Pawn> pawns)
-	{
-		int pawnIndex = pawns.Count - 1;
-		while (pawns.Count > 0 && pawnIndex >= 0 && vehicles.Count > 0)
+		private bool CanAddToCargo(VehiclePawn vehicle, Pawn pawn)
 		{
-			VehiclePawn vehicle = vehicles.Next;
-			if (NoRemainingSeats(vehicle))
-			{
-				bool removed = vehicles.Remove(vehicle);
-				Trace.IsTrue(removed, "Failed to remove vehicle from distribution.");
-				continue;
-			}
-			Pawn pawn = pawns[pawnIndex];
-			Assert.IsFalse(pawn.InVehicle());
-			if (!vehicle.TryAddPawn(pawn))
-			{
-				Log.Error($"Unable to add {pawn} to vehicle {vehicle} during final distribution.");
-			}
-			pawnIndex--;
+			if (!pawn.CanBeTransferredToVehiclesCargo())
+				return false;
+			if (MassUtility.IsOverEncumbered(vehicle))
+				return false;
+
+			float vehicleMass = MassUtility.InventoryMass(pawn);
+			float mass = MassUtility.GearAndInventoryMass(pawn);
+			return vehicleMass + mass <= vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
 		}
-		return;
 
-		static bool NoRemainingSeats(VehiclePawn vehicle)
+		/// <summary>
+		/// Board pawns that must always be loaded into cargo
+		/// </summary>
+		public void DistributeNonColonistsToCargo()
 		{
-			foreach (VehicleRoleHandler handler in vehicle.handlers)
+			for (int i = pawns.Count - 1; i >= 0; i--)
 			{
-				if (handler.AreSlotsAvailable)
-					return false;
+				Pawn pawn = pawns[i];
+				if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
+					continue;
+
+				if (GetNextAvailableVehicle(pawn, CanAddToCargo) is { } vehicle)
+				{
+					vehicle.AddOrTransfer(pawn);
+					pawns.RemoveAt(i);
+				}
 			}
-			return true;
+			return;
+		}
+
+		/// <summary>
+		/// Add pawns to cargo if they are eligible as a fallback for situations where all pawns
+		/// want to be boarded if possible. ie. Aerial vehicles and boats
+		/// </summary>
+		public void DistributeFallbackToCargo()
+		{
+			for (int i = pawns.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = pawns[i];
+				if (!pawn.CanBeTransferredToVehiclesCargo())
+					continue;
+
+				if (GetNextAvailableVehicle(pawn, CanAddToCargo) is { } vehicle)
+				{
+					vehicle.AddOrTransfer(pawn);
+					pawns.RemoveAt(i);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Distribute pawns that can operate roles of this handling type to those roles.
+		/// </summary>
+		/// <param name="handlingType"></param>
+		public void DistributeOnPriority(HandlingType handlingType)
+		{
+			for (int i = pawns.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = pawns[i];
+				if (pawn.ShouldAlwaysTransferToVehiclesCargo())
+					continue;
+
+				VehicleRoleHandler handler = GetAvailableHandler(pawn, vehicles, handlingType);
+				if (handler != null && handler.vehicle.TryAddPawn(pawn, handler))
+				{
+					pawns.RemoveAt(i);
+				}
+			}
+			return;
+
+			static VehicleRoleHandler GetAvailableHandler(Pawn pawn, List<VehiclePawn> vehicles, HandlingType handlingType)
+			{
+				foreach (VehiclePawn vehicle in vehicles)
+				{
+					VehicleRoleHandler handler = vehicle.GetNextAvailableHandler(pawn, handlingType);
+					if (handler != null)
+						return handler;
+				}
+				return null;
+			}
+		}
+
+		/// <summary>
+		/// Send all non-cargo pawns to unfilled roles.
+		/// </summary>
+		public void DistributeToAnyRole()
+		{
+			for (int i = pawns.Count - 1; i >= 0; i--)
+			{
+				Pawn pawn = pawns[i];
+				if (GetNextAvailableVehicle(pawn, CanAddToVehicle) is { } vehicle && !vehicle.TryAddPawn(pawn))
+				{
+					Log.Error($"Unable to add {pawn} to vehicle {vehicle}.");
+				}
+			}
+			return;
+
+			static bool CanAddToVehicle(VehiclePawn vehicle, Pawn pawn)
+			{
+				foreach (VehicleRoleHandler handler in vehicle.handlers)
+				{
+					if ((handler.role.handlingTypes & HandlingType.Movement) != 0 && !handler.CanOperateRole(pawn))
+						continue;
+
+					if (handler.AreSlotsAvailable)
+						return true;
+				}
+				return false;
+			}
 		}
 	}
 }

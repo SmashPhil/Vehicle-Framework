@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using RimWorld.Planet;
@@ -19,6 +20,10 @@ public class VehicleWorldObjectsHolder : WorldComponent
 		vehicleCaravans.RemoveAll(c => c is null);
 		stashedVehicles.RemoveAll(b => b is null);
 	}
+
+	// TODO 1.6.2136 - SOS2
+	[Obsolete("Just fetch from WorldComponents or cache. Singleton statics will be removed.")]
+	public static VehicleWorldObjectsHolder Instance => Find.World.GetComponent<VehicleWorldObjectsHolder>();
 
 	public List<AerialVehicleInFlight> AerialVehicles => aerialVehicles;
 

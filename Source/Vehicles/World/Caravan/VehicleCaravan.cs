@@ -334,15 +334,12 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 
 		using (new RecacheDisabler(this))
 		{
-			foreach (Pawn pawn in DismountedPawnsListForReading)
-			{
-				vehicle.TryAddPawn(pawn);
-			}
+			// pawns list is modified when distributed
+			RoleHelper.DistributeAll(vehicles, DismountedPawns.ToList());
 		}
 		RecacheVehicles();
 
-		int pawnCount = PawnsListForReading.Count(CountNonCargoPawns);
-		if (pawnCount > vehicle.TotalSeats)
+		if (pawns.Count > 1)
 		{
 			Find.WindowStack.Add(new Dialog_Confirm(
 				"VF_PawnsLeftBehindConfirm".Translate(),
@@ -354,14 +351,6 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 			LaunchAction();
 		}
 		return;
-
-		static bool CountNonCargoPawns(Pawn pawn)
-		{
-			if (pawn is VehiclePawn)
-				return false;
-
-			return !pawn.CanBeTransferredToVehiclesCargo();
-		}
 
 		void LaunchAction()
 		{

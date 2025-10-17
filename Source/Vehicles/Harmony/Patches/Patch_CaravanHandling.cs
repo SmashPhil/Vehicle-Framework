@@ -76,11 +76,6 @@ internal class Patch_CaravanHandling : IPatchCategory
 			postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
 				nameof(IdleVehicleCaravans)));
 
-		//HarmonyPatcher.Patch(
-		//	original: AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter"),
-		//	prefix: null, postfix: null,
-		//	transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
-		//		nameof(DoEnterWithShipsTranspiler)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(CaravanEnterMapUtility),
 				nameof(CaravanEnterMapUtility.Enter),
@@ -628,47 +623,6 @@ internal class Patch_CaravanHandling : IPatchCategory
 		}
 	}
 
-	private static IEnumerable<CodeInstruction> DoEnterWithShipsTranspiler(
-		IEnumerable<CodeInstruction> instructions, ILGenerator ilg)
-	{
-		List<CodeInstruction> instructionList = instructions.ToList();
-
-		for (int i = 0; i < instructionList.Count; i++)
-		{
-			CodeInstruction instruction = instructionList[i];
-
-			if (instruction.Calls(AccessTools.Method(typeof(CaravanEnterMapUtility),
-				nameof(CaravanEnterMapUtility.Enter),
-				[
-					typeof(Caravan), typeof(Map),
-					typeof(CaravanEnterMode), typeof(CaravanDropInventoryMode), typeof(bool),
-					typeof(Predicate<IntVec3>)
-				])))
-			{
-				Label label = ilg.DefineLabel();
-				Label brlabel = ilg.DefineLabel();
-
-				yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-				yield return new CodeInstruction(opcode: OpCodes.Call,
-					operand: AccessTools.Method(typeof(Ext_Caravan), nameof(Ext_Caravan.HasVehicle),
-						[typeof(Caravan)]));
-				yield return new CodeInstruction(opcode: OpCodes.Brfalse, label);
-
-				yield return new CodeInstruction(opcode: OpCodes.Call,
-					operand: AccessTools.Method(typeof(EnterMapUtilityVehicles),
-						nameof(EnterMapUtilityVehicles.EnterAndSpawn)));
-				yield return new CodeInstruction(opcode: OpCodes.Br, brlabel);
-
-				instruction.labels.Add(label);
-				yield return instruction; //CALL : CaravanEnterMapUtility::Enter
-				instruction = instructionList[++i];
-
-				instruction.labels.Add(brlabel);
-			}
-			yield return instruction;
-		}
-	}
-
 	private static bool EnterMapVehiclesCatchAll1(Caravan caravan, Map map,
 		CaravanEnterMode enterMode,
 		CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop,
@@ -681,7 +635,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 				dropInventoryMode = dropInventoryMode,
 				draftColonists = draftColonists
 			};
-			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, in spawnParams);
+			EnterMapUtilityVehicles.EnterMap(vehicleCaravan, map, in spawnParams);
 			return false;
 		}
 		return true;
@@ -698,7 +652,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 				dropInventoryMode = dropInventoryMode,
 				draftColonists = draftColonists
 			};
-			EnterMapUtilityVehicles.EnterAndSpawn(vehicleCaravan, map, in spawnParams);
+			EnterMapUtilityVehicles.EnterMap(vehicleCaravan, map, in spawnParams);
 			return false;
 		}
 		return true;

@@ -16,7 +16,7 @@ namespace Vehicles.UnitTesting;
 [TestDescription("VehicleCaravans generate a camp, spawn all pawns, and correctly transition from world to local map.")]
 internal sealed class UnitTest_VehicleCaravan_EnterMap
 {
-	private static readonly IntVec3 TestMapSize = new IntVec3(50, 1, 50);
+	private static readonly IntVec3 TestMapSize = new IntVec3(75, 1, 75);
 
 	private static readonly MethodInfo ArriveAtSiteMethod = 
 		AccessTools.Method(typeof(CaravanArrivalAction_VisitSite), "DoEnter");

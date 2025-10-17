@@ -20,7 +20,7 @@ public static class EnterMapUtilityVehicles
 	}
 
 	// TODO 1.6.2136
-	[Obsolete("Use overload without extraCellValidator", error: true)]
+	[Obsolete("Use EnterMap instead.", error: true)]
 	public static void EnterAndSpawn(VehicleCaravan caravan, Map map, CaravanEnterMode enterMode,
 		CaravanDropInventoryMode dropInventoryMode = CaravanDropInventoryMode.DoNotDrop,
 		bool draftColonists = false, Predicate<IntVec3> extraValidator = null)
@@ -37,7 +37,7 @@ public static class EnterMapUtilityVehicles
 			CellRect.WholeMap(map).GetClosestEdge(enterCell) :
 			Rot4.North;
 		// Removed and pulls straight from caravan pawn lists
-		SpawnVehicles(caravan, /*caravan.PawnsListForReading.Where(p => !p.InVehicle()).ToList()*/ map,
+		SpawnCaravanPawns(caravan, /*caravan.PawnsListForReading.Where(p => !p.InVehicle()).ToList(),*/ map,
 			enterCell, edge, draftColonists);
 	}
 
@@ -59,7 +59,7 @@ public static class EnterMapUtilityVehicles
 		}
 	}
 
-	public static void EnterAndSpawn(VehicleCaravan caravan, Map map, in SpawnParams spawnParams)
+	public static void EnterMap(VehicleCaravan caravan, Map map, in SpawnParams spawnParams)
 	{
 		if (spawnParams.enterMode == CaravanEnterMode.None)
 		{
@@ -71,7 +71,7 @@ public static class EnterMapUtilityVehicles
 		Rot4 edge = spawnParams.enterMode == CaravanEnterMode.Edge ?
 			CellRect.WholeMap(map).GetClosestEdge(enterCell) :
 			Rot4.North;
-		SpawnVehicles(caravan, map, enterCell, edge, spawnParams.draftColonists);
+		SpawnCaravanPawns(caravan, map, enterCell, edge, spawnParams.draftColonists);
 	}
 
 	private static IntVec3 GetEnterCellVehicle(VehicleCaravan caravan, Map map, in SpawnParams spawnParams)
@@ -89,16 +89,20 @@ public static class EnterMapUtilityVehicles
 		}
 	}
 
-	private static void SpawnVehicles(VehicleCaravan caravan, Map map, IntVec3 enterCell, Rot4 edge, bool draftColonists)
+	[Obsolete("Method signature changed, patch SpawnCaravanPawns instead.")]
+	private static void SpawnVehicles(VehicleCaravan caravan, List<Pawn> pawns, Map map, IntVec3 enterCell, Rot4 edge, bool draftColonists)
+	{
+	}
+
+	private static void SpawnCaravanPawns(VehicleCaravan caravan, Map map, IntVec3 enterCell, Rot4 edge, bool draftColonists)
 	{
 		using (new VehicleCaravan.RecacheDisabler(caravan))
 		{
 			bool coastalSpawn = caravan.HasBoat();
 			using var cr = GlobalObjectPool.Get(out List<Pawn> pawns);
 			pawns.AddRange(caravan.pawns);
-			while (pawns.Count > 0)
+			foreach (Pawn pawn in pawns)
 			{
-				Pawn pawn = pawns.Pop();
 				IntVec3 cell = CellFinderExtended.RandomSpawnCellForPawnNear(enterCell, map, pawn,
 					cell => cell.StandableUnknown(pawn, map), coastalSpawn);
 				IntVec3 loc = pawn.ClampToMap(cell, map, extraOffset: 2);
@@ -122,6 +126,10 @@ public static class EnterMapUtilityVehicles
 					vehicle.ignition.Drafted = draftColonists;
 				}
 			}
+			// TODO 1.6.2136 - Trains of the Rim post-spawn patch
+#pragma warning disable CS0618
+			SpawnVehicles(caravan, pawns, map, enterCell, edge, draftColonists);
+#pragma warning restore CS0618
 		}
 		
 		if (caravan.pawns.Count == 0)

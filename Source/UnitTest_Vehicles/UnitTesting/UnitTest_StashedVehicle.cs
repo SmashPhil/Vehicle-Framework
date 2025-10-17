@@ -5,6 +5,7 @@ using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
+using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
@@ -112,9 +113,12 @@ internal sealed class UnitTest_StashedVehicle
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
 		using ScopeWorldObject swc = new(stashedVehicle);
+		using ScopeWorldObject sc = new(caravan);
 		Expect.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle));
 		CheckAnyNonWorldPawns.Invoke(caravan, null);
 		Expect.AreEqual(caravan.PawnsListForReading.Count, Drivers + Passengers + Animals);
+		List<WorldObject> caravansAtTile = Find.WorldObjects.ObjectsAt(stashedVehicle.Tile).Where(obj => obj is Caravan).ToList();
+		Expect.AreEqual(caravansAtTile.Count, 1);
 	}
 
 	[Test]
@@ -149,15 +153,15 @@ internal sealed class UnitTest_StashedVehicle
 		Expect.IsFalse(vehicle.inventory.innerContainer.Contains(animal), "Animal Not Itemized");
 
 		VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
+		using ScopeWorldObject smvc = new(mergedVehicleCaravan);
 		Assert.IsNotNull(mergedVehicleCaravan);
 		Expect.IsTrue(mergedVehicleCaravan.PawnsListForReading.Contains(colonist), "Passenger Transferred");
 		Expect.IsTrue(mergedVehicleCaravan.PawnsListForReading.Contains(animal), "Animal Transferred");
 		Expect.IsTrue(mergedVehicleCaravan.ContainsPawn(vehicle), "Vehicle Merged Into Caravan");
 		Expect.IsTrue(caravan.Destroyed, "Caravan Destroyed");
 		Expect.IsTrue(stashedVehicle.Destroyed, "StashedVehicle Destroyed");
-
-		mergedVehicleCaravan.Destroy();
-		Assert.IsTrue(mergedVehicleCaravan.Destroyed);
+		List<WorldObject> caravansAtTile = Find.WorldObjects.ObjectsAt(mergedVehicleCaravan.Tile).Where(obj => obj is Caravan).ToList();
+		Expect.AreEqual(caravansAtTile.Count, 1);
 	}
 
 	[Test]
@@ -206,9 +210,11 @@ internal sealed class UnitTest_StashedVehicle
 		VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
 		using ScopeWorldObject smvc = new(mergedVehicleCaravan);
 		mergedVehicleCaravan.RecacheVehicles();
-		Expect.AreEqual(mergedVehicleCaravan.PawnsListForReading.Count, 1 + group.pawns.Count);
+		// +1 for vehicle
+		Expect.AreEqual(mergedVehicleCaravan.PawnsListForReading.Count, group.pawns.Count + 1);
 		Expect.All(excessPawns, pawn => mergedVehicleCaravan.PawnsListForReading.Contains(pawn));
-		Expect.AreEqual(mergedVehicleCaravan.DismountedPawnsListForReading.Count, ExcessPawnCount);
+		// +1 for animal, recovering stash only boards roles and send animals to cargo.
+		Expect.AreEqual(mergedVehicleCaravan.DismountedPawnsListForReading.Count, ExcessPawnCount + 1);
 	}
 
 	[Test]
