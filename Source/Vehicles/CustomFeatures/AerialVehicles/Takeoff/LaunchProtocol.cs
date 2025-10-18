@@ -612,7 +612,7 @@ public abstract class LaunchProtocol : IExposable
           {
             Current.Game.CurrentMap = mapParent.Map;
             CameraJumper.TryHideWorld();
-            LandingTargeter.Instance.BeginTargeting(vehicle,
+            LandingTargeter.Instance.BeginTargeting(vehicle, mapParent.Map,
               action: (landingCell, rot) => StartTargetingLocalMap(vehicle, targetData, mapParent, landingCell, rot),
               allowRotating: vehicle.VehicleDef.rotatable,
               targetValidator: targetInfo => targetInfo.Cell.InBounds(mapParent.Map) &&

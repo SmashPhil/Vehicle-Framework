@@ -173,7 +173,7 @@ internal class Patch_WorldHandling : IPatchCategory
 		if (LandingTargeter.Instance.ForcedTargeting)
 		{
 			SoundDefOf.ClickReject.PlayOneShotOnCamera();
-			Messages.Message("MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
+			Messages.Message("VF_MustTargetLanding".Translate(), MessageTypeDefOf.RejectInput);
 			return false;
 		}
 		return true;

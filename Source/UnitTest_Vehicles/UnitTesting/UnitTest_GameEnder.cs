@@ -396,7 +396,7 @@ internal sealed class UnitTest_GameEnder
 		group.BoardAll();
 		Assert.IsFalse(group.vehicle.Spawned);
 
-		LandingTargeter.Instance.BeginTargeting(group.vehicle, action: NoOpTargeterAction);
+		LandingTargeter.Instance.BeginTargeting(group.vehicle, map: null, action: NoOpTargeterAction);
 		gameEnder.CheckOrUpdateGameOver();
 		Expect.IsFalse(gameEnder.gameEnding);
 		LandingTargeter.Instance.StopTargeting();

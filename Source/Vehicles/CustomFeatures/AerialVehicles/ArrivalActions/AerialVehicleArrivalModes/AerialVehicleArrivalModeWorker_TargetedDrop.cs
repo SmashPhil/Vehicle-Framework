@@ -8,7 +8,7 @@ public class AerialVehicleArrivalModeWorker_TargetedDrop : AerialVehicleArrivalM
   public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)
   {
     CameraJumper.TryJump(map.Center, map);
-    LandingTargeter.Instance.BeginTargeting(vehicle, map, delegate(LocalTargetInfo target, Rot4 rot)
+    LandingTargeter.Instance.BeginTargetingAndFocusMap(vehicle, map, delegate(LocalTargetInfo target, Rot4 rot)
     {
       VehicleSkyfaller_Arriving skyfaller =
         (VehicleSkyfaller_Arriving)VehicleSkyfallerMaker.MakeSkyfaller(
