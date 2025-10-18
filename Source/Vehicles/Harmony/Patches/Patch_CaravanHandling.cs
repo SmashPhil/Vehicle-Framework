@@ -9,6 +9,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
+using SmashTools.Performance;
 using UnityEngine;
 using Vehicles.World;
 using Verse;
@@ -21,6 +22,13 @@ namespace Vehicles;
 internal class Patch_CaravanHandling : IPatchCategory
 {
 	private static readonly List<Thing> TmpAerialVehicleThingsWillToBuy = [];
+	private static readonly FuncPtr<Pawn, Pawn, Caravan, bool> IsValidDoctorFor;
+
+	static Patch_CaravanHandling()
+	{
+		IsValidDoctorFor = new FuncPtr<Pawn, Pawn, Caravan, bool>(AccessTools.Method(typeof(CaravanTendUtility), 
+			"IsValidDoctorFor"));
+	}
 
 	PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
 
@@ -201,6 +209,11 @@ internal class Patch_CaravanHandling : IPatchCategory
 			 .GetGetMethod(nonPublic: true),
 			prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
 				nameof(VehicleSocialTabPawns)));
+		HarmonyPatcher.Patch(
+			original: AccessTools.Method(typeof(CaravanTendUtility),
+				nameof(CaravanTendUtility.CheckTend)),
+			prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+				nameof(CheckTendInVehicleCaravan)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(CaravanNeedsTabUtility),
 				nameof(CaravanNeedsTabUtility.DoRows)),
@@ -618,8 +631,8 @@ internal class Patch_CaravanHandling : IPatchCategory
 	{
 		if (!__result.NullOrEmpty())
 		{
-			__result.RemoveAll(c =>
-				c is VehicleCaravan vehicleCaravan && vehicleCaravan.vehiclePather.MovingNow);
+			__result.RemoveAll(static caravan => caravan is VehicleCaravan vehicleCaravan &&
+				vehicleCaravan.vehiclePather.MovingNow);
 		}
 	}
 
@@ -898,6 +911,24 @@ internal class Patch_CaravanHandling : IPatchCategory
 				}
 			}
 			__result = pawns;
+			return false;
+		}
+		return true;
+	}
+
+	private static bool CheckTendInVehicleCaravan(Caravan caravan, int delta)
+	{
+		const int TendIntervalTicks = 1250;
+
+		if (caravan is VehicleCaravan vehicleCaravan)
+		{
+			foreach (Pawn pawn in vehicleCaravan.AllPawnsAndVehiclePassengers)
+			{
+				if (IsValidDoctorFor.Invoke(pawn, null, vehicleCaravan) && pawn.IsHashIntervalTick(TendIntervalTicks, delta))
+				{
+					CaravanTendUtility.TryTendToAnyPawn(vehicleCaravan);
+				}
+			}
 			return false;
 		}
 		return true;
