@@ -615,7 +615,7 @@ public abstract class LaunchProtocol : IExposable
             LandingTargeter.Instance.BeginTargeting(vehicle,
               action: (landingCell, rot) => StartTargetingLocalMap(vehicle, targetData, mapParent, landingCell, rot),
               allowRotating: vehicle.VehicleDef.rotatable,
-              targetValidator: targetInfo =>
+              targetValidator: targetInfo => targetInfo.Cell.InBounds(mapParent.Map) &&
                 !Ext_Vehicles.IsRoofRestricted(vehicle.VehicleDef, targetInfo.Cell, mapParent.Map));
           });
       }

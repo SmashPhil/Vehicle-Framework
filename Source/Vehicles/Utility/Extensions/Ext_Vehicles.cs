@@ -61,7 +61,7 @@ public static class Ext_Vehicles
 	public static bool IsRoofRestricted(VehicleDef vehicleDef, IntVec3 cell, Map map)
 	{
 		CompProperties_VehicleLauncher compProperties =
-			vehicleDef.GetCompProperties<CompProperties_VehicleLauncher>();
+			vehicleDef.GetSortedCompProperties<CompProperties_VehicleLauncher>();
 		if (compProperties is null)
 		{
 			return true;
