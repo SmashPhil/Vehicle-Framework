@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Vehicles;
 
-namespace Vehicles
+public enum FlashGridType
 {
-	public enum FlashGridType
-	{
-		None,
-		CoverGrid,
-		GasGrid,
-		PositionManager,
-		ThingGrid,
-	}
+	None,
+	CoverGrid,
+	GasGrid,
+	PositionManager,
+	ThingGrid,
+	ListerThings
 }

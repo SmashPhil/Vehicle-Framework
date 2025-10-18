@@ -238,7 +238,7 @@ public partial class VehiclePawn
 			{
 				return;
 			}
-
+			RegionListersUpdater.DeregisterInRegions(this, Map);
 			Map.thingGrid.Deregister(this);
 			Map.coverGrid.DeRegister(this);
 		}
@@ -249,6 +249,7 @@ public partial class VehiclePawn
 		{
 			Map.thingGrid.Register(this);
 			Map.coverGrid.Register(this);
+			RegionListersUpdater.RegisterInRegions(this, this.Map);
 			ReclaimPosition();
 
 			CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, oldRot);
