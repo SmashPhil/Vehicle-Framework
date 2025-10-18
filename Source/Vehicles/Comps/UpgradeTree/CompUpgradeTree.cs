@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using RimWorld;
 using SmashTools;
+using SmashTools.Performance;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -24,7 +25,6 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 
 	private static readonly Texture2D CancelIcon = ContentFinder<Texture2D>.Get("UI/Designators/Cancel");
 
-	private static readonly StringBuilder InspectStringBuilder = new();
 	private static readonly Color FrameColor = new(0.6f, 0.6f, 0.6f);
 
 	private Material cachedCornerMat;
@@ -527,16 +527,16 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 			if (StoredCostSatisfied)
 				return $"{"WorkLeft".Translate()}: {Vehicle.CompUpgradeTree.upgrade.WorkLeft.ToStringWorkAmount()}";
 
-			using ClearStringOnDispose csd = new(InspectStringBuilder);
+			using var sr = GlobalObjectPool.Get(out StringBuilder stringBuilder);
 			foreach (ThingDefCountClass thingDefCount in NodeUnlocking.ingredients)
 			{
 				int count = upgradeContainer.TotalStackCountOfDef(thingDefCount.thingDef);
 				if (count > 0)
 				{
-					InspectStringBuilder.AppendWithComma(thingDefCount.Summary);
+					stringBuilder.AppendWithComma($"{count}x {thingDefCount.thingDef.LabelCap}");
 				}
 			}
-			return InspectStringBuilder.ToString();
+			return stringBuilder.ToString();
 		}
 		return null;
 	}

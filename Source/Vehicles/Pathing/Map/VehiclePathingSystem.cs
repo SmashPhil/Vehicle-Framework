@@ -156,7 +156,7 @@ public sealed class VehiclePathingSystem : MapComponent
 		switch (deferment)
 		{
 			case GridDeferment.Lazy:
-			break;
+				break;
 			case GridDeferment.Deferred:
 				if ((grids & GridSelection.PathGrids) != 0)
 				{
@@ -168,11 +168,11 @@ public sealed class VehiclePathingSystem : MapComponent
 					deferredGridGeneration.GenerateAllRegionGrids();
 				}
 
-			break;
+				break;
 			case GridDeferment.Forced:
 				GeneratePathGrids();
 				GenerateRegionsParallel();
-			break;
+				break;
 			default:
 				throw new NotImplementedException();
 		}
@@ -230,7 +230,7 @@ public sealed class VehiclePathingSystem : MapComponent
 		}
 
 		DeepProfiler.Start("Vehicle Regions");
-		Parallel.ForEach(GridOwners.AllOwners, delegate(VehicleDef vehicleDef)
+		Parallel.ForEach(GridOwners.AllOwners, delegate (VehicleDef vehicleDef)
 		{
 			LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
 			VehiclePathData vehiclePathData = this[vehicleDef];
@@ -326,22 +326,22 @@ public sealed class VehiclePathingSystem : MapComponent
 			{
 				case FlashGridType.CoverGrid:
 					FlashCoverGrid();
-				break;
+					break;
 				case FlashGridType.GasGrid:
 					FlashGasGrid();
-				break;
+					break;
 				case FlashGridType.PositionManager:
 					FlashClaimants();
-				break;
+					break;
 				case FlashGridType.ThingGrid:
 					FlashThingGrid();
-				break;
+					break;
 				case FlashGridType.ListerThings:
 					FlashListerThings();
 					break;
 				default:
 					Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
-				break;
+					break;
 			}
 		}
 	}
@@ -373,54 +373,57 @@ public sealed class VehiclePathingSystem : MapComponent
 	{
 		if (!Find.TickManager.Paused)
 		{
-		foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-		{
-			float cover = CoverUtility.TotalSurroundingCoverScore(cell, map);
-			map.debugDrawer.FlashCell(cell, cover / 8, cover.ToString("F2"), duration: 1);
+			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+			{
+				float cover = CoverUtility.TotalSurroundingCoverScore(cell, map);
+				map.debugDrawer.FlashCell(cell, cover / 8, cover.ToString("F2"), duration: 1);
+			}
 		}
-	}
 	}
 
 	private void FlashGasGrid()
 	{
 		if (!Find.TickManager.Paused)
 		{
-		foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-		{
-			if (!map.gasGrid.GasCanMoveTo(cell)) continue;
+			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+			{
+				if (!map.gasGrid.GasCanMoveTo(cell)) 
+					continue;
 
-			float gas = map.gasGrid.DensityPercentAt(cell, GasType.BlindSmoke);
-			map.debugDrawer.FlashCell(cell, gas / 8, gas.ToString("F2"), duration: 1);
+				float gas = map.gasGrid.DensityPercentAt(cell, GasType.BlindSmoke);
+				map.debugDrawer.FlashCell(cell, gas / 8, gas.ToString("F2"), duration: 1);
+			}
 		}
-	}
 	}
 
 	private void FlashClaimants()
 	{
 		if (!Find.TickManager.Paused)
 		{
-		VehiclePositionManager manager = map.GetDetachedMapComponent<VehiclePositionManager>();
-		foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-		{
-			if (!manager.PositionClaimed(cell)) continue;
+			VehiclePositionManager manager = map.GetDetachedMapComponent<VehiclePositionManager>();
+			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+			{
+				if (!manager.PositionClaimed(cell)) 
+					continue;
 
-			map.debugDrawer.FlashCell(cell, 1, duration: 1);
+				map.debugDrawer.FlashCell(cell, 1, duration: 1);
+			}
 		}
-	}
 	}
 
 	private void FlashThingGrid()
 	{
 		if (!Find.TickManager.Paused)
 		{
-		foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-		{
-			Thing thing = map.thingGrid.ThingAt(cell, ThingCategory.Pawn);
-			if (thing is not VehiclePawn) continue;
+			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+			{
+				Thing thing = map.thingGrid.ThingAt(cell, ThingCategory.Pawn);
+				if (thing is not VehiclePawn) 
+					continue;
 
-			map.debugDrawer.FlashCell(cell, 1, duration: 1);
+				map.debugDrawer.FlashCell(cell, 1, duration: 1);
+			}
 		}
-	}
 	}
 
 	private void UpdateRegions()
