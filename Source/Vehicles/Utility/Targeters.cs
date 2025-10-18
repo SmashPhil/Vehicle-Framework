@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SmashTools;
 using Vehicles.World;
 using Verse;
 
@@ -17,6 +18,8 @@ public static class Targeters
 
   static Targeters()
   {
+		GameEvent.OnGameDisposing += ClearAllTargeters;
+
     foreach (Type type in typeof(BaseTargeter).InstantiableDescendantsAndSelf())
     {
       BaseTargeter targeter = (BaseTargeter)Activator.CreateInstance(type, null);
@@ -31,7 +34,16 @@ public static class Targeters
     }
   }
 
-  internal static void PushTargeter(BaseTargeter targeter)
+	private static void ClearAllTargeters()
+	{
+		CurrentTargeter?.StopTargeting();
+		CurrentTargeter = null;
+		CurrentWorldTargeter?.StopTargeting();
+		CurrentWorldTargeter = null;
+	}
+
+
+	internal static void PushTargeter(BaseTargeter targeter)
   {
     if (CurrentTargeter == targeter) return;
 
