@@ -19,6 +19,11 @@ namespace Vehicles
 	                                  IParallelRenderer, IComparable<VehicleRoleHandler>
 	{
 		/// <summary>
+		/// Comfort pawn receives when placed inside vehicle cargo.
+		/// </summary>
+		public const float ComfortInsideCargo = 0.15f;
+
+		/// <summary>
 		/// innerContainer for role instance
 		/// </summary>
 		public ThingOwner<Pawn> thingOwner;

@@ -118,6 +118,14 @@ public partial class VehiclePawn
 	[Profile]
 	protected override void TickInterval(int delta)
 	{
+		if (cachedComps != null)
+		{
+			for (int i = 0; i < cachedComps.Count; i++)
+			{
+				cachedComps[i].CompTickInterval(delta);
+			}
+		}
+
 		ageTracker.AgeTickInterval(delta);
 		records.RecordsTickInterval(delta);
 		if (!this.IsWorldPawn())
@@ -129,6 +137,8 @@ public partial class VehiclePawn
 		{
 			ticksSinceBoarded += delta;
 		}
+		
+		// TODO VF-301,302,303: Enable gas, toxic, and vacuum to affect pawns in vehicles.
 	}
 
 	[Profile]

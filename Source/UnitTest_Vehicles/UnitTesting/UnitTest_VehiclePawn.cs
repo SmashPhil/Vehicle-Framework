@@ -1,4 +1,5 @@
-﻿using DevTools.Testing;
+﻿using System.Linq;
+using DevTools.Testing;
 using RimWorld;
 using SmashTools;
 using UnityEngine.Assertions;
@@ -10,7 +11,41 @@ namespace Vehicles.UnitTesting;
 [TestCategory(TestCategoryNames.VehiclePawn)]
 internal sealed class UnitTest_VehiclePawn
 {
-  [Test]
+	[Test]
+	private void VehicleRoleParent()
+	{
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			drivers = 1
+		});
+		group.Spawn();
+
+		Pawn pawn = group.pawns.FirstOrDefault();
+		Assert.IsTrue(pawn.InVehicle());
+		Assert.IsTrue(pawn.ParentHolder is VehicleRoleHandler);
+		Thing firstParentThing = ThingOwnerUtility.GetFirstParentThing(pawn);
+		Expect.ReferencesAreEqual(group.vehicle, firstParentThing);
+	}
+
+	[Test]
+	private void VehicleInventoryParent()
+	{
+		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+		{
+			permissions = VehiclePermissions.Mobile,
+			animals = 1
+		});
+		group.Spawn();
+
+		Pawn pawn = group.pawns.FirstOrDefault();
+		Assert.IsTrue(pawn.InVehicle());
+		Assert.IsTrue(pawn.ParentHolder is Pawn_InventoryTracker { pawn: VehiclePawn });
+		Thing firstParentThing = ThingOwnerUtility.GetFirstParentThing(pawn);
+		Expect.ReferencesAreEqual(group.vehicle, firstParentThing);
+	}
+
+	[Test]
   private void SpawnDestroy()
   {
     VehicleDef vehicleDef =

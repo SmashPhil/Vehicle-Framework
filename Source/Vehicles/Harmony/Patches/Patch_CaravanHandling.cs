@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
 using RimWorld;
@@ -22,12 +21,17 @@ namespace Vehicles;
 internal class Patch_CaravanHandling : IPatchCategory
 {
 	private static readonly List<Thing> TmpAerialVehicleThingsWillToBuy = [];
-	private static readonly FuncPtr<Pawn, Pawn, Caravan, bool> IsValidDoctorFor;
+	private static readonly StaticFuncPtr<Pawn, Pawn, Caravan, bool> IsValidDoctorFor;
+	private static readonly FastInvokeHandler GetUsableBeds;
+	private static readonly FastInvokeHandler GetAndRemoveFirstAvailableBedFor;
 
 	static Patch_CaravanHandling()
 	{
-		IsValidDoctorFor = new FuncPtr<Pawn, Pawn, Caravan, bool>(AccessTools.Method(typeof(CaravanTendUtility), 
+		IsValidDoctorFor = new StaticFuncPtr<Pawn, Pawn, Caravan, bool>(AccessTools.Method(typeof(CaravanTendUtility),
 			"IsValidDoctorFor"));
+		GetUsableBeds = MethodInvoker.GetHandler(AccessTools.Method(typeof(Caravan_BedsTracker), "GetUsableBeds"));
+		GetAndRemoveFirstAvailableBedFor = MethodInvoker.GetHandler(AccessTools.Method(typeof(Caravan_BedsTracker),
+			"GetAndRemoveFirstAvailableBedFor"));
 	}
 
 	PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;
@@ -170,6 +174,13 @@ internal class Patch_CaravanHandling : IPatchCategory
 				nameof(Caravan_Tweener.TweenerTickInterval)),
 			prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
 				nameof(VehicleCaravanTweenerTick)));
+		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Caravan_BedsTracker), "RecalculateUsedBeds"),
+			prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+			nameof(RecalculateUsedBedsInVehicleCaravan)));
+		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(PawnUtility),
+			nameof(PawnUtility.GainComfortFromThingIfPossible)),
+			prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
+			nameof(GainComfortFromVehicle)));
 
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(SettlementDefeatUtility),
@@ -1029,6 +1040,118 @@ internal class Patch_CaravanHandling : IPatchCategory
 		return true;
 	}
 
+	/// <summary>
+	/// Assigns beds to pawns in VehicleCaravans, prioritizing dismounted pawns over pawns in vehicles.
+	/// </summary>
+	private static bool RecalculateUsedBedsInVehicleCaravan(Caravan_BedsTracker __instance,
+		Dictionary<Pawn, Building_Bed> ___usedBeds)
+	{
+		if (__instance.caravan is VehicleCaravan vehicleCaravan)
+		{
+			___usedBeds.Clear();
+			if (!vehicleCaravan.Spawned)
+				return false;
+
+			using var cr = GlobalObjectPool.Get(out List<Building_Bed> usableBeds);
+			GetUsableBeds(__instance, usableBeds);
+			if (!vehicleCaravan.vehiclePather.MovingNow)
+			{
+				usableBeds.SortByDescending(static bed => bed.GetStatValue(StatDefOf.BedRestEffectiveness));
+				foreach (Pawn pawn in vehicleCaravan.DismountedPawnsListForReading)
+				{
+					TryAssignUsableBed(pawn, __instance, ___usedBeds, usableBeds);
+				}
+				foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+				{
+					foreach (Pawn pawn in vehicle.AllPawnsAboard)
+					{
+						TryAssignUsableBed(pawn, __instance, ___usedBeds, usableBeds);
+					}
+				}
+
+				static void TryAssignUsableBed(Pawn pawn, Caravan_BedsTracker instance, Dictionary<Pawn, Building_Bed> usedBeds, 
+					List<Building_Bed> usableBeds)
+				{
+					if (pawn.needs?.rest == null)
+						return;
+
+					Building_Bed andRemoveFirstAvailableBedFor =
+							(Building_Bed)GetAndRemoveFirstAvailableBedFor(instance, pawn, usableBeds);
+					if (andRemoveFirstAvailableBedFor != null)
+					{
+						usedBeds.Add(pawn, andRemoveFirstAvailableBedFor);
+					}
+				}
+			}
+			else
+			{
+				usableBeds.SortByDescending(static bed => bed.GetStatValue(StatDefOf.ImmunityGainSpeedFactor));
+				foreach (Pawn pawn in vehicleCaravan.DismountedPawnsListForReading)
+				{
+					TryAssignToSickPawn(pawn, vehicleCaravan, __instance, ___usedBeds, usableBeds);
+				}
+				foreach (VehiclePawn vehicle in vehicleCaravan.VehiclesListForReading)
+				{
+					foreach (Pawn pawn in vehicle.AllPawnsAboard)
+					{
+						TryAssignToSickPawn(pawn, vehicleCaravan, __instance, ___usedBeds, usableBeds);
+					}
+				}
+
+				static void TryAssignToSickPawn(Pawn pawn, VehicleCaravan caravan, Caravan_BedsTracker instance, 
+					Dictionary<Pawn, Building_Bed> usedBeds, List<Building_Bed> usableBeds)
+				{
+					if (pawn.needs?.rest == null && !CaravanBedUtility.WouldBenefitFromRestingInBed(pawn))
+						return;
+					if (caravan.vehiclePather.MovingNow && !pawn.CarriedByCaravan())
+						return;
+
+					Building_Bed andRemoveFirstAvailableBedFor2 = (Building_Bed)GetAndRemoveFirstAvailableBedFor(pawn, usableBeds);
+					if (andRemoveFirstAvailableBedFor2 != null)
+					{
+						usedBeds.Add(pawn, andRemoveFirstAvailableBedFor2);
+					}
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// If pawn isn't gaining higher comfort externally (eg. bedrolls in a caravan) then set back to comfort from role.
+	/// </summary>
+	private static bool GainComfortFromVehicle(Pawn p, Thing from, int delta)
+	{
+		const int HashIntervalTick = 15;
+
+		if (from is VehiclePawn)
+		{
+			if (p.needs?.comfort == null || !p.IsHashIntervalTick(HashIntervalTick, delta))
+				return false;
+
+			if (p.ParentHolder is VehicleRoleHandler roleHandler)
+			{
+				float comfort = roleHandler.role.Comfort;
+				if (comfort >= 0 && comfort >= p.needs.comfort.CurInstantLevel)
+				{
+					p.needs.comfort.ComfortUsed(comfort);
+				}
+			}
+			else if (VehicleRoleHandler.ComfortInsideCargo >= p.needs.comfort.CurInstantLevel && 
+				p.ParentHolder is Pawn_InventoryTracker { pawn: VehiclePawn })
+			{
+				p.needs.comfort.ComfortUsed(VehicleRoleHandler.ComfortInsideCargo);
+			}
+			return false;
+		}
+		return true;
+	}
+
+	/// <summary>
+	/// Remove sold pawn from vehicle to avoid infinite trades, as trades only  attempt to remove the pawn directly from 
+	/// the caravan
+	/// </summary>
 	private static void RemoveSoldPawnFromVehicle(Pawn __instance, TradeAction action)
 	{
 		switch (action)

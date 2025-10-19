@@ -51,11 +51,6 @@ internal class Patch_WorldHandling : IPatchCategory
 			prefix: new HarmonyMethod(typeof(Patch_WorldHandling),
 				nameof(ForcedTargetingDontToggleWorld)));
 
-		// TODO 1.7 - REMOVE AFTER TESTING
-		//HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Dialog_Trade), nameof(Dialog_Trade.DoWindowContents)),
-		//	prefix: new HarmonyMethod(typeof(WorldHandling),
-		//	nameof(DrawAerialVehicleInfo)));
-
 		/* World Targeter Event Handling */
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(WorldTargeter), nameof(WorldTargeter.TargeterUpdate)),
@@ -177,13 +172,6 @@ internal class Patch_WorldHandling : IPatchCategory
 			return false;
 		}
 		return true;
-	}
-
-	private static void DrawAerialVehicleInfo(Dialog_Trade __instance, ref Rect inRect)
-	{
-		Rect rect = new(12f, 0f, inRect.width - 24f, 40f);
-		float yUsed = AerialVehicleTraderHelper.DrawAerialVehicleInfo(__instance, rect);
-		inRect.yMin += yUsed;
 	}
 
 	private static void AerialVehiclesDontRandomizePrisoners(Pawn pawn, ref bool __result)

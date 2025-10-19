@@ -37,13 +37,13 @@ internal class Benchmark_Invocation
 	{
 		public readonly MethodInfo method;
 		public readonly Action<bool, int> action;
-		public readonly FuncPtrVoid<bool, int> functionPtr;
+		public readonly StaticVoidFuncPtr<bool, int> functionPtr;
 
 		public InvocationContext()
 		{
 			method = AccessTools.Method(typeof(Benchmark_Invocation), "NoOp");
 			action = (Action<bool, int>)method.CreateDelegate(typeof(Action<bool, int>));
-			functionPtr = new FuncPtrVoid<bool, int>(method);
+			functionPtr = new StaticVoidFuncPtr<bool, int>(method);
 		}
 	}
 }

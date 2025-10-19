@@ -192,8 +192,12 @@ public class VehicleGroup : IDisposable
 		VehicleGroup group = new(vehicle);
 		for (int i = 0; i < settings.drivers + settings.passengers; i++)
 		{
-			Pawn colonist = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
-				settings.faction, fixedBiologicalAge: 30, forceNoBackstory: true));
+			PawnGenerationRequest request = new(PawnKindDefOf.Colonist,
+				settings.faction, fixedBiologicalAge: 30, forceNoBackstory: true)
+			{
+				ForceNoIdeo = settings.forceNoIdeology
+			};
+			Pawn colonist = PawnGenerator.GeneratePawn(request);
 			Assert.IsNotNull(colonist);
 			Assert.AreEqual(colonist.Faction, settings.faction);
 			if (settings.destroyInventory)
@@ -207,8 +211,12 @@ public class VehicleGroup : IDisposable
 		for (int i = 0; i < settings.prisoners; i++)
 		{
 			Faction faction = Find.World.factionManager.RandomEnemyFaction();
-			Pawn prisoner = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
-				faction, fixedBiologicalAge: 30, forceNoBackstory: true));
+			PawnGenerationRequest request = new(PawnKindDefOf.Colonist,
+				faction, fixedBiologicalAge: 30, forceNoBackstory: true)
+			{
+				ForceNoIdeo = settings.forceNoIdeology
+			};
+			Pawn prisoner = PawnGenerator.GeneratePawn(request);
 			prisoner.guest?.CapturedBy(Faction.OfPlayer);
 			group.pawns.Add(prisoner);
 		}
@@ -222,10 +230,10 @@ public class VehicleGroup : IDisposable
 		Assert.IsTrue(settings.mechanoids == 0 || ModsConfig.BiotechActive);
 		for (int i = 0; i < settings.mechanoids; i++)
 		{
-			Pawn animal = PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, settings.faction);
-			Assert.IsNotNull(animal);
-			Assert.AreEqual(animal.Faction, settings.faction);
-			group.pawns.Add(animal);
+			Pawn mech = PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, settings.faction);
+			Assert.IsNotNull(mech);
+			Assert.AreEqual(mech.Faction, settings.faction);
+			group.pawns.Add(mech);
 		}
 		return group;
 	}
@@ -241,6 +249,10 @@ public class VehicleGroup : IDisposable
 		public List<VehicleComponentProperties> components;
 		public List<VehicleStatModifier> statModifiers;
 		public List<CompProperties> comps;
+
+		// Precepts can add a lot of unknown mechanics that make tests unpredictable, disable by default.
+		[MayRequireIdeology]
+		public bool forceNoIdeology = true;
 
 		// Reverse mapping permissions to def restrictions for easy configuration
 		public VehicleType type = VehicleType.Land;
