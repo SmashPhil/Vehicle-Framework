@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
+using Vehicles.Compatibility;
 using Verse;
 
 namespace Vehicles.World;
@@ -33,7 +35,10 @@ public class ArrivalAction_LoadMap : VehicleArrivalAction
         return;
       }
       bool mapGenerated = !mapParent.HasMap;
-
+			if (AerialVehicleCompatibility.ShouldClaimOnArrival(mapParent))
+			{
+				mapParent.SetFaction(Faction.OfPlayer);
+			}
       Site site = Find.WorldObjects.WorldObjectAt<Site>(target.Tile);
       Map map = site != null ?
         GetOrGenerateMapUtility.GetOrGenerateMap(target.Tile, site.PreferredMapSize, null) :
@@ -41,7 +46,15 @@ public class ArrivalAction_LoadMap : VehicleArrivalAction
       if (mapGenerated)
       {
         MapHelper.UnfogMapFromEdge(map, vehicle.VehicleDef);
-      }
+
+				if (mapParent is EscapeShip)
+				{
+					Find.TickManager.Notify_GeneratedPotentiallyHostileMap();
+					Find.LetterStack.ReceiveLetter("EscapeShipFoundLabel".Translate(), 
+						!Find.Storyteller.difficulty.allowBigThreats ? "EscapeShipFoundPeaceful".Translate() : "EscapeShipFound".Translate(), 
+						LetterDefOf.PositiveEvent, new GlobalTargetInfo(map.Center, map));
+				}
+			}
       MapLoaded(map, mapGenerated);
       ExecuteEvents();
       arrivalModeDef.Worker.VehicleArrived(vehicle, vehicle.CompVehicleLauncher.launchProtocol, map);
@@ -57,6 +70,8 @@ public class ArrivalAction_LoadMap : VehicleArrivalAction
     vehicle.EventRegistry[VehicleEventDefOf.AerialVehicleLanding].ExecuteEvents();
   }
 
+	// TODO 1.6.2136
+	[Obsolete("Deprecated since 1.6 refactor. Currently unused and will be removed.")]
   public static FloatMenuAcceptanceReport CanLand(VehiclePawn vehicle, MapParent mapParent)
   {
     if (mapParent is null || !mapParent.Spawned)

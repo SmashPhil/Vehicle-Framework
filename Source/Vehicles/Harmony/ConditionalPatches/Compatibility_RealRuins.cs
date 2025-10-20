@@ -13,11 +13,14 @@ internal class Compatibility_RealRuins : ConditionalVehiclePatch
 
 	public override void PatchAll(ModMetaData mod)
 	{
-		Type ruinsObject_AbandonedBase = AccessTools.TypeByName("RealRuins.AbandonedBaseWorldObject");
-		AerialVehicleCompatibility.AddObject(ruinsObject_AbandonedBase);
-		Type ruinsObject_SmallRuins = AccessTools.TypeByName("RealRuins.SmallRuinsWorldObject");
-		AerialVehicleCompatibility.AddObject(ruinsObject_SmallRuins);
-		Type ruinsObject_POI = AccessTools.TypeByName("RealRuins.RealRuinsPOIWorldObject");
-		AerialVehicleCompatibility.AddObject(ruinsObject_POI);
+		Type ruinsObjectAbandonedBase = AccessTools.TypeByName("RealRuins.AbandonedBaseWorldObject");
+		AerialVehicleCompatibility.RegisterWorldObjectType(ruinsObjectAbandonedBase, 
+			new AerialVehicleCompatibility.Settings(true, false));
+		Type ruinsObjectSmallRuins = AccessTools.TypeByName("RealRuins.SmallRuinsWorldObject");
+		AerialVehicleCompatibility.RegisterWorldObjectType(ruinsObjectSmallRuins, 
+			new AerialVehicleCompatibility.Settings(true, false));
+		Type ruinsObjectPoi = AccessTools.TypeByName("RealRuins.RealRuinsPOIWorldObject");
+		AerialVehicleCompatibility.RegisterWorldObjectType(ruinsObjectPoi, 
+			new AerialVehicleCompatibility.Settings(true, false));
 	}
 }

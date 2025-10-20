@@ -30,6 +30,11 @@ internal sealed class UnitTest_VehicleCaravan_EnterMap
 		foreach (SurfaceTile surfaceTile in Find.WorldGrid.Tiles)
 		{
 			PlanetTile tile = surfaceTile.tile;
+
+			// Rivers are really buggy with map generation at small sizes and at edges of the world grid.
+			if (tile.Tile.Mutators.Any(static tileMutatorDef => tileMutatorDef.Worker is TileMutatorWorker_River))
+				continue;
+
 			if (Find.WorldPathGrid.Passable(tile) && !Find.WorldObjects.AnyWorldObjectAt(tile) && 
 				SettleInEmptyTileUtility.CanCreateMapAt(tile))
 			{
