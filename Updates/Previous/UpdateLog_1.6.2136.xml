@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<UpdateLog>
+  <!--Can utilize Version.txt file placed in mod's root directory-->
+  <currentVersion>1.6.2136</currentVersion>
+  <!--Startup,GameInit,LoadedGame,NewGame-->
+  <updateOn>Startup</updateOn>
+  <!--Full description shown in update page-->
+  <description>&lt;title&gt;New Features&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added multi-item hauling for all vehicle related jobs. Colonists loading cargo, pawns, upgrade materials, or even ammo for turrets will now pick up multiple stacks of resources before loading them onto the vehicle.
+
+- Enabled aerial vehicles to instant-reform from event maps, allowing players to gather all items instantly.
+NOTE: Different vehicle types can be selected together, they will be split into separate caravans on the world map upon reforming.
+
+- Added cargo entry for vehicles on the world map, allowing animals, mechs, and downed pawns to be added to or removed from a vehicle's cargo.
+&lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added additional tooltips to vehicle health panel such as current health, efficiency effects, and base armor values.
+
+- Added alert for pawns idle in vehicles.
+
+- Added labels and applied colors / patterns to the vehicle cards in the Form Caravan window.
+
+- Added sorting options in the Form Caravan window.
+&lt;title&gt;Compatibility&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Added compatibility for &lt;link&gt;https://steamcommunity.com/sharedfiles/filedetails/?id=2854310627&lt;/link&gt;(Caravan Item Selection Enhanced.)
+
+- Added compatibility for &lt;link&gt;https://steamcommunity.com/sharedfiles/filedetails/?id=3535955435&lt;/link&gt;(Visit Settlements.)
+
+- Fixed issue where turrets were unable to shoot with &lt;link&gt;https://steamcommunity.com/sharedfiles/filedetails/?id=2890901044&lt;/link&gt;(Combat Extended.)
+&lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+- Colony mechs and animals not able launch with the aerial vehicle if they were not already loaded into cargo.
+
+- Cargo not distributing to animals for vehicle caravans, resulting in vehicles getting over-encumbered.
+
+- Exiting a map with all pawns onboard a vehicle causing a game over screen under certain conditions.
+
+- Auto load configuration for turrets only taking base cargo capacity into account.
+
+- Caravan formation not able to find an exit spot if colonists were already inside a vehicle.
+
+- Form Caravan properties for travel speed and food not taking vehicles into account.
+
+- Route Planner from Form Caravan window not able to finalize a path over impassable terrain such as boats from an island.
+
+- Route Planner being able to initiate with no vehicles selected.
+
+- Turret icons not scaling correctly in gizmo bar.
+
+- Health panel not resizing for chemical needs.
+&lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
+Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
+  <!--Static parameterless method to execute when update log is executed-->
+  <actionOnUpdate></actionOnUpdate>
+  <!--Show update log on next startup.-->
+  <update>false</update>
+  <!--Testing mode prevents the update from saving over the UpdateLog file-->
+  <testing>false</testing>
+  <!--Icon bar shown to the right of the mod's name.-->
+  <rightIconBar>
+    <li>
+      <name>Github</name>
+      <icon>githubIcon</icon>
+      <url>https://github.com/SmashPhil/Vehicles</url>
+    </li>
+    <li>
+      <name>Steam</name>
+      <icon>steamIcon</icon>
+      <url>https://steamcommunity.com/sharedfiles/filedetails/?id=3014915404</url>
+    </li>
+  </rightIconBar>
+  <!--Icon bar shown to the left of the mod's name.-->
+  <leftIconBar>
+    <li>
+      <name>Patreon</name>
+      <icon>patreonIcon</icon>
+      <url>https://www.patreon.com/smashphil</url>
+    </li>
+    <li>
+      <name>Discord</name>
+      <icon>discordIcon</icon>
+      <url>https://discord.gg/zXDyfWQ</url>
+    </li>
+  </leftIconBar>
+</UpdateLog>
