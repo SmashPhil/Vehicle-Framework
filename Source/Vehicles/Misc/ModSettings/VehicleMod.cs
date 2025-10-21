@@ -210,7 +210,7 @@ public class VehicleMod : Mod
 		if (!type.HasAttribute<VehicleSettingsClassAttribute>())
 			return;
 
-		List<FieldInfo> fields = type.GetPostSettingsFields();
+		List<FieldInfo> fields = type.GetPostSettingsFields().ToList();
 		if (!fields.NullOrEmpty())
 		{
 			CachedFields[type] = fields;

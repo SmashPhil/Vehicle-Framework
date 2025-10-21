@@ -80,5 +80,20 @@
         <li>kopp.caravanitemselectionenhanced</li>
       </loadWithMods>
     </li>
+    <li>
+      <name>Visit Settlements</name>
+      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <loadWithMods>
+        <li>brrainz.harmony</li>
+        <li>ludeon.rimworld</li>
+        <li>ludeon.rimworld.royalty</li>
+        <li>ludeon.rimworld.ideology</li>
+        <li>ludeon.rimworld.biotech</li>
+        <li>ludeon.rimworld.anomaly</li>
+        <li>ludeon.rimworld.odyssey</li>
+        <li>smashphil.vehicleframework</li>
+        <li>ninagoblin.visitsettlements</li>
+      </loadWithMods>
+    </li>
   </jobs>
 </TestPlan>
