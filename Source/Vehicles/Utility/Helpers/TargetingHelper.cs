@@ -25,7 +25,8 @@ public static class TargetingHelper
 		{
 			targetScanFlags |= additionalFlags.Value;
 		}
-		Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags, Validator,
+		Thing thing = (Thing)BestAttackTarget(turret, targetScanFlags,
+			thing => TargetMeetsRequirements(turret, thing, out _),
 			canTakeTargetsCloserThanEffectiveMinRange: false);
 		if (thing != null)
 		{
@@ -33,11 +34,6 @@ public static class TargetingHelper
 			return true;
 		}
 		return false;
-
-		bool Validator(Thing target)
-		{
-			return TargetMeetsRequirements(turret, target, out _);
-		}
 	}
 
 	/// <summary>
@@ -358,9 +354,9 @@ public static class TargetingHelper
 			return false;
 		}
 		TargetScanFlags scanFlags = turret.def.targetScanFlags;
-		if (target.HasThing && (scanFlags & TargetScanFlags.NeedLOSToAll) == TargetScanFlags.NeedLOSToAll ||
-			(scanFlags & TargetScanFlags.NeedLOSToPawns) == TargetScanFlags.NeedLOSToPawns && target.Thing is Pawn ||
-			(scanFlags & TargetScanFlags.NeedLOSToNonPawns) == TargetScanFlags.NeedLOSToNonPawns && target.Thing is not Pawn)
+		if (target.HasThing && ((scanFlags & TargetScanFlags.NeedLOSToAll) == TargetScanFlags.NeedLOSToAll ||
+			((scanFlags & TargetScanFlags.NeedLOSToPawns) == TargetScanFlags.NeedLOSToPawns && target.Thing is Pawn) ||
+			((scanFlags & TargetScanFlags.NeedLOSToNonPawns) == TargetScanFlags.NeedLOSToNonPawns && target.Thing is not Pawn)))
 		{
 			if (target.Thing is { Spawned: false } or { Destroyed: true })
 			{
@@ -421,7 +417,7 @@ public static class TargetingHelper
 		{
 			return false;
 		}
-		if ((scanFlags & TargetScanFlags.NeedAutoTargetable) == 0 &&
+		if ((scanFlags & TargetScanFlags.NeedAutoTargetable) == TargetScanFlags.NeedAutoTargetable &&
 			!LOSIsAutoTargetable(target.Thing))
 		{
 			return false;
