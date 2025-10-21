@@ -2,7 +2,7 @@
   <name>Vehicle Framework</name>
   <author>Smash Phil</author>
   <packageId>SmashPhil.VehicleFramework</packageId>
-  <modVersion>1.6.2144</modVersion>
+  <modVersion>1.6.2144 rev37109</modVersion>
   <description><![CDATA[Framework which allows the creation of vehicles in RimWorld.]]></description>
   <modIconPath>UI/Icons/DefaultVehicleIcon</modIconPath>
   <supportedVersions>
@@ -32,5 +32,6 @@
   </modDependencies>
   <incompatibleWith>
     <li>majorhoff.rimthreaded</li>
+		<li>side1iner.possessionsplus</li>
   </incompatibleWith>
 </ModMetaData>

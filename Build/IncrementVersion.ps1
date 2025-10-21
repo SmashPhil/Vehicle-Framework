@@ -27,7 +27,7 @@ param(
     [Parameter(Mandatory = $true, Position = 0)][Int32]$major = 1,
     [Parameter(Mandatory = $true, Position = 1)][Int32]$minor = 0,
     [Parameter(Position = 2)][DateTime]$startDate = "01-JAN-2000",
-    [string]$useRevision = "false",
+    [string]$useRevision = "true",
     [string]$versionFile = "false"
 )
 
@@ -77,7 +77,7 @@ Function GetVersionNumber {
 Function GetVersionNumberWithRevision {
     $revision = (($buildDate.Hour * 3600 + $buildDate.Minute * 60 + $buildDate.Second) / 2) #AssemblyVersion.Revision is 1/2 the number of seconds into the day
     $revisionString = "{0:d5}" -f [int]$revision
-    return "$(GetVersionNumber).$($revisionString)"
+    return "$(GetVersionNumber) rev$($revisionString)"
 }
 
 ########## Version Output ##########
