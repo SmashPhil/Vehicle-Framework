@@ -77,7 +77,7 @@ Function GetVersionNumber {
 Function GetVersionNumberWithRevision {
     $revision = (($buildDate.Hour * 3600 + $buildDate.Minute * 60 + $buildDate.Second) / 2) #AssemblyVersion.Revision is 1/2 the number of seconds into the day
     $revisionString = "{0:d5}" -f [int]$revision
-    return "$(GetVersionNumber) rev$($revisionString)"
+    return "$(GetVersionNumber) rev$($revisionString.Substring(0, 3))"
 }
 
 ########## Version Output ##########

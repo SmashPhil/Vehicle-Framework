@@ -2,7 +2,7 @@
   <name>Vehicle Framework</name>
   <author>Smash Phil</author>
   <packageId>SmashPhil.VehicleFramework</packageId>
-  <modVersion>1.6.2147 rev34008</modVersion>
+  <modVersion>1.6.2148 rev276</modVersion>
   <description><![CDATA[Framework which allows the creation of vehicles in RimWorld.]]></description>
   <modIconPath>UI/Icons/DefaultVehicleIcon</modIconPath>
   <supportedVersions>

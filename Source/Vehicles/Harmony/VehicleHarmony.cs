@@ -40,7 +40,7 @@ public static class VehicleHarmony
 
 		using DeepProfilerScope dps = new(nameof(VehicleHarmony));
 #if !RELEASE
-		Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion} Unstable");
+		Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion} -DEV");
 #else
     Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion}");
 #endif

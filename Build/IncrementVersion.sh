@@ -34,7 +34,7 @@ function get_version_with_revision() {
   local seconds_since_midnight=$(date -u -d "$now" +%s)
   local midnight=$(date -u -d "$(date -u +%F) 00:00:00" +%s)
   local rev=$(( (seconds_since_midnight - midnight) / 2 ))
-  printf "%s.%05d" "$(get_version_number)" "$rev"
+  printf "%s rev%03d" "$(get_version_number)" "${rev:0:3}"
 }
 
 VERSION=$(get_version_number)
