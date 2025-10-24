@@ -1232,6 +1232,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 				loadedAmmo = null;
 				shellCount = 0;
 				ActivateTimer(true);
+				SetTarget(LocalTargetInfo.Invalid);
 			}
 		}
 	}
