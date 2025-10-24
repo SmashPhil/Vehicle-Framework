@@ -1,47 +1,47 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <Authors>Smash Phil</Authors>
-	    <FileVersion>1.6.0</FileVersion>
-	    <AssemblyVersion>1.6.0</AssemblyVersion>
+	<PropertyGroup>
+		<Authors>Smash Phil</Authors>
+		<FileVersion>1.6.0</FileVersion>
+		<AssemblyVersion>1.6.0</AssemblyVersion>
 
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Vehicles</RootNamespace>
-        <AssemblyName>DevTools_Vehicles</AssemblyName>
-        <TargetFramework>net48</TargetFramework>
-        <FileAlignment>512</FileAlignment>
-        <Deterministic>true</Deterministic>
-        <LangVersion>preview</LangVersion>
-        <OutDir>..\..\1.6\Assemblies\</OutDir>
-        <DebugType>embedded</DebugType>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <NoWarn>CS0649</NoWarn>
-    </PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>Vehicles</RootNamespace>
+		<AssemblyName>DevTools_Vehicles</AssemblyName>
+		<TargetFramework>net48</TargetFramework>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+		<LangVersion>preview</LangVersion>
+		<OutDir>..\..\1.6\Assemblies\</OutDir>
+		<DebugType>embedded</DebugType>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>CS0649</NoWarn>
+	</PropertyGroup>
 
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <DebugSymbols>true</DebugSymbols>
-        <Optimize>false</Optimize>
-        <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
-    </PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>false</Optimize>
+		<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
+	</PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-        <DebugSymbols>true</DebugSymbols>
-        <Optimize>true</Optimize>
-        <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS</DefineConstants>
-    </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS</DefineConstants>
+	</PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-        <DebugSymbols>true</DebugSymbols>
-        <Optimize>true</Optimize>
-        <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS</DefineConstants>
-    </PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS</DefineConstants>
+	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
 		<DebugSymbols>true</DebugSymbols>
@@ -49,30 +49,24 @@
 		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
 	</PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Lib.Harmony" Version="2.3.6">
-            <IncludeAssets>compile; build</IncludeAssets>
-            <ExcludeAssets>runtime</ExcludeAssets>
-        </PackageReference>
-        <PackageReference Include="PolySharp" Version="1.15.0">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
-        <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.4523" />
+	<ItemGroup>
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+		<PackageReference Include="Lib.Harmony.Ref" Version="2.4.1" />
+		<PackageReference Include="PolySharp" Version="1.*" />
 
-        <Reference Include="DevTools">
-	        <HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
-        </Reference>
+		<Reference Include="DevTools">
+			<HintPath>..\..\1.6\Assemblies\DevTools.dll</HintPath>
+		</Reference>
 
-        <Reference Include="SmashTools">
-            <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
-        </Reference>
+		<Reference Include="SmashTools">
+			<HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
+		</Reference>
 
-        <Reference Include="Vehicles">
-            <HintPath>..\..\1.6\Assemblies\Vehicles.dll</HintPath>
-        </Reference>
+		<Reference Include="Vehicles">
+			<HintPath>..\..\1.6\Assemblies\Vehicles.dll</HintPath>
+		</Reference>
 
-        <!--
+		<!--
         <Reference Include="Assembly-CSharp">
             <HintPath>..\..\..\..\RimWorldWin64_Data\Managed\Assembly-CSharp.dll</HintPath>
             <Private>False</Private>
@@ -102,9 +96,9 @@
             <Private>False</Private>
         </Reference>
         -->
-    </ItemGroup>
+	</ItemGroup>
 
-    <ItemGroup>
-        <Folder Include="Properties\" />
-    </ItemGroup>
+	<ItemGroup>
+		<Folder Include="Properties\" />
+	</ItemGroup>
 </Project>

@@ -30,7 +30,7 @@
         <RimWorldDirectory>D:\SteamLibrary\steamapps\common\RimWorld</RimWorldDirectory>
 
         <!-- Require exact patch match? Set to false for wildcard match -->
-        <UseStrictRimWorldVersionComparison>true</UseStrictRimWorldVersionComparison>
+        <UseStrictRimWorldVersionComparison>false</UseStrictRimWorldVersionComparison>
 
         <!-- Run this logic? Example: only enable in Debug builds -->
         <EnableLocalRimWorldReferences Condition="'$(Configuration)' == 'Debug'">true</EnableLocalRimWorldReferences>

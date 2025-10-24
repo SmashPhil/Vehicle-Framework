@@ -261,7 +261,7 @@ namespace Vehicles
     /// </summary>
     private int GetCellCostFast(int index)
     {
-      int num = mapping[vehicleDef].VehiclePathGrid.innerArray[index];
+      int num = mapping[vehicleDef].VehiclePathGrid[index];
       if (avoidGrid != null)
       {
         num += avoidGrid.Grid[index] * 8;

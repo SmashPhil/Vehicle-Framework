@@ -287,7 +287,7 @@ public class VehicleRegionConnector : VehicleGridManager
       return new Node
       {
         parent = current,
-        cost = regionConnector.pathGrid.innerArray[neighbor]
+        cost = regionConnector.pathGrid[neighbor]
       };
     }
 

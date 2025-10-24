@@ -7,10 +7,10 @@ using Verse;
 
 namespace Vehicles;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
+[PublicAPI]
 public class VehiclePath : IDisposable
 {
-	private const int InitialPathSize = 1 << 7;
+	private const int InitialPathSize = 128;
 
 	private readonly List<IntVec3> nodes = new(InitialPathSize);
 

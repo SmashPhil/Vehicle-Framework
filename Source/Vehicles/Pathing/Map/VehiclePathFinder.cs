@@ -168,7 +168,6 @@ public class VehiclePathFinder : VehicleGridManager
 			traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 		CellRect cellRect = CalculateDestinationRect(dest, peMode);
 		bool singleRect = cellRect is { Width: 1, Height: 1 };
-		int[] pathGrid = vehiclePathGrid.innerArray;
 		int searchCount = 0;
 		int nodesOpened = 0;
 		bool drawPaths = VehicleMod.settings.debug.debugDrawPathfinderSearch;
@@ -364,7 +363,7 @@ public class VehiclePathFinder : VehicleGridManager
 							}
 						}
 
-						float cellCost = pathGrid[cellToCheckIndex] * roadMultiplier + roadExtraCost;
+						float cellCost = vehiclePathGrid[cellToCheckIndex] * roadMultiplier + roadExtraCost;
 						if (cellInRect == cellToCheck)
 						{
 							rootCost = cellCost * RootPosWeight;

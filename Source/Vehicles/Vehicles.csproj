@@ -27,11 +27,6 @@
 	<DebugType>embedded</DebugType>
   </PropertyGroup>
 
-  <!-- Build Events -->
-	<Target Name="PostClean" AfterTargets="Clean" Condition="'!$(BuildingInsideVisualStudio)' == 'true'">
-		<RemoveDir Directories="$(OutDir)" />
-	</Target>
-
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
 	<!-- Localization Files -->
 	<!--
@@ -82,11 +77,7 @@
   <ItemGroup>
 	<!-- Nuget -->
 	<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-	<PackageReference Include="Lib.Harmony" Version="2.4.1">
-	  <IncludeAssets>compile; build</IncludeAssets>
-	  <ExcludeAssets>runtime</ExcludeAssets>
-	</PackageReference>
-
+	<PackageReference Include="Lib.Harmony.Ref" Version="2.4.1" />
 	<PackageReference Include="PolySharp" Version="1.*" />
 
 	<!--Local -->

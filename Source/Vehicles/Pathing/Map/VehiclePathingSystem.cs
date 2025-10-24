@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Performance;
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -42,7 +45,9 @@ public sealed class VehiclePathingSystem : MapComponent
 
 	public MapGridOwners GridOwners { get; }
 
-	private static int DayOfYearAt0Long => GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
+	internal GridDebouncer PathGridDebouncer { get; private set; }
+
+	public bool DebouncingPathGridDirtying => PathGridDebouncer != null;
 
 	/// <summary>
 	/// <see cref="dedicatedThread"/> is initialized and running.
@@ -285,6 +290,38 @@ public sealed class VehiclePathingSystem : MapComponent
 		deferredGridGeneration.RequestGridsFor(vehicleDef, urgency);
 	}
 
+	internal void BeginCapturingPathGridDirtying()
+	{
+		List<IGridDebouncerSource> sources = [];
+		foreach (VehiclePathData pathData in vehicleData)
+		{
+			if (pathData.VehiclePathGrid is { Enabled: true })
+			{
+				sources.Add(pathData.VehiclePathGrid);
+			}
+		}
+		if (sources.Count > 0)
+		{
+			PathGridDebouncer = new GridDebouncer(map, sources);
+		}
+	}
+
+	internal void EndCapturingPathGridDirtying()
+	{
+		if (!DebouncingPathGridDirtying)
+			return;
+
+		try
+		{
+			PathGridDebouncer.ExecuteAll();
+		}
+		finally
+		{
+			PathGridDebouncer.Dispose();
+			PathGridDebouncer = null;
+		}
+	}
+
 	public override void MapRemoved()
 	{
 		ReleaseThread();
@@ -305,7 +342,7 @@ public sealed class VehiclePathingSystem : MapComponent
 		base.MapComponentTick();
 		if (ThreadAlive)
 		{
-			int dayOfYear = DayOfYearAt0Long;
+			int dayOfYear = GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
 			if (defGridCalculatedDayOfYear != dayOfYear)
 			{
 				deferredGridGeneration.DoIncrementalPass();
@@ -387,7 +424,7 @@ public sealed class VehiclePathingSystem : MapComponent
 		{
 			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
 			{
-				if (!map.gasGrid.GasCanMoveTo(cell)) 
+				if (!map.gasGrid.GasCanMoveTo(cell))
 					continue;
 
 				float gas = map.gasGrid.DensityPercentAt(cell, GasType.BlindSmoke);
@@ -403,7 +440,7 @@ public sealed class VehiclePathingSystem : MapComponent
 			VehiclePositionManager manager = map.GetDetachedMapComponent<VehiclePositionManager>();
 			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
 			{
-				if (!manager.PositionClaimed(cell)) 
+				if (!manager.PositionClaimed(cell))
 					continue;
 
 				map.debugDrawer.FlashCell(cell, 1, duration: 1);
@@ -418,7 +455,7 @@ public sealed class VehiclePathingSystem : MapComponent
 			foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
 			{
 				Thing thing = map.thingGrid.ThingAt(cell, ThingCategory.Pawn);
-				if (thing is not VehiclePawn) 
+				if (thing is not VehiclePawn)
 					continue;
 
 				map.debugDrawer.FlashCell(cell, 1, duration: 1);

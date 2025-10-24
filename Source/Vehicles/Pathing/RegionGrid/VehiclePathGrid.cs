@@ -4,7 +4,9 @@ using System.Text;
 using System.Threading;
 using SmashTools;
 using SmashTools.Performance;
+using Unity.Collections;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -12,19 +14,27 @@ namespace Vehicles;
 /// <summary>
 /// Vehicle specific path grid
 /// </summary>
-public sealed class VehiclePathGrid : VehicleGridManager
+public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
 {
 	public const int ImpassableCost = 10000;
 
-	public int[] innerArray;
+	private NativeArray<int> costGrid;
 
 	public VehiclePathGrid(VehiclePathingSystem mapping, VehicleDef vehicleDef) : base(mapping,
 		vehicleDef)
 	{
-		innerArray = new int[mapping.map.cellIndices.NumGridCells];
+		costGrid = new NativeArray<int>(mapping.map.cellIndices.NumGridCells, Allocator.Persistent);
 	}
 
 	public bool Enabled { get; private set; }
+
+	public int this[int index]
+	{
+		get
+		{
+			return costGrid[index];
+		}
+	}
 
 	public void Release()
 	{
@@ -89,7 +99,7 @@ public sealed class VehiclePathGrid : VehicleGridManager
 	/// <param name="index"></param>
 	public bool WalkableFast(int index)
 	{
-		return innerArray[index] < ImpassableCost;
+		return costGrid[index] < ImpassableCost;
 	}
 
 	/// <summary>
@@ -98,7 +108,12 @@ public sealed class VehiclePathGrid : VehicleGridManager
 	/// <param name="loc"></param>
 	public int PerceivedPathCostAt(IntVec3 loc)
 	{
-		return innerArray[mapping.map.cellIndices.CellToIndex(loc)];
+		return costGrid[mapping.map.cellIndices.CellToIndex(loc)];
+	}
+
+	void IGridDebouncerSource.Execute(int index)
+	{
+		RecalculatePerceivedPathCostAt(mapping.map.cellIndices[index]);
 	}
 
 	/// <summary>
@@ -123,30 +138,46 @@ public sealed class VehiclePathGrid : VehicleGridManager
 	public void RecalculatePerceivedPathCostAt(IntVec3 cell)
 	{
 		if (!cell.InBounds(mapping.map))
+			return;
+
+		if (mapping.DebouncingPathGridDirtying)
 		{
+			mapping.PathGridDebouncer.SetDirty(cell);
 			return;
 		}
 
-		bool walkable = WalkableFast(cell);
 		StringBuilder debugString = null;
+#if DEBUG
 		if (VehicleMod.settings.debug.debugPathCostChanges)
 		{
 			debugString = new StringBuilder();
 		}
+#endif
 
-		int cost = CalculatedCostAt(cell, debugString);
-		Interlocked.Exchange(ref innerArray[mapping.map.cellIndices.CellToIndex(cell)], cost);
-		debugString?.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
+		bool walkable = WalkableFast(cell);
+		costGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
 		bool walkabilityChanged = WalkableFast(cell) != walkable;
 
+#if DEBUG
 		if (VehicleMod.settings.debug.debugPathCostChanges)
-			Debug.Message(debugString.ToStringSafe());
-
-		if (walkabilityChanged && !mapping[createdFor].Suspended)
 		{
-			mapping[createdFor].VehicleReachability.ClearCache();
-			mapping[createdFor].VehicleRegionDirtyer.NotifyWalkabilityChanged(cell);
+			debugString.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
+			Debug.Message(debugString.ToStringSafe());
 		}
+#endif
+		if (walkabilityChanged)
+		{
+			OnWalkabilityChanged(cell);
+		}
+	}
+
+	private void OnWalkabilityChanged(IntVec3 cell)
+	{
+		if (mapping[createdFor].Suspended)
+			return;
+
+		mapping[createdFor].VehicleReachability.ClearCache();
+		mapping[createdFor].VehicleRegionDirtyer.NotifyWalkabilityChanged(cell);
 	}
 
 	/// <summary>

@@ -17,6 +17,8 @@ internal class FeatureFlags
 	public const string VehicleCaravanProps = "VehicleCaravanProps";
 	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
+	public const string BurstLib = "Burst";
+
 	[UsedImplicitly]
 	public List<IFeatureFlag> features;
 
