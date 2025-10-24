@@ -1091,7 +1091,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		if (ammoDef == null)
 			return;
 
-		if (loadedAmmo is null || shellCount < def.magazineCapacity || shellCount <= 0)
+		if (loadedAmmo is null || shellCount < def.magazineCapacity || shellCount <= 0 || ammoDef != loadedAmmo)
 		{
 			if (ReloadInternal(ammoDef))
 			{
