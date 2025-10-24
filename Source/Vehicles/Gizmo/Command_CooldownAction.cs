@@ -172,7 +172,6 @@ public class Command_CooldownAction : Command_Turret
 		Rect subIconRect = new(gizmoRect.xMax - SubIconSize, gizmoRect.y, SubIconSize, SubIconSize);
 		if ((turret.loadedAmmo is null || turret.shellCount <= 0) && turret.def.ammunition != null)
 		{
-			Disable("VF_NoAmmoLoadedTurret".Translate());
 			ammoLoaded = false;
 		}
 		else if (turret.ProjectileDef is { projectile.flyOverhead: true } &&
