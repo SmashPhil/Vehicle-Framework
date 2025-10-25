@@ -444,6 +444,11 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		UpdateScanEvent();
 	}
 
+	public virtual void RegisterEvents()
+	{
+		this.AddEvent(VehicleTurretEventDefOf.ShotFired, ConsumeChamberedShot);
+	}
+
 	public virtual void PostSpawnSetup(bool respawningAfterLoad)
 	{
 	}
@@ -860,11 +865,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		Vector3 launchPos = TurretLocation +
 			new Vector3(horizontalOffset, 1f, def.projectileOffset).RotatedBy(TurretRotation);
 
-		if (def.ammunition != null)
-		{
-			ConsumeChamberedShot();
-		}
-
 		ThingDef projectileDef = ProjectileDef;
 		if (LaunchProjectileCE is null)
 		{
@@ -1212,11 +1212,24 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 	public void ConsumeChamberedShot()
 	{
 		shellCount--;
-		if (shellCount <= 0 &&
-			vehicle.inventory.innerContainer.FirstOrFallback(x => x.def == loadedAmmo) is null)
+		if (shellCount <= 0 && !AnyAmmoInInventory())
 		{
 			loadedAmmo = null;
 			shellCount = 0;
+		}
+		return;
+
+		bool AnyAmmoInInventory()
+		{
+			if (def.ammunition == null)
+				return true;
+
+			foreach (Thing thing in vehicle.inventory.innerContainer)
+			{
+				if (thing.def == loadedAmmo)
+					return true;
+			}
+			return false;
 		}
 	}
 

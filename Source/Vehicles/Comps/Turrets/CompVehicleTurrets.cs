@@ -362,7 +362,8 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 			TurretData turretData = turretQueue[i];
 			try
 			{
-				if (!turretData.turret.targetInfo.IsValid || !turretData.turret.HasAmmo)
+				VehicleTurret turret = turretData.turret;
+				if (!turret.targetInfo.IsValid || !turret.HasAmmo)
 				{
 					DequeueTurret(turretData);
 					continue;
@@ -370,45 +371,47 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
 				if (!turretData.CanTarget)
 				{
-					turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+					turret.SetTarget(LocalTargetInfo.Invalid);
 					DequeueTurret(turretData);
 					continue;
 				}
 
-				turretQueue[i].turret.AlignToTargetRestricted();
-				if (turretQueue[i].ticksTillShot <= 0)
+				turret.AlignToTargetRestricted();
+				if (turretData.ticksTillShot <= 0)
 				{
-					turretData.turret.FireTurret();
-					turretData.turret.CurrentTurretFiring++;
+					turret.FireTurret();
+					turret.CurrentTurretFiring++;
 					turretData.shots--;
-					turretData.ticksTillShot = turretData.turret.TicksPerShot;
+					turretData.ticksTillShot = turret.TicksPerShot;
 
-					if (turretData.turret.OnCooldown || turretData.shots == 0 || !turretData.turret.HasAmmo)
+					if (turret.OnCooldown || turretData.shots == 0 || !turret.HasAmmo)
 					{
-						//If target doesn't persist, immediately set target to invalid
-						if (turretData.turret.targetPersists)
+						if (turret.targetPersists)
 						{
-							turretData.turret.CheckTargetInvalid();
+							turret.CheckTargetInvalid();
 						}
 						else
 						{
-							if (turretData.turret.targetInfo.Thing is { } thing)
+							if (turret.targetInfo.Thing is { } thing)
 							{
-								if ((turretData.turret.targeting & TargetLock.Thing) == 0 ||
-									thing is Pawn && (turretData.turret.targeting & TargetLock.Pawn) == 0)
+								if ((turret.targeting & TargetLock.Thing) == 0 ||
+									thing is Pawn && (turret.targeting & TargetLock.Pawn) == 0)
 								{
-									turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+									turret.SetTarget(LocalTargetInfo.Invalid);
 								}
 							}
-							else if ((turretData.turret.targeting & TargetLock.Cell) == 0)
+							else if ((turret.targeting & TargetLock.Cell) == 0)
 							{
-								turretData.turret.SetTarget(LocalTargetInfo.Invalid);
+								turret.SetTarget(LocalTargetInfo.Invalid);
 							}
 						}
 
-						if (!turretData.turret.HasAmmo)
+						if (!turret.HasAmmo)
 						{
-							turretData.turret.Reload();
+							turret.Reload();
+							// If unable to auto reload, invalidate target to reset turret state to unused.
+							if (!turret.HasAmmo)
+								turret.SetTarget(LocalTargetInfo.Invalid);
 						}
 
 						DequeueTurret(turretData);
@@ -573,6 +576,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	private void RegisterEventsFor(VehicleTurret turret)
 	{
 		turret.FillEventsDef();
+		turret.RegisterEvents();
 		// TODO Raiders - add stop to shoot AI behavior in a less problematic way. Needs to account for vehicles swapping hands
 		//if (Vehicle.VehicleDef.npcProperties is { stopToShoot: true })
 		//  turret.AddEvent(VehicleTurretEventDefOf.Queued, Vehicle.vehiclePather.StopDead);

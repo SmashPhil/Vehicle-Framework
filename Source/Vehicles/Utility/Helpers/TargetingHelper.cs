@@ -326,33 +326,27 @@ public static class TargetingHelper
 		LocalTargetInfo target, out IntVec3 goodDest)
 	{
 		goodDest = target.Cell;
+
 		if (target == turret.vehicle)
-		{
 			return false;
-		}
+
 		Map map = turret.vehicle.Map;
 		if (map == null)
-		{
 			return false;
-		}
+
 		if (!turret.InRange(target))
-		{
 			return false;
-		}
+
 		if (!turret.AngleBetween(target.CenterVector3))
-		{
 			return false;
-		}
-		ThingDef projectileDef = turret.ProjectileDef;
-		if (projectileDef.projectile.flyOverhead)
-		{
-			// Skip LOS check
+
+		// Skip LOS check if overhead
+		if (turret.ProjectileDef?.projectile is { flyOverhead: true})
 			return !root.Roofed(map);
-		}
+
 		if (target.HasThing && !TargetValidator(turret, map, target))
-		{
 			return false;
-		}
+
 		TargetScanFlags scanFlags = turret.def.targetScanFlags;
 		if (target.HasThing && ((scanFlags & TargetScanFlags.NeedLOSToAll) == TargetScanFlags.NeedLOSToAll ||
 			((scanFlags & TargetScanFlags.NeedLOSToPawns) == TargetScanFlags.NeedLOSToPawns && target.Thing is Pawn) ||

@@ -100,7 +100,7 @@ internal class Patch_VehiclePathing : IPatchCategory
 			postfix: new HarmonyMethod(typeof(Patch_VehiclePathing),
 			nameof(BeginPathGridCapture)));
 		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.ReEnableIncrementalDirtying)),
-			postfix: new HarmonyMethod(typeof(Patch_VehiclePathing),
+			finalizer: new HarmonyMethod(typeof(Patch_VehiclePathing),
 			nameof(EndPathGridCapture)));
 	}
 
@@ -344,18 +344,18 @@ internal class Patch_VehiclePathing : IPatchCategory
   {
     if (!map.TileInfo.WaterCovered)
     {
-      map.GetCachedMapComponent<VehiclePathingSystem>().DisableAllRegionUpdaters();
+      map.GetCachedMapComponent<VehiclePathingSystem>()?.DisableAllRegionUpdaters();
     }
   }
 
 	private static void BeginPathGridCapture(Map ___map)
 	{
-		___map.GetCachedMapComponent<VehiclePathingSystem>().BeginCapturingPathGridDirtying();
+		___map.GetCachedMapComponent<VehiclePathingSystem>()?.BeginCapturingPathGridDirtying();
 	}
 
 	private static void EndPathGridCapture(Map ___map)
 	{
-		___map.GetCachedMapComponent<VehiclePathingSystem>().EndCapturingPathGridDirtying();
+		___map.GetCachedMapComponent<VehiclePathingSystem>()?.EndCapturingPathGridDirtying();
 	}
 
 	/* ---- Helper Methods related to patches ---- */
