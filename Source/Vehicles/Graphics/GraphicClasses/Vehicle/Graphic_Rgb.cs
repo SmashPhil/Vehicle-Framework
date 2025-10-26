@@ -171,7 +171,7 @@ public class Graphic_Rgb : Graphic
     return materials[rot.AsInt];
   }
 
-  public virtual Vector3 DrawOffset(Rot8 rot)
+  public virtual Vector3 DrawOffsetFull(Rot8 rot)
   {
     if (!rot.IsDiagonal)
     {
@@ -514,7 +514,7 @@ public class Graphic_Rgb : Graphic
     {
       position.y = altLayerSpawned.AltitudeFor();
     }
-    Vector3 drawOffset = DrawOffset(transformData.orientation);
+    Vector3 drawOffset = DrawOffsetFull(transformData.orientation);
     drawOffset = Quaternion.AngleAxis(rotAngle, Vector3.up) * drawOffset;
     position += drawOffset;
     render.position = position;

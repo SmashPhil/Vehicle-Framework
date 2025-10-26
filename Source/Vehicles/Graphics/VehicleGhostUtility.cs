@@ -56,8 +56,7 @@ public static class VehicleGhostUtility
   // public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
   //   Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
   // {
-  //   _ = baseGraphic;
-  //   DrawGhostOverlays(center, rot, vehicleDef, ghostCol, drawAltitude, thing);
+  //   DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude, thing, null);
   // }
   
   public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
