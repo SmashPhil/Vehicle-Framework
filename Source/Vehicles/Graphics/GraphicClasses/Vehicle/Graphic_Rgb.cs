@@ -171,6 +171,37 @@ public class Graphic_Rgb : Graphic
     return materials[rot.AsInt];
   }
 
+  public virtual Vector3 DrawOffset(Rot8 rot)
+  {
+    if (!rot.IsDiagonal)
+    {
+      return base.DrawOffset(rot);
+    }
+    if (EastDiagonalRotated)
+    {
+      if (rot == Rot8.NorthEast)
+      {
+        return base.DrawOffset(Rot4.North);
+      }
+      if (rot == Rot8.SouthEast)
+      {
+        return base.DrawOffset(Rot4.South);
+      }
+    }
+    if (WestDiagonalRotated)
+    {
+      if (rot == Rot8.NorthWest)
+      {
+        return base.DrawOffset(Rot4.North);
+      }
+      if (rot == Rot8.SouthWest)
+      {
+        return base.DrawOffset(Rot4.South);
+      }
+    }
+    return base.DrawOffset(rot);
+  }
+
   public override void Init(GraphicRequest req)
   {
     masks = new Texture2D[MatCount];
@@ -519,7 +550,7 @@ public class Graphic_Rgb : Graphic
         if (EastDiagonalRotated)
         {
           rotation *= -1;
-          rotAngle += Rot8.East.AsAngle;
+          rotAngle *= -1;
         }
       break;
       case 6:
@@ -527,7 +558,7 @@ public class Graphic_Rgb : Graphic
         if (WestDiagonalRotated)
         {
           rotation *= -1;
-          rotAngle += Rot8.West.AsAngle;
+          rotAngle *= -1;
         }
       break;
     }
