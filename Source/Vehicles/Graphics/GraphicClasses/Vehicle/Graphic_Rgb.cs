@@ -564,6 +564,25 @@ public class Graphic_Rgb : Graphic
     }
   }
 
+  // Override for rendering ghosts. Just applied extraRotation to drawOffset
+  public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+  {
+    Mesh mesh = MeshAt(rot);
+    Quaternion quat = QuatFromRot(rot);
+    if (extraRotation != 0f)
+    {
+      quat *= Quaternion.Euler(Vector3.up * extraRotation);
+    }
+    if (data is { addTopAltitudeBias: true })
+    {
+      quat *= Quaternion.Euler(Vector3.left * 2f);
+    }
+    loc += DrawOffset(rot).RotatedBy(extraRotation);
+    Material mat = MatAt(rot, thing);
+    DrawMeshInt(mesh, loc, quat, mat);
+    ShadowGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
+  }
+
   public override string ToString()
   {
     return
