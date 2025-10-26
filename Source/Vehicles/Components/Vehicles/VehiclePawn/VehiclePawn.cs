@@ -104,9 +104,17 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		}
 	}
 
-	private void RecacheAlerts()
+	public void ResetIdleTicks()
 	{
-		ticksSinceBoarded = 0;
+		ticksIdle = 0;
+	}
+
+	public void ValidateIdleTicks()
+	{
+		if (AllPawnsAboard.Count > 0 || AllInventoryPawns.Count > 0)
+			return;
+
+		ResetIdleTicks();
 	}
 
 	private void UpdateDraftController()
@@ -133,22 +141,23 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		this.FillEventsDef();
 
 		inventory.innerContainer.OnContentsChanged += RecacheInventoryPawns;
+		inventory.innerContainer.OnContentsChanged += ValidateIdleTicks;
 
 		this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
 		this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
-		this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, RecacheAlerts);
+		this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, ResetIdleTicks);
 		this.AddEvent(VehicleEventDefOf.PawnExited, vehiclePather.RecalculatePermissions, RecachePawnCount);
 		this.AddEvent(VehicleEventDefOf.PawnRemoved, vehiclePather.RecalculatePermissions, RecachePawnCount);
-		this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions, RecachePawnCount);
+		this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions, RecachePawnCount, ResetIdleTicks);
 		this.AddEvent(VehicleEventDefOf.PawnKilled, vehiclePather.RecalculatePermissions, RecachePawnCount);
 		this.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehiclePather.RecalculatePermissions);
-		this.AddEvent(VehicleEventDefOf.MoveStart, RecacheAlerts);
-		this.AddEvent(VehicleEventDefOf.MoveStop, RecacheAlerts);
-		this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, RecacheAlerts,
-			UpdateDraftController);
-		this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions, UpdateDraftController);
+		this.AddEvent(VehicleEventDefOf.MoveStart, ResetIdleTicks);
+		this.AddEvent(VehicleEventDefOf.MoveStop, ResetIdleTicks);
+		this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, ResetIdleTicks,
+			UpdateDraftController, ResetIdleTicks);
+		this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions, UpdateDraftController, ResetIdleTicks);
 		this.AddEvent(VehicleEventDefOf.HealthChanged, vehiclePather.RecalculatePermissions);
-		this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage);
+		this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage, ResetIdleTicks);
 		this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
 		this.AddEvent(VehicleEventDefOf.OutOfFuel, delegate
 		{

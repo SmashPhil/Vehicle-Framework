@@ -9,17 +9,20 @@ namespace Vehicles;
 public partial class VehiclePawn
 {
 	public const int HoursIdleToAlert = 2;
+	public const int HoursIdleToDismount = 5;
 	public const int TicksTillAlert = GenDate.TicksPerHour * HoursIdleToAlert;
+	public const int TicksTillDismount = GenDate.TicksPerHour * HoursIdleToDismount;
 
 	public const int MaxTickInterval = GenTicks.TickRareInterval;
 
 	[Unsaved]
 	public VehicleSustainers sustainers;
 
-	private int ticksSinceBoarded;
+	private int ticksIdle;
 	private List<TimedExplosion> explosives = [];
 
-	public bool IdlePawnsInVehicle => ticksSinceBoarded >= TicksTillAlert && AllPawnsAboard.Count > 0;
+	public bool IdlePawnsInVehicle => ticksIdle >= TicksTillAlert && 
+		(AllPawnsAboard.Count > 0 || AllInventoryPawns.Count > 0);
 
 	// Vehicles should never be suspended since there is no logic for handling passengers in a
 	// suspended vehicle. Suspending the vehicle would also suspend all passengers by proxy.
@@ -133,11 +136,17 @@ public partial class VehiclePawn
 			jobs.JobTrackerTickInterval(delta);
 		}
 
-		if (Spawned && !vehiclePather.Moving && ticksSinceBoarded < TicksTillAlert)
+		if (Spawned && !vehiclePather.Moving && ticksIdle < TicksTillDismount)
 		{
-			ticksSinceBoarded += delta;
+			ticksIdle += delta;
 		}
-		
+		if (ticksIdle >= TicksTillDismount)
+		{
+			DisembarkAll();
+			DisembarkAllFromInventory();
+			ResetIdleTicks();
+		}
+
 		// TODO VF-301,302,303: Enable gas, toxic, and vacuum to affect pawns in vehicles.
 	}
 

@@ -126,7 +126,8 @@ namespace Vehicles
     {
       if (IsTargeting)
       {
-        LocalTargetInfo mouseTarget = CurrentTargetUnderMouse();
+				vehicle.ResetIdleTicks();
+				LocalTargetInfo mouseTarget = CurrentTargetUnderMouse();
         if (TargetingHelper.TargetMeetsRequirements(Turret, mouseTarget, out _))
         {
           GenDraw.DrawTargetHighlight(mouseTarget);

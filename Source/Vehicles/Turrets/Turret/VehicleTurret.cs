@@ -446,7 +446,9 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 
 	public virtual void RegisterEvents()
 	{
-		this.AddEvent(VehicleTurretEventDefOf.ShotFired, ConsumeChamberedShot);
+		this.AddEvent(VehicleTurretEventDefOf.ShotFired, ConsumeChamberedShot, vehicle.ResetIdleTicks);
+		this.AddEvent(VehicleTurretEventDefOf.Reload, vehicle.ResetIdleTicks);
+		this.AddEvent(VehicleTurretEventDefOf.Warmup, vehicle.ResetIdleTicks);
 	}
 
 	public virtual void PostSpawnSetup(bool respawningAfterLoad)
@@ -803,7 +805,6 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		{
 			return TurretTargeter.Turret == this;
 		}
-
 		return false;
 	}
 

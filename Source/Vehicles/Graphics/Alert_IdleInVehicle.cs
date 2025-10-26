@@ -9,6 +9,7 @@ namespace Vehicles;
 public class Alert_IdleInVehicle : Alert
 {
 	private readonly List<Pawn> idlePawns = [];
+
 	private readonly StringBuilder explanation = new();
 
 	public Alert_IdleInVehicle()
@@ -21,7 +22,6 @@ public class Alert_IdleInVehicle : Alert
 	{
 		get
 		{
-			// TODO - add animals
 			idlePawns.Clear();
 			foreach (Map map in Find.Maps)
 			{
@@ -33,6 +33,7 @@ public class Alert_IdleInVehicle : Alert
 					if (vehicle.IdlePawnsInVehicle)
 					{
 						idlePawns.AddRange(vehicle.AllPawnsAboard);
+						idlePawns.AddRange(vehicle.AllInventoryPawns);
 					}
 				}
 			}
@@ -42,7 +43,6 @@ public class Alert_IdleInVehicle : Alert
 
 	public override string GetLabel()
 	{
-		// TODO - add animals
 		List<Pawn> pawns = IdlePawns;
 		return pawns.Count == 1 ? "ColonistIdle".Translate() : "ColonistsIdle".Translate(pawns.Count.ToStringCached());
 	}
