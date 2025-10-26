@@ -38,6 +38,9 @@ public static class CellFinderExtended
 		return false;
 	}
 
+	/// <summary>
+	/// Try to find random centered cell reachable by any <see cref="Pawn"/>.
+	/// </summary>
 	public static bool TryFindRandomCenterCell(Map map, Predicate<IntVec3> validator,
 		out IntVec3 result, bool allowRoofed = false)
 	{
@@ -54,7 +57,7 @@ public static class CellFinderExtended
 			 .Where(thing => thing.Faction == hostFaction));
 		}
 
-		float num2 = 65f;
+		float lengthHorz = 65f;
 		for (int i = 0; i < 300; i++)
 		{
 			CellFinder.TryFindRandomCellNear(map.Center, map, 30, validator, out IntVec3 intVec);
@@ -62,18 +65,18 @@ public static class CellFinderExtended
 			{
 				if (allowRoofed || !Ext_Vehicles.IsRoofed(intVec, map))
 				{
-					num2 -= 0.2f;
-					bool flag = false;
+					lengthHorz -= 0.2f;
+					bool anyThingInRange = false;
 					foreach (Thing thing in thingsOnMap)
 					{
-						if ((intVec - thing.Position).LengthHorizontalSquared < num2 * num2)
+						if ((intVec - thing.Position).LengthHorizontalSquared < lengthHorz * lengthHorz)
 						{
-							flag = true;
+							anyThingInRange = true;
 							break;
 						}
 					}
 
-					if (!flag && map.reachability.CanReachFactionBase(intVec, hostFaction))
+					if (!anyThingInRange && map.reachability.CanReachFactionBase(intVec, hostFaction))
 					{
 						result = intVec;
 						return true;
