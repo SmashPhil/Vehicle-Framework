@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using RimWorld;
 using SmashTools;
 using UnityEngine;
-using Vehicles.Rendering;
 using Verse;
 
 namespace Vehicles;
@@ -49,20 +48,39 @@ public static class VehicleGhostUtility
     graphic.DrawFromDef(loc, baseRot, vehicleDef, baseAngle);
 
     DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude,
-      thing: vehicle);
+      thing: vehicle, baseRot: baseRot, baseAngle: baseAngle);
   }
 
+  // Public method signatures have been changed. Please add a stub if necessary
+  // Vehicle Map Framework patches will be affected, so I'll make it that absorbs the changes if the PR is accepted
+  // public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
+  //   Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
+  // {
+  //   DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude, thing, null);
+  // }
+  
   public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
-    Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
+    Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null, Rot8? baseRot = null, float baseAngle = 0f)
   {
-    Vector3 loc = GenThing.TrueCenter(center, rot, vehicleDef.Size, drawAltitude.AltitudeFor());
+    Rot4 drawRot = baseRot ?? rot;
+    Vector3 loc = GenThing.TrueCenter(center, drawRot, vehicleDef.Size, drawAltitude.AltitudeFor());
+    if (baseAngle != 0f)
+    {
+      Vector3 offset = baseGraphic.DrawOffset(drawRot).RotatedBy(baseAngle);
+      if ((Rot4)rot == Rot4.East)
+      {
+        offset *= -1f;
+      }
+      loc += offset;
+    }
     foreach ((Graphic graphic, float rotation) in vehicleDef.GhostGraphicOverlaysFor(ghostCol))
     {
-      graphic.DrawWorker(loc + baseGraphic.DrawOffsetFull(rot), rot, vehicleDef, thing, rotation);
+      float extraRotation = baseAngle + rotation;
+      graphic.DrawWorker(loc, drawRot, vehicleDef, thing, extraRotation);
     }
     if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is not null)
     {
-      vehicleDef.DrawGhostTurretTextures(loc, rot, ghostCol);
+      vehicleDef.DrawGhostTurretTextures(loc, drawRot, ghostCol);
     }
   }
 

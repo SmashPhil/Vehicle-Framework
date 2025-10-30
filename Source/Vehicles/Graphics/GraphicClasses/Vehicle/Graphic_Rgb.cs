@@ -171,6 +171,37 @@ public class Graphic_Rgb : Graphic
     return materials[rot.AsInt];
   }
 
+  public virtual Vector3 DrawOffsetFull(Rot8 rot)
+  {
+    if (!rot.IsDiagonal)
+    {
+      return base.DrawOffset(rot);
+    }
+    if (EastDiagonalRotated)
+    {
+      if (rot == Rot8.NorthEast)
+      {
+        return base.DrawOffset(Rot4.North);
+      }
+      if (rot == Rot8.SouthEast)
+      {
+        return base.DrawOffset(Rot4.South);
+      }
+    }
+    if (WestDiagonalRotated)
+    {
+      if (rot == Rot8.NorthWest)
+      {
+        return base.DrawOffset(Rot4.North);
+      }
+      if (rot == Rot8.SouthWest)
+      {
+        return base.DrawOffset(Rot4.South);
+      }
+    }
+    return base.DrawOffset(rot);
+  }
+
   public override void Init(GraphicRequest req)
   {
     masks = new Texture2D[MatCount];
@@ -483,7 +514,7 @@ public class Graphic_Rgb : Graphic
     {
       position.y = altLayerSpawned.AltitudeFor();
     }
-    Vector3 drawOffset = DrawOffset(transformData.orientation);
+    Vector3 drawOffset = DrawOffsetFull(transformData.orientation);
     drawOffset = Quaternion.AngleAxis(rotAngle, Vector3.up) * drawOffset;
     position += drawOffset;
     render.position = position;
@@ -519,7 +550,7 @@ public class Graphic_Rgb : Graphic
         if (EastDiagonalRotated)
         {
           rotation *= -1;
-          rotAngle += Rot8.East.AsAngle;
+          rotAngle *= -1;
         }
       break;
       case 6:
@@ -527,10 +558,29 @@ public class Graphic_Rgb : Graphic
         if (WestDiagonalRotated)
         {
           rotation *= -1;
-          rotAngle += Rot8.West.AsAngle;
+          rotAngle *= -1;
         }
       break;
     }
+  }
+
+  // Override for rendering ghosts. Just applied extraRotation to drawOffset
+  public override void DrawWorker(Vector3 loc, Rot4 rot, ThingDef thingDef, Thing thing, float extraRotation)
+  {
+    Mesh mesh = MeshAt(rot);
+    Quaternion quat = QuatFromRot(rot);
+    if (extraRotation != 0f)
+    {
+      quat *= Quaternion.Euler(Vector3.up * extraRotation);
+    }
+    if (data is { addTopAltitudeBias: true })
+    {
+      quat *= Quaternion.Euler(Vector3.left * 2f);
+    }
+    loc += DrawOffset(rot).RotatedBy(extraRotation);
+    Material mat = MatAt(rot, thing);
+    DrawMeshInt(mesh, loc, quat, mat);
+    ShadowGraphic?.DrawWorker(loc, rot, thingDef, thing, extraRotation);
   }
 
   public override string ToString()
