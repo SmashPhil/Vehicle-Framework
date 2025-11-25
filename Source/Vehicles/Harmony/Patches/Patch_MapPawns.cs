@@ -33,7 +33,7 @@ internal class Patch_MapPawns : IPatchCategory
 
 	private static void AllAerialVehicles_AliveOrDead(ref List<Pawn> __result)
 	{
-		var worldObjHolder = Find.World.GetComponent<VehicleWorldObjectsHolder>();
+		var worldObjHolder = Find.World?.GetComponent<VehicleWorldObjectsHolder>();
 		if (worldObjHolder == null)
 		{
 			Assert.IsTrue(false, "Null VehicleWorldObjectsHolder");
