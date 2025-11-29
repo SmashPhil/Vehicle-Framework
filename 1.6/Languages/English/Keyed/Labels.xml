@@ -5,9 +5,9 @@
   <VF_Vehicles>Vehicles</VF_Vehicles>
   
   <!-- Gizmos / Float Menus -->
-  <VF_LoadCargo>Load Cargo</VF_LoadCargo>
-  <VF_HaulPawnToVehicle>Load Pawn</VF_HaulPawnToVehicle>
-  <VF_DisembarkAllPawns>Unload All Pawns</VF_DisembarkAllPawns>
+  <VF_LoadCargo>Load cargo</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Load pawn</VF_HaulPawnToVehicle>
+  <VF_DisembarkAllPawns>Unload all pawns</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
   <VF_GearForward>Forward</VF_GearForward>
   <VF_GearReverse>Reverse</VF_GearReverse>
@@ -15,7 +15,7 @@
   <VF_DisabledByVehicleUpgrading>{0} is being upgraded.</VF_DisabledByVehicleUpgrading>
   
   <VF_StopVehicle>Stop</VF_StopVehicle>
-  <VF_UndraftVehicle>Turn Off</VF_UndraftVehicle>
+  <VF_UndraftVehicle>Turn off</VF_UndraftVehicle>
   <VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
   <VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
   <VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
@@ -38,9 +38,9 @@
   <VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
   <VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
   
-  <VF_ColorOne>ColorOne</VF_ColorOne>
-  <VF_ColorTwo>ColorTwo</VF_ColorTwo>
-  <VF_ColorThree>ColorThree</VF_ColorThree>
+  <VF_ColorOne>Color 1</VF_ColorOne>
+  <VF_ColorTwo>Color 2</VF_ColorTwo>
+  <VF_ColorThree>Color 3</VF_ColorThree>
   <VF_ColorPickerHex>Hex</VF_ColorPickerHex>
   <!-- Stats -->
   
@@ -115,10 +115,10 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   <VF_RemoveFromRole>Remove</VF_RemoveFromRole>
   <VF_AddToRole>Add</VF_AddToRole>
   <VF_RoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VF_RoutePlannerButtonTip>
-  <VF_SelectVehiclesForPlanner>Select Vehicles</VF_SelectVehiclesForPlanner>
-  <VF_StartVehicleRoutePlanner>Start Route</VF_StartVehicleRoutePlanner>
-  <VF_OkName>Confirm Name</VF_OkName>
-  <VF_RemoveName>Remove Name</VF_RemoveName>
+  <VF_SelectVehiclesForPlanner>Select vehicles</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Start route</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Confirm name</VF_OkName>
+  <VF_RemoveName>Remove name</VF_RemoveName>
   <!-- Aerial Vehicles -->
   
   <VF_NoFlightSpeed>Unable to launch with Flight Speed = 0</VF_NoFlightSpeed>
@@ -142,11 +142,11 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   <VF_EfficiencyEffector>Stats Effected</VF_EfficiencyEffector>
   <VF_BaseArmorRating>Base armor rating: {0}</VF_BaseArmorRating>
   
-  <VF_NoFuelReturnTrip>No Return Trip</VF_NoFuelReturnTrip>
-  <VF_NotEnoughFuel>Out Of Range</VF_NotEnoughFuel>
+  <VF_NoFuelReturnTrip>No return trip</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Out of range</VF_NotEnoughFuel>
   <VF_NoSpaceFlight>{0} is incapable of space flight.</VF_NoSpaceFlight>
   <VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
-  <VF_PawnsLeftBehindConfirm>Not Enough Seats</VF_PawnsLeftBehindConfirm>
+  <VF_PawnsLeftBehindConfirm>Not enough seats</VF_PawnsLeftBehindConfirm>
   <VF_PawnsLeftBehindConfirmDesc>Leave</VF_PawnsLeftBehindConfirmDesc>
   <!-- Header Titles -->
   
