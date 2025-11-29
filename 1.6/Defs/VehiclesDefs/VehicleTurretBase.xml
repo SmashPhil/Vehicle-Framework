@@ -2,6 +2,6 @@
 
 <Defs>
 	<Vehicles.VehicleTurretDef Name="VehicleTurretBase" Abstract="True">
-		<gizmoDescription>Select Target.\n\nFire for effect</gizmoDescription>
+		<gizmoDescription>Select target.\n\nFire for effect.</gizmoDescription>
 	</Vehicles.VehicleTurretDef>
 </Defs>
