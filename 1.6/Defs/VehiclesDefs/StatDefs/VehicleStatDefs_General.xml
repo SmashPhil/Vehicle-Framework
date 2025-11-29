@@ -4,7 +4,7 @@
 	<!-- Simplified version of StatDefs that are vehicle specific -->
 	<Vehicles.VehicleStatDef>
 		<defName>MoveSpeed</defName>
-		<label>Move Speed</label>
+		<label>Move speed</label>
 		<description>Speed of movement in cells per second.</description>
 		<workerClass>Vehicles.VehicleStatWorker_MoveSpeed</workerClass>
 		<category>VehicleBasics</category>
@@ -61,7 +61,7 @@
 	
 	<Vehicles.VehicleStatDef>
 		<defName>RepairRate</defName>
-		<label>Repair Rate</label>
+		<label>Repair rate</label>
 		<description>The amount of health that is repaired per second.</description>
 		<category>VehicleBasics</category>
 		<defaultBaseValue>1</defaultBaseValue>
@@ -109,7 +109,7 @@
 	
 	<Vehicles.VehicleStatDef>
 		<defName>BodyIntegrity</defName>
-		<label>Body Integrity</label>
+		<label>Body integrity</label>
 		<description>The average of all vehicle parts' health. If the integrity of the vehicle reaches 0, it will disintegrate into a fraction of its build cost.</description>
 		<workerClass>Vehicles.VehicleStatWorker_BodyIntegrity</workerClass>
 		<category>VehicleBasics</category>
@@ -127,7 +127,7 @@
 
   <Vehicles.VehicleStatDef>
     <defName>WorkToSabotage</defName>
-    <label>Work To Sabotage</label>
+    <label>Work to sabotage</label>
     <description>The base amount of work it takes to sabotage a vehicle.</description>
 
     <defaultBaseValue>50</defaultBaseValue>
