@@ -116,7 +116,7 @@ namespace Vehicles
 			foreach (Pawn pawn in thingOwner)
 			{
 				Rot4 rotOverride = role.PawnRenderer.RotFor(transformData.orientation);
-				Vector3 offset = role.PawnRenderer.DrawOffsetFor(transformData.orientation);
+				Vector3 offset = role.PawnRenderer.DrawOffsetFor(transformData.orientation).RotatedBy(transformData.rotation);
 				pawn.Drawer.renderer.DynamicDrawPhaseAt(phase, transformData.position + offset,
 					rotOverride: rotOverride, neverAimWeapon: true);
 			}
