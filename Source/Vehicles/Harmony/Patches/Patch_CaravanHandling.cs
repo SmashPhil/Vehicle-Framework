@@ -1106,7 +1106,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 					if (caravan.vehiclePather.MovingNow && !pawn.CarriedByCaravan())
 						return;
 
-					Building_Bed andRemoveFirstAvailableBedFor2 = (Building_Bed)GetAndRemoveFirstAvailableBedFor(pawn, usableBeds);
+					Building_Bed andRemoveFirstAvailableBedFor2 = (Building_Bed)GetAndRemoveFirstAvailableBedFor(instance, pawn, usableBeds);
 					if (andRemoveFirstAvailableBedFor2 != null)
 					{
 						usedBeds.Add(pawn, andRemoveFirstAvailableBedFor2);
