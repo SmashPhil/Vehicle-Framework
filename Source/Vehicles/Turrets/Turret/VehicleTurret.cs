@@ -1146,6 +1146,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 			if (ammoDef != savedAmmoType)
 				TryClearChamber();
 
+			savedAmmoType = ammoDef;
+
 			int countToRefill = def.magazineCapacity - shellCount;
 			int countToTake = Mathf.CeilToInt(countToRefill * def.chargePerAmmoCount);
 			int countRefilled = 0;
