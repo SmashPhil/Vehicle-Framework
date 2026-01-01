@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoreLib.Performance;
 using JetBrains.Annotations;
-using SmashTools.Performance;
 using UnityEngine;
 using Verse;
 

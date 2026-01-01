@@ -21,7 +21,7 @@ public class ThreadEnabler : IDisposable
   public ThreadEnabler()
   {
     // Need to enable from main thread, Find.Maps is not thread safe
-    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
 
     foreach (Map map in Find.Maps)
     {
@@ -37,7 +37,7 @@ public class ThreadEnabler : IDisposable
   public void Dispose()
   {
     // Need to dispose from main thread, Find.Maps is not thread safe
-    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
 
     foreach (Map map in Find.Maps)
     {

@@ -2,18 +2,17 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Reflection;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
+using System.Reflection;
 using JetBrains.Annotations;
-using UnityEngine;
-using Verse;
-using Verse.Sound;
 using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
+using UnityEngine;
 using Vehicles.Config;
+using Verse;
+using Verse.Sound;
 
 namespace Vehicles;
 
@@ -32,7 +31,6 @@ public class VehicleMod : Mod
 	public static ModContentPack content;
 
 	internal static VehicleDef selectedDef;
-	private static SettingsSection currentSection;
 
 	internal string currentKey;
 	internal static UpgradeNode selectedNode;
@@ -72,16 +70,16 @@ public class VehicleMod : Mod
 	public static float FishingSkillValue => settings.main.fishingSkillIncrease / 100f;
 
 	public static SettingsSection CurrentSection
-	{
-		get { return currentSection; }
+  {
+    get;
 		set
 		{
-			if (currentSection == value)
+			if (field == value)
 				return;
 
-			currentSection?.OnClose();
-			currentSection = value;
-			currentSection?.OnOpen();
+			field?.OnClose();
+			field = value;
+			field?.OnOpen();
 		}
 	}
 

@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using RimWorld;
+using SmashTools;
+using SmashTools.Burst;
 using UnityEngine;
 using Verse;
 
 namespace Vehicles;
 
-[UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public abstract class Designator_AreaRoad : Designator_Cells
 {
   private readonly DesignateMode mode;
@@ -21,6 +21,8 @@ public abstract class Designator_AreaRoad : Designator_Cells
   public override bool DragDrawMeasurements => true;
 
   public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.Areas;
+
+  protected ModifierGrid ModifierGrid => Map.GetCachedMapComponent<VehiclePathingSystem>().ModifierGrid;
 
   public override void ProcessInput(Event ev)
   {
@@ -41,11 +43,11 @@ public abstract class Designator_AreaRoad : Designator_Cells
     base.ProcessInput(ev);
     return;
 
-    FloatMenuOption RoadTypeOption(string label, RoadType roadType)
+    FloatMenuOption RoadTypeOption(string label, RoadType type)
     {
       return new FloatMenuOption(label, delegate
       {
-        Designator_AreaRoad.roadType = roadType;
+        roadType = type;
         base.ProcessInput(ev);
       }, priority: MenuOptionPriority.Low);
     }
@@ -53,6 +55,10 @@ public abstract class Designator_AreaRoad : Designator_Cells
 
   public override void DesignateSingleCell(IntVec3 cell)
   {
+    const int RoadCostShift = 1;
+    const int RoadAvoidCost = 250;
+
+    int index = CellIndicesUtility.CellToIndex(cell, Map.Size.x);
     if (mode == DesignateMode.Add)
     {
       switch (roadType)
@@ -60,16 +66,27 @@ public abstract class Designator_AreaRoad : Designator_Cells
         case RoadType.Prioritize:
           Map.areaManager.Get<Area_Road>()[cell] = true;
           Map.areaManager.Get<Area_RoadAvoidal>()[cell] = false;
+          ModifierGrid?[index] = new Modifier
+          {
+            type = ModifierType.ShiftRight,
+            value = RoadCostShift
+          };
           break;
         case RoadType.Avoid:
           Map.areaManager.Get<Area_Road>()[cell] = false;
           Map.areaManager.Get<Area_RoadAvoidal>()[cell] = true;
+          ModifierGrid?[index] = new Modifier
+          {
+            type = ModifierType.Add,
+            value = RoadAvoidCost
+          };
           break;
       }
       return;
     }
     Map.areaManager.Get<Area_Road>()[cell] = false;
     Map.areaManager.Get<Area_RoadAvoidal>()[cell] = false;
+    ModifierGrid?[index] = new Modifier { type = ModifierType.None };
   }
 
   public override AcceptanceReport CanDesignateCell(IntVec3 cell)
@@ -85,8 +102,8 @@ public abstract class Designator_AreaRoad : Designator_Cells
       return roadType switch
       {
         RoadType.Prioritize => !road,
-        RoadType.Avoid      => !avoidal,
-        _                   => true,
+        RoadType.Avoid => !avoidal,
+        _ => true,
       };
     }
     return road || avoidal;

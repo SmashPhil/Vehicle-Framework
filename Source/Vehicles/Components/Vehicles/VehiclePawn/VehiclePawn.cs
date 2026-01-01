@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics;
+using CoreLib.Performance;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
 using SmashTools.Animations;
-using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Rendering;
@@ -78,7 +78,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		ageTracker.AgeChronologicalTicks = 0;
 		ageTracker.BirthAbsTicks = 0;
 		statHandler.InitializeComponents();
-		this.RegisterEvents();
+    RegisterEvents();
 		InitializeVehicle();
 		RegenerateUnsavedComponents();
 		UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
@@ -87,7 +87,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		{
 			GenerateInventory();
 		}
-	}
+
+    vehiclePather.PostGenerationSetup();
+  }
 
 	private void GenerateInventory()
 	{
@@ -199,7 +201,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 			}
 		}
 
-		//One Shots
+		// One Shots
 		if (!VehicleDef.soundOneShotsOnEvent.NullOrEmpty())
 		{
 			foreach (VehicleSoundEventEntry<VehicleEventDef> soundEventEntry in VehicleDef
@@ -210,7 +212,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 			}
 		}
 
-		//Sustainers
+		// Sustainers
 		if (!VehicleDef.soundSustainersOnEvent.NullOrEmpty())
 		{
 			foreach (VehicleSustainerEventEntry<VehicleEventDef> soundEventEntry in VehicleDef

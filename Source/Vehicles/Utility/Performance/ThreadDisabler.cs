@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 using SmashTools;
 using SmashTools.Performance;
 using UnityEngine.Assertions;
@@ -22,7 +21,7 @@ public class ThreadDisabler : IDisposable
   public ThreadDisabler()
   {
     // Need to disable from main thread, Find.Maps is not thread safe
-    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
 
     foreach (Map map in Find.Maps)
     {
@@ -38,7 +37,7 @@ public class ThreadDisabler : IDisposable
   public void Dispose()
   {
     // Need to dispose from main thread, Find.Maps is not thread safe
-    Assert.IsTrue(ThreadManager.InMainOrEventThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
 
     foreach (Map map in Find.Maps)
     {

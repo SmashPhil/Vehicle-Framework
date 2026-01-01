@@ -8,6 +8,7 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
+using SmashTools.Burst;
 using SmashTools.Targeting;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -52,7 +53,11 @@ public partial class VehiclePawn
 
 	private Command_Toggle fishToggle;
 
-	public float CachedAngle { get; set; }
+#if DEBUG && RAIDERS
+	private Editor.PathPreview previewer;
+#endif
+
+  public float CachedAngle { get; set; }
 
 	public bool NorthSouthRotation => VehicleGraphic.EastDiagonalRotated &&
 		(FullRotation == Rot8.NorthEast ||
@@ -1175,9 +1180,9 @@ public partial class VehiclePawn
 					options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInNewAnimator));
 #endif
 
-#if RAIDERS
-					Editor.PathPreview previewer = new(this);
-					options.Add(new FloatMenuOption("Path Preview", previewer.Start));
+#if DEBUG && RAIDERS
+					previewer ??= new(this);
+          options.Add(new FloatMenuOption("Path Preview", previewer.Start));
 #endif
 					if (options.Count > 0)
 					{

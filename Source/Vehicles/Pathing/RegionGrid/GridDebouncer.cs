@@ -11,10 +11,11 @@ namespace Vehicles;
 public class GridDebouncer : IDisposable
 {
 	private readonly Map map;
-	private readonly NativeBitArray dirtyCells;
 	private readonly List<IGridDebouncerSource> sources;
 
-	public GridDebouncer(Map map, List<IGridDebouncerSource> sources)
+  private NativeBitArray dirtyCells;
+
+  public GridDebouncer(Map map, List<IGridDebouncerSource> sources)
 	{
 		this.map = map;
 		this.sources = sources;

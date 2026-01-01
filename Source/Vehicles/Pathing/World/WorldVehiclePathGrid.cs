@@ -4,6 +4,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using CoreLib;
+using CoreLib.Performance;
 using HarmonyLib;
 using JetBrains.Annotations;
 using LudeonTK;
@@ -356,7 +358,7 @@ public class WorldVehiclePathGrid : WorldComponent
 
 		// We need to explicitly await on the thread exiting to main menu / desktop or it will still race against
 		// the cancellation request.
-		Assert.IsTrue(ThreadManager.InMainOrEventThread);
+		Assert.IsTrue(LongEventUtils.InMainOrEventThread);
 		pathGrid.cts.Cancel();
 		Task.WaitAll([pathGrid.curTask], MaxCancelWaitTime);
 	}

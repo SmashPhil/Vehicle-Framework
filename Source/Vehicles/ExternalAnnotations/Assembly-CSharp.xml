@@ -4,6 +4,9 @@
 			<argument>3</argument>
 		</attribute>
 	</member>
+	<member name="T:LudeonTK.DebugActionAttribute">
+		<attribute ctor="M:JetBrains.Annotations.UsedImplicitlyAttribute.#ctor"/>
+	</member>
 	<member name="T:Verse.StaticConstructorOnStartup">
 		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
 	</member>

@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoreLib;
+using CoreLib.Performance;
 using JetBrains.Annotations;
 using LudeonTK;
 using RimWorld;
 using SmashTools;
-using SmashTools.Performance;
 using UnityEngine.Assertions;
 using Verse;
 

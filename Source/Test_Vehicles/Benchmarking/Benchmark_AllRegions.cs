@@ -1,0 +1,80 @@
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using DevTools.Benchmarking;
+using LudeonTK;
+using SmashTools;
+using Verse;
+
+namespace Vehicles.Benchmarking;
+
+[BenchmarkClass("get_AllRegions", AllowedGameStates = AllowedGameStates.PlayingOnMap)]
+internal class Benchmark_AllRegions
+{
+  [Benchmark(Label = "Parallel")]
+  [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+  private static void RegionGridGen_Parallel(ref RegionContext context)
+  {
+    VehicleRegionGrid regionGrid = context.regionGrid;
+    ConcurrentSet<VehicleRegion> allRegions = context.allRegionsConcurrent;
+    Parallel.For(0, context.mapping.map.cellIndices.NumGridCells, delegate(int index)
+    {
+      VehicleRegion region = regionGrid.GetRegionAt(index);
+      if (region != null && region.valid && allRegions.Add(region))
+      {
+      }
+    });
+  }
+
+  [Benchmark(Label = "Partitioned")]
+  [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+  private static void RegionGridGen_Partitioned(ref RegionContext context)
+  {
+    VehicleRegionGrid regionGrid = context.regionGrid;
+    ConcurrentSet<VehicleRegion> allRegions = context.allRegionsConcurrent;
+    Parallel.ForEach(Partitioner.Create(0, context.mapping.map.cellIndices.NumGridCells),
+      (range, _) =>
+      {
+        for (int i = range.Item1; i < range.Item2; i++)
+        {
+          VehicleRegion region = regionGrid.GetRegionAt(i);
+          if (region != null && region.valid && allRegions.Add(region))
+          {
+          }
+        }
+      });
+  }
+
+  [Benchmark(Label = "Sequential")]
+  [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
+  private static void RegionGridGen_Sequential(ref RegionContext context)
+  {
+    VehicleRegionGrid regionGrid = context.regionGrid;
+    HashSet<VehicleRegion> allRegions = context.allRegions;
+    for (int i = 0; i < context.mapping.map.cellIndices.NumGridCells; i++)
+    {
+      VehicleRegion region = regionGrid.GetRegionAt(i);
+      if (region != null && region.valid && allRegions.Add(region))
+      {
+      }
+    }
+  }
+
+  private readonly struct RegionContext
+  {
+    public readonly VehiclePathingSystem mapping;
+    public readonly VehicleRegionGrid regionGrid;
+    public readonly HashSet<VehicleRegion> allRegions = [];
+    public readonly ConcurrentSet<VehicleRegion> allRegionsConcurrent = [];
+
+    public RegionContext()
+    {
+      this.mapping = Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>();
+      VehicleDef vehicleDef = mapping.GridOwners.AllOwners.FirstOrDefault(def =>
+        !Find.CurrentMap.GetCachedMapComponent<VehiclePathingSystem>()[def].Suspended);
+      this.regionGrid = mapping[vehicleDef].VehicleRegionGridManager[RegionGridType.Normal];
+    }
+  }
+}

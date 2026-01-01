@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoreLib;
+using CoreLib.Performance;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
-using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;

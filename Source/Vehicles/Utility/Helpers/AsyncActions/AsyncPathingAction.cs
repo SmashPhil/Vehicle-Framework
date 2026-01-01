@@ -1,35 +1,29 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using CoreLib.Performance;
 using Verse;
-using SmashTools;
-using SmashTools.Performance;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class AsyncPathingAction : AsyncAction
 {
-  public class AsyncPathingAction : AsyncAction
+  private VehiclePathingSystem mapping;
+  private IntVec3 position;
+
+  public override bool IsValid => mapping?.map?.Index > -1;
+
+  public void Set(VehiclePathingSystem mapping, IntVec3 position)
   {
-    private VehiclePathingSystem mapping;
-    private IntVec3 position;
+    this.mapping = mapping;
+    this.position = position;
+  }
 
-    public override bool IsValid => mapping?.map?.Index > -1;
+  public override void Invoke()
+  {
+    PathingHelper.RecalculatePerceivedPathCostAtFor(mapping, position);
+  }
 
-    public void Set(VehiclePathingSystem mapping, IntVec3 position)
-    {
-      this.mapping = mapping;
-      this.position = position;
-    }
-
-    public override void Invoke()
-    {
-      PathingHelper.RecalculatePerceivedPathCostAtFor(mapping, position);
-    }
-
-    public override void ReturnToPool()
-    {
-      mapping = null;
-      AsyncPool<AsyncPathingAction>.Return(this);
-    }
+  public override void ReturnToPool()
+  {
+    mapping = null;
+    AsyncPool<AsyncPathingAction>.Return(this);
   }
 }

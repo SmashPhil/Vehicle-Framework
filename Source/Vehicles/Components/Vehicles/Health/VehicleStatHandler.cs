@@ -7,6 +7,7 @@ using Verse;
 using RimWorld;
 using SmashTools;
 using System.Reflection;
+using CoreLib;
 using HarmonyLib;
 using Vehicles.Compatibility;
 

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Text;
 using RimWorld;
 using SmashTools;
-using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;

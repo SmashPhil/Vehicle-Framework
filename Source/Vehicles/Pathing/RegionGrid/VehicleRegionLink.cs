@@ -1,6 +1,7 @@
 ﻿using System;
+using CoreLib.Performance;
+using JetBrains.Annotations;
 using SmashTools;
-using SmashTools.Performance;
 using Verse;
 
 namespace Vehicles;
@@ -8,12 +9,14 @@ namespace Vehicles;
 /// <summary>
 /// Link between regions for reachability determination
 /// </summary>
+[PublicAPI]
 public class VehicleRegionLink : IPoolable
 {
   private const float WeightColorCeiling = 30;
 
   public VehicleRegion regionA;
   public VehicleRegion regionB;
+  public RegionGridType gridType;
 
   public EdgeSpan span;
 
@@ -55,10 +58,11 @@ public class VehicleRegionLink : IPoolable
 
   public IntVec3 End => SpanEnd(in span);
 
-  public void SetNew(EdgeSpan span)
+  public void SetNew(EdgeSpan edgeSpan, RegionGridType regionGridType)
   {
     Reset();
-    this.span = span;
+    span = edgeSpan;
+    gridType = regionGridType;
     anchor = VehicleRegionCostCalculator.RegionLinkCenter(this);
   }
 
@@ -83,18 +87,6 @@ public class VehicleRegionLink : IPoolable
     {
       regionB = region;
     }
-    // TODO - Add portal set based on in / out link.
-    //if (regionA is not null && regionB is not null)
-    //{
-    //  portal = dir.AsInt switch
-    //  {
-    //    0 =>,
-    //    1 =>,
-    //    2 =>,
-    //    3 =>,
-    //    _ => throw new NotImplementedException(nameof(Rot4)),
-    //  };
-    //}
   }
 
   /// <returns>Link is invalid and can be removed from cache</returns>
@@ -110,11 +102,11 @@ public class VehicleRegionLink : IPoolable
     }
   }
 
-  public bool LinksRegions(VehicleRegion regionA, VehicleRegion regionB)
+  public bool LinksRegions(VehicleRegion a, VehicleRegion b)
   {
-    if (this.regionA == regionA && this.regionB == regionB)
+    if (regionA == a && regionB == b)
       return true;
-    return this.regionA == regionB && this.regionB == regionA;
+    return regionA == b && regionB == a;
   }
 
   /// <summary>

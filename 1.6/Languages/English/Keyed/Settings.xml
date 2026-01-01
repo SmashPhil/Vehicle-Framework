@@ -40,6 +40,10 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>
   <VF_MultiplePawnsPerJobTooltip>Allows vehicle related jobs to allow more than 1 pawn to reserve and work on it. Max allowed pawns determined by modders.</VF_MultiplePawnsPerJobTooltip>
   
+  <VF_UseBurstLib>Use Burst</VF_UseBurstLib>
+  <VF_UseBurstLibTooltip>Load external burst library for better performance.</VF_UseBurstLibTooltip>
+  <VF_BurstDisabledFromCrash>RimWorld crashed while attempting to load Vehicle Framework's external burst library.  It has been disabled to prevent further crashes, but can re-enabled from the mod settings.  This won't affect gameplay, the external burst library is only for performance.</VF_BurstDisabledFromCrash>
+  
   <VF_GraphicsSettings>Graphics</VF_GraphicsSettings>
   <VF_PerformanceSettings>Performance</VF_PerformanceSettings>
   <VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>

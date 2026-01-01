@@ -1,333 +1,271 @@
 ﻿using System.Collections.Generic;
-using System.Threading;
+using CoreLib;
 using SmashTools;
 using SmashTools.Performance;
 using UnityEngine;
-using UnityEngine.Assertions;
 using Verse;
-using RegionResult = Vehicles.VehicleRegionMaker.RegionResult;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Region and room update handler
+/// </summary>
+public class VehicleRegionAndRoomUpdater : VehicleGridManager
 {
-	/// <summary>
-	/// Region and room update handler
-	/// </summary>
-	public class VehicleRegionAndRoomUpdater : VehicleGridManager
-	{
-		private readonly List<VehicleRegion> newRegions = [];
+  private readonly List<VehicleRegion> newRegions = [];
+  private readonly List<VehicleRegion> currentRegionGroup = [];
 
-		private readonly List<VehicleRoom> newRooms = [];
-		private readonly HashSet<VehicleRoom> reusedOldRooms = [];
+  private readonly HashSet<VehicleRoom> reusedOldRooms = [];
 
-		private readonly List<VehicleRegion> currentRegionGroup = [];
+  private VehicleRegionGridManager regionGridManager;
 
-		private VehicleRegionGrid regionGrid;
+  public VehicleRegionAndRoomUpdater(VehiclePathingSystem mapping, VehicleDef createdFor)
+    : base(mapping, createdFor)
+  {
+  }
 
-		public VehicleRegionAndRoomUpdater(VehiclePathingSystem mapping, VehicleDef createdFor)
-			: base(mapping, createdFor)
-		{
-		}
+  /// <summary>
+  /// Updater has been initialized
+  /// </summary>
+  public bool Initialized { get; private set; }
 
-		/// <summary>
-		/// Updater has been initialized
-		/// </summary>
-		public bool Initialized { get; private set; }
+  /// <summary>
+  /// Updater is currently updating dirty regions
+  /// </summary>
+  public bool UpdatingRegion { get; private set; }
 
-		/// <summary>
-		/// Currently updating regions
-		/// </summary>
-		public bool UpdatingRegion { get; private set; }
+  /// <summary>
+  /// Updater has finished initial build
+  /// </summary>
+  public bool Enabled { get; private set; }
 
-		/// <summary>
-		/// Cross check objects not in thread safe code is not being modified outside
-		/// of the thread responsible for updating the region set. If within the same
-		/// thread, many locks can be avoided since many of the region specific fields
-		/// are not accessed outside of this context.
-		/// </summary>
-		internal int UpdatingFromThreadId { get; private set; }
+  /// <summary>
+  /// Anything in RegionGrid that needs to be rebuilt
+  /// </summary>
+  public bool AnythingToRebuild
+  {
+    get
+    {
+      if (UpdatingRegion || !Enabled) return false;
+      return !Initialized || mapping[createdFor].VehicleRegionDirtyer.AnyDirty;
+    }
+  }
 
-		/// <summary>
-		/// Updater has finished initial build
-		/// </summary>
-		public bool Enabled { get; private set; }
+  public void Init()
+  {
+    if (!mapping[createdFor].VehiclePathGrid.Enabled &&
+      !mapping.GridOwners.TryForfeitOwnership(createdFor))
+    {
+      Trace.Fail("Trying to initialize region grids with no vehicle to claim ownership.");
+      return;
+    }
 
-		/// <summary>
-		/// Anything in RegionGrid that needs to be rebuilt
-		/// </summary>
-		public bool AnythingToRebuild
-		{
-			get
-			{
-				if (UpdatingRegion || !Enabled) return false;
-				return !Initialized || mapping[createdFor].VehicleRegionDirtyer.AnyDirty;
-			}
-		}
+    Enabled = true;
+    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
+    regionGridManager.Init();
+  }
 
-		public void Init()
-		{
-			if (!mapping[createdFor].VehiclePathGrid.Enabled &&
-				!mapping.GridOwners.TryForfeitOwnership(createdFor))
-			{
-				Trace.Fail("Trying to initialize region grids with no vehicle to claim ownership.");
-				return;
-			}
+  public void Release()
+  {
+    Initialized = false;
+    Enabled = false;
+    regionGridManager.Release();
+  }
 
-			Enabled = true;
-			regionGrid = mapping[createdFor].VehicleRegionGrid;
-			regionGrid.Init();
-		}
+  /// <summary>
+  /// Should only be called for map generation so spawn events don't attempt to rebuild regions. 
+  /// </summary>
+  public void Disable()
+  {
+    Enabled = false;
+  }
 
-		public void Release()
-		{
-			Initialized = false;
-			Enabled = false;
-			regionGrid.Release();
-		}
+  /// <summary>
+  /// Rebuild all regions
+  /// </summary>
+  public void RebuildAllVehicleRegions()
+  {
+    if (!Enabled)
+    {
+      Log.Warning(
+        $"Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. " +
+        $"VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
+    }
 
-		/// <summary>
-		/// Should only be called for map generation so spawn events don't attempt to rebuild regions. 
-		/// </summary>
-		public void Disable()
-		{
-			Enabled = false;
-		}
+    mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
+    TryRebuildVehicleRegions();
+  }
 
-		/// <summary>
-		/// Rebuild all regions
-		/// </summary>
-		public void RebuildAllVehicleRegions()
-		{
-			if (!Enabled)
-			{
-				Log.Warning(
-					$"Called RebuildAllVehicleRegions but VehicleRegionAndRoomUpdater is disabled. " +
-					$"VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
-			}
+  /// <summary>
+  /// Rebuild all regions on the map and generate associated rooms
+  /// </summary>
+  public void TryRebuildVehicleRegions()
+  {
+    if (UpdatingRegion || !Enabled)
+      return;
 
-			mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
-			TryRebuildVehicleRegions();
-		}
+    UpdatingRegion = true;
+    if (!Initialized)
+    {
+      mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
+    }
+    else if (!mapping[createdFor].VehicleRegionDirtyer.AnyDirty)
+    {
+      UpdatingRegion = false;
+      return;
+    }
 
-		/// <summary>
-		/// Rebuild all regions on the map and generate associated rooms
-		/// </summary>
-		public void TryRebuildVehicleRegions()
-		{
-			if (UpdatingRegion || !Enabled)
-				return;
+    try
+    {
+      RegenerateNewVehicleRegions();
+      CreateOrUpdateVehicleRooms();
+    }
+    finally
+    {
+      Initialized = true;
+      UpdatingRegion = false;
+    }
+  }
 
-			UpdatingRegion = true;
-			if (!Initialized)
-			{
-				mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
-			}
-			else if (!mapping[createdFor].VehicleRegionDirtyer.AnyDirty)
-			{
-				UpdatingRegion = false;
-				return;
-			}
+  /// <summary>
+  /// Generate regions with dirty cells
+  /// </summary>
+  [Profile]
+  private void RegenerateNewVehicleRegions()
+  {
+    newRegions.Clear();
+    regionGridManager.RegenerateDirtyRegions(newRegions);
+  }
 
-			try
-			{
-#if DEBUG
-				UpdatingFromThreadId = Thread.CurrentThread.ManagedThreadId;
-#endif
-				RegenerateNewVehicleRegions();
-				CreateOrUpdateVehicleRooms();
-			}
-			finally
-			{
-				newRegions.Clear();
-				Initialized = true;
-				UpdatingRegion = false;
-			}
-		}
+  /// <summary>
+  /// Update procedure for Rooms associated with Vehicle based regions
+  /// </summary>
+  [Profile]
+  private void CreateOrUpdateVehicleRooms()
+  {
+    using ClearOnDispose<VehicleRoom> cod = new(reusedOldRooms);
+    int numRegionGroups = CombineNewRegions();
+    CreateOrAttachToExistingRooms(numRegionGroups);
+    CombineNewAndReusedRooms();
+  }
 
-		/// <summary>
-		/// Generate regions with dirty cells
-		/// </summary>
-		[Profile]
-		private void RegenerateNewVehicleRegions()
-		{
-			newRegions.Clear();
-			VehiclePathingSystem.VehiclePathData pathData = mapping[createdFor];
-			foreach (IntVec3 cell in pathData.VehicleRegionDirtyer.DirtyCells)
-			{
-				if (!cell.InBounds(mapping.map))
-				{
-					Trace.Fail($"Dirtied invalid cell at {cell}");
-					continue;
-				}
+  /// <summary>
+  /// Combine rooms together with room group criteria met
+  /// </summary>
+  private void CombineNewAndReusedRooms()
+  {
+    int count = 0;
+    foreach (VehicleRegion region in newRegions)
+    {
+      if (region.newRegionGroupIndex >= 0)
+        continue;
 
-				VehicleRegion region = pathData.VehicleRegionGrid.GetRegionAt(cell);
+      VehicleRegionTraverser.FloodAndSetNewRegionIndex(region, count);
+      count++;
+    }
+  }
 
-				// ObjectPool should never hold a region which still has references in the region grid.
-				Assert.IsTrue(region == null || !region.InPool,
-					$"{region} has been returned to pool prematurely.");
+  /// <summary>
+  /// Create new room or attach to existing room with predetermined number of region groups
+  /// </summary>
+  /// <param name="numRegionGroups"></param>
+  private void CreateOrAttachToExistingRooms(int numRegionGroups)
+  {
+    for (int i = 0; i < numRegionGroups; i++)
+    {
+      currentRegionGroup.Clear();
+      foreach (VehicleRegion newRegion in newRegions)
+      {
+        if (newRegion.newRegionGroupIndex == i)
+        {
+          currentRegionGroup.Add(newRegion);
+        }
+      }
 
-				if (region == null || !region.valid)
-				{
-					RegionResult result = pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell, ref region);
-					switch (result)
-					{
-						case RegionResult.Success:
-						{
-							newRegions.Add(region);
-						}
-						break;
-						case RegionResult.NoRegion:
-						{
-							// Clean immediately rather than following RimWorld convention of delayed
-							// Update-based clean.
-							if (region != null)
-								regionGrid.SetRegionAt(cell, null);
-						}
-						break;
-					}
-				}
-			}
-		}
+      VehicleRegion firstRegion = currentRegionGroup[0];
+      if (!firstRegion.type.AllowsMultipleRegionsPerDistrict())
+      {
+        if (currentRegionGroup.Count != 1)
+        {
+          Log.Error(
+            "Region type doesn't allow multiple regions per room but there are >1 regions in this group.");
+        }
 
-		/// <summary>
-		/// Update procedure for Rooms associated with Vehicle based regions
-		/// </summary>
-		[Profile]
-		private void CreateOrUpdateVehicleRooms()
-		{
-			newRooms.Clear();
-			reusedOldRooms.Clear();
-			int numRegionGroups = CombineNewRegionsIntoContiguousGroups();
-			CreateOrAttachToExistingRooms(numRegionGroups);
-			CombineNewAndReusedRoomsIntoContiguousGroups();
-			newRooms.Clear();
-			reusedOldRooms.Clear();
-		}
+        VehicleRoom portalRoom = VehicleRoom.MakeNew(mapping.map, createdFor, firstRegion.gridType);
+        firstRegion.Room = portalRoom;
+        return;
+      }
 
-		/// <summary>
-		/// Combine rooms together with room group criteria met
-		/// </summary>
-		private int CombineNewAndReusedRoomsIntoContiguousGroups()
-		{
-			int num = 0;
-			for (int i = 0; i < newRegions.Count; i++)
-			{
-				if (newRegions[i].newRegionGroupIndex < 0)
-				{
-					VehicleRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
-					num++;
-				}
-			}
+      VehicleRoom room = FindCurrentRegionGroupNeighborWithMostRegions(out bool multipleOldNeighborRooms);
+      if (room is null)
+      {
+        room = VehicleRoom.MakeNew(mapping.map, createdFor, firstRegion.gridType);
+        VehicleRegionTraverser.FloodAndSetRooms(firstRegion, mapping.map, createdFor, room);
+      }
+      else if (!multipleOldNeighborRooms)
+      {
+        foreach (VehicleRegion region in currentRegionGroup)
+        {
+          region.Room = room;
+        }
 
-			return num;
-		}
+        reusedOldRooms.Add(room);
+      }
+      else
+      {
+        VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], mapping.map, createdFor, room);
+        reusedOldRooms.Add(room);
+      }
+    }
+  }
 
-		/// <summary>
-		/// Create new room or attach to existing room with predetermined number of region groups
-		/// </summary>
-		/// <param name="numRegionGroups"></param>
-		private void CreateOrAttachToExistingRooms(int numRegionGroups)
-		{
-			for (int i = 0; i < numRegionGroups; i++)
-			{
-				currentRegionGroup.Clear();
-				for (int j = 0; j < newRegions.Count; j++)
-				{
-					if (newRegions[j].newRegionGroupIndex == i)
-					{
-						currentRegionGroup.Add(newRegions[j]);
-					}
-				}
+  /// <summary>
+  /// Combine regions that meet region group criteria
+  /// </summary>
+  private int CombineNewRegions()
+  {
+    int count = 0;
+    foreach (VehicleRegion region in newRegions)
+    {
+      if (region.newRegionGroupIndex >= 0)
+        continue;
 
-				if (!currentRegionGroup[0].type.AllowsMultipleRegionsPerDistrict())
-				{
-					if (currentRegionGroup.Count != 1)
-					{
-						Log.Error(
-							"Region type doesn't allow multiple regions per room but there are >1 regions in this group.");
-					}
+      VehicleRegionTraverser.FloodAndSetNewRegionIndex(region, count);
+      count++;
+    }
+    return count;
+  }
 
-					VehicleRoom room = VehicleRoom.MakeNew(mapping.map, createdFor);
-					currentRegionGroup[0].Room = room;
-					newRooms.Add(room);
-				}
-				else
-				{
-					VehicleRoom room2 = FindCurrentRegionGroupNeighborWithMostRegions(out bool flag);
-					if (room2 is null)
-					{
-						VehicleRoom item = VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0],
-							mapping.map, createdFor, null);
-						newRooms.Add(item);
-					}
-					else if (!flag)
-					{
-						for (int k = 0; k < currentRegionGroup.Count; k++)
-						{
-							currentRegionGroup[k].Room = room2;
-						}
+  /// <summary>
+  /// Find neighboring region group with most regions
+  /// </summary>
+  /// <param name="multipleOldNeighborRooms"></param>
+  private VehicleRoom FindCurrentRegionGroupNeighborWithMostRegions(
+    out bool multipleOldNeighborRooms)
+  {
+    multipleOldNeighborRooms = false;
+    VehicleRoom room = null;
+    foreach (VehicleRegion root in currentRegionGroup)
+    {
+      foreach (VehicleRegion region in root.NeighborsOfSameType)
+      {
+        if (region.Room == null || reusedOldRooms.Contains(region.Room))
+          continue;
 
-						reusedOldRooms.Add(room2);
-					}
-					else
-					{
-						VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], mapping.map, createdFor,
-							room2);
-						reusedOldRooms.Add(room2);
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Combine regions that meet region group criteria
-		/// </summary>
-		private int CombineNewRegionsIntoContiguousGroups()
-		{
-			int num = 0;
-			for (int i = 0; i < newRegions.Count; i++)
-			{
-				if (newRegions[i].newRegionGroupIndex < 0)
-				{
-					VehicleRegionTraverser.FloodAndSetNewRegionIndex(newRegions[i], num);
-					num++;
-				}
-			}
-
-			return num;
-		}
-
-		/// <summary>
-		/// Find neighboring region group with most regions
-		/// </summary>
-		/// <param name="multipleOldNeighborRooms"></param>
-		private VehicleRoom FindCurrentRegionGroupNeighborWithMostRegions(
-			out bool multipleOldNeighborRooms)
-		{
-			multipleOldNeighborRooms = false;
-			VehicleRoom room = null;
-			for (int i = 0; i < currentRegionGroup.Count; i++)
-			{
-				foreach (VehicleRegion region in currentRegionGroup[i].NeighborsOfSameType)
-				{
-					if (region.Room != null && !reusedOldRooms.Contains(region.Room))
-					{
-						if (room == null)
-						{
-							room = region.Room;
-						}
-						else if (region.Room != room)
-						{
-							multipleOldNeighborRooms = true;
-							if (region.Room.RegionCount > room.RegionCount)
-							{
-								room = region.Room;
-							}
-						}
-					}
-				}
-			}
-
-			return room;
-		}
-	}
+        if (room == null)
+        {
+          room = region.Room;
+        }
+        else if (region.Room != room)
+        {
+          multipleOldNeighborRooms = true;
+          if (region.Room.RegionCount > room.RegionCount)
+          {
+            room = region.Room;
+          }
+        }
+      }
+    }
+    return room;
+  }
 }

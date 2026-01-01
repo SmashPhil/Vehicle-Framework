@@ -235,7 +235,6 @@ public static class EnterMapUtilityVehicles
 			root = CellFinderExtended.RandomClosewalkCellNear(root, map, vehicleDef, 5);
 			return true;
 		}
-
 		return false;
 
 		bool MinimalValidator(IntVec3 cell)
@@ -262,7 +261,7 @@ public static class EnterMapUtilityVehicles
 
 			VehiclePathingSystem.VehiclePathData pathData = map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef];
 			return hostFaction != null && pathData.VehicleReachability.CanReachBase(cell, vehicleDef) || 
-				hostFaction == null && pathData.VehicleReachability.CanReachBiggestMapEdgeRoom(cell);
+				hostFaction == null && pathData.VehicleReachability.CanReachBiggestMapEdgeRoom(cell, RegionGridType.Normal);
 		}
 	}
 

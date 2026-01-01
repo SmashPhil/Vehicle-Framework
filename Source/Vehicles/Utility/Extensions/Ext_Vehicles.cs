@@ -17,7 +17,7 @@ using Verse.Sound;
 
 namespace Vehicles;
 
-// TODO 1.7 - Clean up all of the extension methods for Drivable and Standable
+// TODO 1.7 - Clean up all the extension methods for Drivable and Standable
 [PublicAPI]
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles

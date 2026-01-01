@@ -1,42 +1,36 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Verse;
-using SmashTools;
-using SmashTools.Performance;
+﻿using System.Collections.Generic;
+using CoreLib.Performance;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class AsyncReachabilityCacheAction : AsyncAction
 {
-  public class AsyncReachabilityCacheAction : AsyncAction
+  private VehiclePathingSystem mapping;
+  private List<VehicleDef> vehicleDefs;
+
+  public override bool IsValid => mapping?.map?.Index > -1;
+
+  public void Set(VehiclePathingSystem mapping, List<VehicleDef> vehicleDefs)
   {
-    private VehiclePathingSystem mapping;
-    private List<VehicleDef> vehicleDefs;
+    this.mapping = mapping;
+    this.vehicleDefs = vehicleDefs;
+  }
 
-    public override bool IsValid => mapping?.map?.Index > -1;
-
-    public void Set(VehiclePathingSystem mapping, List<VehicleDef> vehicleDefs)
+  public override void Invoke()
+  {
+    foreach (VehicleDef vehicleDef in vehicleDefs)
     {
-      this.mapping = mapping;
-      this.vehicleDefs = vehicleDefs;
-    }
-
-    public override void Invoke()
-    {
-      foreach (VehicleDef vehicleDef in vehicleDefs)
+      if (mapping.GridOwners.IsOwner(vehicleDef))
       {
-        if (mapping.GridOwners.IsOwner(vehicleDef))
-        {
-          mapping[vehicleDef].VehicleReachability.ClearCache();
-        }
+        mapping[vehicleDef].VehicleReachability.ClearCache();
       }
     }
+  }
 
-    public override void ReturnToPool()
-    {
-      mapping = null;
-      vehicleDefs = null;
-      AsyncPool<AsyncReachabilityCacheAction>.Return(this);
-    }
+  public override void ReturnToPool()
+  {
+    mapping = null;
+    vehicleDefs = null;
+    AsyncPool<AsyncReachabilityCacheAction>.Return(this);
   }
 }
