@@ -1,4 +1,4 @@
-﻿using SmashTools.Performance;
+﻿using CoreLib.Performance;
 using VehiclePathData = Vehicles.VehiclePathingSystem.VehiclePathData;
 
 namespace Vehicles

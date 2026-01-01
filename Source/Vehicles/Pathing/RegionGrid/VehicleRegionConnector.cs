@@ -3,9 +3,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CoreLib.Performance;
 using LudeonTK;
 using SmashTools;
-using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -16,7 +16,7 @@ public class VehicleRegionConnector : VehicleGridManager
 {
   private const int ChunkCellCount = VehicleRegion.ChunkSize * VehicleRegion.ChunkSize;
 
-  private VehicleRegionGrid regionGrid;
+  private VehicleRegionGridManager regionGridManager;
   private VehiclePathGrid pathGrid;
   private readonly ObjectPool<ConnectorGroup> connectorPool;
   private readonly ThreadLocal<CostFinder> costFinder;
@@ -47,15 +47,18 @@ public class VehicleRegionConnector : VehicleGridManager
   {
     base.PostInit();
     pathGrid = mapping[createdFor].VehiclePathGrid;
-    regionGrid = mapping[createdFor].VehicleRegionGrid;
+    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
   }
 
   public void RebuildAllConnections()
   {
-    regionGrid.GetAllRegions(regions);
-    foreach (VehicleRegion region in regions)
+    foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
     {
-      RecalculateWeights(region);
+      regionGridManager[gridType].GetAllRegions(regions);
+      foreach (VehicleRegion region in regions)
+      {
+        RecalculateWeights(region);
+      }
     }
   }
 
@@ -269,7 +272,7 @@ public class VehicleRegionConnector : VehicleGridManager
         int x = cell.x + VehiclePathFinder.neighborOffsets[i];
         int z = cell.z + VehiclePathFinder.neighborOffsets[i + 8];
         int index = cellIndices.CellToIndex(x, z);
-        if (regionConnector.regionGrid.GetRegionAt(index) == region)
+        if (regionConnector.regionGridManager[region.gridType].GetRegionAt(index) == region)
           yield return index;
         else
         {

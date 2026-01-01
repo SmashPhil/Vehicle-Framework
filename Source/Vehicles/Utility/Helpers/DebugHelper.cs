@@ -158,44 +158,10 @@ public static class DebugHelper
     return toggles;
   }
 
-  /// <summary>
-  /// Draw water regions to show if they are valid and initialized
-  /// </summary>
-  /// <param name="map"></param>
-  public static void DebugDrawVehicleRegion(Map map)
-  {
-    if (Local.VehicleDef != null)
-    {
-      map.GetCachedMapComponent<VehiclePathingSystem>()[Local.VehicleDef].VehicleRegionGrid
-       .DebugDraw(Local.DebugType);
-    }
-  }
-
-  /// <summary>
-  /// Draw path costs overlay on GUI
-  /// </summary>
-  /// <param name="map"></param>
-  public static void DebugDrawVehiclePathCostsOverlay(Map map)
-  {
-    if (Local.VehicleDef != null)
-    {
-      map.GetCachedMapComponent<VehiclePathingSystem>()[Local.VehicleDef].VehicleRegionGrid
-       .DebugOnGUI(Local.DebugType);
-    }
-  }
-
   public class PathDebugData<T> where T : Enum
   {
     public VehicleDef VehicleDef { get; set; }
 
     public T DebugType { get; set; }
-  }
-
-  public readonly struct DestroyAreaScope(Map map, CellRect rect) : IDisposable
-  {
-    void IDisposable.Dispose()
-    {
-      DestroyArea(rect, map);
-    }
   }
 }

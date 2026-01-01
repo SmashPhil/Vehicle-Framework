@@ -1,5 +1,5 @@
-﻿using RimWorld;
-using SmashTools.Performance;
+﻿using CoreLib.Performance;
+using RimWorld;
 using Verse;
 using Verse.AI.Group;
 

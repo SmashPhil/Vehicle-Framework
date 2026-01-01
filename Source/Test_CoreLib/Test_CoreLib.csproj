@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Authors>Smash Phil</Authors>
+		<FileVersion>1.6.0</FileVersion>
+		<AssemblyVersion>1.6.0</AssemblyVersion>
+
+		<Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{6CBE5790-6C3E-4290-95A5-785466A0A7F0}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>CoreLib</RootNamespace>
+		<AssemblyName>Test_CoreLib</AssemblyName>
+		<TargetFramework>net48</TargetFramework>
+		<FileAlignment>512</FileAlignment>
+		<Deterministic>true</Deterministic>
+		<LangVersion>preview</LangVersion>
+		<ModDir>..\..\</ModDir>
+		<OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
+		<RefDir>$(ModDir)\..\..\RimWorldWin64_Data\Managed</RefDir>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<DebugType>embedded</DebugType>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>CS0649</NoWarn>
+		<SonarQubeTestProject>True</SonarQubeTestProject>
+	</PropertyGroup>
+
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>false</Optimize>
+		<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
+		<DebugSymbols>true</DebugSymbols>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="PolySharp" Version="1.*" />
+
+		<Reference Include="DevTools">
+			<HintPath>$(OutDir)\DevTools.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Reference Include="CoreLib">
+			<HintPath>$(OutDir)\CoreLib.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+
+		<Reference Include="System">
+			<HintPath>$(RefDir)\System.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="System.Xml">
+			<HintPath>$(RefDir)\System.Xml.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="System.Xml.Linq">
+			<HintPath>$(RefDir)\System.Xml.Linq.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="System">
+			<HintPath>$(RefDir)\mscorlib.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine">
+			<HintPath>$(RefDir)\UnityEngine.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.CoreModule">
+			<HintPath>$(RefDir)\UnityEngine.CoreModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.IMGUIModule">
+			<HintPath>$(RefDir)\UnityEngine.IMGUIModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.InputLegacyModule">
+			<HintPath>$(RefDir)\UnityEngine.InputLegacyModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.InputModule">
+			<HintPath>$(RefDir)\UnityEngine.InputModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+		<Reference Include="UnityEngine.TextRenderingModule">
+			<HintPath>$(RefDir)\UnityEngine.TextRenderingModule.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
+	</ItemGroup>
+
+	<ItemGroup>
+		<Folder Include="Properties\" />
+	</ItemGroup>
+</Project>

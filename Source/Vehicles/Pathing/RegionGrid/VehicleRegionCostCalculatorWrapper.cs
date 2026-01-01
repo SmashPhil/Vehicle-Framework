@@ -98,10 +98,10 @@ namespace Vehicles
     /// <summary>
     /// Calculate approximate total path cost through regions from <paramref name="cellIndex"/> to <see cref="endCell"/>
     /// </summary>
-    /// <param name="cellIndex"></param>
-    public int GetPathCostFromDestToRegion(int cellIndex)
+    public int GetPathCostFromDestToRegion(int cellIndex, in TraverseParms parms)
     {
-      VehicleRegion region = mapping[vehicleDef].VehicleRegionGrid.DirectGrid[cellIndex];
+      VehicleRegion region = mapping[vehicleDef].VehicleRegionGridManager[VehicleRegionGridManager.GetGridType(parms)]
+        .DirectGrid[cellIndex];
       IntVec3 cell = mapping.map.cellIndices.IndexToCell(cellIndex);
       if (region != cachedRegion)
       {

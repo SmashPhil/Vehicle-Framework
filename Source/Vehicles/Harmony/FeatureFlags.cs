@@ -7,7 +7,6 @@ namespace Vehicles.Config;
 
 #pragma warning disable CS8793, CS0649
 
-[UsedImplicitly(ImplicitUseTargetFlags.Members)]
 internal class FeatureFlags
 {
 	public const string Raiders = "Raiders";
@@ -40,6 +39,7 @@ internal class FeatureFlags
 				Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
 				Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
 				Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable)
 			]
 		};
 		return flags;

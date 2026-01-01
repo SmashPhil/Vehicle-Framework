@@ -1,175 +1,176 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoreLib.Performance;
 using SmashTools;
-using SmashTools.Performance;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Region dirtyer handler for recaching
+/// </summary>
+public class VehicleRegionDirtyer : VehicleGridManager
 {
-  /// <summary>
-  /// Region dirtyer handler for recaching
-  /// </summary>
-  public class VehicleRegionDirtyer : VehicleGridManager
+  private VehicleRegionMaker regionMaker;
+  private VehicleRegionGridManager regionGridManager;
+
+  private readonly ConcurrentSet<IntVec3> dirtyCells = [];
+
+  public VehicleRegionDirtyer(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
+    createdFor)
   {
-    private VehicleRegionMaker regionMaker;
+  }
 
-    private readonly ConcurrentSet<IntVec3> dirtyCells = [];
+  /// <summary>
+  /// Any dirty cells registered
+  /// </summary>
+  public bool AnyDirty => dirtyCells.Count > 0;
 
-    // Thread Safe - only called accessible within the same thread through AsyncAction
-    // or directly called from PathingHelper (w/ multithreading disabled)
-    private readonly HashSet<VehicleRegion> regionsToDirty = [];
-
-    public VehicleRegionDirtyer(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
-      createdFor)
+  internal IEnumerable<IntVec3> ConsumeDirtyCells()
+  {
+    // It's fine if this isn't a snapshot as this enumeration only occurs for cells being used for region generation.
+    // New dirty cells will be picked up in another pass.
+    foreach ((IntVec3 cell, _) in dirtyCells)
     {
+      yield return cell;
+    }
+    dirtyCells.Clear();
+  }
+
+  public override void PostInit()
+  {
+    regionMaker = mapping[createdFor].VehicleRegionMaker;
+    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
+  }
+
+  /// <summary>
+  /// Set all cells and regions to dirty status
+  /// </summary>
+  internal void SetAllDirty()
+  {
+    dirtyCells.Clear();
+    foreach (IntVec3 cell in mapping.map)
+    {
+      dirtyCells.Add(cell);
     }
 
-    /// <summary>
-    /// Any dirty cells registered
-    /// </summary>
-    public bool AnyDirty => dirtyCells.Count > 0;
-
-    public IEnumerable<IntVec3> DirtyCells
+    foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
     {
-      get
-      {
-        // Lock-free enumeration of dirty cells. It's fine if this isn't a snapshot
-        // as this enumeration only occurs for cells being used for region generation.
-        foreach ((IntVec3 cell, _) in dirtyCells)
-        {
-          yield return cell;
-        }
-
-        dirtyCells.Clear();
-      }
-    }
-
-    public override void PostInit()
-    {
-      regionMaker = mapping[createdFor].VehicleRegionMaker;
-    }
-
-    /// <summary>
-    /// Set all cells and regions to dirty status
-    /// </summary>
-    internal void SetAllDirty()
-    {
-      dirtyCells.Clear();
-      foreach (IntVec3 cell in mapping.map)
-      {
-        dirtyCells.Add(cell);
-      }
-
-      foreach (VehicleRegion region in mapping[createdFor].VehicleRegionGrid
-       .AllRegionsNoRebuildInvalidAllowed)
+      foreach (VehicleRegion region in regionGridManager[gridType].AllRegionsNoRebuildInvalidAllowed)
       {
         SetRegionDirty(region, addCellsToDirtyCells: false);
       }
     }
+  }
 
-    /// <summary>
-    /// Notify that the walkable status at <paramref name="cell"/> has changed
-    /// </summary>
-    public void NotifyWalkabilityChanged(IntVec3 cell)
+  /// <summary>
+  /// Notify that the walkable status at <paramref name="cell"/> has changed.
+  /// </summary>
+  public void NotifyWalkabilityChanged(IntVec3 cell)
+  {
+    // Pad 1 even if vehicle has no region padding, we still want to dirty surrounding tiles for region edges and
+    // regenerating links.
+    int padding = createdFor.SizePadding > 0 ? createdFor.SizePadding : 1;
+    CellRect paddingRect = CellRect.CenteredOn(cell, padding);
+    foreach (IntVec3 adjCell in paddingRect)
     {
-      // Pad 1 even if vehicle has no region padding, we still want to dirty
-      // surrounding tiles for region edges and regenerating links.
-      int padding = createdFor.SizePadding > 0 ? createdFor.SizePadding : 1;
-      CellRect paddingRect = CellRect.CenteredOn(cell, padding);
-      foreach (IntVec3 adjCell in paddingRect)
+      if (!adjCell.InBounds(mapping.map))
+        continue;
+
+      foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
       {
-        if (adjCell.InBounds(mapping.map))
+        VehicleRegion region = regionGridManager[gridType].GetRegionAt(adjCell);
+        if (region is { valid: true })
         {
-          VehicleRegion region = mapping[createdFor].VehicleRegionGrid.GetRegionAt(adjCell);
-          if (region != null && region.valid)
-          {
-            SetRegionDirty(region);
-          }
-          else
-          {
-            dirtyCells.Add(adjCell);
-          }
+          SetRegionDirty(region);
+        }
+        else
+        {
+          dirtyCells.Add(adjCell);
         }
       }
     }
+  }
 
-    public void NotifyThingAffectingRegionsSpawned(CellRect occupiedRect)
+  public void NotifyThingAffectingRegionsSpawned(CellRect occupiedRect)
+  {
+    if (mapping[createdFor].Suspended) 
+      return;
+
+    foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
     {
-      if (mapping[createdFor].Suspended) return;
-
-      foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1)
-       .ClipInsideMap(mapping.map))
+      foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
       {
-        VehicleRegion validRegion = mapping[createdFor].VehicleRegionGrid
-         .GetValidRegionAt(cell, rebuild: false);
+        VehicleRegion validRegion = regionGridManager[gridType].GetValidRegionAt(cell, rebuild: false);
         if (validRegion != null)
         {
           SetRegionDirty(validRegion);
         }
       }
     }
+  }
 
-    public void NotifyThingAffectingRegionsDespawned(CellRect occupiedRect)
+  public void NotifyThingAffectingRegionsDespawned(CellRect occupiedRect)
+  {
+    if (mapping[createdFor].Suspended) 
+      return;
+
+    foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1)
+     .ClipInsideMap(mapping.map))
     {
-      if (mapping[createdFor].Suspended) return;
-
-      foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1)
-       .ClipInsideMap(mapping.map))
+      foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
       {
-        if (cell.InBounds(mapping.map))
+        VehicleRegion validRegion = regionGridManager[gridType].GetValidRegionAt(cell, rebuild: false);
+        if (validRegion != null)
         {
-          VehicleRegion validRegion = mapping[createdFor].VehicleRegionGrid
-           .GetValidRegionAt(cell, rebuild: false);
-          if (validRegion != null)
-          {
-            SetRegionDirty(validRegion);
-          }
+          SetRegionDirty(validRegion);
         }
       }
     }
+  }
 
-    /// <summary>
-    /// Set <paramref name="region"/> to dirty status, marking it for update
-    /// </summary>
-    private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true,
-      bool dirtyLinkedRegions = false)
+  /// <summary>
+  /// Set <paramref name="region"/> to dirty status, marking it for update
+  /// </summary>
+  private void SetRegionDirty(VehicleRegion region, bool addCellsToDirtyCells = true,
+    bool dirtyLinkedRegions = false)
+  {
+    try
     {
-      try
+      if (!region.valid) 
+        return;
+
+      region.valid = false;
+      region.Room = null;
+
+      using ListSnapshot<VehicleRegionLink> links = region.Links;
+      foreach (VehicleRegionLink regionLink in links)
       {
-        if (!region.valid) return;
-
-        region.valid = false;
-        region.Room = null;
-
-        using ListSnapshot<VehicleRegionLink> links = region.Links;
-        foreach (VehicleRegionLink regionLink in links)
+        regionLink.Deregister(region);
+        if (!regionLink.IsValid)
         {
-          regionLink.Deregister(region);
-          if (!regionLink.IsValid)
-          {
-            regionMaker.Return(regionLink);
-          }
-
-          VehicleRegion otherRegion = regionLink.GetOtherRegion(region);
-          if (otherRegion != null && dirtyLinkedRegions)
-          {
-            SetRegionDirty(otherRegion, addCellsToDirtyCells: addCellsToDirtyCells,
-              dirtyLinkedRegions: false);
-          }
+          regionMaker.Return(regionLink);
         }
 
-        if (addCellsToDirtyCells)
+        VehicleRegion otherRegion = regionLink.GetOtherRegion(region);
+        if (otherRegion != null && dirtyLinkedRegions)
         {
-          foreach (IntVec3 intVec in region.Cells)
-          {
-            dirtyCells.Add(intVec);
-          }
+          SetRegionDirty(otherRegion, addCellsToDirtyCells: addCellsToDirtyCells,
+            dirtyLinkedRegions: false);
         }
       }
-      catch (Exception ex)
+
+      if (addCellsToDirtyCells)
       {
-        Log.Error($"Exception thrown in SetRegionDirty. Exception={ex}");
+        foreach (IntVec3 intVec in region.Cells)
+        {
+          dirtyCells.Add(intVec);
+        }
       }
+    }
+    catch (Exception ex)
+    {
+      Log.Error($"Exception thrown in SetRegionDirty. Exception={ex}");
     }
   }
 }

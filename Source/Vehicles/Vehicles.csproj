@@ -1,156 +1,113 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-	<Authors>Smash Phil</Authors>
-	<Description>Framework for creating vehicles in RimWorld.</Description>
-	<Product>Vehicle Framework</Product>
-	<FileVersion>1.6.0</FileVersion>
-	<AssemblyVersion>1.6.0</AssemblyVersion>
-	<CurrentDate>$([System.DateTime]::Now.ToString(yyyy/MM/dd HH:mm:ss))</CurrentDate>
+    <Authors>Smash Phil</Authors>
+    <Description>Framework for creating vehicles in RimWorld.</Description>
+    <Product>Vehicle Framework</Product>
+    <FileVersion>1.6.0</FileVersion>
+    <AssemblyVersion>1.6.0</AssemblyVersion>
+    <CurrentDate>$([System.DateTime]::Now.ToString(yyyy/MM/dd HH:mm:ss))</CurrentDate>
 
-	<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-	<Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
-	<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-	<ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
-	<OutputType>Library</OutputType>
-	<RootNamespace>Vehicles</RootNamespace>
-	<AssemblyName>Vehicles</AssemblyName>
-	<TargetFramework>net48</TargetFramework>
-	<LangVersion>preview</LangVersion>
-	<FileAlignment>512</FileAlignment>
-	<OutDir>..\..\1.6\Assemblies\</OutDir>
-	<!--<ManagedDirectory>..\..\..\..\RimWorldWin64_Data\Managed</ManagedDirectory>-->
-	<GenerateDocumentationFile>False</GenerateDocumentationFile>
-	<ErrorReport>prompt</ErrorReport>
-	<WarningLevel>4</WarningLevel>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-	<DebugType>embedded</DebugType>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>Vehicles</RootNamespace>
+    <AssemblyName>Vehicles</AssemblyName>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <ModDir>..\..\</ModDir>
+    <OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
+    <RefDir>$(ModDir)\..\..\RimWorldWin64_Data\Managed</RefDir>
+    <BurstDir>$(ModDir)\1.6\Burst\</BurstDir>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>embedded</DebugType>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
-	<!-- Localization Files -->
-	<!--
+    <!-- Localization Files -->
+    <!--
         <Exec Condition="'$(OS)' == 'Windows_NT'"
               Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/ExtractTranslations.ps1&quot; &quot;1.6&quot;" />
         <Exec Condition="'$(OS)' != 'Windows_NT'"
               Command="bash &quot;../../Build/ExtractTranslations.sh&quot; &quot;1.6&quot;" />
-	-->
-
-		<!-- Version Increment -->
-		<Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
-		<Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
+-->
+    
+    <!-- Version Increment -->
+    <Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; false true" />
   </Target>
 
   <!-- AssemblyInfo -->
   <ItemGroup>
-	<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-	  <_Parameter1>DevTools_Vehicles</_Parameter1>
-	</AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Test_Vehicles</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
   <!--Build Configurations -->
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-	<DebugSymbols>true</DebugSymbols>
-	<Optimize>false</Optimize>
-	<DefineConstants>TRACE;DEBUG;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>TRACE;DEBUG;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-	<DebugSymbols>true</DebugSymbols>
-	<Optimize>true</Optimize>
-	<DefineConstants>TRACE;UNSTABLE;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;UNSTABLE;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-	<DebugSymbols>true</DebugSymbols>
-	<Optimize>true</Optimize>
-	<DefineConstants>TRACE;RELEASE;</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-	<DebugSymbols>true</DebugSymbols>
-	<Optimize>true</Optimize>
-	<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
   </PropertyGroup>
 
   <!-- Dependencies -->
   <ItemGroup>
-	<!-- Nuget -->
-	<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-	<PackageReference Include="Lib.Harmony.Ref" Version="2.4.1" />
-	<PackageReference Include="PolySharp" Version="1.*" />
+    <!-- Nuget -->
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="PolySharp" Version="1.*" />
+    <PackageReference Include="SmashTools.Burst" Version="1.*" GeneratePathProperty="true" />
 
-	<!--Local -->
-	<Reference Include="SmashTools">
-	  <SpecificVersion>False</SpecificVersion>
-	  <HintPath>..\..\1.6\Assemblies\SmashTools.dll</HintPath>
-	  <Private>False</Private>
-	</Reference>
+    <!--Local -->
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-	<Reference Include="UpdateLogTool">
-	  <SpecificVersion>False</SpecificVersion>
-	  <HintPath>..\..\1.6\Assemblies\UpdateLogTool.dll</HintPath>
-	  <Private>False</Private>
-	</Reference>
+    <Reference Include="SmashTools">
+      <HintPath>$(OutDir)\SmashTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-	<!-- Dependencies -->
-	<!--
-        <Reference Include="mscorlib">
-            <HintPath>$(ManagedDirectory)\mscorlib.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="Assembly-CSharp">
-            <HintPath>$(ManagedDirectory)\Assembly-CSharp.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System">
-            <HintPath>$(ManagedDirectory)\System.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Core">
-            <HintPath>$(ManagedDirectory)\System.Core.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Data">
-            <HintPath>$(ManagedDirectory)\System.Data.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Runtime">
-            <HintPath>$(ManagedDirectory)\System.Runtime.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Runtime.Serialization">
-            <HintPath>$(ManagedDirectory)\System.Runtime.Serialization.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="System.Xml">
-            <HintPath>$(ManagedDirectory)\System.Xml.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine">
-            <HintPath>$(ManagedDirectory)\UnityEngine.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.AssetBundleModule">
-            <HintPath>$(ManagedDirectory)\UnityEngine.AssetBundleModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(ManagedDirectory)\UnityEngine.CoreModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.IMGUIModule">
-            <HintPath>$(ManagedDirectory)\UnityEngine.IMGUIModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.InputLegacyModule">
-            <HintPath>$(ManagedDirectory)\UnityEngine.InputLegacyModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        <Reference Include="UnityEngine.TextRenderingModule">
-            <HintPath>$(ManagedDirectory)\UnityEngine.TextRenderingModule.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
-        -->
+    <Reference Include="UpdateLogTool">
+      <HintPath>$(OutDir)\UpdateLogTool.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
+
+  <ItemGroup>
+    <_BurstFiles Include="$(PkgSmashTools_Burst)\Burst\**\*" />
+  </ItemGroup>
+
+  <Target Name="CopySmashToolsBurst" AfterTargets="Build">
+    <MakeDir Directories="$(BurstDir)" />
+
+    <Copy SourceFiles="@(_BurstFiles)" DestinationFiles="@(_BurstFiles->'$(BurstDir)%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

@@ -54,7 +54,7 @@ namespace Vehicles
 		/// </summary>
 		public BoolUnknown CachedResultFor(VehicleRoom from, VehicleRoom to, TraverseParms traverseParms)
 		{
-			if (cacheDict.TryGetValue(new CachedEntry(from.id, to.id, traverseParms), out bool reachable))
+			if (cacheDict.TryGetValue(new CachedEntry(from.Id, to.Id, traverseParms), out bool reachable))
 			{
 				return reachable ? BoolUnknown.True : BoolUnknown.False;
 			}
@@ -66,7 +66,7 @@ namespace Vehicles
 		/// </summary>
 		public void AddCachedResult(VehicleRoom from, VehicleRoom to, TraverseParms traverseParams, bool reachable)
 		{
-			CachedEntry key = new CachedEntry(from.id, to.id, traverseParams);
+			CachedEntry key = new CachedEntry(from.Id, to.Id, traverseParams);
 			cacheDict.TryAdd(key, reachable);
 		}
 

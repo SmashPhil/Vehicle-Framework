@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using CoreLib;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;

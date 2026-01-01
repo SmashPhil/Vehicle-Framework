@@ -1,306 +1,271 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
-using SmashTools.Performance;
+using CoreLib.Performance;
+using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Traverser utility methods for traversing between 2 regions
+/// </summary>
+public static class VehicleRegionTraverser
 {
+  public const int WorkerCount = 8;
+
+  private static readonly ThreadLocal<Queue<BreadthFirstSearchImpl>> Workers = new(CreateWorkers);
+
+  public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
+
+  public delegate bool VehicleRegionProcessor(VehicleRegion reg);
+
   /// <summary>
-  /// Traverser utility methods for traversing between 2 regions
+  /// <paramref name="cellA"/> and <paramref name="cellB"/> are contained within the same region or can traverse
+  /// between regions
   /// </summary>
-  public static class VehicleRegionTraverser
+  public static bool WithinRegions(this IntVec3 cellA, IntVec3 cellB, Map map, VehicleDef vehicleDef,
+    int regionLookCount, TraverseParms traverseParams,
+    RegionType traversableRegionTypes = RegionType.Set_Passable)
   {
-    public const int WorkerCount = 8;
+    VehicleRegion regionA =
+      VehicleRegionAndRoomQuery.RegionAt(cellA, map, vehicleDef, traversableRegionTypes);
+    if (regionA is null)
+      return false;
 
-    public delegate bool VehicleRegionEntry(VehicleRegion from, VehicleRegion to);
+    VehicleRegion regionB =
+      VehicleRegionAndRoomQuery.RegionAt(cellB, map, vehicleDef, traversableRegionTypes);
+    if (regionB is null)
+      return false;
 
-    public delegate bool VehicleRegionProcessor(VehicleRegion reg);
+    if (regionA == regionB)
+      return true;
 
-    private static readonly ThreadLocal<Queue<BFSWorker>> workers = new(CreateWorkers);
+    bool found = false;
+    BreadthFirstTraverse(regionA, EntryCondition, Processor, regionLookCount,
+      traversableRegionTypes);
+    return found;
 
-    /// <summary>
-    /// <paramref name="A"/> and <paramref name="B"/> are contained within the same region or can traverse between regions
-    /// </summary>
-    /// <param name="A"></param>
-    /// <param name="B"></param>
-    /// <param name="map"></param>
-    /// <param name="vehicleDef"></param>
-    /// <param name="regionLookCount"></param>
-    /// <param name="traverseParams"></param>
-    /// <param name="traversableRegionTypes"></param>
-    public static bool WithinRegions(this IntVec3 A, IntVec3 B, Map map, VehicleDef vehicleDef,
-      int regionLookCount, TraverseParms traverseParams,
-      RegionType traversableRegionTypes = RegionType.Set_Passable)
+    bool EntryCondition(VehicleRegion from, VehicleRegion to)
     {
-      VehicleRegion regionA =
-        VehicleRegionAndRoomQuery.RegionAt(A, map, vehicleDef, traversableRegionTypes);
-      if (regionA is null)
-      {
-        return false;
-      }
-      VehicleRegion regionB =
-        VehicleRegionAndRoomQuery.RegionAt(B, map, vehicleDef, traversableRegionTypes);
-      if (regionB is null)
-      {
-        return false;
-      }
-      if (regionA == regionB)
-      {
-        return true;
-      }
-      bool entryCondition(VehicleRegion from, VehicleRegion to) => to.Allows(traverseParams);
-      bool found = false;
-
-      bool regionProcessor(VehicleRegion region)
-      {
-        if (region == regionB)
-        {
-          found = true;
-          return true;
-        }
-        return false;
-      }
-
-      BreadthFirstTraverse(regionA, entryCondition, regionProcessor, regionLookCount,
-        traversableRegionTypes);
-      return found;
+      return to.Allows(traverseParams);
     }
 
-    public static void MarkRegionsBFS(VehicleRegion root, VehicleRegionEntry entryCondition,
-      int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
+    bool Processor(VehicleRegion region)
     {
-      BreadthFirstTraverse(root, entryCondition, delegate(VehicleRegion region)
-      {
-        region.mark = inRadiusMark;
+      if (region != regionB)
         return false;
-      }, maxRegions: maxRegions, traversableRegionTypes: traversableRegionTypes);
+
+      found = true;
+      return true;
+    }
+  }
+
+  public static void MarkRegionsBfs(VehicleRegion root, VehicleRegionEntry entryCondition,
+    int maxRegions, int inRadiusMark, RegionType traversableRegionTypes = RegionType.Set_Passable)
+  {
+    BreadthFirstTraverse(root, entryCondition, delegate (VehicleRegion region)
+    {
+      region.mark = inRadiusMark;
+      return false;
+    }, maxRegions: maxRegions, traversableRegionTypes: traversableRegionTypes);
+  }
+
+  /// <summary>
+  /// Create all workers up to max worker count.
+  /// </summary>
+  private static Queue<BreadthFirstSearchImpl> CreateWorkers()
+  {
+    Queue<BreadthFirstSearchImpl> workerQueue = new Queue<BreadthFirstSearchImpl>(WorkerCount);
+    for (int i = 0; i < WorkerCount; i++)
+    {
+      workerQueue.Enqueue(new BreadthFirstSearchImpl(i));
+    }
+    return workerQueue;
+  }
+
+  /// <summary>
+  /// BreadthFirstSearch from <paramref name="start"/> and <paramref name="regionProcessor"/>
+  /// </summary>
+  public static void BreadthFirstTraverse(IntVec3 start, Map map, VehicleDef vehicleDef,
+    VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor,
+    int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+  {
+    VehicleRegion region =
+      VehicleRegionAndRoomQuery.RegionAt(start, map, vehicleDef, traversableRegionTypes);
+    if (region is null) return;
+    BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions,
+      traversableRegionTypes);
+  }
+
+  /// <summary>
+  /// BreadthFirstSearch from <paramref name="root"/> and <paramref name="regionProcessor"/>
+  /// </summary>
+  public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition,
+    VehicleRegionProcessor regionProcessor, int maxRegions = 999999,
+    RegionType traversableRegionTypes = RegionType.Set_Passable)
+  {
+    if (root is null)
+    {
+      Log.Error("BFS with null root region.");
+      return;
     }
 
-    /// <summary>
-    /// Requeue <see cref="BFSWorker"/> workers
-    /// </summary>
-    private static Queue<BFSWorker> CreateWorkers()
+    if (Workers.Value.Count == 0)
     {
-      Queue<BFSWorker> workerQueue = new Queue<BFSWorker>(WorkerCount);
-      for (int i = 0; i < WorkerCount; i++)
-      {
-        workerQueue.Enqueue(new BFSWorker(i));
-      }
-      return workerQueue;
+      Log.Error(
+        $"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or this system is in an inconsistent state.");
+      return;
     }
 
-    /// <summary>
-    /// BreadthFirstSearch from <paramref name="start"/> and <paramref name="regionProcessor"/>
-    /// </summary>
-    /// <param name="start"></param>
-    /// <param name="map"></param>
-    /// <param name="vehicleDef"></param>
-    /// <param name="entryCondition"></param>
-    /// <param name="regionProcessor"></param>
-    /// <param name="maxRegions"></param>
-    /// <param name="traversableRegionTypes"></param>
-    public static void BreadthFirstTraverse(IntVec3 start, Map map, VehicleDef vehicleDef,
-      VehicleRegionEntry entryCondition, VehicleRegionProcessor regionProcessor,
-      int maxRegions = 999999, RegionType traversableRegionTypes = RegionType.Set_Passable)
+    BreadthFirstSearchImpl bfsWorker = Workers.Value.Dequeue();
+    try
     {
-      VehicleRegion region =
-        VehicleRegionAndRoomQuery.RegionAt(start, map, vehicleDef, traversableRegionTypes);
-      if (region is null) return;
-      BreadthFirstTraverse(region, entryCondition, regionProcessor, maxRegions,
+      bfsWorker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions,
         traversableRegionTypes);
     }
-
-    /// <summary>
-    /// BreadthFirstSearch from <paramref name="root"/> and <paramref name="regionProcessor"/>
-    /// </summary>
-    /// <param name="root"></param>
-    /// <param name="entryCondition"></param>
-    /// <param name="regionProcessor"></param>
-    /// <param name="maxRegions"></param>
-    /// <param name="traversableRegionTypes"></param>
-    public static void BreadthFirstTraverse(VehicleRegion root, VehicleRegionEntry entryCondition,
-      VehicleRegionProcessor regionProcessor, int maxRegions = 999999,
-      RegionType traversableRegionTypes = RegionType.Set_Passable)
+    catch (Exception ex)
     {
-      if (root is null)
-      {
-        Log.Error("BFS with null root region.");
-        return;
-      }
-
-      if (workers.Value.Count == 0)
-      {
-        Log.Error(
-          $"No free workers for BFS. BFS recurred deeper than {WorkerCount}, or a bug has put this system in an inconsistent state.");
-        return;
-      }
-      BFSWorker bfsWorker = workers.Value.Dequeue();
-
-      try
-      {
-        bfsWorker.BreadthFirstTraverseWork(root, entryCondition, regionProcessor, maxRegions,
-          traversableRegionTypes);
-      }
-      catch (Exception ex)
-      {
-        Log.Error("Exception in BreadthFirstTraverse: " + ex.ToString());
-      }
-      finally
-      {
-        bfsWorker.Clear();
-        workers.Value.Enqueue(bfsWorker);
-      }
+      Log.Error($"Exception thrown while traversing regions.\n{ex}");
     }
-
-    /// <summary>
-    /// Breadth First Search to fill room based on <paramref name="region"/>
-    /// </summary>
-    /// <param name="root"></param>
-    /// <param name="map"></param>
-    /// <param name="existingRoom"></param>
-    public static VehicleRoom FloodAndSetRooms(VehicleRegion region, Map map, VehicleDef vehicleDef,
-      VehicleRoom existingRoom)
+    finally
     {
-      VehicleRoom floodingRoom;
-      if (existingRoom == null)
-      {
-        floodingRoom = VehicleRoom.MakeNew(map, vehicleDef);
-      }
-      else
-      {
-        floodingRoom = existingRoom;
-      }
-      region.Room = floodingRoom;
-      if (!region.type.AllowsMultipleRegionsPerDistrict())
-      {
-        return floodingRoom;
-      }
+      bfsWorker.Clear();
+      Workers.Value.Enqueue(bfsWorker);
+    }
+  }
 
-      bool entryCondition(VehicleRegion from, VehicleRegion r) =>
-        r.type == region.type && r.Room != floodingRoom;
-
-      bool regionProcessor(VehicleRegion r)
-      {
-        r.Room = floodingRoom;
-        return false;
-      }
-
-      BreadthFirstTraverse(region, entryCondition, regionProcessor, 999999, RegionType.Set_All);
+  /// <summary>
+  /// Breadth First Search to fill room based on <paramref name="region"/>
+  /// </summary>
+  public static VehicleRoom FloodAndSetRooms(VehicleRegion region, Map map, VehicleDef vehicleDef,
+    VehicleRoom existingRoom)
+  {
+    VehicleRoom floodingRoom = existingRoom ?? VehicleRoom.MakeNew(map, vehicleDef, region.gridType);
+    region.Room = floodingRoom;
+    if (!region.type.AllowsMultipleRegionsPerDistrict())
+    {
       return floodingRoom;
     }
+    BreadthFirstTraverse(region, EntryCondition, Processor, traversableRegionTypes: RegionType.Set_All);
+    return floodingRoom;
 
-    /// <summary>
-    /// Breadth First Search to assign new region group indices for <paramref name="root"/>
-    /// </summary>
-    /// <param name="root"></param>
-    /// <param name="newRegionGroupIndex"></param>
-    public static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
+    bool EntryCondition(VehicleRegion _, VehicleRegion to)
     {
-      root.newRegionGroupIndex = newRegionGroupIndex;
-      if (!root.type.AllowsMultipleRegionsPerDistrict())
-      {
-        return;
-      }
+      return to.type == region.type && to.Room != floodingRoom;
+    }
 
-      bool entryCondition(VehicleRegion from, VehicleRegion r) =>
-        r.type == root.type && r.newRegionGroupIndex < 0;
+    bool Processor(VehicleRegion r)
+    {
+      r.Room = floodingRoom;
+      return false;
+    }
+  }
 
-      bool regionProcessor(VehicleRegion r)
-      {
-        r.newRegionGroupIndex = newRegionGroupIndex;
-        return false;
-      }
+  /// <summary>
+  /// Breadth First Search to assign new region group indices for <paramref name="root"/>
+  /// </summary>
+  /// <param name="root"></param>
+  /// <param name="newRegionGroupIndex"></param>
+  public static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
+  {
+    root.newRegionGroupIndex = newRegionGroupIndex;
+    if (!root.type.AllowsMultipleRegionsPerDistrict())
+    {
+      return;
+    }
+    BreadthFirstTraverse(root, EntryCondition, RegionProcessor, traversableRegionTypes: RegionType.Set_All);
+    return;
 
-      BreadthFirstTraverse(root, entryCondition, regionProcessor, 999999, RegionType.Set_All);
+    bool EntryCondition(VehicleRegion from, VehicleRegion r)
+    {
+      return r.type == root.type && r.newRegionGroupIndex < 0;
+    }
+
+    bool RegionProcessor(VehicleRegion r)
+    {
+      r.newRegionGroupIndex = newRegionGroupIndex;
+      return false;
+    }
+  }
+
+  /// <summary>
+  /// Breadth First Search worker class
+  /// </summary>
+  private class BreadthFirstSearchImpl
+  {
+    private readonly Queue<VehicleRegion> open = [];
+
+    private int numRegionsProcessed;
+    private uint closedIndex = 1u;
+    private readonly int closedArrayPos;
+
+    public BreadthFirstSearchImpl(int closedArrayPos)
+    {
+      this.closedArrayPos = closedArrayPos;
     }
 
     /// <summary>
-    /// Breadth First Search worker class
+    /// Clear region queue
     /// </summary>
-    private class BFSWorker
+    public void Clear()
     {
-      private readonly Queue<VehicleRegion> open = new Queue<VehicleRegion>();
+      open.Clear();
+    }
 
-      private int numRegionsProcessed;
-      private uint closedIndex = 1u;
-      private readonly int closedArrayPos;
+    /// <summary>
+    /// Queue region available for traversal
+    /// </summary>
+    /// <param name="region"></param>
+    private void QueueNewOpenRegion(VehicleRegion region)
+    {
+      Assert.IsFalse(region.closedIndex.Value[closedArrayPos] == closedIndex, "Enqueueing already closed index.");
+      open.Enqueue(region);
+      region.closedIndex.Value[closedArrayPos] = closedIndex;
+    }
 
-      public BFSWorker(int closedArrayPos)
+    /// <summary>
+    /// Breadth First Traversal search algorithm
+    /// </summary>
+    public void BreadthFirstTraverseWork(VehicleRegion root, VehicleRegionEntry entryCondition,
+      VehicleRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
+    {
+      if (root.type == RegionType.None)
       {
-        this.closedArrayPos = closedArrayPos;
+        return;
       }
-
-      /// <summary>
-      /// Clear region queue
-      /// </summary>
-      public void Clear()
+      closedIndex += 1u;
+      open.Clear();
+      numRegionsProcessed = 0;
+      QueueNewOpenRegion(root);
+      while (open.Count > 0)
       {
-        open.Clear();
-      }
-
-      /// <summary>
-      /// Queue region available for traversal
-      /// </summary>
-      /// <param name="region"></param>
-      private void QueueNewOpenRegion(VehicleRegion region)
-      {
-        if (region.closedIndex.Value[closedArrayPos] == closedIndex)
-        {
-          Log.Warning($"Already closed");
-          //throw new InvalidOperationException($"Region is already closed; you can't open it. Region={region} Index={closedArrayPos}");
-        }
-        open.Enqueue(region);
-        region.closedIndex.Value[closedArrayPos] = closedIndex;
-      }
-
-      /// <summary>
-      /// Breadth First Traversal search algorithm
-      /// </summary>
-      /// <param name="root"></param>
-      /// <param name="entryCondition"></param>
-      /// <param name="regionProcessor"></param>
-      /// <param name="maxRegions"></param>
-      /// <param name="traversableRegionTypes"></param>
-      public void BreadthFirstTraverseWork(VehicleRegion root, VehicleRegionEntry entryCondition,
-        VehicleRegionProcessor regionProcessor, int maxRegions, RegionType traversableRegionTypes)
-      {
-        if (root.type == RegionType.None)
+        VehicleRegion region = open.Dequeue();
+        if (regionProcessor != null && regionProcessor(region))
         {
           return;
         }
-        closedIndex += 1u;
-        open.Clear();
-        numRegionsProcessed = 0;
-        QueueNewOpenRegion(root);
-        while (open.Count > 0)
+        numRegionsProcessed++;
+        if (numRegionsProcessed >= maxRegions)
         {
-          VehicleRegion region = open.Dequeue();
-          if (regionProcessor != null && regionProcessor(region))
-          {
-            return;
-          }
-          numRegionsProcessed++;
-          if (numRegionsProcessed >= maxRegions)
-          {
-            return;
-          }
-          using ListSnapshot<VehicleRegionLink> links = region.Links;
-          foreach (VehicleRegionLink regionLink in links)
-          {
-            ProcessRegion(region, regionLink.GetOtherRegion(region));
-          }
+          return;
         }
-
-        void ProcessRegion(VehicleRegion region, VehicleRegion linkedRegion)
+        using ListSnapshot<VehicleRegionLink> links = region.Links;
+        foreach (VehicleRegionLink regionLink in links)
         {
-          if (linkedRegion != null &&
-            linkedRegion.closedIndex.Value[closedArrayPos] != closedIndex &&
-            (linkedRegion.type & traversableRegionTypes) != RegionType.None &&
-            (entryCondition is null || entryCondition(region, linkedRegion)))
-          {
-            QueueNewOpenRegion(linkedRegion);
-          }
+          ProcessRegion(region, regionLink.GetOtherRegion(region));
+        }
+      }
+      return;
+
+      void ProcessRegion(VehicleRegion region, VehicleRegion linkedRegion)
+      {
+        if (linkedRegion != null &&
+          linkedRegion.closedIndex.Value[closedArrayPos] != closedIndex &&
+          (linkedRegion.type & traversableRegionTypes) != RegionType.None &&
+          (entryCondition is null || entryCondition(region, linkedRegion)))
+        {
+          QueueNewOpenRegion(linkedRegion);
         }
       }
     }

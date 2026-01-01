@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 
 namespace Vehicles;
 
@@ -10,6 +11,7 @@ public static class VehicleRegionTypeUtility
   /// <summary>
   /// Getter for expected region type at <paramref name="cell"/> for <paramref name="vehicleDef"/>
   /// </summary>
+  [Obsolete($"Expected region type is now provided by IRegionSource.", error: true)]
   public static RegionType GetExpectedRegionType(IntVec3 cell, VehiclePathingSystem mapping, VehicleDef vehicleDef)
   {
     // Handles map bounds check here as well

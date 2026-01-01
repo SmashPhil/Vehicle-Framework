@@ -4,7 +4,6 @@ using System.Linq;
 using LudeonTK;
 using RimWorld;
 using SmashTools;
-using SmashTools.Performance;
 using UnityEngine;
 using UpdateLogTool;
 using Verse;

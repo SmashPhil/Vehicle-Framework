@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using CoreLib.Performance;
 using RimWorld;
 using SmashTools;
 using SmashTools.Performance;
@@ -163,7 +164,7 @@ public class VehiclePathFinder : VehicleGridManager
 
 		int mapSizeX = map.Size.x;
 		bool passAllDestroyableThings = traverseParms.mode is TraverseMode.PassAllDestroyableThings
-			or TraverseMode.PassAllDestroyableThingsNotWater;
+			or TraverseMode.PassAllDestroyableThingsNotWater or TraverseMode.PassAllDestroyablePlayerOwnedThings;
 		bool freeTraversal = traverseParms.mode != TraverseMode.NoPassClosedDoorsOrWater &&
 			traverseParms.mode != TraverseMode.PassAllDestroyableThingsNotWater;
 		CellRect cellRect = CalculateDestinationRect(dest, peMode);
@@ -412,7 +413,7 @@ public class VehiclePathFinder : VehicleGridManager
 					if (weightedHeuristics)
 					{
 						int pathCostFromDestToRegion =
-							Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex));
+							Mathf.RoundToInt(regionCostCalculator.GetPathCostFromDestToRegion(cellIndex, traverseParms));
 						float heuristicWeight = regionHeuristicWeightByNodesOpened.Evaluate(nodesOpened);
 						context.calcGrid[cellIndex].heuristicCost = pathCostFromDestToRegion * heuristicWeight;
 						if (context.calcGrid[cellIndex].heuristicCost < 0)

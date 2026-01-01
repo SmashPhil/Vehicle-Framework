@@ -50,7 +50,7 @@ namespace Vehicles
           return false;
         }
         int inRadiusMark = Rand.Int;
-        VehicleRegionTraverser.MarkRegionsBFS(region, null, req.maxRegions, inRadiusMark);
+        VehicleRegionTraverser.MarkRegionsBfs(region, entryCondition: null, req.maxRegions, inRadiusMark);
         if (req.maxRangeFromLocus > 0.01f)
         {
           VehicleRegion locusReg =
