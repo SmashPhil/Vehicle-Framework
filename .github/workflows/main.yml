@@ -1,4 +1,4 @@
-name: Build
+name: build
 
 on:
   push:
@@ -7,22 +7,25 @@ on:
 
 env:
   PROJECT_PATH: "Source/Vehicles/Vehicles.sln"
-  VERSION: "1.6"
 
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
-    environment: develop
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      
+      - name: Get Version
+        shell: bash
+        run: |
+          full="$(tr -d '[:space:]' < Version.txt)"
+          version_str="$(echo "$full" | cut -d. -f1-2)"
+          echo "VERSION=$version_str" >> "$GITHUB_ENV"
 
       - name: Setup .Net
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
 
@@ -33,10 +36,10 @@ jobs:
         run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:WriteVersion=false
 
       - name: Extract Localization Files
+        shell: bash
         run: |
           chmod +x Build/ExtractTranslations.sh
           Build/ExtractTranslations.sh "$VERSION"
-        shell: bash
 
       - name: Get Build Version
         run: |

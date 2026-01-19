@@ -648,7 +648,7 @@ public partial class VehiclePawn
 #if LOAD_PAWN_GIZMO
     Command_Action flagForLoading = new()
     {
-      defaultLabel = "VF_HaulPawnToVehicle".Translate(),
+      defaultLabel = "VF_HaulPawnToVehicle".Translate(this),
       icon = VehicleTex.HaulPawnToVehicle,
       action = delegate
       {
