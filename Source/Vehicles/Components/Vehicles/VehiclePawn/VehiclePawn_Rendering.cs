@@ -1036,16 +1036,6 @@ public partial class VehiclePawn
     }
   }
 
-  public override string GetInspectString()
-  {
-    // TODO BURST - DO NOT COMMIT
-    if (Prefs.DevMode)
-    {
-      return vehiclePather.InspectString();
-    }
-    return base.GetInspectString();
-  }
-
   public void PromptToBoardVehicle(Pawn pawn, VehicleRoleHandler handler)
   {
     // TODO 1.7 - Switch to ArgumentNullException

@@ -179,11 +179,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     controller.RegisterEvents();
   }
 
-  internal string InspectString()
-  {
-    return controller.InspectString();
-  }
-
   public void SetEndRotation(Rot8 rot)
   {
     endRot = rot;

@@ -52,11 +52,6 @@ internal sealed class AccelerationController : IExposable
     vehicle = pathFollower.vehicle;
   }
 
-  internal string InspectString()
-  {
-    return $"({MoveSpeed:#0.0F}->{TargetMoveSpeed:#0.0F} ({Acceleration})\n{moveTick} | {NodesToDecelerate} nodes ahead\n{throttle}";
-  }
-
   private float TargetMoveSpeed { get; set; }
 
   public int NodesToDecelerate => nodesToDecelerate;
