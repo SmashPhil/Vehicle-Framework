@@ -157,9 +157,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     }
 #endif
 
-#if BURST
     pathFinder.NotifyWritingToGrid();
-#endif
     bool walkable = WalkableFast(cell);
     // TODO 1.7 - convert all calculate functions to ushort return types
     costGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);

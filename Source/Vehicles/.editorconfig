@@ -25,6 +25,7 @@ dotnet_diagnostic.IDE0160.severity = none
 dotnet_diagnostic.IDE0290.severity = none
 resharper_check_namespace_highlighting = none
 resharper_convert_to_primary_constructor_highlighting = none
+resharper_invert_if_highlighting = none
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false

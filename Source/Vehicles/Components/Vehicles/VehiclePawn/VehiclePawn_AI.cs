@@ -139,7 +139,7 @@ public partial class VehiclePawn
 				}
 			}
 		}
-		if (!VehicleMod.settings.debug.debugDraftAnyVehicle && !HasEnoughOperators)
+		if (!HasEnoughOperators)
 		{
 			return "VF_NotEnoughToOperate".Translate(this);
 		}

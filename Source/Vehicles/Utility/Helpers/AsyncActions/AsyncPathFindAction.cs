@@ -24,7 +24,8 @@ namespace Vehicles
 
     public override void Invoke()
     {
-      vehicle.vehiclePather.GeneratePath(token);
+      throw new NotImplementedException();
+      //vehicle.vehiclePather.GeneratePath(token);
     }
 
     public override void ReturnToPool()

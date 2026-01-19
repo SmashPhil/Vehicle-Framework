@@ -14,7 +14,9 @@ public static class SoundDefOf_Vehicles
 	public static SoundDef Explode_BombWater;
 	//public static SoundDef VF_ApplyingPaint;
 
-	static SoundDefOf_Vehicles()
+  public static SoundDef TireScreech;
+
+  static SoundDefOf_Vehicles()
 	{
 		DefOfHelper.EnsureInitializedInCtor(typeof(SoundDefOf_Vehicles));
 	}

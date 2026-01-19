@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
+using ScopedPathStatus = DevTools.Testing.ScopedReferenceRollback<Vehicles.VehiclePathFollower, Vehicles.VehiclePathFollower.PathingStatus>;
 
 namespace Vehicles.UnitTesting;
 
@@ -378,7 +379,8 @@ internal sealed class UnitTest_CompFueledTravel
 		compFuel.CompTick();
 		Assert.AreApproximatelyEqual(compFuel.FuelPercent, 1);
 
-		using (new ScopedReferenceRollback<VehiclePathFollower, bool>(group.vehicle.vehiclePather, "moving", true))
+		using (new ScopedPathStatus(group.vehicle.vehiclePather, "status", 
+             VehiclePathFollower.PathingStatus.Moving))
 		{
 			Assert.IsTrue(group.vehicle.vehiclePather.Moving);
 			compFuel.CompTick();
@@ -483,8 +485,9 @@ internal sealed class UnitTest_CompFueledTravel
 		compFuel.CompTick();
 		Assert.AreApproximatelyEqual(compFuel.Fuel, FuelAtTick(compFuel, 2));
 
-		using (new ScopedReferenceRollback<VehiclePathFollower, bool>(group.vehicle.vehiclePather, "moving", true))
-		{
+    using (new ScopedPathStatus(group.vehicle.vehiclePather, "status",
+             VehiclePathFollower.PathingStatus.Moving))
+    {
 			Assert.IsTrue(group.vehicle.vehiclePather.Moving);
 			compFuel.CompTick();
 			Assert.AreApproximatelyEqual(compFuel.Fuel, FuelAtTick(compFuel, 3));
@@ -544,9 +547,10 @@ internal sealed class UnitTest_CompFueledTravel
 		compFuel.Refuel(compFuel.FuelCapacity);
 		Assert.AreApproximatelyEqual(compFuel.FuelPercent, 1);
 
-		// Moving is not discounted
-		using (new ScopedReferenceRollback<VehiclePathFollower, bool>(group.vehicle.vehiclePather, "moving", true))
-		{
+    // Moving is not discounted
+    using (new ScopedPathStatus(group.vehicle.vehiclePather, "status",
+             VehiclePathFollower.PathingStatus.Moving))
+    {
 			Assert.IsTrue(group.vehicle.vehiclePather.Moving);
 			compFuel.CompTick();
 			Assert.AreApproximatelyEqual(compFuel.Fuel, FuelAtTick(compFuel, 1));

@@ -48,6 +48,7 @@ public class SectionMain : SettingsSection
 
   public bool fullVehiclePathing = true;
   public bool smoothVehiclePaths = true;
+  public bool useHandBrakes = true;
 
   public bool ignoreBiomeCostOnRoads = true;
   public bool multiplePawnsPerJob = true;
@@ -107,6 +108,7 @@ public class SectionMain : SettingsSection
     allowDiagonalRendering = true;
     fullVehiclePathing = true;
     smoothVehiclePaths = true;
+    useHandBrakes = true;
 
     ignoreBiomeCostOnRoads = true;
     multiplePawnsPerJob = true;
@@ -158,6 +160,7 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
     Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
     Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
+    Scribe_Values.Look(ref useHandBrakes, nameof(useHandBrakes), defaultValue: true);
 
     Scribe_Values.Look(ref ignoreBiomeCostOnRoads, nameof(ignoreBiomeCostOnRoads), defaultValue: true);
     Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
@@ -240,8 +243,10 @@ public class SectionMain : SettingsSection
         ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
       listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing,
         "VF_FullVehiclePathingTooltip".Translate());
-      listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(),
-        ref smoothVehiclePaths, "VF_SmoothVehiclePathingTooltip".Translate());
+      listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths,
+        "VF_SmoothVehiclePathingTooltip".Translate());
+      listingStandard.CheckboxLabeled("VF_UseHandBrakes".Translate(), ref useHandBrakes,
+        "VF_UseHandBrakesTooltip".Translate());
 
       listingStandard.CheckboxLabeledWithMessage("VF_RoadBiomeCostPathing".Translate(),
         delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },

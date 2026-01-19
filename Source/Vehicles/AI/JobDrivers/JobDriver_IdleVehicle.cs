@@ -41,7 +41,7 @@ public class JobDriver_IdleVehicle : JobDriver
 		}
 	}
 
-	public override void Notify_PatherFailed()
+  public override void Notify_PatherFailed()
 	{
 		// Can't set JobCondition as Errored or ErroredPather otherwise it will force assign a Wait job
 		// which really messes with idling behavior.

@@ -5,94 +5,93 @@ using Verse;
 using RimWorld;
 using UnityEngine;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Tween vehicle while still maintaining the non-pawn TrueCenter pos rather than offset position
+/// </summary>
+public class VehicleTweener
 {
-  /// <summary>
-  /// Tween vehicle while still maintaining the non-pawn TrueCenter pos rather than offset position
-  /// </summary>
-  public class VehicleTweener
+  private const float SpringTightness = 0.09f;
+
+  private VehiclePawn vehicle;
+
+  private Vector3 tweenedPos = Vector3.zero;
+  private Vector3 lastTickSpringPos;
+  private int lastDrawFrame = -1;
+
+  public VehicleTweener(VehiclePawn vehicle)
   {
-    private const float SpringTightness = 0.09f;
+    this.vehicle = vehicle;
+  }
 
-    private VehiclePawn vehicle;
+  public Vector3 TweenedPos => tweenedPos;
 
-    private Vector3 tweenedPos = Vector3.zero;
-    private Vector3 lastTickSpringPos;
-    private int lastDrawFrame = -1;
+  public Vector3 LastTickTweenedVelocity => TweenedPos - lastTickSpringPos;
 
-    public VehicleTweener(VehiclePawn vehicle)
+  public void PreDrawPosCalculation()
+  {
+    if (lastDrawFrame == RealTime.frameCount)
     {
-      this.vehicle = vehicle;
+      return;
     }
-
-    public Vector3 TweenedPos => tweenedPos;
-
-    public Vector3 LastTickTweenedVelocity => TweenedPos - lastTickSpringPos;
-
-    public void PreDrawPosCalculation()
+    if (lastDrawFrame < RealTime.frameCount - 1)
     {
-      if (lastDrawFrame == RealTime.frameCount)
+      ResetTweenedPosToRoot();
+    }
+    else
+    {
+      lastTickSpringPos = tweenedPos;
+      float tickRateMultiplier = Find.TickManager.TickRateMultiplier;
+      if (tickRateMultiplier < 5f)
       {
-        return;
-      }
-      if (lastDrawFrame < RealTime.frameCount - 1)
-      {
-        ResetTweenedPosToRoot();
+        Vector3 a = TweenedPosRoot() - tweenedPos;
+        float num = SpringTightness * (RealTime.deltaTime * 60f * tickRateMultiplier);
+        if (RealTime.deltaTime > 0.05f)
+        {
+          num = Mathf.Min(num, 1f);
+        }
+        tweenedPos += a * num;
       }
       else
       {
-        lastTickSpringPos = tweenedPos;
-        float tickRateMultiplier = Find.TickManager.TickRateMultiplier;
-        if (tickRateMultiplier < 5f)
-        {
-          Vector3 a = TweenedPosRoot() - tweenedPos;
-          float num = SpringTightness * (RealTime.deltaTime * 60f * tickRateMultiplier);
-          if (RealTime.deltaTime > 0.05f)
-          {
-            num = Mathf.Min(num, 1f);
-          }
-          tweenedPos += a * num;
-        }
-        else
-        {
-          tweenedPos = TweenedPosRoot();
-        }
+        tweenedPos = TweenedPosRoot();
       }
-      lastDrawFrame = RealTime.frameCount;
     }
+    lastDrawFrame = RealTime.frameCount;
+  }
 
-    public void ResetTweenedPosToRoot()
-    {
-      tweenedPos = TweenedPosRoot();
-      lastTickSpringPos = tweenedPos;
-    }
+  public void ResetTweenedPosToRoot()
+  {
+    tweenedPos = TweenedPosRoot();
+    lastTickSpringPos = tweenedPos;
+  }
 
-    private Vector3 TweenedPosRoot()
+  private Vector3 TweenedPosRoot()
+  {
+    if (!vehicle.Spawned || vehicle.vehiclePather == null)
     {
-      if (!vehicle.Spawned || vehicle.vehiclePather == null)
-      {
-        return vehicle.TrueCenter();
-      }
-      float num = MovedPercent();
-      return vehicle.TrueCenter(vehicle.vehiclePather.nextCell) * num +
-        vehicle.TrueCenter() * (1f - num);
+      return vehicle.TrueCenter();
     }
+    float num = MovedPercent();
+    return vehicle.TrueCenter(vehicle.vehiclePather.nextCell) * num +
+      vehicle.TrueCenter() * (1f - num);
+  }
 
-    public float MovedPercent()
+  public float MovedPercent()
+  {
+    if (vehicle.vehiclePather is null)
     {
-      if (vehicle.vehiclePather is null)
-      {
-        return 0f;
-      }
-      if (!vehicle.vehiclePather.Moving)
-      {
-        return 0f;
-      }
-      if (vehicle.vehiclePather.BuildingBlockingNextPathCell() != null)
-      {
-        return 0f;
-      }
-      return 1f - vehicle.vehiclePather.nextCellCostLeft / vehicle.vehiclePather.nextCellCostTotal;
+      return 0f;
     }
+    if (!vehicle.vehiclePather.Moving)
+    {
+      return 0f;
+    }
+    if (vehicle.vehiclePather.BuildingBlockingNextPathCell() != null)
+    {
+      return 0f;
+    }
+    return 1f - vehicle.vehiclePather.nextCellCostLeft / vehicle.vehiclePather.nextCellCostTotal;
   }
 }

@@ -6,13 +6,13 @@ using UnityEngine.Assertions;
 
 namespace SmashTools.Burst.Tests;
 
-[TestClass(TestType.Playing)]
+[TestClass(TestType.Playing), Disabled]
 internal class Test_PathFinder
 {
   private const int MapWidth = 5;
   private const int MapHeight = 5;
 
-  [Test, Disabled] // TODO
+  [Test] // TODO
   public void PathFind()
   {
     Assert.IsTrue(UnityThread.IsInMainThread);
@@ -29,7 +29,7 @@ internal class Test_PathFinder
       pathGrid[i] = 1;
     }
     PathRequest request = new() { start = new int3(0, 0, 0), end = new int3(1, 0, 0) };
-    using Path path = pathFinder.FindPath(request);
+    Path path = pathFinder.FindPath(request);
     Assert.IsTrue(path.Found);
     Assert.AreEqual(request.start, path.FirstNode);
     Assert.AreEqual(request.end, path.LastNode);

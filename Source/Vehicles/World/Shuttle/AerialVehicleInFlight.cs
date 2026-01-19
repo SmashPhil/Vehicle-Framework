@@ -334,8 +334,8 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 			speedPctPerTick = 1;
 			return;
 		}
-		float tileDistance = Mathf.Clamp(Ext_Math.SphericalDistance(position, center), 0.00001f,
-			float.MaxValue); // Clamp tile distance to PctPerTick
+    // Clamp tile distance to PctPerTick
+    float tileDistance = Mathf.Clamp(Ext_Math.SphericalDistance(position, center), 0.00001f, float.MaxValue); 
 		float flightSpeed = recon ? ReconFlightSpeed : vehicle.CompVehicleLauncher.FlightSpeed;
 		speedPctPerTick = (PctPerTick / tileDistance) * flightSpeed.Clamp(0, 99999);
 	}

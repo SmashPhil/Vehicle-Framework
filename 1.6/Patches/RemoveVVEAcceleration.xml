@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Patch>
+	<Operation Class = "PatchOperationConditional">
+		<xpath>Defs/Vehicles.VehicleDef/comps/li[@Class = "VanillaVehiclesExpanded.CompProperties_VehicleMovementController"]</xpath>
+		<match Class="PatchOperationRemove">
+			<xpath>Defs/Vehicles.VehicleDef/comps/li[@Class = "VanillaVehiclesExpanded.CompProperties_VehicleMovementController"]</xpath>
+		</match>
+	</Operation>
+</Patch>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using CoreLib.Performance;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -451,9 +452,8 @@ public static class PathingHelper
   /// <summary>
   /// Calculate angle of Vehicle
   /// </summary>
-  public static float CalculateAngle(this VehiclePawn vehicle)
+  public static float CalculateAngle([NotNull] this VehiclePawn vehicle)
   {
-    if (vehicle is null) return 0f;
     if (vehicle.vehiclePather.Moving)
     {
       IntVec3 c = vehicle.vehiclePather.nextCell - vehicle.Position;
@@ -478,7 +478,6 @@ public static class PathingHelper
         vehicle.Angle = 0f;
       }
     }
-
     return vehicle.Angle;
   }
 

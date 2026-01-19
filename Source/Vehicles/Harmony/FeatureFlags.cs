@@ -17,6 +17,7 @@ internal class FeatureFlags
 	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
 	public const string BurstLib = "Burst";
+  public const string Acceleration = "Acceleration";
 
 	[UsedImplicitly]
 	public List<IFeatureFlag> features;
@@ -39,7 +40,8 @@ internal class FeatureFlags
 				Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
 				Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
 				Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable)
+        Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
 			]
 		};
 		return flags;

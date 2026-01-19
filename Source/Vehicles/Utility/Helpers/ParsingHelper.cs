@@ -60,6 +60,7 @@ public static class ParsingHelper
 	private static void RegisterAttributes()
 	{
 		XmlParseHelper.RegisterPreProcessor("FeatureFlag", CheckFeatureFlag);
+    //XmlParseHelper.RegisterDefPreProcessor("Overwrite", CheckModOverwrite);
 
 		XmlParseHelper.RegisterAttribute("LockSetting", CheckFieldLocked);
 		XmlParseHelper.RegisterAttribute("AssignDefaults", AssignDefaults);
@@ -77,6 +78,14 @@ public static class ParsingHelper
 
 		return FeatureFlags.IsFeatureEnabled(value);
 	}
+
+  private static bool CheckModOverwrite(XmlNode node, string value, LoadableXmlAsset loadingAsset)
+  {
+    if (value.NullOrEmpty())
+      return true;
+
+    return !value.EqualsIgnoreCase(loadingAsset.mod.PackageIdPlayerFacing);
+  }
 
 	private static void CheckFieldLocked(XmlNode node, string value, FieldInfo field)
 	{
