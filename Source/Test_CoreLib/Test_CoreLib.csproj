@@ -65,7 +65,11 @@
 			<HintPath>$(OutDir)\CoreLib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-
+	</ItemGroup>
+	<ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true'">
+		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true'">
 		<Reference Include="System">
 			<HintPath>$(RefDir)\System.dll</HintPath>
 			<Private>False</Private>

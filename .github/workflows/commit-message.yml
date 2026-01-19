@@ -1,4 +1,4 @@
-name: CommitMessage
+name: commit-message
 
 on:
   push:
@@ -15,4 +15,4 @@ jobs:
     - uses: actions/checkout@v4
     - uses: uptownaravi/verify-commit-message-action@v2
       with:
-          regex: '(?i)^(VF-[0-9]{2,}|NO\-JIRA)\b'
+        regex: '(?i)^(VF-[0-9]{2,}|\#[0-9]{3,}|NO\-JIRA)\b'

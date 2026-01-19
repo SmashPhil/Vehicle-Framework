@@ -11,6 +11,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: develop
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -30,10 +31,10 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore Packages
-        run: dotnet restore "$PROJECT_PATH"
+        run: dotnet restore "$PROJECT_PATH" -p:UseKrafsPackageRef=true
         
       - name: Compile
-        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:WriteVersion=false
+        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:UseKrafsPackageRef=true
 
       - name: Extract Localization Files
         shell: bash
