@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CoreLib;
-using CoreLib.Performance;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using SmashTools.Burst;
 using SmashTools.Performance;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -18,7 +16,15 @@ using Verse.AI;
 namespace Vehicles;
 
 [PublicAPI]
-public sealed class VehiclePathFollower : IExposable
+public struct PathOrderData
+{
+  public int3 destination;
+  public bool exitMapOnArrival;
+  public Rot8 endRotation;
+}
+
+[PublicAPI]
+public sealed class VehiclePathFollower : IExposable, IDisposable
 {
   public const int MaxMoveTicks = 450;
   public const float SnowReductionFromWalking = 0.001f;
@@ -35,42 +41,39 @@ public sealed class VehiclePathFollower : IExposable
 
   private static readonly HashSet<IntVec3> CollisionCells = [];
 
-  private VehiclePawn vehicle;
+  public readonly VehiclePawn vehicle;
+
+  // Stats during transition
+  private AccelerationController controller;
 
   private List<IntVec3> bumperCells;
 
-  private bool moving;
-
+  // TODO 1.7 - Fix access modifiers
   public IntVec3 nextCell;
   private IntVec3 lastCell;
   public IntVec3 lastPathedTargetPosition;
   private LocalTargetInfo destination;
 
+  // TODO 1.7 - Fix access modifiers and opt for getter for Tween class
   public float nextCellCostLeft;
   public float nextCellCostTotal = 1f;
 
-  private int cellsUntilClamor;
-
-  private int lastMovedTick = -999999;
   private int waitTicks;
 
   private PathEndMode peMode;
   private Rot8 endRot = Rot8.Invalid;
   private bool shouldStopClipping;
+  private PathingStatus status;
 
-#if BURST
+  private Queue<PathOrderData> pathQueue = [];
+  private PathReceipt receipt;
   public Path curPath;
-  private PathReceipt pathReceipt;
-#else
-  public VehiclePath curPath;
-#endif
-
-  private CancellationTokenSource pathCancellationTokenSource = new();
-  private Task curPathTask;
 
   public VehiclePathFollower(VehiclePawn vehicle)
   {
     this.vehicle = vehicle;
+    controller = new AccelerationController(this);
+
     bumperCells = [];
     // If vehicle is not NxN, it may clip buildings at destination.
     shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z;
@@ -82,21 +85,26 @@ public sealed class VehiclePathFollower : IExposable
     CollisionsLookAheadDistance = CheckAheadNodesForCollisions + CollisionsLookAheadStartingIndex;
   }
 
-  public int LookAheadDistance { get; private set; }
+  private int LookAheadDistance { get; set; }
 
-  public int LookAheadStartingIndex { get; private set; }
+  private int LookAheadStartingIndex { get; set; }
 
-  public int CollisionsLookAheadDistance { get; private set; }
+  private int CollisionsLookAheadDistance { get; set; }
 
-  public int CollisionsLookAheadStartingIndex { get; private set; }
-
-  public LocalTargetInfo Destination => destination;
+  private int CollisionsLookAheadStartingIndex { get; set; }
 
   private VehiclePathingSystem PathingSystem { get; set; }
 
   private VehiclePathingSystem.VehiclePathData PathData { get; set; }
 
-  public bool Moving => moving;
+  // TODO 1.7 - Remove
+  public LocalTargetInfo Destination => destination;
+
+  internal float PathCostLeft { get; private set; }
+
+  private bool Stopping => status == PathingStatus.Stopping;
+
+  public bool Moving => status is PathingStatus.Moving or PathingStatus.Stopping;
 
   public bool Waiting => waitTicks > 0;
 
@@ -104,21 +112,19 @@ public sealed class VehiclePathFollower : IExposable
   {
     get
     {
-#if BURST
-      if (pathReceipt is { IsCompleted: false })
+      if (pathQueue.Count > 0)
         return PathRequestStatus.Calculating;
-#endif
+
       return field;
     }
     internal set
     {
-#if BURST
-      if (pathReceipt is { IsCompleted: false } && value != PathRequestStatus.Calculating)
+      if (pathQueue.Count > 0 && value != PathRequestStatus.Calculating)
       {
-        // Force complete and discard
-        pathReceipt.ClaimPath()?.Dispose();
+        receipt?.Dispose();
+        receipt = null;
+        pathQueue.Clear();
       }
-#endif
       field = value;
     }
   }
@@ -165,6 +171,17 @@ public sealed class VehiclePathFollower : IExposable
   {
     vehicle.AddEvent(VehicleEventDefOf.Spawned, RecacheComponents);
     vehicle.AddEvent(VehicleEventDefOf.Despawned, RecacheComponents);
+    controller.RegisterEvents();
+  }
+
+  internal void PostLoad()
+  {
+    controller.RegisterEvents();
+  }
+
+  internal string InspectString()
+  {
+    return controller.InspectString();
   }
 
   public void SetEndRotation(Rot8 rot)
@@ -172,24 +189,34 @@ public sealed class VehiclePathFollower : IExposable
     endRot = rot;
   }
 
-  public void ExposeData()
+  void IExposable.ExposeData()
   {
-    Scribe_Values.Look(ref moving, nameof(moving));
+    Scribe_Deep.Look(ref controller, nameof(controller), ctorArgs: this);
+    Scribe_Values.Look(ref status, nameof(status));
+
+    if (Scribe.mode == LoadSaveMode.LoadingVars)
+    {
+      // TODO 1.7 - REMOVE
+      bool moving = false;
+      Scribe_Values.Look(ref moving, nameof(moving));
+      if (moving) status = PathingStatus.Moving;
+    }
+
     Scribe_Values.Look(ref nextCell, nameof(nextCell));
     Scribe_Values.Look(ref nextCellCostLeft, nameof(nextCellCostLeft));
     Scribe_Values.Look(ref nextCellCostTotal, nameof(nextCellCostTotal));
     Scribe_Values.Look(ref peMode, nameof(peMode));
-    Scribe_Values.Look(ref cellsUntilClamor, nameof(cellsUntilClamor));
-    Scribe_Values.Look(ref lastMovedTick, nameof(lastMovedTick), -999999);
 
-    if (moving)
+    if (Moving)
     {
       Scribe_TargetInfo.Look(ref destination, nameof(destination));
     }
 
     if (Scribe.mode == LoadSaveMode.PostLoadInit)
     {
-      vehicle.animator?.SetBool(PropertyIds.Moving, moving);
+      controller ??= new AccelerationController(this);
+      vehicle.animator?.SetBool(PropertyIds.Moving, Moving);
+      LongEventHandler.ExecuteWhenFinished(RecacheComponents);
     }
   }
 
@@ -251,10 +278,9 @@ public sealed class VehiclePathFollower : IExposable
       return;
     }
 
-    curPath?.Dispose();
     curPath = null;
-    moving = true;
-    vehicle.animator?.SetBool(PropertyIds.Moving, moving);
+    status = PathingStatus.Moving;
+    vehicle.animator?.SetBool(PropertyIds.Moving, Moving);
     vehicle.EventRegistry[VehicleEventDefOf.MoveStart].ExecuteEvents();
   }
 
@@ -266,13 +292,18 @@ public sealed class VehiclePathFollower : IExposable
     if (curPath != null)
     {
       vehicle.EventRegistry[VehicleEventDefOf.MoveStop].ExecuteEvents();
-      curPath.Dispose();
     }
 
     curPath = null;
-    moving = false;
-    vehicle.animator?.SetBool(PropertyIds.Moving, moving);
+    receipt?.Dispose();
+    receipt = null;
+    status = PathingStatus.Idle;
+    pathQueue.Clear();
+    vehicle.animator?.SetBool(PropertyIds.Moving, Moving);
     nextCell = vehicle.Position;
+    RequestStatus = PathRequestStatus.None;
+    SetEndRotation(Rot8.Invalid);
+    ResetToCurrentPosition();
   }
 
   [Profile]
@@ -289,45 +320,69 @@ public sealed class VehiclePathFollower : IExposable
       return; // TODO - apply deceleration and effects
     }
 
-#if BURST
-    if (pathReceipt is { IsCompleted: true })
+    if (receipt is { IsCompleted: true })
     {
-      lastPathedTargetPosition = destination.Cell;
-      Assert.IsNull(curPath);
-      curPath = pathReceipt.ClaimPath();
-      pathReceipt.Dispose();
-      pathReceipt = null;
-      RequestStatus = curPath != null ? PathRequestStatus.None : PathRequestStatus.Failed;
+      ProcessPath();
     }
-#endif
+    // NOTE - curPath can be null for a couple frames if multiple paths are queued up while the
+    // game is paused, where the first initial path hasn't had a chance to be requested yet.
+    if (pathQueue.Count > 0 && curPath != null && receipt == null)
+    {
+      ProcessQueue();
+    }
 
     if (VehicleMod.settings.debug.debugDrawBumpers)
     {
       GenDraw.DrawFieldEdges(bumperCells);
     }
 
-    // Transition between cells
-    lastMovedTick = Find.TickManager.TicksGame;
-    if (nextCellCostLeft > 0f)
+    if (nextCellCostLeft <= 0f)
     {
+      if (Moving)
+      {
+        TryEnterNextPathCell();
+      }
+    }
+    else
+    {
+      controller.Tick();
       float costsToPayTick = CostToPayThisTick();
+      PathCostLeft -= Mathf.Min(costsToPayTick, nextCellCostLeft);
       nextCellCostLeft -= costsToPayTick;
-      return;
     }
 
-    // Attempt setup for next cell transition
-    if (moving)
+    if (Stopping && controller.MoveSpeed <= AccelerationController.MinSpeed)
     {
-      TryEnterNextPathCell();
+      PatherFailed();
+    }
+  }
+
+  public void OrderMoveTo(in PathOrderData data)
+  {
+    if (vehicle.CurJobDef == JobDefOf.Goto && KeyBindingDefOf.QueueOrder.IsDownEvent)
+    {
+      pathQueue.Enqueue(data);
+    }
+    else
+    {
+      Job job = new(JobDefOf.Goto, new LocalTargetInfo(data.destination))
+      {
+        exitMapOnArrival = data.exitMapOnArrival
+      };
+      if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+      {
+        vehicle.vehiclePather.SetEndRotation(data.endRotation);
+        FleckMaker.Static(data.destination, vehicle.Map, FleckDefOf.FeedbackGoto);
+      }
     }
   }
 
   public void TryResumePathingAfterLoading()
   {
-    if (moving)
+    if (Moving)
     {
       // Paths resumed post-load can be assumed to already be reachable. RegionGrid at this point will
-      // be suspended anyways so it is not possible to do a reachability check.
+      // be suspended anyway so it is not possible to do a reachability check.
       StartPath(destination, peMode, ignoreReachability: true);
     }
   }
@@ -345,6 +400,18 @@ public sealed class VehiclePathFollower : IExposable
     nextCell = vehicle.Position;
     nextCellCostLeft = 0f;
     nextCellCostTotal = 1f;
+  }
+
+  private void CalculatePathCosts()
+  {
+    PathCostLeft = vehicle.vehiclePather.CostToMoveIntoCell(vehicle.Position, curPath.LastNode);
+    IReadOnlyList<int3> nodes = curPath.Nodes;
+    for (int i = nodes.Count - 1; i > 0; i--)
+    {
+      int3 from = nodes[i];
+      int3 to = nodes[i - 1];
+      PathCostLeft += vehicle.vehiclePather.CostToMoveIntoCell(from, to);
+    }
   }
 
   public Building BuildingBlockingNextPathCell()
@@ -365,8 +432,13 @@ public sealed class VehiclePathFollower : IExposable
 
   public void PatherDraw()
   {
-    if (curPath != null && (vehicle.Faction == Faction.OfPlayer || DebugViewSettings.drawPaths)
-      && Find.Selector.IsSelected(vehicle))
+    if (curPath == null)
+      return;
+
+    if (vehicle.Faction != Faction.OfPlayer || !DebugViewSettings.drawPaths || Stopping)
+      return;
+
+    if (Find.Selector.IsSelected(vehicle))
     {
       curPath.DrawPath(vehicle);
     }
@@ -412,27 +484,38 @@ public sealed class VehiclePathFollower : IExposable
     }
 
     StopDead();
-    if (vehicle.jobs.curJob != null)
-    {
-      vehicle.jobs.curDriver.Notify_PatherArrived();
-    }
+    vehicle.jobs.curDriver?.Notify_PatherArrived();
   }
 
   public void PatherFailed()
   {
-    if (RequestStatus == PathRequestStatus.Calculating)
-      pathCancellationTokenSource.Cancel();
-
     StopDead();
-    SetEndRotation(Rot8.Invalid);
-    vehicle.jobs?.curDriver?.Notify_PatherFailed();
-    RequestStatus = PathRequestStatus.None;
+    vehicle.jobs.curDriver?.Notify_PatherFailed();
   }
 
   public void EngageBrakes()
   {
+    if (curPath == null)
+    {
+      PatherFailed();
+      return;
+    }
     vehicle.EventRegistry[VehicleEventDefOf.Braking].ExecuteEvents();
-    PatherFailed();
+    controller.DecelerateNow(ThrottleSpeed.Urgent);
+    status = PathingStatus.Stopping;
+
+    if (VehicleMod.settings.main.useHandBrakes)
+    {
+      const string WheelTag = "Wheel";
+      float damageAmount = controller.NodesToDecelerate * vehicle.VehicleDef.properties.brakeDamagePerNode;
+      foreach (VehicleComponent component in vehicle.statHandler.components)
+      {
+        if (component.props.tags != null && component.props.tags.Contains(WheelTag))
+        {
+          component.TakeDamage(vehicle, new DamageInfo(DamageDefOf.Scratch, damageAmount), ignoreArmor: true);
+        }
+      }
+    }
   }
 
   private void SetBumperCells()
@@ -466,7 +549,6 @@ public sealed class VehiclePathFollower : IExposable
       vehicle.BeachShip();
       // VehiclePawn::ReclaimPosition is called from set_Position patch
       vehicle.Position = nextCell;
-      vehicle.CalculateAngle();
       PatherFailed();
       return;
     }
@@ -489,11 +571,7 @@ public sealed class VehiclePathFollower : IExposable
         waitTicks = TicksWhileWaiting;
         return;
       case PathRequest.NeedNew:
-#if BURST
         RequestNewPathBurst();
-#else
-        RequestNewPath();
-#endif
         break;
       default:
         throw new NotImplementedException("TryEnterNextPathCell.PathRequest");
@@ -534,7 +612,6 @@ public sealed class VehiclePathFollower : IExposable
     CellRect hitboxBeforeMoving = vehicle.OccupiedRect();
     lastCell = vehicle.Position;
     vehicle.Position = nextCell;
-    vehicle.CalculateAngle();
 
     foreach (IntVec3 cell in hitboxBeforeMoving.AllCellsNoRepeat(vehicle.OccupiedRect()))
     {
@@ -553,6 +630,14 @@ public sealed class VehiclePathFollower : IExposable
     }
 
     nextCell = curPath.ConsumeNextNode();
+    if (nextCell == vehicle.Position)
+    {
+      // Assigning new path mid-travel may start from lastCell, skip 1 to avoid 1 tick skip
+      // that slows down the vehicle and realigns to horizontal rotation.
+      nextCell = curPath.ConsumeNextNode();
+    }
+    vehicle.CalculateAngle();
+
     if (!vehicle.DrivableFast(nextCell))
     {
       Log.Error($"{vehicle} entering {nextCell} which is impassable.");
@@ -576,9 +661,9 @@ public sealed class VehiclePathFollower : IExposable
       return;
     }
 
-    float num = CostToMoveIntoCell(vehicle, vehicle.Position, nextCell);
-    nextCellCostTotal = num;
-    nextCellCostLeft = num;
+    float cost = CostToMoveIntoCell(vehicle.Position, nextCell);
+    nextCellCostTotal = cost;
+    nextCellCostLeft = cost;
 
     SetBumperCells();
   }
@@ -598,16 +683,16 @@ public sealed class VehiclePathFollower : IExposable
     return tickCost;
   }
 
-  private static void LocomotionTicks(VehiclePawn vehicle, IntVec3 from, IntVec3 to,
+  private void LocomotionTicks(IntVec3 from, IntVec3 to,
     ref float tickCost)
   {
     Pawn locomotionUrgencySameAs = vehicle.jobs.curDriver.locomotionUrgencySameAs;
-    if (locomotionUrgencySameAs is VehiclePawn locomotionVehicle &&
-      locomotionUrgencySameAs != vehicle && locomotionUrgencySameAs.Spawned)
+    if (locomotionUrgencySameAs is VehiclePawn locomotionVehicle && locomotionUrgencySameAs != vehicle &&
+        locomotionUrgencySameAs.Spawned)
     {
-      float tickCostOtherVehicle = CostToMoveIntoCell(locomotionVehicle, from, to);
-      tickCost =
-        Mathf.Max(tickCost, tickCostOtherVehicle); //Slow down to match other vehicle's speed
+      // Slow down to match other vehicle's speed
+      float tickCostOtherVehicle = locomotionVehicle.vehiclePather.CostToMoveIntoCell(from, to);
+      tickCost = Mathf.Max(tickCost, tickCostOtherVehicle);
     }
     else
     {
@@ -638,102 +723,92 @@ public sealed class VehiclePathFollower : IExposable
     }
   }
 
-  public static float CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
+  internal float CostToMoveIntoCell(IntVec3 from, IntVec3 to)
   {
     float tickCost = MoveTicksAt(vehicle, from, to);
-    tickCost += vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicle.VehicleDef]
-     .VehiclePathGrid.PerceivedPathCostAt(to);
-    // At minimum should take ~7.5 seconds per cell, any slower vehicle should be disabled
+    tickCost += PathData.VehiclePathGrid.PerceivedPathCostAt(to);
+    // At minimum should take ~7.5 seconds per cell, any slower and the vehicle should be disabled
     tickCost = Mathf.Min(tickCost, MaxMoveTicks);
     if (vehicle.CurJob != null)
     {
-      LocomotionTicks(vehicle, from, to, ref tickCost);
+      LocomotionTicks(from, to, ref tickCost);
     }
-
     return Mathf.Max(tickCost, 1f);
   }
 
   private float CostToPayThisTick()
   {
-    return Mathf.Max(1, nextCellCostTotal / MaxMoveTicks);
+    if (nextCellCostTotal >= MaxMoveTicks)
+      return nextCellCostTotal / MaxMoveTicks * controller.MoveSpeedPct;
+
+    return controller.MoveSpeedPct;
   }
 
-  private VehiclePath FindPath(CancellationToken token)
+  private void ProcessPath()
   {
-    lastPathedTargetPosition = destination.Cell;
-    VehiclePath pawnPath = PathData.VehiclePathFinder.FindPath(vehicle.Position, destination, vehicle, token, peMode);
-    return pawnPath;
-  }
-
-  /// <summary>
-  /// Calculates and assigns new path to <see cref="curPath"/>
-  /// </summary>
-  internal void GeneratePath(CancellationToken token)
-  {
-    VehiclePath pawnPath = FindPath(token);
-    if (pawnPath is null || !pawnPath.Found)
+    Path path = receipt.ClaimPath();
+    if (path == null)
     {
-      PatherFailed();
-      Messages.Message("VF_NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+      Log.Error($"Unable to find path from {receipt.PathRequest.start} to {receipt.PathRequest.end}");
+      receipt.Dispose();
+      receipt = null;
       return;
     }
-#if !BURST
-    if (curPath is not null)
+    if (curPath == null)
     {
-      VehiclePath oldPath = curPath;
-      if (UnityData.IsInMainThread)
-      {
-        oldPath.Dispose();
-      }
-      else
-      {
-        UnityThread.ExecuteOnMainThread(oldPath.Dispose);
-      }
+      lastPathedTargetPosition = destination.Cell;
+      curPath = path;
+      CalculatePathCosts();
     }
-    curPath = pawnPath;
-#endif
-    RequestStatus = PathRequestStatus.None;
+    else
+    {
+      PathOrderData data = pathQueue.Dequeue();
+      Assert.AreEqual(data.destination, path.LastNode);
+      Assert.AreEqual(JobDefOf.Goto, vehicle.jobs.curJob.def);
+      curPath.Combine(path);
+      CalculatePathCosts();
+      vehicle.jobs.curJob?.exitMapOnArrival = data.exitMapOnArrival;
+      destination = new LocalTargetInfo(data.destination);
+      lastPathedTargetPosition = destination.Cell;
+    }
+    controller.Accelerate(curPath, accelThrottle: ThrottleSpeed.Normal, decelThrottle: ThrottleSpeed.Fast);
+
+    RequestStatus = curPath != null ? PathRequestStatus.None : PathRequestStatus.Failed;
+    if (curPath == null)
+    {
+      PatherFailed();
+    }
+    else
+    {
+      receipt?.Dispose();
+      receipt = null;
+    }
+  }
+
+  private void ProcessQueue()
+  {
+    PathOrderData data = pathQueue.Peek();
+    int3 start = curPath.LastNode;
+    int rotation = curPath.NodesLeft >= 2
+      ? Rot8.DirectionFromCells(curPath.Nodes[1], curPath.Nodes[0]).AsInt
+      : vehicle.FullRotation.AsInt;
+    receipt = RequestPathTo(start, data.destination, rotation);
   }
 
   private void RequestNewPathBurst()
   {
-#if BURST
-    curPath?.Dispose();
-    curPath = null;
-
-    // TODO - ensuring job completes and is disposed + returned to pool. Will need a better way to 'discard'
-    // so it returns to the pool without waiting for it to finish.
-    pathReceipt?.ClaimPath()?.Dispose();
-
-    RequestStatus = PathRequestStatus.Calculating;
-    pathReceipt = PathData.PathFinder.RequestPath(new SmashTools.Burst.PathRequest
-    {
-      start = vehicle.Position,
-      end = destination.Cell,
-      rotation = Rotation.ToOctant(vehicle.FullRotation.AsInt),
-      smoothen = true
-    });
-#endif
+    receipt = RequestPathTo(vehicle.Position, destination.Cell, Rotation.ToOctant(vehicle.FullRotation.AsInt));
   }
 
-  private void RequestNewPath()
+  private PathReceipt RequestPathTo(IntVec3 start, IntVec3 end, int rotation)
   {
-    if (curPathTask is { Status: TaskStatus.Running })
+    return PathData.PathFinder.RequestPath(new SmashTools.Burst.PathRequest
     {
-      const int MaxCancelWaitTime = 1000;
-
-      Trace.Fail("Restarting task while it is ongoing. Cancelling before continuing.");
-      pathCancellationTokenSource.Cancel();
-      Task.WaitAll([curPathTask], MaxCancelWaitTime);
-    }
-
-    if (pathCancellationTokenSource is null or { IsCancellationRequested: true })
-      pathCancellationTokenSource = new CancellationTokenSource();
-
-    RequestStatus = PathRequestStatus.Calculating;
-    AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
-    asyncAction.Set(vehicle, pathCancellationTokenSource.Token);
-    curPathTask = TaskManager.Run(asyncAction.Invoke, pathCancellationTokenSource.Token);
+      start = start,
+      end = end,
+      rotation = rotation,
+      smoothen = true
+    });
   }
 
   private PathRequest NeedNewPath()
@@ -775,13 +850,6 @@ public sealed class VehiclePathFollower : IExposable
       }
     }
 
-#if !BURST
-    if (curPath.UsedHeuristics && curPath.NodesConsumedCount >= 75)
-    {
-      return PathRequest.NeedNew;
-    }
-#endif
-
     if (lastPathedTargetPosition != destination.Cell)
     {
       float length = (vehicle.Position - destination.Cell).LengthHorizontalSquared;
@@ -812,7 +880,7 @@ public sealed class VehiclePathFollower : IExposable
         return PathRequest.NeedNew;
       }
 
-      // Should two vehicles be pathing into eachother directly, first to stop will be given a
+      // Should two vehicles be pathing into each other directly, first to stop will be given a
       // Wait request while the other will request a new path
       CellRect vehicleRect = vehicle.VehicleRect(next, rot);
       foreach (IntVec3 cell in vehicleRect)
@@ -877,6 +945,19 @@ public sealed class VehiclePathFollower : IExposable
     }
   }
 
+  public void Dispose()
+  {
+    receipt?.Dispose();
+  }
+
+  internal enum PathingStatus
+  {
+    Idle,
+    Moving,
+    Stopping
+  }
+
+  // TODO 1.7 - update access modifier
   public enum PathRequest
   {
     None,
@@ -885,6 +966,7 @@ public sealed class VehiclePathFollower : IExposable
     NeedNew
   }
 
+  // TODO 1.7 - update access modifier
   public enum PathRequestStatus
   {
     None,

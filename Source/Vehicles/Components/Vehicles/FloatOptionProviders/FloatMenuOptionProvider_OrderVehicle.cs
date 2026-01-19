@@ -21,7 +21,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
   {
     // TODO Raiders vehicle.Faction != Faction.OfPlayer needed?
 
-    FloatMenuOption option = null;
+    FloatMenuOption option;
     IntVec3 clickCell = context.ClickedCell;
     if (context.IsMultiselect)
     {
@@ -81,56 +81,47 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
       "VF_CannotMoveToCell".Translate(vehicle.LabelCap);
   }
 
-  internal static void PawnGotoAction(IntVec3 clickCell, VehiclePawn vehicle, IntVec3 gotoLoc,
-    Rot8 rot)
+  internal static void PawnGotoAction(IntVec3 clickCell, VehiclePawn vehicle, IntVec3 gotoLoc, Rot8 rot)
   {
-    bool jobSuccess;
     if (vehicle.Position == gotoLoc)
     {
-      jobSuccess = true;
       vehicle.FullRotation = rot;
       if (vehicle.CurJobDef == JobDefOf.Goto)
       {
         vehicle.jobs.EndCurrentJob(JobCondition.Succeeded);
       }
-    }
-    else
-    {
-      if (vehicle.CurJobDef == JobDefOf.Goto && vehicle.CurJob.targetA.Cell == gotoLoc)
-      {
-        jobSuccess = true;
-      }
-      else
-      {
-        Job job = new(JobDefOf.Goto, gotoLoc);
-        bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
-        bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
-        bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, rot)
-         .NotNullAndAny(cell => cell.InBounds(vehicle.Map) &&
-            vehicle.Map.exitMapGrid.IsExitCell(cell));
-
-        if (exitCell || vehicleCellsOverlapExit)
-        {
-          job.exitMapOnArrival = true;
-        }
-        else if (!vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid &&
-          isOnEdge &&
-          vehicle.Map.Parent.GetComponent<FormCaravanComp>() is { } formCaravanComp &&
-          MessagesRepeatAvoider.MessageShowAllowed(
-            $"MessagePlayerTriedToLeaveMapViaExitGrid-{vehicle.Map.uniqueID}", 60f))
-        {
-          string text = formCaravanComp.CanFormOrReformCaravanNow ?
-            "MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate() :
-            "MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate();
-          Messages.Message(text, vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
-        }
-        jobSuccess = vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-
-        if (jobSuccess)
-          vehicle.vehiclePather.SetEndRotation(rot);
-      }
-    }
-    if (jobSuccess)
       FleckMaker.Static(gotoLoc, vehicle.Map, FleckDefOf.FeedbackGoto);
+      return;
+    }
+
+    if (vehicle.CurJobDef == JobDefOf.Goto && vehicle.CurJob.targetA.Cell == gotoLoc)
+    {
+      FleckMaker.Static(gotoLoc, vehicle.Map, FleckDefOf.FeedbackGoto);
+      return;
+    }
+
+    bool isOnEdge = CellRect.WholeMap(vehicle.Map).IsOnEdge(clickCell, 3);
+    bool exitCell = vehicle.Map.exitMapGrid.IsExitCell(clickCell);
+    bool vehicleCellsOverlapExit = vehicle.InhabitedCellsProjected(clickCell, rot)
+      .NotNullAndAny(cell => cell.InBounds(vehicle.Map) &&
+                             vehicle.Map.exitMapGrid.IsExitCell(cell));
+    bool exitMapOnArrival = exitCell || vehicleCellsOverlapExit;
+    if (!exitMapOnArrival && !vehicle.Map.IsPlayerHome && !vehicle.Map.exitMapGrid.MapUsesExitGrid &&
+        isOnEdge && vehicle.Map.Parent.GetComponent<FormCaravanComp>() is { } formCaravanComp &&
+        MessagesRepeatAvoider.MessageShowAllowed(
+          $"MessagePlayerTriedToLeaveMapViaExitGrid-{vehicle.Map.uniqueID}", 60f))
+    {
+      string text = formCaravanComp.CanFormOrReformCaravanNow ?
+        "MessagePlayerTriedToLeaveMapViaExitGrid_CanReform".Translate() :
+        "MessagePlayerTriedToLeaveMapViaExitGrid_CantReform".Translate();
+      Messages.Message(text, vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
+    }
+
+    vehicle.vehiclePather.OrderMoveTo(new PathOrderData
+    {
+      destination = gotoLoc,
+      endRotation = rot,
+      exitMapOnArrival = exitMapOnArrival
+    });
   }
 }

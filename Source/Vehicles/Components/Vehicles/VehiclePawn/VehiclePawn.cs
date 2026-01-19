@@ -250,6 +250,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 		RecachePawnCount();
 		RecacheMovementPermissions();
 		statHandler.MarkAllDirty();
+    vehiclePather.PostLoad();
 		animator?.PostLoad();
 		UnityThread.ExecuteOnMainThread(DrawTracker.overlayRenderer.Init);
 

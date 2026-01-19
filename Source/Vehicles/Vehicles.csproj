@@ -55,7 +55,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>false</Optimize>
-    <DefineConstants>TRACE;DEBUG;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">

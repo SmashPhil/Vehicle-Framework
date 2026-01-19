@@ -74,12 +74,12 @@ public partial class VehiclePawn
 	{
 		get
 		{
-			if ((MovementPermissions & VehiclePermissions.Autonomous) != 0)
-				return true;
 			if (VehicleMod.settings.debug.debugDraftAnyVehicle)
 				return true;
+      if ((MovementPermissions & VehiclePermissions.Autonomous) != 0)
+        return true;
 
-			foreach (VehicleRoleHandler handler in handlers)
+      foreach (VehicleRoleHandler handler in handlers)
 			{
 				if ((handler.role.HandlingTypes & HandlingType.Movement) != 0 && !handler.RoleFulfilled)
 					return false;

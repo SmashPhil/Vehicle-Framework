@@ -56,7 +56,7 @@ internal class Benchmark_PathFinder
   [Benchmark(Label = "Burst")]
   private static void Burst(ref PathFinderContext context)
   {
-    using var path = context.burst.FindPath(new PathRequest
+    var path = context.burst.FindPath(new PathRequest
     {
       start = context.start,
       end = context.end,

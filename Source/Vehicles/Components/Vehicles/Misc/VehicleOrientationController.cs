@@ -127,11 +127,15 @@ public class VehicleOrientationController : BaseTargeter
     }
 
     if (start == end)
+    {
       LessonAutoActivator.TeachOpportunity(ConceptDefOf.GroupGotoHereDragging,
         OpportunityType.GoodToKnow);
+    }
     else if (start.DistanceToSquared(end) > 1.9f)
+    {
       PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.GroupGotoHereDragging,
         KnowledgeAmount.SpecificInteraction);
+    }
 
     SoundDefOf.ColonistOrdered.PlayOneShotOnCamera();
     StopTargeting();

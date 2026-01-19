@@ -5,7 +5,7 @@ using Verse;
 
 namespace Vehicles;
 
-public class StatCache
+public sealed class StatCache
 {
   private readonly VehiclePawn vehicle;
 

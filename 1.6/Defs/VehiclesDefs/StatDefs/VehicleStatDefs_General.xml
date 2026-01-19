@@ -39,6 +39,26 @@
 			</li>
 		</parts>
 	</Vehicles.VehicleStatDef>
+
+	<Vehicles.VehicleStatDef>
+		<defName>AccelerationRate</defName>
+		<label>Acceleration rate</label>
+		<description>The rate at which the care accelerates in cells per second.</description>
+		<category>VehicleBasics</category>
+		<defaultBaseValue>0</defaultBaseValue>
+		<minValue>0</minValue>
+		<hideAtValue>0</hideAtValue>
+		<toStringStyle>FloatTwo</toStringStyle>
+		<formatString>{0} c/s&#x00B2;</formatString>
+		<operationType>Average</operationType>
+		<displayPriorityInCategory>80</displayPriorityInCategory>
+
+		<modSettingsInfo>
+			<settingsType>SliderFloat</settingsType>
+			<roundDecimalPlaces>1</roundDecimalPlaces>
+			<increment>0.1</increment>
+		</modSettingsInfo>
+	</Vehicles.VehicleStatDef>
 	
 	<Vehicles.VehicleStatDef>
 		<defName>CargoCapacity</defName>

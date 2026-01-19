@@ -8,6 +8,7 @@ public static class VehicleStatDefOf
 {
 	// General
 	public static VehicleStatDef MoveSpeed;
+  public static VehicleStatDef AccelerationRate;
 	public static VehicleStatDef Mass;
 	public static VehicleStatDef CargoCapacity;
 	public static VehicleStatDef RepairRate;

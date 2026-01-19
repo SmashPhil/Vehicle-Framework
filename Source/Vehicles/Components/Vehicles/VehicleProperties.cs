@@ -36,6 +36,8 @@ public class VehicleProperties
 
 	public bool diagonalRotation = true;
 
+  public float brakeDamagePerNode = 0.15f;
+
 	[PostToSettings(Label = "VF_ManhunterTargetsVehicle",
 		Tooltip = "VF_ManhunterTargetsVehicleTooltip", Translate = true,
 		UISettingsType = UISettingsType.Checkbox)]
