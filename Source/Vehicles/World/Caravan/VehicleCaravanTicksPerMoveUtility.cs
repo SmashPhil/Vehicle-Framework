@@ -63,7 +63,22 @@ public static class VehicleCaravanTicksPerMoveUtility
 					float worldSpeedMultiplier = vehicle.WorldSpeedMultiplier;
 					float moveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed) *
 						worldSpeedMultiplier / 60;
-					if (moveSpeed > 0)
+
+                    // Highest equipment bonus among everyone inside -> stacking effects could probably easily break the game
+                    float maxEquipmentBonus = 1f;
+
+                    foreach (Pawn occupant in vehicle.AllPawnsAboard)
+                    {
+                        float pawnStat = occupant.GetStatValue(StatDefOf.CaravanBonusSpeedFactor);
+                        if (pawnStat > maxEquipmentBonus)
+                        {
+                            maxEquipmentBonus = pawnStat;
+                        }
+                    }
+
+                    moveSpeed *= maxEquipmentBonus;
+
+                    if (moveSpeed > 0)
 					{
 						int ticksPerTile = TicksFromMoveSpeed(moveSpeed);
 						MoveSpeedTicks.Add(ticksPerTile);
