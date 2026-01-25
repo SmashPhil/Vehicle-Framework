@@ -11,7 +11,7 @@ public class AsyncRegionAction : AsyncAction
   private CellRect cellRect;
   private bool spawned;
 
-  public override bool IsValid => mapping?.map?.Index > -1;
+  public override bool IsValid => mapping?.map is { Disposed: false };
 
   public void Set(VehiclePathingSystem mapping, List<VehicleDef> vehicleDefs, CellRect cellRect, bool spawned)
   {

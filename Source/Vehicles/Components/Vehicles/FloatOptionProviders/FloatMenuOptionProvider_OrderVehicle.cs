@@ -5,6 +5,7 @@ using RimWorld.Planet;
 using SmashTools;
 using Verse;
 using Verse.AI;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles;
 
@@ -117,11 +118,19 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
       Messages.Message(text, vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
     }
 
-    vehicle.vehiclePather.OrderMoveTo(new PathOrderData
+    if (IsFeatureEnabled(PathFinderV2))
     {
-      destination = gotoLoc,
-      endRotation = rot,
-      exitMapOnArrival = exitMapOnArrival
-    });
+      vehicle.vehiclePather.OrderMoveTo(new PathOrderData
+      {
+        destination = gotoLoc,
+        endRotation = rot,
+        exitMapOnArrival = exitMapOnArrival
+      });
+    }
+    else
+    {
+      Job job = new(JobDefOf.Goto, gotoLoc);
+      vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+    }
   }
 }

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using CoreLib.Performance;
 using JetBrains.Annotations;
+using SmashTools.Burst;
+using Unity.Mathematics;
 using UnityEngine;
 using Verse;
 
@@ -92,4 +94,19 @@ public class VehiclePath : IDisposable
 		nodes.Clear();
 		AsyncPool<VehiclePath>.Return(this);
 	}
+
+  private IEnumerable<int3> GetBurstPathEnumerable()
+  {
+    foreach (IntVec3 cell in nodes)
+    {
+      yield return cell;
+    }
+  }
+
+  public Path ToBurstPath()
+  {
+    Path path = new();
+    path.Populate(GetBurstPathEnumerable());
+    return path;
+  }
 }

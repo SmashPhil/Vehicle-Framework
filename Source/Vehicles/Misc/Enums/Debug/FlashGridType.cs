@@ -7,5 +7,6 @@ public enum FlashGridType
 	GasGrid,
 	PositionManager,
 	ThingGrid,
-	ListerThings
+	ListerThings,
+  ModifierGrid
 }

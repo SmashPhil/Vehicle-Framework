@@ -8,7 +8,7 @@ public class AsyncReachabilityCacheAction : AsyncAction
   private VehiclePathingSystem mapping;
   private List<VehicleDef> vehicleDefs;
 
-  public override bool IsValid => mapping?.map?.Index > -1;
+  public override bool IsValid => mapping?.map is { Disposed: false };
 
   public void Set(VehiclePathingSystem mapping, List<VehicleDef> vehicleDefs)
   {

@@ -1,0 +1,121 @@
+ManifestFileVersion: 0
+CRC: 16939744
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 9614d0031edaef808bba4c38f644ba19
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 2d8df09e698f722ada1caa03d3413830
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 9614d0031edaef808bba4c38f644ba19
+HashAppended: 0
+ClassTypes:
+- Class: 28
+  Script: {instanceID: 0}
+- Class: 213
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/Fishing/FishingNetMote.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeF.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_G.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/ArrowRight.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/Gizmo_RepairVehicles.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoPause.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/DefaultBoatIcon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/StartLoadVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoPlay.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Cursors/MouseHandOpen.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/Hexagon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/DefaultVehicleIcon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_F.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Polygon/Polygon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/Gizmo_UndeployVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoSkipToEnd.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/UnloadAll.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Parachute/AirDropCrate2x2.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/EyeStriked.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/DefaultPlaneIcon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/GearReverse.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_H.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Digital/Digital.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_B.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/StashVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyRiver.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/SwitchRight.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeG.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/KeyFrame.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/WorldObject_CrashSite.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/StartLoadAerial.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Designators/RoadAreaOn.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/CancelLoadAerial.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/AddKeyFrame.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/WarningIcon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/Eye.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/Rotate.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/CancelLoadBoat.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/HaulPawnToVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Lizard/Lizard.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/VehicleRoutePlanner.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FireRate_Single.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/ColorCog.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/UnloadArrow.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoSkipToNext.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Cursors/MouseHandClosed.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Default/Default.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Designators/RoadAreaOff.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/Gizmo_DeployVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeA.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_D.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/Square.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/SwapColors.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeC.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Abstract/Abstract_Large.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/ArrowLeft.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FormCaravanVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Hexagon/Hexagon.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/Paintbrush.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/GearDrive.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/ColorHue.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FireRate_Auto.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/CancelLoadVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/DraftVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/HaltVehicle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Abstract/Abstract_Medium.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_E.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/RefuelFromCargo.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/Reload.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Skins/Jungle/Jungle.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Parachute/Parachute.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeE.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Panther/Panther.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Tiger/TigerStripes.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Waves/Waves.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_C.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/AutoTarget.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/AnimationEvent.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_A.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Tiger/Tiger.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Woodland/Woodland.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/StartLoadBoat.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeD.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/CannonPlume/CannonPlumeB.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_I.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Settings/Settings.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyHills.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/AddEvent.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoReturnToBeginning.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/ZigZag/ZigZag.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Settings/ResetPage.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Animations/JetEffect/JetEffect_J.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Icons/EfficiencyRoads.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Rusty/Rusty.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoDoubleSpeed.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FireRate_Burst.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/ColorTools/SwitchLeft.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/UI/Gizmos/FishingGizmo.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/Graphics/Patterns/Hearts/Hearts.png
+- Assets/Data/SmashPhil.VehicleFramework/Textures/SmashTools/VideoReturnToPrevious.png
+Dependencies: []

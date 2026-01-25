@@ -8,7 +8,7 @@ public class AsyncPathingAction : AsyncAction
   private VehiclePathingSystem mapping;
   private IntVec3 position;
 
-  public override bool IsValid => mapping?.map?.Index > -1;
+  public override bool IsValid => mapping?.map is { Disposed: false };
 
   public void Set(VehiclePathingSystem mapping, IntVec3 position)
   {

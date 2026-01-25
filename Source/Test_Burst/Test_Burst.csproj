@@ -56,7 +56,7 @@
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
 		<PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
 		<PackageReference Include="PolySharp" Version="1.*" />
-		<PackageReference Include="SmashTools.Burst" Version="1.*" />
+		<PackageReference Include="SmashTools.Burst" Version="1.0.9" />
 
 		<Reference Include="DevTools">
 			<HintPath>$(OutDir)\DevTools.dll</HintPath>

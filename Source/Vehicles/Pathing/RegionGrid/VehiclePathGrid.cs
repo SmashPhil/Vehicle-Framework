@@ -157,7 +157,8 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     }
 #endif
 
-    pathFinder.NotifyWritingToGrid();
+    // TODO BURST - Remove null check when feature is finalized
+    pathFinder?.NotifyWritingToGrid();
     bool walkable = WalkableFast(cell);
     // TODO 1.7 - convert all calculate functions to ushort return types
     costGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
@@ -166,7 +167,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
 #if DEBUG
     if (VehicleMod.settings.debug.debugPathCostChanges)
     {
-      debugString.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
+      debugString!.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
       Debug.Message(debugString.ToStringSafe());
     }
 #endif

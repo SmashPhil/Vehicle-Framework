@@ -9,6 +9,10 @@ namespace Vehicles;
 
 public abstract class Designator_AreaRoad : Designator_Cells
 {
+  protected const string RoadId = "VehicleRoads";
+  protected const int RoadDiscountCost = 50;
+  protected const int RoadAvoidCost = 250;
+
   private readonly DesignateMode mode;
   private static RoadType roadType = RoadType.Prioritize;
 
@@ -55,38 +59,73 @@ public abstract class Designator_AreaRoad : Designator_Cells
 
   public override void DesignateSingleCell(IntVec3 cell)
   {
-    const int RoadCostShift = 1;
-    const int RoadAvoidCost = 250;
-
     int index = CellIndicesUtility.CellToIndex(cell, Map.Size.x);
     if (mode == DesignateMode.Add)
     {
-      switch (roadType)
+      if (roadType == RoadType.Prioritize)
       {
-        case RoadType.Prioritize:
-          Map.areaManager.Get<Area_Road>()[cell] = true;
-          Map.areaManager.Get<Area_RoadAvoidal>()[cell] = false;
-          ModifierGrid?[index] = new Modifier
-          {
-            type = ModifierType.ShiftRight,
-            value = RoadCostShift
-          };
-          break;
-        case RoadType.Avoid:
-          Map.areaManager.Get<Area_Road>()[cell] = false;
-          Map.areaManager.Get<Area_RoadAvoidal>()[cell] = true;
-          ModifierGrid?[index] = new Modifier
-          {
-            type = ModifierType.Add,
-            value = RoadAvoidCost
-          };
-          break;
+        RemoveAvoid(index);
+        SetRoad(index);
       }
-      return;
+      else if (roadType == RoadType.Avoid)
+      {
+        RemoveRoad(index);
+        SetAvoid(index);
+      }
     }
-    Map.areaManager.Get<Area_Road>()[cell] = false;
-    Map.areaManager.Get<Area_RoadAvoidal>()[cell] = false;
-    ModifierGrid?[index] = new Modifier { type = ModifierType.None };
+    else if (mode == DesignateMode.Remove)
+    {
+      RemoveRoad(index);
+      RemoveAvoid(index);
+    }
+  }
+
+  private void SetRoad(int index)
+  {
+    Area_Road area = Map.areaManager.Get<Area_Road>();
+    if (!area[index])
+    {
+      area[index] = true;
+      ModifierGrid.AddModifier(RoadId, index, new Modifier
+      {
+        type = ModifierType.Subtract,
+        value = RoadDiscountCost
+      }, ModifierPriority.Low);
+    }
+  }
+
+  private void SetAvoid(int index)
+  {
+    Area_RoadAvoidal area = Map.areaManager.Get<Area_RoadAvoidal>();
+    if (!area[index])
+    {
+      area[index] = true;
+      ModifierGrid.AddModifier(RoadId, index, new Modifier
+      {
+        type = ModifierType.Add,
+        value = RoadAvoidCost
+      }, ModifierPriority.Low);
+    }
+  }
+
+  private void RemoveRoad(int index)
+  {
+    Area_Road area = Map.areaManager.Get<Area_Road>();
+    if (area[index])
+    {
+      area[index] = false;
+      ModifierGrid.RemoveModifier(RoadId, index);
+    }
+  }
+
+  private void RemoveAvoid(int index)
+  {
+    Area_RoadAvoidal area = Map.areaManager.Get<Area_RoadAvoidal>();
+    if (area[index])
+    {
+      area[index] = false;
+      ModifierGrid.RemoveModifier(RoadId, index);
+    }
   }
 
   public override AcceptanceReport CanDesignateCell(IntVec3 cell)

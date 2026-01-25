@@ -61,7 +61,7 @@ internal class Benchmark_PathFinder
       start = context.start,
       end = context.end,
       rotation = 0,
-      smoothen = false
+      turnCost = TurnCost.None
     });
   }
 

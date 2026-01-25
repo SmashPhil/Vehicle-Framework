@@ -114,7 +114,7 @@ public class SectionMain : SettingsSection
     multiplePawnsPerJob = true;
 
     useBurstLib = true;
-    burstProbation = true;
+    burstProbation = false;
 
     meleeDamageMultiplier = 1;
     rangedDamageMultiplier = 1;
@@ -165,7 +165,7 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref ignoreBiomeCostOnRoads, nameof(ignoreBiomeCostOnRoads), defaultValue: true);
     Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
     Scribe_Values.Look(ref useBurstLib, nameof(useBurstLib), defaultValue: true);
-    Scribe_Values.Look(ref burstProbation, nameof(burstProbation), defaultValue: true);
+    Scribe_Values.Look(ref burstProbation, nameof(burstProbation), defaultValue: false);
 
     Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
     Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);

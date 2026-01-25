@@ -16,7 +16,8 @@ internal class FeatureFlags
 	public const string VehicleCaravanProps = "VehicleCaravanProps";
 	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
-	public const string BurstLib = "Burst";
+	public const string PathFinderV2 = "PathFinderV2";
+  public const string BurstLib = "BurstLib";
   public const string Acceleration = "Acceleration";
 
 	[UsedImplicitly]
@@ -41,8 +42,9 @@ internal class FeatureFlags
 				Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
 				Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
         Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable),
         Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
-			]
+      ]
 		};
 		return flags;
 	}
@@ -65,7 +67,7 @@ internal class FeatureFlags
 		return Default.IsEnabled(featureName);
 	}
 
-	public class Feature : IFeatureFlag
+	private class Feature : IFeatureFlag
 	{
 		private string name;
 

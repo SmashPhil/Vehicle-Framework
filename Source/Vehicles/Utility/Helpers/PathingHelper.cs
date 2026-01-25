@@ -380,15 +380,15 @@ public static class PathingHelper
     }
   }
 
-  internal static void RecalculatePerceivedPathCostAtFor(VehiclePathingSystem mapping,
-    IntVec3 cell)
+  internal static void RecalculatePerceivedPathCostAtFor(VehiclePathingSystem mapping, IntVec3 cell)
   {
     foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
     {
       VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
-      if (!pathData.VehiclePathGrid.Enabled) continue;
-
-      pathData.VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+      if (pathData.VehiclePathGrid.Enabled)
+      {
+        pathData.VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
+      }
     }
   }
 

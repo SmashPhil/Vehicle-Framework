@@ -295,7 +295,9 @@ internal class Patch_VehiclePathing : IPatchCategory
     if (__instance.Spawned)
     {
       if (__instance is VehiclePawn vehicle)
+      {
         vehicle.ReclaimPosition();
+      }
       PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
     }
   }
@@ -308,7 +310,6 @@ internal class Patch_VehiclePathing : IPatchCategory
       vehicle.SetRotationInt(value, ref ___rotationInt);
       return false;
     }
-
     return true;
   }
 

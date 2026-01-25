@@ -257,7 +257,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
     int size = DefDatabase<VehicleDef>.DefCount;
     vehicleData = new VehiclePathData[size];
 
-    if (IsFeatureEnabled(BurstLib) && VehicleMod.settings.main.useBurstLib)
+    if (IsFeatureEnabled(PathFinderV2))
     {
       ModifierGrid = new ModifierGrid(map.Size.x * map.Size.z, this);
     }
@@ -363,113 +363,40 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
   public override void MapComponentDraw()
   {
     FlashGridType flashGridType = SectionDebug.debugDrawFlashGrid;
-    if (flashGridType > FlashGridType.None)
-    {
-      if (Find.CurrentMap is null || WorldRendererUtility.WorldRendered)
-        return;
+    if (flashGridType == FlashGridType.None || Find.TickManager.Paused)
+      return;
+    if (Find.CurrentMap is null || WorldRendererUtility.WorldRendered)
+      return;
 
-      switch (flashGridType)
-      {
-        case FlashGridType.CoverGrid:
-          FlashCoverGrid();
-          break;
-        case FlashGridType.GasGrid:
-          FlashGasGrid();
-          break;
-        case FlashGridType.PositionManager:
-          FlashClaimants();
-          break;
-        case FlashGridType.ThingGrid:
-          FlashThingGrid();
-          break;
-        case FlashGridType.ListerThings:
-          FlashListerThings();
-          break;
-        default:
-          Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
-          break;
-      }
+    switch (flashGridType)
+    {
+      case FlashGridType.CoverGrid:
+        map.FlashCoverGrid();
+        break;
+      case FlashGridType.GasGrid:
+        map.FlashGasGrid();
+        break;
+      case FlashGridType.PositionManager:
+        map.FlashClaimants();
+        break;
+      case FlashGridType.ThingGrid:
+        map.FlashThingGrid();
+        break;
+      case FlashGridType.ListerThings:
+        map.FlashListerThings();
+        break;
+      case FlashGridType.ModifierGrid:
+        map.FlashModifierGrid();
+        break;
+      default:
+        Log.ErrorOnce($"Not Implemented: {flashGridType}", flashGridType.GetHashCode());
+        break;
     }
   }
 
   public override void MapComponentUpdate()
   {
     UpdateRegions();
-  }
-
-  private void FlashListerThings()
-  {
-    foreach (Region region in map.regionGrid.AllRegions)
-    {
-      if (region.ListerThings.ThingsInGroup(ThingRequestGroup.Pawn).Exists(static pawn => pawn is VehiclePawn))
-      {
-        Draw(region);
-      }
-    }
-    return;
-
-    static void Draw(Region region)
-    {
-      float a = 1f - (Find.TickManager.TicksGame % 60) / 60f;
-      GenDraw.DrawFieldEdges([.. region.Cells], new Color(0f, 0f, 1f, a));
-    }
-  }
-
-  private void FlashCoverGrid()
-  {
-    if (!Find.TickManager.Paused)
-    {
-      foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-      {
-        float cover = CoverUtility.TotalSurroundingCoverScore(cell, map);
-        map.debugDrawer.FlashCell(cell, cover / 8, cover.ToString("F2"), duration: 1);
-      }
-    }
-  }
-
-  private void FlashGasGrid()
-  {
-    if (!Find.TickManager.Paused)
-    {
-      foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-      {
-        if (!map.gasGrid.GasCanMoveTo(cell))
-          continue;
-
-        float gas = map.gasGrid.DensityPercentAt(cell, GasType.BlindSmoke);
-        map.debugDrawer.FlashCell(cell, gas / 8, gas.ToString("F2"), duration: 1);
-      }
-    }
-  }
-
-  private void FlashClaimants()
-  {
-    if (!Find.TickManager.Paused)
-    {
-      VehiclePositionManager manager = map.GetDetachedMapComponent<VehiclePositionManager>();
-      foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-      {
-        if (!manager.PositionClaimed(cell))
-          continue;
-
-        map.debugDrawer.FlashCell(cell, 1, duration: 1);
-      }
-    }
-  }
-
-  private void FlashThingGrid()
-  {
-    if (!Find.TickManager.Paused)
-    {
-      foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
-      {
-        Thing thing = map.thingGrid.ThingAt(cell, ThingCategory.Pawn);
-        if (thing is not VehiclePawn)
-          continue;
-
-        map.debugDrawer.FlashCell(cell, 1, duration: 1);
-      }
-    }
   }
 
   private void UpdateRegions()
@@ -533,14 +460,14 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
       vehiclePathData.VehicleRegionConnector = new VehicleRegionConnector(this, vehicleDef);
       vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
 
-      if (IsFeatureEnabled(BurstLib))
+      if (IsFeatureEnabled(PathFinderV2))
       {
         vehiclePathData.PathFinder = new PathFinder(new PathFinder.Settings
         {
           mapSize = new int2(map.Size.x, map.Size.z),
           hitbox = new int2(vehicleDef.size.x, vehicleDef.size.z),
           pathGrid = vehiclePathData.VehiclePathGrid.CostGrid,
-          modifierGrid = ModifierGrid.InnerGrid,
+          modifierGrid = ModifierGrid,
           poolObjects = true
         });
       }
