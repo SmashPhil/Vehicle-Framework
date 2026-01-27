@@ -7,6 +7,9 @@
   <!-- Gizmos / Float Menus -->
   <VF_LoadCargo>Load cargo</VF_LoadCargo>
   <VF_HaulPawnToVehicle>Load into {0_labelShort}</VF_HaulPawnToVehicle>
+  <VF_CarryToVehicle>Carry {0_labelShort} to {1_labelShort}</VF_CarryToVehicle>
+  <VF_CantLoadInVehicle>Cannot load {0_labelShort} in {1_labelShort}</VF_CantLoadInVehicle>
+  <VF_NoRoleAvailable>No seat available.</VF_NoRoleAvailable>
   <VF_DisembarkAllPawns>Unload everyone</VF_DisembarkAllPawns>
   <VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
   <VF_GearForward>Forward</VF_GearForward>

@@ -126,7 +126,8 @@ namespace Vehicles
 		{
 			if (!CanOperateRole(pawn, role.HandlingTypes))
 				return false;
-			return pawn.Faction == vehicle.Faction;
+
+			return pawn.Faction == vehicle.Faction || role.HandlingTypes == HandlingType.None;
 		}
 
 		public static bool CanOperateRole(Pawn pawn, HandlingType handlingType)

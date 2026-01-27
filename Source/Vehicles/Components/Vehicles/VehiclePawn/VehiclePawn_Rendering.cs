@@ -1,4 +1,4 @@
-﻿#define LOAD_PAWN_GIZMO
+﻿//#define LOAD_PAWN_GIZMO
 
 using System;
 using System.Collections.Generic;
@@ -681,7 +681,7 @@ public partial class VehiclePawn
           }
         }, delegate (LocalTargetInfo target)
         {
-          if (target.Thing is Pawn { Downed: false } pawn)
+          if (target.Thing is Pawn { Downed: false } pawn && !pawn.ShouldAlwaysTransferToVehiclesCargo())
           {
             VehicleRoleHandler handler = pawn.IsColonistPlayerControlled ?
               GetAnyAvailableHandler() :
@@ -846,7 +846,7 @@ public partial class VehiclePawn
             }
           }
 
-          if (!options.NullOrEmpty())
+          if (options.Count > 0)
           {
             Find.WindowStack.Add(new FloatMenu(options));
           }
@@ -1177,7 +1177,7 @@ public partial class VehiclePawn
             options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));
           }
 #if ANIMATOR
-					options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInNewAnimator));
+          options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInNewAnimator));
 #endif
 
 #if DEBUG && RAIDERS

@@ -1,31 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.6.2241</currentVersion>
+  <currentVersion>1.6.2242</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;New Features&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicles now give comfort when pawns are inside. This is configurable per vehicle but will default to 50% for roles, and 15% when inside cargo.
 
-Additionally, when in a vehicle caravan, bedrolls will be prioritized by pawns outside of the vehicle first. If there are still bedrolls available, pawns inside vehicles will take whichever provides greater comfort between the role they occupy and bedrolls available.
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Fuel icon now uses icon of fuel type instead of hardcoded Chemfuel icon.
+- Downed pawns are no longer allowed inside cargo. They will instead fill the least impactful role if one is available, otherwise they will not be able to be placed inside the vehicle.
+NOTE: If they are downed while inside a vehicle, they will remain in the role they were originally in.
+
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Caravan formations for vehicle caravans loading more items than requested.
-- Pawns loading items into vehicle entered infinite loop when unable to place item in vehicle.
-- Feature flag restrictions not applying to patch operations, enabling options for features still in alpha.
-- Doctors inside vehicles not tending to other pawns when in a caravan.
-- Pawns inside vehicle caravans not using bedrolls to rest.
-- Aerial vehicles not being able to land at Escape Ship map.
-- Animals in boats throwing errors while fishing due to missing skill tracker.
-- Changing seats in a vehicle caravan would sometimes result in duplicate or missing entry in colonist bar.
-- Setting up a camp would fail to remove the caravan on the world map in some cases, leaving behind a ghost caravan.
-- Loading mechs and animals via instant reform would add them to cargo, overencumbering the vehicle.
-- Vehicle pathing not deregistering itself on rotation from regions, resulting in errors for job scanning.
-- Targeting for landing threw errors when targeting out of bounds.
-- Targeting for landing would continue after switching maps.
-- Targeting would persist when reloading a save, throwing errors until canceling the targeter.
+
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 Please report any issues you find on either &lt;link&gt;https://discord.gg/zXDyfWQ&lt;/link&gt;(discord) or &lt;link&gt;https://github.com/SmashPhil/Vehicle-Framework/issues&lt;/link&gt;(github).</description>
   <!--Static parameterless method to execute when update log is executed-->

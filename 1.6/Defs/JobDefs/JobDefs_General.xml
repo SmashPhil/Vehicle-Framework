@@ -54,6 +54,7 @@
 		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
 		<reportString>Carrying TargetA to TargetB.</reportString>
 		<casualInterruptible>false</casualInterruptible>
+		<dropThingBeforeJob>false</dropThingBeforeJob>
 	</JobDef>
 	
 	<JobDef>

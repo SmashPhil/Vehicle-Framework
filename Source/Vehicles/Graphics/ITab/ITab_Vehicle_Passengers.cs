@@ -61,8 +61,11 @@ public class ITab_Vehicle_Passengers : ITab
 		{
 			VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, Vehicle,
 				ref specificNeedsTabForPawn);
-			VehicleTabHelper_Passenger.ListPawns(ref curY, viewRect, scrollPosition, Vehicle.inventory,
-				"VF_Caravan_Cargo".Translate(), Vehicle.AllInventoryPawns, ref specificNeedsTabForPawn);
+      if (Vehicle.AllInventoryPawns.Count > 0)
+      {
+        VehicleTabHelper_Passenger.ListPawns(ref curY, viewRect, scrollPosition, Vehicle.inventory,
+          "VF_Caravan_Cargo".Translate(), Vehicle.AllInventoryPawns, ref specificNeedsTabForPawn);
+      }
 		}
 		Widgets.EndScrollView();
 		// End ScrollView

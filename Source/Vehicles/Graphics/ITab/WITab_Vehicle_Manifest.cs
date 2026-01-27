@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -10,8 +11,7 @@ using Verse.Sound;
 
 namespace Vehicles.World;
 
-// ReSharper disable once InconsistentNaming
-// It's cleaner to just stick with RimWorld's naming convention when deriving from their types.
+[UsedImplicitly]
 public class WITab_Vehicle_Manifest : WITab
 {
 	private Vector2 scrollPosition;
@@ -56,17 +56,13 @@ public class WITab_Vehicle_Manifest : WITab
 		dismountedPawns.Clear();
 
 		dismountedPawns.AddRange(VehicleObject.DismountedPawns);
-		canUseCargoHold = VehicleObject.Vehicles.NotNullAndAny(HasCargoPawn) || dismountedPawns.Exists(IsCargoPawn);
+		canUseCargoHold = VehicleObject.Vehicles.NotNullAndAny(HasCargoPawn) ||
+                      dismountedPawns.Exists(Ext_Thing.ShouldAlwaysTransferToVehiclesCargo);
 		return;
 
 		static bool HasCargoPawn(VehiclePawn vehicle)
 		{
 			return vehicle.AllInventoryPawns.Count > 0;
-		}
-
-		static bool IsCargoPawn(Pawn pawn)
-		{
-			return pawn.CanBeTransferredToVehiclesCargo();
 		}
 	}
 
@@ -145,7 +141,7 @@ public class WITab_Vehicle_Manifest : WITab
 			}
 			VehicleTabHelper_Passenger.DrawPassengersFor(ref curY, viewRect, scrollPosition, vehicle,
 				ref moreDetailsForPawn);
-			if (canUseCargoHold)
+			if (canUseCargoHold && vehicle.AllInventoryPawns.Count > 0)
 			{
 				VehicleTabHelper_Passenger.ListPawns(ref curY, viewRect, scrollPosition, vehicle.inventory,
 					"VF_Caravan_Cargo".Translate(), vehicle.AllInventoryPawns, ref moreDetailsForPawn);

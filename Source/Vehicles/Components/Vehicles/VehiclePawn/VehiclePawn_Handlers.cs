@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CoreLib;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
@@ -293,9 +292,9 @@ public partial class VehiclePawn
 	{
 		foreach (VehicleRoleHandler handler in handlers)
 		{
-			// None has an explicit check for no handling types, otherwise HasFlag would
-			// always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
-			if (handlingTypeFlag == HandlingType.None)
+      // HandlingType.None has an explicit check for no handling types, otherwise HasFlag would
+      // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
+      if (handlingTypeFlag == HandlingType.None)
 			{
 				if (handler.role.HandlingTypes == HandlingType.None ||
 					handler.AreSlotsAvailableAndReservable)
@@ -314,7 +313,7 @@ public partial class VehiclePawn
 		return null;
 	}
 
-	[Pure]
+	[Pure, Obsolete("Will be removed in 1.7, use GetAnyAvailableHandler instead.")]
 	public VehicleRoleHandler GetHighestPriorityAvailableHandler()
 	{
 		foreach (VehicleRoleHandler handler in handlers.OrderBy(handler => handler))
@@ -342,7 +341,7 @@ public partial class VehiclePawn
 	/// <summary>
 	/// Pawn with bill has boarded vehicle.
 	/// </summary>
-	/// <remarks>For boarding vehicles outside of the job system, use <see cref="TryAddPawn(Pawn)"/></remarks>
+	/// <remarks>For boarding vehicles outside the job system, use <see cref="TryAddPawn(Pawn)"/></remarks>
 	/// <returns>Pawn successfully boarded the vehicle</returns>
 	public bool BoardPawn(Pawn pawn)
 	{
@@ -381,12 +380,21 @@ public partial class VehiclePawn
 
 		foreach (VehicleRoleHandler handler in handlers)
 		{
-			if (handler.role.HandlingTypes != HandlingType.None && !handler.CanOperateRole(pawn))
+			if (!handler.CanOperateRole(pawn))
 				continue;
 
 			if (TryAddPawn(pawn, handler))
 				return true;
 		}
+
+    foreach (VehicleRoleHandler handler in handlers)
+    {
+      if ((handler.role.HandlingTypes & HandlingType.Movement) != 0)
+        continue;
+
+      if (handler.AreSlotsAvailableAndReservable && TryAddPawn(pawn, handler))
+        return true;
+    }
 		return false;
 	}
 
