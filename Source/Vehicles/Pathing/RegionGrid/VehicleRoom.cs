@@ -16,7 +16,6 @@ public sealed class VehicleRoom
 {
   private static int nextRoomID;
 
-  private sbyte mapIndex = -1;
   private RegionGridType gridType;
 
   private readonly VehicleDef vehicleDef;
@@ -37,7 +36,7 @@ public sealed class VehicleRoom
   /// <summary>
   /// Map getter with fallback
   /// </summary>
-  public Map Map => (mapIndex >= 0) ? Find.Maps[mapIndex] : null;
+  public Map Map { get; private set; }
 
   /// <summary>
   /// Region type with fallback
@@ -96,9 +95,9 @@ public sealed class VehicleRoom
   public static VehicleRoom MakeNew(Map map, VehicleDef vehicleDef, RegionGridType gridType)
   {
     int id = Interlocked.CompareExchange(ref nextRoomID, 0, 0);
-    VehicleRoom room = new VehicleRoom(vehicleDef)
+    VehicleRoom room = new(vehicleDef)
     {
-      mapIndex = (sbyte)map.Index,
+      Map = map,
       Id = id,
       gridType = gridType
     };
