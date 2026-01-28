@@ -235,7 +235,7 @@ public class VehicleOrientationController : BaseTargeter
   {
     if (!IsDragging)
     {
-      // Will fallback to whatever orientation the vehicle ends in after pathing.
+      // Will fall back to whatever orientation the vehicle ends in after pathing.
       // Also allows map edge exit grid checks to use full hitbox for validation.
       Rotation = Rot8.Invalid;
 
