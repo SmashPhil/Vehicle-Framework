@@ -5,29 +5,43 @@ using Verse;
 
 namespace SmashTools.Performance;
 
-[BenchmarkClass("CellRectUtils")]
-internal class Benchmark_CellRectUtils
+[BenchmarkClass("CellRectOverlap")]
+internal class Benchmark_CellRectOverlap
 {
+  [Benchmark(Label = "Duplicates")]
+  private static void Duplicates(ref CellRectContext context)
+  {
+    foreach (IntVec3 cell in context.normalRect)
+    {
+      DeadCodeHelper.Consume(cell.x);
+    }
+    foreach (IntVec3 cell in context.rotatedRect)
+    {
+      DeadCodeHelper.Consume(cell.x);
+    }
+  }
+
   [Benchmark(Label = "HashSet")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-  private static void CellRectUtils_HashSet(ref CellRectContext context)
+  private static void HashSet(ref CellRectContext context)
   {
     context.hashset.AddRange(context.normalRect.Cells);
     context.hashset.AddRange(context.rotatedRect.Cells);
 
-    foreach (IntVec3 _ in context.hashset)
+    foreach (IntVec3 cell in context.hashset)
     {
+      DeadCodeHelper.Consume(cell.x);
     }
 
     context.hashset.Clear();
   }
 
-  [Benchmark(Label = "Extension")]
-  [MethodImpl(MethodImplOptions.NoOptimization | MethodImplOptions.NoInlining)]
-  private static void CellRectUtils_Extension(ref CellRectContext context)
+  [Benchmark(Label = "Enumerator")]
+  [MethodImpl(MethodImplOptions.NoOptimization)]
+  private static void Enumerator(ref CellRectContext context)
   {
-    foreach (IntVec3 _ in context.normalRect.AllCellsNoRepeat(context.rotatedRect))
+    foreach (IntVec3 cell in new CellRectOverlap(context.normalRect, context.rotatedRect))
     {
+      DeadCodeHelper.Consume(cell.x);
     }
   }
 
@@ -39,12 +53,12 @@ internal class Benchmark_CellRectUtils
 
     public CellRectContext()
     {
-      const int width = 3;
-      const int height = 5;
+      const int Width = 3;
+      const int Height = 5;
       IntVec3 testPosition = new(3, 0, 3);
 
-      normalRect = CellRect.CenteredOn(testPosition, width, height);
-      rotatedRect = CellRect.CenteredOn(testPosition, height, width);
+      normalRect = CellRect.CenteredOn(testPosition, Width, Height);
+      rotatedRect = CellRect.CenteredOn(testPosition, Height, Width);
       hashset = [];
     }
   }

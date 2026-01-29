@@ -95,63 +95,6 @@ internal class UnitTest_CellRectUtils
   }
 
   [Test]
-  private void AllCellsNoRepeat()
-  {
-    // t shape overlap
-    Test("Cross", new CellRect(0, 2, 8, 4), new CellRect(2, 0, 4, 8));
-    // T shape overlap
-    Test("T_Left", new CellRect(0, 2, 8, 4), new CellRect(0, 0, 4, 8));
-    Test("T_Right", new CellRect(0, 2, 8, 4), new CellRect(4, 0, 4, 8));
-    Test("T_Top", new CellRect(0, 4, 8, 4), new CellRect(2, 0, 4, 8));
-    Test("T_Bottom", new CellRect(0, 0, 8, 4), new CellRect(2, 0, 4, 8));
-    // L shape overlap
-    Test("L_BottomLeft", new CellRect(0, 0, 8, 4), new CellRect(0, 0, 4, 8));
-    Test("L_TopLeft", new CellRect(0, 4, 8, 4), new CellRect(0, 0, 4, 8));
-    Test("L_TopRight", new CellRect(0, 4, 8, 4), new CellRect(4, 0, 4, 8));
-    Test("L_BottomRight", new CellRect(0, 0, 8, 4), new CellRect(4, 0, 4, 8));
-    // Partial overlap
-    Test("LeftHanging", new CellRect(4, 2, 8, 4), new CellRect(2, 0, 4, 8));
-    Test("RightHanging", new CellRect(0, 2, 8, 4), new CellRect(6, 0, 4, 8));
-    Test("TopHanging", new CellRect(0, 6, 8, 4), new CellRect(2, 0, 4, 8));
-    Test("BottomHanging", new CellRect(0, 0, 8, 4), new CellRect(2, 2, 4, 8));
-    // Corner overlap
-    Test("BottomLeftCorner", new CellRect(0, 0, 8, 4), new CellRect(6, 2, 4, 8));
-    Test("TopLeftCorner", new CellRect(0, 6, 8, 4), new CellRect(6, 0, 4, 8));
-    Test("TopRightCorner", new CellRect(2, 6, 8, 4), new CellRect(0, 0, 4, 8));
-    Test("BottomRightCorner", new CellRect(2, 0, 8, 4), new CellRect(0, 2, 4, 8));
-    // Full overlap
-    Test("Full", new CellRect(0, 2, 8, 4), new CellRect(0, 2, 8, 4));
-    // No overlap
-    Test("None", new CellRect(0, 0, 8, 4), new CellRect(10, 10, 4, 8));
-
-    return;
-
-    static void Test(string label, CellRect cellRect, CellRect otherRect)
-    {
-      HashSet<IntVec3> uniqueCells = cellRect.Cells.Concat(otherRect.Cells).Distinct().ToHashSet();
-      List<IntVec3> extensionCells = cellRect.AllCellsNoRepeat(otherRect).ToList();
-
-      // Distinct cells in result
-      Expect.AreEqual(extensionCells.Count, uniqueCells.Count,
-        $"AllCellsNoRepeat_{label} (Distinct)");
-      // Result is the same as if we enumerated both separately and filtered out duplicates
-      Expect.All(extensionCells, uniqueCells.Contains, $"AllCellsNoRepeat_{label} (Correct)");
-
-      // Ensure that order of rects does not matter
-      Gen.Swap(ref cellRect, ref otherRect);
-
-      uniqueCells = cellRect.Cells.Concat(otherRect.Cells).Distinct().ToHashSet();
-      extensionCells = cellRect.AllCellsNoRepeat(otherRect).ToList();
-
-      // Distinct cells in result
-      Expect.AreEqual(extensionCells.Count, uniqueCells.Count,
-        $"AllCellsNoRepeat_Swap_{label} (Distinct)");
-      // Result is the same as if we enumerated both separately and filtered out duplicates
-      Expect.All(extensionCells, uniqueCells.Contains, $"AllCellsNoRepeat_Swap_{label} (Correct)");
-    }
-  }
-
-  [Test]
   private void EdgeCellsSpan()
   {
     const int MapSize = 250;

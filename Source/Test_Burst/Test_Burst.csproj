@@ -5,27 +5,11 @@
 		<FileVersion>1.6.0</FileVersion>
 		<AssemblyVersion>1.6.0</AssemblyVersion>
 
-		<Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<ProjectGuid>{6CBE5790-6C3E-4290-95A5-785466A0A7F0}</ProjectGuid>
-		<OutputType>Library</OutputType>
-		<AppDesignerFolder>Properties</AppDesignerFolder>
 		<RootNamespace>SmashTools.Burst</RootNamespace>
 		<AssemblyName>Test_Burst</AssemblyName>
-		<TargetFramework>net48</TargetFramework>
-		<FileAlignment>512</FileAlignment>
-		<Deterministic>true</Deterministic>
-		<LangVersion>preview</LangVersion>
 		<ModDir>..\..\</ModDir>
 		<OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<DebugType>embedded</DebugType>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>CS0649</NoWarn>
-		<SonarQubeTestProject>True</SonarQubeTestProject>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

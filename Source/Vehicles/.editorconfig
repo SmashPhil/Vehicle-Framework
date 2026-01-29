@@ -26,6 +26,9 @@ dotnet_diagnostic.IDE0290.severity = none
 resharper_check_namespace_highlighting = none
 resharper_convert_to_primary_constructor_highlighting = none
 resharper_invert_if_highlighting = none
+resharper_move_to_extension_block_highlighting = none
+resharper_switch_statement_missing_some_enum_cases_no_default_highlighting = suggestion
+resharper_switch_statement_handles_some_known_enum_values_with_default_highlighting = none
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false

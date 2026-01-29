@@ -7,27 +7,14 @@
     <FileVersion>1.6.0</FileVersion>
     <AssemblyVersion>1.6.0</AssemblyVersion>
     <CurrentDate>$([System.DateTime]::Now.ToString(yyyy/MM/dd HH:mm:ss))</CurrentDate>
-
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{357562A0-ED54-4AE8-AA13-5FC3AC4C5B8E}</ProjectGuid>
-    <OutputType>Library</OutputType>
+
     <RootNamespace>Vehicles</RootNamespace>
     <AssemblyName>Vehicles</AssemblyName>
-    <TargetFramework>net48</TargetFramework>
-    <LangVersion>preview</LangVersion>
-    <FileAlignment>512</FileAlignment>
     <ModDir>..\..\</ModDir>
     <OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
     <RefDir>$(ModDir)\..\..\RimWorldWin64_Data\Managed</RefDir>
     <BurstDir>$(ModDir)\1.6\Burst\</BurstDir>
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <DebugType>embedded</DebugType>
-    <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
@@ -61,7 +48,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
     <DebugSymbols>true</DebugSymbols>
     <Optimize>true</Optimize>
-    <DefineConstants>TRACE;UNSTABLE;RAIDERS;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
+    <DefineConstants>TRACE;UNSTABLE;RAIDERS;</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">

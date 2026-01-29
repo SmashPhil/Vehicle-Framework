@@ -5,26 +5,12 @@
 		<FileVersion>1.6.0</FileVersion>
 		<AssemblyVersion>1.6.0</AssemblyVersion>
 
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Configurations>Debug;Unstable;Release;ReleaseTesting</Configurations>
-		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 		<ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
-		<OutputType>Library</OutputType>
-		<AppDesignerFolder>Properties</AppDesignerFolder>
 		<RootNamespace>Vehicles</RootNamespace>
 		<AssemblyName>Test_Vehicles</AssemblyName>
-		<TargetFramework>net48</TargetFramework>
-		<FileAlignment>512</FileAlignment>
-		<Deterministic>true</Deterministic>
 		<LangVersion>preview</LangVersion>
 		<ModDir>..\..\</ModDir>
 		<OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
-		<DebugType>embedded</DebugType>
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<NoWarn>CS0649</NoWarn>
-		<SonarQubeTestProject>True</SonarQubeTestProject>
 	</PropertyGroup>
 
 	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">

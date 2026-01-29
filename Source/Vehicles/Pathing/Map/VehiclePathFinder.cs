@@ -120,7 +120,7 @@ public class VehiclePathFinder : VehicleGridManager
 	{
 		if (!vehicle.DrivableRectOnCell(dest.Cell, hitboxReq: Ext_Vehicles.DestinationHitboxReq.AnyRotation))
 		{
-			Messages.Message("VF_CannotFit".Translate(), MessageTypeDefOf.RejectInput);
+			Messages.Message("VF_CannotFit".Translate(vehicle), MessageTypeDefOf.RejectInput);
 			return VehiclePath.NotFound;
 		}
 		return FindPath(start, dest, TraverseParms.For(vehicle), token, peMode);

@@ -45,9 +45,6 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
       if (pawn is not VehiclePawn vehicle)
         return null;
 
-      if (!PathingHelper.TryFindNearestStandableCell(vehicle, clickCell, out IntVec3 result))
-        return null;
-
       foreach (ThingComp comp in vehicle.AllComps)
       {
         if (comp is VehicleComp vehicleComp)
@@ -60,7 +57,8 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
           }
         }
       }
-      AcceptanceReport gotoReport = VehicleCanGoto(vehicle, result);
+      bool canReach = PathingHelper.TryFindNearestStandableCell(vehicle, clickCell, out IntVec3 result);
+      AcceptanceReport gotoReport = canReach ? VehicleCanGoto(vehicle, result) : "VF_CannotMoveToCell".Translate(vehicle.LabelCap);
       if (!gotoReport.Accepted)
         return new FloatMenuOption("VF_CannotMoveToCell".Translate(vehicle.LabelCap), null);
 
@@ -75,6 +73,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
     return option;
   }
 
+  // TODO 1.7 - Merge with TryFindNearestStandableCell check above
   public static AcceptanceReport VehicleCanGoto(VehiclePawn vehicle, IntVec3 gotoLoc)
   {
     return vehicle.CanReachVehicle(gotoLoc, PathEndMode.OnCell, Danger.Deadly) ?

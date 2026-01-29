@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using SmashTools;
+using Verse;
 using VehiclePathData = Vehicles.VehiclePathingSystem.VehiclePathData;
 
 namespace Vehicles;
@@ -10,6 +11,8 @@ internal sealed class RegionSourceBreach : IRegionSource
     VehiclePathData pathData = pathingSystem[vehicleDef];
     Map map = pathingSystem.map;
     if (!cell.InBounds(map))
+      return RegionType.None;
+    if (HugsEdge(cell, pathingSystem, vehicleDef))
       return RegionType.None;
     if (!CanTraverse(map, pathData, cell))
       return RegionType.None;
@@ -29,6 +32,19 @@ internal sealed class RegionSourceBreach : IRegionSource
 
     Building edifice = cell.GetEdifice(map);
     return edifice != null && IsBreachable(edifice);
+  }
+
+  private static bool HugsEdge(IntVec3 pos, VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
+  {
+    CellRect verticalRect = vehicleDef.VehicleRect(pos, Rot8.North);
+    CellRect horizontalRect = vehicleDef.VehicleRect(pos, Rot8.East);
+
+    foreach (IntVec3 cell in new CellRectOverlap(verticalRect, horizontalRect))
+    {
+      if (!cell.InBounds(pathingSystem.map))
+        return true;
+    }
+    return false;
   }
 
   private static bool FullRectBreachable(Map map, VehicleDef vehicleDef, VehiclePathData pathData, IntVec3 root)

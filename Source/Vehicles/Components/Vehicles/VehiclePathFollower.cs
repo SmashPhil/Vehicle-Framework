@@ -665,7 +665,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     lastCell = vehicle.Position;
     vehicle.Position = nextCell;
 
-    foreach (IntVec3 cell in hitboxBeforeMoving.AllCellsNoRepeat(vehicle.OccupiedRect()))
+    foreach (IntVec3 cell in new CellRectOverlap(hitboxBeforeMoving, vehicle.OccupiedRect()))
     {
       vehicle.Map.pathing.RecalculatePerceivedPathCostAt(cell);
     }
@@ -806,11 +806,10 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
 #endif
     Path path = receipt.ClaimPath();
-    if (path == null)
+    if (path is not { Found: true })
     {
-      Log.Error($"Unable to find path from {receipt.PathRequest.start} to {receipt.PathRequest.end}");
-      receipt.Dispose();
-      receipt = null;
+      Messages.Message("VF_NoPathForVehicle".Translate(vehicle), MessageTypeDefOf.RejectInput, false);
+      PatherFailed();
       return;
     }
     if (curPath == null || pathQueue.Count == 0)
@@ -912,7 +911,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     if (pawnPath is null || !pawnPath.Found)
     {
       PatherFailed();
-      Messages.Message("VF_NoPathForVehicle".Translate(), MessageTypeDefOf.RejectInput, false);
+      Messages.Message("VF_CannotFit".Translate(vehicle), MessageTypeDefOf.RejectInput, false);
       return;
     }
     curPath = pawnPath.ToBurstPath();

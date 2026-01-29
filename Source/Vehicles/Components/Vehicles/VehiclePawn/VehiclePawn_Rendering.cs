@@ -259,7 +259,7 @@ public partial class VehiclePawn
 
       CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, oldRot);
       CellRect newRect = this.OccupiedRectShifted(IntVec2.Zero, rotationInt);
-      foreach (IntVec3 cell in oldRect.AllCellsNoRepeat(newRect))
+      foreach (IntVec3 cell in new CellRectOverlap(oldRect, newRect))
       {
         Map.pathing.RecalculatePerceivedPathCostAt(cell);
       }

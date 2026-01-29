@@ -127,8 +127,10 @@ public class VehiclePositionManager : DetachedMapComponent
     CellIndices indices = map.cellIndices;
     foreach (IntVec3 occupiedCell in occupiedRect)
     {
-      occupiedCells[occupiedCell] = vehicle;
-      thingIdGrid[indices.CellToIndex(occupiedCell)] = vehicle.thingIDNumber;
+      if (occupiedCells.TryAdd(occupiedCell, vehicle))
+      {
+        thingIdGrid[indices.CellToIndex(occupiedCell)] = vehicle.thingIDNumber;
+      }
     }
     claimants.Add(vehicle);
     if (vehicle.Spawned)
@@ -155,6 +157,13 @@ public class VehiclePositionManager : DetachedMapComponent
       CellIndices indices = map.cellIndices;
       foreach (IntVec3 cell in rect)
       {
+        if (occupiedCells.TryGetValue(cell, out VehiclePawn claimant) && claimant != vehicle)
+        {
+          // NOTE: When diagonal hitboxes are converted away from improperly mapped horizontals, we can
+          // assert against overlapping claims. But because of the inconsistency with diagonal turns and
+          // rotating on the first node, overlapping claims are both possible and expected.
+          continue;
+        }
         if (occupiedCells.TryRemove(cell, out _))
         {
           thingIdGrid[indices.CellToIndex(cell)] = -1;

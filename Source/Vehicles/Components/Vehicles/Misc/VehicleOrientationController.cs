@@ -81,16 +81,16 @@ public class VehicleOrientationController : BaseTargeter
 
   private void Init(List<VehiclePawn> vehicles, IntVec3 cell, IntVec3 clickCell)
   {
-    this.vehicle = vehicles.FirstOrDefault();
+    vehicle = vehicles.First();
     Assert.IsNotNull(vehicle);
     this.vehicles.AddRange(vehicles);
     dests.Populate(IntVec3.Invalid, vehicles.Count);
     potentialDests.Populate(IntVec3.Invalid, vehicles.Count);
     dests[0] = cell;
-    Rotation = this.vehicle.FullRotation;
-    this.start = clickCell;
-    this.end = cell;
-    this.clickPos = UI.MouseMapPosition();
+    Rotation = vehicle.FullRotation;
+    start = clickCell;
+    end = cell;
+    clickPos = UI.MouseMapPosition();
 
     if (IsMultiSelect)
     {
@@ -122,6 +122,13 @@ public class VehicleOrientationController : BaseTargeter
       IntVec3 cell = dests[i];
       if (!confirmVehicle.Spawned || !cell.IsValid)
         continue;
+      if (!VehicleCanStandAt(confirmVehicle, cell, Rotation))
+      {
+        Messages.Message("VF_CannotFit".Translate(confirmVehicle), vehicle, MessageTypeDefOf.RejectInput,
+          historical: false);
+        continue;
+      }
+
       FloatMenuOptionProvider_OrderVehicle.PawnGotoAction(end, confirmVehicle, cell,
         Rotation);
     }
@@ -141,6 +148,14 @@ public class VehicleOrientationController : BaseTargeter
     StopTargeting();
   }
 
+  private static bool VehicleCanStandAt(VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
+  {
+    CellRect vehicleRect = rot.IsDiagonal ? vehicle.MinRect(cell) : vehicle.VehicleRect(cell, rot);
+    if (!vehicle.CellRectStandable(vehicle.Map, cell, rot))
+      return false;
+
+    return PathingHelper.AnyVehicleBlockingPathAt(cell, vehicle) == null;
+  }
 
   private void RecomputeDestinations()
   {
@@ -223,7 +238,9 @@ public class VehicleOrientationController : BaseTargeter
       if (mouseCell != end || ticksGame > lastUpdatedTick + RecomputeDestinationsFrequency)
       {
         if (mouseCell != end)
+        {
           SoundDefOf.DragGoto.PlayOneShotOnCamera();
+        }
         end = mouseCell;
         lastUpdatedTick = ticksGame;
         RecomputeDestinations();
@@ -289,8 +306,11 @@ public class VehicleOrientationController : BaseTargeter
       }
       else
       {
-        VehicleGhostUtility.DrawGhostVehicleDef(dests[0], Rotation, vehicle.VehicleDef,
-          VehicleGhostUtility.whiteGhostColor, AltitudeLayer.MetaOverlays, vehicle);
+        Color drawColor = VehicleCanStandAt(vehicle, dests[0], Rotation) ?
+          VehicleGhostUtility.whiteGhostColor :
+          VehicleGhostUtility.RedGhostColor;
+        VehicleGhostUtility.DrawGhostVehicleDef(dests[0], Rotation, vehicle.VehicleDef, drawColor,
+          AltitudeLayer.MetaOverlays, vehicle);
       }
     }
   }

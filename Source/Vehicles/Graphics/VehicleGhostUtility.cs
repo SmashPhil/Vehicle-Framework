@@ -9,7 +9,9 @@ namespace Vehicles;
 
 public static class VehicleGhostUtility
 {
+  // TODO 1.7 - Rename to proper name convention
   public static readonly Color whiteGhostColor = new(1, 1, 1, 0.5f);
+  public static readonly Color RedGhostColor = new(1, 0, 0, 0.5f);
 
   private static readonly Dictionary<int, Graphic> cachedGhostGraphics = [];
 
