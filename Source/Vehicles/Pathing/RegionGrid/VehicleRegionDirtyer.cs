@@ -68,9 +68,14 @@ public class VehicleRegionDirtyer : VehicleGridManager
   /// </summary>
   public void NotifyWalkabilityChanged(IntVec3 cell)
   {
-    // Pad 1 even if vehicle has no region padding, we still want to dirty surrounding tiles for region edges and
-    // regenerating links.
-    int padding = createdFor.SizePadding > 0 ? createdFor.SizePadding : 1;
+    int padding = createdFor.SizePadding;
+    if (padding == 0 && createdFor.Size.x == 2)
+    {
+      // For 2 width vehicles we need to dirty surrounding tiles for region edges in order to regenerate links properly.
+      // South edges will have padding applied, so we must pad by 2 in order to reach across in those cases, otherwise
+      // those regions won't be dirtied, and the southern link won't connect.
+      padding = 2;
+    }
     CellRect paddingRect = CellRect.CenteredOn(cell, padding);
     foreach (IntVec3 adjCell in paddingRect)
     {
