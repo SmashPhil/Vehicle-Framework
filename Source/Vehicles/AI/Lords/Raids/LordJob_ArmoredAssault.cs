@@ -154,7 +154,7 @@ public class LordJob_ArmoredAssault : LordJob_VehicleNPC
   public override void ExposeData()
   {
     Scribe_References.Look(ref assaulterFaction, nameof(assaulterFaction));
-    Scribe_Values.Look(ref permission, nameof(permission), RaiderPermissions.All);
+    Scribe_Deep.Look(ref permission, nameof(permission));
     Scribe_Values.Look(ref behavior, nameof(behavior), RaiderBehavior.None);
   }
 
