@@ -331,8 +331,9 @@ public partial class VehiclePawn
 			{
 				StringBuilder downWithShipString = new();
 				bool pawnsLostAtSea = false;
-				foreach (Pawn pawn in AllPawnsAboard)
+				for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
 				{
+					Pawn pawn = AllPawnsAboard[i];
 					if (HealthHelper.AttemptToDrown(pawn))
 					{
 						pawnsLostAtSea = true;
