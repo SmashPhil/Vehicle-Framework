@@ -501,9 +501,11 @@ public class Graphic_Rgb : Graphic
       material = MatAtFull(transformData.orientation)
     };
 
-    float rotAngle = transformData.orientation.AsRotationAngle + transformData.rotation;
+    float rotAngle = transformData.orientation.AsRotationAngle;
     float rotation = rotAngle + extraRotation;
     AdjustAngle(transformData.orientation, ref rotation, ref rotAngle);
+    rotAngle += transformData.rotation;
+    rotation += transformData.rotation;
     Quaternion quaternion = Quaternion.AngleAxis(rotation, Vector3.up);
     if (data is { addTopAltitudeBias: true })
     {
