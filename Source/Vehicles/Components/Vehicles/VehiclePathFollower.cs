@@ -583,7 +583,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     // TODO - add snow tracks / depressions
     //if (vehicle.BodySize > 0.9f)
     //{
-    //  vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking); 
+    //  vehicle.Map.snowGrid.AddDepth(vehicle.Position, -SnowReductionFromWalking);
     //}
 
     PathRequest pathRequest = NeedNewPath();
@@ -985,8 +985,12 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       }
     }
 
-    IntVec3 previous = IntVec3.Invalid;
     int nodeIndex = LookAheadStartingIndex;
+    if (nodeIndex >= curPath.NodesLeft)
+      return PathRequest.None;
+
+    IntVec3 previous = curPath.Peek(nodeIndex);
+    nodeIndex++;
     while (nodeIndex < LookAheadStartingIndex + MaxCheckAheadNodes &&
            nodeIndex < curPath.NodesLeft)
     {
