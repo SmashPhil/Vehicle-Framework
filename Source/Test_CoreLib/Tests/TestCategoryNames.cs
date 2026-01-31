@@ -8,4 +8,6 @@ public static class TestCategoryNames
   public const string ObjectPool = "ObjectPool";
   public const string DedicatedThread = "DedicatedThread";
   public const string Performance = "Performance";
+
+  public const string Collections = "Collections";
 }

@@ -343,7 +343,8 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 	TargetValidation ITargeterSource<GlobalTargetInfo, ArrivalOption>.CanTarget(GlobalTargetInfo target)
 	{
 		if (vehicle == null || Destroyed)
-			return TargetValidation.Failed; // TODO Launcher - Cancel if aerial vehicle destroys
+			return TargetValidation.Failed;
+
 		return vehicle.CompVehicleLauncher.CanTarget(target);
 	}
 

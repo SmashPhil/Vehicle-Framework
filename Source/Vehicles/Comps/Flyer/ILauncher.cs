@@ -13,10 +13,13 @@ namespace Vehicles;
 [PublicAPI]
 public interface ILauncher
 {
+  /// <summary>
+  /// Destination to launch to.
+  /// </summary>
   PlanetTile Tile { get; }
 
   /// <summary>
-  /// The location on the world map the object is originating from
+  /// The location on the world map the object is originating from.
   /// </summary>
   Vector3 Origin { get; }
 

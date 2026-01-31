@@ -190,7 +190,6 @@ public class VehicleMod : Mod
 
 	internal static void PopulateCachedFields()
 	{
-		using ProfilerBlock pb = new("Cache Settings Types");
 		try
 		{
 			QuickIter.EnumerateAllModTypes(CacheForType);

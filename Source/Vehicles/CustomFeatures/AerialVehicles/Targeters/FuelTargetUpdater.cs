@@ -1,4 +1,5 @@
-﻿using RimWorld.Planet;
+﻿using CoreLib.Collections;
+using RimWorld.Planet;
 using SmashTools.Targeting;
 using UnityEngine;
 using Verse;
@@ -12,6 +13,10 @@ public sealed class FuelTargetUpdater : FlightPathTargetUpdater
   }
 
   private float TotalFuelCost { get; set; }
+
+  private bool NoReturnTrip => TotalFuelCost > vehicle.CompFueledTravel.Fuel - TotalFuelCost;
+
+  private bool NotEnoughFuel => TotalFuelCost > vehicle.CompFueledTravel.Fuel;
 
   public override void TargeterOnGUI()
   {
@@ -35,6 +40,32 @@ public sealed class FuelTargetUpdater : FlightPathTargetUpdater
   {
     base.TargeterUpdate(in targetData);
     TotalFuelCost = vehicle.CompVehicleLauncher.FuelNeededToLaunchAtDist(TotalDistance);
+  }
+
+  public override TargetValidation ValidateTargets(ReadOnlyList<GlobalTargetInfo> targets)
+  {
+    TargetValidation baseResult = base.ValidateTargets(targets);
+    if (!baseResult)
+      return baseResult;
+
+    if (vehicle.CompFueledTravel != null)
+    {
+      if (NotEnoughFuel)
+      {
+        return TargetValidation.Failed with
+        {
+          Tooltip = "VF_NotEnoughFuel".Translate().Colorize(TexData.RedReadable)
+        };
+      }
+      if (NoReturnTrip)
+      {
+        return TargetValidation.Success with
+        {
+          Tooltip = "VF_NoFuelReturnTrip".Translate().Colorize(TexData.YellowReadable)
+        };
+      }
+    }
+    return TargetValidation.Success;
   }
 
   protected override ShuttleLaunchStatus LaunchStatus()
