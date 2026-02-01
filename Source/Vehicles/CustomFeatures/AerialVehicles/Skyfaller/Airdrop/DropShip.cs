@@ -98,15 +98,13 @@ public class DropShip : IExposable
       return;
 
     int index = dropZone.dropPoints.Count - airDroppables.Count;
-    IAirDroppable airDroppable = airDroppables.Pop();
+    IAirDroppable airDrop = airDroppables.Pop();
     IntVec3 dropSpot = dropZone.dropPoints[index];
-    if (!TryDropNear(airDroppable, map, dropSpot, DropAngle))
+
+    float angle = DropAngle + ExtraAngleVariance.RandomInRange;
+    if (!airDrop.TryDropAt(map, dropSpot, angle))
     {
-      airDroppable.OnFailureToDrop(map, dropSpot);
-    }
-    else
-    {
-      airDroppable.OnDropped(map, dropSpot);
+      airDrop.OnFailureToDrop(map, dropSpot);
     }
   }
 
@@ -137,23 +135,6 @@ public class DropShip : IExposable
     {
       RecalculateDropAngle();
     }
-  }
-
-  private static bool TryDropNear(IAirDroppable airDroppable, Map map, IntVec3 dropCenter, float angle)
-  {
-    const int AccuracyRadii = 9; // TODO - Should be dependent on the droppable
-
-    if (!DropCellFinder.TryFindDropSpotNear(dropCenter, map, out IntVec3 position, allowFogged: false, 
-      canRoofPunch: true, allowIndoors: true, maxRadius: AccuracyRadii, mustBeReachableFromCenter: false))
-    {
-      return false;
-    }
-    if (!position.IsValid || !position.InBounds(map))
-      return false;
-
-    Skyfaller skyfaller = AirdropSkyfallerMaker.MakeAirdrop(airDroppable, angle + ExtraAngleVariance.RandomInRange);
-    GenSpawn.Spawn(skyfaller, position, map);
-    return true;
   }
 
   public record Properties : IExposable

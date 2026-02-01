@@ -31,6 +31,6 @@
     <minTechLevel>Industrial</minTechLevel>
     <textEnemy>A group of {0} from {1} are parachuting nearby.</textEnemy>
     <textFriendly>A group of friendly {0} from {1} are parachuting nearby.</textFriendly>
-    <textWillArrive>{0_pawnsPluralDef} will arrive in parachutes.</textWillArrive>
+    <textWillArrive>{0_pawnsPluralDef} will drop from above.</textWillArrive>
   </PawnsArrivalModeDef>
 </Defs>

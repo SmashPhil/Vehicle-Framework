@@ -14,6 +14,8 @@ public class AirdropSupplies : IAirDroppable
 
 	ThingDef IAirDroppable.SkyfallerDef => SkyfallerDefOf.AirdropPackage;
 
+  public int DropRadii => 9;
+
 	public AirdropSupplies()
 	{
 	}
@@ -36,13 +38,24 @@ public class AirdropSupplies : IAirDroppable
 		Scribe_Deep.Look(ref airdrop, nameof(airdrop));
 	}
 
-	void IAirDroppable.OnDropped(Map map, IntVec3 pos)
+	bool IAirDroppable.TryDropAt(Map map, IntVec3 center, float angle)
 	{
-	}
+    if (!DropCellFinder.TryFindDropSpotNear(center, map, out IntVec3 position, allowFogged: false,
+          canRoofPunch: true, allowIndoors: false, maxRadius: DropRadii, mustBeReachableFromCenter: false))
+    {
+      return false;
+    }
+
+    if (!position.IsValid || !position.InBounds(map))
+      return false;
+
+    Skyfaller skyfaller = AirdropSkyfallerMaker.MakeAirdrop(this, angle);
+    return GenSpawn.Spawn(skyfaller, position, map) != null;
+  }
 
 	void IAirDroppable.OnFailureToDrop(Map map, IntVec3 simPos)
 	{
-		IntVec3 dropCell = DropCellFinder.TradeDropSpot(map);
+		IntVec3 dropCell = DropCellFinder.RandomDropSpot(map);
 		if (dropCell.InBounds(map))
 		{
 			Skyfaller skyfaller = AirdropSkyfallerMaker.MakeAirdrop(this, Rand.Range(-15, 15));

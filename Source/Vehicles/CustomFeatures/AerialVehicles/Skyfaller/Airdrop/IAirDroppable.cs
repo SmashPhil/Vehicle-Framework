@@ -10,7 +10,9 @@ public interface IAirDroppable : IExposable
 
 	ThingDef SkyfallerDef { get; }
 
-	void OnDropped(Map map, IntVec3 pos);
+  int DropRadii { get; }
 
-	void OnFailureToDrop(Map map, IntVec3 simPos);
+  bool TryDropAt(Map map, IntVec3 center, float angle);
+
+	void OnFailureToDrop(Map map, IntVec3 pos);
 }

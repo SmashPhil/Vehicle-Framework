@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
 using UnityEngine.Assertions;
@@ -6,6 +7,7 @@ using Verse;
 
 namespace Vehicles.Raiders;
 
+[UsedImplicitly]
 internal class PawnsArrivalModeWorker_Airdrop : PawnsArrivalModeWorker
 {
 	private const int DefaultDelayTicks = 6 * GenTicks.TicksPerRealSecond;

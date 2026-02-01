@@ -57,7 +57,7 @@ public class AirdropManager : MapComponent
       catch
       {
         // Remove the drop ship so it doesn't spam errors indefinitely. These are serialized so a broken
-        // dropship would be game-ending for a player's run due to lag.
+        // DropShip would be game-ending for a player's run due to lag.
         dropShips.RemoveAt(i);
         throw;
       }
