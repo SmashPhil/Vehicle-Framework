@@ -6,38 +6,29 @@ namespace SmashTools.Benchmarking;
 [BenchmarkClass("EnumBitwise")]
 internal class Benchmark_EnumBitwise
 {
-	[Benchmark(Label = "HasFlag")]
-	private static bool HasFlag(ref readonly ContainsContext context)
+  public TestEnum a = TestEnum.A;
+  public TestEnum b = TestEnum.B | TestEnum.C;
+
+  [Benchmark(Label = "HasFlag")]
+	public bool HasFlag()
 	{
-		return context.a.HasFlag(context.b);
+		return a.HasFlag(b);
 	}
 
 	[Benchmark(Label = "Bitwise")]
-	private static bool Bitwise(ref readonly ContainsContext context)
+  public bool Bitwise()
 	{
-		return (context.a & context.b) != 0;
+		return (a & b) != 0;
 	}
 
 	[Benchmark(Label = "Unsafe")]
-	private static bool Unsafe(ref readonly ContainsContext context)
+  public bool Unsafe()
 	{
-		return context.a.IsAnyBitSet(context.b);
-	}
-
-	private readonly struct ContainsContext
-	{
-		public readonly TestEnum a;
-		public readonly TestEnum b;
-
-		public ContainsContext()
-		{
-			a = TestEnum.A;
-			b = TestEnum.B | TestEnum.C;
-		}
+		return a.IsAnyBitSet(b);
 	}
 
 	[Flags]
-	private enum TestEnum
+  public enum TestEnum
 	{
 		A = 1,
 		B = 2,
