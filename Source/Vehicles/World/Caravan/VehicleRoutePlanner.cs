@@ -41,6 +41,8 @@ public class VehicleRoutePlanner : WorldComponent
 
 	private bool cantRemoveFirstWaypoint;
 
+	private readonly string mouseoverTip = "VF_RoutePlannerButtonTip".Translate();
+
 	public VehicleRoutePlanner(RimWorld.Planet.World world) : base(world)
 	{
 		this.world = world;
@@ -392,7 +394,7 @@ public class VehicleRoutePlanner : WorldComponent
 				SoundDefOf.Tick_High.PlayOneShotOnCamera();
 			}
 		}
-		TooltipHandler.TipRegion(rect, "VF_RoutePlannerButtonTip".Translate());
+		TooltipHandler.TipRegion(rect, mouseoverTip);
 		curBaseY -= RouteButtonDimension + 20f;
 	}
 
