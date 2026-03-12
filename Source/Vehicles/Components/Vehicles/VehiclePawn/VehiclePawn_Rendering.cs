@@ -1081,13 +1081,7 @@ public partial class VehiclePawn
 			Color colorThree,
 			PatternDef patternDef, Vector2 displacement, float tiles)
 		{
-
-			//patternToPaint =
-			//	new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
-			//if (DebugSettings.godMode)
-			//{
-			//	SetColor();
-			//}
+			
 			[SyncMethod] void SyncColor(VehiclePawn self, bool godMode, Color colorOne, Color colorTwo,
 			 Color colorThree,
 			 PatternDef patternDef, Vector2 displacement, float tiles)
