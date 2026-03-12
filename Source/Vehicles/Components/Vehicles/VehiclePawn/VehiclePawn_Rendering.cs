@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
+using Multiplayer.API;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -1075,16 +1076,29 @@ public partial class VehiclePawn
 
 	public void ChangeColor()
 	{
-		Dialog_VehiclePainter.OpenColorPicker(this, delegate(Color colorOne, Color colorTwo,
+		var godMode = DebugSettings.godMode;
+		Dialog_VehiclePainter.OpenColorPicker(this, delegate (Color colorOne, Color colorTwo,
 			Color colorThree,
 			PatternDef patternDef, Vector2 displacement, float tiles)
 		{
-			patternToPaint =
-				new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
-			if (DebugSettings.godMode)
+
+			//patternToPaint =
+			//	new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
+			//if (DebugSettings.godMode)
+			//{
+			//	SetColor();
+			//}
+			[SyncMethod] void SyncColor(VehiclePawn self, bool godMode, Color colorOne, Color colorTwo,
+			 Color colorThree,
+			 PatternDef patternDef, Vector2 displacement, float tiles)
 			{
-				SetColor();
+			  self.patternToPaint =
+			    new PatternData(colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
+			 if (godMode)
+			  {
+			    self.SetColor(); }
 			}
+			SyncColor(this, godMode, colorOne, colorTwo, colorThree, patternDef, displacement, tiles);
 		});
 	}
 

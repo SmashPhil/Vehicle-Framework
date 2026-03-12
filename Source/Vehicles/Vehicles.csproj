@@ -89,6 +89,8 @@
 
 	<PackageReference Include="PolySharp" Version="1.*" />
 
+	<PackageReference Include="RimWorld.MultiplayerAPI" Version="0.6.0" />
+
 	<!--Local -->
 	<Reference Include="SmashTools">
 	  <SpecificVersion>False</SpecificVersion>
