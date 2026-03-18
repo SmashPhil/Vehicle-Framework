@@ -1420,6 +1420,13 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 	{
 		AutoTarget = false; // Deregister event
 		RGBMaterialPool.Release(this);
+		mainMaskTex = null;
+		cachedTexture = null;
+		cachedMaterial = null;
+		cachedGraphic = null;
+		cachedGraphicData = null;
+		results = default;
+		subGraphicResults.Clear();
 		if (!turretGraphics.NullOrEmpty())
 		{
 			foreach (TurretDrawData turretDrawData in turretGraphics)
@@ -1427,6 +1434,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 				RGBMaterialPool.Release(turretDrawData);
 			}
 		}
+		turretGraphics = null;
 	}
 
 	/// <summary>

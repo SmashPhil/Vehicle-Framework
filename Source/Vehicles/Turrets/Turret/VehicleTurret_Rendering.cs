@@ -152,7 +152,7 @@ public partial class VehicleTurret
 				return vehicle?.PatternDef ?? PatternDefOf.Default;
 			}
 
-			return GraphicData.pattern;
+			return GraphicData?.pattern ?? def.graphicData.pattern;
 		}
 	}
 
@@ -184,7 +184,7 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (!cachedMaterial)
+			if (!cachedMaterial && UnityData.IsInMainThread)
 				ResolveGraphics(vehicle);
 			return cachedMaterial;
 		}
@@ -194,12 +194,13 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (GraphicData.texPath.NullOrEmpty())
+			string texPath = cachedGraphicData?.texPath ?? def.graphicData.texPath;
+			if (texPath.NullOrEmpty())
 				return null;
 
-			if (!cachedTexture)
+			if (!cachedTexture && UnityData.IsInMainThread)
 			{
-				cachedTexture = ContentFinder<Texture2D>.Get(GraphicData.texPath);
+				cachedTexture = ContentFinder<Texture2D>.Get(texPath);
 			}
 			return cachedTexture;
 		}
@@ -209,12 +210,13 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (GraphicData.texPath.NullOrEmpty())
+			string texPath = cachedGraphicData?.texPath ?? def.graphicData.texPath;
+			if (texPath.NullOrEmpty())
 				return null;
 
-			if (!mainMaskTex)
+			if (!mainMaskTex && UnityData.IsInMainThread)
 			{
-				mainMaskTex = ContentFinder<Texture2D>.Get(GraphicData.texPath + Graphic_Turret.TurretMaskSuffix);
+				mainMaskTex = ContentFinder<Texture2D>.Get(texPath + Graphic_Turret.TurretMaskSuffix);
 			}
 			return mainMaskTex;
 		}
@@ -224,7 +226,7 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (cachedGraphicData is null)
+			if (cachedGraphicData is null && UnityData.IsInMainThread)
 				ResolveGraphics(vehicle);
 			return cachedGraphicData;
 		}
@@ -234,7 +236,7 @@ public partial class VehicleTurret
 	{
 		get
 		{
-			if (cachedGraphic is null)
+			if (cachedGraphic is null && UnityData.IsInMainThread)
 				ResolveGraphics(vehicle);
 			return cachedGraphic;
 		}
@@ -376,6 +378,12 @@ public partial class VehicleTurret
 			valid = true,
 			draw = true,
 		};
+		Graphic_Turret graphic = Graphic;
+		Material material = Material;
+		if (graphic is null || material is null)
+		{
+			return default;
+		}
 
 		// This is more or less the same implementation as Graphic_Rgb::ParallelGetPreRenderResults
 		// The fixed North orientation, turret rotation, and additional offsetting makes it more
@@ -394,11 +402,11 @@ public partial class VehicleTurret
 		if (vehicle is { Spawned: true } && def.graphicData.altLayerSpawned is { } altLayerSpawned)
 		{
 			render.position.y = altLayerSpawned.AltitudeFor();
-			render.position.y += Graphic.DrawOffset(Rot4.North).y;
+			render.position.y += graphic.DrawOffset(Rot4.North).y;
 		}
 		render.quaternion = turretRotation.ToQuat();
-		render.mesh = Graphic.MeshAt(transformData.orientation);
-		render.material = Material;
+		render.mesh = graphic.MeshAt(transformData.orientation);
+		render.material = material;
 		return render;
 	}
 
@@ -406,10 +414,10 @@ public partial class VehicleTurret
 		ref readonly TransformData transformData, List<PreRenderResults> outList, float rotation,
 		float parentRotation)
 	{
-		if (results is { valid: true, draw: false })
+		if (!results.valid || !results.draw)
 		{
-			// Rendering will be skipped if base pre-render results has draw = false. No point in
-			// evaluating further, the main turret body and all subgraphics will not be drawn.
+			// Rendering will be skipped if the base pre-render results are missing or have draw = false.
+			// No point in evaluating further, the main turret body and all subgraphics will not be drawn.
 			return;
 		}
 

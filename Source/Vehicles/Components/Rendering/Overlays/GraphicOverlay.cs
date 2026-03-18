@@ -102,7 +102,7 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 	{
 		get
 		{
-			if (graphic is null)
+			if (graphic is null && UnityData.IsInMainThread)
 			{
 				PropertyBlock ??= new MaterialPropertyBlock();
 				if (vehicle is { Destroyed: true } && !RGBMaterialPool.GetAll(this).NullOrEmpty())
@@ -179,7 +179,13 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 			return new PreRenderResults { valid = true, draw = false };
 		}
 
-		if (Graphic is Graphic_Rgb graphicRgb)
+		Graphic cachedGraphic = Graphic;
+		if (cachedGraphic is null)
+		{
+			return default;
+		}
+
+		if (cachedGraphic is Graphic_Rgb graphicRgb)
 		{
 			float extraRotation = transform.rotation + data.rotation;
 			PreRenderResults render =
@@ -222,6 +228,8 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
 	{
 		vehicle.RemoveEvent(VehicleEventDefOf.ColorChanged, Notify_ColorChanged);
 		RGBMaterialPool.Release(this);
+		graphic = null;
+		results = default;
 	}
 
 	public static GraphicOverlay Create(GraphicDataOverlay graphicDataOverlay, VehiclePawn vehicle)

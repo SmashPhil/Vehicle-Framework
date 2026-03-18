@@ -59,7 +59,13 @@ public sealed class VehicleRenderer : IParallelRenderer
   private PreRenderResults ParallelGetPreRenderResults(ref readonly TransformData transformData,
     bool forceDraw = false)
   {
-    return vehicle.VehicleGraphic.ParallelGetPreRenderResults(in transformData,
+    Graphic_Vehicle graphic = vehicle.VehicleGraphic;
+    if (graphic == null)
+    {
+      return default;
+    }
+
+    return graphic.ParallelGetPreRenderResults(in transformData,
       forceDraw: forceDraw, thing: vehicle);
   }
 

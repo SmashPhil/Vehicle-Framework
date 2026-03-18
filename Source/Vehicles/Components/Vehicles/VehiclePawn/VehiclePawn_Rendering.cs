@@ -158,7 +158,10 @@ public partial class VehiclePawn
   {
     get
     {
-      graphic ??= GenerateGraphic();
+      if (graphic == null && UnityData.IsInMainThread)
+      {
+        graphic = GenerateGraphic();
+      }
       return graphic;
     }
   }
@@ -376,7 +379,14 @@ public partial class VehiclePawn
 
   public void ResetGraphic()
   {
-    graphic = GenerateGraphic();
+    if (UnityData.IsInMainThread)
+    {
+      graphic = GenerateGraphic();
+    }
+    else
+    {
+      LongEventHandler.ExecuteWhenFinished(ResetGraphic);
+    }
   }
 
   private void ResetMaterialProperties()
