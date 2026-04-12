@@ -568,10 +568,10 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
 		if (CompPropsFueledTravel != null)
 		{
-			ThingDef fuelType = CompPropsFueledTravel.fuelType;
+      string fuelLabel = CompPropsFueledTravel.ElectricPowered ? "VF_Electricity".Translate() : CompPropsFueledTravel.fuelType.LabelCap;
 			yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable,
 				"VF_FuelType".Translate().CapitalizeFirst(),
-				fuelType.LabelCap, "VF_FuelTypeDesc".Translate(), 4500);
+        fuelLabel, "VF_FuelTypeDesc".Translate(), 4500);
 			float fuelConsumptionRate = vehicle?.CompFueledTravel.FuelEfficiency ??
 				CompPropsFueledTravel.fuelConsumptionRate;
 			yield return new VehicleStatDrawEntry(VehicleStatCategoryDefOf.VehicleRefuelable,
