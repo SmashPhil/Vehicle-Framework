@@ -49,7 +49,7 @@ public class ScenPart_StartingVehicle : ScenPart
 	{
 		if (tag == "PlayerStartsWith")
 		{
-			yield return vehicleDef.LabelCap;
+			yield return vehicleDef != null ? vehicleDef.LabelCap : "VF_RandomVehicle".Translate();
 		}
 	}
 
