@@ -1,8 +1,10 @@
-﻿using RimWorld;
+﻿using JetBrains.Annotations;
+using RimWorld;
 using Verse;
 
 namespace Vehicles;
 
+[UsedImplicitly]
 public class AerialVehicleArrivalModeWorker_CenterDrop : AerialVehicleArrivalModeWorker
 {
   public override void VehicleArrived(VehiclePawn vehicle, LaunchProtocol launchProtocol, Map map)

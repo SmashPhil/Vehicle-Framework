@@ -1,12 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using JetBrains.Annotations;
 
 namespace Vehicles;
 
+/// <summary>
+/// Represents a source of grid updates that can temporarily batch index changes while a map is
+/// being generated or otherwise updated in bulk.
+/// </summary>
+[PublicAPI]
 public interface IGridDebouncerSource
 {
-	void Execute(int index);
+  /// <summary>
+  /// Gets the active debouncer, or null if none has been initialized.
+  /// </summary>
+  GridDebouncer ActiveDebouncer { set; }
+
+  /// <summary>
+  /// Executes the update for the grid index.
+  /// </summary>
+  /// <param name="index">The grid index to update.</param>
+  void Execute(int index);
 }

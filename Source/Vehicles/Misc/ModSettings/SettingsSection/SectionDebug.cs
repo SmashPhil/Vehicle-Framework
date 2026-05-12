@@ -35,7 +35,6 @@ public class SectionDebug : SettingsSection
   public static FlashGridType debugDrawFlashGrid = FlashGridType.None;
 
   public bool debugLogging;
-  public bool debugPathCostChanges;
 
   public bool debugDrawVehiclePathCosts;
   public bool debugDrawPathfinderSearch;
@@ -44,7 +43,6 @@ public class SectionDebug : SettingsSection
   public bool debugUseMultithreading = true;
 
   public bool debugAllowRaiders;
-  public bool hierarchalPathfinding;
 
   public override void ResetSettings()
   {
@@ -63,7 +61,6 @@ public class SectionDebug : SettingsSection
     debugDrawFlashGrid = FlashGridType.None;
 
     debugLogging = false;
-    debugPathCostChanges = false;
 
     debugDrawVehiclePathCosts = false;
     debugDrawPathfinderSearch = false;
@@ -72,7 +69,6 @@ public class SectionDebug : SettingsSection
     debugUseMultithreading = true;
 
     debugAllowRaiders = false;
-    hierarchalPathfinding = false;
   }
 
   public override void ExposeData()
@@ -91,7 +87,6 @@ public class SectionDebug : SettingsSection
     Scribe_Values.Look(ref debugDrawFlashGrid, nameof(debugDrawFlashGrid));
 
     Scribe_Values.Look(ref debugLogging, nameof(debugLogging));
-    Scribe_Values.Look(ref debugPathCostChanges, nameof(debugPathCostChanges));
 
     Scribe_Values.Look(ref debugDrawVehiclePathCosts, nameof(debugDrawVehiclePathCosts));
     Scribe_Values.Look(ref debugDrawPathfinderSearch, nameof(debugDrawPathfinderSearch));
@@ -107,11 +102,6 @@ public class SectionDebug : SettingsSection
 
 #if RAIDERS
     Scribe_Values.Look(ref debugAllowRaiders, nameof(debugAllowRaiders));
-#endif
-
-#if HIERARCHAL_PATHFINDING
-    Scribe_Values.Look(ref hierarchalPathfinding, nameof(hierarchalPathfinding),
-      defaultValue: false);
 #endif
   }
 
@@ -133,11 +123,6 @@ public class SectionDebug : SettingsSection
           fontSize: GameFont.Small, anchor: TextAnchor.MiddleCenter);
         listingStandard.CheckboxLabeled("VF_DevMode_DebugLogging".Translate(), ref debugLogging,
           "VF_DevMode_DebugLoggingTooltip".Translate());
-#if DEBUG
-        listingStandard.CheckboxLabeled(
-          "VF_DevMode_DebugPathCostRecalculationLogging".Translate(), ref debugPathCostChanges,
-          "VF_DevMode_DebugPathCostRecalculationLoggingTooltip".Translate());
-#endif
 
         listingStandard.Header("VF_DevMode_Troubleshooting".Translate(),
           ListingExtension.BannerColor, fontSize: GameFont.Small,
@@ -173,10 +158,6 @@ public class SectionDebug : SettingsSection
             new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput),
           ref debugAllowRaiders,
           "Enables vehicle generation for NPCs.\n NOTE: This is an experimental feature. Use at your own risk.");
-#endif
-#if HIERARCHAL_PATHFINDING
-        listingStandard.CheckboxLabeled("VF_HierarchalPathfinding".Translate(),
-          ref hierarchalPathfinding, "VF_HierarchalPathfindingTooltip".Translate());
 #endif
 
 #if DEBUG

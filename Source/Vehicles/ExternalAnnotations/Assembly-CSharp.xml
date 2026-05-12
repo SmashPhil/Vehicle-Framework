@@ -5,7 +5,7 @@
 		</attribute>
 	</member>
 	<member name="T:LudeonTK.DebugActionAttribute">
-		<attribute ctor="M:JetBrains.Annotations.UsedImplicitlyAttribute.#ctor"/>
+		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor(JetBrains.Annotations.ImplicitUseTargetFlags)"/>
 	</member>
 	<member name="T:Verse.StaticConstructorOnStartup">
 		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />

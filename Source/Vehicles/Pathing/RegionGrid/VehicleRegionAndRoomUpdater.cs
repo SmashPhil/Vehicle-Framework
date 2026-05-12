@@ -17,11 +17,15 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
 
   private readonly HashSet<VehicleRoom> reusedOldRooms = [];
 
+  private readonly VehicleRegionDirtyer regionDirtyer;
+
+  private VehiclePathGrid pathGrid;
   private VehicleRegionGridManager regionGridManager;
 
-  public VehicleRegionAndRoomUpdater(VehiclePathingSystem mapping, VehicleDef createdFor)
-    : base(mapping, createdFor)
+  public VehicleRegionAndRoomUpdater(IPathingManager pathing, VehicleDef createdFor,
+    VehicleRegionDirtyer regionDirtyer) : base(pathing, createdFor)
   {
+    this.regionDirtyer = regionDirtyer;
   }
 
   /// <summary>
@@ -46,23 +50,36 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
   {
     get
     {
-      if (UpdatingRegion || !Enabled) return false;
-      return !Initialized || mapping[createdFor].VehicleRegionDirtyer.AnyDirty;
+      if (UpdatingRegion || !Enabled)
+        return false;
+
+      return !Initialized || regionDirtyer.AnyDirty;
     }
+  }
+
+  public override void PostInit()
+  {
+    regionGridManager = pathing.GetRegionGridManager(createdFor);
+    pathGrid = pathing.GetPathGrid(createdFor);
+  }
+
+  protected internal override void ChangeOwner(VehicleDef newOwner)
+  {
+    base.ChangeOwner(newOwner);
+    pathGrid = pathing.GetPathGrid(createdFor);
   }
 
   public void Init()
   {
-    if (!mapping[createdFor].VehiclePathGrid.Enabled &&
-      !mapping.GridOwners.TryForfeitOwnership(createdFor))
+    if (!pathGrid.Enabled &&
+      !pathing.GridOwners.TryForfeitOwnership(createdFor))
     {
       Trace.Fail("Trying to initialize region grids with no vehicle to claim ownership.");
       return;
     }
 
     Enabled = true;
-    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
-    regionGridManager.Init();
+    regionGridManager.Init(this);
   }
 
   public void Release()
@@ -92,7 +109,7 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
         $"VehicleRegions won't be rebuilt. StackTrace: {StackTraceUtility.ExtractStackTrace()}");
     }
 
-    mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
+    regionDirtyer.SetAllDirty();
     TryRebuildVehicleRegions();
   }
 
@@ -107,9 +124,9 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
     UpdatingRegion = true;
     if (!Initialized)
     {
-      mapping[createdFor].VehicleRegionDirtyer.SetAllDirty();
+      regionDirtyer.SetAllDirty();
     }
-    else if (!mapping[createdFor].VehicleRegionDirtyer.AnyDirty)
+    else if (!regionDirtyer.AnyDirty)
     {
       UpdatingRegion = false;
       return;
@@ -191,7 +208,7 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
             "Region type doesn't allow multiple regions per room but there are >1 regions in this group.");
         }
 
-        VehicleRoom portalRoom = VehicleRoom.MakeNew(mapping.map, createdFor, firstRegion.gridType);
+        VehicleRoom portalRoom = VehicleRoom.MakeNew(pathing, createdFor, firstRegion.GridType);
         firstRegion.Room = portalRoom;
         return;
       }
@@ -199,8 +216,8 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
       VehicleRoom room = FindCurrentRegionGroupNeighborWithMostRegions(out bool multipleOldNeighborRooms);
       if (room is null)
       {
-        room = VehicleRoom.MakeNew(mapping.map, createdFor, firstRegion.gridType);
-        VehicleRegionTraverser.FloodAndSetRooms(firstRegion, mapping.map, createdFor, room);
+        room = VehicleRoom.MakeNew(pathing, createdFor, firstRegion.GridType);
+        VehicleRegionTraverser.FloodAndSetRooms(pathing, firstRegion, createdFor, room);
       }
       else if (!multipleOldNeighborRooms)
       {
@@ -213,7 +230,7 @@ public class VehicleRegionAndRoomUpdater : VehicleGridManager
       }
       else
       {
-        VehicleRegionTraverser.FloodAndSetRooms(currentRegionGroup[0], mapping.map, createdFor, room);
+        VehicleRegionTraverser.FloodAndSetRooms(pathing, currentRegionGroup[0], createdFor, room);
         reusedOldRooms.Add(room);
       }
     }

@@ -633,6 +633,17 @@ public static class Ext_Vehicles
 		return false;
 	}
 
+  [Pure]
+  public static TraverseMode DefaultTraverseMode(this VehiclePawn vehicle)
+  {
+    if (vehicle.Faction != null && vehicle.Faction.HostileTo(Faction.OfPlayer))
+    {
+      return TraverseMode.PassAllDestroyablePlayerOwnedThings;
+    }
+
+    return TraverseMode.ByPawn;
+  }
+
 	/// <summary>
 	/// Vehicle can path over cell and cell is in bounds.
 	/// </summary>
@@ -676,6 +687,25 @@ public static class Ext_Vehicles
 			 .VehiclePathGrid.WalkableFast(index);
 		return passable;
 	}
+
+  /// <summary>
+  /// Vehicle can path over <paramref name="cell"/> ignoring any buildings or other vehicles.
+  /// </summary>
+  [MustUseReturnValue]
+  public static bool CanTraverseTerrainAt(this VehiclePawn vehicle, IntVec3 cell)
+  {
+    return CanTraverseTerrainAt(vehicle, vehicle.Map.cellIndices.CellToIndex(cell));
+  }
+
+  /// <summary>
+  /// Vehicle can path over cell at <paramref name="index"/> ignoring any buildings or other vehicles.
+  /// </summary>
+  [MustUseReturnValue]
+  public static bool CanTraverseTerrainAt(this VehiclePawn vehicle, int index)
+  {
+    TerrainDef terrainDef = vehicle.Map.terrainGrid.TerrainAt(index);
+    return VehiclePathGrid.PassableTerrainCost(vehicle.VehicleDef, terrainDef, out _);
+  }
 
 	/// <summary>
 	/// Determine if <paramref name="dest"/> is not large enough to fit <paramref name="vehicle"/>'s full hitbox
@@ -812,7 +842,7 @@ public static class Ext_Vehicles
 	[Pure]
 	public static bool FullRectWalkable(this VehicleDef vehicleDef, VehiclePathingSystem pathing, IntVec3 cell, Rot4 rot)
 	{
-		VehiclePathingSystem.VehiclePathData pathData = pathing[vehicleDef];
+		PathData pathData = pathing[vehicleDef];
 		foreach (IntVec3 hitboxCell in vehicleDef.VehicleRect(cell, rot))
 		{
 			if (!pathData.VehiclePathGrid.Walkable(hitboxCell))
@@ -821,11 +851,23 @@ public static class Ext_Vehicles
 		return true;
 	}
 
-	/// <summary>
-	/// Seats assigned to vehicle in caravan formation
-	/// </summary>
-	/// <param name="vehicle"></param>
-	[Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
+  [Pure]
+  public static bool FullRectWalkable(this IPathingManager manager, VehicleDef vehicleDef, IntVec3 cell, Rot4 rot)
+  {
+    VehiclePathGrid pathGrid = manager.GetPathGrid(vehicleDef);
+    foreach (IntVec3 hitboxCell in vehicleDef.VehicleRect(cell, rot))
+    {
+      if (!pathGrid.Walkable(hitboxCell))
+        return false;
+    }
+    return true;
+  }
+
+  /// <summary>
+  /// Seats assigned to vehicle in caravan formation
+  /// </summary>
+  /// <param name="vehicle"></param>
+  [Pure, MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static int CountAssignedToVehicle(this VehiclePawn vehicle)
 	{
 		return CaravanHelper.assignedSeats.GetAssignments(vehicle).Count;

@@ -1,13 +1,17 @@
-﻿namespace Vehicles;
+﻿using Verse;
+
+namespace Vehicles;
 
 public abstract class VehicleGridManager
 {
-  protected readonly VehiclePathingSystem mapping;
-  protected internal VehicleDef createdFor;
+  protected readonly IPathingManager pathing;
+  protected readonly Map map;
+  protected VehicleDef createdFor;
 
-  protected VehicleGridManager(VehiclePathingSystem mapping, VehicleDef createdFor)
+  protected VehicleGridManager(IPathingManager pathing, VehicleDef createdFor)
   {
-    this.mapping = mapping;
+    this.pathing = pathing;
+    map = pathing.Map;
     this.createdFor = createdFor;
   }
 
@@ -15,5 +19,10 @@ public abstract class VehicleGridManager
 
   public virtual void PostInit()
   {
+  }
+
+  protected internal virtual void ChangeOwner(VehicleDef newOwner)
+  {
+    createdFor = newOwner;
   }
 }

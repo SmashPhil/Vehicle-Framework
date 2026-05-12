@@ -77,4 +77,20 @@
 		<toStringStyle>PercentZero</toStringStyle>
 		<upgradeEffectType>Negative</upgradeEffectType>
 	</Vehicles.StatUpgradeCategoryDef>
+
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>BuildingCollisionMultiplier</defName>
+		<label>Impact Damage</label>
+
+		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Positive</upgradeEffectType>
+	</Vehicles.StatUpgradeCategoryDef>
+	
+	<Vehicles.StatUpgradeCategoryDef>
+		<defName>BuildingCollisionRecoilMultiplier</defName>
+		<label>Impact Damage Received</label>
+
+		<toStringStyle>PercentZero</toStringStyle>
+		<upgradeEffectType>Negative</upgradeEffectType>
+	</Vehicles.StatUpgradeCategoryDef>
 </Defs>

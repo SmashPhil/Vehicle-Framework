@@ -96,11 +96,11 @@ internal class Patch_VehiclePathing : IPatchCategory
         nameof(GenStep_RocksFromGrid.Generate)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(DisableRegionUpdatingRockGen)));
-		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.DisableIncrementalDirtying)),
-			postfix: new HarmonyMethod(typeof(Patch_VehiclePathing),
+		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.DisableIncrementalDirtying)),
+			prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
 			nameof(BeginPathGridCapture)));
-		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(PathGrid), nameof(PathGrid.ReEnableIncrementalDirtying)),
-			finalizer: new HarmonyMethod(typeof(Patch_VehiclePathing),
+		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.ReEnableIncrementalDirtying)),
+      prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
 			nameof(EndPathGridCapture)));
 	}
 
@@ -180,9 +180,6 @@ internal class Patch_VehiclePathing : IPatchCategory
   /// <summary>
   /// StartPath hook to divert to vehicle related pather
   /// </summary>
-  /// <param name="dest"></param>
-  /// <param name="peMode"></param>
-  /// <param name="___pawn"></param>
   private static bool StartVehiclePath(LocalTargetInfo dest, PathEndMode peMode, Pawn ___pawn)
   {
     if (___pawn is VehiclePawn vehicle)
@@ -350,13 +347,13 @@ internal class Patch_VehiclePathing : IPatchCategory
   }
 
 	private static void BeginPathGridCapture(Map ___map)
-	{
-		___map.GetCachedMapComponent<VehiclePathingSystem>()?.BeginCapturingPathGridDirtying();
+  {
+    ___map.GetCachedMapComponent<VehiclePathingSystem>()?.BeginCapturingPathGridDirtying();
 	}
 
 	private static void EndPathGridCapture(Map ___map)
 	{
-		___map.GetCachedMapComponent<VehiclePathingSystem>()?.EndCapturingPathGridDirtying();
+    ___map.GetCachedMapComponent<VehiclePathingSystem>()?.EndCapturingPathGridDirtying();
 	}
 
 	/* ---- Helper Methods related to patches ---- */

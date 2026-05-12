@@ -11,14 +11,15 @@ namespace Vehicles;
 /// </summary>
 public class VehicleRegionDirtyer : VehicleGridManager
 {
-  private VehicleRegionMaker regionMaker;
+  private readonly VehicleRegionMaker regionMaker;
   private VehicleRegionGridManager regionGridManager;
 
   private readonly ConcurrentSet<IntVec3> dirtyCells = [];
 
-  public VehicleRegionDirtyer(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
-    createdFor)
+  public VehicleRegionDirtyer(IPathingManager pathing, VehicleDef createdFor, VehicleRegionMaker regionMaker) :
+    base(pathing, createdFor)
   {
+    this.regionMaker = regionMaker;
   }
 
   /// <summary>
@@ -39,8 +40,8 @@ public class VehicleRegionDirtyer : VehicleGridManager
 
   public override void PostInit()
   {
-    regionMaker = mapping[createdFor].VehicleRegionMaker;
-    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
+    pathing.GetPathGrid(createdFor).OnWalkabilityChanged += NotifyWalkabilityChanged;
+    regionGridManager = pathing.GetRegionGridManager(createdFor);
   }
 
   /// <summary>
@@ -49,7 +50,7 @@ public class VehicleRegionDirtyer : VehicleGridManager
   internal void SetAllDirty()
   {
     dirtyCells.Clear();
-    foreach (IntVec3 cell in mapping.map)
+    foreach (IntVec3 cell in map)
     {
       dirtyCells.Add(cell);
     }
@@ -79,7 +80,7 @@ public class VehicleRegionDirtyer : VehicleGridManager
     CellRect paddingRect = CellRect.CenteredOn(cell, padding);
     foreach (IntVec3 adjCell in paddingRect)
     {
-      if (!adjCell.InBounds(mapping.map))
+      if (!adjCell.InBounds(map))
         continue;
 
       foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
@@ -99,10 +100,10 @@ public class VehicleRegionDirtyer : VehicleGridManager
 
   public void NotifyThingAffectingRegionsSpawned(CellRect occupiedRect)
   {
-    if (mapping[createdFor].Suspended) 
+    if (pathing.IsPathDataSuspended(createdFor)) 
       return;
 
-    foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(mapping.map))
+    foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1).ClipInsideMap(map))
     {
       foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
       {
@@ -117,11 +118,11 @@ public class VehicleRegionDirtyer : VehicleGridManager
 
   public void NotifyThingAffectingRegionsDespawned(CellRect occupiedRect)
   {
-    if (mapping[createdFor].Suspended) 
+    if (pathing.IsPathDataSuspended(createdFor)) 
       return;
 
     foreach (IntVec3 cell in occupiedRect.ExpandedBy(createdFor.SizePadding + 1)
-     .ClipInsideMap(mapping.map))
+     .ClipInsideMap(map))
     {
       foreach (RegionGridType gridType in VehicleRegionGridManager.AllGridTypes)
       {

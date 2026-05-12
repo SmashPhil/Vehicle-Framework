@@ -1,112 +1,156 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using CoreLib.PathFinding;
 using CoreLib.Performance;
 using JetBrains.Annotations;
-using SmashTools.Burst;
-using Unity.Mathematics;
+using SmashTools;
 using UnityEngine;
 using Verse;
+using Path = CoreLib.PathFinding.Path;
 
 namespace Vehicles;
 
-[PublicAPI]
-public class VehiclePath : IDisposable
+#pragma warning disable CS0612 // Type or member is obsolete
+
+public class VehiclePathReceipt : IPathPromise
 {
-	private const int InitialPathSize = 128;
+  private const int MaxCancelWaitTime = 1000;
 
-	private readonly List<IntVec3> nodes = new(InitialPathSize);
+  private readonly CancellationTokenSource cts = new();
+  private readonly AsyncPathFindAction action;
 
-	public bool Found { get; private set; }
-
-	public bool UsedHeuristics { get; private set; }
-
-	public IntVec3 LastNode => nodes[0];
-
-	public int Current { get; private set; }
-
-	public int NodesLeft => Current + 1;
-
-	public bool Finished => NodesLeft <= 0;
-
-	public int NodesConsumedCount => nodes.Count - NodesLeft;
-
-	public IReadOnlyList<IntVec3> Nodes => nodes;
-
-	public static VehiclePath NotFound => new();
-
-	public void Init(bool usedHeuristics)
-	{
-		UsedHeuristics = usedHeuristics;
-		Current = nodes.Count - 1;
-		Found = true;
-	}
-
-	public void AddNode(IntVec3 cell)
-	{
-		nodes.Add(cell);
-	}
-
-	public IntVec3 ConsumeNextNode()
-	{
-		IntVec3 cell = Peek(1);
-		Current--;
-		return cell;
-	}
-
-	public IntVec3 Peek(int nodesAhead)
-	{
-		return nodes[Current - nodesAhead];
-	}
-
-	public void DrawPath(VehiclePawn vehicle)
-	{
-		if (!Found || Finished)
-			return;
-
-		float drawOffset = AltitudeLayer.Item.AltitudeFor();
-
-		for (int i = 0; i < NodesLeft - 1; i++)
-		{
-			Vector3 from = Peek(i).ToVector3Shifted();
-			from.y = drawOffset;
-			Vector3 to = Peek(i + 1).ToVector3Shifted();
-			to.y = drawOffset;
-			GenDraw.DrawLineBetween(from, to);
-		}
-		if (vehicle is not null)
-		{
-			Vector3 curFrom = vehicle.DrawPos;
-			curFrom.y = drawOffset;
-			Vector3 curTo = Peek(0).ToVector3Shifted();
-			curTo.y = drawOffset;
-			if ((curFrom - curTo).sqrMagnitude > 0.01f)
-			{
-				GenDraw.DrawLineBetween(curFrom, curTo);
-			}
-		}
-	}
-
-	public void Dispose()
-	{
-		Current = -1;
-		UsedHeuristics = false;
-		Found = false;
-		nodes.Clear();
-		AsyncPool<VehiclePath>.Return(this);
-	}
-
-  private IEnumerable<int3> GetBurstPathEnumerable()
+  internal VehiclePathReceipt(AsyncPathFindAction action)
   {
-    foreach (IntVec3 cell in nodes)
+    this.action = action;
+  }
+
+  internal Task Task { get; set; }
+
+  internal Path Path { get; set; }
+
+  bool IPathPromise.IsCompleted => Task is { IsCompleted: true };
+
+  public CancellationToken Token => cts.Token;
+
+  void IPathPromise.Cancel()
+  {
+    cts.Cancel();
+    if (Task != null)
     {
-      yield return cell;
+      Task.WaitAll([Task], MaxCancelWaitTime);
     }
   }
 
-  public Path ToBurstPath()
+  void IDisposable.Dispose()
   {
-    Path path = new();
-    path.Populate(GetBurstPathEnumerable());
-    return path;
+    cts.Dispose();
+    action.ReturnToPool();
+  }
+
+  Path IPathPromise.GetPath()
+  {
+    return Path;
+  }
+}
+
+// TODO 1.7 - Remove and use CoreLib.Path fully
+[PublicAPI]
+public class VehiclePath : Path, IDisposable
+{
+  private List<IntVec3> copyOfNodes;
+
+  [Obsolete("Use IsValid instead.")]
+  public bool Found => IsValid;
+
+  [Obsolete]
+  public bool UsedHeuristics { get; private set; }
+
+  public new IntVec3 LastNode => base.LastNode.ToIntVec3();
+
+  public new IReadOnlyList<IntVec3> Nodes
+  {
+    get
+    {
+      copyOfNodes ??= base.Nodes.Select(node => node.ToIntVec3()).ToList();
+      return copyOfNodes;
+    }
+  }
+
+  public static VehiclePath NotFound => new();
+
+  public void Init(bool usedHeuristics)
+  {
+    UsedHeuristics = usedHeuristics;
+    IsValid = true;
+    ResetPathToStart();
+  }
+
+  public void AddNode(IntVec3 cell)
+  {
+    Add(cell.ToPathNode());
+  }
+
+  public new IntVec3 ConsumeNextNode()
+  {
+    Node node = base.ConsumeNextNode();
+    return node.ToIntVec3();
+  }
+
+  public new IntVec3 Peek(int nodesAhead)
+  {
+    return base.Peek(nodesAhead).ToIntVec3();
+  }
+
+  public void DrawPath(VehiclePawn vehicle)
+  {
+    if (!IsValid || IsFinished)
+      return;
+
+    float drawOffset = AltitudeLayer.Item.AltitudeFor();
+
+    for (int i = 0; i < NodesLeft - 1; i++)
+    {
+      Vector3 from = Peek(i).ToVector3Shifted();
+      from.y = drawOffset;
+      Vector3 to = Peek(i + 1).ToVector3Shifted();
+      to.y = drawOffset;
+      GenDraw.DrawLineBetween(from, to);
+    }
+    if (vehicle is not null)
+    {
+      Vector3 curFrom = vehicle.DrawPos;
+      curFrom.y = drawOffset;
+      Vector3 curTo = Peek(0).ToVector3Shifted();
+      curTo.y = drawOffset;
+      if ((curFrom - curTo).sqrMagnitude > 0.01f)
+      {
+        GenDraw.DrawLineBetween(curFrom, curTo);
+      }
+    }
+  }
+
+  public void Dispose()
+  {
+    UsedHeuristics = false;
+    Clear();
+    AsyncPool<VehiclePath>.Return(this);
+  }
+
+  public static VehiclePath FromCoreLibPath(Path path)
+  {
+    if (path is VehiclePath existingPath)
+      return existingPath;
+
+    VehiclePath vehiclePath = new();
+    foreach (Node node in path.Nodes)
+    {
+      vehiclePath.Add(node);
+    }
+    vehiclePath.IsValid = path.IsValid;
+    vehiclePath.ResetPathToStart();
+    return vehiclePath;
   }
 }

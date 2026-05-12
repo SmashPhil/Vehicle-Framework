@@ -26,7 +26,7 @@ namespace Vehicles
           engagedTargetMethod);
     }
 
-    protected virtual IntRange ExpiryInterval => new IntRange(30, 30);
+    protected virtual IntRange ExpiryInterval => new(30, 30);
 
     protected virtual int TicksSinceEngageToLoseTarget => 400;
 

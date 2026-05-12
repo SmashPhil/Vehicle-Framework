@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <Defs>
 	<ThinkTreeDef>
@@ -12,18 +12,24 @@
 						<!-- Shoot targets within range -->
 						<li Class="Vehicles.ThinkNode_ConditionalHasTurret">
 							<subNodes>
-								<li Class = "Vehicles.JobGiver_RangedSupport"/>
+								<li Class="Vehicles.ThinkNode_ConditionalEngaging">
+									<subNodes>
+										<li Class="Vehicles.JobGiver_AwaitOrders" />
+									</subNodes>
+								</li>
+								<li Class="Vehicles.JobGiver_BreachWalls" />
+								<!-- <li Class = "Vehicles.JobGiver_RangedSupport"/> -->
 							</subNodes>
 						</li>
 
-            <!-- Eject all if disabled and no target in range -->
-            <li Class="Vehicles.ThinkNode_ConditionalVehicleState">
-              <canMove>false</canMove>
-              <hasPassengers>true</hasPassengers>
+						<!-- Eject all if disabled and no target in range -->
+						<li Class="Vehicles.ThinkNode_ConditionalVehicleState">
+							<canMove>false</canMove>
+							<hasPassengers>true</hasPassengers>
 							<subNodes>
-								<li Class = "Vehicles.ThinkNode_ExecuteAction">
-                  <action>Vehicles.VehicleActions.DisembarkAll</action>
-                </li>
+								<li Class="Vehicles.ThinkNode_ExecuteAction">
+									<action>Vehicles.VehicleActions.DisembarkAll</action>
+								</li>
 							</subNodes>
 						</li>
 
@@ -36,86 +42,23 @@
 						</li>
 
 						<!-- Provide overwatch -->
-						
+
 						<!-- Idle rather than continue to humanlike nodes -->
-						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+						<li Class="Vehicles.JobGiver_AwaitOrders" />
 					</subNodes>
 				</li>
-        <!-- Sabotage Vehicle -->
-        <li Class="ThinkNode_ConditionalIntelligence">
-          <minIntelligence>ToolUser</minIntelligence>
-          <subNodes>
-            <li Class="ThinkNode_ConditionalCapableOfWorkTag">
-              <workTags>Violent,Constructing</workTags>
-              <subNodes>
-                <li Class="Vehicles.JobGiver_SabotageVehicle"/>
-              </subNodes>
-            </li>
-          </subNodes>
-        </li>
-			</subNodes>
-		</thinkRoot>
-	</ThinkTreeDef>
-
-  <ThinkTreeDef>
-		<defName>Vehicle_Sapper</defName>
-		<thinkRoot Class="ThinkNode_Priority">
-			<subNodes>
-				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
+				<!-- Sabotage Vehicle -->
+				<li Class="ThinkNode_ConditionalIntelligence">
+					<minIntelligence>ToolUser</minIntelligence>
 					<subNodes>
-						<!-- Run down targets that are too close -->
-
-						<!-- Shoot targets within range -->
-						<li Class="Vehicles.ThinkNode_ConditionalHasTurret">
+						<li Class="ThinkNode_ConditionalCapableOfWorkTag">
+							<workTags>Violent,Constructing</workTags>
 							<subNodes>
-								<li Class = "Vehicles.JobGiver_RangedSupport"/>
+								<li Class="Vehicles.JobGiver_SabotageVehicle" />
 							</subNodes>
 						</li>
-
-            <!-- Sapper -->
-            <li Class="Vehicles.ThinkNode_ConditionalHasTurret">
-							<subNodes>
-								<li Class = "Vehicles.JobGiver_RangedSupport"/>
-							</subNodes>
-						</li>
-
-            <!-- Eject all if disabled and no target in range -->
-            <li Class="Vehicles.ThinkNode_ConditionalVehicleState">
-              <canMove>false</canMove>
-              <hasPassengers>true</hasPassengers>
-							<subNodes>
-								<li Class = "Vehicles.ThinkNode_ExecuteAction">
-                  <action>Vehicles.VehicleActions.DisembarkAll</action>
-                </li>
-							</subNodes>
-						</li>
-
-						<!-- Run down targets within distance -->
-
-						<!-- Carry pawns closer before deploying -->
-						<li Class="Vehicles.JobGiver_GotoNearestHostile">
-							<urgency>Walk</urgency>
-							<overrideExpiryInterval>60</overrideExpiryInterval>
-						</li>
-
-						<!-- Provide overwatch -->
-						
-						<!-- Idle rather than continue to humanlike nodes -->
-						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
 					</subNodes>
 				</li>
-        <!-- Sabotage Vehicle -->
-        <li Class="ThinkNode_ConditionalIntelligence">
-          <minIntelligence>ToolUser</minIntelligence>
-          <subNodes>
-            <li Class="ThinkNode_ConditionalCapableOfWorkTag">
-              <workTags>Violent,Constructing</workTags>
-              <subNodes>
-                <li Class="Vehicles.JobGiver_SabotageVehicle"/>
-              </subNodes>
-            </li>
-          </subNodes>
-        </li>
 			</subNodes>
 		</thinkRoot>
 	</ThinkTreeDef>
@@ -128,22 +71,22 @@
 					<subNodes>
 						<li Class="Vehicles.JobGiver_ExitMapBest" />
 						<!-- Idle rather than continue to humanlike nodes -->
-						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+						<li Class="Vehicles.JobGiver_AwaitOrders" />
 					</subNodes>
 				</li>
 			</subNodes>
 		</thinkRoot>
 	</ThinkTreeDef>
 
-  <ThinkTreeDef>
+	<ThinkTreeDef>
 		<defName>Vehicle_ExitMapRandom</defName>
 		<thinkRoot Class="ThinkNode_Priority">
 			<subNodes>
 				<li Class="Vehicles.ThinkNode_ConditionalVehicle">
 					<subNodes>
-						<li Class="Vehicles.JobGiver_ExitMapRandom"/>
+						<li Class="Vehicles.JobGiver_ExitMapRandom" />
 						<!-- Idle rather than continue to humanlike nodes -->
-						<li Class= "Vehicles.JobGiver_AwaitOrders"/>
+						<li Class="Vehicles.JobGiver_AwaitOrders" />
 					</subNodes>
 				</li>
 			</subNodes>

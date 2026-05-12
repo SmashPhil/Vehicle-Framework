@@ -7,17 +7,20 @@ namespace Vehicles
 {
   public class JobGiver_RangedSupport : JobGiver_CombatFormation
   {
+    protected override IntRange ExpiryInterval => new(120, 240);
+
     protected override bool TryFindCombatPosition(VehiclePawn vehicle, out IntVec3 dest)
     {
-      return CombatPositionFinder.TryFindCastPosition(
-        CastPositionRequest.For(vehicle, vehicle.mindState.enemyTarget), out dest);
+      return CombatPositionFinder.TryFindShootPosition(
+        CombatPositionFinder.Request.For(vehicle, vehicle.mindState.enemyTarget), out dest);
     }
 
     protected override void UpdateEnemyTarget(VehiclePawn vehicle)
     {
-      const TargetScanFlags scanFlags = TargetScanFlags.NeedLOSToPawns |
-        TargetScanFlags.NeedReachableIfCantHitFromMyPos
-        | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
+      const TargetScanFlags ScanFlags = TargetScanFlags.NeedLOSToPawns |
+        TargetScanFlags.NeedReachableIfCantHitFromMyPos | TargetScanFlags.NeedThreat |
+        TargetScanFlags.NeedAutoTargetable;
+
       Thing thing = vehicle.mindState.enemyTarget;
       if (thing != null && ShouldLoseTarget(vehicle))
       {
@@ -25,7 +28,7 @@ namespace Vehicles
       }
       if (thing == null)
       {
-        thing = CombatTargetFinder.FindAttackTarget(vehicle, scanFlags,
+        thing = CombatTargetFinder.FindAttackTarget(vehicle, ScanFlags,
           validator: (target) => ExtraTargetValidator(vehicle, target),
           minDistance: vehicle.CompVehicleTurrets.MinRange,
           maxDistance: vehicle.CompVehicleTurrets.MaxRange, onlyRanged: true);

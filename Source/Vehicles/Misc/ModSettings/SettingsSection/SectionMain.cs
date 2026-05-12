@@ -53,8 +53,9 @@ public class SectionMain : SettingsSection
   public bool ignoreBiomeCostOnRoads = true;
   public bool multiplePawnsPerJob = true;
 
+  internal string testedBurstOn;
   public bool useBurstLib = true;
-  public bool burstProbation = false;
+  public bool testingBurst = false;
 
   // Graphics
   public bool passiveWaterWaves = true;
@@ -114,7 +115,7 @@ public class SectionMain : SettingsSection
     multiplePawnsPerJob = true;
 
     useBurstLib = true;
-    burstProbation = false;
+    testingBurst = false;
 
     meleeDamageMultiplier = 1;
     rangedDamageMultiplier = 1;
@@ -165,7 +166,7 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref ignoreBiomeCostOnRoads, nameof(ignoreBiomeCostOnRoads), defaultValue: true);
     Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
     Scribe_Values.Look(ref useBurstLib, nameof(useBurstLib), defaultValue: true);
-    Scribe_Values.Look(ref burstProbation, nameof(burstProbation), defaultValue: false);
+    Scribe_Values.Look(ref testingBurst, nameof(testingBurst), defaultValue: false);
 
     Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
     Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);

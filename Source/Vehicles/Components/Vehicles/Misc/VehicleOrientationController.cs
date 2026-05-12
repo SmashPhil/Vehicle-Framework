@@ -122,7 +122,7 @@ public class VehicleOrientationController : BaseTargeter
       IntVec3 cell = dests[i];
       if (!confirmVehicle.Spawned || !cell.IsValid)
         continue;
-      if (!VehicleCanStandAt(confirmVehicle, cell, Rotation))
+      if (!CanFitAt(confirmVehicle, cell, Rotation))
       {
         Messages.Message("VF_CannotFit".Translate(confirmVehicle), vehicle, MessageTypeDefOf.RejectInput,
           historical: false);
@@ -148,10 +148,9 @@ public class VehicleOrientationController : BaseTargeter
     StopTargeting();
   }
 
-  private static bool VehicleCanStandAt(VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
+  private static bool CanFitAt(VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
   {
-    CellRect vehicleRect = rot.IsDiagonal ? vehicle.MinRect(cell) : vehicle.VehicleRect(cell, rot);
-    if (!vehicle.CellRectStandable(vehicle.Map, cell, rot))
+    if (vehicle.LocationRestrictedBySize(vehicle.Map, cell, rot))
       return false;
 
     return PathingHelper.AnyVehicleBlockingPathAt(cell, vehicle) == null;
@@ -306,7 +305,7 @@ public class VehicleOrientationController : BaseTargeter
       }
       else
       {
-        Color drawColor = VehicleCanStandAt(vehicle, dests[0], Rotation) ?
+        Color drawColor = CanFitAt(vehicle, dests[0], Rotation) ?
           VehicleGhostUtility.whiteGhostColor :
           VehicleGhostUtility.RedGhostColor;
         VehicleGhostUtility.DrawGhostVehicleDef(dests[0], Rotation, vehicle.VehicleDef, drawColor,

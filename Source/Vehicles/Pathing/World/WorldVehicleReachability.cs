@@ -129,7 +129,7 @@ public class WorldVehicleReachability
 		}
 	}
 
-	// TODO 1.6 - Account for planet layers (map surface layer -> int[], then PlanetTile::tileId)
+	// TODO VF-341: Account for planet layers (map surface layer -> int[], then PlanetTile::tileId)
 	public class WorldRegionGrid
 	{
 		private readonly WorldVehiclePathGrid pathGrid;

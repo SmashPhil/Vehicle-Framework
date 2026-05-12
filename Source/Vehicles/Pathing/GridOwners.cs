@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using LudeonTK;
 using SmashTools;
 using Vehicles.World;
@@ -10,27 +7,10 @@ using Verse;
 
 namespace Vehicles;
 
+// TODO - Move away from static cache
 public static class GridOwners
 {
-  public static WorldGridOwners World { get; } = new();
-
-  internal static void RecacheMoveableVehicleDefs()
-  {
-    VehicleHarmony.AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading
-     .Where(PathingHelper.ShouldCreateRegions).ToList();
-
-    World.Init();
-
-    if (!Find.Maps.NullOrEmpty())
-    {
-      foreach (Map map in Find.Maps)
-      {
-        VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-        mapping.GridOwners.Init();
-        mapping.ConstructComponents();
-      }
-    }
-  }
+  public static WorldGridOwners World { get; } = new(DefDatabase<VehicleDef>.AllDefsListForReading);
 
   [DebugOutput(VehicleHarmony.VehiclesLabel, name = "Output GridOwners")]
   private static void OutputMapOwners()

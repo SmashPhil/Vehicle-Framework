@@ -1,11 +1,16 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using CoreLib;
 using JetBrains.Annotations;
+using LudeonTK;
 using SmashTools;
 using SmashTools.Burst;
 using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine.Assertions;
 using Verse;
+using NativeArrayUtility = SmashTools.Burst.NativeArrayUtility;
 
 namespace Vehicles;
 
@@ -24,7 +29,7 @@ public class VehiclePositionManager : DetachedMapComponent
   private const int VehicleCostOffset = VehiclePathGrid.ImpassableCost;
 
   private readonly ConcurrentDictionary<IntVec3, VehiclePawn> occupiedCells = [];
-  private readonly ConcurrentDictionary<VehiclePawn, CellRect> occupiedRects = [];
+  private readonly ConcurrentDictionary<VehiclePawn, EntityRect> occupiedRects = [];
 
   private readonly VehiclePathingSystem pathingSystem;
 
@@ -93,7 +98,7 @@ public class VehiclePositionManager : DetachedMapComponent
   /// returns a default CellRect (empty).
   /// </returns>
   /// <remarks>Safe to call concurrently from worker threads.</remarks>
-  public CellRect ClaimedBy(VehiclePawn vehicle)
+  public EntityRect ClaimedBy(VehiclePawn vehicle)
   {
     return occupiedRects.TryGetValue(vehicle);
   }
@@ -105,7 +110,7 @@ public class VehiclePositionManager : DetachedMapComponent
   /// <remarks>Main-thread only.</remarks>
   public void ClaimPosition(VehiclePawn vehicle)
   {
-    ClaimPosition(vehicle, vehicle.Position, vehicle.Rotation);
+    ClaimPosition(vehicle, vehicle.Position, vehicle.FullRotation);
   }
 
   /// <summary>
@@ -115,18 +120,31 @@ public class VehiclePositionManager : DetachedMapComponent
   /// <param name="cell">The cell to calculate the full hitbox claim at.</param>
   /// <param name="rot">The rotation of the vehicle for calculating the full hitbox claim.</param>
   /// <remarks>Main-thread only.</remarks>
-  /// <exception cref="UnityEngine.Assertions.AssertionException">Thrown if invoked off the main thread.</exception>
   public void ClaimPosition(VehiclePawn vehicle, IntVec3 cell, Rot4 rot)
+  {
+    ClaimPosition(vehicle, cell, new Rot8(rot.AsInt));
+  }
+
+  /// <summary>
+  /// Claims the <paramref name="vehicle"/>'s hitbox at <paramref name="cell"/> given rotation <paramref name="rot"/> and updates internal occupancy maps.
+  /// </summary>
+  /// <param name="vehicle">The vehicle to claim the position for.</param>
+  /// <param name="cell">The cell to calculate the full hitbox claim at.</param>
+  /// <param name="rot">The rotation of the vehicle for calculating the full hitbox claim.</param>
+  /// <remarks>Main-thread only.</remarks>
+  public void ClaimPosition(VehiclePawn vehicle, IntVec3 cell, Rot8 rot)
   {
     // NOTE - Updating position manager is done from VehiclePathFollower. This allows us to have a thread-unsafe list
     // accessor for hot paths. Reading claims can be done concurrently, but writing must be from the main thread.
     Assert.IsTrue(UnityData.IsInMainThread);
     ReleaseClaimed(vehicle);
-    CellRect occupiedRect = vehicle.VehicleRect(cell, rot);
+    IntVec2 size = vehicle.VehicleDef.Size;
+    EntityRect occupiedRect = new(cell.x, cell.z, size.x, size.z, new Orientation(rot.AsInt));
     occupiedRects[vehicle] = occupiedRect;
     CellIndices indices = map.cellIndices;
-    foreach (IntVec3 occupiedCell in occupiedRect)
+    foreach (int2 pos in occupiedRect)
     {
+      IntVec3 occupiedCell = new(pos.x, 0, pos.y);
       if (occupiedCells.TryAdd(occupiedCell, vehicle))
       {
         thingIdGrid[indices.CellToIndex(occupiedCell)] = vehicle.thingIDNumber;
@@ -152,11 +170,12 @@ public class VehiclePositionManager : DetachedMapComponent
   public void ReleaseClaimed(VehiclePawn vehicle)
   {
     Assert.IsTrue(UnityData.IsInMainThread);
-    if (occupiedRects.TryGetValue(vehicle, out CellRect rect))
+    if (occupiedRects.TryGetValue(vehicle, out EntityRect rect))
     {
       CellIndices indices = map.cellIndices;
-      foreach (IntVec3 cell in rect)
+      foreach (int2 pos in rect)
       {
+        IntVec3 cell = new(pos.x, 0, pos.y);
         if (occupiedCells.TryGetValue(cell, out VehiclePawn claimant) && claimant != vehicle)
         {
           // NOTE: When diagonal hitboxes are converted away from improperly mapped horizontals, we can
@@ -172,5 +191,10 @@ public class VehiclePositionManager : DetachedMapComponent
     }
     occupiedRects.TryRemove(vehicle, out _);
     claimants.Remove(vehicle);
+  }
+
+  public override void Dispose()
+  {
+    thingIdGrid.Dispose();
   }
 }

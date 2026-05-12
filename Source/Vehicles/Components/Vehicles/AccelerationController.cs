@@ -1,8 +1,7 @@
 ﻿using System;
+using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
-using SmashTools.Burst;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Config;
@@ -252,10 +251,10 @@ internal sealed class AccelerationController : IExposable
 
     float maxMoveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed);
     float simulatedSpeed = MoveSpeed;
-    int3 from = vehicle.Position;
+    IntVec3 from = vehicle.Position;
     for (int i = path.Current; i >= 0; i--)
     {
-      int3 to = path.Nodes[i];
+      IntVec3 to = path.Nodes[i].ToIntVec3();
       float cost = pathFollower.CostToMoveIntoCell(from, to);
       from = to;
 
@@ -291,10 +290,10 @@ internal sealed class AccelerationController : IExposable
 
     float maxMoveSpeed = vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed);
     float simulatedSpeed = 0;
-    int3 from = path.LastNode;
+    IntVec3 from = path.LastNode.ToIntVec3();
     for (int i = 1; i <= path.Current; i++)
     {
-      int3 to = path.Nodes[i];
+      IntVec3 to = path.Nodes[i].ToIntVec3();
       float cost = pathFollower.CostToMoveIntoCell(from, to);
       from = to;
 

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CoreLib;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
@@ -101,12 +100,6 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	[Unsaved]
 	private readonly SelfOrderingList<CompProperties> cachedComps = [];
 
-	[Unsaved]
-	private Texture2D resolvedLoadCargoTexture;
-
-	[Unsaved]
-	private Texture2D resolvedCancelCargoTexture;
-
 	public VehiclePermissions MovementPermissions { get; private set; }
 
 	/// <summary>
@@ -140,14 +133,16 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	{
 		get
 		{
-			if (!resolvedLoadCargoTexture)
+			if (!field)
 			{
-				resolvedLoadCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.loadCargoTexPath, false);
-				if (!resolvedLoadCargoTexture)
-					resolvedLoadCargoTexture = VehicleTex.PackCargoIcon[(uint)type];
-				Trace.IsTrue(resolvedLoadCargoTexture, "Unable to load LoadCargo icon.");
+        field = ContentFinder<Texture2D>.Get(drawProperties.loadCargoTexPath, false);
+        if (!field)
+        {
+          field = VehicleTex.PackCargoIcon[(uint)type];
+        }
+				Trace.IsTrue(field, "Unable to load LoadCargo icon.");
 			}
-			return resolvedLoadCargoTexture;
+			return field;
 		}
 	}
 
@@ -158,14 +153,16 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 	{
 		get
 		{
-			if (!resolvedCancelCargoTexture)
+			if (!field)
 			{
-				resolvedCancelCargoTexture = ContentFinder<Texture2D>.Get(drawProperties.cancelCargoTexPath, false);
-				if (!resolvedCancelCargoTexture)
-					resolvedCancelCargoTexture = VehicleTex.CancelPackCargoIcon[(uint)type];
-				Trace.IsTrue(resolvedCancelCargoTexture, "Unable to load CancelCargo icon.");
+        field = ContentFinder<Texture2D>.Get(drawProperties.cancelCargoTexPath, false);
+        if (!field)
+        {
+          field = VehicleTex.CancelPackCargoIcon[(uint)type];
+        }
+				Trace.IsTrue(field, "Unable to load CancelCargo icon.");
 			}
-			return resolvedCancelCargoTexture;
+			return field;
 		}
 	}
 

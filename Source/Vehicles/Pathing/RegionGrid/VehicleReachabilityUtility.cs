@@ -5,6 +5,7 @@ using SmashTools;
 
 namespace Vehicles;
 
+// TODO 1.7 - This is in need of a refactor, it reaches into VehiclePathingSystem and hinders mocking.
 /// <summary>
 /// Reachability utility methods
 /// </summary>

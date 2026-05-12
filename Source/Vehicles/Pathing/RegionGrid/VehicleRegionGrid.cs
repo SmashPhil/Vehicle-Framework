@@ -26,7 +26,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
 
   private VehicleRegionAndRoomUpdater regionUpdater;
 
-  public VehicleRegionGrid(VehiclePathingSystem mapping, VehicleDef createdFor, IRegionSource source) : base(mapping,
+  public VehicleRegionGrid(IPathingManager pathing, VehicleDef createdFor, IRegionSource source) : base(pathing,
     createdFor)
   {
     Source = source;
@@ -55,7 +55,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
       Assert.IsTrue(allRegionsYielded.Value.Count == 0);
       try
       {
-        int count = mapping.map.cellIndices.NumGridCells;
+        int count = map.cellIndices.NumGridCells;
         for (int i = 0; i < count; i++)
         {
           VehicleRegion region = GetRegionAt(i);
@@ -99,7 +99,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
     Assert.IsTrue(allRegionsYielded.Value.Count == 0);
     try
     {
-      Parallel.ForEach(Partitioner.Create(0, mapping.map.cellIndices.NumGridCells), 
+      Parallel.ForEach(Partitioner.Create(0, map.cellIndices.NumGridCells), 
         (range, _) =>
         {
           for (int i = range.Item1; i < range.Item2; i++)
@@ -124,12 +124,12 @@ public sealed class VehicleRegionGrid : VehicleGridManager
     allRooms.Clear();
   }
 
-  public void Init()
+  public void Init(VehicleRegionAndRoomUpdater regionAndRoomUpdater)
   {
     // RegionGrid is large in size and could still be in-use if rebuild-all is called
     // from debug menu. No need to reallocate the entire array if this is the case.
-    regionGrid ??= new VehicleRegion[mapping.map.cellIndices.NumGridCells];
-    regionUpdater ??= mapping[createdFor].VehicleRegionAndRoomUpdater;
+    regionGrid ??= new VehicleRegion[map.cellIndices.NumGridCells];
+    regionUpdater = regionAndRoomUpdater;
   }
 
   /// <summary>
@@ -137,7 +137,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
   /// </summary>
   public VehicleRegion GetValidRegionAt(IntVec3 cell, bool rebuild = true)
   {
-    if (!cell.InBounds(mapping.map))
+    if (!cell.InBounds(map))
     {
       Log.Error($"Tried to get valid vehicle region for {createdFor} out of bounds at {cell}");
       return null;
@@ -163,7 +163,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
   /// </summary>
   public VehicleRegion GetRegionAt(IntVec3 cell)
   {
-    int index = mapping.map.cellIndices.CellToIndex(cell);
+    int index = map.cellIndices.CellToIndex(cell);
     return GetRegionAt(index);
   }
 
@@ -181,7 +181,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
   /// </summary>
   public void SetRegionAt(IntVec3 cell, VehicleRegion region)
   {
-    SetRegionAt(mapping.map.cellIndices.CellToIndex(cell), region);
+    SetRegionAt(map.cellIndices.CellToIndex(cell), region);
   }
 
   /// <summary>
@@ -206,10 +206,9 @@ public sealed class VehicleRegionGrid : VehicleGridManager
     // after all references have been removed from grid.
     foreach (IntVec3 cell in region.Cells)
     {
-      int index = mapping.map.cellIndices.CellToIndex(cell);
+      int index = map.cellIndices.CellToIndex(cell);
       Interlocked.CompareExchange(ref regionGrid[index], null, regionGrid[index]);
     }
-
     region.Reset();
   }
 
@@ -226,12 +225,11 @@ public sealed class VehicleRegionGrid : VehicleGridManager
       }
 
       VehicleRegion region = regionGrid[curCleanIndex];
-      if (region != null && !region.valid)
+      if (region is { valid: false })
       {
         Trace.Fail("Cleaning region which should have already been returned to pool.");
         SetRegionAt(curCleanIndex, null);
       }
-
       curCleanIndex++;
     }
   }
@@ -241,7 +239,8 @@ public sealed class VehicleRegionGrid : VehicleGridManager
   /// </summary>
   public void DebugDraw(DebugRegionType debugRegionType)
   {
-    if (mapping.map != Find.CurrentMap) return;
+    if (map != Find.CurrentMap)
+      return;
 
     foreach (VehicleRoom room in allRooms.Keys)
     {
@@ -257,7 +256,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
     }
 
     IntVec3 intVec = UI.MouseCell();
-    if (intVec.InBounds(mapping.map))
+    if (intVec.InBounds(map))
     {
       VehicleRegion region = GetRegionAt(intVec);
       region?.DebugDraw(debugRegionType);
@@ -270,7 +269,7 @@ public sealed class VehicleRegionGrid : VehicleGridManager
   public void DebugOnGUI(DebugRegionType debugRegionType)
   {
     IntVec3 intVec = UI.MouseCell();
-    if (intVec.InBounds(mapping.map))
+    if (intVec.InBounds(map))
     {
       VehicleRegion region = GetRegionAt(intVec);
       region?.DebugOnGUIMouseover(debugRegionType);

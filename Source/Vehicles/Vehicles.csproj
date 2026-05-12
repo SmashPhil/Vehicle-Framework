@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <Authors>Smash Phil</Authors>
@@ -64,12 +64,21 @@
   </PropertyGroup>
 
   <!-- Dependencies -->
+  <ItemGroup Condition="'$(UseLocalBurstLib)' != 'true'">
+    <PackageReference Include="SmashTools.Burst" Version="1.2.3" GeneratePathProperty="true" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseLocalBurstLib)' == 'true'">
+    <Reference Include="SmashTools.Burst">
+      <HintPath>$(OutDir)\SmashToolsBurst.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
   <ItemGroup>
     <!-- Nuget -->
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
     <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
     <PackageReference Include="PolySharp" Version="1.*" />
-    <PackageReference Include="SmashTools.Burst" Version="1.0.9" GeneratePathProperty="true" />
 
     <!--Local -->
     <Reference Include="CoreLib">

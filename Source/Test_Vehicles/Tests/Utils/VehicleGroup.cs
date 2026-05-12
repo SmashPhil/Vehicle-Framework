@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using DevTools;
 using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.UnitTesting;
+namespace Vehicles.Testing;
 
 public class VehicleGroup : IDisposable
 {
@@ -188,7 +187,6 @@ public class VehicleGroup : IDisposable
 
 		// VehicleDef needs to be complete by this point for PostGeneration events
 		VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, settings.faction);
-		DevLog.WriteVerbose($"Creating vehicle {vehicle}");
 		VehicleGroup group = new(vehicle);
 		for (int i = 0; i < settings.drivers + settings.passengers; i++)
 		{

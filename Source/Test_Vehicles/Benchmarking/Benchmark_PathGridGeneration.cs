@@ -22,7 +22,7 @@ internal class Benchmark_PathGridGeneration
     // is written so it's accurate.
     Parallel.ForEach(context.vehicleDefs, delegate(VehicleDef vehicleDef)
     {
-      VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDef];
+      PathData vehiclePathData = mapping[vehicleDef];
       vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
     });
   }
@@ -38,7 +38,7 @@ internal class Benchmark_PathGridGeneration
     {
       for (int i = range.Item1; i < range.Item2; i++)
       {
-        VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDefs[i]];
+        PathData vehiclePathData = mapping[vehicleDefs[i]];
         vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
       }
     });
@@ -51,7 +51,7 @@ internal class Benchmark_PathGridGeneration
 
     foreach (VehicleDef vehicleDef in context.vehicleDefs)
     {
-      VehiclePathingSystem.VehiclePathData vehiclePathData = mapping[vehicleDef];
+      PathData vehiclePathData = mapping[vehicleDef];
       vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
     }
   }

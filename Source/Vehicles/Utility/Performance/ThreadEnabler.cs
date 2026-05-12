@@ -8,7 +8,7 @@ using Verse;
 namespace Vehicles;
 
 /// <summary>
-/// RAII pattern for suspending dedicated thread activity on VehicleMapping components.
+/// Dispose pattern for suspending dedicated thread activity on VehicleMapping components.
 /// This does not stop or abort the threads, it only flags the thread as being unavailable
 /// so that further actions are executed synchronously rather than getting enqueued to
 /// the dedicated thread.

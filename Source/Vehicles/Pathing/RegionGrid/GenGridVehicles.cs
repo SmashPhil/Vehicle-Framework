@@ -32,14 +32,19 @@ public static class GenGridVehicles
 		return mapping[vehicleDef].VehiclePathGrid.Walkable(cell);
 	}
 
-	/// <summary>
-	/// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
-	/// </summary>
-	/// <param name="cell"></param>
-	/// <param name="pawn"></param>
-	/// <param name="map"></param>
-	/// <returns></returns>
-	public static bool StandableUnknown(this IntVec3 cell, Pawn pawn, Map map)
+  public static bool Walkable(this IPathingManager manager, IntVec3 cell, VehicleDef vehicleDef)
+  {
+    return manager.GetPathGrid(vehicleDef).Walkable(cell);
+  }
+
+  /// <summary>
+  /// Check if <paramref name="cell"/> is standable on <paramref name="map"/> for <paramref name="pawn"/> unknown to be a <see cref="VehiclePawn"/> or not
+  /// </summary>
+  /// <param name="cell"></param>
+  /// <param name="pawn"></param>
+  /// <param name="map"></param>
+  /// <returns></returns>
+  public static bool StandableUnknown(this IntVec3 cell, Pawn pawn, Map map)
 	{
 		if (pawn is VehiclePawn vehicle)
 		{

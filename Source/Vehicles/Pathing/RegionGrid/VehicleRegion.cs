@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using CoreLib.Performance;
-using SmashTools;
+using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles;
@@ -17,14 +18,9 @@ public sealed class VehicleRegion : IPoolable
   public const int ChunkSize = 12;
 
   public RegionType type;
-  public RegionGridType gridType;
 
   private VehicleDef vehicleDef;
   private int referenceCount;
-  private int cellCount;
-
-  private VehiclePathingSystem mapping;
-  private VehicleRegionMaker regionMaker;
 
   private VehicleRegionGrid regionGrid;
 
@@ -34,6 +30,7 @@ public sealed class VehicleRegion : IPoolable
   public ThreadLocal<uint[]>
     closedIndex = new(() => new uint[VehicleRegionTraverser.WorkerCount]);
 
+  // TODO 1.7 - Change access modifiers, these should not be modifiable outside of this class
   public CellRect extentsClose;
   public CellRect extentsLimit;
 
@@ -68,10 +65,37 @@ public sealed class VehicleRegion : IPoolable
   /// </summary>
   public bool InPool { get; set; }
 
+  /// <summary>
+  /// Object pool to return to when this region's ref count reaches 0.
+  /// </summary>
+  internal IObjectPool<VehicleRegion> ObjectPool { get; set; }
+
   // NOTE - Only used for seed generation, doesn't matter if list count is stale at time of
   // reading. No need for a lock here since List<T>::_size does not access the internal array.
   // ReSharper disable once InconsistentlySynchronizedField
   public int LinksCount => links.Count;
+
+  /// <summary>
+  /// Gets the type of region grid this region belongs to.
+  /// </summary>
+  /// <remarks>The grid type determines how regions are stored and accessed within the manager.</remarks>
+  public RegionGridType GridType
+  {
+    get;
+    private set
+    {
+      if (field == value)
+        return;
+
+      field = value;
+      if (field == RegionGridType.Invalid)
+      {
+        regionGrid = null;
+        return;
+      }
+      regionGrid = PathingManager.GetRegionGridManager(vehicleDef)[GridType];
+    }
+  } = RegionGridType.Invalid;
 
   /// <summary>
   /// Fetch a pooled List object and copy all link references over to the list snapshot.
@@ -79,7 +103,7 @@ public sealed class VehicleRegion : IPoolable
   /// Allows for thread-safe enumeration of a region's links without interrupting region
   /// updating.
   /// <para/>
-  /// Should be used with RAII pattern to allow for List object to be returned
+  /// Should be used with dispose pattern to allow for List object to be returned
   /// to async object pool after ListSnapshot goes out of scope.
   /// </summary>
   public ListSnapshot<VehicleRegionLink> Links
@@ -94,50 +118,33 @@ public sealed class VehicleRegion : IPoolable
   }
 
   /// <summary>
-  /// Map this region belongs to. Setter will cache various map components on new map references.
+  /// Get the current map this region belongs to.
   /// </summary>
-  public Map Map
+  /// <remarks></remarks>
+  public Map Map { get; private set; }
+
+  /// <summary>
+  /// Gets the current pathing manager this region belongs to.
+  /// </summary>
+  public IPathingManager PathingManager
   {
     get;
-    internal set
+    private set
     {
-      if (field == value) return;
+      if (field == value)
+        return;
 
       field = value;
       if (field == null)
       {
-        mapping = null;
-        regionMaker = null;
+        Map = null;
         return;
       }
-      mapping = field.GetCachedMapComponent<VehiclePathingSystem>();
-      regionMaker = mapping[vehicleDef].VehicleRegionMaker;
-      regionGrid = mapping[vehicleDef].VehicleRegionGridManager[gridType];
+      Map = PathingManager.Map;
     }
   }
 
-  public int CellCount
-  {
-    get
-    {
-      if (cellCount < 0)
-      {
-        for (int z = extentsClose.minZ; z <= extentsClose.maxZ; z++)
-        {
-          for (int x = extentsClose.minX; x <= extentsClose.maxX; x++)
-          {
-            IntVec3 cell = new(x, 0, z);
-            if (regionGrid.GetRegionAt(cell) == this)
-            {
-              Interlocked.Increment(ref cellCount);
-            }
-          }
-        }
-      }
-
-      return cellCount;
-    }
-  }
+  public int CellCount { get; private set; }
 
   /// <summary>
   /// Yield all cells in the region
@@ -146,11 +153,8 @@ public sealed class VehicleRegion : IPoolable
   {
     get
     {
-      if (InPool)
-      {
-        yield break;
-      }
-
+      Assert.IsFalse(InPool, "Should never be enumerating cells while pooled.");
+      Assert.IsNotNull(regionGrid, "Should never be enumerating cells while invalid.");
       for (int z = extentsClose.minZ; z <= extentsClose.maxZ; z++)
       {
         for (int x = extentsClose.minX; x <= extentsClose.maxX; x++)
@@ -263,23 +267,23 @@ public sealed class VehicleRegion : IPoolable
     }
   }
 
-	public void Init(VehicleDef def, int id, RegionGridType regionGridType)
+  internal void Init(IPathingManager pathing, VehicleDef def, int id, RegionGridType gridType)
   {
     vehicleDef = def;
     Id = id;
-    cellCount = -1;
-    debugMakeTick = Find.TickManager.TicksGame;
 
+    CellCount = 0;
+    debugMakeTick = Find.TickManager.TicksGame;
     type = RegionType.Normal;
-    gridType = regionGridType;
     extentsClose = CellRect.Empty;
     extentsLimit = CellRect.Empty;
-
     touchesMapEdge = false;
-    valid = true;
-
+    valid = gridType != RegionGridType.Invalid;
     reachedIndex = 0;
     newRegionGroupIndex = -1;
+
+    PathingManager = pathing;
+    GridType = gridType;
   }
 
   public void IncrementRefCount()
@@ -292,7 +296,7 @@ public sealed class VehicleRegion : IPoolable
     Interlocked.Decrement(ref referenceCount);
     if (ReferenceCount == 0)
     {
-      regionMaker.Return(this);
+      ObjectPool?.Return(this);
     }
   }
 
@@ -302,17 +306,6 @@ public sealed class VehicleRegion : IPoolable
     {
       links.Add(regionLink);
     }
-#if HIERARCHAL_PATHFINDING
-      //RecalculateWeights(); // TODO
-#endif
-  }
-
-  internal float WeightBetween(VehicleRegionLink linkA, VehicleRegionLink linkB)
-  {
-#if HIERARCHAL_PATHFINDING
-#endif
-    Log.Error($"Unable to pull weight between {linkA.anchor} and {linkB.anchor}");
-    return 0;
   }
 
   public void Reset()
@@ -322,11 +315,31 @@ public sealed class VehicleRegion : IPoolable
     // up for a different vehicle on a different map.
     valid = false;
     Room = null;
-    cellCount = 0;
+    CellCount = 0;
     referenceCount = 0;
     extentsClose = CellRect.Empty;
     extentsLimit = CellRect.Empty;
+
+    GridType = RegionGridType.Invalid;
     ClearLinks();
+  }
+
+  internal void CountCells()
+  {
+    // Need to use separate counter w/ atomic primitive assign, regions may be accessed from other threads.
+    int cellCount = 0;
+    for (int z = extentsClose.minZ; z <= extentsClose.maxZ; z++)
+    {
+      for (int x = extentsClose.minX; x <= extentsClose.maxX; x++)
+      {
+        IntVec3 cell = new(x, 0, z);
+        if (regionGrid.GetRegionAt(cell) == this)
+        {
+          cellCount++;
+        }
+      }
+    }
+    CellCount = cellCount;
   }
 
   private void ClearLinks()
@@ -340,6 +353,8 @@ public sealed class VehicleRegion : IPoolable
   /// <summary>
   /// Doesn't take movement ticks into account
   /// </summary>
+  // TODO 1.7 - Remove
+  [Obsolete("Will be removed in 1.7"), PublicAPI]
   public static int EuclideanDistance(IntVec3 cell, VehicleRegionLink link)
   {
     IntVec3 diff = cell - link.anchor;
@@ -349,14 +364,14 @@ public sealed class VehicleRegion : IPoolable
   /// <summary>
   /// <paramref name="traverseParms"/> allows this region
   /// </summary>
-  public bool Allows(TraverseParms traverseParms)
+  public bool Allows(in TraverseParms traverseParms)
   {
     return traverseParms.mode switch
     {
-      TraverseMode.PassAllDestroyableThings            => true,
-      TraverseMode.PassAllDestroyableThingsNotWater    => true,
+      TraverseMode.PassAllDestroyableThings => true,
+      TraverseMode.PassAllDestroyableThingsNotWater => true,
       TraverseMode.PassAllDestroyablePlayerOwnedThings => true,
-      _                                                => type.Passable()
+      _ => type.Passable()
     };
   }
 
@@ -371,6 +386,8 @@ public sealed class VehicleRegion : IPoolable
   /// <summary>
   /// Debug draw field edges of this region
   /// </summary>
+  // TODO 1.7 - Remove
+  [Obsolete("Use DebugDraw overload with DebugRegionType instead."), PublicAPI]
   public void DebugDraw()
   {
     GenDraw.DrawFieldEdges(Cells.ToList(), new Color(0f, 0f, 1f, 0.5f));
@@ -426,33 +443,6 @@ public sealed class VehicleRegion : IPoolable
         }
       }
     }
-#if HIERARCHAL_PATHFINDING
-    if ((debugRegionType & DebugRegionType.Weights) != 0)
-    {
-      DrawWeights();
-    }
-#endif
-  }
-
-  [Conditional("HIERARCHAL_PATHFINDING")]
-  private void DrawWeights()
-  {
-    using ListSnapshot<VehicleRegionLink> linksSnapshot = Links;
-    for (int i = 0; i < linksSnapshot.Count; i++)
-    {
-      VehicleRegionLink regionLink = linksSnapshot.items[i];
-      for (int j = i + 1; j < linksSnapshot.Count; j++)
-      {
-        VehicleRegionLink toRegionLink = linksSnapshot.items[j];
-
-        float weight = 1; // TODO
-        Vector3 from = regionLink.anchor.ToVector3();
-        from.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-        Vector3 to = toRegionLink.anchor.ToVector3();
-        to.y += AltitudeLayer.MapDataOverlay.AltitudeFor();
-        GenDraw.DrawLineBetween(from, to, VehicleRegionLink.WeightColor(weight));
-      }
-    }
   }
 
   /// <summary>
@@ -470,9 +460,8 @@ public sealed class VehicleRegion : IPoolable
           Rect rect = new(vector.x - 20f, vector.y - 20f, 40f, 40f);
           if (new Rect(0f, 0f, UI.screenWidth, UI.screenHeight).Overlaps(rect))
           {
-            Widgets.Label(rect,
-              Map.GetCachedMapComponent<VehiclePathingSystem>()[DebugHelper.Local.VehicleDef]
-               .VehiclePathGrid.PerceivedPathCostAt(intVec).ToString());
+            var pathCost = PathingManager.GetPathGrid(DebugHelper.Local.VehicleDef).PerceivedPathCostAt(intVec);
+            Widgets.Label(rect, pathCost.ToString());
           }
         }
       }

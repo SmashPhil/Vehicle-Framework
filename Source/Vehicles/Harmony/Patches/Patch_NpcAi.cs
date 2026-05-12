@@ -7,6 +7,7 @@ using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Config;
 using Verse;
 using Verse.AI;
 
@@ -30,7 +31,7 @@ internal class Patch_NpcAi : IPatchCategory
 	void IPatchCategory.PatchMethods()
 	{
 #if RAIDERS
-		if (VehicleMod.settings.debug.debugAllowRaiders)
+		if (FeatureFlags.RaidersEnabled)
 		{
 			VehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkIn);
 			VehicleArrivalModes.Add(PawnsArrivalModeDefOf.EdgeWalkInGroups);

@@ -6,7 +6,6 @@ using SmashTools.Performance;
 using Unity.Collections;
 using UnityEngine;
 using Verse;
-using PathFinder = SmashTools.Burst.PathFinder;
 
 namespace Vehicles;
 
@@ -17,16 +16,35 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
 {
   public const int ImpassableCost = 10000;
 
+  private readonly IPathGridCalculator calculator;
   private NativeArray<int> costGrid;
-  private PathFinder pathFinder;
 
-  public VehiclePathGrid(VehiclePathingSystem mapping, VehicleDef vehicleDef) : base(mapping,
-    vehicleDef)
+  /// <summary>
+  /// Emits when the path grid is about to recalculate the path cost of a cell and update the path grid array.
+  /// </summary>
+  /// <remarks>This is not called on the main thread.</remarks>
+  public event Action OnWritingToGrid;
+
+  /// <summary>
+  /// Emits when the walkability state of a cell changes.
+  /// </summary>
+  /// <remarks>
+  /// Listeners are notified with the coordinates of the cell whose walkability has changed.
+  /// </remarks>
+  public event Action<IntVec3> OnWalkabilityChanged;
+
+  public VehiclePathGrid(IPathingManager pathing, VehicleDef vehicleDef, IPathGridCalculator calculator) :
+    base(pathing, vehicleDef)
   {
-    costGrid = new NativeArray<int>(mapping.map.cellIndices.NumGridCells, Allocator.Persistent);
+    this.calculator = calculator;
+    costGrid = new NativeArray<int>(pathing.Map.cellIndices.NumGridCells, Allocator.Persistent);
   }
 
   public bool Enabled { get; private set; }
+
+  GridDebouncer IGridDebouncerSource.ActiveDebouncer { set => GridDebouncer = value; }
+
+  private GridDebouncer GridDebouncer { get; set; }
 
   public NativeArray<int>.ReadOnly CostGrid => costGrid.AsReadOnly();
 
@@ -38,22 +56,9 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     }
   }
 
-  public override void PostInit()
-  {
-    pathFinder = mapping[createdFor].PathFinder;
-  }
-
-  public void Release()
+  internal void Release()
   {
     Enabled = false;
-
-    if (mapping.GridOwners.IsOwner(createdFor) &&
-      !mapping.GridOwners.TryForfeitOwnership(createdFor))
-    {
-      // If there are no vehicles left to claim ownership, we should release the region grid
-      // rather than leave it in an invalid state.
-      mapping[createdFor].VehicleRegionAndRoomUpdater.Release();
-    }
   }
 
   /// <summary>
@@ -64,13 +69,13 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   {
     try
     {
-      return loc.InBounds(mapping.map) && WalkableFast(loc);
+      return loc.InBounds(map) && WalkableFast(loc);
     }
     catch (Exception ex)
     {
       Log.Error(
-        $"Mapping: {mapping is null} Map: {mapping?.map is null} CellInd: " +
-        $"{mapping?.map?.cellIndices is null} Info: {mapping?.map?.info}Exception: {ex}");
+        $"Mapping: {pathing is null} Map: {map is null} CellInd: " +
+        $"{map?.cellIndices is null} Info: {map?.info}Exception: {ex}");
       Log.Error($"StackTrace: {StackTraceUtility.ExtractStackTrace()}");
     }
 
@@ -83,7 +88,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   /// <param name="loc"></param>
   public bool WalkableFast(IntVec3 loc)
   {
-    return WalkableFast(mapping.map.cellIndices.CellToIndex(loc));
+    return WalkableFast(map.cellIndices.CellToIndex(loc));
   }
 
   /// <summary>
@@ -93,7 +98,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   /// <param name="z"></param>
   public bool WalkableFast(int x, int z)
   {
-    return WalkableFast(mapping.map.cellIndices.CellToIndex(x, z));
+    return WalkableFast(map.cellIndices.CellToIndex(x, z));
   }
 
   /// <summary>
@@ -111,12 +116,12 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   /// <param name="loc"></param>
   public int PerceivedPathCostAt(IntVec3 loc)
   {
-    return costGrid[mapping.map.cellIndices.CellToIndex(loc)];
+    return costGrid[map.cellIndices.CellToIndex(loc)];
   }
 
   void IGridDebouncerSource.Execute(int index)
   {
-    RecalculatePerceivedPathCostAt(mapping.map.cellIndices[index]);
+    RecalculatePerceivedPathCostAt(map.cellIndices[index]);
   }
 
   /// <summary>
@@ -140,50 +145,26 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   /// <param name="cell"></param>
   public void RecalculatePerceivedPathCostAt(IntVec3 cell)
   {
-    if (!cell.InBounds(mapping.map))
+    // PathGrid can get disabled while recalculating from another thread.
+    if (!cell.InBounds(map) || !Enabled)
       return;
 
-    if (mapping.DebouncingPathGridDirtying)
+    if (GridDebouncer != null)
     {
-      mapping.PathGridDebouncer.SetDirty(cell);
+      GridDebouncer.SetDirty(cell);
       return;
     }
 
-    StringBuilder debugString = null;
-#if DEBUG
-    if (VehicleMod.settings.debug.debugPathCostChanges)
-    {
-      debugString = new StringBuilder();
-    }
-#endif
-
-    // TODO BURST - Remove null check when feature is finalized
-    pathFinder?.NotifyWritingToGrid();
+    OnWritingToGrid?.Invoke();
     bool walkable = WalkableFast(cell);
     // TODO 1.7 - convert all calculate functions to ushort return types
-    costGrid[mapping.map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell, debugString);
+    costGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell);
     bool walkabilityChanged = WalkableFast(cell) != walkable;
 
-#if DEBUG
-    if (VehicleMod.settings.debug.debugPathCostChanges)
-    {
-      debugString!.Append($"WalkableNew: {WalkableFast(cell)} WalkableOld: {walkable}");
-      Debug.Message(debugString.ToStringSafe());
-    }
-#endif
     if (walkabilityChanged)
     {
-      OnWalkabilityChanged(cell);
+      OnWalkabilityChanged?.Invoke(cell);
     }
-  }
-
-  private void OnWalkabilityChanged(IntVec3 cell)
-  {
-    if (mapping[createdFor].Suspended)
-      return;
-
-    mapping[createdFor].VehicleReachability.ClearCache();
-    mapping[createdFor].VehicleRegionDirtyer.NotifyWalkabilityChanged(cell);
   }
 
   /// <summary>
@@ -193,24 +174,25 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
   {
     Enabled = true;
 
-    foreach (IntVec3 cell in mapping.map.AllCells)
+    foreach (IntVec3 cell in map.AllCells)
     {
       RecalculatePerceivedPathCostAt(cell);
     }
   }
 
+  // TODO 1.7 - Remove
   /// <summary>
   /// Calculate cost at <paramref name="cell"/>
   /// </summary>
   public int CalculatedCostAt(IntVec3 cell, StringBuilder stringBuilder = null)
   {
-    return CalculatePathCostFor(createdFor, mapping.map, cell, stringBuilder);
+    return calculator.PathCostAt(map, cell, createdFor);
   }
 
   /// <summary>
   /// Static calculation that allows for pseudo-calculations outside real-time pathgrids
   /// </summary>
-  [Profile]
+  [Profile, Obsolete("Path cost calculations have been moved to PathGridCalculator")]
   public static int CalculatePathCostFor(VehicleDef vehicleDef, Map map, IntVec3 cell,
     StringBuilder stringBuilder = null)
   {
@@ -303,6 +285,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     return thingPathCost;
   }
 
+  // TODO 1.7 - Get rid of the unused out parameter 'pathCost'
   public static bool PassableTerrainCost(VehicleDef vehicleDef, TerrainDef terrainDef,
     out int pathCost, StringBuilder stringBuilder = null)
   {

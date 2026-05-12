@@ -6,7 +6,10 @@
   </log>
 
   <warningsAllowed>
+    <!-- Intermittent vanilla bug -->
     <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
+    <!-- GenStep_BaseRuins fails to find valid location on small maps, but fails safely -->
+    <li>did not find any valid rects to generate ruins in for bounds</li>
   </warningsAllowed>
 
   <preTestActions>
@@ -17,8 +20,4 @@
     <li>Vehicles.TestActions.EmptyWorldAndMapOfVehicles</li>
     <li>Vehicles.TestActions.ClearVanillaVehiclesExpandedTrackerCache</li>
   </postTestActions>
-
-  <map>
-    <size>50</size>
-  </map>
 </Config>

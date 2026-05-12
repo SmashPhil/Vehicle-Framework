@@ -53,10 +53,6 @@ public partial class VehiclePawn
 
   private Command_Toggle fishToggle;
 
-#if DEBUG && RAIDERS
-  private Editor.PathPreview previewer;
-#endif
-
   public float CachedAngle { get; set; }
 
   public bool NorthSouthRotation => VehicleGraphic.EastDiagonalRotated &&
@@ -1180,10 +1176,6 @@ public partial class VehiclePawn
           options.Add(new FloatMenuOption("Open in Animator (test version)", OpenInNewAnimator));
 #endif
 
-#if DEBUG && RAIDERS
-          previewer ??= new(this);
-          options.Add(new FloatMenuOption("Path Preview", previewer.Start));
-#endif
           if (options.Count > 0)
           {
             Find.WindowStack.Add(new FloatMenu(options));

@@ -1,9 +1,6 @@
 ### ASSERT_ENABLED
 Enable all asserts even outside release.
 
-### HIERARCHAL_PATHFINDING
-Enables experimental HPA* for vehicle pathfinding
-
 ### UPGRADES_TAB
 Add 'Upgrades' tab to VF mod settings
 

@@ -31,13 +31,14 @@ public class VehicleRegionMaker : VehicleGridManager
   private readonly FloodFiller floodFiller;
   private int nextId = 1;
 
-  public VehicleRegionMaker(VehiclePathingSystem mapping, VehicleDef createdFor) : base(mapping,
+  public VehicleRegionMaker(IPathingManager pathing, VehicleDef createdFor) : base(pathing,
     createdFor)
   {
     const float PoolSize = 0.5f; // Create pool for 50% of average regions / links count
 
-    float totalRegions = ((float)mapping.map.Size.x / VehicleRegion.ChunkSize) *
-      ((float)mapping.map.Size.z / VehicleRegion.ChunkSize);
+    int gridCount = VehicleRegionGridManager.AllGridTypes.Length;
+    float totalRegions = ((float)pathing.Map.Size.x / VehicleRegion.ChunkSize) *
+      ((float)pathing.Map.Size.z / VehicleRegion.ChunkSize) * gridCount;
     int regions = Mathf.CeilToInt(totalRegions * PoolSize);
     int links = Mathf.CeilToInt(regions * 4); // 4 cardinal directions are typical
     regionPool = new ObjectPool<VehicleRegion>(regions);
@@ -50,7 +51,7 @@ public class VehicleRegionMaker : VehicleGridManager
   public override void PostInit()
   {
     base.PostInit();
-    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
+    regionGridManager = pathing.GetRegionGridManager(createdFor);
   }
 
   /// <summary>
@@ -60,7 +61,7 @@ public class VehicleRegionMaker : VehicleGridManager
   public RegionResult TryGenerateRegionFrom(IntVec3 root, RegionGridType gridType, ref VehicleRegion region)
   {
     VehicleRegionGrid regionGrid = regionGridManager[gridType];
-    RegionType expectedRegionType = regionGrid.Source.ExpectedRegionType(root, mapping, createdFor);
+    RegionType expectedRegionType = regionGrid.Source.ExpectedRegionType(root, pathing, createdFor);
 
     if (expectedRegionType == RegionType.None)
       return RegionResult.NoRegion;
@@ -79,7 +80,7 @@ public class VehicleRegionMaker : VehicleGridManager
       region = GetRegion(root, gridType);
       region.type = expectedRegionType;
 
-      FloodFill(region, root);
+      floodFiller.FloodFill(root, region, CancellationToken.None);
       CreateLinks(region);
     }
     catch (Exception ex)
@@ -96,13 +97,6 @@ public class VehicleRegionMaker : VehicleGridManager
     return RegionResult.Success;
   }
 
-  [Profile]
-  private void FloodFill(VehicleRegion region, IntVec3 root)
-  {
-    regionCells.Clear();
-    floodFiller.FloodFill(root, region, CancellationToken.None);
-  }
-
   /// <summary>
   /// Generate region links for region currently being created
   /// </summary>
@@ -113,10 +107,10 @@ public class VehicleRegionMaker : VehicleGridManager
     Assert.IsTrue(linksProcessedAt.All(static set => set.Count == 0));
     foreach (IntVec3 cell in regionCells)
     {
-      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.North, cell, linksProcessedAt);
-      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.South, cell, linksProcessedAt);
-      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.East, cell, linksProcessedAt);
-      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.West, cell, linksProcessedAt);
+      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.North, cell, linksProcessedAt[Rot4.NorthInt]);
+      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.South, cell, linksProcessedAt[Rot4.SouthInt]);
+      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.East, cell, linksProcessedAt[Rot4.EastInt]);
+      SweepInTwoDirectionsAndTryToCreateLink(region, Rot4.West, cell, linksProcessedAt[Rot4.WestInt]);
     }
     foreach (HashSet<IntVec3> linksProcessed in linksProcessedAt)
     {
@@ -128,20 +122,19 @@ public class VehicleRegionMaker : VehicleGridManager
   /// Try to make region link with neighboring rotations as fallback
   /// </summary>
   private void SweepInTwoDirectionsAndTryToCreateLink(VehicleRegion region,
-    Rot4 potentialOtherRegionDir, IntVec3 cell, HashSet<IntVec3>[] linksProcessedAt)
+    Rot4 potentialOtherRegionDir, IntVec3 cell, HashSet<IntVec3> linksProcessed)
   {
     if (!potentialOtherRegionDir.IsValid)
       return;
 
-    HashSet<IntVec3> linksProcessed = linksProcessedAt[potentialOtherRegionDir.AsInt];
     if (linksProcessed.Contains(cell))
       return;
 
     IntVec3 facingCell = cell + potentialOtherRegionDir.FacingCell;
-    if (facingCell.InBounds(mapping.map) && regionGridManager[region.gridType].GetRegionAt(facingCell) == region)
+    if (facingCell.InBounds(map) && regionGridManager[region.GridType].GetRegionAt(facingCell) == region)
       return;
 
-    RegionType expectedRegionType = regionGridManager[region.gridType].Source.ExpectedRegionType(facingCell, mapping, createdFor);
+    RegionType expectedRegionType = regionGridManager[region.GridType].Source.ExpectedRegionType(facingCell, pathing, createdFor);
     if (expectedRegionType == RegionType.None)
       return;
 
@@ -153,17 +146,17 @@ public class VehicleRegionMaker : VehicleGridManager
 
     if (!expectedRegionType.IsOneCellRegion())
     {
-      VehicleRegionGrid regionGrid = regionGridManager[region.gridType];
+      VehicleRegionGrid regionGrid = regionGridManager[region.GridType];
       bool IsInvalidForLinking(Rot4 rot, IntVec3 next)
       {
-        if (!next.InBounds(mapping.map))
+        if (!next.InBounds(map))
           return true;
 
         if (regionGrid.GetRegionAt(next) != region)
           return true;
 
-        return regionGridManager[region.gridType].Source
-          .ExpectedRegionType(next + rot.FacingCell, mapping, createdFor) != expectedRegionType;
+        return regionGridManager[region.GridType].Source
+          .ExpectedRegionType(next + rot.FacingCell, pathing, createdFor) != expectedRegionType;
       }
 
       for (spanRight = 0; spanRight <= VehicleRegion.ChunkSize; spanRight++)
@@ -212,7 +205,7 @@ public class VehicleRegionMaker : VehicleGridManager
     }
 
     EdgeSpan span = new(root, dir, length);
-    VehicleRegionLink regionLink = linkDatabase.LinkFrom(span, region.gridType);
+    VehicleRegionLink regionLink = linkDatabase.LinkFrom(span, region.GridType);
     regionLink.Register(region, potentialOtherRegionDir);
     region.AddLink(regionLink);
   }
@@ -239,13 +232,14 @@ public class VehicleRegionMaker : VehicleGridManager
       SetNew(region, root, gridType);
       return region;
     }
-    region = CreateNew(root, gridType);
+    region = GetNew(root, gridType);
     return region;
   }
 
-  private VehicleRegion CreateNew(IntVec3 root, RegionGridType gridType)
+  private VehicleRegion GetNew(IntVec3 root, RegionGridType gridType)
   {
     VehicleRegion region = regionPool.Get();
+    region.ObjectPool = regionPool;
     SetNew(region, root, gridType);
     return region;
   }
@@ -259,16 +253,15 @@ public class VehicleRegionMaker : VehicleGridManager
     }
 
     int id = GetRegionId();
-    region.Init(createdFor, id, gridType);
-    region.Map = mapping.map;
-    region.extentsClose = new CellRect()
+    region.Init(pathing, createdFor, id, gridType);
+    region.extentsClose = new CellRect
     {
       minX = root.x,
       maxX = root.x,
       minZ = root.z,
       maxZ = root.z
     };
-    region.extentsLimit = VehicleRegion.ChunkAt(root).ClipInsideMap(mapping.map);
+    region.extentsLimit = VehicleRegion.ChunkAt(root).ClipInsideMap(map);
   }
 
   private int GetRegionId()
@@ -317,7 +310,7 @@ public class VehicleRegionMaker : VehicleGridManager
 
     private readonly int mapWidth;
     private readonly int mapHeight;
-    private readonly VehiclePathingSystem pathingSystem;
+    private readonly IPathingManager pathing;
 
     private readonly FlatQueue<IntVec3> openQueue = new(BufferSize);
     private readonly uint[] visited = new uint[BufferSize];
@@ -327,8 +320,8 @@ public class VehicleRegionMaker : VehicleGridManager
     public FloodFiller(VehicleRegionMaker regionMaker)
     {
       this.regionMaker = regionMaker;
-      pathingSystem = regionMaker.mapping;
-      Map map = regionMaker.mapping.map;
+      pathing = regionMaker.pathing;
+      Map map = regionMaker.map;
       (mapWidth, mapHeight) = (map.Size.x, map.Size.z);
     }
 
@@ -345,7 +338,7 @@ public class VehicleRegionMaker : VehicleGridManager
     private void Init(VehicleRegion region)
     {
       Region = region;
-      RegionGrid = regionMaker.regionGridManager[region.gridType];
+      RegionGrid = regionMaker.regionGridManager[region.GridType];
       visitId++;
     }
 
@@ -409,7 +402,7 @@ public class VehicleRegionMaker : VehicleGridManager
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private bool CanEnter(IntVec3 cell)
     {
-      return RegionGrid.Source.ExpectedRegionType(cell, pathingSystem, CreatedFor) == Region.type;
+      return RegionGrid.Source.ExpectedRegionType(cell, pathing, CreatedFor) == Region.type;
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -463,6 +456,7 @@ public class VehicleRegionMaker : VehicleGridManager
             openQueue.Enqueue(neighbor);
           }
         }
+        Region.CountCells();
       }
       catch (Exception ex)
       {

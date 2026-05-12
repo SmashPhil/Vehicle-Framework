@@ -228,7 +228,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 		}.Start();
 	}
 
-	protected override void Tick()
+  protected override void Tick()
 	{
 		base.Tick();
 		if (vehicle.CompVehicleLauncher.inFlight)

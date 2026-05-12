@@ -9,7 +9,6 @@ public enum DebugRegionType
   Regions = 1 << 0,
   Rooms = 1 << 1,
   Links = 1 << 2,
-  Weights = 1 << 3,
-  PathCosts = 1 << 4,
-  References = 1 << 5,
+  PathCosts = 1 << 3,
+  References = 1 << 4,
 }

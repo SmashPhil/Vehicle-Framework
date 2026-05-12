@@ -99,7 +99,7 @@ internal class TestActions
     {
       if (pawn is VehiclePawn { Destroyed: false } vehicle)
       {
-        Expect.IsTrue(false, "WorldPawn vehicle still alive.");
+        Test.Fail("WorldPawn vehicle still alive.");
         DestroyAndRemoveFromWorldPawns(vehicle);
       }
     }
@@ -109,7 +109,7 @@ internal class TestActions
       {
         if (pawn is VehiclePawn { Destroyed: false } vehicle)
         {
-          Expect.IsTrue(false, "MapPawn vehicle still alive.");
+          Test.Fail("MapPawn vehicle still alive.");
           DestroyAndRemoveFromWorldPawns(vehicle);
         }
       }
@@ -119,10 +119,14 @@ internal class TestActions
     static void DestroyAndRemoveFromWorldPawns(VehiclePawn vehicle)
     {
       if (!vehicle.Destroyed)
+      {
         vehicle.DestroyVehicleAndPawns();
+      }
       Assert.IsTrue(vehicle.Destroyed);
       if (Find.WorldPawns.Contains(vehicle))
+      {
         Find.WorldPawns.RemoveAndDiscardPawnViaGC(vehicle);
+      }
       Assert.IsFalse(Find.WorldPawns.Contains(vehicle));
     }
   }

@@ -1,23 +1,24 @@
 <Project>
-  <PropertyGroup>
-    <Configurations>Debug;Unstable;Release;ReleaseTesting;</Configurations>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+	<PropertyGroup>
+		<Configurations>Debug;Unstable;Release;ReleaseTesting;</Configurations>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
 
-    <GenerateDocumentationFile>False</GenerateDocumentationFile>
-    <Deterministic>true</Deterministic>
-    <OutputType>Library</OutputType>
-    <TargetFramework>net48</TargetFramework>
-    <LangVersion>preview</LangVersion>
-    <FileAlignment>512</FileAlignment>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
+		<GenerateDocumentationFile>False</GenerateDocumentationFile>
+		<Deterministic>true</Deterministic>
+		<OutputType>Library</OutputType>
+		<TargetFramework>net48</TargetFramework>
+		<LangVersion>preview</LangVersion>
+		<FileAlignment>512</FileAlignment>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
 
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    <NoWarn>CS0649</NoWarn>
-    <DebugType>embedded</DebugType>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+		<NoWarn>CS0649</NoWarn>
+		<DebugType>embedded</DebugType>
 
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<UseLocalBurstLib>false</UseLocalBurstLib>
+	</PropertyGroup>
 </Project>

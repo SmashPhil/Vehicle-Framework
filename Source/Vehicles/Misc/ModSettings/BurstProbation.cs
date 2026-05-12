@@ -13,13 +13,13 @@ internal struct BurstProbation : IDisposable
 {
   public BurstProbation()
   {
-    VehicleMod.settings.main.burstProbation = true;
+    VehicleMod.settings.main.testingBurst = true;
     VehicleMod.settings.Write();
   }
 
   void IDisposable.Dispose()
   {
-    VehicleMod.settings.main.burstProbation = false;
+    VehicleMod.settings.main.testingBurst = false;
     VehicleMod.settings.Write();
   }
 }

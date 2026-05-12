@@ -127,7 +127,7 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 
 		bool IPoolable.InPool { get; set; }
 
-		public void Add(ThingDef thingDef)
+    public void Add(ThingDef thingDef)
 		{
 			neededThingDefs.Add(thingDef);
 		}
@@ -150,7 +150,7 @@ public abstract class JobDriverGetItemForVehicleBase : JobDriverLoadVehicleBase
 
 		bool IPoolable.InPool { get; set; }
 
-		ThingDef ISharedJobSearch.ThingDef => thingDefCount.thingDef;
+    ThingDef ISharedJobSearch.ThingDef => thingDefCount.thingDef;
 
 		public void Init(JobDef jobDef, ThingDefCountClass thingDefCount)
 		{

@@ -399,7 +399,7 @@ public static class CellFinderExtended
 
 		Map map = vehicle.Map;
 		VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-		VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+		PathData pathData = mapping[vehicle.VehicleDef];
 
 		Danger maxDanger = Danger.Some;
 		for (int i = 0; i < 40; i++)
@@ -456,7 +456,7 @@ public static class CellFinderExtended
 		cell = IntVec3.Invalid;
 		Map map = vehicle.Map;
 		VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
-		VehiclePathingSystem.VehiclePathData pathData = mapping[vehicle.VehicleDef];
+		PathData pathData = mapping[vehicle.VehicleDef];
 		if (!pathData.VehicleReachability.CanReachMapEdge(vehicle.Position,
 			TraverseParms.For(vehicle)))
 		{

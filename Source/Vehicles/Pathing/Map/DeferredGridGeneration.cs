@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using CoreLib;
 using CoreLib.Performance;
 using JetBrains.Annotations;
 using LudeonTK;
@@ -34,7 +33,7 @@ public class DeferredGridGeneration
 
   internal void GenerateAllPathGrids()
   {
-    // We don't want this to change mid execution, either queue all or none
+    // We don't want this to change mid-execution, either queue all or none
     bool deferred = mapping.ThreadAvailable;
     AsyncLongOperationAction longOperation =
       deferred ? AsyncPool<AsyncLongOperationAction>.Get() : null;
@@ -58,7 +57,7 @@ public class DeferredGridGeneration
 
   internal void GenerateAllRegionGrids()
   {
-    // We don't want this to change mid execution, either queue all or none
+    // We don't want this to change mid-execution, either queue all or none
     bool deferred = mapping.ThreadAvailable;
     AsyncLongOperationAction longOperation =
       deferred ? AsyncPool<AsyncLongOperationAction>.Get() : null;
@@ -174,7 +173,7 @@ public class DeferredGridGeneration
 
     foreach (VehicleDef vehicleDef in mapping.GridOwners.AllOwners)
     {
-      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
+      PathData pathData = mapping[vehicleDef];
       if (!pathData.VehiclePathGrid.Enabled && !mapping.GridOwners.TryForfeitOwnership(vehicleDef))
       {
         ReleaseRegionGrid(vehicleDef);
@@ -189,6 +188,7 @@ public class DeferredGridGeneration
     // Path grid has already been initialized
     if (mapping[vehicleDef].VehiclePathGrid.Enabled)
       return false;
+
     longOperation.OnInvoke += () => GeneratePathGridFor(vehicleDef);
     return true;
   }
@@ -199,14 +199,14 @@ public class DeferredGridGeneration
     // Region grid has already been initialized
     if (!mapping[vehicleDef].Suspended)
       return false;
+
     longOperation.OnInvoke += () => GenerateRegionGridFor(vehicleDef);
     return true;
   }
 
   private void GeneratePathGridFor(VehicleDef vehicleDef)
   {
-    VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
-
+    PathData pathData = mapping[vehicleDef];
     if (pathData.VehiclePathGrid.Enabled)
       return;
 
@@ -221,18 +221,24 @@ public class DeferredGridGeneration
     if (!mapping[vehicleDef].Suspended)
       return;
 
-    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
+    PathData pathData = mapping[ownerDef];
     pathData.VehicleRegionAndRoomUpdater.Init();
     pathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
   }
 
   private void ReleasePathGrid(VehicleDef ownerDef)
   {
-    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
+    PathData pathData = mapping[ownerDef];
     if (!pathData.VehiclePathGrid.Enabled)
       return;
 
     pathData.VehiclePathGrid.Release();
+    if (mapping.GridOwners.IsOwner(ownerDef) && !mapping.GridOwners.TryForfeitOwnership(ownerDef))
+    {
+      // If there are no vehicles left to claim ownership, we should release the region grid
+      // rather than leave it in an invalid state.
+      pathData.VehicleRegionAndRoomUpdater.Release();
+    }
 
 #if DEBUG
     Ext_Messages.Message($"Released PathGrid for {ownerDef}", MessageTypeDefOf.SilentInput,
@@ -242,7 +248,7 @@ public class DeferredGridGeneration
 
   private void ReleaseRegionGrid(VehicleDef ownerDef)
   {
-    VehiclePathingSystem.VehiclePathData pathData = mapping[ownerDef];
+    PathData pathData = mapping[ownerDef];
     if (pathData.Suspended)
       return;
 

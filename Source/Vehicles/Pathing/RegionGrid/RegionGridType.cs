@@ -6,5 +6,6 @@ namespace Vehicles;
 public enum RegionGridType
 {
   Normal,
-  Breach
+  Breach,
+  Invalid = 0xFF
 }

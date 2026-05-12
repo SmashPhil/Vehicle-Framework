@@ -1,12 +1,13 @@
-﻿using System;
-using Verse;
+﻿using JetBrains.Annotations;
 using SmashTools;
+using Verse;
 
 namespace Vehicles;
 
 /// <summary>
 /// Region and room retrieval helper methods
 /// </summary>
+[PublicAPI]
 public static class VehicleRegionAndRoomQuery
 {
   public static VehicleRegion RegionAt(IntVec3 cell, Map map, VehicleDef vehicleDef,
@@ -32,6 +33,31 @@ public static class VehicleRegionAndRoomQuery
       return null;
     }
     VehicleRegion validRegionAt = mapping[vehicleDef].VehicleRegionGridManager[gridType].GetValidRegionAt(cell);
+    if (validRegionAt != null && (allowedRegionTypes & validRegionAt.type) == validRegionAt.type)
+    {
+      return validRegionAt;
+    }
+    return null;
+  }
+
+  public static VehicleRegion RegionAt(IntVec3 cell, IPathingManager pathing, VehicleDef vehicleDef,
+    RegionType allowedRegionTypes = RegionType.Set_Passable)
+  {
+    return RegionAt(cell, pathing, vehicleDef, RegionGridType.Normal, allowedRegionTypes);
+  }
+
+  /// <summary>
+  /// Retrieve region at <paramref name="cell"/> for <paramref name="vehicleDef"/>
+  /// </summary>
+  public static VehicleRegion RegionAt(IntVec3 cell, IPathingManager pathing, VehicleDef vehicleDef,
+    RegionGridType gridType, RegionType allowedRegionTypes = RegionType.Set_Passable)
+  {
+    if (!cell.InBounds(pathing.Map))
+    {
+      return null;
+    }
+    VehicleRegionGridManager gridManager = pathing.GetRegionGridManager(vehicleDef);
+    VehicleRegion validRegionAt = gridManager[gridType].GetValidRegionAt(cell);
     if (validRegionAt != null && (allowedRegionTypes & validRegionAt.type) == validRegionAt.type)
     {
       return validRegionAt;

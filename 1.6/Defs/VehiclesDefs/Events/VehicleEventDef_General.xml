@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8" ?>
 
 <Defs>
+	<!-- General -->
+	 <Vehicles.VehicleEventDef>
+		<defName>FactionChanged</defName>
+	 </Vehicles.VehicleEventDef>
+	 
 	<!-- Movement -->
 	<Vehicles.VehicleEventDef>
 		<defName>IgnitionOn</defName>
