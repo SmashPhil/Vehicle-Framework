@@ -25,7 +25,8 @@ public class VehicleRegionCostCalculator
   private static readonly List<int> TmpPathableNeighborIndices = [];
   private static readonly Dictionary<int, float> TmpDistances = [];
 
-  private readonly VehiclePathingSystem mapping;
+  private readonly IPathingManager manager;
+  private readonly Map map;
   private readonly VehicleDef vehicleDef;
 
   private AvoidGrid avoidGrid;
@@ -51,24 +52,22 @@ public class VehicleRegionCostCalculator
 
   private readonly List<Pair<VehicleRegionLink, int>> preciseRegionLinkDistances = [];
 
-  public VehicleRegionCostCalculator(VehiclePathingSystem mapping, VehicleDef vehicleDef)
+  public VehicleRegionCostCalculator(VehiclePathingSystem mapping, VehicleDef vehicleDef) :
+    this((IPathingManager)mapping, vehicleDef)
   {
-    this.mapping = mapping;
+  }
+
+  public VehicleRegionCostCalculator(IPathingManager manager, VehicleDef vehicleDef)
+  {
+    this.manager = manager;
+    map = manager.Map;
     this.vehicleDef = vehicleDef;
-    preciseRegionLinkDistancesDistanceGetter =
-      new Func<int, int, float>(PreciseRegionLinkDistancesDistanceGetter);
+    preciseRegionLinkDistancesDistanceGetter = PreciseRegionLinkDistancesDistanceGetter;
   }
 
   /// <summary>
   /// Initialize region cost calculation between region to region
   /// </summary>
-  /// <param name="destination"></param>
-  /// <param name="destRegions"></param>
-  /// <param name="parms"></param>
-  /// <param name="moveTicksCardinal"></param>
-  /// <param name="moveTicksDiagonal"></param>
-  /// <param name="avoidGrid"></param>
-  /// <param name="drafted"></param>
   public void Init(CellRect destination, HashSet<VehicleRegion> destRegions, TraverseParms parms,
     float moveTicksCardinal, float moveTicksDiagonal, AvoidGrid avoidGrid, bool drafted)
   {
@@ -236,7 +235,7 @@ public class VehicleRegionCostCalculator
     {
       return result;
     }
-    CellIndices cellIndices = mapping.map.cellIndices;
+    CellIndices cellIndices = map.cellIndices;
     Rand.PushState();
     Rand.Seed = cellIndices.CellToIndex(region.extentsClose.CenterCell) * (region.LinksCount + 1);
     for (int i = 0; i < SampleCount; i++)
@@ -255,14 +254,14 @@ public class VehicleRegionCostCalculator
   /// </summary>
   private int GetCellCostFast(int index)
   {
-    int num = mapping[vehicleDef].VehiclePathGrid[index];
+    int num = manager.GetPathGrid(vehicleDef)[index];
     if (avoidGrid != null)
     {
       num += avoidGrid.Grid[index] * 8;
     }
     num += drafted ?
-      mapping.map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost :
-      mapping.map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
+      map.terrainGrid.topGrid[index].extraDraftedPerceivedPathCost :
+      map.terrainGrid.topGrid[index].extraNonDraftedPerceivedPathCost;
     return num;
   }
 
@@ -406,15 +405,15 @@ public class VehicleRegionCostCalculator
     TmpCellIndices.Clear();
     if (destination.Width == 1 && destination.Height == 1)
     {
-      TmpCellIndices.Add(mapping.map.cellIndices.CellToIndex(destination.CenterCell));
+      TmpCellIndices.Add(map.cellIndices.CellToIndex(destination.CenterCell));
     }
     else
     {
       foreach (IntVec3 cell in destination)
       {
-        if (cell.InBounds(mapping.map))
+        if (cell.InBounds(map))
         {
-          TmpCellIndices.Add(mapping.map.cellIndices.CellToIndex(cell));
+          TmpCellIndices.Add(map.cellIndices.CellToIndex(cell));
         }
       }
     }
@@ -427,7 +426,7 @@ public class VehicleRegionCostCalculator
       if (regionLink.GetOtherRegion(region).Allows(traverseParms))
       {
         if (!TmpDistances.TryGetValue(
-          mapping.map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))
+          map.cellIndices.CellToIndex(linkTargetCells[regionLink]), out float num))
         {
           Log.ErrorOnce(
             "Dijkstra couldn't reach one of the cells even though they are in the same region. There is most likely something wrong with the " +
@@ -446,7 +445,7 @@ public class VehicleRegionCostCalculator
   /// </summary>
   private IEnumerable<int> PreciseRegionLinkDistancesNeighborsGetter(int node, VehicleRegion region)
   {
-    VehicleRegion[] directGrid = mapping[vehicleDef].VehicleRegionGridManager[region.gridType].DirectGrid;
+    VehicleRegion[] directGrid = manager.GetRegionGridManager(vehicleDef)[region.GridType].DirectGrid;
     if (directGrid?[node] is null || directGrid[node] != region)
     {
       return null;
@@ -472,7 +471,7 @@ public class VehicleRegionCostCalculator
   /// <param name="b"></param>
   private bool AreCellsDiagonal(int a, int b)
   {
-    int x = mapping.map.Size.x;
+    int x = map.Size.x;
     return a % x != b % x && a / x != b / x;
   }
 
@@ -483,12 +482,12 @@ public class VehicleRegionCostCalculator
   private List<int> PathableNeighborIndices(int index)
   {
     TmpPathableNeighborIndices.Clear();
-    VehiclePathGrid pathGrid = mapping[vehicleDef].VehiclePathGrid;
-    int x = mapping.map.Size.x;
+    VehiclePathGrid pathGrid = manager.GetPathGrid(vehicleDef);
+    int x = map.Size.x;
     bool flag = index % x > 0;
     bool flag2 = index % x < x - 1;
     bool flag3 = index >= x;
-    bool flag4 = index / x < mapping.map.Size.z - 1;
+    bool flag4 = index / x < map.Size.z - 1;
     if (flag3 && pathGrid.WalkableFast(index - x))
     {
       TmpPathableNeighborIndices.Add(index - x);
@@ -506,10 +505,10 @@ public class VehicleRegionCostCalculator
       TmpPathableNeighborIndices.Add(index + x);
     }
     bool flag5 = !flag ||
-      VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index - 1);
+      VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index - 1);
     bool flag6 = !flag2 ||
-      VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index + 1);
-    if (flag3 && !VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index - x))
+      VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index + 1);
+    if (flag3 && !VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index - x))
     {
       if (!flag6 && pathGrid.WalkableFast(index - x + 1))
       {
@@ -520,7 +519,7 @@ public class VehicleRegionCostCalculator
         TmpPathableNeighborIndices.Add(index - x - 1);
       }
     }
-    if (flag4 && !VehiclePathFinder.BlocksDiagonalMovement(mapping.map, vehicleDef, index + x))
+    if (flag4 && !VehiclePathFinder.BlocksDiagonalMovement(map, vehicleDef, index + x))
     {
       if (!flag6 && pathGrid.WalkableFast(index + x + 1))
       {

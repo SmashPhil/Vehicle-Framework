@@ -3,9 +3,9 @@ using DevTools.Testing;
 using Verse;
 
 // ReSharper disable all
-namespace SmashTools.UnitTesting;
+namespace SmashTools.Testing;
 
-[UnitTest(TestType.MainMenu)]
+[TestFixture(TestType.MainMenu)]
 [Disabled]
 public sealed class LudeonCode
 {
@@ -66,11 +66,11 @@ public sealed class LudeonCode
     // This next line throws because if no namespace is included, the type fails to resolve. Additionally you can ONLY
     // include 1 namespace name, any extended namespace will throw.
     Expect.Throws<NullReferenceException>(() =>
-      ParseHelper.ParseAction("UnitTest_LudeonCode.ParseHelperAction"));
+      ParseHelper.ParseAction("TestFixture_LudeonCode.ParseHelperAction"));
     Expect.Throws<NullReferenceException>(() =>
-      ParseHelper.ParseAction("SmashTools.UnitTest_LudeonCode.ParseHelperAction"));
+      ParseHelper.ParseAction("SmashTools.TestFixture_LudeonCode.ParseHelperAction"));
     Expect.Throws<NullReferenceException>(() =>
-      ParseHelper.ParseAction("SmashTools.UnitTesting.UnitTest_LudeonCode.ParseHelperAction"));
+      ParseHelper.ParseAction("SmashTools.Testing.TestFixture_LudeonCode.ParseHelperAction"));
     Expect.Throws<NullReferenceException>(() =>
       ParseHelper.ParseAction("12+1?l8`.+InvalidMethodName"));
   }

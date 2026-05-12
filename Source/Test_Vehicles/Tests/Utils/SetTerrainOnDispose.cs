@@ -1,7 +1,7 @@
 ﻿using System;
 using Verse;
 
-namespace Vehicles.UnitTesting;
+namespace Vehicles.Testing;
 
 public readonly struct SetTerrainOnDispose(Map map, TerrainDef terrainDef, CellRect area) : IDisposable
 {

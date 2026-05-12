@@ -12,6 +12,7 @@ using Verse;
 
 namespace Vehicles;
 
+[Obsolete] // TODO 1.7 - Remove
 public class VehicleRegionConnector : VehicleGridManager
 {
   private const int ChunkCellCount = VehicleRegion.ChunkSize * VehicleRegion.ChunkSize;
@@ -46,8 +47,8 @@ public class VehicleRegionConnector : VehicleGridManager
   public override void PostInit()
   {
     base.PostInit();
-    pathGrid = mapping[createdFor].VehiclePathGrid;
-    regionGridManager = mapping[createdFor].VehicleRegionGridManager;
+    pathGrid = pathing.GetPathGrid(createdFor);
+    regionGridManager = null;//pathing[createdFor].VehicleRegionGridManager;
   }
 
   public void RebuildAllConnections()
@@ -105,8 +106,8 @@ public class VehicleRegionConnector : VehicleGridManager
   {
     float cost = costFinder.Value.ConnectionCost(region, from, to);
     ulong hash = from.UniqueHashCode();
-    int fromIdx = mapping.map.cellIndices.CellToIndex(from);
-    int toIdx = mapping.map.cellIndices.CellToIndex(from);
+    int fromIdx = map.cellIndices.CellToIndex(from);
+    int toIdx = map.cellIndices.CellToIndex(from);
     group.Add(hash, fromIdx, toIdx, cost);
   }
 
@@ -131,8 +132,8 @@ public class VehicleRegionConnector : VehicleGridManager
     }
   }
 
-  [DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Rebuild All Connections",
-    actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
+  //[DebugAction(category = VehicleHarmony.VehiclesLabel, name = "Rebuild All Connections",
+  //  actionType = DebugActionType.Action, allowedGameStates = AllowedGameStates.PlayingOnMap)]
   private static void DebugRebuildAllConnections()
   {
     Map map = Find.CurrentMap;
@@ -144,7 +145,7 @@ public class VehicleRegionConnector : VehicleGridManager
       mapping.GridOwners.AllOwners.FirstOrDefault(def => !mapping[def].Suspended);
     Assert.IsNotNull(vehicleDef);
 
-    VehicleRegionConnector connector = mapping[vehicleDef].VehicleRegionConnector;
+    VehicleRegionConnector connector = null;//mapping[vehicleDef].VehicleRegionConnector;
     DeepProfiler.Start("Rebuild All Connections");
     connector.RebuildAllConnections();
     DeepProfiler.End();
@@ -213,7 +214,7 @@ public class VehicleRegionConnector : VehicleGridManager
     public CostFinder(VehicleRegionConnector regionConnector)
     {
       this.regionConnector = regionConnector;
-      cellIndices = new CellIndices(regionConnector.mapping.map);
+      cellIndices = new CellIndices(regionConnector.pathing.Map);
     }
 
     private bool IsRunning { get; set; }
@@ -272,7 +273,7 @@ public class VehicleRegionConnector : VehicleGridManager
         int x = cell.x + VehiclePathFinder.neighborOffsets[i];
         int z = cell.z + VehiclePathFinder.neighborOffsets[i + 8];
         int index = cellIndices.CellToIndex(x, z);
-        if (regionConnector.regionGridManager[region.gridType].GetRegionAt(index) == region)
+        if (regionConnector.regionGridManager[region.GridType].GetRegionAt(index) == region)
           yield return index;
         else
         {

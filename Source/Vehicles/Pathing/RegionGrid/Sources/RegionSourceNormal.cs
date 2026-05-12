@@ -5,39 +5,40 @@ namespace Vehicles;
 
 internal sealed class RegionSourceNormal : IRegionSource
 {
-  RegionType IRegionSource.ExpectedRegionType(IntVec3 cell, VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
+  RegionType IRegionSource.ExpectedRegionType(IntVec3 cell, IPathingManager manager, VehicleDef vehicleDef)
   {
     // Handles map bounds check here as well
-    if (!pathingSystem[vehicleDef].VehiclePathGrid.Walkable(cell))
+    VehiclePathGrid pathGrid = manager.GetPathGrid(vehicleDef);
+    if (!pathGrid.Walkable(cell))
       return RegionType.None;
 
-    if (HugsEdge(cell, pathingSystem, vehicleDef))
+    if (HugsEdge(manager.Map, cell, vehicleDef))
       return RegionType.None;
 
-    if (!VerifyCardinalCellSpace(cell, pathingSystem, vehicleDef))
+    if (!VerifyCardinalCellSpace(manager, cell, vehicleDef))
       return RegionType.None;
 
     return RegionType.Normal;
   }
 
-  private static bool HugsEdge(IntVec3 pos, VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
+  private static bool HugsEdge(Map map, IntVec3 pos, VehicleDef vehicleDef)
   {
     CellRect verticalRect = vehicleDef.VehicleRect(pos, Rot8.North);
     CellRect horizontalRect = vehicleDef.VehicleRect(pos, Rot8.East);
 
     foreach (IntVec3 cell in new CellRectOverlap(verticalRect, horizontalRect))
     {
-      if (!cell.InBounds(pathingSystem.map))
+      if (!cell.InBounds(map))
         return true;
     }
     return false;
   }
 
-  private static bool VerifyCardinalCellSpace(IntVec3 cell, VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
+  private static bool VerifyCardinalCellSpace(IPathingManager manager, IntVec3 cell, VehicleDef vehicleDef)
   {
-    return vehicleDef.FullRectWalkable(pathingSystem, cell, Rot4.North) ||
-           vehicleDef.FullRectWalkable(pathingSystem, cell, Rot4.South) ||
-           vehicleDef.FullRectWalkable(pathingSystem, cell, Rot4.East) ||
-           vehicleDef.FullRectWalkable(pathingSystem, cell, Rot4.West);
+    return manager.FullRectWalkable(vehicleDef, cell, Rot4.North) ||
+           manager.FullRectWalkable(vehicleDef, cell, Rot4.South) ||
+           manager.FullRectWalkable(vehicleDef, cell, Rot4.East) ||
+           manager.FullRectWalkable(vehicleDef, cell, Rot4.West);
   }
 }

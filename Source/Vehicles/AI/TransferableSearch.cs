@@ -13,7 +13,7 @@ public sealed class TransferableSearch : ISharedJobSearch, IPoolable
 
 	bool IPoolable.InPool { get; set; }
 
-	ThingDef ISharedJobSearch.ThingDef => transferable.ThingDef;
+  ThingDef ISharedJobSearch.ThingDef => transferable.ThingDef;
 
 	public void Init(JobDef jobDef, TransferableOneWay transferable)
 	{

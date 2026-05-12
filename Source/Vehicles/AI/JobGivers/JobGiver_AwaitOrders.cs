@@ -10,9 +10,9 @@ namespace Vehicles
 
     public override ThinkNode DeepCopy(bool resolve = true)
     {
-      JobGiver_AwaitOrders jobGiver_AwaitOrders = (JobGiver_AwaitOrders)base.DeepCopy(resolve);
-      jobGiver_AwaitOrders.overrideExpiryInterval = overrideExpiryInterval;
-      return jobGiver_AwaitOrders;
+      JobGiver_AwaitOrders jobGiverAwaitOrders = (JobGiver_AwaitOrders)base.DeepCopy(resolve);
+      jobGiverAwaitOrders.overrideExpiryInterval = overrideExpiryInterval;
+      return jobGiverAwaitOrders;
     }
 
     protected override Job TryGiveJob(Pawn pawn)
@@ -22,12 +22,12 @@ namespace Vehicles
 
       if (vehicle.vehiclePather.Moving)
       {
-        vehicle.vehiclePather.StopDead();
+        vehicle.vehiclePather.EngageBrakes();
       }
-      Job job = new Job(JobDefOf_Vehicles.IdleVehicle, vehicle)
+      Job job = new(JobDefOf_Vehicles.IdleVehicle, vehicle)
       {
         checkOverrideOnExpire = true,
-        expiryInterval = (overrideExpiryInterval > 0) ? overrideExpiryInterval : 180
+        expiryInterval = overrideExpiryInterval > 0 ? overrideExpiryInterval : 180
       };
       return job;
     }

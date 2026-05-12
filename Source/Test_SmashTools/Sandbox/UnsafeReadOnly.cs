@@ -5,7 +5,7 @@ using DevTools.Testing;
 using HarmonyLib;
 using Verse;
 
-namespace SmashTools.UnitTesting;
+namespace SmashTools.Testing;
 
 // ReSharper disable all
 #pragma warning disable CS8500
@@ -13,7 +13,7 @@ namespace SmashTools.UnitTesting;
 /// <summary>
 /// Verifying that reassigning static readonly fields at runtime results in undefined behavior.
 /// </summary>
-[UnitTest(TestType.MainMenu)]
+[TestFixture(TestType.MainMenu)]
 [TestDescription(
   "Reassigning static readonly fields at runtime through either reflection or unsafe code invokes undefined behavior.")]
 [Disabled]

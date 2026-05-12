@@ -34,9 +34,31 @@ public sealed class VehicleRoom
   public int Id { get; init; }
 
   /// <summary>
-  /// Map getter with fallback
+  /// Get the current map this region belongs to.
   /// </summary>
+  /// <remarks></remarks>
   public Map Map { get; private set; }
+
+  /// <summary>
+  /// Gets the current pathing manager this region belongs to.
+  /// </summary>
+  public IPathingManager PathingManager
+  {
+    get;
+    private set
+    {
+      if (field == value)
+        return;
+
+      field = value;
+      if (field == null)
+      {
+        Map = null;
+        return;
+      }
+      Map = PathingManager.Map;
+    }
+  }
 
   /// <summary>
   /// Region type with fallback
@@ -92,14 +114,14 @@ public sealed class VehicleRoom
   /// <summary>
   /// Create new room for <paramref name="vehicleDef"/>
   /// </summary>
-  public static VehicleRoom MakeNew(Map map, VehicleDef vehicleDef, RegionGridType gridType)
+  internal static VehicleRoom MakeNew(IPathingManager pathing, VehicleDef vehicleDef, RegionGridType gridType)
   {
     int id = Interlocked.CompareExchange(ref nextRoomID, 0, 0);
     VehicleRoom room = new(vehicleDef)
     {
-      Map = map,
       Id = id,
-      gridType = gridType
+      gridType = gridType,
+      PathingManager = pathing
     };
     Interlocked.Increment(ref nextRoomID);
     return room;
@@ -124,8 +146,7 @@ public sealed class VehicleRoom
     }
     if (Regions.Count == 1)
     {
-      VehiclePathingSystem.VehiclePathData pathData = Map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef];
-      pathData.VehicleRegionGridManager[gridType].allRooms.Add(this);
+      PathingManager.GetRegionGridManager(vehicleDef)[gridType].allRooms.Add(this);
     }
   }
 

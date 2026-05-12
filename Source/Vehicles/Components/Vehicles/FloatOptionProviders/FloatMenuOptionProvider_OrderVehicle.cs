@@ -117,19 +117,22 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
       Messages.Message(text, vehicle.Map.Parent, MessageTypeDefOf.RejectInput, false);
     }
 
-    if (IsFeatureEnabled(PathFinderV2))
-    {
-      vehicle.vehiclePather.OrderMoveTo(new PathOrderData
-      {
-        destination = gotoLoc,
-        endRotation = rot,
-        exitMapOnArrival = exitMapOnArrival
-      });
-    }
-    else
+    if (!IsFeatureEnabled(PathFinderV2))
     {
       Job job = new(JobDefOf.Goto, gotoLoc);
       vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+      return;
+    }
+
+    bool success = vehicle.vehiclePather.TryOrderMoveTo(new PathOrderData
+    {
+      destination = gotoLoc,
+      endRotation = rot,
+      exitMapOnArrival = exitMapOnArrival
+    });
+    if (success)
+    {
+      FleckMaker.Static(gotoLoc, vehicle.Map, FleckDefOf.FeedbackGoto);
     }
   }
 }

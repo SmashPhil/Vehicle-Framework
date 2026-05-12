@@ -1,9 +1,11 @@
-﻿using RimWorld;
+﻿using JetBrains.Annotations;
+using RimWorld;
 using UnityEngine;
 using Verse;
 
 namespace Vehicles;
 
+[UsedImplicitly]
 public class VehicleTrack_Wake : VehicleTrack
 {
   private const float DefaultSizeSplash = 10;

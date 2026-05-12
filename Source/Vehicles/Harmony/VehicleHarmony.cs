@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using CoreLib;
 using HarmonyLib;
 using RimWorld;
@@ -49,22 +50,36 @@ public static class VehicleHarmony
 
     if (IsFeatureEnabled(BurstLib) && VehicleMod.settings.main.useBurstLib)
     {
-      if (!VehicleMod.settings.main.burstProbation)
+      if (VehicleMod.settings.main.testingBurst)
       {
-        using BurstProbation bp = new();
-        BurstEnabled = BurstAssemblyLoader.LoadAllFor(VehicleMod.content) && BurstTest.IsBurstLibLoaded();
-        Log.Message($"{LogLabel} Burst enabled: {BurstEnabled.ToStringYesNo()}");
-      }
-      else
-      {
-        VehicleMod.settings.main.burstProbation = false;
+        VehicleMod.settings.main.testingBurst = false;
         VehicleMod.settings.main.useBurstLib = false;
         VehicleMod.settings.Write();
         _ = new DeferredInvoker(action: delegate
+          {
+            Find.WindowStack.Add(new Dialog_MessageBox("VF_BurstDisabledFromCrash".Translate()));
+          }, condition: () => Current.ProgramState == ProgramState.Entry && Find.WindowStack != null,
+          settings: new DeferredInvoker.Settings { timeoutMs = 1000 });
+      }
+      else
+      {
+        string modVersion = VehicleMod.metaData.ModVersion;
+        if (modVersion != VehicleMod.settings.main.testedBurstOn)
         {
-          Find.WindowStack.Add(new Dialog_MessageBox("VF_BurstDisabledFromCrash".Translate()));
-        }, condition: () => Current.ProgramState == ProgramState.Entry && Find.WindowStack != null,
-          settings: new DeferredInvoker.Settings{ timeoutMs = 1000 });
+          using BurstProbation bp = new();
+          using BurstCheck burst = new();
+          BurstEnabled = BurstAssemblyLoader.LoadAllFor(VehicleMod.content) && burst.IsBurstLibLoaded();
+          Log.Message($"{LogLabel} Burst enabled: {BurstEnabled.ToStringYesNo()}");
+          if (BurstEnabled)
+          {
+            burst.RunTests();
+            VehicleMod.settings.main.testedBurstOn = modVersion;
+          }
+          else
+          {
+            Log.Warning($"{LogLabel} Unable to load burst lib.");
+          }
+        }
       }
     }
 
@@ -80,7 +95,7 @@ public static class VehicleHarmony
     Utilities.InvokeWithLogging(ApplyAllDefModExtensions);
     Utilities.InvokeWithLogging(PathingHelper.LoadTerrainTagCosts);
     Utilities.InvokeWithLogging(PathingHelper.LoadTerrainDefaults);
-    Utilities.InvokeWithLogging(GridOwners.RecacheMoveableVehicleDefs);
+    Utilities.InvokeWithLogging(RecacheMoveableVehicleDefs);
     Utilities.InvokeWithLogging(PathingHelper.CacheVehicleRegionEffecters);
 
     Utilities.InvokeWithLogging(LoadedModManager.GetMod<VehicleMod>().InitializeTabs);
@@ -147,6 +162,16 @@ public static class VehicleHarmony
       () => StartupTest.OpenMenu());
     MainMenuKeyBindHandler.RegisterKeyBind(KeyBindingDefOf_Vehicles.VF_DebugSettings,
       () => VehiclesModSettings.OpenWithContext());
+  }
+
+  internal static void RecacheMoveableVehicleDefs()
+  {
+    AllMoveableVehicleDefs = DefDatabase<VehicleDef>.AllDefsListForReading
+      .Where(PathingHelper.ShouldCreateRegions).ToList();
+
+    // Trigger static constructor right after caching vehicle defs. Temporary process until
+    // WorldGridOwners is moved away from static cache.
+    _ = GridOwners.World;
   }
 
   private static void FillVehicleLordJobTypes()

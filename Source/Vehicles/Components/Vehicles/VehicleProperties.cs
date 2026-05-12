@@ -19,8 +19,6 @@ public class VehicleProperties
 	[LoadAlias("fishing"), FeatureEnabled(FeatureFlags.Fishing)]
 	public bool canFish;
 
-	public VehicleTrack track;
-
 	[PostToSettings(Label = "VF_CollisionMultiplier", Tooltip = "VF_CollisionMultiplierTooltip",
 		Translate = true, UISettingsType = UISettingsType.SliderFloat)]
 	[SliderValues(MinValue = 0, MaxValue = 2, Increment = 0.05f, RoundDecimalPlaces = 2)]
@@ -32,7 +30,10 @@ public class VehicleProperties
 	[SliderValues(MinValue = 0, MaxValue = 2, Increment = 0.05f, RoundDecimalPlaces = 2)]
 	public float pawnCollisionRecoilMultiplier = 0.5f;
 
-	public List<VehicleJobLimitations> vehicleJobLimitations = [];
+  public float buildingCollisionMultiplier = 2.5f;
+  public float buildingCollisionRecoilMultiplier = 0.1f;
+
+  public List<VehicleJobLimitations> vehicleJobLimitations = [];
 
 	public bool diagonalRotation = true;
 
@@ -53,11 +54,13 @@ public class VehicleProperties
 
 	public float visibilityWeight = 1;
 
-	/// <summary>
-	/// Player-facing only, allowing players to disable emp stuns for a vehicle without having to modify components via patches.
-	/// Only enabled if any component within the vehicle has an emp severity > None.
-	/// </summary>
-	[Unsaved]
+  public VehicleTrack track;
+
+  /// <summary>
+  /// Player-facing only, allowing players to disable emp stuns for a vehicle without having to modify components via patches.
+  /// Only enabled if any component within the vehicle has an emp severity > None.
+  /// </summary>
+  [Unsaved]
 	[PostToSettings(Label = "VF_EMPStuns", Tooltip = "VF_EMPStunsTooltip", Translate = true,
 		UISettingsType = UISettingsType.Checkbox)]
 	[DisableSettingConditional(MemberType = typeof(VehicleDef),

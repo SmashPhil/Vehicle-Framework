@@ -9,95 +9,85 @@ namespace Vehicles.Config;
 
 internal class FeatureFlags
 {
-	public const string Raiders = "Raiders";
-	public const string Paratroopers = "Paratroopers";
-	public const string Fishing = "Fishing";
-	public const string TradeableVehicles = "TradeableVehicles";
-	public const string VehicleCaravanProps = "VehicleCaravanProps";
-	public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
+  public const string Raiders = "Raiders";
+  public const string Paratroopers = "Paratroopers";
+  public const string Fishing = "Fishing";
+  public const string TradeableVehicles = "TradeableVehicles";
+  public const string VehicleCaravanProps = "VehicleCaravanProps";
+  public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
 
-	public const string PathFinderV2 = "PathFinderV2";
+  public const string PathFinderV2 = "PathFinderV2";
   public const string BurstLib = "BurstLib";
   public const string Acceleration = "Acceleration";
 
-	[UsedImplicitly]
-	public List<IFeatureFlag> features;
+  [UsedImplicitly]
+  public List<IFeatureFlag> features;
 
-	public static FeatureFlags Default => VehicleMod.mod.features;
+  public static FeatureFlags Default => VehicleMod.mod.features;
 
-	public static bool RaidersEnabled => Default.IsEnabled(Raiders);
+  public static bool RaidersEnabled => Default.IsEnabled(Raiders) && VehicleMod.settings.debug.debugAllowRaiders;
 
-	public static bool ParatroopersEnabled => Default.IsEnabled(Paratroopers);
+  public static bool ParatroopersEnabled => Default.IsEnabled(Paratroopers);
 
-	public static bool FishingEnabled => Default.IsEnabled(Fishing);
+  public static bool FishingEnabled => Default.IsEnabled(Fishing);
 
-	public static FeatureFlags InitDefault()
-	{
-		FeatureFlags flags = new()
-		{
-			features =
-			[
-				Feature.Create(Raiders, Build.Configuration.Debug, Build.Configuration.Unstable),
-				Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
-				Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
-				Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
+  public static FeatureFlags InitDefault()
+  {
+    FeatureFlags flags = new()
+    {
+      features =
+      [
+        Feature.Create(Raiders, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
+        Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
         Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
         Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable),
         Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
       ]
-		};
-		return flags;
-	}
+    };
+    return flags;
+  }
 
-	public bool IsEnabled(string featureName)
-	{
-		if (features.NullOrEmpty())
-			return false;
+  public bool IsEnabled(string featureName)
+  {
+    if (features.NullOrEmpty())
+      return false;
 
-		foreach (IFeatureFlag feature in features)
-		{
-			if (feature.Name == featureName)
-				return feature.Enabled;
-		}
-		return false;
-	}
+    foreach (IFeatureFlag feature in features)
+    {
+      if (feature.Name == featureName)
+        return feature.Enabled;
+    }
+    return false;
+  }
 
-	public static bool IsFeatureEnabled(string featureName)
-	{
-		return Default.IsEnabled(featureName);
-	}
+  public static bool IsFeatureEnabled(string featureName)
+  {
+    return Default.IsEnabled(featureName);
+  }
 
-	private class Feature : IFeatureFlag
-	{
-		private string name;
+  private class Feature : IFeatureFlag
+  {
+    private string name;
 
-		private readonly HashSet<Build.Configuration> enabledFor = [];
+    private readonly HashSet<Build.Configuration> enabledFor = [];
 
-		string IFeatureFlag.Name => name;
+    string IFeatureFlag.Name => name;
 
-		bool IFeatureFlag.Enabled => enabledFor.Contains(Build.Config);
+    bool IFeatureFlag.Enabled => enabledFor.Contains(Build.Config);
 
-		public static Feature Create(string name, params Build.Configuration[] config)
-		{
-			Feature feature = new()
-			{
-				name = name
-			};
-			if (!config.NullOrEmpty())
-			{
-				feature.enabledFor.AddRange(config);
-			}
-			return feature;
-		}
-
-		public static string Name(Feature feature)
-		{
-			return feature.name;
-		}
-
-		public static void Write(Feature feature)
-		{
-			XmlExporter.WriteString(string.Join('|', feature.enabledFor));
-		}
-	}
+    public static Feature Create(string name, params Build.Configuration[] config)
+    {
+      Feature feature = new()
+      {
+        name = name
+      };
+      if (!config.NullOrEmpty())
+      {
+        feature.enabledFor.AddRange(config);
+      }
+      return feature;
+    }
+  }
 }

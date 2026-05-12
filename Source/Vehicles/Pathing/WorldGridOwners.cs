@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
-using Verse;
 
 namespace Vehicles.World;
 
 public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
 {
+  public WorldGridOwners(List<VehicleDef> vehicleDefs) : base(vehicleDefs)
+  {
+  }
+
   protected override bool CanTransferOwnershipTo(VehicleDef vehicleDef)
   {
     //WorldVehiclePathGrid.PathGrid pathGrid =
@@ -20,8 +24,8 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
   // Accessed from Init, already locked for the duration of owner generation
   protected override void GenerateConfigs()
   {
-    configs = new PathConfig[DefDatabase<VehicleDef>.DefCount];
-    foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+    configs = new PathConfig[vehicleDefs.Count];
+    foreach (VehicleDef vehicleDef in vehicleDefs)
     {
       configs[vehicleDef.DefIndex] = new PathConfig(vehicleDef);
     }
@@ -50,10 +54,10 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
 
       this.vehicleDef = vehicleDef;
 
-      this.defaultWorldImpassable = vehicleDef.properties.defaultImpassable & BitMaskWorld;
-      this.customBiomeCosts = vehicleDef.properties.customBiomeCosts;
-      this.customHillinessCosts = vehicleDef.properties.customHillinessCosts;
-      this.customRiverCosts = vehicleDef.properties.customRiverCosts;
+      defaultWorldImpassable = vehicleDef.properties.defaultImpassable & BitMaskWorld;
+      customBiomeCosts = vehicleDef.properties.customBiomeCosts;
+      customHillinessCosts = vehicleDef.properties.customHillinessCosts;
+      customRiverCosts = vehicleDef.properties.customRiverCosts;
     }
 
     bool IPathConfig.UsesRegions =>
@@ -77,7 +81,7 @@ public class WorldGridOwners : GridOwnerList<WorldGridOwners.PathConfig>
       static bool MatchingValues<T>(SimpleDictionary<T, float> lhs, SimpleDictionary<T, float> rhs)
       {
         // NOTE - We must check both dictionary configurations to avoid missed cases resulting from
-        // 1 dictionary containing all of the keys of the other plus more.
+        // 1 dictionary containing all the keys of the other plus more.
 
         foreach ((T key, float cost) in lhs)
         {

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using CoreLib;
 using CoreLib.Performance;
 using JetBrains.Annotations;
 using RimWorld;
@@ -151,7 +150,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 
 		bool IPoolable.InPool { get; set; }
 
-		public void Add(Thing thing)
+    public void Add(Thing thing)
 		{
 			neededThings.Add(thing);
 		}

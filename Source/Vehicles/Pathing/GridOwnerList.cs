@@ -11,10 +11,10 @@ namespace Vehicles;
 [UsedImplicitly(ImplicitUseTargetFlags.WithMembers)]
 public abstract class GridOwnerList<T> where T : IPathConfig
 {
+  protected readonly List<VehicleDef> vehicleDefs;
+
   protected int[] piggyToOwner;
-
   protected T[] configs;
-
   protected object gridOwnerLock = new();
 
   public event OwnershipTransferred OnOwnershipTransfer;
@@ -27,7 +27,7 @@ public abstract class GridOwnerList<T> where T : IPathConfig
   {
     get
     {
-      foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+      foreach (VehicleDef vehicleDef in vehicleDefs)
       {
         if (!IsOwner(vehicleDef))
           yield return vehicleDef;
@@ -36,18 +36,19 @@ public abstract class GridOwnerList<T> where T : IPathConfig
   }
 
   /// <summary>
-  /// Ownership of region grid is being transferred from <paramref name="fromVehicleDef"/> to
-  /// <paramref name="toVehicleDef"/>
+  /// Ownership of region grid is being transferred from one VehicleDef to another.
   /// </summary>
-  /// <param name="fromVehicleDef"></param>
-  /// <param name="toVehicleDef"></param>
-  public delegate void OwnershipTransferred(VehicleDef fromVehicleDef, VehicleDef toVehicleDef);
+  public delegate void OwnershipTransferred(VehicleDef from, VehicleDef to);
 
-  // NOTE - Initialized on startup, there should never be any values in the owner lookup that
-  // point to invalid indices.
-  internal virtual void Init()
+  protected GridOwnerList(List<VehicleDef> vehicleDefs)
   {
-    piggyToOwner ??= new int[DefDatabase<VehicleDef>.DefCount];
+    this.vehicleDefs = vehicleDefs;
+    Init();
+  }
+
+  private void Init()
+  {
+    piggyToOwner ??= new int[vehicleDefs.Count];
     piggyToOwner.Populate(-1);
 
     List<VehicleDef> owners = [];
@@ -67,7 +68,7 @@ public abstract class GridOwnerList<T> where T : IPathConfig
 
   protected void SeparateIntoGroups(List<VehicleDef> owners, bool compress = true)
   {
-    foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+    foreach (VehicleDef vehicleDef in vehicleDefs)
     {
       if (TryGetOwner(owners, vehicleDef, out int ownerId) && compress)
       {

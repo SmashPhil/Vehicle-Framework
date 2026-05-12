@@ -259,7 +259,7 @@ public static class EnterMapUtilityVehicles
 			if (!AllowsPreference(map, cell, roadPref))
 				return false;
 
-			VehiclePathingSystem.VehiclePathData pathData = map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef];
+			PathData pathData = map.GetCachedMapComponent<VehiclePathingSystem>()[vehicleDef];
 			return hostFaction != null && pathData.VehicleReachability.CanReachBase(cell, vehicleDef) || 
 				hostFaction == null && pathData.VehicleReachability.CanReachBiggestMapEdgeRoom(cell, RegionGridType.Normal);
 		}

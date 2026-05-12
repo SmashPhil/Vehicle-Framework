@@ -138,10 +138,10 @@ public static class VehicleRegionTraverser
   /// <summary>
   /// Breadth First Search to fill room based on <paramref name="region"/>
   /// </summary>
-  public static VehicleRoom FloodAndSetRooms(VehicleRegion region, Map map, VehicleDef vehicleDef,
+  internal static VehicleRoom FloodAndSetRooms(IPathingManager pathing, VehicleRegion region, VehicleDef vehicleDef,
     VehicleRoom existingRoom)
   {
-    VehicleRoom floodingRoom = existingRoom ?? VehicleRoom.MakeNew(map, vehicleDef, region.gridType);
+    VehicleRoom floodingRoom = existingRoom ?? VehicleRoom.MakeNew(pathing, vehicleDef, region.GridType);
     region.Room = floodingRoom;
     if (!region.type.AllowsMultipleRegionsPerDistrict())
     {
@@ -167,7 +167,7 @@ public static class VehicleRegionTraverser
   /// </summary>
   /// <param name="root"></param>
   /// <param name="newRegionGroupIndex"></param>
-  public static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
+  internal static void FloodAndSetNewRegionIndex(VehicleRegion root, int newRegionGroupIndex)
   {
     root.newRegionGroupIndex = newRegionGroupIndex;
     if (!root.type.AllowsMultipleRegionsPerDistrict())

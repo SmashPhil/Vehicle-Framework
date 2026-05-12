@@ -1,7 +1,9 @@
-﻿using CoreLib.Performance;
+﻿using System;
+using CoreLib.Performance;
 
 namespace Vehicles;
 
+[Obsolete] // TODO 1.7 - Remove
 public class AsyncConnectionAction : AsyncAction
 {
   private VehicleRegionConnector connector;

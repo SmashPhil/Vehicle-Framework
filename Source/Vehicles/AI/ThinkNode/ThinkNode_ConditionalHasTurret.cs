@@ -1,9 +1,11 @@
-﻿using UnityEngine.Assertions;
+﻿using JetBrains.Annotations;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 
 namespace Vehicles;
 
+[PublicAPI]
 public class ThinkNode_ConditionalHasTurret : ThinkNode_Conditional
 {
   protected override bool Satisfied(Pawn pawn)

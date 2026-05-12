@@ -6,8 +6,11 @@ namespace Vehicles;
 [DefOf]
 public static class VehicleEventDefOf
 {
-	// Movement
-	public static VehicleEventDef IgnitionOn;
+  // General
+  public static VehicleEventDef FactionChanged;
+
+  // Movement
+  public static VehicleEventDef IgnitionOn;
 	public static VehicleEventDef IgnitionOff;
 	public static VehicleEventDef Braking;
 	public static VehicleEventDef MoveStart;

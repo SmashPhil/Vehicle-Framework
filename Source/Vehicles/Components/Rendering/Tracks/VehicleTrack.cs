@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace Vehicles
+namespace Vehicles;
+
+public abstract class VehicleTrack
 {
-	public abstract class VehicleTrack
-	{
-		public abstract void TryPlaceTrack(VehiclePawn vehicle, ref Vector3 lastTrackPlacePos);
-	}
+  public abstract void TryPlaceTrack(VehiclePawn vehicle, ref Vector3 lastTrackPlacePos);
 }

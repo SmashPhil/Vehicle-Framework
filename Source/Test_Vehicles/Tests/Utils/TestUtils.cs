@@ -1,16 +1,11 @@
-﻿using System;
-using System.Linq;
-using System.Reflection;
-using System.Threading;
-using HarmonyLib;
-using JetBrains.Annotations;
+﻿using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.UnitTesting;
+namespace Vehicles.Testing;
 
 [PublicAPI]
 public static class TestUtils
@@ -45,6 +40,7 @@ public static class TestUtils
 		TerrainDef terrainDef = DefDatabase<TerrainDef>.AllDefsListForReading
 		 .FirstOrDefault(def => VehiclePathGrid.PassableTerrainCost(vehicleDef, def, out _) &&
 				def.affordances.Contains(vehicleDef.buildDef.terrainAffordanceNeeded));
+    Assert.IsNotNull(terrainDef);
 		DebugHelper.DestroyArea(areaRect, map, terrainDef);
 	}
 

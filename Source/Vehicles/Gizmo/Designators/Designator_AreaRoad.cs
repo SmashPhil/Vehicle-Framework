@@ -4,15 +4,12 @@ using SmashTools;
 using SmashTools.Burst;
 using UnityEngine;
 using Verse;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles;
 
 public abstract class Designator_AreaRoad : Designator_Cells
 {
-  protected const string RoadId = "VehicleRoads";
-  protected const int RoadDiscountCost = 50;
-  protected const int RoadAvoidCost = 250;
-
   private readonly DesignateMode mode;
   private static RoadType roadType = RoadType.Prioritize;
 
@@ -26,7 +23,17 @@ public abstract class Designator_AreaRoad : Designator_Cells
 
   public override DrawStyleCategoryDef DrawStyleCategory => DrawStyleCategoryDefOf.Areas;
 
-  protected ModifierGrid ModifierGrid => Map.GetCachedMapComponent<VehiclePathingSystem>().ModifierGrid;
+  private RoadPreferGrid RoadPreferGrid => Map.GetCachedMapComponent<VehiclePathingSystem>()
+    .PathFinderManager.GetSource<RoadPreferGrid>();
+
+  private RoadAvoidGrid RoadAvoidGrid => Map.GetCachedMapComponent<VehiclePathingSystem>()
+    .PathFinderManager.GetSource<RoadAvoidGrid>();
+
+  private RoadHeuristic HeuristicGrid => Map.GetCachedMapComponent<VehiclePathingSystem>()
+    .PathFinderManager.HeuristicGrid;
+
+  private PathGridScalar ScalarGrid => Map.GetCachedMapComponent<VehiclePathingSystem>()
+    .PathFinderManager.ScalarGrid;
 
   public override void ProcessInput(Event ev)
   {
@@ -86,11 +93,12 @@ public abstract class Designator_AreaRoad : Designator_Cells
     if (!area[index])
     {
       area[index] = true;
-      ModifierGrid.AddModifier(RoadId, index, new Modifier
+      if (IsFeatureEnabled(PathFinderV2))
       {
-        type = ModifierType.Subtract,
-        value = RoadDiscountCost
-      }, ModifierPriority.Low);
+        RoadPreferGrid[index] = true;
+        HeuristicGrid[index] = HeuristicWeight.Prefer;
+        ScalarGrid[index] = true;
+      }
     }
   }
 
@@ -100,11 +108,11 @@ public abstract class Designator_AreaRoad : Designator_Cells
     if (!area[index])
     {
       area[index] = true;
-      ModifierGrid.AddModifier(RoadId, index, new Modifier
+      if (IsFeatureEnabled(PathFinderV2))
       {
-        type = ModifierType.Add,
-        value = RoadAvoidCost
-      }, ModifierPriority.Low);
+        RoadAvoidGrid[index] = true;
+        HeuristicGrid[index] = HeuristicWeight.Avoid;
+      }
     }
   }
 
@@ -114,7 +122,12 @@ public abstract class Designator_AreaRoad : Designator_Cells
     if (area[index])
     {
       area[index] = false;
-      ModifierGrid.RemoveModifier(RoadId, index);
+      if (IsFeatureEnabled(PathFinderV2))
+      {
+        RoadPreferGrid[index] = false;
+        HeuristicGrid[index] = HeuristicWeight.Normal;
+        ScalarGrid[index] = false;
+      }
     }
   }
 
@@ -124,7 +137,11 @@ public abstract class Designator_AreaRoad : Designator_Cells
     if (area[index])
     {
       area[index] = false;
-      ModifierGrid.RemoveModifier(RoadId, index);
+      if (IsFeatureEnabled(PathFinderV2))
+      {
+        RoadAvoidGrid[index] = false;
+        HeuristicGrid[index] = HeuristicWeight.Normal;
+      }
     }
   }
 

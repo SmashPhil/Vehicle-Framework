@@ -70,6 +70,10 @@
 			<HintPath>$(RefDir)\mscorlib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+		<Reference Include="Unity.Mathematics">
+			<HintPath>$(RefDir)\Unity.Mathematics.dll</HintPath>
+			<Private>False</Private>
+		</Reference>
 		<Reference Include="UnityEngine">
 			<HintPath>$(RefDir)\UnityEngine.dll</HintPath>
 			<Private>False</Private>

@@ -41,7 +41,7 @@ namespace Vehicles
         if (map is null || vehicle is null)
         {
           SmashLog.Error(
-            $"Unable to execute startup action <method>UnitTestUpgradeMenu</method> post load.");
+            $"Unable to execute startup action <method>TestFixtureUpgradeMenu</method> post load.");
           return;
         }
         CameraJumper.TryJump(vehicle);

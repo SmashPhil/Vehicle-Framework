@@ -1,147 +1,129 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
+using CoreLib;
 using RimWorld;
 using Verse;
-using SmashTools;
 
-namespace Vehicles
+namespace Vehicles;
+
+/// <summary>
+/// Cache results from reachability calculations for faster retrieval
+/// </summary>
+public class VehicleReachabilityCache
 {
-	/// <summary>
-	/// Cache results from reachability calculations for faster retrieval
-	/// </summary>
-	public class VehicleReachabilityCache
-	{
-		private ConcurrentDictionary<CachedEntry, bool> cacheDict = new ConcurrentDictionary<CachedEntry, bool>();
+  private readonly ConcurrentDictionary<CachedEntry, bool> cacheDict = [];
 
-		[ThreadStatic]
-		private static HashSet<CachedEntry> tmpCachedEntries;
+  private readonly HashSet<CachedEntry> cachedEntries = [];
 
-		private static HashSet<CachedEntry> CachedEntries
-		{
-			get
-			{
-				if (tmpCachedEntries == null)
-				{
-					tmpCachedEntries = new HashSet<CachedEntry>();
-				}
-				return tmpCachedEntries;
-			}
-		}
+  /// <summary>
+  /// Cache count
+  /// </summary>
+  public int Count
+  {
+    get
+    {
+      return cacheDict.Count;
+    }
+  }
 
-		/// <summary>
-		/// Cache count
-		/// </summary>
-		public int Count
-		{
-			get
-			{
-				return cacheDict.Count;
-			}
-		}
+  /// <summary>
+  /// Clear reachability cache
+  /// </summary>
+  public void Clear()
+  {
+    cacheDict.Clear();
+  }
 
-		/// <summary>
-		/// Clear reachability cache
-		/// </summary>
-		public void Clear()
-		{
-			cacheDict.Clear();
-		}
+  /// <summary>
+  /// Retrieve cached result for reachability from <paramref name="from"/> to <paramref name="to"/>
+  /// </summary>
+  public BoolUnknown CachedResultFor(VehicleRoom from, VehicleRoom to, TraverseParms traverseParms)
+  {
+    if (cacheDict.TryGetValue(new CachedEntry(from.Id, to.Id, traverseParms), out bool reachable))
+    {
+      return reachable ? BoolUnknown.True : BoolUnknown.False;
+    }
+    return BoolUnknown.Unknown;
+  }
 
-		/// <summary>
-		/// Retrieve cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
-		/// </summary>
-		public BoolUnknown CachedResultFor(VehicleRoom from, VehicleRoom to, TraverseParms traverseParms)
-		{
-			if (cacheDict.TryGetValue(new CachedEntry(from.Id, to.Id, traverseParms), out bool reachable))
-			{
-				return reachable ? BoolUnknown.True : BoolUnknown.False;
-			}
-			return BoolUnknown.Unknown;
-		}
+  /// <summary>
+  /// Add cached result for reachability from <paramref name="from"/> to <paramref name="to"/>
+  /// </summary>
+  public void AddCachedResult(VehicleRoom from, VehicleRoom to, TraverseParms traverseParams, bool reachable)
+  {
+    CachedEntry key = new(from.Id, to.Id, traverseParams);
+    cacheDict.TryAdd(key, reachable);
+  }
 
-		/// <summary>
-		/// Add cached result for reachability from <paramref name="A"/> to <paramref name="B"/>
-		/// </summary>
-		public void AddCachedResult(VehicleRoom from, VehicleRoom to, TraverseParms traverseParams, bool reachable)
-		{
-			CachedEntry key = new CachedEntry(from.Id, to.Id, traverseParams);
-			cacheDict.TryAdd(key, reachable);
-		}
+  /// <summary>
+  /// Clear all results for <paramref name="vehicle"/>
+  /// </summary>
+  /// <param name="vehicle"></param>
+  public void ClearFor(VehiclePawn vehicle)
+  {
+    using ClearOnDispose<CachedEntry> cod = new(cachedEntries);
+    foreach ((CachedEntry entry, _) in cacheDict)
+    {
+      if (entry.traverseParms.pawn == vehicle)
+      {
+        cachedEntries.Add(entry);
+      }
+    }
+    foreach (CachedEntry cachedEntry in cachedEntries)
+    {
+      cacheDict.TryRemove(cachedEntry, out _);
+    }
+  }
 
-		/// <summary>
-		/// Clear all results for <paramref name="vehicle"/>
-		/// </summary>
-		/// <param name="vehicle"></param>
-		public void ClearFor(VehiclePawn vehicle)
-		{
-			CachedEntries.Clear();
-			foreach ((CachedEntry entry, bool result) in cacheDict)
-			{
-				if (entry.traverseParms.pawn == vehicle)
-				{
-					CachedEntries.Add(entry);
-				}
-			}
-			foreach (CachedEntry cachedEntry in CachedEntries)
-			{
-				cacheDict.TryRemove(cachedEntry, out _);
-			}
-			CachedEntries.Clear();
-		}
+  /// <summary>
+  /// Clear all results containing results targeting <paramref name="hostileTo"/>
+  /// </summary>
+  /// <param name="hostileTo"></param>
+  public void ClearForHostile(Thing hostileTo)
+  {
+    using ClearOnDispose<CachedEntry> cod = new(cachedEntries);
+    foreach ((CachedEntry entry, _) in cacheDict)
+    {
+      if (entry.traverseParms.pawn is {} pawn && pawn.HostileTo(hostileTo))
+      {
+        cachedEntries.Add(entry);
+      }
+    }
+    foreach (CachedEntry cachedEntry in cachedEntries)
+    {
+      cacheDict.TryRemove(cachedEntry, out _);
+    }
+  }
 
-		/// <summary>
-		/// Clear all results containing results targeting <paramref name="hostileTo"/>
-		/// </summary>
-		/// <param name="hostileTo"></param>
-		public void ClearForHostile(Thing hostileTo)
-		{
-			CachedEntries.Clear();
-			foreach ((CachedEntry entry, bool result) in cacheDict)
-			{
-				if (entry.traverseParms.pawn is Pawn pawn && pawn.HostileTo(hostileTo))
-				{
-					CachedEntries.Add(entry);
-				}
-			}
-			foreach (CachedEntry cachedEntry in CachedEntries)
-			{
-				cacheDict.TryRemove(cachedEntry, out _);
-			}
-			CachedEntries.Clear();
-		}
+  /// <summary>
+  /// Cached result data for reachability between two <see cref="VehicleRegion"/>
+  /// </summary>
+  private readonly record struct CachedEntry
+  {
+    private readonly int from;
+    private readonly int to;
+    public readonly TraverseParms traverseParms;
 
-		/// <summary>
-		/// Cached result data for reachability between two <see cref="VehicleRegion"/>
-		/// </summary>
-		private readonly record struct CachedEntry
-		{
-			public readonly int from;
-			public readonly int to;
-			public readonly TraverseParms traverseParms;
+    public CachedEntry(int from, int to, TraverseParms traverseParms)
+    {
+      this = default;
+      if (from < to)
+      {
+        this.from = from;
+        this.to = to;
+      }
+      else
+      {
+        this.from = to;
+        this.to = from;
+      }
+      this.traverseParms = traverseParms;
+    }
 
-			public CachedEntry(int from, int to, TraverseParms traverseParms)
-			{
-				this = default;
-				if (from < to)
-				{
-					this.from = from;
-					this.to = to;
-				}
-				else
-				{
-					this.from = to;
-					this.to = from;
-				}
-				this.traverseParms = traverseParms;
-			}
-
-			public override readonly int GetHashCode()
-			{
-				int seed = Gen.HashCombineInt(from, to);
-				return Gen.HashCombineStruct(seed, traverseParms);
-			}
-		}
-	}
+    public override int GetHashCode()
+    {
+      int seed = Gen.HashCombineInt(from, to);
+      return Gen.HashCombineStruct(seed, traverseParms);
+    }
+  }
 }

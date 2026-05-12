@@ -1,15 +1,12 @@
 ﻿//#define SYNCHRONOUS_PATHFINDING
 #if SYNCHRONOUS_PATHFINDING
-#undef PROFILER
 using System.Diagnostics;
 #endif
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using CoreLib;
-using CoreLib.Performance;
+using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
@@ -21,7 +18,6 @@ using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 using static Vehicles.Config.FeatureFlags;
-using Trace = SmashTools.Trace;
 
 namespace Vehicles;
 
@@ -55,6 +51,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   public readonly VehiclePawn vehicle;
 
+  private IPathFinder<PathSettings> pathFinder;
+
   // Stats during transition
   private AccelerationController controller;
 
@@ -72,21 +70,13 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private int waitTicks;
 
-  private PathEndMode peMode;
   private Rot8 endRot = Rot8.Invalid;
-  private bool shouldStopClipping;
+  private PathSettings.GridSetting pathSearch;
   private PathingStatus status;
 
   private Queue<PathOrderData> pathQueue = [];
-  private PathReceipt receipt;
-  public Path curPath;
-
-  private CancellationTokenSource pathCancellationTokenSource = new();
-  private Task curPathTask;
-
-#if PROFILER
-  private Profiler.Timer timer;
-#endif
+  public VehiclePath curPath;
+  private IPathPromise promise;
 
   public VehiclePathFollower(VehiclePawn vehicle)
   {
@@ -95,14 +85,18 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
     bumperCells = [];
     // If vehicle is not NxN, it may clip buildings at destination.
-    shouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z;
+    ShouldStopClipping = vehicle.VehicleDef.size.x != vehicle.VehicleDef.size.z;
 
     // N cells away from vehicle's front
     LookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f);
     LookAheadDistance = MinCheckAheadNodes + LookAheadStartingIndex;
     CollisionsLookAheadStartingIndex = Mathf.CeilToInt(vehicle.VehicleDef.Size.z / 2f);
     CollisionsLookAheadDistance = CheckAheadNodesForCollisions + CollisionsLookAheadStartingIndex;
+
+    ConfigureSearchSettings();
   }
+
+  private bool ShouldStopClipping { get; }
 
   private int LookAheadDistance { get; set; }
 
@@ -112,11 +106,11 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private int CollisionsLookAheadStartingIndex { get; set; }
 
-  private VehiclePathingSystem PathingSystem { get; set; }
-
   private VehiclePositionManager PositionManager { get; set; }
 
-  private VehiclePathingSystem.VehiclePathData PathData { get; set; }
+  private VehiclePathGrid PathGrid { get; set; }
+
+  private VehicleReachability Reachability { get; set; }
 
   // TODO 1.7 - Remove
   public LocalTargetInfo Destination => destination;
@@ -129,6 +123,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   public bool Waiting => waitTicks > 0;
 
+  private bool FailOnClipping => ShouldStopClipping && (pathSearch & PathSettings.GridSetting.BreachWalls) == 0;
+
   public PathRequestStatus RequestStatus
   {
     get;
@@ -139,8 +135,9 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
       if (pathQueue.Count > 0 && value != PathRequestStatus.Calculating)
       {
-        receipt?.Dispose();
-        receipt = null;
+        promise?.Cancel();
+        promise?.Dispose();
+        promise = null;
         pathQueue.Clear();
       }
       field = value;
@@ -183,15 +180,28 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
   {
     if (vehicle.Spawned)
     {
-      PathingSystem = vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>();
-      PathData = PathingSystem?[vehicle.VehicleDef];
+      var pathingSystem = vehicle.Map.GetCachedMapComponent<VehiclePathingSystem>();
+      pathFinder = pathingSystem.PathFinder;
+      var pathData = pathingSystem[vehicle.VehicleDef];
+      Reachability = pathData.VehicleReachability;
+      PathGrid = pathData.VehiclePathGrid;
       PositionManager = vehicle.Map.GetDetachedMapComponent<VehiclePositionManager>();
     }
     else
     {
-      PathingSystem = null;
-      PathData = null;
+      pathFinder = null;
+      Reachability = null;
       PositionManager = null;
+    }
+  }
+
+  private void ConfigureSearchSettings()
+  {
+    pathSearch = PathSettings.GridSetting.None;
+    if (vehicle.DefaultTraverseMode() is TraverseMode.PassAllDestroyableThings or
+        TraverseMode.PassAllDestroyablePlayerOwnedThings or TraverseMode.PassAllDestroyableThingsNotWater)
+    {
+      pathSearch = PathSettings.GridSetting.BreachWalls | PathSettings.GridSetting.UseAvoidGrid;
     }
   }
 
@@ -199,6 +209,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
   {
     vehicle.AddEvent(VehicleEventDefOf.Spawned, RecacheComponents);
     vehicle.AddEvent(VehicleEventDefOf.Despawned, RecacheComponents);
+    vehicle.AddEvent(VehicleEventDefOf.FactionChanged, ConfigureSearchSettings);
     controller.RegisterEvents();
   }
 
@@ -230,7 +241,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     Scribe_Values.Look(ref nextCell, nameof(nextCell));
     Scribe_Values.Look(ref nextCellCostLeft, nameof(nextCellCostLeft));
     Scribe_Values.Look(ref nextCellCostTotal, nameof(nextCellCostTotal));
-    Scribe_Values.Look(ref peMode, nameof(peMode));
 
     if (Moving)
     {
@@ -245,6 +255,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
+  // TODO 1.7 - Remove PathEndMode parameter
   public void StartPath(LocalTargetInfo dest, PathEndMode peMode, bool ignoreReachability = false)
   {
     if (!vehicle.Drafted)
@@ -271,20 +282,19 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       return;
     }
 
-    if (Moving && curPath != null && destination == dest && this.peMode == peMode)
+    if (Moving && curPath != null && destination == dest)
     {
       PatherFailed();
       return;
     }
 
-    if (!ignoreReachability && !PathData.VehicleReachability.CanReachVehicle(vehicle.Position, dest, peMode,
+    if (!ignoreReachability && !Reachability.CanReachVehicle(vehicle.Position, dest, peMode,
           TraverseParms.For(TraverseMode.ByPawn)))
     {
       PatherFailed();
       return;
     }
 
-    this.peMode = peMode;
     destination = dest;
 
     PawnDestinationReservationManager.PawnDestinationReservation pawnDestinationReservation =
@@ -320,8 +330,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
 
     curPath = null;
-    receipt?.Dispose();
-    receipt = null;
+    promise?.Dispose();
+    promise = null;
     status = PathingStatus.Idle;
     pathQueue.Clear();
     vehicle.animator?.SetBool(PropertyIds.Moving, Moving);
@@ -345,13 +355,13 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       return; // TODO - apply deceleration and effects
     }
 
-    if (receipt is { IsCompleted: true })
+    if (promise is { IsCompleted: true })
     {
       ProcessPath();
     }
     // NOTE - curPath can be null for a couple frames if multiple paths are queued up while the
     // game is paused, where the first initial path hasn't had a chance to be requested yet.
-    if (pathQueue.Count > 0 && curPath != null && receipt == null)
+    if (pathQueue.Count > 0 && curPath != null && promise == null)
     {
       ProcessQueue();
     }
@@ -382,26 +392,26 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
-  public void OrderMoveTo(in PathOrderData data)
+  public bool TryOrderMoveTo(in PathOrderData data)
   {
     if (vehicle.CurJobDef == JobDefOf.Goto && KeyBindingDefOf.QueueOrder.IsDownEvent)
     {
       pathQueue.Enqueue(data);
       endRot = data.endRotation;
-      FleckMaker.Static(data.destination, vehicle.Map, FleckDefOf.FeedbackGoto);
+      return true;
     }
-    else
+
+    Job job = new(JobDefOf.Goto, new LocalTargetInfo(data.destination))
     {
-      Job job = new(JobDefOf.Goto, new LocalTargetInfo(data.destination))
-      {
-        exitMapOnArrival = data.exitMapOnArrival
-      };
-      if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
-      {
-        endRot = data.endRotation;
-        FleckMaker.Static(data.destination, vehicle.Map, FleckDefOf.FeedbackGoto);
-      }
+      exitMapOnArrival = data.exitMapOnArrival
+    };
+    if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
+    {
+      endRot = data.endRotation;
+      return true;
     }
+
+    return false;
   }
 
   public void TryResumePathingAfterLoading()
@@ -410,7 +420,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     {
       // Paths resumed post-load can be assumed to already be reachable. RegionGrid at this point will
       // be suspended anyway so it is not possible to do a reachability check.
-      StartPath(destination, peMode, ignoreReachability: true);
+      StartPath(destination, PathEndMode.OnCell, ignoreReachability: true);
     }
   }
 
@@ -431,13 +441,13 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private void CalculatePathCosts()
   {
-    PathCostLeft = vehicle.vehiclePather.CostToMoveIntoCell(vehicle.Position, curPath.LastNode);
-    IReadOnlyList<int3> nodes = curPath.Nodes;
+    PathCostLeft = CostToMoveIntoCell(vehicle.Position, curPath.LastNode);
+    var nodes = curPath.Nodes;
     for (int i = nodes.Count - 1; i > 0; i--)
     {
-      int3 from = nodes[i];
-      int3 to = nodes[i - 1];
-      PathCostLeft += vehicle.vehiclePather.CostToMoveIntoCell(from, to);
+      var from = nodes[i];
+      var to = nodes[i - 1];
+      PathCostLeft += CostToMoveIntoCell(from, to);
     }
   }
 
@@ -454,7 +464,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private bool AtDestinationPosition()
   {
-    return vehicle.CanReachImmediateVehicle(destination, peMode);
+    return vehicle.CanReachImmediateVehicle(destination, PathEndMode.OnCell);
   }
 
   public void PatherDraw()
@@ -594,37 +604,23 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       case PathRequest.Fail:
         PatherFailed();
         return;
+      case PathRequest.Brake:
+        EngageBrakes();
+        return;
       case PathRequest.Wait:
         waitTicks = TicksWhileWaiting;
         return;
       case PathRequest.NeedNew:
 #if SYNCHRONOUS_PATHFINDING
         Stopwatch stopwatch = new();
-        if (IsFeatureEnabled(PathFinderV2))
-        {
-          stopwatch.Start();
-          GeneratePathBurst();
-          stopwatch.Stop();
-        }
-        else
-        {
-          stopwatch.Start();
-          VehiclePath path = FindPath(CancellationToken.None);
-          stopwatch.Stop();
-          curPath = path.ToBurstPath();
-        }
+        stopwatch.Start();
+        FindNewPath();
+        stopwatch.Stop();
         Log.Message($"FindPath: {Ext_Profiler.ToMilliseconds(stopwatch.ElapsedTicks):0.##}ms");
 #else
-        if (IsFeatureEnabled(PathFinderV2))
-        {
-          RequestNewPathBurst();
-        }
-        else
-        {
-          RequestNewPath();
-        }
+        RequestNewPath();
 #endif
-          break;
+        break;
       default:
         throw new NotImplementedException(pathRequest.ToString());
     }
@@ -690,7 +686,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
     vehicle.CalculateAngle();
 
-    if (!vehicle.DrivableFast(nextCell))
+    if (!vehicle.DrivableFast(nextCell) && !vehicle.CanTraverseTerrainAt(nextCell))
     {
       Log.Error($"{vehicle} entering {nextCell} which is impassable.");
       PatherFailed();
@@ -701,13 +697,35 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     if (nextRot.IsValid && vehicle.PawnOccupiedCells(nextCell, nextRot)
      .Any(cell => !cell.InBounds(vehicle.Map)))
     {
-      PatherFailed(); //Emergency fail if vehicle tries to go out of bounds
+      PatherFailed();
       return;
     }
 
-    //Check ahead and stop prematurely if vehicle won't fit at final destination
-    if (shouldStopClipping && curPath.NodesLeft < LookAheadStartingIndex &&
-      vehicle.LocationRestrictedBySize(vehicle.Map, nextCell, vehicle.FullRotation))
+    if ((pathSearch & PathSettings.GridSetting.BreachWalls) != 0)
+    {
+      foreach (IntVec3 cell in vehicle.VehicleRect(nextCell, vehicle.FullRotation))
+      {
+        if (vehicle.Map.edificeGrid[cell] is { } building)
+        {
+          float speed = IsFeatureEnabled(Acceleration)
+            ? controller.MoveSpeed
+            : vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed);
+          float damage = Mathf.Lerp(0, vehicle.GetStatValue(VehicleStatDefOf.Mass), speed / 20f);
+          vehicle.TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage * vehicle.BuildingCollisionRecoilMultiplier,
+            instigator: building));
+          building.TakeDamage(new DamageInfo(DamageDefOf.Blunt, amount: damage * vehicle.BuildingCollisionMultiplier,
+            instigator: vehicle));
+
+          if (!building.Destroyed)
+          {
+            PatherFailed();
+          }
+        }
+      }
+    }
+
+    if (FailOnClipping && curPath.NodesLeft < LookAheadStartingIndex &&
+        vehicle.LocationRestrictedBySize(vehicle.Map, nextCell, vehicle.FullRotation))
     {
       PatherFailed();
       return;
@@ -778,7 +796,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
   internal float CostToMoveIntoCell(IntVec3 from, IntVec3 to)
   {
     float tickCost = MoveTicksAt(vehicle, from, to);
-    tickCost += PathData.VehiclePathGrid.PerceivedPathCostAt(to);
+    tickCost += PathGrid.PerceivedPathCostAt(to);
     // At minimum should take ~7.5 seconds per cell, any slower and the vehicle should be disabled
     tickCost = Mathf.Min(tickCost, MaxMoveTicks);
     if (vehicle.CurJob != null)
@@ -798,15 +816,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private void ProcessPath()
   {
-#if PROFILER
-    if (timer != null)
-    {
-      Profiler.End(timer);
-      timer = null;
-    }
-#endif
-    Path path = receipt.ClaimPath();
-    if (path is not { Found: true })
+    var path = VehiclePath.FromCoreLibPath(promise.GetPath());
+    if (path is not { IsValid: true })
     {
       Messages.Message("VF_NoPathForVehicle".Translate(vehicle), MessageTypeDefOf.RejectInput, false);
       PatherFailed();
@@ -821,7 +832,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     else
     {
       PathOrderData data = pathQueue.Dequeue();
-      Assert.AreEqual(data.destination, path.LastNode);
+      Assert.AreEqual((IntVec3)data.destination, path.LastNode);
       Assert.AreEqual(JobDefOf.Goto, vehicle.jobs.curJob.def);
       curPath.Combine(path);
       CalculatePathCosts();
@@ -829,12 +840,12 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       destination = new LocalTargetInfo(data.destination);
       lastPathedTargetPosition = destination.Cell;
     }
-    FinalizePathAndAccelerate();
+    FinalizePath();
+    controller.Accelerate(curPath, accelThrottle: ThrottleSpeed.Normal, decelThrottle: ThrottleSpeed.Fast);
   }
 
-  private void FinalizePathAndAccelerate()
+  private void FinalizePath()
   {
-    controller.Accelerate(curPath, accelThrottle: ThrottleSpeed.Normal, decelThrottle: ThrottleSpeed.Fast);
     RequestStatus = curPath != null ? PathRequestStatus.None : PathRequestStatus.Failed;
     if (curPath == null)
     {
@@ -842,8 +853,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
     else
     {
-      receipt?.Dispose();
-      receipt = null;
+      promise?.Dispose();
+      promise = null;
     }
   }
 
@@ -851,92 +862,55 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
   {
     PathOrderData data = pathQueue.Peek();
     int3 start = curPath.LastNode;
-    int rotation = curPath.NodesLeft >= 2
-      ? Rot8.DirectionFromCells(curPath.Nodes[1], curPath.Nodes[0]).AsInt
-      : vehicle.FullRotation.AsInt;
-
-#if PROFILER
-    timer = Profiler.Begin(ProfileName);
-#endif
-    receipt = RequestPathTo(start, data.destination, rotation);
-  }
-
-  private void RequestNewPathBurst()
-  {
-#if PROFILER
-    timer = Profiler.Begin(ProfileName);
-#endif
-    receipt = RequestPathTo(vehicle.Position, destination.Cell, Rotation.ToOctant(vehicle.FullRotation.AsInt));
-  }
-
-  private PathReceipt RequestPathTo(IntVec3 start, IntVec3 end, int rotation)
-  {
-    return PathData.PathFinder.RequestPath(new SmashTools.Burst.PathRequest
-    {
-      start = start,
-      end = end,
-      rotation = rotation,
-      turnCost = TurnCost.Linear,
-      entityCost = new EntityConfig(vehicle.thingIDNumber, PositionManager.ThingIdGrid)
-    });
-  }
-
-  private void GeneratePathBurst()
-  {
-    lastPathedTargetPosition = destination.Cell;
-    curPath = PathData.PathFinder.FindPath(new SmashTools.Burst.PathRequest
-    {
-      start = vehicle.Position,
-      end = destination.Cell,
-      rotation = Rotation.ToOctant(vehicle.FullRotation.AsInt),
-      turnCost = TurnCost.Linear,
-      entityCost = new EntityConfig(vehicle.thingIDNumber, PositionManager.ThingIdGrid)
-    });
-    CalculatePathCosts();
-    FinalizePathAndAccelerate();
-  }
-
-  private VehiclePath FindPath(CancellationToken token)
-  {
-    lastPathedTargetPosition = destination.Cell;
-    return PathData.VehiclePathFinder.FindPath(vehicle.Position, destination, vehicle, token, peMode: peMode);
-  }
-
-  /// <summary>
-  /// Calculates and assigns new path to <see cref="curPath"/>
-  /// </summary>
-  internal void GeneratePath(CancellationToken token)
-  {
-    VehiclePath pawnPath = FindPath(token);
-    if (pawnPath is null || !pawnPath.Found)
-    {
-      PatherFailed();
-      Messages.Message("VF_CannotFit".Translate(vehicle), MessageTypeDefOf.RejectInput, false);
-      return;
-    }
-    curPath = pawnPath.ToBurstPath();
-    CalculatePathCosts();
-    FinalizePathAndAccelerate();
+    Rot8 rotation = curPath.NodesLeft >= 2
+      ? Rot8.DirectionFromCells(curPath.Nodes[1], curPath.Nodes[0])
+      : vehicle.FullRotation;
+    promise = RequestPath(start, data.destination, rotation);
   }
 
   private void RequestNewPath()
   {
-    if (curPathTask is { Status: TaskStatus.Running })
-    {
-      const int MaxCancelWaitTime = 1000;
+    promise = RequestPath(vehicle.Position, destination.Cell, vehicle.FullRotation);
+  }
 
-      Trace.Fail("Restarting task while it is ongoing. Cancelling before continuing.");
-      pathCancellationTokenSource.Cancel();
-      Task.WaitAll([curPathTask], MaxCancelWaitTime);
-    }
-
-    if (pathCancellationTokenSource is null or { IsCancellationRequested: true })
-      pathCancellationTokenSource = new CancellationTokenSource();
-
+  private IPathPromise RequestPath(IntVec3 start, IntVec3 end, Rot8 rot)
+  {
     RequestStatus = PathRequestStatus.Calculating;
-    AsyncPathFindAction asyncAction = AsyncPool<AsyncPathFindAction>.Get();
-    asyncAction.Set(vehicle, pathCancellationTokenSource.Token);
-    curPathTask = TaskManager.Run(asyncAction.Invoke, pathCancellationTokenSource.Token);
+    return pathFinder.RequestPath(start.ToPathNode(), end.ToPathNode(),
+      PathSettings.For(vehicle) with
+    {
+      search = pathSearch,
+      rotation = rot
+    });
+  }
+
+  private VehiclePath FindPath(IntVec3 start, IntVec3 end, Rot8 rot)
+  {
+    Path path = pathFinder.FindPath(start.ToPathNode(), end.ToPathNode(),
+      PathSettings.For(vehicle) with
+    {
+      search = pathSearch,
+      rotation = rot
+    });
+    if (path is null || !path.IsValid)
+    {
+      PatherFailed();
+      Messages.Message("VF_CannotFit".Translate(vehicle), MessageTypeDefOf.RejectInput, false);
+      return null;
+    }
+    return VehiclePath.FromCoreLibPath(path);
+  }
+
+  private void FindNewPath()
+  {
+    lastPathedTargetPosition = destination.Cell;
+    curPath = FindPath(vehicle.Position, destination.Cell, vehicle.FullRotation);
+    if (curPath is { IsValid: true })
+    {
+      CalculatePathCosts();
+      FinalizePath();
+      controller.Accelerate(curPath, accelThrottle: ThrottleSpeed.Normal, decelThrottle: ThrottleSpeed.Fast);
+    }
   }
 
   private PathRequest NeedNewPath()
@@ -945,26 +919,17 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     if (RequestStatus == PathRequestStatus.Calculating)
       return PathRequest.None;
 
-    if (!destination.IsValid || curPath is null || !curPath.Found || curPath.NodesLeft == 0)
+    if (!destination.IsValid || curPath is not { IsValid: true }|| curPath.NodesLeft == 0)
       return PathRequest.NeedNew;
 
     if (destination.HasThing && destination.Thing.Map != vehicle.Map)
       return PathRequest.NeedNew;
 
-    if (IsVehicleAtDest(vehicle, curPath, destination, out IntVec3 newDestination))
+    if (PathingHelper.AnyVehicleBlockingPathAt(destination.Cell, vehicle) != null &&
+        TryAdjustDestination(vehicle, curPath, destination, out IntVec3 newDestination))
     {
       destination = newDestination;
       return PathRequest.NeedNew;
-    }
-
-    if (vehicle.Position.InHorDistOf(curPath.LastNode, 15f) ||
-      vehicle.Position.InHorDistOf(destination.Cell, 15f))
-    {
-      if (!VehicleReachabilityImmediate.CanReachImmediateVehicle(curPath.LastNode, destination,
-        vehicle.Map, vehicle.VehicleDef, peMode))
-      {
-        return PathRequest.NeedNew;
-      }
     }
 
     if (lastPathedTargetPosition != destination.Cell)
@@ -996,9 +961,9 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     {
       IntVec3 next = curPath.Peek(nodeIndex);
       Rot8 rot = Ext_Map.DirectionToCell(previous, next);
-      if (!next.Walkable(vehicle.VehicleDef, vehicle.Map))
+      if (!vehicle.CanTraverseTerrainAt(next))
       {
-        return PathRequest.NeedNew;
+        return PathRequest.Fail;
       }
 
       // Should two vehicles be pathing into each other directly, first to stop will be given a
@@ -1023,7 +988,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
     return PathRequest.None;
 
-    static bool IsVehicleAtDest(VehiclePawn vehicle, Path curPath, LocalTargetInfo destination, out IntVec3 result)
+    static bool TryAdjustDestination(VehiclePawn vehicle, VehiclePath curPath, LocalTargetInfo destination, out IntVec3 result)
     {
       result = IntVec3.Invalid;
       Rot8 rot = curPath.NodesLeft >= 2
@@ -1091,7 +1056,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   public void Dispose()
   {
-    receipt?.Dispose();
+    curPath?.Dispose();
+    promise?.Dispose();
   }
 
   internal enum PathingStatus
@@ -1107,6 +1073,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     None,
     Wait,
     Fail,
+    Brake,
     NeedNew
   }
 

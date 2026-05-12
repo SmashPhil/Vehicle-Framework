@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoreLib.PathFinding;
 using CoreLib.Performance;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Burst;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -47,11 +49,16 @@ public static class PathingHelper
     return !Mathf.Approximately(vehicleDef.GetStatValueAbstract(VehicleStatDefOf.MoveSpeed), 0);
   }
 
-#region Raiders
+  #region Raiders
 
   public static Thing FirstBlockingBuilding(VehiclePawn vehicle, VehiclePath path)
   {
-    if (!path.Found)
+    return FirstBlockingBuilding(vehicle.VehicleDef, vehicle.Map, path);
+  }
+
+  public static Thing FirstBlockingBuilding(VehicleDef vehicleDef, Map map, VehiclePath path)
+  {
+    if (!path.IsValid)
     {
       return null;
     }
@@ -61,24 +68,49 @@ public static class PathingHelper
       return null;
     }
 
-    VehicleDef vehicleDef = vehicle.VehicleDef;
     // -2 since we don't care about vehicle's starting position
     for (int i = nodes.Count - 2; i >= 0; i--)
     {
-      Building edifice = nodes[i].GetEdifice(vehicle.Map);
-      if (edifice != null)
+      Building edifice = nodes[i].GetEdifice(map);
+      if (edifice != null && IsRegionEffector(vehicleDef, edifice.def))
       {
-        bool fenceBlocked = edifice.def.IsFence && !vehicleDef.race.CanPassFences;
-        if (fenceBlocked || IsRegionEffector(vehicleDef, edifice.def))
-        {
-          return edifice;
-        }
+        return edifice;
       }
     }
     return null;
   }
 
-#endregion Raiders
+  public static Thing FirstBlockingBuilding(VehiclePawn vehicle, Path path)
+  {
+    return FirstBlockingBuilding(vehicle.VehicleDef, vehicle.Map, path);
+  }
+
+  public static Thing FirstBlockingBuilding(VehicleDef vehicleDef, Map map, Path path)
+  {
+    if (!path.IsValid)
+    {
+      return null;
+    }
+    var nodes = path.Nodes;
+    if (nodes.Count == 1)
+    {
+      return null;
+    }
+
+    // -2 since we don't care about vehicle's starting position
+    for (int i = nodes.Count - 2; i >= 0; i--)
+    {
+      IntVec3 cell = nodes[i].ToIntVec3();
+      Building edifice = cell.GetEdifice(map);
+      if (edifice != null && IsRegionEffector(vehicleDef, edifice.def))
+      {
+        return edifice;
+      }
+    }
+    return null;
+  }
+
+  #endregion Raiders
 
   public static bool TryGetStandableCell(VehiclePawn vehicle, IntVec3 cell)
   {
@@ -276,11 +308,17 @@ public static class PathingHelper
   {
     foreach (VehicleDef vehicleDef in vehicleDefs)
     {
-      mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
+      var pathData = mapping[vehicleDef];
+      var pathGrid = pathData.VehiclePathGrid;
+      if (!pathGrid.Enabled)
+        continue;
+
+      Assert.IsFalse(pathData.Suspended);
+      pathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
       if (mapping.GridOwners.IsOwner(vehicleDef))
       {
-        mapping[vehicleDef].VehicleRegionDirtyer.NotifyThingAffectingRegionsSpawned(occupiedRect);
-        mapping[vehicleDef].VehicleReachability.ClearCache();
+        pathData.VehicleRegionDirtyer.NotifyThingAffectingRegionsSpawned(occupiedRect);
+        pathData.VehicleReachability.ClearCache();
       }
     }
   }
@@ -290,12 +328,17 @@ public static class PathingHelper
   {
     foreach (VehicleDef vehicleDef in vehicleDefs)
     {
-      mapping[vehicleDef].VehiclePathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
+      var pathData = mapping[vehicleDef];
+      var pathGrid = pathData.VehiclePathGrid;
+      if (!pathGrid.Enabled)
+        continue;
+
+      Assert.IsFalse(pathData.Suspended);
+      pathGrid.RecalculatePerceivedPathCostUnderRect(occupiedRect);
       if (mapping.GridOwners.IsOwner(vehicleDef))
       {
-        mapping[vehicleDef].VehicleRegionDirtyer
-         .NotifyThingAffectingRegionsDespawned(occupiedRect);
-        mapping[vehicleDef].VehicleReachability.ClearCache();
+        pathData.VehicleRegionDirtyer.NotifyThingAffectingRegionsDespawned(occupiedRect);
+        pathData.VehicleReachability.ClearCache();
       }
     }
   }
@@ -305,7 +348,7 @@ public static class PathingHelper
     if (regionEffectors.TryGetValue(thing.def, out List<VehicleDef> vehicleDefs) &&
       !vehicleDefs.NullOrEmpty())
     {
-      VehiclePathingSystem mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
+      var mapping = MapComponentCache<VehiclePathingSystem>.GetComponent(map);
       if (mapping.ThreadAvailable)
       {
         AsyncReachabilityCacheAction asyncAction = AsyncPool<AsyncReachabilityCacheAction>.Get();
@@ -324,9 +367,13 @@ public static class PathingHelper
   {
     foreach (VehicleDef vehicleDef in vehicleDefs)
     {
+      var pathData = mapping[vehicleDef];
+      if (pathData.Suspended)
+        continue;
+
       if (mapping.GridOwners.IsOwner(vehicleDef))
       {
-        mapping[vehicleDef].VehicleReachability.ClearCache();
+        pathData.VehicleReachability.ClearCache();
       }
     }
   }
@@ -384,7 +431,7 @@ public static class PathingHelper
   {
     foreach (VehicleDef vehicleDef in VehicleHarmony.AllMoveableVehicleDefs)
     {
-      VehiclePathingSystem.VehiclePathData pathData = mapping[vehicleDef];
+      PathData pathData = mapping[vehicleDef];
       if (pathData.VehiclePathGrid.Enabled)
       {
         pathData.VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
@@ -437,7 +484,6 @@ public static class PathingHelper
         if (AnyVehicleBlockingPathAt(curLoc, vehicle) != null)
           continue;
 
-        // If unreachable (eg. wall), skip
         if (!vehicle.CanReachVehicle(curLoc, PathEndMode.OnCell, Danger.Deadly))
           continue;
 

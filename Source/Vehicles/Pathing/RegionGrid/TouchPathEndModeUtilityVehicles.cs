@@ -60,6 +60,12 @@ public static class TouchPathEndModeUtilityVehicles
   public static void AddAllowedAdjacentRegions(LocalTargetInfo dest, TraverseParms traverseParams,
     Map map, VehicleDef vehicleDef, List<VehicleRegion> regions)
   {
+    AddAllowedAdjacentRegions(dest, traverseParams, map, vehicleDef, RegionGridType.Normal, regions);
+  }
+
+  public static void AddAllowedAdjacentRegions(LocalTargetInfo dest, TraverseParms traverseParams,
+    Map map, VehicleDef vehicleDef, RegionGridType gridType, List<VehicleRegion> regions)
+  {
     VehiclePathingSystem mapping = map.GetCachedMapComponent<VehiclePathingSystem>();
     GenAdj.GetAdjacentCorners(dest, out IntVec3 bl, out IntVec3 tl, out IntVec3 tr,
       out IntVec3 br);
@@ -70,9 +76,9 @@ public static class TouchPathEndModeUtilityVehicles
       {
         IntVec3 intVec = GenAdj.AdjacentCells[i] + cell;
         if (intVec.InBounds(map) &&
-          !IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map, vehicleDef))
+            !IsAdjacentCornerAndNotAllowed(intVec, bl, tl, tr, br, map, vehicleDef))
         {
-          VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef);
+          VehicleRegion region = VehicleRegionAndRoomQuery.RegionAt(intVec, mapping, vehicleDef, gridType);
           if (region != null && region.Allows(traverseParams))
           {
             regions.Add(region);
@@ -86,9 +92,9 @@ public static class TouchPathEndModeUtilityVehicles
       for (int j = 0; j < list.Count; j++)
       {
         if (list[j].InBounds(map) &&
-          !IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map, vehicleDef))
+            !IsAdjacentCornerAndNotAllowed(list[j], bl, tl, tr, br, map, vehicleDef))
         {
-          VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(list[j], mapping, vehicleDef);
+          VehicleRegion region2 = VehicleRegionAndRoomQuery.RegionAt(list[j], mapping, vehicleDef, gridType);
           if (region2 != null && region2.Allows(traverseParams))
           {
             regions.Add(region2);

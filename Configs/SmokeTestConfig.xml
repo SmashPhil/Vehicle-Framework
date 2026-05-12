@@ -3,10 +3,6 @@
 <Config>
   <stopOnFailure>false</stopOnFailure>
 
-  <log>
-    <verboseLogging>true</verboseLogging>
-  </log>
-
   <warningsAllowed>
     <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
     <li>Releasing render texture that is set to be RenderTexture.active!</li>

@@ -1,56 +1,64 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using CoreLib.PathFinding;
 using CoreLib.Performance;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using SmashTools.Burst;
-using Unity.Mathematics;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using static Vehicles.Config.FeatureFlags;
-using PathFinder = SmashTools.Burst.PathFinder;
 
 namespace Vehicles;
 
 /// <summary>
 /// MapComponent container for all pathing related subcomponents for vehicles
 /// </summary>
-[StaticConstructorOnStartup]
-public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridNotifier
+[StaticConstructorOnStartup] // TODO 1.7 - Verify if SCOS is still needed
+public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingManager
 {
-  private const int EventMapThreadId = 25;
-
   private const GridSelection DefaultGrids = GridSelection.All;
   private const GridDeferment DefaultDeferment = GridDeferment.Lazy;
 
-  private VehiclePathData[] vehicleData;
-
-  private VehicleDef buildingFor;
   private int ownerCleanIndex;
 
+  // TODO 1.7 - set access modifier to private
   public DedicatedThread dedicatedThread;
   public DeferredGridGeneration deferredGridGeneration;
 
   private int defGridCalculatedDayOfYear;
 
+  // TODO 1.6.2144 - VehicleMapFramework has a direct patch on this.
+#pragma warning disable CS0618
+  [UsedImplicitly]
+  private VehiclePathData[] vehicleData;
+#pragma warning restore CS0618
+
   public VehiclePathingSystem(Map map) : base(map)
   {
     deferredGridGeneration = new DeferredGridGeneration(this);
-    GridOwners = new MapGridOwners(this);
+    GridOwners = new MapGridOwners(this, DefDatabase<VehicleDef>.AllDefsListForReading);
     GridOwners.OnOwnershipTransfer += SwapRegionManagerOwners;
-    GridOwners.Init();
     ConstructComponents();
   }
 
+  public Map Map => map;
+
   public MapGridOwners GridOwners { get; }
+
+  public PathDataContainer PathData { get; private set; }
 
   internal GridDebouncer PathGridDebouncer { get; private set; }
 
-  internal ModifierGrid ModifierGrid { get; private set; }
+  public IPathFinder<PathSettings> PathFinder => IsFeatureEnabled(PathFinderV2) ? PathFinderManager : VehiclePathFinder;
 
+  internal PathFinderManager PathFinderManager { get; private set; }
+
+  internal VehiclePathFinder VehiclePathFinder { get; private set; }
+
+  [Obsolete]
   public bool DebouncingPathGridDirtying => PathGridDebouncer != null;
 
   /// <summary>
@@ -71,26 +79,32 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
 
   /// <summary>
   /// Generates all path data if they haven't been already and fetches
-  /// <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>.
+  /// <see cref="PathData"/> for <paramref name="vehicleDef"/>.
   /// </summary>
-  public VehiclePathData this[VehicleDef vehicleDef]
+  public PathData this[VehicleDef vehicleDef]
   {
     get
     {
       if (vehicleDef == null)
         throw new ArgumentNullException(nameof(vehicleDef));
 
-#if DEBUG
-      if (buildingFor == vehicleDef)
-      {
-        Trace.Fail(
-          "Trying to pull VehiclePathData by indexing when it's currently in the middle of " +
-          "generation. Recursion is not supported here.");
-        return null;
-      }
-#endif
-      return vehicleData[vehicleDef.DefIndex];
+      return PathData[vehicleDef.DefIndex];
     }
+  }
+
+  bool IPathingManager.IsPathDataSuspended(VehicleDef vehicleDef)
+  {
+    return this[vehicleDef].Suspended;
+  }
+
+  VehiclePathGrid IPathingManager.GetPathGrid(VehicleDef vehicleDef)
+  {
+    return this[vehicleDef].VehiclePathGrid;
+  }
+
+  VehicleRegionGridManager IPathingManager.GetRegionGridManager(VehicleDef vehicleDef)
+  {
+    return this[vehicleDef].VehicleRegionGridManager;
   }
 
   internal void InitThread()
@@ -129,6 +143,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
       return thread;
     }
 
+    const int EventMapThreadId = 25;
     thread = ThreadManager.GetOrCreateShared(EventMapThreadId);
     Debug.Message(
       $"Fetching thread with shared ownership (id={thread?.id})");
@@ -142,8 +157,11 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
   {
     base.FinalizeInit();
     if (!ThreadAlive)
+    {
       InitThread();
+    }
     RegenerateGrids();
+    PathFinderManager?.ForceUpdateAll();
   }
 
   /// <summary>
@@ -189,13 +207,13 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
 
   private void GeneratePathGrids()
   {
-    for (int i = 0; i < vehicleData.Length; i++)
+    var allPathData = PathData.AllPathData;
+    int i = 0;
+    foreach (PathData pathData in allPathData)
     {
-      VehiclePathData vehiclePathData = vehicleData[i];
       LongEventHandler.SetCurrentEventText(
-        $"{"VF_GeneratingPathGrids".Translate()} {i}/{vehicleData.Length}");
-      //using VehicleRegionConnector.Disabler disabler = new(vehiclePathData.VehicleRegionConnector);
-      vehiclePathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
+        $"{"VF_GeneratingPathGrids".Translate()} {i++}/{allPathData.Length}");
+      pathData.VehiclePathGrid.RecalculateAllPerceivedPathCosts();
     }
   }
 
@@ -207,22 +225,9 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
       VehicleDef vehicleDef = GridOwners.AllOwners[i];
       LongEventHandler.SetCurrentEventText($"{"VF_GeneratingRegions".Translate()} {i}/{total}");
 
-      VehiclePathData vehiclePathData = this[vehicleDef];
+      PathData vehiclePathData = this[vehicleDef];
       vehiclePathData.VehicleRegionAndRoomUpdater.Init();
       vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
-    }
-  }
-
-  private void GenerateGridConnections()
-  {
-    int total = GridOwners.AllOwners.Length;
-    for (int i = 0; i < total; i++)
-    {
-      VehicleDef vehicleDef = GridOwners.AllOwners[i];
-      LongEventHandler.SetCurrentEventText($"{"VF_GeneratingRegions".Translate()} {i}/{total}");
-
-      VehiclePathData vehiclePathData = this[vehicleDef];
-      vehiclePathData.VehicleRegionConnector.RebuildAllConnections();
     }
   }
 
@@ -242,7 +247,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
     Parallel.ForEach(GridOwners.AllOwners, delegate (VehicleDef vehicleDef)
     {
       LongEventHandler.SetCurrentEventText("VF_GeneratingRegions".Translate());
-      VehiclePathData vehiclePathData = this[vehicleDef];
+      PathData vehiclePathData = this[vehicleDef];
       vehiclePathData.VehicleRegionAndRoomUpdater.Init();
       vehiclePathData.VehicleRegionAndRoomUpdater.RebuildAllVehicleRegions();
     });
@@ -250,27 +255,36 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
   }
 
   /// <summary>
-  /// Construct and cache <see cref="VehiclePathData"/> for each moveable <see cref="VehicleDef"/> 
+  /// Construct and cache <see cref="PathData"/> for each moveable <see cref="VehicleDef"/> 
   /// </summary>
   public void ConstructComponents()
   {
-    int size = DefDatabase<VehicleDef>.DefCount;
-    vehicleData = new VehiclePathData[size];
-
     if (IsFeatureEnabled(PathFinderV2))
     {
-      ModifierGrid = new ModifierGrid(map.Size.x * map.Size.z, this);
+      PathFinderManager = new PathFinderManager(this);
+    }
+    else
+    {
+      VehiclePathFinder = new VehiclePathFinder(this);
     }
 
-    GenerateAllPathData();
+    PathData = new PathDataContainer(this, DefDatabase<VehicleDef>.AllDefsListForReading);
+    PathData.GenerateAllPathData(new PathGridCalculator(), PathFinder);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+    vehicleData = new VehiclePathData[PathData.AllPathData.Length];
+#pragma warning restore CS0618 // Type or member is obsolete
+
     DisableAllRegionUpdaters();
+
+    PathFinderManager?.Init();
   }
 
   public void DisableAllRegionUpdaters()
   {
     foreach (VehicleDef vehicleDef in GridOwners.AllOwners)
     {
-      VehiclePathData pathData = this[vehicleDef];
+      PathData pathData = this[vehicleDef];
       pathData.VehicleRegionAndRoomUpdater.Disable();
     }
   }
@@ -302,22 +316,22 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
   internal void BeginCapturingPathGridDirtying()
   {
     List<IGridDebouncerSource> sources = [];
-    foreach (VehiclePathData pathData in vehicleData)
+    foreach (PathData pathData in PathData.AllPathData)
     {
       if (pathData.VehiclePathGrid is { Enabled: true })
       {
         sources.Add(pathData.VehiclePathGrid);
       }
     }
-    if (sources.Count > 0)
-    {
-      PathGridDebouncer = new GridDebouncer(map, sources);
-    }
+    PathGridDebouncer = new GridDebouncer(map, sources);
   }
 
   internal void EndCapturingPathGridDirtying()
   {
-    if (!DebouncingPathGridDirtying)
+    // NOTE: RimWorld's MapGenerator has an unnecessary check after DisableDirtyingScope goes out of
+    // scope which 're-enables' incremental dirtying if it wasn't already. This will call into here a
+    // 2nd time even though this should logically be impossible.
+    if (PathGridDebouncer == null)
       return;
 
     try
@@ -349,6 +363,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
   public override void MapComponentTick()
   {
     base.MapComponentTick();
+    PathFinderManager?.Tick();
     if (ThreadAlive)
     {
       int dayOfYear = GenDate.DayOfYear(GenTicks.TicksAbs, 0f);
@@ -407,7 +422,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
     if (ownerCleanIndex < GridOwners.AllOwners.Length)
     {
       VehicleDef vehicleDef = GridOwners.AllOwners[ownerCleanIndex];
-      VehiclePathData pathData = this[vehicleDef];
+      PathData pathData = this[vehicleDef];
       if (!pathData.Suspended && pathData.VehicleRegionDirtyer.AnyDirty)
       {
         if (ThreadAvailable)
@@ -435,88 +450,17 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
     }
   }
 
-  private void GenerateAllPathData()
-  {
-    // All vehicles need path data (even aerial vehicles for landing)
-    foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
-    {
-      GeneratePathData(vehicleDef);
-    }
-  }
-
-  /// <summary>
-  /// Generate new <see cref="VehiclePathData"/> for <paramref name="vehicleDef"/>
-  /// </summary>
-  /// <param name="vehicleDef"></param>
-  private void GeneratePathData(VehicleDef vehicleDef)
-  {
-    VehiclePathData vehiclePathData = new();
-    vehicleData[vehicleDef.DefIndex] = vehiclePathData;
-    bool isOwner = GridOwners.IsOwner(vehicleDef);
-
-    buildingFor = vehicleDef;
-    {
-      vehiclePathData.VehiclePathGrid = new VehiclePathGrid(this, vehicleDef);
-      vehiclePathData.VehicleRegionConnector = new VehicleRegionConnector(this, vehicleDef);
-      vehiclePathData.VehiclePathFinder = new VehiclePathFinder(this, vehicleDef);
-
-      if (IsFeatureEnabled(PathFinderV2))
-      {
-        vehiclePathData.PathFinder = new PathFinder(new PathFinder.Settings
-        {
-          mapSize = new int2(map.Size.x, map.Size.z),
-          hitbox = new int2(vehicleDef.size.x, vehicleDef.size.z),
-          pathGrid = vehiclePathData.VehiclePathGrid.CostGrid,
-          modifierGrid = ModifierGrid,
-          poolObjects = true
-        });
-      }
-
-      if (isOwner)
-      {
-        vehiclePathData.ReachabilityData =
-          new VehicleReachabilitySettings(this, vehicleDef);
-      }
-      else
-      {
-        // Will return itself if it's an owner
-        VehicleDef ownerDef = GridOwners.GetOwner(vehicleDef);
-        vehiclePathData.ReachabilityData = vehicleData[ownerDef.DefIndex].ReachabilityData;
-      }
-    }
-    buildingFor = null;
-
-    vehiclePathData.VehiclePathGrid.PostInit();
-    vehiclePathData.VehicleRegionConnector.PostInit();
-    vehiclePathData.VehiclePathFinder.PostInit();
-    if (isOwner)
-    {
-      vehiclePathData.ReachabilityData.PostInit();
-    }
-  }
-
   private void SwapRegionManagerOwners(VehicleDef fromVehicleDef, VehicleDef toVehicleDef)
   {
-    VehiclePathData pathData = this[fromVehicleDef];
+    PathData pathData = this[fromVehicleDef];
     // Should be same instance for ownership to be transferable.
-    Assert.IsTrue(pathData.ReachabilityData == this[toVehicleDef].ReachabilityData);
-    pathData.ReachabilityData.ChangeOwner(toVehicleDef);
-  }
-
-  void IPathGridNotifier.NotifyWritingToGrid()
-  {
-    foreach (VehiclePathData pathData in vehicleData)
-    {
-      if (!pathData.Suspended)
-      {
-        pathData.PathFinder.NotifyWritingToGrid();
-      }
-    }
+    Assert.IsTrue(pathData.RegionData == this[toVehicleDef].RegionData);
+    pathData.RegionData.ChangeOwner(toVehicleDef);
   }
 
   public void Dispose()
   {
-    ModifierGrid?.Dispose();
+    PathFinderManager?.Dispose();
   }
 
   [Flags]
@@ -544,73 +488,61 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathGridN
     Forced,
   }
 
-  /// <summary>
-  /// Container for all path related subcomponents specific to a <see cref="VehicleDef"/>.
-  /// </summary>
-  /// <remarks>Stores data strictly for deviations from vanilla regarding impassable values</remarks>
-  public class VehiclePathData
+  [PublicAPI, Obsolete("Use Vehicles.PathData instead.")]
+  public class VehiclePathData : PathData
   {
-    // Region grid is currently disabled.
-    public bool Suspended => !VehicleRegionAndRoomUpdater.Enabled;
-
-    public VehicleReachabilitySettings ReachabilityData { get; set; }
-
-    public VehiclePathGrid VehiclePathGrid { get; set; }
-
-    public VehicleRegionConnector VehicleRegionConnector { get; set; }
-
-    public VehiclePathFinder VehiclePathFinder { get; set; }
-
-    public PathFinder PathFinder { get; set; }
-
-    public VehicleReachability VehicleReachability => ReachabilityData.reachability;
-
-    // TODO 1.6.2144
-    [Obsolete("Fetch from region grid manager.")]
-    public VehicleRegionGrid VehicleRegionGrid => VehicleRegionGridManager[RegionGridType.Normal];
-
-    public VehicleRegionGridManager VehicleRegionGridManager => ReachabilityData.regionGridManager;
-
-    public VehicleRegionMaker VehicleRegionMaker => ReachabilityData.regionMaker;
-
-    public VehicleRegionAndRoomUpdater VehicleRegionAndRoomUpdater => ReachabilityData.regionAndRoomUpdater;
-
-    public VehicleRegionDirtyer VehicleRegionDirtyer => ReachabilityData.regionDirtyer;
+    internal VehiclePathData(IPathingManager manager, VehicleDef vehicleDef)
+      : base(manager, vehicleDef)
+    {
+    }
   }
 
+  [Obsolete("No longer used, this was split out into RegionData, but access to region classes should go through VehiclePathingSystem.")]
   public class VehicleReachabilitySettings
   {
-    internal readonly VehicleRegionGridManager regionGridManager;
     internal readonly VehicleRegionMaker regionMaker;
+    internal readonly VehicleRegionGridManager regionGridManager;
     internal readonly VehicleRegionAndRoomUpdater regionAndRoomUpdater;
     internal readonly VehicleRegionDirtyer regionDirtyer;
     internal readonly VehicleReachability reachability;
 
+    private readonly VehicleGridManager[] gridManagers;
+
     public VehicleReachabilitySettings(VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
     {
-      regionGridManager = new VehicleRegionGridManager(pathingSystem, vehicleDef);
       regionMaker = new VehicleRegionMaker(pathingSystem, vehicleDef);
-      regionAndRoomUpdater = new VehicleRegionAndRoomUpdater(pathingSystem, vehicleDef);
-      regionDirtyer = new VehicleRegionDirtyer(pathingSystem, vehicleDef);
-      reachability = new VehicleReachability(pathingSystem, vehicleDef);
+      regionDirtyer = new VehicleRegionDirtyer(pathingSystem, vehicleDef, regionMaker);
+      regionAndRoomUpdater = new VehicleRegionAndRoomUpdater(pathingSystem, vehicleDef, regionDirtyer);
+      regionGridManager = new VehicleRegionGridManager(pathingSystem, vehicleDef, regionMaker, regionDirtyer);
+      reachability = new VehicleReachability(pathingSystem, vehicleDef, pathingSystem.PathFinder);
+
+      gridManagers = [regionMaker, regionDirtyer, regionAndRoomUpdater, regionGridManager, reachability];
+    }
+
+    internal VehicleReachabilitySettings(RegionData data)
+    {
+      regionMaker = data.regionMaker;
+      regionDirtyer = data.regionDirtyer;
+      regionAndRoomUpdater = data.regionAndRoomUpdater;
+      regionGridManager = data.regionGridManager;
+      reachability = data.reachability;
+      gridManagers = [regionMaker, regionDirtyer, regionAndRoomUpdater, regionGridManager, reachability];
     }
 
     public void PostInit()
     {
-      regionGridManager.PostInit();
-      regionMaker.PostInit();
-      regionAndRoomUpdater.PostInit();
-      regionDirtyer.PostInit();
-      reachability.PostInit();
+      foreach (var gridManager in gridManagers)
+      {
+        gridManager.PostInit();
+      }
     }
 
     public void ChangeOwner(VehicleDef vehicleDef)
     {
-      regionGridManager.createdFor = vehicleDef;
-      regionMaker.createdFor = vehicleDef;
-      regionAndRoomUpdater.createdFor = vehicleDef;
-      regionDirtyer.createdFor = vehicleDef;
-      reachability.createdFor = vehicleDef;
+      foreach (var gridManager in gridManagers)
+      {
+        gridManager.ChangeOwner(vehicleDef);
+      }
     }
   }
 }

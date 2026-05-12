@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using SmashTools;
 using UnityEngine.Assertions;
 using Vehicles.Config;
@@ -15,25 +14,31 @@ public sealed class VehicleRegionGridManager : VehicleGridManager
   private readonly VehicleRegionGrid normal;
   private readonly VehicleRegionGrid breach;
 
-  private VehiclePathingSystem.VehiclePathData pathData;
+  private readonly VehicleRegionMaker regionMaker;
+  private readonly VehicleRegionDirtyer regionDirtyer;
 
   static VehicleRegionGridManager()
   {
     if (FeatureFlags.RaidersEnabled)
     {
-      AllGridTypes = [.. Enum.GetValues(typeof(RegionGridType)).Cast<RegionGridType>()];
+      AllGridTypes = [RegionGridType.Normal, RegionGridType.Breach];
     }
     else
     {
       AllGridTypes = [RegionGridType.Normal];
     }
   }
-  public VehicleRegionGridManager(VehiclePathingSystem pathingSystem, VehicleDef vehicleDef) : base(pathingSystem, vehicleDef)
+
+  public VehicleRegionGridManager(IPathingManager pathing, VehicleDef vehicleDef, VehicleRegionMaker regionMaker,
+    VehicleRegionDirtyer regionDirtyer) : base(pathing, vehicleDef)
   {
-    normal = new VehicleRegionGrid(pathingSystem, vehicleDef, new RegionSourceNormal());
+    this.regionMaker = regionMaker;
+    this.regionDirtyer = regionDirtyer;
+
+    normal = new VehicleRegionGrid(pathing, vehicleDef, new RegionSourceNormal());
     if (FeatureFlags.RaidersEnabled)
     {
-      breach = new VehicleRegionGrid(pathingSystem, vehicleDef, new RegionSourceBreach());
+      breach = new VehicleRegionGrid(pathing, vehicleDef, new RegionSourceBreach());
     }
   }
 
@@ -61,19 +66,17 @@ public sealed class VehicleRegionGridManager : VehicleGridManager
     return RegionGridType.Normal;
   }
 
-  public void Init()
+  public void Init(VehicleRegionAndRoomUpdater regionAndRoomUpdater)
   {
-    normal.Init();
+    normal.Init(regionAndRoomUpdater);
     if (FeatureFlags.RaidersEnabled)
     {
-      breach.Init();
+      breach.Init(regionAndRoomUpdater);
     }
   }
 
   public override void PostInit()
   {
-    pathData = mapping[createdFor];
-
     normal.PostInit();
     if (FeatureFlags.RaidersEnabled)
     {
@@ -92,9 +95,9 @@ public sealed class VehicleRegionGridManager : VehicleGridManager
 
   public void RegenerateDirtyRegions(List<VehicleRegion> newRegions)
   {
-    foreach (IntVec3 cell in pathData.VehicleRegionDirtyer.ConsumeDirtyCells())
+    foreach (IntVec3 cell in regionDirtyer.ConsumeDirtyCells())
     {
-      if (!cell.InBounds(mapping.map))
+      if (!cell.InBounds(map))
       {
         Trace.Fail($"Dirtied invalid cell at {cell}");
         continue;
@@ -118,7 +121,7 @@ public sealed class VehicleRegionGridManager : VehicleGridManager
     if (region is { valid: true })
       return;
 
-    RegionResult result = pathData.VehicleRegionMaker.TryGenerateRegionFrom(cell, gridType, ref region);
+    RegionResult result = regionMaker.TryGenerateRegionFrom(cell, gridType, ref region);
     switch (result)
     {
       case RegionResult.Success:

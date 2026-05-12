@@ -7,23 +7,24 @@ namespace Vehicles;
 
 public class MapGridOwners : GridOwnerList<MapGridOwners.PathConfig>
 {
-  private readonly VehiclePathingSystem mapping;
+  private readonly IPathingManager pathing;
 
-  public MapGridOwners(VehiclePathingSystem mapping)
+  public MapGridOwners(IPathingManager pathing, List<VehicleDef> vehicleDefs) :
+    base(vehicleDefs)
   {
-    this.mapping = mapping;
+    this.pathing = pathing;
   }
 
   protected override bool CanTransferOwnershipTo(VehicleDef vehicleDef)
   {
-    return mapping[vehicleDef].VehiclePathGrid.Enabled;
+    return pathing.GetPathGrid(vehicleDef).Enabled;
   }
 
   // Accessed from Init, already locked for the duration of owner generation
   protected override void GenerateConfigs()
   {
-    configs = new PathConfig[DefDatabase<VehicleDef>.DefCount];
-    foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
+    configs = new PathConfig[vehicleDefs.Count];
+    foreach (VehicleDef vehicleDef in vehicleDefs)
     {
       configs[vehicleDef.DefIndex] = new PathConfig(vehicleDef);
     }
@@ -62,6 +63,7 @@ public class MapGridOwners : GridOwnerList<MapGridOwners.PathConfig>
     {
       if (other is not PathConfig pathConfig)
         return false;
+
       return size == pathConfig.size &&
         defaultMapImpassable == pathConfig.defaultMapImpassable &&
         impassableThingDefs.SetEquals(pathConfig.impassableThingDefs) &&

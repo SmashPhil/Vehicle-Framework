@@ -17,6 +17,11 @@ public class GridDebouncer : IDisposable
 		this.map = map;
 		this.sources = sources;
 		dirtyCells = new NativeBitArray(map.cellIndices.NumGridCells, Allocator.Persistent);
+
+    foreach (IGridDebouncerSource source in sources)
+    {
+      source.ActiveDebouncer = this;
+    }
 	}
 
 	public void SetDirty(IntVec3 cell)
@@ -46,5 +51,10 @@ public class GridDebouncer : IDisposable
 	public void Dispose()
 	{
 		dirtyCells.Dispose();
-	}
+
+    foreach (IGridDebouncerSource source in sources)
+    {
+      source.ActiveDebouncer = null;
+    }
+  }
 }

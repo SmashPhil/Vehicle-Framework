@@ -1,13 +1,12 @@
 ﻿using CoreLib.Performance;
-using VehiclePathData = Vehicles.VehiclePathingSystem.VehiclePathData;
 
 namespace Vehicles
 {
   public class AsyncRebuildRegionsAction : AsyncAction
   {
-    private VehiclePathData pathData;
+    private PathData pathData;
 
-    public void Set(VehiclePathData pathData)
+    public void Set(PathData pathData)
     {
       this.pathData = pathData;
     }

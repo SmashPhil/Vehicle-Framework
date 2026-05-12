@@ -5,7 +5,7 @@
   <jobs>
     <li>
       <name>Unit Tests</name>
-      <commandLineArgs>--test</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -t</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -22,7 +22,7 @@
     </li>
     <li>
       <name>Save Our Ship 2</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -37,7 +37,7 @@
     </li>
     <li>
       <name>Vehicle Map Framework</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -52,7 +52,7 @@
     </li>
     <li>
       <name>Trains of the Rim</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -67,7 +67,7 @@
     </li>
     <li>
       <name>Caravan Item Selection</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -82,7 +82,7 @@
     </li>
     <li>
       <name>Visit Settlements</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -97,7 +97,7 @@
     </li>
     <li>
       <name>Enter Here</name>
-      <commandLineArgs>--smoke-test -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>

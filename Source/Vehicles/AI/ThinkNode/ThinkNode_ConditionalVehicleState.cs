@@ -1,45 +1,46 @@
-﻿using SmashTools;
+﻿using JetBrains.Annotations;
+using SmashTools;
 using Verse;
 using Verse.AI;
 
-namespace Vehicles
+namespace Vehicles;
+
+[PublicAPI]
+public class ThinkNode_ConditionalVehicleState : ThinkNode_Conditional
 {
-  public class ThinkNode_ConditionalVehicleState : ThinkNode_Conditional
+  private bool? canMove;
+  private bool? canTakeoff;
+  private bool? hasPassengers;
+  
+  public override ThinkNode DeepCopy(bool resolve = true)
   {
-    private bool? canMove;
-    private bool? canTakeoff;
-    private bool? hasPassengers;
+    ThinkNode_ConditionalVehicleState thinkNode =
+      (ThinkNode_ConditionalVehicleState)base.DeepCopy(resolve);
+    thinkNode.canMove = canMove;
+    thinkNode.canTakeoff = canTakeoff;
+    thinkNode.hasPassengers = hasPassengers;
 
-    public override ThinkNode DeepCopy(bool resolve = true)
+    return thinkNode;
+  }
+
+  protected override bool Satisfied(Pawn pawn)
+  {
+    if (pawn is not VehiclePawn vehicle)
     {
-      ThinkNode_ConditionalVehicleState thinkNode =
-        (ThinkNode_ConditionalVehicleState)base.DeepCopy(resolve);
-      thinkNode.canMove = canMove;
-      thinkNode.canTakeoff = canTakeoff;
-      thinkNode.hasPassengers = hasPassengers;
-
-      return thinkNode;
+      return false;
     }
 
-    protected override bool Satisfied(Pawn pawn)
+    if (canTakeoff.HasValue && vehicle.CompVehicleLauncher != null &&
+      vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string _) != canTakeoff.Value)
     {
-      if (pawn is not VehiclePawn vehicle)
-      {
-        return false;
-      }
-
-      if (canTakeoff.HasValue && vehicle.CompVehicleLauncher != null &&
-        vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string _) != canTakeoff.Value)
-      {
-        return false;
-      }
-
-      if (hasPassengers.HasValue && (vehicle.AllPawnsAboard.Count > 0) != hasPassengers.Value)
-      {
-        return false;
-      }
-
-      return !canMove.HasValue || vehicle.CanMove == canMove.Value;
+      return false;
     }
+
+    if (hasPassengers.HasValue && (vehicle.AllPawnsAboard.Count > 0) != hasPassengers.Value)
+    {
+      return false;
+    }
+
+    return !canMove.HasValue || vehicle.CanMove == canMove.Value;
   }
 }
