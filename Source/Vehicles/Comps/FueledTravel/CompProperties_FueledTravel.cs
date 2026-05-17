@@ -72,8 +72,6 @@ public class CompProperties_FueledTravel : VehicleCompProperties
 
   public string fuelIconPath;
 
-  private Texture2D fuelIcon;
-
   public CompProperties_FueledTravel()
   {
     compClass = typeof(CompFueledTravel);
@@ -95,10 +93,10 @@ public class CompProperties_FueledTravel : VehicleCompProperties
   {
     get
     {
-      fuelIcon ??= !fuelIconPath.NullOrEmpty() ?
+      field ??= !fuelIconPath.NullOrEmpty() ?
         ContentFinder<Texture2D>.Get(fuelIconPath) :
         fuelType.uiIcon;
-      return fuelIcon;
+      return field;
     }
   }
 }
