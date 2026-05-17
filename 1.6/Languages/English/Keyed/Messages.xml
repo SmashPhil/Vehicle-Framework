@@ -10,8 +10,8 @@
   <VF_UpgradeInProgress>Cannot draft while {0} is upgrading.</VF_UpgradeInProgress>
   <VF_NotEnoughCrew>Not enough colonists in {0} to operate {1}.</VF_NotEnoughCrew>
   
-  <VF_CannotFit>Not enough space.</VF_CannotFit>
-  <VF_NoPathForVehicle>Cannot path here.</VF_NoPathForVehicle>
+  <VF_CannotFit>{0_labelShort} cannot reach destination. Not enough space.</VF_CannotFit>
+  <VF_NoPathForVehicle>{0_labelShort} cannot reach destination.</VF_NoPathForVehicle>
   <VF_IncapableStatusForRole>{0} is incapable of fulfilling this role.</VF_IncapableStatusForRole>
   <VF_CannotAddToCargo>{0} cannot be added to cargo.</VF_CannotAddToCargo>
   

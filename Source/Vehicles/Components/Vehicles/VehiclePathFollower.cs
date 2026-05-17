@@ -10,7 +10,6 @@ using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
-using SmashTools.Burst;
 using SmashTools.Performance;
 using Unity.Mathematics;
 using UnityEngine;

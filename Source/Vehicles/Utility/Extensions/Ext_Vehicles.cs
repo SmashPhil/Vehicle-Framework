@@ -495,7 +495,7 @@ public static class Ext_Vehicles
 		return null;
 	}
 
-	[MustUseReturnValue]
+	[Pure]
 	public static List<VehicleDef> UniqueVehicleDefs(this IEnumerable<VehiclePawn> vehicles)
 	{
 		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
@@ -513,7 +513,7 @@ public static class Ext_Vehicles
 	/// <summary>
 	/// Get all unique Vehicles in <paramref name="vehicles"/>
 	/// </summary>
-	[MustUseReturnValue]
+	[Pure]
 	public static List<VehicleDef> UniqueVehicleDefsInList(this List<VehiclePawn> vehicles)
 	{
 		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
@@ -531,7 +531,7 @@ public static class Ext_Vehicles
 	/// <summary>
 	/// Get all unique Vehicles in <paramref name="pawns"/>
 	/// </summary>
-	[MustUseReturnValue]
+	[Pure]
 	public static List<VehicleDef> UniqueVehicleDefsInList(this List<Pawn> pawns)
 	{
 		using var cs = GlobalObjectPool.Get(out HashSet<VehicleDef> uniqueVehicleDefs);
@@ -546,11 +546,28 @@ public static class Ext_Vehicles
 		return vehicleDefs;
 	}
 
-	/// <summary>
-	/// Check if <paramref name="thing"/> is a boat
-	/// </summary>
-	/// <param name="thing"></param>
-	[Pure]
+  /// <summary>
+  /// Get all vehicles in <paramref name="pawns"/>
+  /// </summary>
+  [Pure]
+  public static List<VehiclePawn> VehiclesInList(this List<Pawn> pawns)
+  {
+    List<VehiclePawn> vehicles = [];
+    foreach (Pawn pawn in pawns)
+    {
+      if (pawn is VehiclePawn vehicle)
+      {
+        vehicles.Add(vehicle);
+      }
+    }
+    return vehicles;
+  }
+
+  /// <summary>
+  /// Check if <paramref name="thing"/> is a boat
+  /// </summary>
+  /// <param name="thing"></param>
+  [Pure]
 	public static bool IsBoat(this Thing thing)
 	{
 		return thing is VehiclePawn vehicle && vehicle.VehicleDef.type == VehicleType.Sea;

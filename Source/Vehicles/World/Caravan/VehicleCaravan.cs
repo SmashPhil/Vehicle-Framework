@@ -20,870 +20,870 @@ namespace Vehicles.World;
 public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<GlobalTargetInfo, ArrivalOption>,
                               ILauncher
 {
-	private const int RepairMothballTicks = 300;
-
-	private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
-	private static readonly Color PlayerCaravanColor = new(1f, 0.863f, 0.33f);
-	private static readonly MaterialPropertyBlock PropertyBlock = new();
-	private static readonly Dictionary<ThingDef, Material> Materials = [];
-
-	private static readonly StringBuilder ExplanationBuilder = new();
-
-	public VehicleCaravan_PathFollower vehiclePather;
-	public VehicleCaravanTweener vehicleTweener;
-
-	private VehiclePawn leadVehicle;
-	private bool initialized;
-
-	private bool repairing;
-
-	// Fast lookup cache lists
-	private List<Pawn> allPawns = [];
-	private List<VehiclePawn> vehicles = [];
-	private List<Pawn> dismountedPawns = [];
-
-	public VehicleCaravan()
-	{
-		vehiclePather = new VehicleCaravan_PathFollower(this);
-		vehicleTweener = new VehicleCaravanTweener(this);
-	}
-
-	private bool RecachePawnLists { get; set; } = true;
-
-	public float ConstructionAverage { get; private set; }
-
-	public bool VehiclesNeedRepairs { get; private set; }
-
-	public override Vector3 DrawPos => vehicleTweener.TweenedPos;
-
-	bool ITargeterSource<GlobalTargetInfo, ArrivalOption>.TargeterValid =>
-		!Destroyed && LeadVehicle is { Spawned: false, Destroyed: false };
-
-	public Vector3 Origin => Tile.Valid ? Find.WorldGrid.GetTileCenter(Tile) : DrawPos;
-
-	public bool CanDismount => true;
-
-	public bool AerialVehicle =>
-		vehicles.FirstOrDefault()?.VehicleDef.type == VehicleType.Air;
-
-	public IEnumerable<VehiclePawn> Vehicles => vehicles;
-
-	public IEnumerable<Pawn> DismountedPawns => dismountedPawns;
-
-	public List<VehiclePawn> VehiclesListForReading => vehicles;
-
-	public List<Pawn> DismountedPawnsListForReading => dismountedPawns;
-
-	/// <summary>
-	/// Strictly for appending internal pawns in AllPawns list from vanilla.
-	/// </summary>
-	public List<Pawn> AllPawnsAndVehiclePassengers => allPawns;
-
-	public bool Repairing
-	{
-		get { return !vehiclePather.Moving && repairing; }
-		set { repairing = value; }
-	}
-
-	public VehiclePawn LeadVehicle
-	{
-		get
-		{
-			// TODO - should be based on max vehicle size
-			leadVehicle ??= PawnsListForReading.FirstOrDefault(pawn => pawn is VehiclePawn) as VehiclePawn;
-			return leadVehicle;
-		}
-	}
-
-	public override Material Material
-	{
-		get
-		{
-			VehicleDef leadVehicleDef = LeadVehicle?.VehicleDef;
-			if (leadVehicleDef is null)
-			{
-				return null;
-			}
-			if (!Materials.ContainsKey(leadVehicleDef))
-			{
-				Color color = Color.white;
-				if (Faction.IsPlayer)
-					color = PlayerCaravanColor;
-				else if (Faction != null)
-					color = Faction.Color;
-				Texture2D texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
-				Material material = MaterialPool.MatFrom(texture,
-					ShaderDatabase.WorldOverlayTransparentLit, color,
-					WorldMaterials.WorldObjectRenderQueue);
-				Materials.Add(leadVehicleDef, material);
-			}
-			return Materials[leadVehicleDef];
-		}
-	}
-
-	public bool OutOfFuel
-	{
-		get
-		{
-			foreach (VehiclePawn vehicle in vehicles)
-			{
-				if (vehicle.CompFueledTravel is { Fuel: <= 0 })
-					return true;
-			}
-			return false;
-		}
-	}
-
-	public bool VehicleCantMove
-	{
-		get
-		{
-			return VehiclesListForReading.Exists(Immobile);
-
-			static bool Immobile(VehiclePawn vehicle)
-			{
-				return !vehicle.CanMoveFinal;
-			}
-		}
-	}
-
-	public new int TicksPerMove
-	{
-		get { return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this); }
-	}
-
-	public new string TicksPerMoveExplanation
-	{
-		get
-		{
-			using ClearStringOnDispose ssr = new(ExplanationBuilder);
-			_ = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, ExplanationBuilder);
-			return ExplanationBuilder.ToString();
-		}
-	}
-
-	public override void Draw()
-	{
-		float averageTileSize = Find.WorldGrid.AverageTileSize;
-		float transitionPct = ExpandableWorldObjectsUtility.TransitionPct(this);
-		if (def.expandingIcon && transitionPct > 0f)
-		{
-			Color color = Material.color;
-			float num = 1f - transitionPct;
-			PropertyBlock.SetColor(ShaderPropertyIDs.Color,
-				new Color(color.r, color.g, color.b, color.a * num));
-			WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material,
-				propertyBlock: PropertyBlock);
-			return;
-		}
-		WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
-	}
-
-	public override IEnumerable<Gizmo> GetGizmos()
-	{
-		foreach (Gizmo gizmo in base.GetGizmos())
-		{
-			// skip all vanilla caravan devmode commands
-			if (gizmo is Command command && !command.icon)
-				continue;
-
-			yield return gizmo;
-		}
-
-		if (IsPlayerControlled)
-		{
-			if (AerialVehicle)
-			{
-				VehiclePawn vehicle = vehicles.FirstOrDefault();
-				Assert.IsNotNull(vehicle);
-				Command_Action launchCommand = new()
-				{
-					defaultLabel = "CommandLaunchGroup".Translate(),
-					defaultDesc = "CommandLaunchGroupDesc".Translate(),
-					icon = TexData.LaunchCommandTex,
-					alsoClickIfOtherInGroupClicked = false,
-					action = LaunchAerialVehicle
-				};
-				if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
-				{
-					launchCommand.Disabled = true;
-					launchCommand.disabledReason = disableReason;
-				}
-				yield return launchCommand;
-			}
-			if (vehiclePather.Moving)
-			{
-				yield return new Command_Toggle
-				{
-					defaultLabel = "CommandPauseCaravan".Translate(),
-					defaultDesc =
-						"CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
-					icon = TexCommand.PauseCaravan,
-					hotKey = KeyBindingDefOf.Misc1,
-					isActive = () => vehiclePather.Paused,
-					toggleAction = delegate
-					{
-						if (!vehiclePather.Moving)
-						{
-							return;
-						}
-						vehiclePather.Paused = !vehiclePather.Paused;
-					},
-				};
-			}
-			else
-			{
-				if (VehiclesNeedRepairs)
-				{
-					yield return new Command_Toggle
-					{
-						defaultLabel = "VF_ToggleRepairVehicle".Translate(),
-						defaultDesc = "VF_ToggleRepairVehicleDesc".Translate(),
-						icon = VehicleTex.RepairVehicles,
-						hotKey = KeyBindingDefOf.Misc2,
-						isActive = () => !vehiclePather.Moving && repairing && VehiclesNeedRepairs,
-						toggleAction = delegate { repairing = !repairing; },
-					};
-				}
-
-				Command_Action disembark = new()
-				{
-					icon = VehicleTex.StashVehicle,
-					defaultLabel = "VF_CommandDisembark".Translate(),
-					defaultDesc = "VF_CommandDisembarkDesc".Translate(),
-					action = delegate { CaravanHelper.StashVehicles(this); }
-				};
-
-				// If tile is impassable, normal caravan won't be able to return
-				if (Find.World.Impassable(Tile))
-				{
-					disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
-				}
-				yield return disembark;
-			}
-		}
-
-		foreach (VehiclePawn vehicle in VehiclesListForReading)
-		{
-			foreach (ThingComp thingComp in vehicle.AllComps)
-			{
-				if (thingComp is not VehicleComp vehicleComp)
-					continue;
-
-				foreach (Gizmo gizmo in vehicleComp.CompCaravanGizmos())
-				{
-					yield return gizmo;
-				}
-			}
-		}
-
-		if (DebugSettings.ShowDevGizmos)
-		{
-			yield return new Command_Action
-			{
-				defaultLabel = "Down Random Pawn",
-				action = delegate
-				{
-					Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
-					pawn?.health.GetOrAddHediff(HediffDefOf.RegenerationComa);
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "Kill Random Pawn",
-				action = delegate
-				{
-					Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
-					pawn?.Kill(null);
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "Vehicle Dev: Teleport to destination",
-				action = delegate
-				{
-					Tile = vehiclePather.Destination;
-					vehiclePather.StopDead();
-				}
-			};
-			yield return new Command_Action
-			{
-				defaultLabel = "Repair all Vehicles",
-				action = delegate
-				{
-					foreach (VehiclePawn vehicle in VehiclesListForReading)
-					{
-						vehicle.statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
-					}
-				}
-			};
-		}
-	}
-
-	public void LaunchAerialVehicle()
-	{
-		if (!AerialVehicle)
-		{
-			Trace.Fail(
-				"Trying to launch aerial vehicle with caravan not registered as an aerial vehicle.");
-			SoundDefOf.ClickReject.PlayOneShotOnCamera();
-			return;
-		}
-
-		Assert.IsTrue(vehicles.Count == 1);
-		VehiclePawn vehicle = vehicles[0];
-
-		using (new RecacheDisabler(this))
-		{
-			// pawns list is modified when distributed
-			RoleHelper.DistributeAll(vehicles, DismountedPawns.ToList());
-		}
-		RecacheVehicles();
-
-		if (pawns.Count > 1)
-		{
-			Find.WindowStack.Add(new Dialog_Confirm(
-				"VF_PawnsLeftBehindConfirm".Translate(),
-				"VF_PawnsLeftBehindConfirmDesc".Translate(),
-				LaunchAction));
-		}
-		else
-		{
-			LaunchAction();
-		}
-		return;
-
-		void LaunchAction()
-		{
-			CameraJumper.TryJump(CameraJumper.GetWorldTarget(this));
-			Find.WorldSelector.ClearSelection();
-			ITargeterUpdate<GlobalTargetInfo> updater =
-				LeadVehicle.CompFueledTravel != null ?
-					new FuelTargetUpdater(LeadVehicle, this) :
-					null;
-			new WorldTargeter<ArrivalOption>(this, updater)
-			{
-				TargetTexture = TexData.TargeterMouseAttachment
-			}.Start();
-		}
-	}
-
-	TargetValidation ITargeterSource<GlobalTargetInfo, ArrivalOption>.CanTarget(GlobalTargetInfo target)
-	{
-		return LeadVehicle.CompVehicleLauncher.CanTarget(target);
-	}
-
-	TargeterResult ITargeterSource<GlobalTargetInfo, ArrivalOption>.Select(GlobalTargetInfo target)
-	{
-		return LeadVehicle.CompVehicleLauncher.Select(target);
-	}
-
-	void ITargeterSource<GlobalTargetInfo, ArrivalOption>.OnTargetingFinished(
-		TargetData<GlobalTargetInfo> targetData,
-		ArrivalOption arrivalOption)
-	{
-		if (arrivalOption.continueWith != null)
-		{
-			arrivalOption.continueWith(targetData);
-		}
-		else
-		{
-			Launch(targetData, arrivalOption.arrivalAction);
-		}
-	}
-
-	public void Launch(TargetData<GlobalTargetInfo> targetData, IArrivalAction arrivalAction)
-	{
-		AerialVehicleInFlight aerialVehicle = LeadVehicle.GetOrMakeAerialVehicle();
-		List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
-		aerialVehicle.OrderFlyToTiles(nodes, arrivalAction);
-	}
-
-	IEnumerable<ArrivalOption> ILauncher.OptionsAt(GlobalTargetInfo target)
-	{
-		return LeadVehicle.CompVehicleLauncher.OptionsAt(target);
-	}
-
-	public /* override */ new void Notify_PawnAdded(Pawn pawn)
-	{
-		RecacheVehiclesOrConvertCaravan();
-	}
-
-	public /* override */ new void Notify_PawnRemoved(Pawn pawn)
-	{
-		RecacheVehiclesOrConvertCaravan();
-	}
-
-	public void Notify_VehicleTeleported()
-	{
-		vehicleTweener.ResetTweenedPosToRoot();
-		vehiclePather.Notify_Teleported_Int();
-	}
-
-	public override void Notify_Merged(List<Caravan> group)
-	{
-		base.Notify_Merged(group);
-		RecacheVehiclesOrConvertCaravan();
-	}
-
-	public override void Notify_MemberDied(Pawn member)
-	{
-		if (!Spawned)
-		{
-			Log.Error(
-				"Caravan member died in an unspawned caravan. Unspawned caravans shouldn't be kept for more than a single frame.");
-		}
-		if (!PawnsListForReading.NotNullAndAny(x =>
-			x is VehiclePawn { Dead: false } vehicle &&
-			vehicle.AllPawnsAboard.NotNullAndAny(pawn => pawn != member && IsOwner(pawn))))
-		{
-			RemovePawn(member);
-			if (Faction == Faction.OfPlayer)
-			{
-				Find.LetterStack.ReceiveLetter("LetterLabelAllCaravanColonistsDied".Translate(),
-					"LetterAllCaravanColonistsDied".Translate(Name).CapitalizeFirst(),
-					LetterDefOf.NegativeEvent, new GlobalTargetInfo(Tile));
-			}
-			pawns.Clear();
-			Destroy();
-		}
-		else
-		{
-			member.Strip();
-			RemovePawn(member);
-		}
-		RecacheStatAverages();
-	}
-
-	/// <summary>
-	/// Recache internal vehicle list for quick reading
-	/// </summary>
-	public void RecacheVehicles()
-	{
-		if (!RecachePawnLists)
-			return;
-
-		allPawns.Clear();
-		vehicles.Clear();
-		dismountedPawns.Clear();
-		foreach (Pawn pawn in pawns.InnerListForReading)
-		{
-			allPawns.Add(pawn);
-			if (pawn is VehiclePawn vehicle)
-			{
-				vehicles.Add(vehicle);
-				foreach (Pawn onboardPawn in vehicle.AllPawnsAboard)
-				{
-					allPawns.Add(onboardPawn);
-				}
-				foreach (Thing thing in vehicle.inventory.innerContainer)
-				{
-					if (thing is Pawn inventoryPawn)
-					{
-						allPawns.Add(inventoryPawn);
-					}
-				}
-			}
-			else
-			{
-				dismountedPawns.Add(pawn);
-			}
-		}
-		leadVehicle = null;
-	}
-
-	/// <summary>
-	/// Recache vehicle list and convert to normal caravan if no vehicles remain
-	/// </summary>
-	public void RecacheVehiclesOrConvertCaravan()
-	{
-		if (!RecachePawnLists)
-			return;
-
-		RecacheVehicles();
-		ValidateCaravanType();
-		RecacheStatAverages();
-	}
-
-	public void RecacheStatAverages()
-	{
-		float total = 0;
-		int pawnCount = 0;
-		foreach (Pawn pawn in PawnsListForReading)
-		{
-			if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
-			{
-				total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
-				pawnCount++;
-			}
-		}
-		float average = 1;
-		if (pawnCount > 0)
-		{
-			average = total / pawnCount;
-		}
-		ConstructionAverage = average;
-
-		VehiclesNeedRepairs = vehicles.Any(vehicle =>
-			vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1));
-	}
-
-	public virtual void PostInit()
-	{
-		initialized = true;
-		RecacheVehiclesOrConvertCaravan();
-	}
-
-	/// <summary>
-	/// Convert to vanilla caravan if no vehicles exist in VehicleCaravan
-	/// </summary>
-	private void ValidateCaravanType()
-	{
-		if (initialized && vehicles.NullOrEmpty())
-		{
-			Debug.Message(
-				$"VehicleCaravan {this} has no more vehicles. Converting to normal caravan. Pawns={string.Join(", ", pawns.InnerListForReading.Select(pawn => pawn.Label))}");
-			List<Pawn> pawnsToTransfer = pawns.InnerListForReading.ToList();
-			if (pawnsToTransfer.Count > 0)
-			{
-				// base pawn list must be cleared before this Caravan object is ultimately destroyed,
-				// otherwise their references will persist here and they will still get destroyed.
-				using RecacheDisabler rd = new(this);
-				RemoveAllPawns();
-				_ = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
-			}
-			if (!Destroyed)
-			{
-				Destroy();
-			}
-		}
-	}
-
-	public override void Destroy()
-	{
-		// Can destroy prematurely for vanilla methods removing / transferring pawns like with Caravan merging
-		if (Destroyed)
-			return;
-
-		// Ensure we're not destroying based on a stale cache
-		RecacheVehicles();
-
-		// Removing pawn from caravan pawn list will propagate events back up to Notify_PawnRemoved, triggering additional
-		// recaches.
-		using RecacheDisabler pd = new(this);
-		foreach (VehiclePawn vehicle in vehicles)
-		{
-			for (int i = vehicle.AllPawnsAboard.Count; --i >= 0;)
-			{
-				Pawn pawn = vehicle.AllPawnsAboard[i];
-				vehicle.RemovePawn(pawn);
-				if (!pawn.IsWorldPawn() && pawn is not VehiclePawn)
-					Find.WorldPawns.PassToWorld(pawn);
-			}
-			if (!vehicle.Destroyed)
-				vehicle.Destroy();
-		}
-		base.Destroy();
-	}
-
-	public override string GetInspectString()
-	{
-		StringBuilder stringBuilder = new();
-
-		int colonists = 0;
-		int animals = 0;
-		int prisoners = 0;
-		int downed = 0;
-		int mentalState = 0;
-		int vehicleCount = 0;
-
-		vehicleCount++;
-		foreach (Pawn pawn in PawnsListForReading)
-		{
-			if (pawn is VehiclePawn) vehicleCount++;
-			if (pawn.IsColonist) colonists++;
-			if (pawn.RaceProps.Animal) animals++;
-			if (pawn.IsPrisoner) prisoners++;
-			if (pawn.Downed) downed++;
-			if (pawn.InMentalState) mentalState++;
-		}
-
-		if (vehicleCount >= 1)
-		{
-			VehicleCounts.Clear();
-			{
-				foreach (VehiclePawn vehicle in VehiclesListForReading)
-				{
-					if (!VehicleCounts.TryAdd(vehicle.VehicleDef, 1))
-						VehicleCounts[vehicle.VehicleDef]++;
-				}
-				foreach ((VehicleDef vehicleDef, int count) in VehicleCounts)
-				{
-					stringBuilder.Append($"{count} {vehicleDef.LabelCap}, ");
-				}
-			}
-			VehicleCounts.Clear();
-		}
-		stringBuilder.Append("CaravanColonistsCount".Translate(colonists,
-			(colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
-		if (animals == 1)
-		{
-			stringBuilder.Append(", " + "CaravanAnimal".Translate());
-		}
-		else if (animals > 1)
-		{
-			stringBuilder.Append(", " + "CaravanAnimalsCount".Translate(animals));
-		}
-		if (prisoners == 1)
-		{
-			stringBuilder.Append(", " + "CaravanPrisoner".Translate());
-		}
-		else if (prisoners > 1)
-		{
-			stringBuilder.Append(", " + "CaravanPrisonersCount".Translate(prisoners));
-		}
-		stringBuilder.AppendLine();
-		if (mentalState > 0)
-		{
-			stringBuilder.Append("CaravanPawnsInMentalState".Translate(mentalState));
-		}
-		if (downed > 0)
-		{
-			if (mentalState > 0)
-			{
-				stringBuilder.Append(", ");
-			}
-			stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
-		}
-		VehiclePawn vehicleIncapacitated = null;
-		string vehicleIncapReason = null;
-		foreach (VehiclePawn vehicle in VehiclesListForReading)
-		{
-			// We only care about the first, any incap. vehicle blocks the whole caravan from moving
-			// and checking roles + stats can be expensive if uncached.
-			if (vehicleIncapacitated == null)
-			{
-				if (!vehicle.CanMove)
-				{
-					vehicleIncapacitated = vehicle;
-					vehicleIncapReason = "VF_VehicleUnableToMove".Translate(vehicle);
-				}
-				else if (!vehicle.HasEnoughOperators)
-				{
-					vehicleIncapacitated = vehicle;
-					vehicleIncapReason = "VF_NotEnoughToOperate".Translate();
-				}
-			}
-
-			foreach (ThingComp comp in vehicle.AllComps)
-			{
-				if (comp is VehicleComp vehicleComp)
-				{
-					vehicleComp.CompCaravanInspectString(stringBuilder);
-				}
-			}
-		}
-		if (mentalState > 0 || downed > 0)
-		{
-			stringBuilder.AppendLine();
-		}
-
-		if (vehiclePather.Moving)
-		{
-			if (vehiclePather.ArrivalAction != null)
-			{
-				stringBuilder.Append(vehiclePather.ArrivalAction.ReportString);
-			}
-			else if (this.HasBoat())
-			{
-				stringBuilder.Append("VF_Sailing".Translate());
-			}
-			else
-			{
-				stringBuilder.Append("CaravanTraveling".Translate());
-			}
-		}
-		else
-		{
-			Settlement settlementBase = CaravanVisitUtility.SettlementVisitedNow(this);
-			stringBuilder.Append(settlementBase is not null ?
-				"CaravanVisiting".Translate(settlementBase.Label) :
-				"CaravanWaiting".Translate());
-		}
-		if (vehiclePather.Moving)
-		{
-			float estimatedDaysToArrive =
-				VehicleCaravanPathingHelper.EstimatedTicksToArrive(this, true) / 60000f;
-			stringBuilder.AppendLine();
-			stringBuilder.Append(
-				"CaravanEstimatedTimeToDestination".Translate(estimatedDaysToArrive.ToString("0.#")));
-		}
-		if (vehicleIncapacitated != null)
-		{
-			stringBuilder.AppendLine();
-			stringBuilder.Append(vehicleIncapReason);
-		}
-		else if (AllOwnersDowned)
-		{
-			stringBuilder.AppendLine();
-			stringBuilder.Append("AllCaravanMembersDowned".Translate());
-		}
-		else if (AllOwnersHaveMentalBreak)
-		{
-			stringBuilder.AppendLine();
-			stringBuilder.Append("AllCaravanMembersMentalBreak".Translate());
-		}
-		else if (ImmobilizedByMass)
-		{
-			stringBuilder.AppendLine();
-			stringBuilder.Append("CaravanImmobilizedByMass".Translate());
-		}
-		if (needs.AnyPawnOutOfFood(out string text))
-		{
-			stringBuilder.AppendLine();
-			stringBuilder.Append("CaravanOutOfFood".Translate());
-			if (!text.NullOrEmpty())
-			{
-				stringBuilder.Append(" ");
-				stringBuilder.Append(text);
-				stringBuilder.Append(".");
-			}
-		}
-		if (!vehiclePather.MovingNow)
-		{
-			int usedBedCount = beds.GetUsedBedCount();
-			stringBuilder.AppendLine();
-			stringBuilder.Append(
-				CaravanBedUtility.AppendUsingBedsLabel("CaravanResting".Translate(), usedBedCount));
-		}
-		else
-		{
-			string inspectStringLine = carryTracker.GetInspectStringLine();
-			if (!inspectStringLine.NullOrEmpty())
-			{
-				stringBuilder.AppendLine();
-				stringBuilder.Append(inspectStringLine);
-			}
-			string inBedForMedicalReasonsInspectStringLine =
-				beds.GetInBedForMedicalReasonsInspectStringLine();
-			if (!inBedForMedicalReasonsInspectStringLine.NullOrEmpty())
-			{
-				stringBuilder.AppendLine();
-				stringBuilder.Append(inBedForMedicalReasonsInspectStringLine);
-			}
-		}
-		return stringBuilder.ToString();
-	}
-
-	public override void DrawExtraSelectionOverlays()
-	{
-		if (IsPlayerControlled && vehiclePather.curPath != null)
-		{
-			vehiclePather.curPath.DrawPath(this);
-		}
-		gotoMote.RenderMote();
-	}
-
-	protected override void Tick()
-	{
-		base.Tick();
-		vehiclePather.PatherTick();
-
-		if (vehiclePather.MovingNow)
-		{
-			foreach (VehiclePawn vehicle in vehicles)
-			{
-				vehicle.CompFueledTravel?.ConsumeFuelWorld();
-			}
-		}
-		else
-		{
-			int gameTicks = Find.TickManager.TicksGame;
-			if (gameTicks % RepairMothballTicks == 0)
-			{
-				RecacheStatAverages();
-			}
-			if (VehiclesNeedRepairs && Repairing && gameTicks % RepairMothballTicks == 0)
-			{
-				RepairAllVehicles();
-			}
-		}
-	}
-
-	public void RepairAllVehicles()
-	{
-		LearnSkill(SkillDefOf.Construction, RepairMothballTicks);
-		foreach (VehiclePawn vehicle in vehicles)
-		{
-			VehicleComponent component =
-				vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
-			if (component != null)
-			{
-				component.HealComponent(vehicle.GetStatValue(VehicleStatDefOf.RepairRate) *
-					RepairMothballTicks / JobDriver_RepairVehicle.TicksForRepair);
-				return; //Only repair 1 vehicle at a time
-			}
-		}
-	}
-
-	private void LearnSkill(SkillDef skillDef, int mothballTicks)
-	{
-		foreach (Pawn pawn in PawnsListForReading)
-		{
-			if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
-			{
-				pawn.skills?.Learn(skillDef, 0.08f * mothballTicks);
-				pawn.records.Increment(RecordDefOf.ThingsRepaired);
-			}
-		}
-	}
-
-	public override void PostRemove()
-	{
-		base.PostRemove();
-		vehiclePather.StopDead();
-	}
-
-	public override void SpawnSetup()
-	{
-		base.SpawnSetup();
-		RecacheVehicles();
-		vehicleTweener.ResetTweenedPosToRoot();
-
-		// Necessary check for post load, otherwise registry will be null until spawned on map
-		foreach (VehiclePawn vehicle in vehicles)
-		{
-			vehicle.RegisterEvents();
-		}
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
-		Scribe_Values.Look(ref repairing, nameof(repairing));
-
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			initialized = true;
-		}
-	}
-
-	public readonly struct RecacheDisabler : IDisposable
-	{
-		private readonly bool oldValue;
-		private readonly VehicleCaravan caravan;
-
-		public RecacheDisabler(VehicleCaravan caravan)
-		{
-			this.caravan = caravan;
-			oldValue = caravan.RecachePawnLists;
-			caravan.RecachePawnLists = false;
-		}
-
-		void IDisposable.Dispose()
-		{
-			caravan.RecachePawnLists = oldValue;
-		}
-	}
+  private const int RepairMothballTicks = 300;
+
+  private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
+  private static readonly Color PlayerCaravanColor = new(1f, 0.863f, 0.33f);
+  private static readonly MaterialPropertyBlock PropertyBlock = new();
+  private static readonly Dictionary<ThingDef, Material> Materials = [];
+
+  private static readonly StringBuilder ExplanationBuilder = new();
+
+  public VehicleCaravan_PathFollower vehiclePather;
+  public VehicleCaravanTweener vehicleTweener;
+
+  private VehiclePawn leadVehicle;
+  private bool initialized;
+
+  private bool repairing;
+
+  // Fast lookup cache lists
+  private List<Pawn> allPawns = [];
+  private List<VehiclePawn> vehicles = [];
+  private List<Pawn> dismountedPawns = [];
+
+  public VehicleCaravan()
+  {
+    vehiclePather = new VehicleCaravan_PathFollower(this);
+    vehicleTweener = new VehicleCaravanTweener(this);
+  }
+
+  private bool RecachePawnLists { get; set; } = true;
+
+  public float ConstructionAverage { get; private set; }
+
+  public bool VehiclesNeedRepairs { get; private set; }
+
+  public override Vector3 DrawPos => vehicleTweener.TweenedPos;
+
+  bool ITargeterSource<GlobalTargetInfo, ArrivalOption>.TargeterValid =>
+    !Destroyed && LeadVehicle is { Spawned: false, Destroyed: false };
+
+  public Vector3 Origin => Tile.Valid ? Find.WorldGrid.GetTileCenter(Tile) : DrawPos;
+
+  public bool CanDismount => true;
+
+  public bool AerialVehicle =>
+    vehicles.FirstOrDefault()?.VehicleDef.type == VehicleType.Air;
+
+  public IEnumerable<VehiclePawn> Vehicles => vehicles;
+
+  public IEnumerable<Pawn> DismountedPawns => dismountedPawns;
+
+  public List<VehiclePawn> VehiclesListForReading => vehicles;
+
+  public List<Pawn> DismountedPawnsListForReading => dismountedPawns;
+
+  /// <summary>
+  /// Strictly for appending internal pawns in AllPawns list from vanilla.
+  /// </summary>
+  public List<Pawn> AllPawnsAndVehiclePassengers => allPawns;
+
+  public bool Repairing
+  {
+    get { return !vehiclePather.Moving && repairing; }
+    set { repairing = value; }
+  }
+
+  public VehiclePawn LeadVehicle
+  {
+    get
+    {
+      // TODO - should be based on max vehicle size
+      leadVehicle ??= PawnsListForReading.FirstOrDefault(pawn => pawn is VehiclePawn) as VehiclePawn;
+      return leadVehicle;
+    }
+  }
+
+  public override Material Material
+  {
+    get
+    {
+      VehicleDef leadVehicleDef = LeadVehicle?.VehicleDef;
+      if (leadVehicleDef is null)
+      {
+        return null;
+      }
+      if (!Materials.ContainsKey(leadVehicleDef))
+      {
+        Color color = Color.white;
+        if (Faction.IsPlayer)
+          color = PlayerCaravanColor;
+        else if (Faction != null)
+          color = Faction.Color;
+        Texture2D texture = VehicleTex.CachedTextureIcons[leadVehicleDef];
+        Material material = MaterialPool.MatFrom(texture,
+          ShaderDatabase.WorldOverlayTransparentLit, color,
+          WorldMaterials.WorldObjectRenderQueue);
+        Materials.Add(leadVehicleDef, material);
+      }
+      return Materials[leadVehicleDef];
+    }
+  }
+
+  public bool OutOfFuel
+  {
+    get
+    {
+      foreach (VehiclePawn vehicle in vehicles)
+      {
+        if (vehicle.CompFueledTravel is { Fuel: <= 0 })
+          return true;
+      }
+      return false;
+    }
+  }
+
+  public bool VehicleCantMove
+  {
+    get
+    {
+      return VehiclesListForReading.Exists(Immobile);
+
+      static bool Immobile(VehiclePawn vehicle)
+      {
+        return !vehicle.CanMoveFinal;
+      }
+    }
+  }
+
+  public new int TicksPerMove
+  {
+    get { return VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this); }
+  }
+
+  public new string TicksPerMoveExplanation
+  {
+    get
+    {
+      using ClearStringOnDispose ssr = new(ExplanationBuilder);
+      _ = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(this, ExplanationBuilder);
+      return ExplanationBuilder.ToString();
+    }
+  }
+
+  public override void Draw()
+  {
+    float averageTileSize = Find.WorldGrid.AverageTileSize;
+    float transitionPct = ExpandableWorldObjectsUtility.TransitionPct(this);
+    if (def.expandingIcon && transitionPct > 0f)
+    {
+      Color color = Material.color;
+      float num = 1f - transitionPct;
+      PropertyBlock.SetColor(ShaderPropertyIDs.Color,
+        new Color(color.r, color.g, color.b, color.a * num));
+      WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material,
+        propertyBlock: PropertyBlock);
+      return;
+    }
+    WorldHelper.DrawQuadTangentialToPlanet(DrawPos, 0.7f * averageTileSize, 0.015f, Material);
+  }
+
+  public override IEnumerable<Gizmo> GetGizmos()
+  {
+    foreach (Gizmo gizmo in base.GetGizmos())
+    {
+      // skip all vanilla caravan devmode commands
+      if (gizmo is Command command && !command.icon)
+        continue;
+
+      yield return gizmo;
+    }
+
+    if (IsPlayerControlled)
+    {
+      if (AerialVehicle)
+      {
+        VehiclePawn vehicle = vehicles.FirstOrDefault();
+        Assert.IsNotNull(vehicle);
+        Command_Action launchCommand = new()
+        {
+          defaultLabel = "CommandLaunchGroup".Translate(),
+          defaultDesc = "CommandLaunchGroupDesc".Translate(),
+          icon = TexData.LaunchCommandTex,
+          alsoClickIfOtherInGroupClicked = false,
+          action = LaunchAerialVehicle
+        };
+        if (!vehicle.CompVehicleLauncher.CanLaunchWithCargoCapacity(out string disableReason))
+        {
+          launchCommand.Disabled = true;
+          launchCommand.disabledReason = disableReason;
+        }
+        yield return launchCommand;
+      }
+      if (vehiclePather.Moving)
+      {
+        yield return new Command_Toggle
+        {
+          defaultLabel = "CommandPauseCaravan".Translate(),
+          defaultDesc =
+            "CommandToggleCaravanPauseDesc".Translate(2f.ToString("0.#"), 0.3f.ToStringPercent()),
+          icon = TexCommand.PauseCaravan,
+          hotKey = KeyBindingDefOf.Misc1,
+          isActive = () => vehiclePather.Paused,
+          toggleAction = delegate
+          {
+            if (!vehiclePather.Moving)
+            {
+              return;
+            }
+            vehiclePather.Paused = !vehiclePather.Paused;
+          },
+        };
+      }
+      else
+      {
+        if (VehiclesNeedRepairs)
+        {
+          yield return new Command_Toggle
+          {
+            defaultLabel = "VF_ToggleRepairVehicle".Translate(),
+            defaultDesc = "VF_ToggleRepairVehicleDesc".Translate(),
+            icon = VehicleTex.RepairVehicles,
+            hotKey = KeyBindingDefOf.Misc2,
+            isActive = () => !vehiclePather.Moving && repairing && VehiclesNeedRepairs,
+            toggleAction = delegate { repairing = !repairing; },
+          };
+        }
+
+        Command_Action disembark = new()
+        {
+          icon = VehicleTex.StashVehicle,
+          defaultLabel = "VF_CommandDisembark".Translate(),
+          defaultDesc = "VF_CommandDisembarkDesc".Translate(),
+          action = delegate { CaravanHelper.StashVehicles(this); }
+        };
+
+        // If tile is impassable, normal caravan won't be able to return
+        if (Find.World.Impassable(Tile))
+        {
+          disembark.Disable("VF_CommandDisembarkImpassableBiome".Translate());
+        }
+        yield return disembark;
+      }
+    }
+
+    foreach (VehiclePawn vehicle in VehiclesListForReading)
+    {
+      foreach (ThingComp thingComp in vehicle.AllComps)
+      {
+        if (thingComp is not VehicleComp vehicleComp)
+          continue;
+
+        foreach (Gizmo gizmo in vehicleComp.CompCaravanGizmos())
+        {
+          yield return gizmo;
+        }
+      }
+    }
+
+    if (DebugSettings.ShowDevGizmos)
+    {
+      yield return new Command_Action
+      {
+        defaultLabel = "Down Random Pawn",
+        action = delegate
+        {
+          Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
+          pawn?.health.GetOrAddHediff(HediffDefOf.RegenerationComa);
+        }
+      };
+      yield return new Command_Action
+      {
+        defaultLabel = "Kill Random Pawn",
+        action = delegate
+        {
+          Pawn pawn = Vehicles.SelectMany(vehicle => vehicle.AllPawnsAboard).RandomElementWithFallback();
+          pawn?.Kill(null);
+        }
+      };
+      yield return new Command_Action
+      {
+        defaultLabel = "Vehicle Dev: Teleport to destination",
+        action = delegate
+        {
+          Tile = vehiclePather.Destination;
+          vehiclePather.StopDead();
+        }
+      };
+      yield return new Command_Action
+      {
+        defaultLabel = "Repair all Vehicles",
+        action = delegate
+        {
+          foreach (VehiclePawn vehicle in VehiclesListForReading)
+          {
+            vehicle.statHandler.components.ForEach(c => c.HealComponent(float.MaxValue));
+          }
+        }
+      };
+    }
+  }
+
+  public void LaunchAerialVehicle()
+  {
+    if (!AerialVehicle)
+    {
+      Trace.Fail(
+        "Trying to launch aerial vehicle with caravan not registered as an aerial vehicle.");
+      SoundDefOf.ClickReject.PlayOneShotOnCamera();
+      return;
+    }
+
+    Assert.IsTrue(vehicles.Count == 1);
+    VehiclePawn vehicle = vehicles[0];
+
+    using (new RecacheDisabler(this))
+    {
+      // pawns list is modified when distributed
+      RoleHelper.DistributeAll(vehicles, DismountedPawns.ToList());
+    }
+    RecacheVehicles();
+
+    if (pawns.Count > 1)
+    {
+      Find.WindowStack.Add(new Dialog_Confirm(
+        "VF_PawnsLeftBehindConfirm".Translate(),
+        "VF_PawnsLeftBehindConfirmDesc".Translate(),
+        LaunchAction));
+    }
+    else
+    {
+      LaunchAction();
+    }
+    return;
+
+    void LaunchAction()
+    {
+      CameraJumper.TryJump(CameraJumper.GetWorldTarget(this));
+      Find.WorldSelector.ClearSelection();
+      ITargeterUpdate<GlobalTargetInfo> updater =
+        LeadVehicle.CompFueledTravel != null ?
+          new FuelTargetUpdater(LeadVehicle, this) :
+          null;
+      new WorldTargeter<ArrivalOption>(this, updater)
+      {
+        TargetTexture = TexData.TargeterMouseAttachment
+      }.Start();
+    }
+  }
+
+  TargetValidation ITargeterSource<GlobalTargetInfo, ArrivalOption>.CanTarget(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.CanTarget(target);
+  }
+
+  TargeterResult ITargeterSource<GlobalTargetInfo, ArrivalOption>.Select(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.Select(target);
+  }
+
+  void ITargeterSource<GlobalTargetInfo, ArrivalOption>.OnTargetingFinished(
+    TargetData<GlobalTargetInfo> targetData,
+    ArrivalOption arrivalOption)
+  {
+    if (arrivalOption.continueWith != null)
+    {
+      arrivalOption.continueWith(targetData);
+    }
+    else
+    {
+      Launch(targetData, arrivalOption.arrivalAction);
+    }
+  }
+
+  public void Launch(TargetData<GlobalTargetInfo> targetData, IArrivalAction arrivalAction)
+  {
+    AerialVehicleInFlight aerialVehicle = LeadVehicle.GetOrMakeAerialVehicle();
+    List<FlightNode> nodes = targetData.targets.Select(target => new FlightNode(target)).ToList();
+    aerialVehicle.OrderFlyToTiles(nodes, arrivalAction);
+  }
+
+  IEnumerable<ArrivalOption> ILauncher.OptionsAt(GlobalTargetInfo target)
+  {
+    return LeadVehicle.CompVehicleLauncher.OptionsAt(target);
+  }
+
+  public /* override */ new void Notify_PawnAdded(Pawn pawn)
+  {
+    RecacheVehiclesOrConvertCaravan();
+  }
+
+  public /* override */ new void Notify_PawnRemoved(Pawn pawn)
+  {
+    RecacheVehiclesOrConvertCaravan();
+  }
+
+  public void Notify_VehicleTeleported()
+  {
+    vehicleTweener.ResetTweenedPosToRoot();
+    vehiclePather.Notify_Teleported_Int();
+  }
+
+  public override void Notify_Merged(List<Caravan> group)
+  {
+    base.Notify_Merged(group);
+    RecacheVehiclesOrConvertCaravan();
+  }
+
+  public override void Notify_MemberDied(Pawn member)
+  {
+    if (!Spawned)
+    {
+      Log.Error(
+        "Caravan member died in an unspawned caravan. Unspawned caravans shouldn't be kept for more than a single frame.");
+    }
+    if (!PawnsListForReading.NotNullAndAny(x =>
+      x is VehiclePawn { Dead: false } vehicle &&
+      vehicle.AllPawnsAboard.NotNullAndAny(pawn => pawn != member && IsOwner(pawn))))
+    {
+      RemovePawn(member);
+      if (Faction == Faction.OfPlayer)
+      {
+        Find.LetterStack.ReceiveLetter("LetterLabelAllCaravanColonistsDied".Translate(),
+          "LetterAllCaravanColonistsDied".Translate(Name).CapitalizeFirst(),
+          LetterDefOf.NegativeEvent, new GlobalTargetInfo(Tile));
+      }
+      pawns.Clear();
+      Destroy();
+    }
+    else
+    {
+      member.Strip();
+      RemovePawn(member);
+    }
+    RecacheStatAverages();
+  }
+
+  /// <summary>
+  /// Recache internal vehicle list for quick reading
+  /// </summary>
+  public void RecacheVehicles()
+  {
+    if (!RecachePawnLists)
+      return;
+
+    allPawns.Clear();
+    vehicles.Clear();
+    dismountedPawns.Clear();
+    foreach (Pawn pawn in pawns.InnerListForReading)
+    {
+      allPawns.Add(pawn);
+      if (pawn is VehiclePawn vehicle)
+      {
+        vehicles.Add(vehicle);
+        foreach (Pawn onboardPawn in vehicle.AllPawnsAboard)
+        {
+          allPawns.Add(onboardPawn);
+        }
+        foreach (Thing thing in vehicle.inventory.innerContainer)
+        {
+          if (thing is Pawn inventoryPawn)
+          {
+            allPawns.Add(inventoryPawn);
+          }
+        }
+      }
+      else
+      {
+        dismountedPawns.Add(pawn);
+      }
+    }
+    leadVehicle = null;
+  }
+
+  /// <summary>
+  /// Recache vehicle list and convert to normal caravan if no vehicles remain
+  /// </summary>
+  public void RecacheVehiclesOrConvertCaravan()
+  {
+    if (!RecachePawnLists)
+      return;
+
+    RecacheVehicles();
+    ValidateCaravanType();
+    RecacheStatAverages();
+  }
+
+  public void RecacheStatAverages()
+  {
+    float total = 0;
+    int pawnCount = 0;
+    foreach (Pawn pawn in PawnsListForReading)
+    {
+      if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+      {
+        total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
+        pawnCount++;
+      }
+    }
+    float average = 1;
+    if (pawnCount > 0)
+    {
+      average = total / pawnCount;
+    }
+    ConstructionAverage = average;
+
+    VehiclesNeedRepairs = vehicles.Any(vehicle =>
+      vehicle.statHandler.ComponentsPrioritized.Any(c => c.HealthPercent < 1));
+  }
+
+  public virtual void PostInit()
+  {
+    initialized = true;
+    RecacheVehiclesOrConvertCaravan();
+  }
+
+  /// <summary>
+  /// Convert to vanilla caravan if no vehicles exist in VehicleCaravan
+  /// </summary>
+  private void ValidateCaravanType()
+  {
+    if (initialized && vehicles.NullOrEmpty())
+    {
+      Debug.Message(
+        $"VehicleCaravan {this} has no more vehicles. Converting to normal caravan. Pawns={string.Join(", ", pawns.InnerListForReading.Select(pawn => pawn.Label))}");
+      List<Pawn> pawnsToTransfer = pawns.InnerListForReading.ToList();
+      if (pawnsToTransfer.Count > 0)
+      {
+        // base pawn list must be cleared before this Caravan object is ultimately destroyed,
+        // otherwise their references will persist here and they will still get destroyed.
+        using RecacheDisabler rd = new(this);
+        RemoveAllPawns();
+        _ = CaravanMaker.MakeCaravan(pawnsToTransfer, Faction, Tile, true);
+      }
+      if (!Destroyed)
+      {
+        Destroy();
+      }
+    }
+  }
+
+  public override void Destroy()
+  {
+    // Can destroy prematurely for vanilla methods removing / transferring pawns like with Caravan merging
+    if (Destroyed)
+      return;
+
+    // Ensure we're not destroying based on a stale cache
+    RecacheVehicles();
+
+    // Removing pawn from caravan pawn list will propagate events back up to Notify_PawnRemoved, triggering additional
+    // recaches.
+    using RecacheDisabler pd = new(this);
+    foreach (VehiclePawn vehicle in vehicles)
+    {
+      for (int i = vehicle.AllPawnsAboard.Count; --i >= 0;)
+      {
+        Pawn pawn = vehicle.AllPawnsAboard[i];
+        vehicle.RemovePawn(pawn);
+        if (!pawn.IsWorldPawn() && pawn is not VehiclePawn)
+          Find.WorldPawns.PassToWorld(pawn);
+      }
+      if (!vehicle.Destroyed)
+        vehicle.Destroy();
+    }
+    base.Destroy();
+  }
+
+  public override string GetInspectString()
+  {
+    StringBuilder stringBuilder = new();
+
+    int colonists = 0;
+    int animals = 0;
+    int prisoners = 0;
+    int downed = 0;
+    int mentalState = 0;
+    int vehicleCount = 0;
+
+    vehicleCount++;
+    foreach (Pawn pawn in PawnsListForReading)
+    {
+      if (pawn is VehiclePawn) vehicleCount++;
+      if (pawn.IsColonist) colonists++;
+      if (pawn.RaceProps.Animal) animals++;
+      if (pawn.IsPrisoner) prisoners++;
+      if (pawn.Downed) downed++;
+      if (pawn.InMentalState) mentalState++;
+    }
+
+    if (vehicleCount >= 1)
+    {
+      VehicleCounts.Clear();
+      {
+        foreach (VehiclePawn vehicle in VehiclesListForReading)
+        {
+          if (!VehicleCounts.TryAdd(vehicle.VehicleDef, 1))
+            VehicleCounts[vehicle.VehicleDef]++;
+        }
+        foreach ((VehicleDef vehicleDef, int count) in VehicleCounts)
+        {
+          stringBuilder.Append($"{count} {vehicleDef.LabelCap}, ");
+        }
+      }
+      VehicleCounts.Clear();
+    }
+    stringBuilder.Append("CaravanColonistsCount".Translate(colonists,
+      (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));
+    if (animals == 1)
+    {
+      stringBuilder.Append(", " + "CaravanAnimal".Translate());
+    }
+    else if (animals > 1)
+    {
+      stringBuilder.Append(", " + "CaravanAnimalsCount".Translate(animals));
+    }
+    if (prisoners == 1)
+    {
+      stringBuilder.Append(", " + "CaravanPrisoner".Translate());
+    }
+    else if (prisoners > 1)
+    {
+      stringBuilder.Append(", " + "CaravanPrisonersCount".Translate(prisoners));
+    }
+    stringBuilder.AppendLine();
+    if (mentalState > 0)
+    {
+      stringBuilder.Append("CaravanPawnsInMentalState".Translate(mentalState));
+    }
+    if (downed > 0)
+    {
+      if (mentalState > 0)
+      {
+        stringBuilder.Append(", ");
+      }
+      stringBuilder.Append("CaravanPawnsDowned".Translate(downed));
+    }
+    VehiclePawn vehicleIncapacitated = null;
+    string vehicleIncapReason = null;
+    foreach (VehiclePawn vehicle in VehiclesListForReading)
+    {
+      // We only care about the first, any incap. vehicle blocks the whole caravan from moving
+      // and checking roles + stats can be expensive if uncached.
+      if (vehicleIncapacitated == null)
+      {
+        if (!vehicle.CanMove)
+        {
+          vehicleIncapacitated = vehicle;
+          vehicleIncapReason = "VF_VehicleUnableToMove".Translate(vehicle);
+        }
+        else if (!vehicle.HasEnoughOperators)
+        {
+          vehicleIncapacitated = vehicle;
+          vehicleIncapReason = "VF_NotEnoughToOperate".Translate();
+        }
+      }
+
+      foreach (ThingComp comp in vehicle.AllComps)
+      {
+        if (comp is VehicleComp vehicleComp)
+        {
+          vehicleComp.CompCaravanInspectString(stringBuilder);
+        }
+      }
+    }
+    if (mentalState > 0 || downed > 0)
+    {
+      stringBuilder.AppendLine();
+    }
+
+    if (vehiclePather.Moving)
+    {
+      if (vehiclePather.ArrivalAction != null)
+      {
+        stringBuilder.Append(vehiclePather.ArrivalAction.ReportString);
+      }
+      else if (this.HasBoat())
+      {
+        stringBuilder.Append("VF_Sailing".Translate());
+      }
+      else
+      {
+        stringBuilder.Append("CaravanTraveling".Translate());
+      }
+    }
+    else
+    {
+      Settlement settlementBase = CaravanVisitUtility.SettlementVisitedNow(this);
+      stringBuilder.Append(settlementBase is not null ?
+        "CaravanVisiting".Translate(settlementBase.Label) :
+        "CaravanWaiting".Translate());
+    }
+    if (vehiclePather.Moving)
+    {
+      float estimatedDaysToArrive =
+        VehicleCaravanPathingHelper.EstimatedTicksToArrive(this, allowCaching: true) / (float)GenDate.TicksPerDay;
+      stringBuilder.AppendLine();
+      stringBuilder.Append(
+        "CaravanEstimatedTimeToDestination".Translate(estimatedDaysToArrive.ToString("0.#")));
+    }
+    if (vehicleIncapacitated != null)
+    {
+      stringBuilder.AppendLine();
+      stringBuilder.Append(vehicleIncapReason);
+    }
+    else if (AllOwnersDowned)
+    {
+      stringBuilder.AppendLine();
+      stringBuilder.Append("AllCaravanMembersDowned".Translate());
+    }
+    else if (AllOwnersHaveMentalBreak)
+    {
+      stringBuilder.AppendLine();
+      stringBuilder.Append("AllCaravanMembersMentalBreak".Translate());
+    }
+    else if (ImmobilizedByMass)
+    {
+      stringBuilder.AppendLine();
+      stringBuilder.Append("CaravanImmobilizedByMass".Translate());
+    }
+    if (needs.AnyPawnOutOfFood(out string text))
+    {
+      stringBuilder.AppendLine();
+      stringBuilder.Append("CaravanOutOfFood".Translate());
+      if (!text.NullOrEmpty())
+      {
+        stringBuilder.Append(" ");
+        stringBuilder.Append(text);
+        stringBuilder.Append(".");
+      }
+    }
+    if (!vehiclePather.MovingNow)
+    {
+      int usedBedCount = beds.GetUsedBedCount();
+      stringBuilder.AppendLine();
+      stringBuilder.Append(
+        CaravanBedUtility.AppendUsingBedsLabel("CaravanResting".Translate(), usedBedCount));
+    }
+    else
+    {
+      string inspectStringLine = carryTracker.GetInspectStringLine();
+      if (!inspectStringLine.NullOrEmpty())
+      {
+        stringBuilder.AppendLine();
+        stringBuilder.Append(inspectStringLine);
+      }
+      string inBedForMedicalReasonsInspectStringLine =
+        beds.GetInBedForMedicalReasonsInspectStringLine();
+      if (!inBedForMedicalReasonsInspectStringLine.NullOrEmpty())
+      {
+        stringBuilder.AppendLine();
+        stringBuilder.Append(inBedForMedicalReasonsInspectStringLine);
+      }
+    }
+    return stringBuilder.ToString();
+  }
+
+  public override void DrawExtraSelectionOverlays()
+  {
+    if (IsPlayerControlled && vehiclePather.curPath != null)
+    {
+      vehiclePather.curPath.DrawPath(this);
+    }
+    gotoMote.RenderMote();
+  }
+
+  protected override void Tick()
+  {
+    base.Tick();
+    vehiclePather.PatherTick();
+
+    if (vehiclePather.MovingNow)
+    {
+      foreach (VehiclePawn vehicle in vehicles)
+      {
+        vehicle.CompFueledTravel?.ConsumeFuelWorld();
+      }
+    }
+    else
+    {
+      int gameTicks = Find.TickManager.TicksGame;
+      if (gameTicks % RepairMothballTicks == 0)
+      {
+        RecacheStatAverages();
+      }
+      if (VehiclesNeedRepairs && Repairing && gameTicks % RepairMothballTicks == 0)
+      {
+        RepairAllVehicles();
+      }
+    }
+  }
+
+  public void RepairAllVehicles()
+  {
+    LearnSkill(SkillDefOf.Construction, RepairMothballTicks);
+    foreach (VehiclePawn vehicle in vehicles)
+    {
+      VehicleComponent component =
+        vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
+      if (component != null)
+      {
+        component.HealComponent(vehicle.GetStatValue(VehicleStatDefOf.RepairRate) *
+          RepairMothballTicks / JobDriver_RepairVehicle.TicksForRepair);
+        return; //Only repair 1 vehicle at a time
+      }
+    }
+  }
+
+  private void LearnSkill(SkillDef skillDef, int mothballTicks)
+  {
+    foreach (Pawn pawn in PawnsListForReading)
+    {
+      if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+      {
+        pawn.skills?.Learn(skillDef, 0.08f * mothballTicks);
+        pawn.records.Increment(RecordDefOf.ThingsRepaired);
+      }
+    }
+  }
+
+  public override void PostRemove()
+  {
+    base.PostRemove();
+    vehiclePather.StopDead();
+  }
+
+  public override void SpawnSetup()
+  {
+    base.SpawnSetup();
+    RecacheVehicles();
+    vehicleTweener.ResetTweenedPosToRoot();
+
+    // Necessary check for post load, otherwise registry will be null until spawned on map
+    foreach (VehiclePawn vehicle in vehicles)
+    {
+      vehicle.RegisterEvents();
+    }
+  }
+
+  public override void ExposeData()
+  {
+    base.ExposeData();
+    Scribe_Deep.Look(ref vehiclePather, nameof(vehiclePather), this);
+    Scribe_Values.Look(ref repairing, nameof(repairing));
+
+    if (Scribe.mode == LoadSaveMode.PostLoadInit)
+    {
+      initialized = true;
+    }
+  }
+
+  public readonly struct RecacheDisabler : IDisposable
+  {
+    private readonly bool oldValue;
+    private readonly VehicleCaravan caravan;
+
+    public RecacheDisabler(VehicleCaravan caravan)
+    {
+      this.caravan = caravan;
+      oldValue = caravan.RecachePawnLists;
+      caravan.RecachePawnLists = false;
+    }
+
+    void IDisposable.Dispose()
+    {
+      caravan.RecachePawnLists = oldValue;
+    }
+  }
 }

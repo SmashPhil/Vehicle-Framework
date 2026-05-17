@@ -6,6 +6,8 @@
   <VF_Caravan_Cargo>Cargo</VF_Caravan_Cargo>
   <VF_Sailing>Sailing</VF_Sailing>
   <VF_ShowVehicleProperties>Show Properties</VF_ShowVehicleProperties>
+  <VF_MultiplierFromRoad>Multiplier from road: {0}</VF_MultiplierFromRoad>
+  <VF_MultiplierFromOffRoad>Multiplier from off road: {0}</VF_MultiplierFromOffRoad>
   
   <VF_DockToCaravan>Items to Take</VF_DockToCaravan>
   <VF_ImpassableBiome>Biome impassable for this vehicle.</VF_ImpassableBiome>

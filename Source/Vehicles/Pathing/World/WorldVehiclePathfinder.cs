@@ -15,7 +15,6 @@ namespace Vehicles.World;
 public class WorldVehiclePathfinder : WorldComponent
 {
   private const int SearchLimit = 500000;
-  private const int HeuristicTickCost = 1200;
 
   private static readonly SimpleCurve HeuristicWeights =
   [
@@ -135,8 +134,8 @@ public class WorldVehiclePathfinder : WorldComponent
       WorldGrid grid = world.grid;
       bool coastalTravel =
         vehicleDefs.All(v => v.properties.customBiomeCosts.ContainsKey(BiomeDefOf.Ocean));
-      NativeArray<int> tileIDToNeighbors_offsets = grid.UnsafeTileIDToNeighbors_offsets;
-      NativeArray<PlanetTile> tileIDToNeighbors_values = grid.UnsafeTileIDToNeighbors_values;
+      NativeArray<int> tileIDToNeighborsOffsets = grid.UnsafeTileIDToNeighbors_offsets;
+      NativeArray<PlanetTile> tileIDToNeighborsValues = grid.UnsafeTileIDToNeighbors_values;
       Vector3 normalized = grid.GetTileCenter(destTile).normalized;
       float bestRoadDiscount = DefDatabase<RoadDef>.AllDefsListForReading.Min(road =>
         RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, road));
@@ -173,12 +172,12 @@ public class WorldVehiclePathfinder : WorldComponent
                 $"{vehiclesPathing} pathing from {startTile} to {destTile}. Hit search limit of {SearchLimit} tiles.");
               return WorldPath.NotFound;
             }
-            int neighborOffsetCount = (tile + 1 < tileIDToNeighbors_offsets.Length) ?
-              tileIDToNeighbors_offsets[tile + 1] :
-              tileIDToNeighbors_values.Length;
-            for (int i = tileIDToNeighbors_offsets[tile]; i < neighborOffsetCount; i++)
+            int neighborOffsetCount = (tile + 1 < tileIDToNeighborsOffsets.Length) ?
+              tileIDToNeighborsOffsets[tile + 1] :
+              tileIDToNeighborsValues.Length;
+            for (int i = tileIDToNeighborsOffsets[tile]; i < neighborOffsetCount; i++)
             {
-              int neighbor = tileIDToNeighbors_values[i];
+              int neighbor = tileIDToNeighborsValues[i];
               if (calcGrid[neighbor].status != statusClosedValue)
               {
                 bool allPassable = vehicleDefs.All(vehicleDef =>
@@ -194,10 +193,9 @@ public class WorldVehiclePathfinder : WorldComponent
                         WorldVehiclePathGrid.ConsistentDirectionCost(tile, neighbor, vehicleDef));
                     }
                   }
-                  float roadMultiplier =
-                    RoadCostHelper.GetRoadMovementDifficultyMultiplier(vehicleDefs, tile,
-                      neighbor);
-                  int totalPathCost = (int)(ticksPerMove * highestTerrainCost * roadMultiplier) +
+                  RoadCostHelper.RoadMultiplier roadMultiplier =
+                    RoadCostHelper.GetRoadMovementMultiplier(vehicleDefs, tile, neighbor);
+                  int totalPathCost = (int)(ticksPerMove * highestTerrainCost * roadMultiplier.multiplier) +
                     calcGrid[tile].knownCost;
                   ushort status = calcGrid[neighbor].status;
                   bool diffStatusValues =

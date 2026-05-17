@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -19,6 +20,7 @@ using Verse.Sound;
 
 namespace Vehicles;
 
+[UsedImplicitly]
 internal class Patch_FormCaravanDialog : IPatchCategory
 {
 	// Starting at a high offset just to avoid any int value clashing with the underlying enum
@@ -73,6 +75,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 		return false;
 	}
 
+  [MustDisposeResource]
 	private static GlobalObjectPool.CollectionReceipt<List<VehiclePawn>, VehiclePawn> GetVehiclesToTransfer(
 		List<TransferableOneWay> transferables, out List<VehiclePawn> vehicles)
 	{
@@ -235,21 +238,23 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 				if (transferable is not { AnyThing: Pawn, CountToTransfer: > 0 })
 					continue;
 
-				Pawn pawn = transferable.AnyThing as Pawn;
-				if (pawn is VehiclePawn || !CaravanHelper.assignedSeats.IsAssigned(pawn))
-				{
-					pawns.Add(pawn);
-				}
-			}
+        pawns.Add(transferable.AnyThing as Pawn);
+      }
 			Assert.IsTrue(pawns.Count > 0);
 			// Ugly but this is how RimWorld is set up so the patch should just match the flow
 			StringBuilder stringBuilder = explanation != null ? new StringBuilder() : null;
-			int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(pawns, massUsage,
-				massCapacity, explanation: stringBuilder);
-			__result =
-				VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(pawns.UniqueVehicleDefsInList(), ticks, tile, nextTile,
-					explanation: explanation,
-					caravanTicksPerMoveExplanation: stringBuilder?.ToString());
+			int ticks = VehicleCaravanTicksPerMoveUtility.GetTicksPerMove(pawns, massUsage, massCapacity,
+        explanation: stringBuilder);
+
+      TicksPerMoveData data = new()
+      {
+        ticksPerMove = ticks,
+        tile = tile,
+        nextTile = nextTile,
+        explanation = explanation,
+        caravanTicksPerMoveExplanation = stringBuilder?.ToString()
+      };
+			__result = VehicleCaravanTicksPerMoveUtility.ApproxTilesPerDay(pawns.VehiclesInList(), data);
 			return false;
 		}
 		return true;

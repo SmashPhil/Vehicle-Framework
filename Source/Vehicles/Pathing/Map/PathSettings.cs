@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using JetBrains.Annotations;
 using RimWorld;
@@ -9,7 +8,7 @@ using Verse;
 
 namespace Vehicles;
 
-[PublicAPI, SkipLocalsInit]
+[PublicAPI]
 public struct PathSettings
 {
   public const int DefaultTurnFactor = 10;

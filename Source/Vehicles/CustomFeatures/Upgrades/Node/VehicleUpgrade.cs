@@ -36,10 +36,10 @@ public class VehicleUpgrade : Upgrade
               {
                 yield return textEntry;
               }
-            break;
+              break;
             case UpgradeType.Set:
               component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
-            break;
+              break;
           }
         }
       }
@@ -70,10 +70,10 @@ public class VehicleUpgrade : Upgrade
           {
             case UpgradeType.Add:
               component.AddArmorModifiers[node.key] = armorUpgrade.statModifiers;
-            break;
+              break;
             case UpgradeType.Set:
               component.SetArmorModifiers[node.key] = armorUpgrade.statModifiers;
-            break;
+              break;
           }
         }
       }
@@ -92,10 +92,10 @@ public class VehicleUpgrade : Upgrade
           {
             case UpgradeType.Add:
               component.AddHealthModifiers[node.key] = healthUpgrade.value.Value;
-            break;
+              break;
             case UpgradeType.Set:
               component.SetHealthModifier = healthUpgrade.value.Value;
-            break;
+              break;
             default:
               throw new NotImplementedException(nameof(UpgradeType));
           }
@@ -132,10 +132,10 @@ public class VehicleUpgrade : Upgrade
           {
             case UpgradeType.Add:
               component.AddArmorModifiers.Remove(node.key);
-            break;
+              break;
             case UpgradeType.Set:
               component.SetArmorModifiers.Remove(node.key);
-            break;
+              break;
           }
         }
       }
@@ -154,10 +154,10 @@ public class VehicleUpgrade : Upgrade
           {
             case UpgradeType.Add:
               component.AddHealthModifiers.Remove(node.key);
-            break;
+              break;
             case UpgradeType.Set:
               component.SetHealthModifier = -1;
-            break;
+              break;
             default:
               throw new NotImplementedException(nameof(UpgradeType));
           }

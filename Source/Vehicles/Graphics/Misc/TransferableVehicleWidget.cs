@@ -402,9 +402,8 @@ public sealed class TransferableVehicleWidget
 		if (moveSpeed > 0)
 		{
 			// Conversion for tiles per day
-			moveSpeed /= 60; // normalize
-			int ticksPerTile = VehicleCaravanTicksPerMoveUtility.TicksFromMoveSpeed(moveSpeed);
-			tilesPerDay = GenDate.TicksPerDay / (float)ticksPerTile;
+			float ticksPerTile = VehicleCaravanTicksPerMoveUtility.MoveSpeedToTileSpeed(moveSpeed);
+			tilesPerDay = GenDate.TicksPerDay / ticksPerTile;
 		}
 		using (new TextBlock(TextAnchor.MiddleLeft))
 		{

@@ -34,8 +34,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
   <VF_UseHandBrakes>Use Hand Brakes</VF_UseHandBrakes>
   <VF_UseHandBrakesTooltip>Vehicles will apply hand brakes when signaled to stop, decelerating faster at the cost of some health.</VF_UseHandBrakesTooltip>
-  <VF_HierarchalPathfinding>Hierarchal Pathfinding</VF_HierarchalPathfinding>
-  <VF_HierarchalPathfindingTooltip>Use HPA* instead of A* for faster pathfinding. Sacrifices a small amount of pathfinding accuracy for substantially faster pathfinding across large distances.</VF_HierarchalPathfindingTooltip>
   
   <VF_RoadBiomeCostPathing>Ignore Biomes on Roads</VF_RoadBiomeCostPathing>
   <VF_RoadBiomeCostPathingTooltip>Vehicle Caravans moving over roads on the world map ignore biome path costs.</VF_RoadBiomeCostPathingTooltip>
