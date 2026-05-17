@@ -31,8 +31,6 @@ public struct PathOrderData
 [PublicAPI]
 public sealed class VehiclePathFollower : IExposable, IDisposable
 {
-  private const string ProfileName = "PathFinding";
-
   public const int MaxMoveTicks = 450;
   public const float SnowReductionFromWalking = 0.001f;
   public const int ClamorCellsInterval = 12;

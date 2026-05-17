@@ -5,7 +5,6 @@ using CoreLib.Collections;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
-using SmashTools.Burst;
 
 namespace Vehicles;
 
@@ -18,9 +17,7 @@ public class PathDataContainer
 
   private readonly PathData[] pathDatas;
 
-#if DEBUG
   private readonly Ref<VehicleDef> buildingFor = new();
-#endif
 
   public PathDataContainer(IPathingManager manager, List<VehicleDef> vehicleDefs)
   {
