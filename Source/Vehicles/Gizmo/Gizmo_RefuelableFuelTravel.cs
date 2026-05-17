@@ -66,7 +66,8 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
 	protected override string GetTooltip()
 	{
-		return $"{refuelable.TargetFuelLevel:F0} {refuelable.Props.fuelType.LabelCap}";
+    string fuelLabel = refuelable.Props.ElectricPowered ? " Wd" : refuelable.Props.fuelType.LabelCap;
+    return $"{refuelable.TargetFuelLevel:F0} {fuelLabel}";
 	}
 
 	private void UpdateDisableStatus()
@@ -139,7 +140,7 @@ public class Gizmo_RefuelableFuelTravel : Gizmo_Slider
 
 		if (Widgets.ButtonInvisible(iconRect))
 		{
-			ToggleAutoRefuel();
+      ToggleSwitch();
 		}
 
 		if (Mouse.IsOver(iconRect))

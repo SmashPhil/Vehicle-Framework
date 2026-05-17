@@ -129,7 +129,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
 	// Electric Vehicles
 	public bool Charging => connectedPower != null && !FullTank &&
-		connectedPower.PowerNet.CurrentStoredEnergy() > Props.chargeRate;
+		connectedPower.PowerNet?.CurrentStoredEnergy() > Props.chargeRate;
 
 	public IEnumerable<(ThingDef thingDef, float count)> Refunds
 	{
@@ -525,6 +525,22 @@ public class CompFueledTravel : VehicleComp, IRefundable
 		if (FuelLeaking)
 			LeakTick();
 
+    if (Props.ElectricPowered)
+    {
+      if (connectedPower is { PowerNet: null })
+        connectedPower = null;
+
+      if (!Charging)
+      {
+        ConsumeFuel(Mathf.Min(DischargeRate * EfficiencyTickMultiplier, Fuel));
+      }
+      else if (Find.TickManager.TicksGame % TicksToCharge == 0)
+      {
+        ChangeStoredEnergy(-ChargeRate);
+        Refuel(ChargeRate);
+      }
+    }
+
 		if (!ShouldConsumeNow)
 			return;
 
@@ -540,19 +556,6 @@ public class CompFueledTravel : VehicleComp, IRefundable
 		if (EmptyTank && !VehicleMod.settings.debug.debugDraftAnyVehicle)
 		{
 			Vehicle.ignition.Drafted = false;
-		}
-
-		if (Props.ElectricPowered)
-		{
-			if (!Charging)
-			{
-				ConsumeFuel(Mathf.Min(DischargeRate * EfficiencyTickMultiplier, Fuel));
-			}
-			else if (Find.TickManager.TicksGame % TicksToCharge == 0)
-			{
-				ChangeStoredEnergy(-ChargeRate);
-				Refuel(ChargeRate);
-			}
 		}
 	}
 
