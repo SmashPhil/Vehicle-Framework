@@ -1,6 +1,4 @@
-﻿using SmashTools;
-
-namespace Vehicles;
+﻿namespace Vehicles;
 
 public class GraphicDataOverlay
 {

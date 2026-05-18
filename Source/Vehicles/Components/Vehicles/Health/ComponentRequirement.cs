@@ -1,4 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿using System;
+using JetBrains.Annotations;
 using SmashTools;
 
 namespace Vehicles;
@@ -21,11 +22,20 @@ public class ComponentRequirement
 		Component = vehicle.statHandler.GetComponent(key);
 	}
 
+  // TODO 1.7 - Rename to Init
+  [Obsolete("Use Init instead.")]
 	public void RegisterEvents(VehiclePawn vehicle)
-	{
-		vehicle.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
-		vehicle.AddEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
-	}
+  {
+    Init(vehicle);
+  }
+
+  public void Init(VehiclePawn vehicle)
+  {
+    vehicle.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    vehicle.AddEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    RecacheComponent(vehicle);
+    OnHealthChanged();
+  }
 
 	private void OnHealthChanged()
 	{

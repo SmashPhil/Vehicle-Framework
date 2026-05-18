@@ -441,7 +441,7 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		ResetAngle();
 		LongEventHandler.ExecuteWhenFinished(() => PropertyBlock ??= new MaterialPropertyBlock());
 		LongEventHandler.ExecuteWhenFinished(RecacheRootDrawPos);
-		component?.RegisterEvents(vehicle);
+		component?.Init(vehicle);
 		UpdateScanEvent();
 	}
 
