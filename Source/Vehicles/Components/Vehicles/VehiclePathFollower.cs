@@ -202,8 +202,23 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
+  // TODO 1.7 - Remove
+  [Obsolete]
   public void PostGenerationSetup()
   {
+  }
+
+  public void RegisterEvents()
+  {
+    vehicle.AddEvent(VehicleEventDefOf.PawnExited, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.PawnRemoved, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.PawnKilled, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, RecalculatePermissions);
+    vehicle.AddEvent(VehicleEventDefOf.HealthChanged, RecalculatePermissions);
+
     vehicle.AddEvent(VehicleEventDefOf.Spawned, RecacheComponents);
     vehicle.AddEvent(VehicleEventDefOf.Despawned, RecacheComponents);
     vehicle.AddEvent(VehicleEventDefOf.FactionChanged, ConfigureSearchSettings);

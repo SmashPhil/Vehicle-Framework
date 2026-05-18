@@ -87,8 +87,6 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     {
       GenerateInventory();
     }
-
-    vehiclePather.PostGenerationSetup();
   }
 
   private void GenerateInventory()
@@ -148,17 +146,15 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     this.AddEvent(VehicleEventDefOf.CargoAdded, statHandler.MarkAllDirty);
     this.AddEvent(VehicleEventDefOf.CargoRemoved, statHandler.MarkAllDirty);
     this.AddEvent(VehicleEventDefOf.PawnEntered, RecachePawnCount, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.PawnExited, vehiclePather.RecalculatePermissions, RecachePawnCount);
-    this.AddEvent(VehicleEventDefOf.PawnRemoved, vehiclePather.RecalculatePermissions, RecachePawnCount);
-    this.AddEvent(VehicleEventDefOf.PawnChangedSeats, vehiclePather.RecalculatePermissions, RecachePawnCount, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.PawnKilled, vehiclePather.RecalculatePermissions, RecachePawnCount);
-    this.AddEvent(VehicleEventDefOf.PawnCapacitiesDirty, vehiclePather.RecalculatePermissions);
+    this.AddEvent(VehicleEventDefOf.PawnExited, RecachePawnCount);
+    this.AddEvent(VehicleEventDefOf.PawnRemoved, RecachePawnCount);
+    this.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecachePawnCount, ResetIdleTicks);
+    this.AddEvent(VehicleEventDefOf.PawnKilled, RecachePawnCount);
     this.AddEvent(VehicleEventDefOf.MoveStart, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.MoveStop, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.IgnitionOn, vehiclePather.RecalculatePermissions, ResetIdleTicks,
+    this.AddEvent(VehicleEventDefOf.IgnitionOn, ResetIdleTicks,
       UpdateDraftController, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.IgnitionOff, vehiclePather.RecalculatePermissions, UpdateDraftController, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.HealthChanged, vehiclePather.RecalculatePermissions);
+    this.AddEvent(VehicleEventDefOf.IgnitionOff, UpdateDraftController, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
     this.AddEvent(VehicleEventDefOf.OutOfFuel, delegate
@@ -174,6 +170,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
       RecacheMovementPermissions);
     this.AddEvent(VehicleEventDefOf.UpgradeRefundCompleted, ResetRenderStatus,
       RecacheMovementPermissions);
+
+    vehiclePather.RegisterEvents();
+
     if (!VehicleDef.events.NullOrEmpty())
     {
       foreach ((VehicleEventDef vehicleEventDef, List<DynamicDelegate<VehiclePawn>> methods) in
