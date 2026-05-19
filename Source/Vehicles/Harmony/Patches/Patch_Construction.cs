@@ -1,13 +1,12 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Reflection.Emit;
+using System.Linq;
 using HarmonyLib;
-using Verse;
-using Verse.Sound;
 using RimWorld;
 using SmashTools;
 using SmashTools.Patching;
+using Verse;
+using Verse.Sound;
 
 namespace Vehicles;
 
@@ -49,9 +48,6 @@ internal class Patch_Construction : IPatchCategory
         [typeof(Thing), typeof(Map), typeof(DestroyMode), typeof(List<Thing>)]),
       prefix: new HarmonyMethod(typeof(Patch_Construction),
         nameof(DoUnsupportedVehicleRefunds)));
-    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pawn), nameof(Pawn.Destroy)),
-      transpiler: new HarmonyMethod(typeof(Patch_Construction),
-        nameof(ValidDestroyModeForVehicles)));
   }
 
   private static bool GenerateVehiclePawn(PawnGenerationRequest request, ref Pawn __result)
@@ -168,7 +164,7 @@ internal class Patch_Construction : IPatchCategory
         return PlaceVehicle(vehicle, map, ref rot, ref loc, respawningAfterLoad);
       case Pawn { Dead: false } pawn:
         TryAdjustPawn(pawn, map, ref loc);
-      break;
+        break;
     }
     return true;
 
@@ -243,7 +239,7 @@ internal class Patch_Construction : IPatchCategory
       // Check for close adjust
       Rot4 lambdaRot = rot;
       if (!CellFinderExtended.TryRadialSearchForCell(loc, map, CloseRadialCheck,
-        delegate(IntVec3 cell)
+        delegate (IntVec3 cell)
         {
           foreach (IntVec3 occupiedCell in vehicle.PawnOccupiedCells(cell, lambdaRot))
           {
@@ -333,13 +329,13 @@ internal class Patch_Construction : IPatchCategory
             cell.x -= 1;
           if (vehicle.VehicleDef.Size.z % 2 == 0)
             cell.z -= 1;
-        break;
+          break;
         case 3:
           if (vehicle.VehicleDef.Size.x % 2 == 0)
             cell.z += 1;
           if (vehicle.VehicleDef.Size.z % 2 == 0)
             cell.x -= 1;
-        break;
+          break;
       }
     }
   }
@@ -373,41 +369,6 @@ internal class Patch_Construction : IPatchCategory
       vehicle.RefundMaterials(map, mode);
       return false;
     }
-
     return true;
-  }
-
-  private static IEnumerable<CodeInstruction> ValidDestroyModeForVehicles(
-    IEnumerable<CodeInstruction> instructions)
-  {
-    List<CodeInstruction> instructionList = instructions.ToList();
-
-    for (int i = 0; i < instructionList.Count; i++)
-    {
-      CodeInstruction instruction = instructionList[i];
-
-      if ((instruction.opcode == OpCodes.Brfalse || instruction.opcode == OpCodes.Brfalse_S) &&
-        !instructionList.OutOfBounds(i - 1) && instructionList[i - 1].opcode == OpCodes.Ldarg_1)
-      {
-        List<Label> labels = instruction.labels;
-        yield return instruction;
-        instruction = instructionList[++i];
-
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_1);
-        yield return new CodeInstruction(opcode: OpCodes.Call, operand:
-          AccessTools.Method(typeof(Patch_Construction), nameof(VehicleValidDestroyMode)));
-        yield return new CodeInstruction(opcode: OpCodes.Brtrue,
-          operand: labels.FirstOrDefault());
-      }
-
-      yield return instruction;
-    }
-  }
-
-  private static bool VehicleValidDestroyMode(Pawn pawn, DestroyMode destroyMode)
-  {
-    return pawn is VehiclePawn && destroyMode != DestroyMode.QuestLogic &&
-      destroyMode != DestroyMode.FailConstruction && destroyMode != DestroyMode.WillReplace;
   }
 }

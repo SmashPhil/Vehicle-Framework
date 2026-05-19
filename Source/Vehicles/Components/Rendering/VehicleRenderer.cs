@@ -12,22 +12,10 @@ public sealed class VehicleRenderer : IParallelRenderer
 
   private PreRenderResults results;
 
-  //public VehicleGraphicSet graphics;
-
-  //private Graphic_DynamicShadow shadowGraphic;
-
-  //private PawnFirefoamDrawer firefoamOverlays;
-
   public VehicleRenderer(VehiclePawn vehicle)
   {
     this.vehicle = vehicle;
-    //graphics = new VehicleGraphicSet(vehicle);
-
-    //firefoamOverlays = new PawnFirefoamDrawer(vehicle);
   }
-
-  [Obsolete("Not currently implemented, still WIP. Do not reference.", error: true)]
-  public PawnFirefoamDrawer FirefoamOverlays => throw new NotImplementedException();
 
   bool IParallelRenderer.IsDirty { get; set; }
 
@@ -40,17 +28,17 @@ public sealed class VehicleRenderer : IParallelRenderer
         // Ensure meshes are cached beforehand
         for (int i = 0; i < 4; i++)
           _ = vehicle.VehicleGraphic.MeshAt(new Rot4(i));
-      break;
+        break;
       case DrawPhase.ParallelPreDraw:
         results = ParallelGetPreRenderResults(in transformData);
-      break;
+        break;
       case DrawPhase.Draw:
         // Out of phase drawing must immediately generate pre-render results for valid data.
         if (!results.valid)
           results = ParallelGetPreRenderResults(in transformData);
         Draw();
         results = default;
-      break;
+        break;
       default:
         throw new NotImplementedException();
     }
@@ -70,19 +58,5 @@ public sealed class VehicleRenderer : IParallelRenderer
 
     if (vehicle.Spawned && !vehicle.Dead)
       vehicle.vehiclePather.PatherDraw();
-
-    // TODO - Firefoam overlays for vehicle
-    //if (firefoamOverlays.IsCoveredInFoam)
-    //{
-    //	Vector3 overlayPos = rootLoc;
-    //	overlayPos.y += YOffset_CoveredInOverlay;
-    //	firefoamOverlays.RenderPawnOverlay(overlayPos, mesh, quaternion, flags.FlagSet(PawnRenderFlags.DrawNow), PawnOverlayDrawer.OverlayLayer.Body, bodyFacing);
-    //}
-
-    // TODO - pack graphics
-    //if (vehicle.inventory != null && vehicle.inventory.innerContainer.Count > 0 && graphics.packGraphic != null)
-    //{
-    //	Graphics.DrawMesh(mesh, drawLoc, quaternion, graphics.packGraphic.MatAt(bodyFacing, null), 0);
-    //}
   }
 }

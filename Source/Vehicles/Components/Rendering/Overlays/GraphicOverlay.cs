@@ -6,6 +6,7 @@ using SmashTools;
 using SmashTools.Animations;
 using SmashTools.Rendering;
 using UnityEngine;
+using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Transform = SmashTools.Rendering.Transform;
@@ -108,6 +109,7 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
     {
       if (graphic is null)
       {
+        Assert.IsTrue(UnityData.IsInMainThread);
         PropertyBlock ??= new MaterialPropertyBlock();
         if (vehicle is { Destroyed: true } && !RGBMaterialPool.GetAll(this).NullOrEmpty())
         {

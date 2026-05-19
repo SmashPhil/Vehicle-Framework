@@ -8,8 +8,6 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
-using SmashTools.Burst;
-using SmashTools.Targeting;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Compatibility;
@@ -145,7 +143,8 @@ public partial class VehiclePawn
     }
   }
 
-  [Obsolete("Vehicles should call DrawTracker instead of the vanilla implementation", true)]
+  // TODO 1.6.2144 - Remove
+  [Obsolete("Vehicles should call DrawTracker instead of the vanilla implementation", error: true)]
   public new VehicleDrawTracker Drawer => DrawTracker;
 
   public VehicleDrawTracker DrawTracker => drawTracker;
@@ -392,10 +391,12 @@ public partial class VehiclePawn
 
   private Graphic_Vehicle GenerateGraphic()
   {
+    Assert.IsTrue(UnityData.IsInMainThread);
     if (Destroyed && !RGBMaterialPool.GetAll(this).NullOrEmpty())
     {
       Log.Error(
-        $"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not cleared for this entry. This may result in a memory leak.");
+        $"Reinitializing RGB Materials but {this} has already been destroyed and the cache was not " +
+        $"cleared for this entry. This may result in a memory leak.");
       RGBMaterialPool.Release(this);
     }
 
@@ -415,15 +416,13 @@ public partial class VehiclePawn
       GraphicDatabaseRGB
        .Remove(this); // Clear cached graphic to pick up potential retexture changes
       graphicData.Init(this);
-      newGraphic = graphicData.Graphic as Graphic_Vehicle;
-      Assert.IsNotNull(newGraphic);
+      newGraphic = (Graphic_Vehicle)graphicData.Graphic;
       RGBMaterialPool.SetProperties(this, patternData, newGraphic.TexAt, newGraphic.MaskAt);
     }
     else
     {
       // Triggers vanilla Init call for normal material caching
-      newGraphic = ((GraphicData)graphicData).Graphic as Graphic_Vehicle;
-      Assert.IsNotNull(newGraphic);
+      newGraphic = (Graphic_Vehicle)((GraphicData)graphicData).Graphic;
     }
 
     // Ensure meshes are cached beforehand, without needing to call this in EnsureInitialized event
@@ -1089,6 +1088,9 @@ public partial class VehiclePawn
     });
   }
 
+  // TODO 1.7 - Rename parameter, I think someone has a patch on this method and changing the
+  // name will break parameter binding.
+  // ReSharper disable once ParameterHidesMember
   public void SetRetexture(RetextureDef retextureDef)
   {
     SetRetextureInternal(this, retextureDef);
@@ -1165,9 +1167,9 @@ public partial class VehiclePawn
       {
         if (Widgets.ButtonImage(rect, VehicleTex.Settings))
         {
-          List<FloatMenuOption> options = [];
-          options.Add(new FloatMenuOption("Tweak Values",
-            delegate { Find.WindowStack.Add(new EditWindow_TweakFields(this)); }));
+          List<FloatMenuOption> options = [
+            new("Tweak Values", delegate { Find.WindowStack.Add(new EditWindow_TweakFields(this)); })
+          ];
           if (CompVehicleLauncher != null)
           {
             options.Add(new FloatMenuOption("Open in Graph Editor", OpenInAnimator));

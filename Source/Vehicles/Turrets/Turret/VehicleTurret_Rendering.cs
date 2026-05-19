@@ -782,7 +782,8 @@ public partial class VehicleTurret
 		VehicleTurret turret, GraphicDataRGB copyGraphicData, PatternData patternData,
 		ref GraphicDataRGB cachedGraphicData)
 	{
-		cachedGraphicData = new GraphicDataRGB();
+    Assert.IsTrue(UnityData.IsInMainThread);
+    cachedGraphicData = new GraphicDataRGB();
 		cachedGraphicData.CopyFrom(copyGraphicData);
 		Graphic_Turret graphic;
 		if (cachedGraphicData.shaderType.Shader.SupportsMaskTex() ||

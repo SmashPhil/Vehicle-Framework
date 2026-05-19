@@ -86,11 +86,11 @@ public class VehicleDrawTracker
             parallelRenderer.DynamicDrawPhaseAt(phase, in transformData);
             parallelRenderer.IsDirty = false;
           }
-        break;
+          break;
         case DrawPhase.ParallelPreDraw:
         case DrawPhase.Draw:
           parallelRenderer.DynamicDrawPhaseAt(phase, in transformData);
-        break;
+          break;
         default:
           throw new NotImplementedException(nameof(DrawPhase));
       }
