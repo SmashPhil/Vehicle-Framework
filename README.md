@@ -1,4 +1,7 @@
-# Vehicle Framework
+<p align="center">
+  <img src="https://raw.githubusercontent.com/SmashPhil/Vehicle-Framework/develop/About/Preview.png" alt="Vehicle FrameWork" width="512" /><br>
+	<b>RimWorld mod framework for creating vehicles.</b>
+</p>
 
 <p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-squared&label=License" /></a>
@@ -10,9 +13,7 @@
   <a href="https://discord.gg/zXDyfWQ"><img src="https://img.shields.io/discord/588278492655910925?style=flat&logo=Discord&label=Discord" /></a>
 </p>
 
-Vehicle Framework is a RimWorld mod framework for creating vehicles.
-
-It provides the systems that vehicle content mods build upon: vehicle pawns, custom pathing, component-based vehicle health, turrets, aerial launch and landing behavior, paint and skin support, graphic overlays, mod settings, and compatibility hooks.
+This mod provides the mechanics that vehicle content mods build upon: vehicle pawns, custom pathing, component-based vehicle health, turrets, aerial launch and landing behavior, paint and skin support, graphic overlays, mod settings, and compatibility hooks.
 
 Vehicle Framework does **not** add playable vehicles by itself. Install vehicle content mods alongside it.
 
