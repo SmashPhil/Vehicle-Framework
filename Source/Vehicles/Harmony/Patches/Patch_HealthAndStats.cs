@@ -57,11 +57,11 @@ internal class Patch_HealthAndStats : IPatchCategory
 				nameof(HediffUtility.CanHealFromTending)),
 			prefix: new HarmonyMethod(typeof(Patch_HealthAndStats),
 				nameof(VehiclesDontHealTended)));
-		HarmonyPatcher.Patch(
-			original: AccessTools.Method(typeof(Verb_CastAbility),
-				nameof(Verb_CastAbility.CanHitTarget)),
-			prefix: new HarmonyMethod(typeof(Patch_HealthAndStats),
-				nameof(VehiclesImmuneToPsycast)));
+		//HarmonyPatcher.Patch(
+		//	original: AccessTools.Method(typeof(Verb_CastAbility),
+		//		nameof(Verb_CastAbility.CanHitTarget)),
+		//	prefix: new HarmonyMethod(typeof(Patch_HealthAndStats),
+		//		nameof(VehiclesImmuneToPsycast)));
 		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(StatWorker), nameof(StatWorker.IsDisabledFor)),
 			prefix: new HarmonyMethod(typeof(Patch_HealthAndStats),
@@ -239,11 +239,10 @@ internal class Patch_HealthAndStats : IPatchCategory
 	/// <summary>
 	/// Block vehicles from receiving psycast effects
 	/// </summary>
-	/// <param name="targ"></param>
-	public static bool VehiclesImmuneToPsycast(LocalTargetInfo targ)
+	private static bool VehiclesImmuneToPsycast(Verb_CastAbility __instance, LocalTargetInfo targ)
 	{
 		// TODO VF-208: Remove psycast targeter blocking and implement in cleaner way that bocks status effects like manhunter
-		if (targ.Pawn is VehiclePawn vehicle)
+		if (__instance is Verb_CastPsycast && targ.Pawn is VehiclePawn vehicle)
 		{
 			Debug.Message($"Psycast blocked for {vehicle}");
 			return false;
