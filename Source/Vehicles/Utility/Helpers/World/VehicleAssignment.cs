@@ -77,7 +77,6 @@ public sealed class VehicleAssignment
 
   public void SetAssignments(VehiclePawn vehicle, List<AssignedSeat> assignments)
   {
-    Assert.IsFalse(assignments.NullOrEmpty());
     vehicleAssignments[vehicle] = assignments;
     UpdatePawnAssignments();
   }

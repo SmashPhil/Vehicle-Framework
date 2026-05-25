@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Performance;
 using SmashTools.Targeting;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -22,7 +23,6 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 {
   private const int RepairMothballTicks = 300;
 
-  private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
   private static readonly Color PlayerCaravanColor = new(1f, 0.863f, 0.33f);
   private static readonly MaterialPropertyBlock PropertyBlock = new();
   private static readonly Dictionary<ThingDef, Material> Materials = [];
@@ -595,12 +595,9 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
     int prisoners = 0;
     int downed = 0;
     int mentalState = 0;
-    int vehicleCount = 0;
 
-    vehicleCount++;
     foreach (Pawn pawn in PawnsListForReading)
     {
-      if (pawn is VehiclePawn) vehicleCount++;
       if (pawn.IsColonist) colonists++;
       if (pawn.RaceProps.Animal) animals++;
       if (pawn.IsPrisoner) prisoners++;
@@ -608,21 +605,17 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
       if (pawn.InMentalState) mentalState++;
     }
 
-    if (vehicleCount >= 1)
+    using var vc = GlobalObjectPool.Get(out Dictionary<VehicleDef, int> vehicleCounts);
+    foreach (VehiclePawn vehicle in VehiclesListForReading)
     {
-      VehicleCounts.Clear();
+      if (!vehicleCounts.TryAdd(vehicle.VehicleDef, 1))
       {
-        foreach (VehiclePawn vehicle in VehiclesListForReading)
-        {
-          if (!VehicleCounts.TryAdd(vehicle.VehicleDef, 1))
-            VehicleCounts[vehicle.VehicleDef]++;
-        }
-        foreach ((VehicleDef vehicleDef, int count) in VehicleCounts)
-        {
-          stringBuilder.Append($"{count} {vehicleDef.LabelCap}, ");
-        }
+        vehicleCounts[vehicle.VehicleDef]++;
       }
-      VehicleCounts.Clear();
+    }
+    foreach ((VehicleDef vehicleDef, int count) in vehicleCounts)
+    {
+      stringBuilder.Append($"{count} {vehicleDef.LabelCap}, ");
     }
     stringBuilder.Append("CaravanColonistsCount".Translate(colonists,
       (colonists != 1) ? Faction.OfPlayer.def.pawnsPlural : Faction.OfPlayer.def.pawnSingular));

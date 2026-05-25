@@ -8,7 +8,8 @@
   
   <VF_NotEnoughToOperate>Cannot move. Needs more crew in order to operate.</VF_NotEnoughToOperate>
   <VF_UpgradeInProgress>Cannot draft while {0} is upgrading.</VF_UpgradeInProgress>
-  <VF_NotEnoughCrew>Not enough colonists in {0} to operate {1}.</VF_NotEnoughCrew>
+  <VF_NotEnoughCrew>Not enough colonists to operate {0_labelShort}.</VF_NotEnoughCrew>
+  <VF_NotEnoughCrewFor>Not enough colonists in {0_labelShort} to operate {1}.</VF_NotEnoughCrewFor>
   
   <VF_CannotFit>{0_labelShort} cannot reach destination. Not enough space.</VF_CannotFit>
   <VF_NoPathForVehicle>{0_labelShort} cannot reach destination.</VF_NoPathForVehicle>

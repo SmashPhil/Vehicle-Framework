@@ -285,7 +285,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 				if (relatedHandler.thingOwner.Count < relatedHandler.role.SlotsToOperate &&
 					!VehicleMod.settings.debug.debugShootAnyTurret)
 				{
-					command.Disable("VF_NotEnoughCrew".Translate(Vehicle.LabelShort,
+					command.Disable("VF_NotEnoughCrewFor".Translate(Vehicle,
 						relatedHandler.role.label));
 					break;
 				}

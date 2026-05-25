@@ -414,7 +414,7 @@ public class Dialog_AssignSeats : Window
 
 			// Add all pawns to assigned seating registry and refresh caravan dialog
 			CaravanHelper.assignedSeats.SetAssignments(vehicle, Assignments);
-			int transferCount = Assignments.Count > 0 ? vehicleTransferable.GetMaximumToTransfer() : 0;
+			int transferCount = vehicleTransferable.GetMaximumToTransfer();
 			vehicleTransferable.AdjustTo(transferCount);
 			parent.NotifyTransferablesChanged();
 		}

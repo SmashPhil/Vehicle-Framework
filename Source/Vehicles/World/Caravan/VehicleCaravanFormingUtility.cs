@@ -92,7 +92,7 @@ public static class VehicleCaravanFormingUtility
 
     LordJob_FormAndSendVehicles lordJob = new(vehicles, pawns, transferables,
       meetingPoint, exitSpot, startingTile, destinationTile);
-    LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, pawns[0].MapHeld, vehicles.Concat(pawns));
+    LordMaker.MakeNewLord(Faction.OfPlayer, lordJob, vehicles[0].MapHeld, vehicles.Concat(pawns));
 
     // Disembark pawns, they will immediately join the vehicle's lord job and begin packing the caravan
     foreach (VehiclePawn vehicle in vehicles)

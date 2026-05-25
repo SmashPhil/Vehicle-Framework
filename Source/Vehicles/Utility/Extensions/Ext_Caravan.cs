@@ -13,12 +13,27 @@ namespace Vehicles.World;
 [PublicAPI]
 public static class Ext_Caravan
 {
-	/// <summary>
-	/// Determines whether the caravan contains one or more vehicles.
-	/// </summary>
-	/// <param name="caravan">The caravan to inspect.</param>
-	/// <returns><see langword="true"/> if the caravan has at least one vehicle, otherwise <see langword="false"/>.</returns>
-	public static bool HasVehicle(this Caravan caravan)
+  /// <summary>
+  /// Determines whether all vehicles in the caravan are autonomous.
+  /// </summary>
+  /// <param name="caravan">The vehicle caravan to evaluate.</param>
+  /// <returns><see langword="true"/> if every vehicle in the caravan is autonomous, otherwise <see langword="false"/>.</returns>
+  public static bool IsAutonomousCaravan([NotNull] this VehicleCaravan caravan)
+  {
+    foreach (VehiclePawn vehicle in caravan.VehiclesListForReading)
+    {
+      if (!vehicle.IsAutonomousVehicle())
+        return false;
+    }
+    return true;
+  }
+
+  /// <summary>
+  /// Determines whether the caravan contains one or more vehicles.
+  /// </summary>
+  /// <param name="caravan">The caravan to inspect.</param>
+  /// <returns><see langword="true"/> if the caravan has at least one vehicle, otherwise <see langword="false"/>.</returns>
+  public static bool HasVehicle(this Caravan caravan)
 	{
 		return caravan is VehicleCaravan vehicleCaravan && vehicleCaravan.VehiclesListForReading.Count > 0;
 	}
