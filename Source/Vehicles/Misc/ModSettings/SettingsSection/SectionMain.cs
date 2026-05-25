@@ -14,7 +14,6 @@ public class SectionMain : SettingsSection
   private const int MainSectionColumns = 3;
 
   private const int MaxSettlementAdjustRadius = 15;
-  private const int MaxRoadAdjustRadius = 4;
 
   public const float BeachMultMin = 0;
   public const float BeachMultMax = 2;
@@ -43,10 +42,7 @@ public class SectionMain : SettingsSection
 
   // General
   public bool modifiableSettings = true;
-  public bool useCustomShaders = true;
-  public bool allowDiagonalRendering = true;
 
-  public bool fullVehiclePathing = true;
   public bool smoothVehiclePaths = true;
   public bool useHandBrakes = true;
 
@@ -60,6 +56,8 @@ public class SectionMain : SettingsSection
   // Graphics
   public bool passiveWaterWaves = true;
   public bool aerialVehicleEffects = true;
+  public bool useCustomShaders = true;
+  public bool allowDiagonalRendering = true;
 
   // Turrets
   public bool overheatMechanics = true;
@@ -104,10 +102,6 @@ public class SectionMain : SettingsSection
 
     // General
     modifiableSettings = true;
-    useCustomShaders = true;
-
-    allowDiagonalRendering = true;
-    fullVehiclePathing = true;
     smoothVehiclePaths = true;
     useHandBrakes = true;
 
@@ -127,6 +121,8 @@ public class SectionMain : SettingsSection
     // Graphics
     passiveWaterWaves = true;
     aerialVehicleEffects = true;
+    useCustomShaders = true;
+    allowDiagonalRendering = true;
 
     // Fishing
     fishingMultiplier = 1f;
@@ -156,10 +152,7 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref adjustRiverWeight, nameof(adjustRiverWeight), defaultValue: DefaultRiverWeight);
 
     Scribe_Values.Look(ref modifiableSettings, nameof(modifiableSettings), defaultValue: true);
-    Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
-
-    Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
-    Scribe_Values.Look(ref fullVehiclePathing, nameof(fullVehiclePathing), defaultValue: true);
+    
     Scribe_Values.Look(ref smoothVehiclePaths, nameof(smoothVehiclePaths), defaultValue: true);
     Scribe_Values.Look(ref useHandBrakes, nameof(useHandBrakes), defaultValue: true);
 
@@ -176,6 +169,8 @@ public class SectionMain : SettingsSection
 
     Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
     Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
+    Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
+    Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
 
     Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: DefaultFishingMultiplier);
     Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: DefaultFishingSkillGain);
@@ -236,14 +231,6 @@ public class SectionMain : SettingsSection
         delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
         ref modifiableSettings, "VF_ModifiableSettingsTooltip".Translate());
 
-      listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),
-        delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
-        ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
-
-      listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(),
-        ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
-      listingStandard.CheckboxLabeled("VF_FullVehiclePathing".Translate(), ref fullVehiclePathing,
-        "VF_FullVehiclePathingTooltip".Translate());
       listingStandard.CheckboxLabeled("VF_SmoothVehiclePathing".Translate(), ref smoothVehiclePaths,
         "VF_SmoothVehiclePathingTooltip".Translate());
       listingStandard.CheckboxLabeled("VF_UseHandBrakes".Translate(), ref useHandBrakes,
@@ -271,6 +258,11 @@ public class SectionMain : SettingsSection
         "VF_PassiveWaterWavesTooltip".Translate());
       listingStandard.CheckboxLabeled("VF_AerialVehicleEffects".Translate(),
         ref aerialVehicleEffects, "VF_AerialVehicleEffectsTooltip".Translate());
+      listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),
+        delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
+        ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
+      listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(),
+        ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 
       listingStandard.Gap(8);
 
@@ -342,14 +334,14 @@ public class SectionMain : SettingsSection
       {
         listingStandard.EnumSliderLabeled("VF_ChanceToRunOverFriendlies".Translate(),
           ref friendlyFire, "VF_ChanceToRunOverFriendliesTooltip".Translate(), string.Empty,
-          delegate(VehicleTracksFriendlyFire friendlyFire)
+          static fire =>
           {
-            return friendlyFire switch
+            return fire switch
             {
               VehicleTracksFriendlyFire.None    => "VF_VehicleTracksNone".Translate(),
               VehicleTracksFriendlyFire.Vanilla => "VF_VehicleTracksVanilla".Translate(),
               VehicleTracksFriendlyFire.Custom  => "ScenariosCustom".Translate(),
-              _                                 => friendlyFire.ToString(),
+              _                                 => fire.ToString(),
             };
           });
         if (friendlyFire == VehicleTracksFriendlyFire.Custom)

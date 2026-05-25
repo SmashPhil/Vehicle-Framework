@@ -12,27 +12,27 @@ public static class SettingsCustomizableFields
 {
   static SettingsCustomizableFields()
   {
-    if (VehicleMod.ModifiableSettings)
-    {
-      List<bool> successfulGenerations = [];
+    if (!VehicleMod.ModifiableSettings)
+      return;
 
-      VehicleMod.PopulateCachedFields();
-      foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
+    List<bool> successfulGenerations = [];
+    VehicleMod.PopulateCachedFields();
+    foreach (VehicleDef def in DefDatabase<VehicleDef>.AllDefsListForReading)
+    {
+      bool fields = PopulateSaveableFields(def);
+      successfulGenerations.Add(fields);
+      //bool upgrades = PopulateSaveableUpgrades(def);
+      //successfulGenerations.Add(upgrades);
+      if (!fields /*|| !upgrades*/)
       {
-        bool fields = PopulateSaveableFields(def);
-        bool upgrades = true; // PopulateSaveableUpgrades(def);
-        successfulGenerations.Add(fields);
-        successfulGenerations.Add(upgrades);
-        if (!fields || !upgrades)
-        {
-          VehicleMod.SettingsDisabledFor.Add(def.defName);
-        }
+        VehicleMod.SettingsDisabledFor.Add(def.defName);
       }
-      if (!successfulGenerations.NullOrEmpty() && successfulGenerations.All(b => b == false))
-      {
-        Log.Error(
-          "SaveableFields have failed for every VehicleDef. Consider turning off the ModifiableSettings option in the ModSettings to bypass customizable field generation. This will require a restart.");
-      }
+    }
+    if (successfulGenerations.Count > 0 && successfulGenerations.All(static boolean => !boolean))
+    {
+      Log.Error(
+        "SaveableFields have failed for every VehicleDef. Consider turning off the ModifiableSettings " +
+        "option in the ModSettings to bypass customizable field generation. This will require a restart.");
     }
   }
 
@@ -57,13 +57,12 @@ public static class SettingsCustomizableFields
       {
         IterateTypeFields(def, props.GetType(), props, ref currentDict);
       }
-      //Redundancy only
       VehicleMod.settings.vehicles.fieldSettings[def.defName] = currentDict;
     }
     catch (Exception ex)
     {
       Log.Error(
-        $"Failed to populate field settings for <text>{def.defName}</text>.\nException=\"{ex}\"\nInnerException=\"{ex.InnerException}\"");
+        $"Failed to populate field settings for {def.defName}.\nException=\"{ex}\"");
       return false;
     }
     return true;
@@ -98,7 +97,7 @@ public static class SettingsCustomizableFields
     catch (Exception ex)
     {
       Log.Error(
-        $"Failed to populate upgrade settings for {def.defName}. Exception=\"{ex}\"\nInnerException=\"{ex.InnerException}\"");
+        $"Failed to populate upgrade settings for {def.defName}. Exception=\"{ex}\"");
       return false;
     }
     return true;
@@ -107,99 +106,95 @@ public static class SettingsCustomizableFields
   public static void IterateTypeFields(VehicleDef def, Type type, object obj,
     ref Dictionary<SaveableField, SavedField<object>> currentDict)
   {
-    if (VehicleMod.CachedFields.TryGetValue(type, out List<FieldInfo> fields))
-    {
-      var dict = VehicleMod.settings.vehicles.fieldSettings[def.defName];
-      var defaultValuesDict = VehicleMod.settings.vehicles.defaultValues[def.defName];
+    if (!VehicleMod.CachedFields.TryGetValue(type, out List<FieldInfo> fields))
+      return;
 
-      foreach (FieldInfo field in fields)
-      {
-        if (field.TryGetAttribute<PostToSettingsAttribute>(out var settings) &&
+    var dict = VehicleMod.settings.vehicles.fieldSettings[def.defName];
+    var defaultValuesDict = VehicleMod.settings.vehicles.defaultValues[def.defName];
+
+    foreach (FieldInfo field in fields)
+    {
+      if (field.TryGetAttribute<PostToSettingsAttribute>(out var settings) &&
           settings.ParentHolder)
+      {
+        object value = field.GetValue(obj);
+        if (field.FieldType.IsGenericType && field.DeclaringType != null)
         {
-          object value = field.GetValue(obj);
-          if (field.FieldType.IsGenericType)
+          MethodInfo method = field.DeclaringType.GetMethod("ResolvePostToSettings",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
+            BindingFlags.Static);
+          if (method != null)
           {
-            MethodInfo method = field.DeclaringType.GetMethod("ResolvePostToSettings",
-              BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-              BindingFlags.Static);
-            if (method != null)
-            {
-              object[] arguments = new object[] { def, currentDict };
-              method.Invoke(obj, arguments);
-              currentDict = (Dictionary<SaveableField, SavedField<object>>)arguments[1];
-            }
-            else
-            {
-              SmashLog.Error(
-                $"Unable to generate customizable setting <field>{field.Name}</field> for <text>{def.defName}</text>. Fields of type <type>Dictionary<T></type> must implement ResolvePostToSettings method to be manually resolved.");
-            }
+            object[] arguments = [def, currentDict];
+            method.Invoke(obj, arguments);
+            currentDict = (Dictionary<SaveableField, SavedField<object>>)arguments[1];
           }
           else
           {
-            IterateTypeFields(def, field.FieldType, value, ref currentDict);
+            SmashLog.Error(
+              $"Unable to generate customizable setting {field.Name} for {def.defName}. Fields of type " +
+              $"Dictionary<T> must implement ResolvePostToSettings method to be manually resolved.");
           }
         }
         else
         {
-          SaveableField saveField = new SaveableField(def, field);
-          defaultValuesDict[saveField] = field.GetValue(obj);
-          //if (!dict.ContainsKey(saveField))
-          //{
-          //	dict.Add(saveField, new SavedField<object>(field.GetValue(obj)));
-          //}
+          IterateTypeFields(def, field.FieldType, value, ref currentDict);
         }
       }
-      //Redundancy sake.
-      VehicleMod.settings.vehicles.fieldSettings[def.defName] = dict;
+      else
+      {
+        SaveableField saveField = new(def, field);
+        defaultValuesDict[saveField] = field.GetValue(obj);
+      }
     }
+    VehicleMod.settings.vehicles.fieldSettings[def.defName] = dict;
   }
 
   public static void IterateUpgradeNode(VehicleDef def, UpgradeNode node,
     ref Dictionary<SaveableField, SavedField<object>> currentDict)
   {
-    if (VehicleMod.CachedFields.TryGetValue(node.GetType(), out var fields))
+    if (!VehicleMod.CachedFields.TryGetValue(node.GetType(), out var fields))
+      return;
+
+    var dict = VehicleMod.settings.upgrades.upgradeSettings[def.defName];
+    foreach (FieldInfo field in fields)
     {
-      var dict = VehicleMod.settings.upgrades.upgradeSettings[def.defName];
-      foreach (FieldInfo field in fields)
-      {
-        if (field.TryGetAttribute<PostToSettingsAttribute>(out var settings) &&
+      if (field.TryGetAttribute<PostToSettingsAttribute>(out var settings) &&
           settings.ParentHolder)
+      {
+        object value = field.GetValue(node);
+        if (field.FieldType.IsGenericType && field.DeclaringType != null)
         {
-          object value = field.GetValue(node);
-          if (field.FieldType.IsGenericType)
+          MethodInfo method = field.DeclaringType.GetMethod("ResolvePostToSettings",
+            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
+            BindingFlags.Static);
+          if (method != null)
           {
-            MethodInfo method = field.DeclaringType.GetMethod("ResolvePostToSettings",
-              BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance |
-              BindingFlags.Static);
-            if (method != null)
-            {
-              object[] arguments = new object[] { def, currentDict };
-              method.Invoke(node, arguments);
-              currentDict = (Dictionary<SaveableField, SavedField<object>>)arguments[1];
-            }
-            else
-            {
-              Log.Error(
-                $"Unable to generate customizable setting {field.Name} for {def.defName}. Fields of type Dictionary<> must implement ResolvePostToSettings method to be manually resolved.");
-            }
+            object[] arguments = [def, currentDict];
+            method.Invoke(node, arguments);
+            currentDict = (Dictionary<SaveableField, SavedField<object>>)arguments[1];
           }
           else
           {
-            IterateTypeFields(def, field.FieldType, value, ref currentDict);
+            Log.Error(
+              $"Unable to generate customizable setting {field.Name} for {def.defName}. Fields of type " +
+              $"Dictionary<> must implement ResolvePostToSettings method to be manually resolved.");
           }
         }
         else
         {
-          SaveableField saveField = new SaveableField(def, field);
-          if (!dict.TryGetValue(saveField, out var _))
-          {
-            dict.Add(saveField, new SavedField<object>(field.GetValue(node)));
-          }
+          IterateTypeFields(def, field.FieldType, value, ref currentDict);
         }
       }
-      //Redundancy sake.
-      VehicleMod.settings.upgrades.upgradeSettings[def.defName] = dict;
+      else
+      {
+        SaveableField saveField = new(def, field);
+        if (!dict.TryGetValue(saveField, out _))
+        {
+          dict.Add(saveField, new SavedField<object>(field.GetValue(node)));
+        }
+      }
     }
+    VehicleMod.settings.upgrades.upgradeSettings[def.defName] = dict;
   }
 }

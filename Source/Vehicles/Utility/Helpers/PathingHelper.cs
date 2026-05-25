@@ -119,7 +119,7 @@ public static class PathingHelper
     {
       IntVec3 curLoc = GenRadial.RadialPattern[i] + cell;
       if (curLoc.Standable(vehicle, vehicle.Map) &&
-        (!VehicleMod.settings.main.fullVehiclePathing || vehicle.DrivableRectOnCell(curLoc)))
+        (vehicle.DrivableRectOnCell(curLoc)))
       {
         return curLoc != vehicle.Position && !vehicle.beached;
       }
@@ -471,8 +471,7 @@ public static class PathingHelper
     {
       IntVec3 curLoc = GenRadial.RadialPattern[i] + cell;
       if (curLoc.Standable(vehicle, vehicle.Map) &&
-        (!VehicleMod.settings.main.fullVehiclePathing ||
-          vehicle.DrivableRectOnCell(curLoc, Ext_Vehicles.DestinationHitboxReq.AnyRotation)))
+        (vehicle.DrivableRectOnCell(curLoc, Ext_Vehicles.DestinationHitboxReq.AnyRotation)))
       {
         if (curLoc == vehicle.Position || vehicle.beached)
         {

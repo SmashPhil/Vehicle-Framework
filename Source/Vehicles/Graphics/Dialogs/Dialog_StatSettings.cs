@@ -47,7 +47,7 @@ namespace Vehicles
           if (stats?.ContainsKey(statModifier.statDef.defName) ?? false)
           {
             label =
-              $"<color={UIElements.ToHex(Listing_Settings.modifiedColor)}>{label}</color>"; //Rich Text to avoid having to add optional parameter to all lister methods
+              $"<color={UIElements.ToHex(Listing_Settings.ModifiedColor)}>{label}</color>"; //Rich Text to avoid having to add optional parameter to all lister methods
           }
           switch (settingsType)
           {
