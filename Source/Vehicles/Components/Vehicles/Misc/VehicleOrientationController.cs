@@ -4,6 +4,7 @@ using RimWorld;
 using SmashTools;
 using SmashTools.Algorithms;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
@@ -114,8 +115,11 @@ public class VehicleOrientationController : BaseTargeter
   private void ConfirmOrientation()
   {
     if (IsMultiSelect)
+    {
       RecomputeDestinations();
+    }
 
+    bool playedSound = false;
     for (int i = 0; i < vehicles.Count; i++)
     {
       VehiclePawn confirmVehicle = vehicles[i];
@@ -124,11 +128,24 @@ public class VehicleOrientationController : BaseTargeter
         continue;
       if (!CanFitAt(confirmVehicle, cell, Rotation))
       {
-        Messages.Message("VF_CannotFit".Translate(confirmVehicle), vehicle, MessageTypeDefOf.RejectInput,
-          historical: false);
+        if (!playedSound)
+        {
+          playedSound = true;
+          Messages.Message("VF_CannotFit".Translate(confirmVehicle), vehicle, MessageTypeDefOf.RejectInput,
+            historical: false);
+        }
         continue;
       }
 
+      if (vehicle.VehicleDef.Size.x % 2 == 0)
+      {
+        //cell += Rotation.AsInt switch
+        //{
+        //  2 => new IntVec3(0, 0, 1),
+        //  4 => new IntVec3(0, 0, -1),
+        //  _ => IntVec3.Zero
+        //};
+      }
       FloatMenuOptionProvider_OrderVehicle.PawnGotoAction(end, confirmVehicle, cell,
         Rotation);
     }
@@ -181,8 +198,11 @@ public class VehicleOrientationController : BaseTargeter
         destPos = (start.ToVector3() + (end.ToVector3() - start.ToVector3()) * frac)
          .ToIntVec3();
       }
+
       if (!PathingHelper.TryFindNearestStandableCell(selVehicle, destPos, out IntVec3 result))
+      {
         result = IntVec3.Invalid;
+      }
       potentialDests[i] = result;
     }
 
@@ -190,7 +210,9 @@ public class VehicleOrientationController : BaseTargeter
     for (int i = 0; i < count; i++)
     {
       for (int j = 0; j < count; j++)
+      {
         costMatrix[i, j] = vehicles[i].Position.DistanceTo(dests[j]);
+      }
     }
     int[] assignment = assigner.Compute(costMatrix);
 
@@ -308,8 +330,14 @@ public class VehicleOrientationController : BaseTargeter
         Color drawColor = CanFitAt(vehicle, dests[0], Rotation) ?
           VehicleGhostUtility.whiteGhostColor :
           VehicleGhostUtility.RedGhostColor;
-        VehicleGhostUtility.DrawGhostVehicleDef(dests[0], Rotation, vehicle.VehicleDef, drawColor,
-          AltitudeLayer.MetaOverlays, vehicle);
+        VehicleGhostUtility.DrawData data = new(vehicle)
+        {
+          center = dests[0],
+          rot = Rotation,
+          ghostColor = drawColor,
+          altitude = AltitudeLayer.MetaOverlays
+        };
+        VehicleGhostUtility.DrawAt(in data);
       }
     }
   }

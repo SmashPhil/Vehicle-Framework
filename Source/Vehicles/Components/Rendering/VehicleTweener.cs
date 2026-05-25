@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using RimWorld;
+using SmashTools;
 using UnityEngine;
 
 namespace Vehicles;
@@ -74,7 +75,8 @@ public class VehicleTweener
       return vehicle.TrueCenter();
     }
     float num = MovedPercent();
-    return vehicle.TrueCenter(vehicle.vehiclePather.nextCell) * num +
+    Rot8 nextRot = Rot8.DirectionFromCells(vehicle.Position, vehicle.vehiclePather.nextCell);
+    return Ext_Vehicles.TrueCenter(vehicle.vehiclePather.nextCell, nextRot, vehicle.VehicleDef) * num +
       vehicle.TrueCenter() * (1f - num);
   }
 

@@ -229,7 +229,9 @@ internal class Patch_Construction : IPatchCategory
       if (standable)
       {
         if (!respawningAfterLoad)
-          FinalizePosition(vehicle, rot, ref loc);
+        {
+          loc = Ext_Vehicles.AdjustPosition(vehicle.VehicleDef, rot, loc);
+        }
         return true; // If location is still valid, skip to spawning
       }
 
@@ -275,7 +277,9 @@ internal class Patch_Construction : IPatchCategory
 
       loc = newLoc;
       if (!respawningAfterLoad)
-        FinalizePosition(vehicle, rot, ref loc);
+      {
+        loc = Ext_Vehicles.AdjustPosition(vehicle.VehicleDef, rot, loc);
+      }
       return true;
     }
 
@@ -310,32 +314,6 @@ internal class Patch_Construction : IPatchCategory
       {
         Log.Error(
           $"Pawn {pawn.Label} could not be readjusted for spawn location.\nException={ex}");
-      }
-    }
-
-    // There is a discrepancy between Thing true centers and Vehicle true centers. If the vehicle
-    // is even width or even height, it will shift when transitioning between the placement of
-    // the building and the spawning of the vehicle. Adjusting the position unconditionally will
-    // avoid map edge issues where the vehicle jumps 1 cell off the map and despawns from
-    // registration issues.
-    static void FinalizePosition(VehiclePawn vehicle, Rot4 rot, ref IntVec3 cell)
-    {
-      switch (rot.AsInt)
-      {
-        // This is only a problem with south and west facing entities due to the way
-        // RimWorld handles even-size rotations.
-        case 2:
-          if (vehicle.VehicleDef.Size.x % 2 == 0)
-            cell.x -= 1;
-          if (vehicle.VehicleDef.Size.z % 2 == 0)
-            cell.z -= 1;
-          break;
-        case 3:
-          if (vehicle.VehicleDef.Size.x % 2 == 0)
-            cell.z += 1;
-          if (vehicle.VehicleDef.Size.z % 2 == 0)
-            cell.x -= 1;
-          break;
       }
     }
   }

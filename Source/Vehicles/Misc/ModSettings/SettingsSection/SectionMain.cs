@@ -1,4 +1,6 @@
-﻿using RimWorld;
+﻿using System;
+using JetBrains.Annotations;
+using RimWorld;
 using SmashTools;
 using UnityEngine;
 using Vehicles.Compatibility;
@@ -45,6 +47,10 @@ public class SectionMain : SettingsSection
 
   public bool smoothVehiclePaths = true;
   public bool useHandBrakes = true;
+
+  [UsedImplicitly] // VehicleMapFramework references this
+  [Obsolete("This is now a permanent setting and cannot be changed. It is safe to remove.")]
+  public bool fullVehiclePathing = true;
 
   public bool ignoreBiomeCostOnRoads = true;
   public bool multiplePawnsPerJob = true;

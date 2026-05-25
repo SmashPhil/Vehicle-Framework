@@ -77,20 +77,23 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
   /// where it will never be executed.</remarks>
   public bool ThreadAvailable => ThreadAlive && !dedicatedThread.IsSuspended;
 
+  // TODO 1.7 - Switch to PathData
+#pragma warning disable CS0618
   /// <summary>
   /// Generates all path data if they haven't been already and fetches
   /// <see cref="PathData"/> for <paramref name="vehicleDef"/>.
   /// </summary>
-  public PathData this[VehicleDef vehicleDef]
+  public VehiclePathData this[VehicleDef vehicleDef]
   {
     get
     {
       if (vehicleDef == null)
         throw new ArgumentNullException(nameof(vehicleDef));
 
-      return PathData[vehicleDef.DefIndex];
+      return (VehiclePathData)PathData[vehicleDef.DefIndex];
     }
   }
+#pragma warning restore CS0618
 
   bool IPathingManager.IsPathDataSuspended(VehicleDef vehicleDef)
   {

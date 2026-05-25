@@ -6,6 +6,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
+using SmashTools.Burst;
 using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -22,6 +23,33 @@ namespace Vehicles;
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
 {
+  // There is a discrepancy between Thing true centers and Vehicle true centers. If the vehicle
+  // is even width or even height, it will shift when transitioning between the placement of
+  // the building and the spawning of the vehicle. Adjusting the position unconditionally will
+  // avoid map edge issues where the vehicle jumps 1 cell off the map and despawns from
+  // registration issues.
+  internal static IntVec3 AdjustPosition(VehicleDef vehicleDef, Rot4 rot, IntVec3 cell)
+  {
+    switch (rot.AsInt)
+    {
+      // This is only a problem with south and west facing entities due to the way
+      // RimWorld handles even-size rotations.
+      case 2:
+        if (vehicleDef.Size.x % 2 == 0)
+          cell.x -= 1;
+        if (vehicleDef.Size.z % 2 == 0)
+          cell.z -= 1;
+        break;
+      case 3:
+        if (vehicleDef.Size.x % 2 == 0)
+          cell.z += 1;
+        if (vehicleDef.Size.z % 2 == 0)
+          cell.x -= 1;
+        break;
+    }
+    return cell;
+  }
+
   public static bool IsAutonomousVehicle(this VehiclePawn vehicle)
   {
     foreach (VehicleRoleHandler handler in vehicle.handlers)
@@ -254,6 +282,56 @@ public static class Ext_Vehicles
       size.x = maxSize;
       size.z = maxSize;
     }
+  }
+
+  [Pure]
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public static Vector3 TrueCenter(IntVec3 cell, Rot8 rot, VehicleDef vehicleDef)
+  {
+    return TrueCenter(cell, rot, vehicleDef.Size, vehicleDef.Altitude);
+  }
+
+  [Pure]
+  public static Vector3 TrueCenter(IntVec3 cell, Rot8 rot, IntVec2 size, float altitude)
+  {
+    Vector3 result = cell.ToVector3ShiftedWithAltitude(altitude);
+    if (size.x != 1 || size.z != 1)
+    {
+      if (rot.IsHorizontal)
+      {
+        (size.x, size.z) = (size.z, size.x);
+      }
+
+      switch (rot.AsInt)
+      {
+        case 0:
+        case 2:
+          if (size.x % 2 == 0)
+          {
+            result.x += 0.5f;
+          }
+          if (size.z % 2 == 0)
+          {
+            result.z += 0.5f;
+          }
+
+          break;
+        case 1:
+        case 3:
+          if (size.x % 2 == 0)
+          {
+            result.x += 0.5f;
+          }
+
+          if (size.z % 2 == 0)
+          {
+            result.z -= 0.5f;
+          }
+
+          break;
+      }
+    }
+    return result;
   }
 
   [Pure]

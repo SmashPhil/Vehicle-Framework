@@ -316,8 +316,14 @@ internal class Patch_Rendering : IPatchCategory
 		if (thingDef is VehicleBuildDef def)
 		{
 			VehicleDef vehicleDef = def.thingToSpawn;
-			VehicleGhostUtility.DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol,
-				drawAltitude, thing: thing);
+      VehicleGhostUtility.DrawData data = new(vehicleDef)
+      {
+        center = center,
+        rot = rot,
+        ghostColor = ghostCol,
+        altitude = drawAltitude
+      };
+			VehicleGhostUtility.DrawGhostOverlays(in data, baseGraphic, angle: 0);
 		}
 	}
 

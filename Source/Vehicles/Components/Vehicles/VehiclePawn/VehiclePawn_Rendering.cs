@@ -3,14 +3,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
+using CoreLib.Performance;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Animations;
+using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Vehicles.Compatibility;
 using Vehicles.Rendering;
 using Verse;
 using Verse.AI;
@@ -151,6 +153,7 @@ public partial class VehiclePawn
   {
     get
     {
+      // TODO 1.7 - Move away from lazy-init graphic since it can end up being called outside the main thread.
       graphic ??= GenerateGraphic();
       return graphic;
     }
@@ -259,56 +262,18 @@ public partial class VehiclePawn
     }
   }
 
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public Vector3 TrueCenter()
   {
+#pragma warning disable CS0618 // Type or member is obsolete
     return TrueCenter(Position);
+#pragma warning restore CS0618 // Type or member is obsolete
   }
 
+  [Obsolete("Use Ext_Vehicles.TrueCenter instead.")]
   public Vector3 TrueCenter(IntVec3 cell, float? altitude = null)
   {
-    float altitudeValue = altitude ?? VehicleDef.Altitude;
-    Vector3 result = cell.ToVector3ShiftedWithAltitude(altitudeValue);
-    IntVec2 size = VehicleDef.Size;
-    Rot8 rot = Rotation; //Switch to FullRotation when diagonal hitboxes are implemented
-    if (size.x != 1 || size.z != 1)
-    {
-      if (rot.IsHorizontal)
-      {
-        (size.x, size.z) = (size.z, size.x);
-      }
-
-      switch (rot.AsInt)
-      {
-        case 0:
-        case 2:
-          if (size.x % 2 == 0)
-          {
-            result.x += 0.5f;
-          }
-
-          if (size.z % 2 == 0)
-          {
-            result.z += 0.5f;
-          }
-
-          break;
-        case 1:
-        case 3:
-          if (size.x % 2 == 0)
-          {
-            result.x += 0.5f;
-          }
-
-          if (size.z % 2 == 0)
-          {
-            result.z -= 0.5f;
-          }
-
-          break;
-      }
-    }
-
-    return result;
+    return Ext_Vehicles.TrueCenter(cell, Rotation, VehicleDef.Size, altitude ?? VehicleDef.Altitude);
   }
 
   public override void DynamicDrawPhaseAt(DrawPhase phase, Vector3 drawLoc, bool flip = false)
@@ -350,6 +315,18 @@ public partial class VehiclePawn
   }
 
   public void ResetRenderStatus()
+  {
+    if (!LongEventUtils.InMainOrEventThread)
+    {
+      UnityThread.ExecuteOnMainThreadAndWait(RemoveRoleRenderers);
+    }
+    else
+    {
+      RemoveRoleRenderers();
+    }
+  }
+
+  private void RemoveRoleRenderers()
   {
     foreach (VehicleRoleHandler handler in handlers)
       DrawTracker.RemoveRenderer(handler);

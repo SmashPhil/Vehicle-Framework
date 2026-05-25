@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoreLib.Collections;
+using CoreLib.Performance;
 using JetBrains.Annotations;
 using SmashTools;
 using SmashTools.Animations;
+using SmashTools.Performance;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -42,7 +45,7 @@ public class VehicleDrawTracker
 
   private bool RenderersInitialized { get; set; }
 
-  internal IReadOnlyList<IParallelRenderer> ParallelRenderers => parallelRenderers;
+  public ReadOnlyList<IParallelRenderer> ParallelRenderers => new(parallelRenderers);
 
   public Vector3 DrawPos
   {
@@ -62,6 +65,7 @@ public class VehicleDrawTracker
 
   public void AddRenderer(IParallelRenderer parallelRenderer)
   {
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
     Assert.IsFalse(parallelRenderers.Contains(parallelRenderer));
     parallelRenderer.SetDirty();
     parallelRenderers.Add(parallelRenderer);
@@ -69,6 +73,7 @@ public class VehicleDrawTracker
 
   public void RemoveRenderer(IParallelRenderer parallelRenderer)
   {
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
     parallelRenderers.Remove(parallelRenderer);
   }
 
@@ -80,6 +85,7 @@ public class VehicleDrawTracker
       switch (phase)
       {
         case DrawPhase.EnsureInitialized:
+          Assert.IsTrue(UnityThread.IsInMainThread);
           // Only initialize on request
           if (parallelRenderer.IsDirty)
           {

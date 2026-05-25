@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using RimWorld.Planet;
 using SmashTools;
 using UnityEngine;
@@ -27,7 +26,7 @@ public abstract class VehicleSkyfaller : Thing, IThingHolderTickable, IRoofColla
 
   public override Vector3 DrawPos => launchProtocolDrawPos;
 
-  protected Vector3 RootPos => vehicle.TrueCenter(Position, base.DrawPos.y);
+  protected Vector3 RootPos => Ext_Vehicles.TrueCenter(Position, Rotation, vehicle.VehicleDef.size, base.DrawPos.y);
 
   public ThingWithComps Thing => vehicle;
 

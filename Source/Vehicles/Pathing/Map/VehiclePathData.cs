@@ -5,6 +5,7 @@ using CoreLib.Collections;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
+using static Vehicles.VehiclePathingSystem;
 
 namespace Vehicles;
 
@@ -15,7 +16,7 @@ public class PathDataContainer
   private readonly IPathingManager manager;
   private readonly List<VehicleDef> vehicleDefs;
 
-  private readonly PathData[] pathDatas;
+  private readonly VehiclePathData[] pathDatas;
 
   private readonly Ref<VehicleDef> buildingFor = new();
 
@@ -23,7 +24,7 @@ public class PathDataContainer
   {
     this.manager = manager;
     this.vehicleDefs = vehicleDefs;
-    pathDatas = new PathData[vehicleDefs.Count];
+    pathDatas = new VehiclePathData[vehicleDefs.Count];
   }
 
   public PathData this[int index] => pathDatas[index];
@@ -56,13 +57,13 @@ public class PathDataContainer
     }
   }
 
-  private PathData CreatePathData(IPathGridCalculator calculator, VehicleDef vehicleDef,
+  private VehiclePathData CreatePathData(IPathGridCalculator calculator, VehicleDef vehicleDef,
     [CanBeNull] IPathFinder<PathSettings> pathFinder)
   {
-    PathData pathData;
+    VehiclePathData pathData;
     using (new ScopedReferenceRollback<VehicleDef>(buildingFor, vehicleDef))
     {
-      pathData = new PathData(manager, vehicleDef)
+      pathData = new VehiclePathData(manager, vehicleDef)
       {
         VehiclePathFinder = pathFinder as VehiclePathFinder,
         // TODO - may need refactor later, pathfinder isn't necessarily the only grid that needs synchronizing
