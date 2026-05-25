@@ -171,6 +171,11 @@ public class VehicleProperties
 
 	public IEnumerable<string> ConfigErrors(VehicleDef vehicleDef)
 	{
+    if (vehicleDef.race.canFishForFood && !vehicleDef.properties.canFish)
+    {
+      yield return
+        "`canFishForFood` does not apply to vehicles. Use `canFish` underneath `properties` instead.";
+    }
 		yield break;
 	}
 

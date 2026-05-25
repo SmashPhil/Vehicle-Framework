@@ -136,4 +136,10 @@
 		<reportString>Escorting TargetA.</reportString>
 		<casualInterruptible>false</casualInterruptible>
 	</JobDef>
+
+	<JobDef>
+		<defName>VF_JoinVehicleLord</defName>
+		<driverClass>Vehicles.JobDriver_JoinVehicleLord</driverClass>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
 </Defs>

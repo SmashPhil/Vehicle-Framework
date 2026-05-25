@@ -41,9 +41,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
 	public Vector3 position;
 
-	private Material material;
-
-	[Obsolete("This constructor is requierd for Xml Deserialization, use AerialVehicleInFlight::Create instead")]
+  [UsedWithReflection]
 	public AerialVehicleInFlight()
 	{
 		innerContainer = new ThingOwner<VehiclePawn>(this, false, LookMode.Reference);
@@ -108,14 +106,14 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 	{
 		get
 		{
-			if (!material)
+			if (!field)
 			{
 				string texPath = VehicleTex.CachedTextureIconPaths.TryGetValue(
 					vehicle.VehicleDef, VehicleTex.DefaultVehicleIconTexPath);
-				material = MaterialPool.MatFrom(texPath, ShaderDatabase.WorldOverlayTransparentLit, Faction.Color,
+        field = MaterialPool.MatFrom(texPath, ShaderDatabase.WorldOverlayTransparentLit, Faction.Color,
 					WorldMaterials.WorldObjectRenderQueue);
 			}
-			return material;
+			return field;
 		}
 	}
 

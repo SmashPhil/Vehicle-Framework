@@ -15,7 +15,7 @@ public static class WorldHelper
 {
   private static readonly List<Thing> InventoryItems = [];
 
-  private static readonly BFS<PlanetTile> WorldTileBfs = new();
+  private static readonly BreadthFirstSearch<PlanetTile> WorldTileBfs = new();
   private static readonly Dictionary<PlanetTile, float> TileWeights = [];
   private static readonly List<PlanetTile> CandidateTiles = [];
 

@@ -463,6 +463,12 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
     PathFinderManager?.Dispose();
   }
 
+  // TODO 1.6.2144 - Referenced by VehicleMapFramework
+  [Obsolete("This reference has been moved to PathData.", error: true)]
+  private void GeneratePathData()
+  {
+  }
+
   [Flags]
   public enum GridSelection
   {

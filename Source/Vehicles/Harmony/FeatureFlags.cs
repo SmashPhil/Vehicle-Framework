@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using JetBrains.Annotations;
-using SmashTools.Xml;
 using Verse;
 
 namespace Vehicles.Config;
-
-#pragma warning disable CS8793, CS0649
 
 internal class FeatureFlags
 {

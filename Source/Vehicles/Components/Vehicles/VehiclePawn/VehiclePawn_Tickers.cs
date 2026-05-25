@@ -179,12 +179,9 @@ public partial class VehiclePawn
 			//animator?.AnimationTick();
 			vehiclePather.PatherTick();
 			stances.StanceTrackerTick();
-			if (Drafted || fishing || CompVehicleTurrets is { Deploying: true })
+			if (Drafted || fishingTracker is { IsFishing: true } || CompVehicleTurrets is { Deploying: true })
 			{
 				jobs.JobTrackerTick();
-
-				if (vehiclePather.Moving)
-					fishing = false;
 			}
 			TickExplosives();
 		}

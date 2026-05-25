@@ -39,7 +39,7 @@ namespace Vehicles
 			{
 				if(p is VehiclePawn)
 				{
-					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
+					p.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.WaitVehicle);
 				}
 				else if (!p.RaceProps.Animal && !p.IsColonist)
 				{

@@ -57,7 +57,7 @@ internal sealed class Test_WorldReachability
       }
 
       int totalCount = 0;
-      BFS<PlanetTile> bfs = new();
+      BreadthFirstSearch<PlanetTile> bfs = new();
       // Regions are homogenous
       foreach ((int id, List<int> tiles) in regions)
       {

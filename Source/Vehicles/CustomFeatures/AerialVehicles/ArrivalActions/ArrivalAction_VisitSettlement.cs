@@ -10,6 +10,7 @@ namespace Vehicles;
 [PublicAPI]
 public class ArrivalAction_VisitSettlement : ArrivalAction_LandToCaravan
 {
+  [UsedWithReflection]
   public ArrivalAction_VisitSettlement()
   {
   }

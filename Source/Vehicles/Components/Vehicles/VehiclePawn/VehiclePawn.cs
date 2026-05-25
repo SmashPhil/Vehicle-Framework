@@ -7,6 +7,7 @@ using SmashTools;
 using SmashTools.Animations;
 using SmashTools.Rendering;
 using UnityEngine;
+using Vehicles.Compatibility;
 using Vehicles.Rendering;
 using Verse;
 
@@ -172,6 +173,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
       RecacheMovementPermissions);
 
     vehiclePather.RegisterEvents();
+    fishingTracker?.RegisterEvents();
 
     if (!VehicleDef.events.NullOrEmpty())
     {
@@ -366,7 +368,15 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     Scribe_Deep.Look(ref patternToPaint, nameof(patternToPaint));
     Scribe_Values.Look(ref movementStatus, nameof(movementStatus), VehicleMovementStatus.Online);
     //Scribe_Values.Look(ref navigationCategory, nameof(navigationCategory), NavigationCategory.Opportunistic);
-    Scribe_Values.Look(ref fishing, nameof(fishing));
+
+    Scribe_Deep.Look(ref fishingTracker, nameof(fishingTracker), this);
+
+    // Back compatibility for vehicles given fishing support. During the initial rollout of fishing
+    // jobs this tracker will also be null
+    if (FishingCompatibility.EnabledFor(VehicleDef) && fishingTracker is null)
+    {
+      fishingTracker = new FishingTracker(this);
+    }
 
     Scribe_Collections.Look(ref cargoToLoad, nameof(cargoToLoad), lookMode: LookMode.Deep);
 
@@ -393,6 +403,8 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
         CompUpgradeTree?.ReloadUnlocks();
         UpdateDraftController();
       break;
+      case LoadSaveMode.Inactive or LoadSaveMode.ResolvingCrossRefs:
+        break;
     }
 
     if (!deactivatedComps.NullOrEmpty())

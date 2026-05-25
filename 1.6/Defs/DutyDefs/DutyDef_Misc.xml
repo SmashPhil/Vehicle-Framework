@@ -1,6 +1,28 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <Defs>
 	<DutyDef>
+		<defName>VF_WaitVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>VF_BoardVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyBasicNeeds</treeDef>
+				</li>
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
 		<defName>TravelOrWaitVehicle</defName>
 		<thinkNode Class="ThinkNode_Priority">
 			<subNodes>

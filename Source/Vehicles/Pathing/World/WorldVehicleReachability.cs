@@ -165,7 +165,7 @@ public class WorldVehicleReachability
 		[Profile]
 		public void GenerateRegions(CancellationToken token)
 		{
-			BFS<PlanetTile> floodfiller = new();
+			BreadthFirstSearch<PlanetTile> floodfiller = new();
 			int[] tilesToId = new int[Find.WorldGrid.TilesCount];
 			totalRegions = 1;
 

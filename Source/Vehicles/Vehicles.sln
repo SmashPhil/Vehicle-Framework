@@ -53,6 +53,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_CoreLib", "..\Test_Cor
 		{CBD9893C-47BE-405E-89F7-2342F47D26BC} = {CBD9893C-47BE-405E-89F7-2342F47D26BC}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools.Analyzer", "..\..\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj", "{D5BDD861-18FC-4F58-B62E-38A850197BE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -128,6 +130,14 @@ Global
 		{4C450CC0-CB07-43CF-B9FE-88BE285A55EC}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{4C450CC0-CB07-43CF-B9FE-88BE285A55EC}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{4C450CC0-CB07-43CF-B9FE-88BE285A55EC}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

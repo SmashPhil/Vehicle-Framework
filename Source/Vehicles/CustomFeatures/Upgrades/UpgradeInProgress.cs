@@ -1,68 +1,60 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using RimWorld;
+﻿using JetBrains.Annotations;
 using Verse;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class UpgradeInProgress : IExposable
 {
-	public class UpgradeInProgress : IExposable
-	{
-		private string nodeKey;
+  private string nodeKey;
 
-		[Unsaved]
-		public UpgradeNode node;
+  [Unsaved]
+  public UpgradeNode node;
 
-		private VehiclePawn vehicle;
+  private VehiclePawn vehicle;
+  private float workLeft;
+  private bool removal;
 
-		private float workLeft;
-		private bool removal = false;
+  [UsedWithReflection]
+  public UpgradeInProgress()
+  {
+  }
 
-		/// <summary>
-		/// For Xml Deserialization
-		/// </summary>
-		public UpgradeInProgress()
-		{
-		}
+  public UpgradeInProgress(VehiclePawn vehicle, UpgradeNode node, bool removal)
+  {
+    nodeKey = node.key;
 
-		public UpgradeInProgress(VehiclePawn vehicle, UpgradeNode node, bool removal)
-		{
-			nodeKey = node.key;
+    this.node = node;
+    this.vehicle = vehicle;
 
-			this.node = node;
-			this.vehicle = vehicle;
+    WorkLeft = node.work;
+    this.removal = removal;
+  }
 
-			WorkLeft = node.work;
-			this.removal = removal;
-		}
+  public bool Removal => removal;
 
-		public bool Removal => removal;
+  public float WorkLeft
+  {
+    get
+    {
+      return workLeft;
+    }
+    set
+    {
+      workLeft = value;
+    }
+  }
 
-		public float WorkLeft
-		{
-			get
-			{
-				return workLeft;
-			}
-			set
-			{
-				if (workLeft != value)
-				{
-					workLeft = value;
-				}
-			}
-		}
+  public void ExposeData()
+  {
+    Scribe_Values.Look(ref nodeKey, nameof(nodeKey));
+    Scribe_References.Look(ref vehicle, nameof(vehicle));
+    Scribe_Values.Look(ref workLeft, nameof(workLeft));
+    Scribe_Values.Look(ref removal, nameof(removal));
 
-		public void ExposeData()
-		{
-			Scribe_Values.Look(ref nodeKey, nameof(nodeKey));
-			Scribe_References.Look(ref vehicle, nameof(vehicle));
-			Scribe_Values.Look(ref workLeft, nameof(workLeft));
-
-			if (Scribe.mode == LoadSaveMode.PostLoadInit)
-			{
-				node = vehicle.GetComp<CompUpgradeTree>().Props.def.GetNode(nodeKey); //Must get comp the normal way since comps will not be cached at this time
-			}
-		}
-	}
+    if (Scribe.mode == LoadSaveMode.PostLoadInit)
+    {
+      // Must get comp the normal way since comps will not be cached at this time
+      node = vehicle.GetComp<CompUpgradeTree>().Props.def.GetNode(nodeKey);
+    }
+  }
 }

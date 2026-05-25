@@ -24,9 +24,7 @@ public class FlightNode : IExposable
 
   public WorldObject WorldObject { get; private set; }
 
-  /// <summary>
-  /// For Xml Deserialization only
-  /// </summary>
+  [UsedWithReflection]
   public FlightNode()
   {
   }

@@ -18,10 +18,7 @@ public class PatternData : IExposable
 
 	private string patternId = "Default";
 
-	/// <summary>
-	/// Needed for Xml Deserialization
-	/// </summary>
-	public PatternData()
+  public PatternData()
 	{
 	}
 

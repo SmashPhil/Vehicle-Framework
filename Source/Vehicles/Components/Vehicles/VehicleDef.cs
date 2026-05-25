@@ -379,9 +379,11 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 			yield return error;
 		}
 
-		if (drawerType != DrawerType.RealtimeOnly)
-			yield return
-				$"{drawerType} is not valid for vehicle rendering. <field>drawerType</type> must be DrawerType.RealtimeOnly";
+    if (drawerType != DrawerType.RealtimeOnly)
+    {
+      yield return
+        $"{drawerType} is not valid for vehicle rendering. <field>drawerType</type> must be DrawerType.RealtimeOnly";
+    }
 
 		foreach (string error in properties.ConfigErrors(this))
 		{

@@ -30,7 +30,7 @@ public class LordToil_PrepareCaravan_BoardVehicles : LordToil, IDebugLordMeeting
         continue;
 
       pawn.mindState.duty = pawn is VehiclePawn ?
-        new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle) :
+        new PawnDuty(DutyDefOf_Vehicles.WaitVehicle) :
         new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_BoardVehicle)
         {
           locomotion = LocomotionUrgency.Jog
@@ -50,9 +50,8 @@ public class LordToil_PrepareCaravan_BoardVehicles : LordToil, IDebugLordMeeting
         if (pawn.InVehicle())
           continue;
 
-        LordJob_FormAndSendVehicles lordJob = lord.LordJob as LordJob_FormAndSendVehicles;
-        Assert.IsNotNull(lordJob);
-        AssignedSeat assignedSeat = lordJob.GetVehicleAssigned(pawn);
+        LordJob_FormAndSendVehicles lordJob = (LordJob_FormAndSendVehicles)lord.LordJob;
+        AssignedSeat assignedSeat = lordJob.GetAssignedSeat(pawn);
         if (assignedSeat?.handler is null)
           continue;
 

@@ -1,4 +1,5 @@
-﻿using RimWorld;
+﻿using JetBrains.Annotations;
+using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
@@ -6,9 +7,7 @@ namespace Vehicles.World;
 
 public class ArrivalAction_AttackSettlement : ArrivalAction_LoadMap
 {
-  /// <summary>
-  /// Required for Xml deserialization
-  /// </summary>
+  [UsedWithReflection]
   public ArrivalAction_AttackSettlement()
   {
   }

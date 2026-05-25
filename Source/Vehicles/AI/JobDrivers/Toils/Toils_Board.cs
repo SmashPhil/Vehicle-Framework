@@ -16,9 +16,9 @@ internal class Toils_Board
     {
       VehiclePawn vehicle = toil.actor.jobs.curJob.GetTarget(TargetIndex.A).Thing as VehiclePawn;
       Assert.IsNotNull(vehicle);
-      if (pawn.GetLord()?.LordJob is LordJob_FormAndSendVehicles lordJob)
+      if (pawn.GetLord()?.LordJob is IVehicleAssigner assigner)
       {
-        AssignedSeat assignedSeat = lordJob.GetVehicleAssigned(pawn);
+        AssignedSeat assignedSeat = assigner.GetAssignedSeat(pawn);
         assignedSeat.Vehicle.TryAddPawn(pawn, assignedSeat.handler);
         return;
       }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
 using RimWorld;
 using SmashTools;
 using Verse;
@@ -16,9 +15,11 @@ public partial class VehiclePawn
 	public VehicleIgnitionController ignition;
 
 	public SharedJob sharedJob;
-	private bool fishing;
 
-	public bool IsFishing => fishing;
+  public FishingTracker fishingTracker;
+
+  [Obsolete("Use fishingTracker.IsFishing instead.")]
+  public bool IsFishing => fishingTracker.IsFishing;
 
 	public virtual bool DeconstructibleBy(Faction faction)
 	{

@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Config>
-  <stopOnFailure>false</stopOnFailure>
-
   <warningsAllowed>
+    <!-- Intermittent vanilla bug -->
     <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
-    <li>Releasing render texture that is set to be RenderTexture.active!</li>
+    <!-- GenStep_BaseRuins fails to find valid location on small maps, but fails safely -->
+    <li>did not find any valid rects to generate ruins in for bounds</li>
   </warningsAllowed>
 
-  <map>
-    <size>100</size>
-  </map>
+  <errorsAllowed>
+    <li>^Faction .+? contains ideo .+? which was removed!$</li>
+    <!-- Error coming from VMF steam version -->
+    <li>Not enough squares to get to radius 80\. Max is 79\.81228$</li>
+  </errorsAllowed>
 </Config>

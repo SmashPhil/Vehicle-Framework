@@ -51,6 +51,9 @@ public static class JobDefOf_Vehicles
 
   public static JobDef EscortVehicle;
 
+  [DefAlias("VF_JoinVehicleLord")]
+  public static JobDef JoinVehicleLord;
+
   // Raiders
   public static JobDef SabotageVehicle;
 }

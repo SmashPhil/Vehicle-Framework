@@ -139,4 +139,18 @@
 			<li>Manipulation</li>
 		</requiredCapacities>
 	</WorkGiverDef>
+	
+	<WorkGiverDef FeatureFlag="Fishing">
+		<defName>FishWithVehicle</defName>
+		<label>fish</label>
+		<giverClass>Vehicles.WorkGiver_FishWithVehicle</giverClass>
+		<workType>Fishing</workType>
+		<verb>fish</verb>
+		<gerund>fishing</gerund>
+		<tagToGive>Fieldwork</tagToGive>
+		<priorityInType>55</priorityInType>
+		<requiredCapacities>
+			<li>Manipulation</li>
+		</requiredCapacities>
+	</WorkGiverDef>
 </Defs>

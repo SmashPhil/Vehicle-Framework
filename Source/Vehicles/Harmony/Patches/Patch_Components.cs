@@ -2,6 +2,7 @@
 using RimWorld;
 using SmashTools.Patching;
 using UnityEngine;
+using Vehicles.Compatibility;
 using Verse;
 
 namespace Vehicles;
@@ -79,6 +80,11 @@ internal class Patch_Components : IPatchCategory
 			vehicle.vehicleAI = new VehicleAI(vehicle);
 			vehicle.statHandler = new VehicleStatHandler(vehicle);
 			vehicle.sharedJob = new SharedJob();
+
+      if (FishingCompatibility.EnabledFor(vehicle.VehicleDef))
+      {
+        vehicle.fishingTracker = new FishingTracker(vehicle);
+      }
 
 			if (!VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicle.VehicleDef.defName,
 				out PatternData defaultPatternData))

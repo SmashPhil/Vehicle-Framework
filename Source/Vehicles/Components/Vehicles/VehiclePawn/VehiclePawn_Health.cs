@@ -35,24 +35,13 @@ public partial class VehiclePawn
 
   public CellRect Hitbox { get; private set; }
 
+  [Obsolete("Use fishingTracker instead.")]
   public bool CanFish
   {
     get
     {
-      // TODO Fishing - I can't decide if autonomous fishing is a good idea or not.  This seems like it would be
-      // incredibly broken for food gathering.
-      //if ((MovementPermissions & VehiclePermissions.Autonomous) != 0)
-      //	return true;
-
-      foreach (VehicleRoleHandler handler in handlers)
-      {
-        foreach (Pawn pawn in handler.thingOwner)
-        {
-          if (pawn.skills?.GetSkill(SkillDefOf.Animals) is { TotallyDisabled: false })
-            return true;
-        }
-      }
-      return false;
+      // Old functionality was only checking for workers onboard
+      return fishingTracker?.HasWorkers ?? false;
     }
   }
 

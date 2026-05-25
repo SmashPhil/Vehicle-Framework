@@ -5,7 +5,6 @@ using System.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 using CoreLib;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
@@ -282,7 +281,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
     if (dest is { HasThing: true, ThingDestroyed: true })
     {
-      Log.Error(vehicle + " pathing to destroyed thing " + dest.Thing);
+      Log.Error($"{vehicle} pathing to destroyed thing {dest.Thing}");
       PatherFailed();
       return;
     }

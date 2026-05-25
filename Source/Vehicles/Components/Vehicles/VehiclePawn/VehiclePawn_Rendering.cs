@@ -49,8 +49,6 @@ public partial class VehiclePawn
 
   private bool crashLanded;
 
-  private Command_Toggle fishToggle;
-
   public float CachedAngle { get; set; }
 
   public bool NorthSouthRotation => VehicleGraphic.EastDiagonalRotated &&
@@ -609,35 +607,9 @@ public partial class VehiclePawn
       yield return loadVehicle;
     }
 
-    if (FishingCompatibility.Active && SettingsCache.TryGetValue(VehicleDef,
-      typeof(VehicleProperties), nameof(VehicleProperties.canFish), VehicleDef.properties.canFish))
+    if (fishingTracker != null)
     {
-      fishToggle ??= new Command_Toggle
-      {
-        defaultLabel = "VF_StartFishing".Translate(),
-        defaultDesc = "VF_StartFishingDesc".Translate(),
-        icon = VehicleTex.FishingIcon,
-        isActive = () => fishing,
-        toggleAction = delegate
-        {
-          fishing = !fishing;
-          (fishing ? SoundDefOf.Checkbox_TurnedOn : SoundDefOf.Checkbox_TurnedOff).PlayOneShotOnCamera();
-        }
-      };
-      fishToggle.Disabled = false;
-      fishToggle.disabledReason = null;
-
-      if (!CanFish)
-      {
-        fishing = false;
-        fishToggle.Disable("VF_NoFishermenTooltip".Translate());
-      }
-      if (!FishingCompatibility.CanFishAt(this, Position))
-      {
-        fishing = false;
-        fishToggle.Disable("VF_NoFishAtSpot".Translate());
-      }
-      yield return fishToggle;
+      yield return fishingTracker.GetFishingGizmo();
     }
 
 #if LOAD_PAWN_GIZMO

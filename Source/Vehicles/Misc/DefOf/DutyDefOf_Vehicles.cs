@@ -1,41 +1,50 @@
-﻿using RimWorld;
+﻿using System;
+using RimWorld;
 using Verse.AI;
 
-namespace Vehicles
+namespace Vehicles;
+
+// ReSharper disable InconsistentNaming
+[DefOf]
+public static class DutyDefOf_Vehicles
 {
-	[DefOf]
-	public static class DutyDefOf_Vehicles
-	{
-		static DutyDefOf_Vehicles()
-		{
-			DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
-		}
+  static DutyDefOf_Vehicles()
+  {
+    DefOfHelper.EnsureInitializedInCtor(typeof(DutyDefOf_Vehicles));
+  }
 
-		// Vehicle Caravans
-		public static DutyDef PrepareVehicleCaravan_BoardVehicle;
+  // General
+  [DefAlias("VF_WaitVehicle")]
+  public static DutyDef WaitVehicle;
 
-		public static DutyDef PrepareVehicleCaravan_GatherItems;
+  [DefAlias("VF_BoardVehicle")]
+  public static DutyDef BoardVehicle;
 
-		public static DutyDef PrepareVehicleCaravan_WaitVehicle;
+  // Vehicle Caravans
+  public static DutyDef PrepareVehicleCaravan_BoardVehicle;
 
-		public static DutyDef PrepareVehicleCaravan_GatherDownedPawns;
+  public static DutyDef PrepareVehicleCaravan_GatherItems;
 
-		public static DutyDef PrepareVehicleCaravan_SendSlavesToVehicle;
+  [Obsolete]
+  public static DutyDef PrepareVehicleCaravan_WaitVehicle;
 
-		public static DutyDef PrepareVehicleCaravan_RopeAnimalsToVehicle;
+  public static DutyDef PrepareVehicleCaravan_GatherDownedPawns;
 
-		public static DutyDef TravelOrWaitVehicle;
+  public static DutyDef PrepareVehicleCaravan_SendSlavesToVehicle;
 
-		public static DutyDef FollowVehicle;
+  public static DutyDef PrepareVehicleCaravan_RopeAnimalsToVehicle;
 
-		// Vehicle NPC AI
-		public static DutyDef VF_RangedAggressive;
+  public static DutyDef TravelOrWaitVehicle;
 
-		public static DutyDef VF_RangedSupport;
+  public static DutyDef FollowVehicle;
 
-		/* Vehicle NPC AI */
-		public static DutyDef VF_ArmoredAssault;
+  // Vehicle NPC AI
+  public static DutyDef VF_RangedAggressive;
 
-		public static DutyDef VF_EscortVehicle;
-	}
+  public static DutyDef VF_RangedSupport;
+
+  /* Vehicle NPC AI */
+  public static DutyDef VF_ArmoredAssault;
+
+  public static DutyDef VF_EscortVehicle;
 }

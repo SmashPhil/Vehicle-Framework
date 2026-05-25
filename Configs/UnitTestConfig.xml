@@ -12,6 +12,11 @@
     <li>did not find any valid rects to generate ruins in for bounds</li>
   </warningsAllowed>
 
+  <errorsAllowed>
+    <!-- Intermittent vanilla bug -->
+    <li>^Faction .+? contains ideo .+? which was removed!$</li>
+  </errorsAllowed>
+
   <preTestActions>
     <li>Vehicles.TestActions.RefocusMap</li>
   </preTestActions>

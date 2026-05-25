@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -11,7 +12,7 @@ using Verse.AI.Group;
 
 namespace Vehicles;
 
-public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan
+public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan, IVehicleAssigner
 {
 	private static readonly AccessTools.FieldRef<LordJob_FormAndSendCaravan, bool>
 		CaravanSentFieldRef;
@@ -55,10 +56,8 @@ public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan
 			AccessTools.FieldRefAccess<bool>(typeof(LordJob_FormAndSendCaravan), "caravanSent");
 	}
 
-	/// <summary>
-	/// Strictly for Xml Deserialization which requires a public default constructor.
-	/// </summary>
-	public LordJob_FormAndSendVehicles()
+  [UsedWithReflection]
+  public LordJob_FormAndSendVehicles()
 	{
 	}
 
@@ -148,7 +147,7 @@ public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan
 		lord.GotoToil(Board.source);
 	}
 
-	public AssignedSeat GetVehicleAssigned(Pawn pawn)
+	public AssignedSeat GetAssignedSeat(Pawn pawn)
 	{
 		return vehicleAssigned.TryGetValue(pawn);
 	}

@@ -1,14 +1,11 @@
-﻿using RimWorld;
+﻿using JetBrains.Annotations;
 using RimWorld.Planet;
-using Verse;
 
 namespace Vehicles.World;
 
 public class ArrivalAction_LandToCaravan : VehicleArrivalAction
 {
-  /// <summary>
-  /// Required for Xml deserialization
-  /// </summary>
+  [UsedWithReflection]
   public ArrivalAction_LandToCaravan()
   {
   }

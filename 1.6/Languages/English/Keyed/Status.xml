@@ -7,6 +7,8 @@
   <VF_FormingCaravanStatus_Leaving_Vehicles>Leaving.</VF_FormingCaravanStatus_Leaving_Vehicles>
   <VF_FormingCaravanStatus_Leaving_Vehicles_Pause>Leaving. (waiting)</VF_FormingCaravanStatus_Leaving_Vehicles_Pause>
   
+  <VF_FishingInVehicle>Fishing from {0}.</VF_FishingInVehicle>
+  
   <VF_draftLabel>Start Engine</VF_draftLabel>
   <VF_healthLabel_Healthy>Operational</VF_healthLabel_Healthy>
   <VF_healthLabel_Injured>Needs Repairs</VF_healthLabel_Injured>

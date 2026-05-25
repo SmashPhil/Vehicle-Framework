@@ -1,14 +1,12 @@
 <assembly name="Assembly-CSharp">
 	<member name="T:RimWorld.DefOf">
-		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor(JetBrains.Annotations.ImplicitUseTargetFlags)">
-			<argument>3</argument>
-		</attribute>
+		<attribute ctor="M:JetBrains.Annotations.AssignedFromXml.#ctor"/>
 	</member>
 	<member name="T:LudeonTK.DebugActionAttribute">
-		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor(JetBrains.Annotations.ImplicitUseTargetFlags)"/>
+		<attribute ctor="M:JetBrains.Annotations.UsedWithReflection.#ctor"/>
 	</member>
 	<member name="T:Verse.StaticConstructorOnStartup">
-		<attribute ctor="M:JetBrains.Annotations.MeansImplicitUseAttribute.#ctor" />
+		<attribute ctor="M:JetBrains.Annotations.UsedWithReflection.#ctor"/>
 	</member>
   <member name="M:Verse.GenList.NullOrEmpty``1(System.Collections.Generic.IList{``0})">
     <attribute ctor="M:JetBrains.Annotations.ContractAnnotationAttribute.#ctor(System.String)">

@@ -44,7 +44,7 @@ namespace Vehicles
 				}
 				else if (pawn is VehiclePawn)
 				{
-					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.PrepareVehicleCaravan_WaitVehicle);
+					pawn.mindState.duty = new PawnDuty(DutyDefOf_Vehicles.WaitVehicle);
 				}
 				else
 				{

@@ -1,11 +1,12 @@
-﻿using RimWorld;
-using UnityEngine.Assertions;
+﻿using JetBrains.Annotations;
+using RimWorld;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
 namespace Vehicles;
 
+[UsedWithReflection]
 public class JobGiver_BoardVehicle : ThinkNode_JobGiver
 {
   private const float FollowRadius = 5;
@@ -15,9 +16,9 @@ public class JobGiver_BoardVehicle : ThinkNode_JobGiver
     if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Moving))
       return null;
 
-    if (pawn.GetLord().LordJob is LordJob_FormAndSendVehicles lordJob)
+    if (pawn.GetLord().LordJob is IVehicleAssigner assigner)
     {
-      AssignedSeat assignedSeat = lordJob.GetVehicleAssigned(pawn);
+      AssignedSeat assignedSeat = assigner.GetAssignedSeat(pawn);
       if (assignedSeat?.Vehicle is null)
         return null;
 

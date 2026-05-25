@@ -46,10 +46,9 @@ public abstract class LaunchProtocol : IExposable
 		LongEventHandler.ExecuteWhenFinished(delegate { shadowPropertyBlock = new MaterialPropertyBlock(); });
 	}
 
-	/// <summary>
-	/// Include only for XML initialization
-	/// </summary>
-	public LaunchProtocol()
+  // ReSharper disable once PublicConstructorInAbstractClass
+  [UsedWithReflection]
+  public LaunchProtocol()
 	{
 	}
 

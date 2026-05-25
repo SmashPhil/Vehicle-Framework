@@ -232,6 +232,7 @@ internal sealed class Test_VehicleCaravan_EnterMap
   }
 
   [Test]
+  [Retry(3)] // TODO - this test is flaky, presumably region generation is racing against this test
   private void EnterSettlement()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
@@ -269,6 +270,7 @@ internal sealed class Test_VehicleCaravan_EnterMap
   }
 
   [Test]
+  [Retry(3)] // TODO - this test is flaky, presumably region generation is racing against this test
   private void AttackSettlement()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings

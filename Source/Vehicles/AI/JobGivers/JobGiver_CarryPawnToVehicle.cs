@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using Verse;
 using Verse.AI;
@@ -6,6 +7,7 @@ using Verse.AI.Group;
 
 namespace Vehicles;
 
+[UsedWithReflection]
 public class JobGiver_CarryPawnToVehicle : ThinkNode_JobGiver
 {
   protected override Job TryGiveJob(Pawn pawn)
@@ -19,7 +21,7 @@ public class JobGiver_CarryPawnToVehicle : ThinkNode_JobGiver
     if (FindDownedPawn(pawn) is not { } downedPawn)
       return null;
 
-    AssignedSeat assignedSeat = lordJob.GetVehicleAssigned(downedPawn);
+    AssignedSeat assignedSeat = lordJob.GetAssignedSeat(downedPawn);
     if (assignedSeat is null)
     {
       VehicleRoleHandler handler = FindAvailableVehicle(downedPawn);
