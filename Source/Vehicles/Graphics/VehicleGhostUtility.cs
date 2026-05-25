@@ -53,14 +53,7 @@ public static class VehicleGhostUtility
       thing: vehicle, baseRot: baseRot, baseAngle: baseAngle);
   }
 
-  // Public method signatures have been changed. Please add a stub if necessary
-  // Vehicle Map Framework patches will be affected, so I'll make it that absorbs the changes if the PR is accepted
-  // public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
-  //   Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null)
-  // {
-  //   DrawGhostOverlays(center, rot, vehicleDef, baseGraphic, ghostCol, drawAltitude, thing, null);
-  // }
-  
+  // TODO 1.7 - Compact method signature with struct param
   public static void DrawGhostOverlays(IntVec3 center, Rot8 rot, VehicleDef vehicleDef,
     Graphic baseGraphic, Color ghostCol, AltitudeLayer drawAltitude, Thing thing = null, Rot8? baseRot = null, float baseAngle = 0f)
   {
@@ -98,7 +91,7 @@ public static class VehicleGhostUtility
       turret.ResolveGraphics(vehicleDef, true);
       graphic = turret.Graphic;
 
-      GraphicData graphicData = new GraphicData();
+      GraphicData graphicData = new();
       graphicData.CopyFrom(graphic.data);
       graphicData.drawOffsetWest =
         graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West
@@ -127,7 +120,7 @@ public static class VehicleGhostUtility
       if (!cachedGhostGraphics.TryGetValue(hash, out Graphic graphic))
       {
         graphic = graphicOverlay.Graphic;
-        GraphicData graphicData = new GraphicData();
+        GraphicData graphicData = new();
         graphicData.CopyFrom(graphic.data);
         graphicData.drawOffsetWest =
           graphic.data.drawOffsetWest; //TEMPORARY - Bug in vanilla copies South over to West

@@ -50,9 +50,11 @@
 			<Private>False</Private>
 		</Reference>
 	</ItemGroup>
+
 	<ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true'">
 		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
 	</ItemGroup>
+
 	<ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true'">
 		<Reference Include="System">
 			<HintPath>$(RefDir)\System.dll</HintPath>
@@ -98,6 +100,11 @@
 			<HintPath>$(RefDir)\UnityEngine.TextRenderingModule.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+
+    <ProjectReference
+      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
 	</ItemGroup>
 
 	<ItemGroup>

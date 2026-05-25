@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using Verse;
 
 namespace Vehicles.Config;
 
-internal class FeatureFlags
+public sealed class FeatureFlags
 {
   public const string Raiders = "Raiders";
   public const string Paratroopers = "Paratroopers";
@@ -17,32 +16,30 @@ internal class FeatureFlags
   public const string BurstLib = "BurstLib";
   public const string Acceleration = "Acceleration";
 
-  [UsedImplicitly]
-  public List<IFeatureFlag> features;
+  private readonly List<IFeatureFlag> features;
+
+  internal FeatureFlags(List<IFeatureFlag> flags)
+  {
+    features = flags;
+  }
 
   public static FeatureFlags Default => VehicleMod.mod.features;
 
   public static bool RaidersEnabled => Default.IsEnabled(Raiders) && VehicleMod.settings.debug.debugAllowRaiders;
 
-  public static bool ParatroopersEnabled => Default.IsEnabled(Paratroopers);
-
   public static bool FishingEnabled => Default.IsEnabled(Fishing);
 
-  public static FeatureFlags InitDefault()
+  internal static FeatureFlags InitDefault()
   {
-    FeatureFlags flags = new()
-    {
-      features =
-      [
-        Feature.Create(Raiders, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable),
-        Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
-      ]
-    };
+    FeatureFlags flags = new([
+      Feature.Create(Raiders, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
+    ]);
     return flags;
   }
 

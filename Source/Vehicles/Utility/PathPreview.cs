@@ -39,8 +39,10 @@ internal sealed class PathPreview : ITargeter
 
   public enum Type { PathFinding, BreachPath, BreachTarget };
 
-  private PathPreview(IPathFinder<PathSettings> pathFinder, Map map, Type type, in PathSettings settings)
+  private PathPreview(IPathingManager pathingManager, IPathFinder<PathSettings> pathFinder,
+    Map map, Type type, in PathSettings settings)
   {
+    this.pathingManager = pathingManager;
     this.pathFinder = pathFinder;
     this.vehicleDef = settings.vehicleDef;
     this.map = map;
@@ -56,7 +58,7 @@ internal sealed class PathPreview : ITargeter
   {
     Instance?.Stop();
     VehiclePathingSystem pathing = map.GetCachedMapComponent<VehiclePathingSystem>();
-    Instance = new PathPreview(pathing.PathFinder, map, type, settings)
+    Instance = new PathPreview(pathing, pathing.PathFinder, map, type, settings)
     {
       chunkSearch = new ChunkSearch(pathing, vehicleDef, cache: null)
     };

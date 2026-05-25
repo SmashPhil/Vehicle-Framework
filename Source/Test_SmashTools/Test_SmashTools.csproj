@@ -66,5 +66,10 @@
 			<HintPath>$(OutDir)\CoreLib.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
+
+    <ProjectReference
+      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
 	</ItemGroup>
 </Project>

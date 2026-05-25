@@ -6,6 +6,8 @@
     <li>Object with load ID Thing_[^\s]+ is referenced \(xml node name: .+?\) but is not deep-saved\. This will cause errors during loading\.</li>
     <!-- GenStep_BaseRuins fails to find valid location on small maps, but fails safely -->
     <li>did not find any valid rects to generate ruins in for bounds</li>
+    <!-- Warning spit out in batchmode -->
+    <li>Releasing render texture that is set to be RenderTexture.active!</li>
   </warningsAllowed>
 
   <errorsAllowed>

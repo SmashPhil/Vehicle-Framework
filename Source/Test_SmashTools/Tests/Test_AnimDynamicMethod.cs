@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using DevTools.Testing;
 using HarmonyLib;
+using JetBrains.Annotations;
 using SmashTools.Animations;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -152,8 +153,11 @@ internal sealed class Test_AnimDynamicMethod
 
   private class TestObject : IAnimator
   {
+    [UsedWithReflection]
     public int tInt;
+    [UsedWithReflection]
     public float tFloat;
+    [UsedWithReflection]
     public bool tBool;
 
     public Vector3 vector = new();
