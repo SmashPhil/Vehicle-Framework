@@ -27,6 +27,12 @@ public static class JobDefOf_Vehicles
 
   public static JobDef CarryPawnToVehicle;
 
+  [DefAlias("VF_CapturePawnToVehicle")]
+  public static JobDef CapturePawnToVehicle;
+
+  [DefAlias("VF_RescuePawnToVehicle")]
+  public static JobDef RescuePawnToVehicle;
+
   public static JobDef RepairVehicle;
 
   public static JobDef DisassembleVehicle;

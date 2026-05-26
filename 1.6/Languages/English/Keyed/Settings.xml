@@ -28,8 +28,6 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_DiagonalVehicleRendering>Allow Diagonal Rendering</VF_DiagonalVehicleRendering>
   <VF_DiagonalVehicleRenderingTooltip>Vehicles that support diagonal rendering will do so when set to diagonal rotations (NorthEast, SouthEast, SouthWest, NorthWest)</VF_DiagonalVehicleRenderingTooltip>
   
-  <VF_FullVehiclePathing>Full Vehicle Pathing</VF_FullVehiclePathing>
-  <VF_FullVehiclePathingTooltip>Use the entire hitbox of the vehicle when determining shortest path. Vehicle will still be constrained by its size.</VF_FullVehiclePathingTooltip>
   <VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>
   <VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
   <VF_UseHandBrakes>Use Hand Brakes</VF_UseHandBrakes>
@@ -66,7 +64,7 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_FishingSkill>Fishing Skill</VF_FishingSkill>
   <VF_FishingSkillTooltip>How much exp is given by fishing on a boat</VF_FishingSkillTooltip>
   
-  <VF_AerialVehicles>Air</VF_AerialVehicles>
+  <VF_AerialVehicles>Aerial</VF_AerialVehicles>
   <VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>
   <VF_DrawLandingGhostTooltip>Draws a transparent 'blueprint' where an aerial vehicle is landing.</VF_DrawLandingGhostTooltip>
   <VF_RocketsBurnRadius>Rockets Burn</VF_RocketsBurnRadius>

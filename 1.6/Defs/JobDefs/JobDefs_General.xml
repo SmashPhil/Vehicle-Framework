@@ -54,6 +54,27 @@
 		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
 		<reportString>Carrying TargetA to TargetB.</reportString>
 		<casualInterruptible>false</casualInterruptible>
+		<carryThingAfterJob>true</carryThingAfterJob>
+		<dropThingBeforeJob>false</dropThingBeforeJob>
+	</JobDef>
+
+	<JobDef>
+		<defName>VF_RescuePawnToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
+		<reportString>Carrying TargetA to TargetB.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+		<carryThingAfterJob>true</carryThingAfterJob>
+		<dropThingBeforeJob>false</dropThingBeforeJob>
+	</JobDef>
+
+	<JobDef>
+		<defName>VF_CapturePawnToVehicle</defName>
+		<driverClass>Vehicles.JobDriver_CarryPawnToVehicle</driverClass>
+		<reportString>Capturing TargetA in TargetB.</reportString>
+		<alwaysShowWeapon>true</alwaysShowWeapon>
+		<makeTargetPrisoner>true</makeTargetPrisoner>
+		<casualInterruptible>false</casualInterruptible>
+		<carryThingAfterJob>true</carryThingAfterJob>
 		<dropThingBeforeJob>false</dropThingBeforeJob>
 	</JobDef>
 	

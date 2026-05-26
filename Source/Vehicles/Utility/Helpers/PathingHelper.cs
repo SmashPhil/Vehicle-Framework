@@ -652,7 +652,8 @@ public static class PathingHelper
       }
     }
 
-    QuestUtility.SendQuestTargetSignals(vehicle.questTags, "LeftMap", vehicle.Named("SUBJECT"));
+    QuestUtility.SendQuestTargetSignals(vehicle.questTags, QuestUtility.QuestTargetSignalPart_LeftMap,
+      vehicle.Named(SignalArgsNames.Subject));
     Find.FactionManager.Notify_PawnLeftMap(vehicle);
     Find.IdeoManager.Notify_PawnLeftMap(vehicle);
   }
