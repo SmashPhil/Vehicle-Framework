@@ -11,7 +11,7 @@ namespace Vehicles;
 public class JobGiver_GotoTravelDestinationVehicle : JobGiver_GotoTravelDestination
 {
   // Amble = Raiders + Vehicle Formations
-  // Walk = 
+  // Walk =
   // Jog = Normal Speed
   // Sprint = Speed Away (escaping raiders?)
 
@@ -31,6 +31,10 @@ public class JobGiver_GotoTravelDestinationVehicle : JobGiver_GotoTravelDestinat
       }
       if (!vehicle.CanReachVehicle(cell, PathEndMode.Touch, PawnUtility.ResolveMaxDanger(pawn, maxDanger),
             TraverseMode(vehicle)))
+      {
+        return null;
+      }
+      if (!vehicle.Drafted)
       {
         return null;
       }
