@@ -931,8 +931,10 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 						projectileInstance.def.projectile.speed,
 					hitflags = def.attachProjectileFlag
 				};
-				if (!projectileInstance.TryAddComp(projectileProps))
-					Log.Error($"Failed to attach modified properties to {projectileDef}");
+        if (!projectileInstance.TryInsertComp(projectileProps, index: 0))
+        {
+          Log.Error($"Failed to attach modified properties to {projectileDef}");
+        }
 			}
 			projectileInstance.Launch(vehicle, launchPos, usedTarget, targetInfo, hitFlags,
 				equipment: vehicle, targetCoverDef: hitCover?.def);

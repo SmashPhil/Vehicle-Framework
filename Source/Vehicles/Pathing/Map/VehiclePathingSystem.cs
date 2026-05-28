@@ -52,7 +52,10 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
 
   internal GridDebouncer PathGridDebouncer { get; private set; }
 
-  public IPathFinder<PathSettings> PathFinder => IsFeatureEnabled(PathFinderV2) ? PathFinderManager : VehiclePathFinder;
+  public IPathFinder<PathSettings> PathFinder =>
+    IsFeatureEnabled(PathFinderV2) ?
+    PathFinderManager :
+    VehiclePathFinder;
 
   internal PathFinderManager PathFinderManager { get; private set; }
 

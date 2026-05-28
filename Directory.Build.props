@@ -1,49 +1,46 @@
 <Project>
-	<PropertyGroup>
-		<Configurations>Debug;Unstable;Release;ReleaseTesting;</Configurations>
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<FileVersion>1.6.0</FileVersion>
-		<AssemblyVersion>1.6.0</AssemblyVersion>
+  <PropertyGroup>
+    <Configurations>Debug;Unstable;Release;ReleaseTesting;</Configurations>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <FileVersion>1.6.0</FileVersion>
+    <AssemblyVersion>1.6.0</AssemblyVersion>
 
-		<GenerateDocumentationFile>False</GenerateDocumentationFile>
-		<Deterministic>true</Deterministic>
-		<OutputType>Library</OutputType>
-		<TargetFramework>net48</TargetFramework>
-		<LangVersion>preview</LangVersion>
-		<FileAlignment>512</FileAlignment>
-		<AppDesignerFolder>Properties</AppDesignerFolder>
+    <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <Deterministic>true</Deterministic>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>preview</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
 
-		<ErrorReport>prompt</ErrorReport>
-		<WarningLevel>4</WarningLevel>
-		<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-		<DebugType>embedded</DebugType>
-
-		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-		<UseLocalBurstLib>false</UseLocalBurstLib>
-	</PropertyGroup>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <DebugType>embedded</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <UseLocalBurstLib>false</UseLocalBurstLib>
+  </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-			<DebugSymbols>true</DebugSymbols>
-			<Optimize>false</Optimize>
-			<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
-		</PropertyGroup>
+    <Optimize>false</Optimize>
+    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
+  </PropertyGroup>
 
-		<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-			<DebugSymbols>true</DebugSymbols>
-			<Optimize>true</Optimize>
-			<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-		</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+  </PropertyGroup>
 
-		<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-			<DebugSymbols>true</DebugSymbols>
-			<Optimize>true</Optimize>
-			<DefineConstants>TRACE;RELEASE;</DefineConstants>
-		</PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;</DefineConstants>
+  </PropertyGroup>
 
-		<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-			<DebugSymbols>true</DebugSymbols>
-			<Optimize>true</Optimize>
-			<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
-		</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
+  </PropertyGroup>
 </Project>

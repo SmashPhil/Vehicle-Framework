@@ -28,7 +28,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
   private IPathCostGrid[] costGrids;
   private DirtyGrid[] dirtyGrids;
 
-  private PathFindImpl[] pathFinders;
+  private PathFinderImpl[] pathFinders;
 
   private int currentSource;
 
@@ -43,7 +43,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
     ModifierGrid = new ModifierGrid(map.Size.x * map.Size.z, this);
     HeuristicGrid = new RoadHeuristic(map, this);
     ScalarGrid = new PathGridScalar(new int2(map.Size.x, map.Size.z));
-    pathFinders = new PathFindImpl[DefDatabase<VehicleDef>.DefCount];
+    pathFinders = new PathFinderImpl[DefDatabase<VehicleDef>.DefCount];
   }
 
   internal ModifierGrid ModifierGrid { get; private set; }
@@ -77,7 +77,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
     foreach (VehicleDef vehicleDef in DefDatabase<VehicleDef>.AllDefsListForReading)
     {
       Assert.IsNull(pathFinders[vehicleDef.DefIndex]);
-      pathFinders[vehicleDef.DefIndex] = new PathFindImpl(this, vehicleDef);
+      pathFinders[vehicleDef.DefIndex] = new PathFinderImpl(this, vehicleDef);
     }
   }
 
@@ -166,7 +166,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
 
   void IPathGridSync.NotifyWritingToGrid()
   {
-    foreach (PathFindImpl pathFinder in pathFinders)
+    foreach (PathFinderImpl pathFinder in pathFinders)
     {
       pathFinder.NotifyWritingToGrid();
     }
@@ -290,7 +290,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
         dirtyGrid.Dispose();
       }
     }
-    foreach (PathFindImpl pathFinder in pathFinders)
+    foreach (PathFinderImpl pathFinder in pathFinders)
     {
       pathFinder.Dispose();
     }
@@ -322,14 +322,14 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
     }
   }
 
-  private class PathFindImpl : IDisposable
+  private class PathFinderImpl : IDisposable
   {
     private readonly VehicleDef vehicleDef;
     private readonly IPathingManager pathing;
 
     private readonly BurstPathFinder pathFinder;
 
-    public PathFindImpl(PathFinderManager manager, VehicleDef vehicleDef)
+    public PathFinderImpl(PathFinderManager manager, VehicleDef vehicleDef)
     {
       pathing = manager.pathing;
       this.vehicleDef = vehicleDef;

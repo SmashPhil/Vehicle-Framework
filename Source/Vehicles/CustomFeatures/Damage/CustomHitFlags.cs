@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using JetBrains.Annotations;
 using Verse;
-using RimWorld;
 
-namespace Vehicles
+namespace Vehicles;
+
+[AssignedFromXml]
+public class CustomHitFlags : Def
 {
-	public class CustomHitFlags : Def
-	{
-		public float minFillPercent = -1f;
-		public bool hitThroughPawns;
-	}
+  public float minFillPercent = -1f;
+  [Obsolete]
+  public bool hitThroughPawns;
 }

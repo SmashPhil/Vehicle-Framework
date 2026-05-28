@@ -805,6 +805,14 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
+  // Used by Vanilla Vehicles Expanded, can be removed after acceleration + handbrakes are finalized
+  // as a new feature in Vehicle Framework, and deprecated + removed in VVE.
+  [PublicAPI, UsedImplicitly]
+  public static float CostToMoveIntoCell(VehiclePawn vehicle, IntVec3 from, IntVec3 to)
+  {
+    return vehicle.vehiclePather.CostToMoveIntoCell(from, to);
+  }
+
   internal float CostToMoveIntoCell(IntVec3 from, IntVec3 to)
   {
     float tickCost = MoveTicksAt(vehicle, from, to);
