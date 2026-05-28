@@ -68,6 +68,14 @@ public class LordToil_PrepareCaravan_LeaveWithVehicles : LordToil, IDebugLordMee
   {
     if (Find.TickManager.TicksGame % 100 == 0)
     {
+      foreach (Pawn pawn in lord.ownedPawns)
+      {
+        if (pawn is not VehiclePawn vehicle)
+        {
+          continue;
+        }
+        vehicle.ignition.Drafted = true;
+      }
       ExitMapUtility.CheckArrived(lord, lord.ownedPawns, exitSpot, MemoTrigger.ExitMap,
         CheckPawnArrived, PawnCanMove);
     }
