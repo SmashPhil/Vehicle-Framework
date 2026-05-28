@@ -74,10 +74,10 @@ public class VehicleTweener
     {
       return vehicle.TrueCenter();
     }
-    float num = MovedPercent();
-    Rot8 nextRot = Rot8.DirectionFromCells(vehicle.Position, vehicle.vehiclePather.nextCell);
-    return Ext_Vehicles.TrueCenter(vehicle.vehiclePather.nextCell, nextRot, vehicle.VehicleDef) * num +
-      vehicle.TrueCenter() * (1f - num);
+    float movePercent = MovedPercent();
+    Vector3 trueCenter =
+      Ext_Vehicles.TrueCenter(vehicle.vehiclePather.nextCell, vehicle.Rotation, vehicle.VehicleDef);
+    return trueCenter * movePercent + vehicle.TrueCenter() * (1f - movePercent);
   }
 
   public float MovedPercent()
