@@ -991,7 +991,7 @@ public partial class VehiclePawn
       return;
     }
 
-    Job job = new(JobDefOf_Vehicles.Board, this);
+    Job job = JobMaker.MakeJob(JobDefOf_Vehicles.Board, this);
     GiveLoadJob(pawn, handler);
     pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
     if (!pawn.Spawned)

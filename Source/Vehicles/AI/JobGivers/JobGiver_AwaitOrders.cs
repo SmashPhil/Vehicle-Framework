@@ -24,11 +24,10 @@ namespace Vehicles
       {
         vehicle.vehiclePather.EngageBrakes();
       }
-      Job job = new(JobDefOf_Vehicles.IdleVehicle, vehicle)
-      {
-        checkOverrideOnExpire = true,
-        expiryInterval = overrideExpiryInterval > 0 ? overrideExpiryInterval : 180
-      };
+
+      Job job = JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, vehicle);
+      job.checkOverrideOnExpire = true;
+      job.expiryInterval = overrideExpiryInterval > 0 ? overrideExpiryInterval : 180;
       return job;
     }
   }

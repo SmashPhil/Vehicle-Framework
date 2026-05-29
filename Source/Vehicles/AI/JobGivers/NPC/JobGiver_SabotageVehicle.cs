@@ -41,7 +41,7 @@ public class JobGiver_SabotageVehicle : ThinkNode_JobGiver
           IntVec3 jobCell = vehicle.SurroundingCells.RandomOrFallback(cell =>
               resMgr.CanReserve<LocalTargetInfo, VehicleTargetReservation>(vehicle, pawn, cell),
             IntVec3.Invalid);
-          return new Job(JobDefOf_Vehicles.SabotageVehicle, vehicle, jobCell);
+          return JobMaker.MakeJob(JobDefOf_Vehicles.SabotageVehicle, vehicle, jobCell);
         }
       }
     }

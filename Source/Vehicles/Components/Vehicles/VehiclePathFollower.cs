@@ -413,10 +413,8 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       return true;
     }
 
-    Job job = new(JobDefOf.Goto, new LocalTargetInfo(data.destination))
-    {
-      exitMapOnArrival = data.exitMapOnArrival
-    };
+    Job job = JobMaker.MakeJob(JobDefOf.Goto, new LocalTargetInfo(data.destination));
+    job.exitMapOnArrival = data.exitMapOnArrival;
     if (vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc))
     {
       endRot = data.endRotation;

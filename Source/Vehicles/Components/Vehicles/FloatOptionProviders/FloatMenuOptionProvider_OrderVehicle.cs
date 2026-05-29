@@ -119,7 +119,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
 
     if (!IsFeatureEnabled(PathFinderV2))
     {
-      Job job = new(JobDefOf.Goto, gotoLoc);
+      Job job = JobMaker.MakeJob(JobDefOf.Goto, gotoLoc);
       vehicle.jobs.TryTakeOrderedJob(job, JobTag.Misc);
       return;
     }
