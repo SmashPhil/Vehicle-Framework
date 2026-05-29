@@ -32,6 +32,7 @@ public class JobGiver_BoardVehicle : ThinkNode_JobGiver
         job.expiryInterval = 140;
         job.checkOverrideOnExpire = true;
         job.followRadius = FollowRadius;
+        return job;
       }
       return JobMaker.MakeJob(JobDefOf_Vehicles.Board, assignedSeat.Vehicle);
     }
