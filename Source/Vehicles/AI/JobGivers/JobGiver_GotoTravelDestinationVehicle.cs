@@ -34,7 +34,10 @@ public class JobGiver_GotoTravelDestinationVehicle : JobGiver_GotoTravelDestinat
       {
         return null;
       }
-
+      if (!vehicle.Drafted)
+      {
+        return null;
+      }
       Job job = JobMaker.MakeJob(JobDefOf.Goto, cell);
       job.locomotionUrgency = LocomotionUrgency.Jog;
       job.expiryInterval = jobMaxDuration;
