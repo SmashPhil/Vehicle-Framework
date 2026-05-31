@@ -27,15 +27,14 @@ public class JobGiver_BoardVehicle : ThinkNode_JobGiver
         if (!JobDriver_FollowClose.FarEnoughAndPossibleToStartJob(pawn, assignedSeat.Vehicle,
           FollowRadius))
           return null;
-        return new Job(JobDefOf.FollowClose, assignedSeat.Vehicle)
-        {
-          lord = pawn.GetLord(),
-          expiryInterval = 140,
-          checkOverrideOnExpire = true,
-          followRadius = FollowRadius
-        };
+        Job job = JobMaker.MakeJob(JobDefOf.FollowClose, assignedSeat.Vehicle);
+        job.lord = pawn.GetLord();
+        job.expiryInterval = 140;
+        job.checkOverrideOnExpire = true;
+        job.followRadius = FollowRadius;
+        return job;
       }
-      return new Job(JobDefOf_Vehicles.Board, assignedSeat.Vehicle);
+      return JobMaker.MakeJob(JobDefOf_Vehicles.Board, assignedSeat.Vehicle);
     }
     return null;
   }

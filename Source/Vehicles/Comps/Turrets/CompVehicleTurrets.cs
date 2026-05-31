@@ -175,7 +175,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 			{
 				toggleAction = delegate
 				{
-					Vehicle.jobs.StartJob(new Job(JobDefOf_Vehicles.DeployVehicle, targetA: Vehicle),
+					Vehicle.jobs.StartJob(JobMaker.MakeJob(JobDefOf_Vehicles.DeployVehicle, targetA: Vehicle),
 						JobCondition.InterruptForced);
 					deployTicks = DeployTicks;
 				},
@@ -750,7 +750,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
 	private void ResolveAllTurretChildren()
 	{
-		// Break all connections, then reassign. Out of sequence parent and renderer registration can result in child 
+		// Break all connections, then reassign. Out of sequence parent and renderer registration can result in child
 		// turrets being registered as renderers, even though they're drawn by their parents.
 		foreach (VehicleTurret turret in turrets)
 		{
@@ -1077,7 +1077,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	}
 
 	/// <summary>
-	/// Used for serializing turret quotas of turrets that were removed, 
+	/// Used for serializing turret quotas of turrets that were removed,
 	/// such that they will reload the quota if re-added
 	/// </summary>
 	[UsedImplicitly]

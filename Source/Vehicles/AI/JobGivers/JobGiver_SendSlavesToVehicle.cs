@@ -18,11 +18,10 @@ namespace Vehicles
 				return null;
 			VehiclePawn vehicle = FindShipToDeposit(pawn, pawn2);
 			VehicleRoleHandler handler = vehicle.handlers.Find(x => x.role.HandlingTypes == HandlingType.None);
-			return new Job(JobDefOf.PrepareCaravan_GatherDownedPawns, pawn2)
-			{
-				count = 1
-			};
-		}
+      Job job = JobMaker.MakeJob(JobDefOf.PrepareCaravan_GatherDownedPawns, pawn2);
+      job.count = 1;
+      return job;
+    }
 
 		private Pawn FindPrisoner(Pawn pawn)
 		{

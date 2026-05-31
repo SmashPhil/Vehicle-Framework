@@ -22,9 +22,8 @@ public class JobGiver_PrepareVehicleCaravan_GatheringItems : ThinkNode_JobGiver
 		if (thing is null)
 			return null;
 
-		return new Job(JobDef, thing)
-		{
-			lord = lord
-		};
-	}
+    Job job = JobMaker.MakeJob(JobDef, thing);
+    job.lord = lord;
+    return job;
+  }
 }

@@ -483,7 +483,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
     yield return new FloatMenuOption("Refuel".Translate().ToString(),
       delegate
       {
-        Job job = new(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
+        Job job = JobMaker.MakeJob(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
         selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
       });
   }

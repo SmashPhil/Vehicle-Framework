@@ -38,11 +38,9 @@ public class JobGiver_GotoTravelDestinationVehicle : JobGiver_GotoTravelDestinat
       {
         return null;
       }
-      Job job = new(JobDefOf.Goto, cell)
-      {
-        locomotionUrgency = LocomotionUrgency.Jog,
-        expiryInterval = jobMaxDuration
-      };
+      Job job = JobMaker.MakeJob(JobDefOf.Goto, cell);
+      job.locomotionUrgency = LocomotionUrgency.Jog;
+      job.expiryInterval = jobMaxDuration;
       if (vehicle.InhabitedCellsProjected(cell, Rot8.Invalid)
           .Any(projCell => pawn.Map.exitMapGrid.IsExitCell(projCell)))
       {
