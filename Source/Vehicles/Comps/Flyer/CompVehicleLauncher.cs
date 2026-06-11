@@ -194,7 +194,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
       {
         disableReason = "VF_CannotLaunchImmobile".Translate(Vehicle.LabelShort);
       }
-      else if (Vehicle.Angle != 0)
+      else if (Vehicle.Angle != 0 && Vehicle.Spawned)
       {
         disableReason = "VF_CannotLaunchRotated".Translate(Vehicle.LabelShort);
       }
