@@ -19,8 +19,8 @@ public static class VehicleGui
 	private static readonly List<VehicleTurret> AllTurrets = [];
 	private static readonly List<GraphicOverlay> AllOverlays = [];
 
-	private static (int width, int height) GetOptimalTextureSize(Rect rect, in BlitRequest request,
-		float oversampleFactor)
+	internal static (int width, int height) GetOptimalTextureSize(Rect rect, in BlitRequest request,
+		float oversampleFactor = OversampleFactor)
 	{
 		(int width, int height) max = (0, 0);
 		foreach (IBlitTarget blitTarget in request.blitTargets)
@@ -133,21 +133,38 @@ public static class VehicleGui
 		if (Event.current.type != EventType.Repaint)
 			return;
 
-		TextureDrawer.Open();
 		try
 		{
-			foreach (IBlitTarget blitTarget in request.blitTargets)
+			// Compose the vehicle into a cached RenderTexture (rotation done via GL, never through
+			// GUI.matrix) and draw it flat, which renders correctly at any UIScale.
+			RenderTextureIdler idler =
+				VehicleGuiCache.GetOrBlit(rect, in request, iconScale, forceCentering);
+			if (idler != null && !idler.Disposed)
 			{
-				foreach (RenderData renderData in blitTarget.GetRenderData(rect, request))
-				{
-					TextureDrawer.Add(renderData);
-				}
+				GUI.DrawTexture(rect, idler.Read);
+				return;
 			}
-			TextureDrawer.Draw(rect, scale: iconScale, forceCentering: forceCentering);
+
+			// Fallback to the immediate path if the blit produced no usable texture.
+			TextureDrawer.Open();
+			try
+			{
+				foreach (IBlitTarget blitTarget in request.blitTargets)
+				{
+					foreach (RenderData renderData in blitTarget.GetRenderData(rect, request))
+					{
+						TextureDrawer.Add(renderData);
+					}
+				}
+				TextureDrawer.Draw(rect, scale: iconScale, forceCentering: forceCentering);
+			}
+			finally
+			{
+				TextureDrawer.Close();
+			}
 		}
 		finally
 		{
-			TextureDrawer.Close();
 			AllTurrets.Clear();
 			AllOverlays.Clear();
 		}
