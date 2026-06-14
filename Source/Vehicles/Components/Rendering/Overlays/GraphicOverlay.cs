@@ -10,6 +10,7 @@ using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Transform = SmashTools.Rendering.Transform;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles;
 
@@ -306,15 +307,14 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
   IEnumerable<RenderData> IBlitTarget.GetRenderData(Rect rect, BlitRequest request)
   {
     Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, this, request.rot);
-    Material material = null;
     Texture2D texture = Graphic.MatAt(request.rot).mainTexture as Texture2D;
-    if (Graphic.Shader.SupportsRGBMaskTex())
+
+    Material material = null;
+    if (graphic.Shader.SupportsRGBMaskTex())
     {
-      material = Graphic.MatAt(request.rot);
-      if (Graphic is Graphic_Rgb graphicRgb)
+      material = RGBMaterialPool.GetUi(this, request.rot);
+      if (graphic is Graphic_Rgb graphicRgb)
       {
-        if (Graphic.Shader.SupportsRGBMaskTex())
-          material = RGBMaterialPool.GetUi(this, request.rot);
         RGBMaterialPool.SetProperties(this, request.patternData, graphicRgb.TexAt, graphicRgb.MaskAt);
       }
       else
@@ -324,6 +324,13 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
           forRot => Graphic.MatAt(forRot).GetMaskTexture());
       }
     }
+    else if (IsFeatureEnabled(BlitTexturePortraits))
+    {
+      material = graphic is Graphic_Rgb graphicRgb ?
+        graphicRgb.MatAtFull(request.rot) :
+        graphic.MatAt(request.rot);
+    }
+
     // TODO - vehicleDef.PropertyBlock here would be incorrect for VehiclePawn instance rendering. Will
     // need a refactor later if and when I get to drawing all of this via material property blocks.
     RenderData overlayRenderData = new(overlayRect, texture, material, vehicleDef.PropertyBlock,

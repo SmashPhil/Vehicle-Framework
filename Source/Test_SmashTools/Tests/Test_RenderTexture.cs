@@ -5,7 +5,6 @@ using DevTools.Testing;
 using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Object = UnityEngine.Object;
 
 namespace SmashTools.Testing;
 
@@ -18,15 +17,11 @@ internal sealed class Test_RenderTexture
   {
     RenderTexture renderTexture = RenderTextureUtil.CreateRenderTexture(2, 2);
 
-    Expect.IsTrue(renderTexture.IsCreated(), "RenderTexture GPU Allocated");
-    Expect.AreEqual(renderTexture.depth, 0, "No Depth");
-    Expect.IsTrue(SystemInfo.SupportsRenderTextureFormat(renderTexture.format),
-      "RenderTexture Format Supported");
-    Expect.Throws<ArgumentException>(delegate { _ = RenderTextureUtil.CreateRenderTexture(0, 0); },
-      "Invalid RenderTexture Throws");
-
-    renderTexture.Release();
-    Object.Destroy(renderTexture);
+    Expect.IsTrue(renderTexture.IsCreated());
+    Expect.AreEqual(expected: 0, renderTexture.depth);
+    Expect.IsTrue(SystemInfo.SupportsRenderTextureFormat(renderTexture.format));
+    Expect.Throws<ArgumentException>(delegate { _ = RenderTextureUtil.CreateRenderTexture(0, 0); });
+    renderTexture.ReleaseAndDestroy();
   }
 
   [Test]
@@ -34,27 +29,32 @@ internal sealed class Test_RenderTexture
   {
     RenderTexture rtA = RenderTextureUtil.CreateRenderTexture(2, 2);
     RenderTexture rtB = RenderTextureUtil.CreateRenderTexture(2, 2);
-    RenderTextureBuffer buffer = new(rtA, rtB);
+    Assert.IsNotNull(rtA);
+    Assert.IsNotNull(rtB);
+    RenderTextureBuffered buffer = new(rtA, rtB);
 
     Assert.IsTrue(rtA.IsCreated());
     Assert.IsTrue(rtB.IsCreated());
 
-    Expect.ReferencesAreEqual(buffer.Read, rtA, "Read No Swap Before");
-    Expect.ReferencesAreEqual(buffer.Read, rtA, "Read No Swap After");
-    Expect.ReferencesAreEqual(buffer.GetWrite(), rtB, "GetWrite Swap and Return");
-    Expect.ReferencesAreEqual(buffer.Write, rtA, "Write Swapped");
-    Expect.ReferencesAreEqual(buffer.Read, rtB, "Read Swapped");
-    Expect.ReferencesAreNotEqual(buffer.Read, buffer.Write, "No Overwritten Assignment");
+    Expect.ReferencesAreEqual(rtA, buffer.Read);
+    Expect.ReferencesAreEqual(rtA, buffer.Read);
+    Expect.ReferencesAreEqual(rtB, buffer.GetWrite());
+    Expect.ReferencesAreEqual(rtA, buffer.Write);
+    Expect.ReferencesAreEqual(rtB, buffer.Read);
+    Expect.ReferencesAreNotEqual(buffer.Read, buffer.Write);
+
+    // Cause a swap by fetching writable texture
     _ = buffer.GetWrite();
-    Expect.ReferencesAreEqual(buffer.Read, rtA, "Swap 2 Reset Read");
-    Expect.ReferencesAreEqual(buffer.Write, rtB, "Swap 2 Reset Write");
+
+    Expect.ReferencesAreEqual(rtA, buffer.Read);
+    Expect.ReferencesAreEqual(rtB, buffer.Write);
 
     // Dispose will queue the texture object for destruction, but we still have 1 frame to verify
     // GPU allocations were released.
     buffer.Dispose();
 
-    Expect.AreEqual(buffer.Read.GetNativeDepthBufferPtr(), IntPtr.Zero, "Read GPU Memory Freed");
-    Expect.AreEqual(buffer.Write.GetNativeDepthBufferPtr(), IntPtr.Zero, "Write GPU Memory Freed");
+    Expect.AreEqual(expected: IntPtr.Zero, buffer.Read.GetNativeDepthBufferPtr());
+    Expect.AreEqual(expected: IntPtr.Zero, buffer.Write.GetNativeDepthBufferPtr());
 
     // Allow RenderTextures to be destroyed, then verify
     yield return new WaitForEndOfFrame();
@@ -68,32 +68,60 @@ internal sealed class Test_RenderTexture
   {
     const float ExpiryTime = 999; // seconds
 
+    RenderTexture renderTex = RenderTextureUtil.CreateRenderTexture(2, 2);
+    Assert.IsNotNull(renderTex);
+    Assert.IsTrue(renderTex.IsCreated());
+    RenderTextureIdler idler = new(renderTex, ExpiryTime);
+    Assert.AreEqual(renderTex, idler.RenderTex);
+
+    Expect.IsTrue(UnityThread.InUpdateQueue(idler.UpdateLoop));
+    
+    idler.SetTimeDirect(100);
+    bool continue100 = idler.UpdateLoop();
+    Expect.IsTrue(continue100);
+
+    idler.SetTimeDirect(9999);
+    bool continue9999 = idler.UpdateLoop();
+    Expect.IsFalse(continue9999);
+    UnityThread.RemoveUpdate(idler.UpdateLoop);
+
+    Expect.AreEqual(expected: IntPtr.Zero, renderTex.GetNativeDepthBufferPtr());
+
+    // Allow RenderTextures to be destroyed, then verify
+    yield return new WaitForEndOfFrame();
+
+    Expect.IsFalse(renderTex);
+  }
+
+  [Test]
+  private IEnumerator IdlerBuffered()
+  {
+    const float ExpiryTime = 999; // seconds
+
     RenderTexture rtA = RenderTextureUtil.CreateRenderTexture(2, 2);
     RenderTexture rtB = RenderTextureUtil.CreateRenderTexture(2, 2);
     Assert.IsNotNull(rtA);
     Assert.IsNotNull(rtB);
-    RenderTextureIdler idler = new(rtA, rtB, ExpiryTime);
+    Assert.IsTrue(rtA.IsCreated());
+    Assert.IsTrue(rtB.IsCreated());
+    RenderTextureIdlerBuffered idler = new(rtA, rtB, ExpiryTime);
 
-    Expect.IsTrue(UnityThread.InUpdateQueue(idler.UpdateLoop), "Idler Timer Started");
-    Expect.IsTrue(idler.Read.IsCreated(), "Read Allocated");
-    Expect.IsTrue(idler.Write.IsCreated(), "Write Allocated");
-    Expect.ReferencesAreNotEqual(idler.Read, idler.GetWrite(), "Read/Write NotEqual");
+    Expect.IsTrue(UnityThread.InUpdateQueue(idler.UpdateLoop));
+    Expect.ReferencesAreNotEqual(idler.Read, idler.GetWrite());
 
     idler.SetTimeDirect(100);
     bool continue100 = idler.UpdateLoop();
-    Expect.IsTrue(continue100, "UpdateLoop Continuing");
-    Expect.IsTrue(idler.Read.IsCreated(), "SetTimer 100 Read Retained");
-    Expect.IsTrue(idler.Write.IsCreated(), "SetTimer 100 Write Retained");
+    Expect.IsTrue(continue100);
+    Expect.IsTrue(idler.Read.IsCreated());
+    Expect.IsTrue(idler.Write.IsCreated());
 
     idler.SetTimeDirect(9999);
     bool continue9999 = idler.UpdateLoop();
-    Expect.IsFalse(continue9999, "UpdateLoop Stopping");
+    Expect.IsFalse(continue9999);
     UnityThread.RemoveUpdate(idler.UpdateLoop);
 
-    Expect.AreEqual(idler.Read.GetNativeDepthBufferPtr(), IntPtr.Zero,
-      "Idler Read GPU Memory Freed");
-    Expect.AreEqual(idler.Write.GetNativeDepthBufferPtr(), IntPtr.Zero,
-      "Idler Write GPU Memory Freed");
+    Expect.AreEqual(expected: IntPtr.Zero, idler.Read.GetNativeDepthBufferPtr());
+    Expect.AreEqual(expected: IntPtr.Zero, idler.Write.GetNativeDepthBufferPtr());
 
     // Allow RenderTextures to be destroyed, then verify
     yield return new WaitForEndOfFrame();

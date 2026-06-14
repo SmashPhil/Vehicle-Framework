@@ -5,11 +5,11 @@ using Verse;
 
 namespace Vehicles.Rendering;
 
-[UsedImplicitly(ImplicitUseTargetFlags.Members)]
+[PublicAPI]
 public struct BlitRequest
 {
 	// Required for drawing graphics tied to vehicle defs that aren't necessarily defined in their
-	// own defs (eg. VehicleTurrets and the upgrade tree)
+	// own defs (e.g. VehicleTurrets and the upgrade tree)
 	public readonly VehicleDef vehicleDef;
 
 	public Rot8 rot;

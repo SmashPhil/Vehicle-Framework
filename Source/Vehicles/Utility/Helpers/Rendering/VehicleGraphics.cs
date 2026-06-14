@@ -63,6 +63,7 @@ public static class VehicleGraphics
     return new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.")]
   public static void DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null,
     List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null,
     List<string> excludeTurrets = null)
@@ -71,6 +72,7 @@ public static class VehicleGraphics
       extraTurrets: extraTurrets, excludeTurrets: excludeTurrets);
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.")]
   public static void DrawVehicle(Rect rect, VehiclePawn vehicle, PatternData patternData,
     Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null,
     List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
@@ -144,8 +146,8 @@ public static class VehicleGraphics
     }
     catch (Exception ex)
     {
-      SmashLog.Error(
-        $"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex}");
+      Log.Error(
+        $"Exception thrown while trying to draw Graphics VehicleDef=\"{vehicleDef?.defName ?? "Null"}\"\nException={ex}");
     }
     finally
     {
@@ -299,18 +301,31 @@ public static class VehicleGraphics
     VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay, PatternData pattern)
   {
     Rect overlayRect = OverlayRect(rect, vehicleDef, graphicOverlay, rot);
-    Graphic_Rgb graphic = graphicOverlay.data.graphicData.Graphic;
-    Texture2D texture = graphic.TexAt(rot);
-    Material material = null;
+    Graphic graphic = graphicOverlay.Graphic;
 
-    if (graphic.Shader.SupportsRGBMaskTex())
+    Material material = null;
+    Texture2D texture;
+    if (graphic is Graphic_Rgb graphicRgb)
     {
+      texture = graphicRgb.TexAt(rot);
       material = RGBMaterialPool.Get(graphicOverlay, rot);
-      RGBMaterialPool.SetProperties(graphicOverlay, pattern, graphic.TexAt, graphic.MaskAt);
+      if (graphicRgb.Shader.SupportsRGBMaskTex())
+      {
+        RGBMaterialPool.SetProperties(graphicOverlay, pattern, graphicRgb.TexAt, graphicRgb.MaskAt);
+      }
     }
     else if (graphic.Shader.SupportsMaskTex())
     {
       material = graphic.MatAt(rot);
+      texture = material.mainTexture as Texture2D;
+    }
+    else
+    {
+      // Drawing UI through VehicleGraphics is deprecated, but in order to not spam errors on non-rgb overlays
+      // we need some kind of fallback.
+      Log.WarningOnce("Unable to fetch texture for graphic overlay drawing. Using slower fallback.",
+        Gen.HashCombineInt(vehicleDef.GetHashCode(), "VehicleGraphics.OverlayProperties".GetHashCode()));
+      texture = ContentFinder<Texture2D>.Get(graphicOverlay.data.graphicData.texPath);
     }
     return new RenderData(overlayRect, texture, material,
       graphicOverlay.data.graphicData.DrawOffsetFull(rot).y, graphicOverlay.data.rotation);

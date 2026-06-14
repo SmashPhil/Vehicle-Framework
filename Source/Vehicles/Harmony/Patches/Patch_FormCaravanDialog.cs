@@ -277,8 +277,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
           break;
       }
     }
-    vehiclesTransfer =
-      new TransferableVehicleWidget("VF_Vehicles".Translate(), vehicles, pawns, tile: tile);
+
+    vehiclesTransfer?.Dispose();
+    vehiclesTransfer = new TransferableVehicleWidget("VF_Vehicles".Translate(), vehicles, pawns, tile: tile);
   }
 
   /// <summary>
@@ -409,6 +410,8 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   {
     if (!___choosingRoute)
     {
+      vehiclesTransfer?.Dispose();
+      vehiclesTransfer = null;
       CaravanFormation.formation = null;
       ___tabsList.Clear();
       selectedTab = TabVehicles;
@@ -597,7 +600,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         __instance?.DrawAutoSelectCheckbox(transferablesRect, ref anythingChanged);
         break;
       case TabVehicles: // Vehicles Tab
-        vehiclesTransfer.OnGUI(transferablesRect /*, out anythingChanged*/);
+        // Dialog can end up drawing for 1 more event type after PostClose where this widget is disposed
+        // and set to null, so this null check is necessary.
+        vehiclesTransfer?.OnGUI(transferablesRect /*, out anythingChanged*/);
         break;
       default:
         Log.Error(

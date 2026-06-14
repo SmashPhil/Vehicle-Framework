@@ -21,6 +21,7 @@ public class Dialog_VehiclePainter : Window
 
   private const int GridDimensionColumns = 2;
   private const int GridDimensionRows = 2;
+  private const int SampleCount = GridDimensionColumns * GridDimensionRows;
 
   private int pageNumber;
   private int pageCount;
@@ -53,6 +54,9 @@ public class Dialog_VehiclePainter : Window
 
   private bool showPatterns = true;
   private bool mouseOver;
+
+  private VehiclePortrait portrait;
+  private readonly VehiclePortrait[] samplePortraits = new VehiclePortrait[SampleCount];
 
   public delegate void SaveColor(Color r, Color g, Color b, PatternDef pattern,
     Vector2 displacement, float tiles);
@@ -88,7 +92,18 @@ public class Dialog_VehiclePainter : Window
 
   public override Vector2 InitialSize => new(900f, 540f);
 
-  private Rot8 DisplayRotation { get; set; }
+  private Rot8 DisplayRotation
+  {
+    get;
+    set
+    {
+      if (field == value)
+        return;
+
+      field = value;
+      MarkAllDirty();
+    }
+  }
 
   private Color CurrentColor
   {
@@ -101,6 +116,15 @@ public class Dialog_VehiclePainter : Window
         ColorIndex.Three => currentColorThree,
         _ => throw new NotImplementedException(nameof(ColorIndex))
       };
+    }
+  }
+
+  private void MarkAllDirty()
+  {
+    portrait.MarkDirty();
+    foreach (VehiclePortrait samplePortrait in samplePortraits)
+    {
+      samplePortrait.MarkDirty();
     }
   }
 
@@ -134,13 +158,12 @@ public class Dialog_VehiclePainter : Window
   /// </summary>
   public static void OpenColorPicker(VehicleDef vehicleDef, SaveColor onSave)
   {
+    PatternData data = new(
+      VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, vehicleDef.graphicData));
     Dialog_VehiclePainter colorPickerDialog = new(vehicleDef)
     {
       OnSave = onSave,
-      PatternData =
-        new PatternData(
-          VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName,
-            vehicleDef.graphicData)),
+      PatternData = data
     };
     Open(colorPickerDialog);
   }
@@ -153,6 +176,12 @@ public class Dialog_VehiclePainter : Window
 
   private void Init()
   {
+    portrait = new VehiclePortrait();
+    for (int i = 0; i < samplePortraits.Length; i++)
+    {
+      samplePortraits[i] = new VehiclePortrait();
+    }
+
     additionalTiling = PatternData.tiles;
     displacementX = PatternData.displacement.x;
     displacementY = PatternData.displacement.y;
@@ -187,15 +216,19 @@ public class Dialog_VehiclePainter : Window
   /// <param name="index">Color index.</param>
   private void SetColor(Color color, ColorIndex index)
   {
+    bool colorChange;
     switch (index)
     {
       case ColorIndex.One:
+        colorChange = currentColorOne != color;
         currentColorOne = color;
         break;
       case ColorIndex.Two:
+        colorChange = currentColorTwo != color;
         currentColorTwo = color;
         break;
       case ColorIndex.Three:
+        colorChange = currentColorThree != color;
         currentColorThree = color;
         break;
       default:
@@ -207,6 +240,11 @@ public class Dialog_VehiclePainter : Window
     // also be toggling between colors so this needs updating regardless of whether the color set
     // differs from the assigned color index, as the HSV values still need to be reassigned.
     UpdateHSV(CurrentColor);
+
+    if (colorChange)
+    {
+      MarkAllDirty();
+    }
   }
 
   private void SetColors(Color color1, Color color2, Color color3)
@@ -250,6 +288,8 @@ public class Dialog_VehiclePainter : Window
       PatternData.patternDef :
       AvailablePatterns.FirstOrDefault();
     selectedPattern ??= PatternDefOf.Default;
+
+    MarkAllDirty();
   }
 
   public override void PostClose()
@@ -260,12 +300,19 @@ public class Dialog_VehiclePainter : Window
     // which results in null textures being accessed. We can just skip this last frame.
     IsClosing = true;
     CursorSettings.Reset();
+
+    portrait.Dispose();
+    foreach (VehiclePortrait samplePortrait in samplePortraits)
+    {
+      samplePortrait.Dispose();
+    }
   }
 
   public override void PostOpen()
   {
     base.PostOpen();
     hex = ColorToHex(CurrentColor);
+    MarkAllDirty();
   }
 
   public override void DoWindowContents(Rect inRect)
@@ -329,15 +376,16 @@ public class Dialog_VehiclePainter : Window
     BlitRequest request = Vehicle != null ?
       BlitRequest.For(Vehicle) with { patternData = patternData, rot = DisplayRotation } :
       BlitRequest.For(VehicleDef) with { patternData = patternData, rot = DisplayRotation };
-    VehicleGui.DrawVehicleOnGUI(displayRect, request);
+    portrait.Draw(displayRect, in request);
 
     // Disable displacement sliders
     if (!selectedPattern.properties.dynamicTiling)
+    {
       GUIState.Disable();
+    }
 
-    Rect sliderRect =
-      new(0f, inRect.height - SliderHeight * 3, ButtonWidth * 3, SliderHeight);
-    UIElements.SliderLabeled(sliderRect, "VF_PatternZoom".Translate(),
+    Rect sliderRect = new(0f, inRect.height - SliderHeight * 3, ButtonWidth * 3, SliderHeight);
+    bool sliderChanged = UIElements.SliderLabeled(sliderRect, "VF_PatternZoom".Translate(),
       "VF_PatternZoomTooltip".Translate(), string.Empty, ref additionalTiling, 0.01f, 2);
     Rect positionLeftBox = new(sliderRect)
     {
@@ -349,10 +397,15 @@ public class Dialog_VehiclePainter : Window
       x = positionLeftBox.x + (sliderRect.width / 2) * 1.05f
     };
 
-    UIElements.SliderLabeled(positionLeftBox, "VF_PatternDisplacementX".Translate(),
+    sliderChanged |= UIElements.SliderLabeled(positionLeftBox, "VF_PatternDisplacementX".Translate(),
       "VF_PatternDisplacementXTooltip".Translate(), string.Empty, ref displacementX, -1.5f, 1.5f);
-    UIElements.SliderLabeled(positionRightBox, "VF_PatternDisplacementY".Translate(),
+    sliderChanged |= UIElements.SliderLabeled(positionRightBox, "VF_PatternDisplacementY".Translate(),
       "VF_PatternDisplacementYTooltip".Translate(), string.Empty, ref displacementY, -1.5f, 1.5f);
+
+    if (sliderChanged)
+    {
+      MarkAllDirty();
+    }
 
     // Re-enable after displacement sliders
     GUIState.Enable();
@@ -393,6 +446,7 @@ public class Dialog_VehiclePainter : Window
           !Mathf.Approximately(displacementY, prevDisplacementY))
         {
           SoundDefOf.DragSlider.PlayOneShotOnCamera();
+          MarkAllDirty();
         }
       }
       if (Input.GetMouseButtonUp(0))
@@ -438,28 +492,33 @@ public class Dialog_VehiclePainter : Window
     {
       showPatterns = !showPatterns;
       RecacheAvailablePatterns();
+      MarkAllDirty();
       SoundDefOf.Click.PlayOneShotOnCamera();
     }
 
     switchRect.x = toggleRect.xMax;
     UIElements.DrawLabel(switchRect, skinsLabel, Color.clear, skinLabelColor, GameFont.Small);
 
-    Rect outRect = paintRect with
+    Rect paginationRect = new(paintRect.x + 5, paintRect.y + paintRect.height - ButtonHeight,
+      paintRect.width - 10, PaginationBarHeight);
+    if (pageCount > 1 && UIHelper.DrawPagination(paginationRect, ref pageNumber, pageCount))
+    {
+      // pagination button was clicked, cycling next page requires redraw
+      MarkAllDirty();
+    }
+
+    Rect outRect = (paintRect with
     {
       yMin = switchRect.yMax,
       yMax = paintRect.yMax - PaginationBarHeight
-    };
-    outRect = outRect.ContractedBy(10f);
+    }).ContractedBy(10f);
+    DrawSamplePortraits(outRect, !mouseOverToggle);
+  }
+
+  private void DrawSamplePortraits(Rect outRect, bool doTipRegion)
+  {
     float gridSize = Mathf.Min(outRect.width, outRect.height) / GridDimensionColumns;
-
-    Rect displayRect = new(0, 0, gridSize, gridSize);
-    Rect paginationRect = new(paintRect.x + 5, paintRect.y + paintRect.height - ButtonHeight,
-      paintRect.width - 10, PaginationBarHeight);
-    if (pageCount > 1)
-    {
-      UIHelper.DrawPagination(paginationRect, ref pageNumber, pageCount);
-    }
-
+    Rect portraitRect = new(0, 0, gridSize, gridSize);
     Rect showcaseRect = outRect.ToSquare();
     int startingIndex = (pageNumber - 1) * (GridDimensionColumns * GridDimensionRows);
     int maxIndex =
@@ -468,12 +527,15 @@ public class Dialog_VehiclePainter : Window
     for (int i = startingIndex; i < maxIndex; i++, iteration++)
     {
       PatternDef pattern = AvailablePatterns[i];
-      displayRect.x = showcaseRect.x + iteration % GridDimensionColumns * gridSize;
-      displayRect.y = showcaseRect.y +
-        Mathf.FloorToInt(iteration / (float)GridDimensionRows) * gridSize;
+      portraitRect.x = showcaseRect.x + iteration % GridDimensionColumns * gridSize;
+      portraitRect.y = showcaseRect.y +
+                      Mathf.FloorToInt(iteration / (float)GridDimensionRows) * gridSize;
+
       PatternData patternData = new(currentColorOne, currentColorTwo,
         currentColorThree, pattern, new Vector2(displacementX, displacementY),
         additionalTiling);
+
+      int sampleIdx = i - startingIndex;
       BlitRequest request = Vehicle != null ?
         BlitRequest.For(Vehicle) with { patternData = patternData, rot = DisplayRotation } :
         BlitRequest.For(VehicleDef) with
@@ -481,15 +543,15 @@ public class Dialog_VehiclePainter : Window
           patternData = patternData,
           rot = DisplayRotation
         };
-      VehicleGui.DrawVehicleOnGUI(displayRect, request);
-      
-      Rect imageRect = new(displayRect.x, displayRect.y, gridSize, gridSize);
-      if (!mouseOverToggle)
+      samplePortraits[sampleIdx].Draw(portraitRect, in request);
+
+      if (doTipRegion)
       {
-        TooltipHandler.TipRegion(imageRect, pattern.LabelCap);
-        if (Widgets.ButtonInvisible(imageRect))
+        TooltipHandler.TipRegion(portraitRect, pattern.LabelCap);
+        if (Widgets.ButtonInvisible(portraitRect))
         {
           selectedPattern = pattern;
+          MarkAllDirty();
           SoundDefOf.Click.PlayOneShotOnCamera();
         }
       }

@@ -11,10 +11,12 @@ public sealed class FeatureFlags
   public const string TradeableVehicles = "TradeableVehicles";
   public const string VehicleCaravanProps = "VehicleCaravanProps";
   public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
+  public const string Acceleration = "Acceleration";
 
   public const string PathFinderV2 = "PathFinderV2";
   public const string BurstLib = "BurstLib";
-  public const string Acceleration = "Acceleration";
+
+  public const string BlitTexturePortraits = "BlitTexturePortraits";
 
   private readonly List<IFeatureFlag> features;
 
@@ -36,9 +38,10 @@ public sealed class FeatureFlags
       Feature.Create(Paratroopers, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
+      Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable),
-      Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable)
+      Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable)
     ]);
     return flags;
   }
