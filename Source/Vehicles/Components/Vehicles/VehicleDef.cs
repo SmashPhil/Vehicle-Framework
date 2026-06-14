@@ -716,7 +716,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		Assert.IsNotNull(graphicVehicle);
 
 		Texture2D mainTex = graphicVehicle.TexAt(request.rot);
-		Material material = null;
+		Material material;
 		Shader shader = graphicVehicle.Shader;
 		if (!shader && RGBMaterialPool.TargetCached(this))
 		{
@@ -729,7 +729,11 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 		{
 			RGBMaterialPool.SetProperties(this, request.patternData, graphicVehicle.TexAt,
 				graphicVehicle.MaskAt);
-			material = RGBMaterialPool.GetUi(this, request.rot);
+			material = RGBMaterialPool.Get(this, request.rot);
+		}
+		else
+		{
+			material = graphicVehicle.MatAt(request.rot);
 		}
 		yield return new RenderData(adjustedRect, mainTex, material, PropertyBlock, 0, 0);
 	}

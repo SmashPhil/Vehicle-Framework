@@ -306,15 +306,13 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
   IEnumerable<RenderData> IBlitTarget.GetRenderData(Rect rect, BlitRequest request)
   {
     Rect overlayRect = VehicleGraphics.OverlayRect(rect, vehicleDef, this, request.rot);
-    Material material = null;
-    Texture2D texture = Graphic.MatAt(request.rot).mainTexture as Texture2D;
+    Material material = Graphic.MatAt(request.rot);
+    Texture2D texture = material.mainTexture as Texture2D;
     if (Graphic.Shader.SupportsRGBMaskTex())
     {
-      material = Graphic.MatAt(request.rot);
       if (Graphic is Graphic_Rgb graphicRgb)
       {
-        if (Graphic.Shader.SupportsRGBMaskTex())
-          material = RGBMaterialPool.GetUi(this, request.rot);
+        material = RGBMaterialPool.Get(this, request.rot);
         RGBMaterialPool.SetProperties(this, request.patternData, graphicRgb.TexAt, graphicRgb.MaskAt);
       }
       else

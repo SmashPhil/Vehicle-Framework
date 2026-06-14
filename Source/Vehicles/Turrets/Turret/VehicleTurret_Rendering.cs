@@ -595,9 +595,7 @@ public partial class VehicleTurret
 			BlitRequest request, Graphic_Turret graphic)
 		{
 			bool canMask = graphic.Shader.SupportsRGBMaskTex();
-			Material material = canMask ? graphic.MatAtFull(Rot8.North) : null;
-			if (graphic.Shader.SupportsRGBMaskTex())
-				material = RGBMaterialPool.GetUi(target, request.rot);
+			Material material = canMask ? RGBMaterialPool.Get(target, Rot8.North) : graphic.MatAtFull(Rot8.North);
 			if (canMask && turret.def.matchParentColor)
 			{
 				RGBMaterialPool.SetProperties(target, request.patternData, graphic.TexAt, graphic.MaskAt);
