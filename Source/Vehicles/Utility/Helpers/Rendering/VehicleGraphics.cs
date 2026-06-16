@@ -57,8 +57,18 @@ public static class VehicleGraphics
       scaledWidth = rectSize.y;
       scaledHeight = rectSize.x;
     }
-    float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
-    float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
+
+    Vector2 original = new(vehicleDef.graphicData.drawSize.x, vehicleDef.graphicData.drawSize.y);
+    Vector2 scaleFactors = new(rectSize.x / original.x, rectSize.y / original.y);
+    if (elongated)
+    {
+      (scaleFactors.x, scaleFactors.y) = (scaleFactors.y, scaleFactors.x);
+    }
+    Vector3 drawOffset = vehicleDef.graphicData.DrawOffsetForRot(rot);
+    Vector2 baseOffset = new(drawOffset.x * scaleFactors.x, -drawOffset.z * scaleFactors.y);
+
+    float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width) + baseOffset.x;
+    float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height) + baseOffset.y;
 
     return new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
   }
@@ -429,9 +439,16 @@ public static class VehicleGraphics
     Vector2 size = vehicleDef.ScaleDrawRatio(data, rot, rect.size, iconScale: scale);
     Vector2 basePos = rect.position + (rect.size - size) * 0.5f;
     Vector3 off = data.DrawOffsetForRot(rot);
-    Vector2 original = new(data.drawSize.x, data.drawSize.y);
-    Vector2 scaleFactors = new(size.x / original.x, size.y / original.y);
-    Vector2 pos = basePos + new Vector2(off.x * scaleFactors.x, -off.z * scaleFactors.y);
+    bool elongated = rot.IsHorizontal || rot.IsDiagonal;
+    Vector2 drawSize = data.drawSize;
+    if (elongated)
+    {
+      (drawSize.x, drawSize.y) = (drawSize.y, drawSize.x);
+    }
+    Vector2 scaleFactors = new(size.x / drawSize.x, size.y / drawSize.y);
+    Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rot);
+    Vector2 proportionOffset = new(displayOffset.x * rect.width, displayOffset.y * rect.height);
+    Vector2 pos = basePos + proportionOffset + new Vector2(off.x * scaleFactors.x, -off.z * scaleFactors.y);
     return new Rect(pos, size);
   }
 
