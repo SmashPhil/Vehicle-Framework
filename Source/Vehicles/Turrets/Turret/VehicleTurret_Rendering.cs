@@ -553,13 +553,20 @@ public partial class VehicleTurret
   {
     GraphicDataRGB data = def.graphicData;
     Vector2 size = vehicleDef.ScaleDrawRatio(data, rot, rect.size, iconScale: iconScale);
-    Vector2 original = new(data.drawSize.x, data.drawSize.y);
-    Vector2 scaleFactors = new(size.x / original.x, size.y / original.y);
+    bool elongated = rot.IsHorizontal || rot.IsDiagonal;
+    Vector2 drawSize = data.drawSize;
+    if (elongated)
+    {
+      (drawSize.x, drawSize.y) = (drawSize.y, drawSize.x);
+    }
+    Vector2 scaleFactors = new(size.x / drawSize.x, size.y / drawSize.y);
     Vector3 drawOffset = data.DrawOffsetForRot(rot);
     Vector2 baseOffset = new(drawOffset.x * scaleFactors.x, -drawOffset.z * scaleFactors.y);
     Vector2 propOffset = renderProperties.OffsetFor(rot);
     Vector2 offset = new(propOffset.x * scaleFactors.x, -propOffset.y * scaleFactors.y);
-    Vector2 position = rect.center + baseOffset + offset;
+    Vector2 displayOffset = vehicleDef.drawProperties.DisplayOffsetForRot(rot);
+    Vector2 proportionOffset = new(displayOffset.x * rect.width, displayOffset.y * rect.height);
+    Vector2 position = rect.center + baseOffset + offset + proportionOffset;
     if (attachedTo != null)
     {
       Rect parentRect = attachedTo.ScaleUIRectFor(vehicleDef, rect, rot, iconScale);

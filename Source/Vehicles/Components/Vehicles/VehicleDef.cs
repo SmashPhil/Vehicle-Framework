@@ -91,7 +91,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
   /// <summary>
   /// Auto-generated <c>PawnKindDef</c> that has been assigned for this VehicleDef.
   /// </summary>
-  /// <remarks>If kindDef is set in VehicleDef, it will be overridden and the implied 
+  /// <remarks>If kindDef is set in VehicleDef, it will be overridden and the implied
   /// PawnKindDef will not be assigned.</remarks>
   public PawnKindDef kindDef;
 
@@ -719,8 +719,17 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
       scaledWidth = rectSize.y;
       scaledHeight = rectSize.x;
     }
-    float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width);
-    float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height);
+
+    Vector2 scaleFactors = new(rectSize.x / graphicData.drawSize.x, rectSize.y / graphicData.drawSize.y);
+    if (elongated)
+    {
+      (scaleFactors.x, scaleFactors.y) = (scaleFactors.y, scaleFactors.x);
+    }
+    Vector3 drawOffset = graphicData.DrawOffsetForRot(request.rot);
+    Vector2 baseOffset = new(drawOffset.x * scaleFactors.x, -drawOffset.z * scaleFactors.y);
+
+    float offsetX = (rect.width - scaledWidth) / 2 + (displayOffset.x * rect.width) + baseOffset.x;
+    float offsetY = (rect.height - scaledHeight) / 2 + (displayOffset.y * rect.height) + baseOffset.y;
 
     Rect adjustedRect = new(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
 
