@@ -20,7 +20,7 @@ public abstract class VehicleWorkGiver : WorkGiver_Scanner
     if (t.Faction != pawn.Faction || t is not VehiclePawn vehicle)
       return null;
 
-    if (!vehicle.vehiclePather.Moving || !CanBeWorkedOn(vehicle))
+    if (vehicle.vehiclePather.Moving || !CanBeWorkedOn(vehicle))
       return null;
 
     if (!pawn.CanReach(new LocalTargetInfo(t.Position), PathEndMode.Touch, Danger.Deadly))
