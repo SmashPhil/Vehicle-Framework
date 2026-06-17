@@ -331,10 +331,13 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
         graphic.MatAt(request.rot);
     }
 
+    bool flip = request.rot == Rot8.East && graphic.EastFlipped ||
+                request.rot == Rot8.West && graphic.WestFlipped;
+
     // TODO - vehicleDef.PropertyBlock here would be incorrect for VehiclePawn instance rendering. Will
     // need a refactor later if and when I get to drawing all of this via material property blocks.
     RenderData overlayRenderData = new(overlayRect, texture, material, vehicleDef.PropertyBlock,
-      data.graphicData.DrawOffsetFull(request.rot).y, data.rotation);
+      data.graphicData.DrawOffsetFull(request.rot).y, data.rotation, flip);
     yield return overlayRenderData;
   }
 

@@ -730,6 +730,9 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
         graphicVehicle.MaskAt);
       material = RGBMaterialPool.GetUi(this, request.rot);
     }
-    yield return new RenderData(adjustedRect, mainTex, material, PropertyBlock, 0, 0);
+
+    bool flip = request.rot == Rot8.East && graphicVehicle.EastFlipped ||
+                request.rot == Rot8.West && graphicVehicle.WestFlipped;
+    yield return new RenderData(adjustedRect, mainTex, material, PropertyBlock, 0, 0, flip);
   }
 }
