@@ -6,6 +6,7 @@ public enum FlashGridType
 	CoverGrid,
 	GasGrid,
 	PositionManager,
+  EntityGrid,
 	ThingGrid,
 	ListerThings,
   ModifierGrid

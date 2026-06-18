@@ -107,6 +107,20 @@ public static class FlashMapGrid
     }
   }
 
+  public static void FlashEntityGrid(this Map map)
+  {
+    foreach (IntVec3 cell in Find.CameraDriver.CurrentViewRect)
+    {
+      if (!cell.InBounds(map))
+        continue;
+
+      int index = CellIndicesUtility.CellToIndex(cell, map.Size.x);
+      var positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
+      int id = positionMgr.ThingIdGrid[index];
+      map.debugDrawer.FlashCell(cell, colorPct: id >= 0 ? 0.5f : 0, duration: 1);
+    }
+  }
+
   public static void FlashModifierGrid(this Map map)
   {
     VehiclePathingSystem pathing = map.GetCachedMapComponent<VehiclePathingSystem>();

@@ -713,23 +713,24 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
     if ((pathSearch & PathSettings.GridSetting.BreachWalls) != 0)
     {
-      foreach (IntVec3 cell in vehicle.VehicleRect(nextCell, vehicle.FullRotation))
+      foreach (int2 pos in EntityRectAt(vehicle, nextCell, vehicle.FullRotation))
       {
-        if (vehicle.Map.edificeGrid[cell] is { } building)
-        {
-          float speed = IsFeatureEnabled(Acceleration)
-            ? controller.MoveSpeed
-            : vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed);
-          float damage = Mathf.Lerp(0, vehicle.GetStatValue(VehicleStatDefOf.Mass), speed / 20f);
-          vehicle.TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage * vehicle.BuildingCollisionRecoilMultiplier,
-            instigator: building));
-          building.TakeDamage(new DamageInfo(DamageDefOf.Blunt, amount: damage * vehicle.BuildingCollisionMultiplier,
-            instigator: vehicle));
+        IntVec3 cell = new(pos.x, 0, pos.y);
+        if (vehicle.Map.edificeGrid[cell] is not { } building)
+          continue;
 
-          if (!building.Destroyed)
-          {
-            PatherFailed();
-          }
+        float speed = IsFeatureEnabled(Acceleration)
+          ? controller.MoveSpeed
+          : vehicle.GetStatValue(VehicleStatDefOf.MoveSpeed);
+        float damage = Mathf.Lerp(0, vehicle.GetStatValue(VehicleStatDefOf.Mass), speed / 20f);
+        vehicle.TakeDamage(new DamageInfo(DamageDefOf.Blunt, damage * vehicle.BuildingCollisionRecoilMultiplier,
+          instigator: building));
+        building.TakeDamage(new DamageInfo(DamageDefOf.Blunt, amount: damage * vehicle.BuildingCollisionMultiplier,
+          instigator: vehicle));
+
+        if (!building.Destroyed)
+        {
+          PatherFailed();
         }
       }
     }
@@ -896,20 +897,20 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     RequestStatus = PathRequestStatus.Calculating;
     return pathFinder.RequestPath(start.ToPathNode(), end.ToPathNode(),
       PathSettings.For(vehicle) with
-    {
-      search = pathSearch,
-      rotation = rot
-    });
+      {
+        search = pathSearch,
+        rotation = rot
+      });
   }
 
   private VehiclePath FindPath(IntVec3 start, IntVec3 end, Rot8 rot)
   {
     Path path = pathFinder.FindPath(start.ToPathNode(), end.ToPathNode(),
       PathSettings.For(vehicle) with
-    {
-      search = pathSearch,
-      rotation = rot
-    });
+      {
+        search = pathSearch,
+        rotation = rot
+      });
     if (path is null || !path.IsValid)
     {
       PatherFailed();
@@ -937,7 +938,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     if (RequestStatus == PathRequestStatus.Calculating)
       return PathRequest.None;
 
-    if (!destination.IsValid || curPath is not { IsValid: true }|| curPath.NodesLeft == 0)
+    if (!destination.IsValid || curPath is not { IsValid: true } || curPath.NodesLeft == 0)
       return PathRequest.NeedNew;
 
     if (destination.HasThing && destination.Thing.Map != vehicle.Map)
@@ -986,16 +987,14 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
       // Should two vehicles be pathing into each other directly, first to stop will be given a
       // Wait request while the other will request a new path
-      CellRect vehicleRect = rot.IsDiagonal ? vehicle.MinRect(next) : vehicle.VehicleRect(next, rot);
-      foreach (IntVec3 cell in vehicleRect)
+      foreach (int2 cell in VehicleFootPrint(vehicle, next, rot))
       {
-        if (PathingHelper.AnyVehicleBlockingPathAt(cell, vehicle) is { } otherVehicle)
+        if (PathingHelper.AnyVehicleBlockingPathAt(new IntVec3(cell.x, 0, cell.y), vehicle) is { } otherVehicle)
         {
           if (otherVehicle.vehiclePather.Moving && !otherVehicle.vehiclePather.Waiting)
           {
             return PathRequest.Wait;
           }
-
           return PathRequest.NeedNew;
         }
       }
@@ -1012,11 +1011,9 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       Rot8 rot = curPath.NodesLeft >= 2
         ? Rot8.DirectionFromCells(curPath.Nodes[1], curPath.Nodes[0])
         : vehicle.FullRotation;
-      CellRect cellRect = rot.IsDiagonal
-        ? vehicle.MinRect(destination.Cell)
-        : vehicle.VehicleRect(destination.Cell, rot);
-      foreach (IntVec3 cell in cellRect)
+      foreach (int2 pos in EntityRectAt(vehicle, destination.Cell, rot))
       {
+        IntVec3 cell = new(pos.x, 0, pos.y);
         VehiclePawn otherVehicle = PathingHelper.AnyVehicleBlockingPathAt(cell, vehicle);
         if (otherVehicle is null || otherVehicle.vehiclePather.Moving || otherVehicle.vehiclePather.Waiting)
           continue;
@@ -1044,9 +1041,9 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       IntVec3 next = curPath.Peek(nodeIndex);
       Rot8 rot = Ext_Map.DirectionToCell(previous, next);
 
-      CellRect vehicleRect = vehicle.VehicleRect(next, rot).ExpandedBy(1);
-      foreach (IntVec3 cell in vehicleRect)
+      foreach (int2 pos in EntityRectAt(vehicle, next, rot))
       {
+        IntVec3 cell = new(pos.x, 0, pos.y);
         if (!cell.InBounds(vehicle.Map) || !CollisionCells.Add(cell)) continue;
 
         List<Thing> thingList = cell.GetThingList(vehicle.Map);
@@ -1076,6 +1073,19 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
   {
     curPath?.Dispose();
     promise?.Dispose();
+  }
+
+  private static EntityRect EntityRectAt(VehiclePawn vehicle, IntVec3 position, Rot8 rot)
+  {
+    IntVec2 size = vehicle.VehicleDef.Size;
+    return new EntityRect(position.x, position.z, size.x, size.z, new Orientation(rot.AsInt));
+  }
+
+  private static EntityRect VehicleFootPrint(VehiclePawn vehicle, IntVec3 position, Rot8 rot)
+  {
+    IntVec2 size = vehicle.VehicleDef.Size;
+    int minSize = Mathf.Min(size.x, size.x);
+    return new EntityRect(position.x, position.z, minSize, minSize, new Orientation(rot.AsInt));
   }
 
   internal enum PathingStatus

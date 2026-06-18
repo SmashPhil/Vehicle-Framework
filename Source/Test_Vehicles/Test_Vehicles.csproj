@@ -38,7 +38,7 @@
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(UseLocalBurstLib)' != 'true'">
-		<PackageReference Include="SmashTools.Burst" Version="1.2.3" GeneratePathProperty="true" />
+		<PackageReference Include="SmashTools.Burst" Version="1.2.4" GeneratePathProperty="true" />
 	</ItemGroup>
 	<ItemGroup Condition="'$(UseLocalBurstLib)' == 'true'">
 		<Reference Include="SmashTools.Burst">
@@ -72,9 +72,6 @@
 			<Private>False</Private>
 		</Reference>
 
-    <ProjectReference
-      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
 	</ItemGroup>
 </Project>

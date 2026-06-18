@@ -13,7 +13,7 @@ namespace Vehicles;
 /// so that further actions are executed synchronously rather than getting enqueued to
 /// the dedicated thread.
 /// </summary>
-public class ThreadDisabler : IDisposable
+public sealed class ThreadDisabler : IDisposable
 {
   // True = thread was active before disabling
   private readonly Dictionary<Map, bool> threadStates = [];
@@ -47,6 +47,5 @@ public class ThreadDisabler : IDisposable
         mapping.dedicatedThread.Unsuspend();
       }
     }
-    GC.SuppressFinalize(this);
   }
 }

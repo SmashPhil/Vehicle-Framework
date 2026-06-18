@@ -60,6 +60,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
 	public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
+  // TODO 1.7 - Change to ReadOnlyList from CoreLib
 	public IReadOnlyList<VehicleTurret> Turrets => turrets;
 
 	public IEnumerable<(ThingDef thingDef, float count)> Refunds

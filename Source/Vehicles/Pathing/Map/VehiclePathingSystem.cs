@@ -403,6 +403,9 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
       case FlashGridType.ThingGrid:
         map.FlashThingGrid();
         break;
+      case FlashGridType.EntityGrid:
+        map.FlashEntityGrid();
+        break;
       case FlashGridType.ListerThings:
         map.FlashListerThings();
         break;

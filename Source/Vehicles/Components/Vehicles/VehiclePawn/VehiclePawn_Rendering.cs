@@ -97,6 +97,7 @@ public partial class VehiclePawn
     {
       if (Mathf.Approximately(value, angle))
         return;
+
       // Flips across axis (negative = NE & SW, positive = NW & SE)
       angle = Reverse ? -value : value;
     }
@@ -117,7 +118,7 @@ public partial class VehiclePawn
     {
       if (value == FullRotation)
         return;
-      Rotation = value;
+
       Angle = 0;
       if (value == Rot8.NorthEast || value == Rot8.SouthWest)
       {
@@ -127,6 +128,8 @@ public partial class VehiclePawn
       {
         Angle = 45;
       }
+
+      Rotation = value;
     }
   }
 

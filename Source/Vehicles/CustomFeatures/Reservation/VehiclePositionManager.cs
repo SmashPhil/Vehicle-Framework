@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using CoreLib;
 using JetBrains.Annotations;
-using LudeonTK;
 using SmashTools;
-using SmashTools.Burst;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
@@ -71,6 +70,7 @@ public class VehiclePositionManager : DetachedMapComponent
   /// <param name="cell">The cell to check.</param>
   /// <returns><see langword="true"/> if the cell is claimed; otherwise, <see langword="false"/>.</returns>
   /// <remarks>Safe to call concurrently from worker threads.</remarks>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public bool PositionClaimed(IntVec3 cell)
   {
     return ClaimedBy(cell) != null;
@@ -84,6 +84,7 @@ public class VehiclePositionManager : DetachedMapComponent
   /// The <see cref="Vehicles.VehiclePawn"/> that claims the cell; otherwise <see langword="null"/> if unclaimed.
   /// </returns>
   /// <remarks>Safe to call concurrently from worker threads.</remarks>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
   public VehiclePawn ClaimedBy(IntVec3 cell)
   {
     return occupiedCells.TryGetValue(cell);
@@ -98,9 +99,17 @@ public class VehiclePositionManager : DetachedMapComponent
   /// returns a default CellRect (empty).
   /// </returns>
   /// <remarks>Safe to call concurrently from worker threads.</remarks>
-  public EntityRect ClaimedBy(VehiclePawn vehicle)
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  public EntityRect ClaimedRect(VehiclePawn vehicle)
   {
     return occupiedRects.TryGetValue(vehicle);
+  }
+
+  [Obsolete("Use ClaimedRect instead.", error: true)]
+  public CellRect ClaimedBy(VehiclePawn vehicle)
+  {
+    EntityRect rect = occupiedRects.TryGetValue(vehicle);
+    return CellRect.CenteredOn(rect.position.ToIntVec3(), rect.size.ToIntVec2());
   }
 
   /// <summary>

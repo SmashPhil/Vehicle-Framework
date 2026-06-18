@@ -181,6 +181,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
   string ITweakFields.Category => defName;
 
+  // ReSharper disable once InconsistentNaming
   public bool CanDisableEMPSetting
   {
     get

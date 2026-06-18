@@ -528,22 +528,11 @@ public static class PathingHelper
 
   public static VehiclePawn AnyVehicleBlockingPathAt(IntVec3 cell, VehiclePawn vehicle)
   {
-    List<Thing> thingList = cell.GetThingList(vehicle.Map);
-    if (thingList.NullOrEmpty()) return null;
+    if (!vehicle.Spawned)
+      return null;
 
-    float euclideanDistance = Ext_Map.Distance(vehicle.Position, cell);
-    foreach (Thing thing in thingList)
-    {
-      if (thing is VehiclePawn otherVehicle && otherVehicle != vehicle)
-      {
-        if (euclideanDistance < 20 || !otherVehicle.vehiclePather.Moving)
-        {
-          return otherVehicle;
-        }
-      }
-    }
-
-    return null;
+    VehiclePawn otherVehicle = vehicle.Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell);
+    return vehicle != otherVehicle ? otherVehicle : null;
   }
 
   public static void ExitMapForVehicle(VehiclePawn vehicle, Job job)
