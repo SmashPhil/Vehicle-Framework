@@ -1,4 +1,4 @@
-﻿//#define LOAD_PAWN_GIZMO
+﻿#define LOAD_PAWN_GIZMO
 
 using System;
 using System.Collections.Generic;
