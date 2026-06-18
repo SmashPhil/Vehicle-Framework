@@ -21,8 +21,6 @@ namespace Vehicles.World;
 public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<GlobalTargetInfo, ArrivalOption>,
                               ILauncher
 {
-  private const int RepairMothballTicks = 300;
-
   private static readonly Color PlayerCaravanColor = new(1f, 0.863f, 0.33f);
   private static readonly MaterialPropertyBlock PropertyBlock = new();
   private static readonly Dictionary<ThingDef, Material> Materials = [];
@@ -55,6 +53,8 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
   public bool VehiclesNeedRepairs { get; private set; }
 
   public override Vector3 DrawPos => vehicleTweener.TweenedPos;
+
+  protected override int UpdateRateTicks => 15;
 
   bool ITargeterSource<GlobalTargetInfo, ArrivalOption>.TargeterValid =>
     !Destroyed && LeadVehicle is { Spawned: false, Destroyed: false };
@@ -511,7 +511,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
     int pawnCount = 0;
     foreach (Pawn pawn in PawnsListForReading)
     {
-      if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+      if (pawn.IsColonistPlayerOrSlave() || pawn.IsColonyMech)
       {
         total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
         pawnCount++;
@@ -789,43 +789,48 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
         vehicle.CompFueledTravel?.ConsumeFuelWorld();
       }
     }
-    else
+  }
+
+  protected override void TickInterval(int delta)
+  {
+    RecacheStatAverages();
+    if (VehiclesNeedRepairs && Repairing)
     {
-      int gameTicks = Find.TickManager.TicksGame;
-      if (gameTicks % RepairMothballTicks == 0)
-      {
-        RecacheStatAverages();
-      }
-      if (VehiclesNeedRepairs && Repairing && gameTicks % RepairMothballTicks == 0)
-      {
-        RepairAllVehicles();
-      }
+      RepairAllVehicles(delta);
     }
   }
 
+  [Obsolete("Will be removed in 1.7. VehicleCaravan repairs are handled automatically.")]
   public void RepairAllVehicles()
   {
-    LearnSkill(SkillDefOf.Construction, RepairMothballTicks);
+    RepairAllVehicles(1);
+  }
+
+  private void RepairAllVehicles(int delta)
+  {
     foreach (VehiclePawn vehicle in vehicles)
     {
       VehicleComponent component =
-        vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(c => c.HealthPercent < 1);
+        vehicle.statHandler.ComponentsPrioritized.FirstOrDefault(static comp => comp.HealthPercent < 1);
       if (component != null)
       {
-        component.HealComponent(vehicle.GetStatValue(VehicleStatDefOf.RepairRate) *
-          RepairMothballTicks / JobDriver_RepairVehicle.TicksForRepair);
-        return; //Only repair 1 vehicle at a time
+        float healthToRepair = vehicle.GetStatValue(VehicleStatDefOf.RepairRate) * ConstructionAverage;
+        component.HealComponent(healthToRepair * delta / JobDriver_RepairVehicle.TicksForRepair);
+        LearnSkill(SkillDefOf.Construction, delta);
+        return; // Only repairs 1 vehicle at a time
       }
     }
   }
 
-  private void LearnSkill(SkillDef skillDef, int mothballTicks)
+  private void LearnSkill(SkillDef skillDef, int tickDelta)
   {
+    const float SkillPointsPerTick = 0.08f;
+
     foreach (Pawn pawn in PawnsListForReading)
     {
-      if (pawn.IsColonistPlayerControlled || pawn.IsColonyMechPlayerControlled)
+      if (pawn.IsColonistPlayerOrSlave() || pawn.IsColonyMech)
       {
-        pawn.skills?.Learn(skillDef, 0.08f * mothballTicks);
+        pawn.skills?.Learn(skillDef, SkillPointsPerTick * tickDelta);
         pawn.records.Increment(RecordDefOf.ThingsRepaired);
       }
     }
