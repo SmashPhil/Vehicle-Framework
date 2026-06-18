@@ -628,13 +628,24 @@ public partial class VehiclePawn
           }
         }, delegate (LocalTargetInfo target)
         {
-          if (target.Thing is Pawn { Downed: false } pawn && !pawn.ShouldAlwaysTransferToVehiclesCargo())
+          if (target.Thing is Pawn pawn)
           {
-            VehicleRoleHandler handler = pawn.IsColonistPlayerControlled ?
-              GetAnyAvailableHandler() :
-              GetNextAvailableHandler(pawn, HandlingType.None);
-            PromptToBoardVehicle(pawn, handler);
-            return;
+            if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
+            {
+              // Role validation should still apply to downed pawns since they will be loaded into a role by another
+              // colonist. They only skip the job assignment from PromptToBoardVehicle since they have to be loaded.
+              VehicleRoleHandler role = GetNextAvailableHandler(pawn);
+              if (role == null)
+              {
+                Messages.Message("VF_NoRoleAvailable".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+                return;
+              }
+              if (!pawn.Downed)
+              {
+                PromptToBoardVehicle(pawn, role);
+                return;
+              }
+            }
           }
 
           Thing thing = target.Thing;
@@ -645,9 +656,11 @@ public partial class VehiclePawn
             things = [thing],
           };
           transferable.AdjustTo(thing.stackCount);
-          cargoToLoad.Add(transferable);
-          Map.GetCachedMapComponent<VehicleReservationManager>()
-           .RegisterLister(this, ReservationType.LoadVehicle);
+          if (!cargoToLoad.Exists(cargo => cargo.AnyThing == thing))
+          {
+            cargoToLoad.Add(transferable);
+          }
+          Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
         }, this);
       }
     };
@@ -965,7 +978,7 @@ public partial class VehiclePawn
       {
         bool canOperate = handler.CanOperateRole(selPawn);
         int reservedCount = reservationManager.GetReservation<VehicleHandlerReservation>(this)
-        ?.ClaimantsOnHandler(handler) ?? 0;
+          ?.ClaimantsOnHandler(handler) ?? 0;
         string label = canOperate ?
           // Board {Label} {Count Remaining}
           "VF_BoardVehicle".Translate(handler.role.label,
@@ -1198,11 +1211,7 @@ public partial class VehiclePawn
         if (cells.Contains(p.Position))
           continue;
 
-        VehicleRoleHandler handler = p.IsColonistPlayerControlled ?
-          GetAnyAvailableHandler() :
-          handlers.FirstOrDefault(handler => handler.AreSlotsAvailableAndReservable &&
-            handler.role.HandlingTypes == HandlingType.None);
-        PromptToBoardVehicle(p, handler);
+        PromptToBoardVehicle(p, GetNextAvailableHandler(p));
       }
     }
   }

@@ -112,7 +112,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 			return null;
 
 		Assert.IsNotNull(jobDef);
-		using ObjectPool<ThingSet>.Scope ap = SetPool.GetTemporary(out ThingSet thingSet);
+		using var scope = SetPool.GetTemporary(out ThingSet thingSet);
 		foreach (TransferableOneWay transferableOneWay in transferables)
 		{
 			int countLeftToTransfer = CountLeftToPack(pawn, jobDef, transferableOneWay, lord);
@@ -124,10 +124,7 @@ public class JobDriver_LoadVehicle : JobDriverLoadVehicleBase
 				thingSet.Add(thing);
 			}
 		}
-		if (thingSet.Count == 0)
-			return null;
-
-		return Search.FindNearestThing(pawn, thingSet.IsValid);
+		return thingSet.Count > 0 ? Search.FindNearestThing(pawn, thingSet.IsValid) : null;
 	}
 
 	public static int CountLeftToPack(Pawn pawn, JobDef jobDef, TransferableOneWay transferable, Lord lord = null)

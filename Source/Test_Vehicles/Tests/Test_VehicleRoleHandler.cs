@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using DevTools.Testing;
 using RimWorld;
 using SmashTools;
@@ -15,404 +16,505 @@ namespace Vehicles.Testing;
 [TestDescription("VehicleRoleHandler behavior and all logic surrounding board and disembark.")]
 internal sealed class Test_VehicleRoleHandler
 {
-	[Test]
-	[TestDescription("Colonists successfully board into the vehicle with no handler specified.")]
-	private void BoardingColonists()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 1,
-			passengers = 1
-		});
+  [Test]
+  [TestDescription("VehiclePawn.GetHandler returns the handler matching the role key.")]
+  private void GetHandler()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1
+    });
 
-		TestUtils.ForceSpawn(group.vehicle);
+    VehicleRoleHandler driver = group.vehicle.GetHandler("Driver");
+    VehicleRoleHandler passenger = group.vehicle.GetHandler("Passenger");
 
-		// Colonists can board
-		for (int i = 0; i < group.pawns.Count; i++)
-		{
-			Pawn pawn = group.pawns[i];
-			Expect.IsTrue(group.vehicle.TryAddPawn(pawn), $"Boarded {i + 1}/{group.pawns.Count}");
-		}
-		Assert.IsTrue(group.pawns.All(pawn => pawn.InVehicle() && !pawn.Spawned));
+    Assert.IsNotNull(driver);
+    Assert.IsNotNull(passenger);
+    Expect.ReferencesAreEqual(driver, group.vehicle.Handlers.First(handler => handler.role.key == "Driver"));
+    Expect.ReferencesAreEqual(passenger, group.vehicle.Handlers.First(handler => handler.role.key == "Passenger"));
+    Expect.IsNull(group.vehicle.GetHandler("Invalid"));
+  }
 
-		// Colonist cannot board full vehicle
-		Pawn failColonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
-		Assert.IsNotNull(failColonist);
-		using ScopeEntity se = new(failColonist);
-		Assert.AreEqual(failColonist.Faction, Faction.OfPlayer);
-		Expect.IsFalse(group.vehicle.TryAddPawn(failColonist));
-	}
+  [Test]
+  [TestDescription("VehiclePawn.GetAnyAvailableHandler returns the first handler with an available slot.")]
+  private void GetAnyAvailableHandler()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1
+    });
 
-	[TestDescription("Animals successfully board into the vehicle inventory.")]
-	private void BoardingAnimals()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			animals = 1
-		});
-		Assert.AreEqual(group.pawns.Count, 1);
+    VehicleRoleHandler firstHandler = group.vehicle.Handlers[0];
+    VehicleRoleHandler secondHandler = group.vehicle.Handlers[1];
 
-		TestUtils.ForceSpawn(group.vehicle);
-		Pawn mechanoid = group.pawns[0];
-		Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
+    Expect.ReferencesAreEqual(firstHandler, group.vehicle.GetAnyAvailableHandler());
 
-		// Boarding vehicle with no roles still works for mechs since they go to inventory
-		Pawn failAnimal = PawnGenerator.GeneratePawn(PawnKindDefOf.Muffalo, Faction.OfPlayer);
-		Assert.IsNotNull(failAnimal);
-		using ScopeEntity se = new(failAnimal);
-		Assert.AreEqual(failAnimal.Faction, Faction.OfPlayer);
-		Expect.IsTrue(group.vehicle.TryAddPawn(failAnimal));
-		group.vehicle.DisembarkPawn(failAnimal);
-	}
+    Assert.IsTrue(firstHandler.thingOwner.TryAdd(group.pawns[0]));
+    Expect.ReferencesAreEqual(secondHandler, group.vehicle.GetAnyAvailableHandler());
 
-	[Test, LoadIfBiotechActive]
-	[TestDescription("Mechanoids successfully board into the vehicle inventory.")]
-	private void BoardingMechanoids()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			mechanoids = 1
-		});
-		Assert.AreEqual(group.pawns.Count, 1);
+    Assert.IsTrue(secondHandler.thingOwner.TryAdd(group.pawns[1]));
+    Expect.IsNull(group.vehicle.GetAnyAvailableHandler());
+  }
 
-		TestUtils.ForceSpawn(group.vehicle);
-		Pawn mechanoid = group.pawns[0];
-		Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
+  [Test]
+  [TestDescription("VehiclePawn.GetNextAvailableHandler chooses a role based on pawn ownership.")]
+  private void GetNextAvailableHandlerForPawn()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1,
+      prisoners = 1
+    });
 
-		// Boarding vehicle with no roles still works for mechs since they go to inventory
-		Pawn failMechanoid = PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, Faction.OfPlayer);
-		Assert.IsNotNull(failMechanoid);
-		using ScopeEntity se = new(failMechanoid);
-		Assert.AreEqual(failMechanoid.Faction, Faction.OfPlayer);
-		Expect.IsTrue(group.vehicle.TryAddPawn(failMechanoid));
-	}
+    Pawn colonist = group.pawns.First(pawn => pawn.IsColonistPlayerOrSlave());
+    Pawn prisoner = group.pawns.First(pawn => pawn.IsPrisoner);
 
-	[Test]
-	[TestDescription("Colonists successfully disembark from the vehicle.")]
-	private void DisembarkColonistsSpawned()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 1,
-			passengers = 1
-		});
-		group.Spawn();
+    VehicleRoleHandler driver = group.vehicle.GetHandler("Driver");
+    VehicleRoleHandler passenger = group.vehicle.GetHandler("Passenger");
 
-		Pawn driver = group.pawns[0];
-		Assert.IsFalse(driver.Spawned);
-		Assert.IsTrue(driver.InVehicle());
-		Pawn passenger = group.pawns[1];
-		Assert.IsFalse(passenger.Spawned);
-		Assert.IsTrue(passenger.InVehicle());
+    Assert.IsNotNull(driver);
+    Assert.IsNotNull(passenger);
+    Expect.ReferencesAreEqual(driver, group.vehicle.GetNextAvailableHandler(colonist));
+    Expect.ReferencesAreEqual(passenger, group.vehicle.GetNextAvailableHandler(prisoner));
+  }
 
-		group.vehicle.DisembarkPawn(driver);
-		Expect.IsTrue(driver.Spawned);
-		Expect.IsFalse(driver.InVehicle());
-		group.vehicle.DisembarkPawn(passenger);
-		Expect.IsTrue(passenger.Spawned);
-		Expect.IsFalse(passenger.InVehicle());
-	}
+  [Test]
+  [TestDescription("VehiclePawn.GetNextAvailableHandler with HandlingType chooses the next matching role.")]
+  private void GetNextAvailableHandlerForHandlingType()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1
+    });
+    group.vehicle.AddRole(new VehicleRole
+    {
+      key = "Gunner",
+      slots = 1,
+      slotsToOperate = 1,
+      handlingTypes = HandlingType.Turret
+    });
 
-	[Test]
-	[TestDescription("Animals successfully disembark from the vehicle.")]
-	private void DisembarkAnimalsSpawned()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			animals = 1
-		});
-		group.Spawn();
+    Pawn colonist = group.pawns[0];
 
-		Pawn animal = group.pawns[0];
-		Assert.IsFalse(animal.Spawned);
-		Assert.IsTrue(animal.InVehicle());
+    VehicleRoleHandler driver = group.vehicle.GetHandler("Driver");
+    VehicleRoleHandler gunner = group.vehicle.GetHandler("Gunner");
+    VehicleRoleHandler passenger = group.vehicle.GetHandler("Passenger");
 
-		group.vehicle.DisembarkPawn(animal);
-		Expect.IsTrue(animal.Spawned);
-		Expect.IsFalse(animal.InVehicle());
-	}
+    Assert.IsNotNull(driver);
+    Assert.IsNotNull(gunner);
+    Assert.IsNotNull(passenger);
 
-	[Test, LoadIfBiotechActive]
-	[TestDescription("Mechanoids successfully disembark from the vehicle.")]
-	private void DisembarkMechanoidsSpawned()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			mechanoids = 1
-		});
-		group.Spawn();
+    Expect.ReferencesAreEqual(driver, group.vehicle.GetNextAvailableHandler(colonist, HandlingType.Movement));
+    Expect.ReferencesAreEqual(gunner, group.vehicle.GetNextAvailableHandler(colonist, HandlingType.Turret));
+    Expect.ReferencesAreEqual(passenger, group.vehicle.GetNextAvailableHandler(colonist, HandlingType.None));
+  }
 
-		Pawn mechanoid = group.pawns[0];
-		Assert.IsFalse(mechanoid.Spawned);
-		Assert.IsTrue(mechanoid.InVehicle());
 
-		group.vehicle.DisembarkPawn(mechanoid);
-		Expect.IsTrue(mechanoid.Spawned);
-		Expect.IsFalse(mechanoid.InVehicle());
-	}
+  [Test]
+  [TestDescription("Colonists successfully board into the vehicle with no handler specified.")]
+  private void BoardingColonists()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1
+    });
 
-	[Test]
-	[TestDescription("Verify that drivers and passengers are recached in vehicle lists.")]
-	private void PawnListCaching()
-	{
-		const int Drivers = 1;
-		const int Passengers = 1;
+    TestUtils.ForceSpawn(group.vehicle);
 
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = Drivers,
-			passengers = Passengers
-		});
-		TestUtils.ForceSpawn(group.vehicle);
-		Assert.IsTrue(group.vehicle.Spawned);
-		Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-		Assert.AreEqual(group.pawns.Count, Drivers + Passengers);
+    // Colonists can board
+    for (int i = 0; i < group.pawns.Count; i++)
+    {
+      Pawn pawn = group.pawns[i];
+      Expect.IsTrue(group.vehicle.TryAddPawn(pawn), $"Boarded {i + 1}/{group.pawns.Count}");
+    }
+    Assert.IsTrue(group.pawns.All(pawn => pawn.InVehicle() && !pawn.Spawned));
 
-		Pawn colonist = group.pawns.FirstOrDefault(pawn => pawn.IsColonist);
-		Assert.IsNotNull(colonist);
-		Assert.IsTrue(group.vehicle.TryAddPawn(colonist));
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 1);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 1);
+    // Colonist cannot board full vehicle
+    Pawn failColonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+    Assert.IsNotNull(failColonist);
+    using ScopeEntity se = new(failColonist);
+    Assert.AreEqual(failColonist.Faction, Faction.OfPlayer);
+    Expect.IsFalse(group.vehicle.TryAddPawn(failColonist));
+  }
 
-		group.BoardAll();
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, Drivers + Passengers);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, Drivers + Passengers);
-	}
+  [Test]
+  [TestDescription("Animals successfully board into the vehicle inventory.")]
+  private void BoardingAnimals()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      animals = 1
+    });
+    Assert.AreEqual(group.pawns.Count, 1);
 
-	[Test]
-	[TestDescription("Verify that animals are not cached in vehicle lists as they are added to inventory")]
-	private void PawnListCachingAnimals()
-	{
-		const int Animals = 1;
+    TestUtils.ForceSpawn(group.vehicle);
+    Pawn mechanoid = group.pawns[0];
+    Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
 
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			animals = Animals
-		});
-		TestUtils.ForceSpawn(group.vehicle);
-		Assert.IsTrue(group.vehicle.Spawned);
-		Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-		Assert.AreEqual(group.pawns.Count, Animals);
+    // Boarding vehicle with no roles still works for mechs since they go to inventory
+    Pawn failAnimal = PawnGenerator.GeneratePawn(PawnKindDefOf.Muffalo, Faction.OfPlayer);
+    Assert.IsNotNull(failAnimal);
+    using ScopeEntity se = new(failAnimal);
+    Assert.AreEqual(failAnimal.Faction, Faction.OfPlayer);
+    Expect.IsTrue(group.vehicle.TryAddPawn(failAnimal));
+    group.vehicle.DisembarkPawn(failAnimal);
+  }
 
-		Pawn animal = group.pawns.FirstOrDefault(pawn => pawn.IsAnimal);
-		Assert.IsNotNull(animal);
-		Assert.IsTrue(group.vehicle.TryAddPawn(animal));
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-		group.BoardAll();
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-	}
+  [Test, LoadIfBiotechActive]
+  [TestDescription("Mechanoids successfully board into the vehicle inventory.")]
+  private void BoardingMechanoids()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      mechanoids = 1
+    });
+    Assert.AreEqual(group.pawns.Count, 1);
 
-	[Test, LoadIfBiotechActive]
-	[TestDescription("Verify that mechanoids are not cached in vehicle lists as they are added to inventory")]
-	private void PawnListCachingMechs()
-	{
-		const int Mechanoids = 1;
+    TestUtils.ForceSpawn(group.vehicle);
+    Pawn mechanoid = group.pawns[0];
+    Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
 
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			mechanoids = Mechanoids
-		});
-		TestUtils.ForceSpawn(group.vehicle);
-		Assert.IsTrue(group.vehicle.Spawned);
-		Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-		Assert.AreEqual(group.pawns.Count, Mechanoids);
+    // Boarding vehicle with no roles still works for mechs since they go to inventory
+    Pawn failMechanoid = PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, Faction.OfPlayer);
+    Assert.IsNotNull(failMechanoid);
+    using ScopeEntity se = new(failMechanoid);
+    Assert.AreEqual(failMechanoid.Faction, Faction.OfPlayer);
+    Expect.IsTrue(group.vehicle.TryAddPawn(failMechanoid));
+  }
 
-		Pawn mech = group.pawns.FirstOrDefault(pawn => pawn.IsColonyMech);
-		Assert.IsNotNull(mech);
-		Assert.IsTrue(group.vehicle.TryAddPawn(mech));
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-		group.BoardAll();
-		Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
-		Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
-	}
+  [Test]
+  [TestDescription("Colonists successfully disembark from the vehicle.")]
+  private void DisembarkColonistsSpawned()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1
+    });
+    group.Spawn();
 
-	[Test]
-	private void BoardingUnboardingCaravan()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 2,
-			passengers = 2,
-			animals = 2,
-		});
+    Pawn driver = group.pawns[0];
+    Assert.IsFalse(driver.Spawned);
+    Assert.IsTrue(driver.InVehicle());
+    Pawn passenger = group.pawns[1];
+    Assert.IsFalse(passenger.Spawned);
+    Assert.IsTrue(passenger.InVehicle());
 
-		VehicleCaravan vehicleCaravan =
-			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
-		Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
+    group.vehicle.DisembarkPawn(driver);
+    Expect.IsTrue(driver.Spawned);
+    Expect.IsFalse(driver.InVehicle());
+    group.vehicle.DisembarkPawn(passenger);
+    Expect.IsTrue(passenger.Spawned);
+    Expect.IsFalse(passenger.InVehicle());
+  }
 
-		// Colonists can board
-		for (int i = 0; i < group.pawns.Count; i++)
-		{
-			Pawn pawn = group.pawns[i];
-			Expect.IsTrue(group.vehicle.TryAddPawn(pawn), $"Boarded {i + 1}/{group.pawns.Count}");
-		}
-		Assert.IsTrue(group.pawns.All(pawn =>
-			pawn.InVehicle() && !pawn.Spawned && pawn.InVehicleCaravan()));
+  [Test]
+  [TestDescription("Animals successfully disembark from the vehicle.")]
+  private void DisembarkAnimalsSpawned()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      animals = 1
+    });
+    group.Spawn();
 
-		// Colonist cannot board full vehicle
-		Pawn failColonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
-		Assert.IsNotNull(failColonist);
-		Assert.AreEqual(failColonist.Faction, Faction.OfPlayer);
-		Expect.IsFalse(group.vehicle.TryAddPawn(failColonist));
+    Pawn animal = group.pawns[0];
+    Assert.IsFalse(animal.Spawned);
+    Assert.IsTrue(animal.InVehicle());
 
-		failColonist.Destroy();
+    group.vehicle.DisembarkPawn(animal);
+    Expect.IsTrue(animal.Spawned);
+    Expect.IsFalse(animal.InVehicle());
+  }
 
-		if (ModsConfig.BiotechActive)
-		{
-			group.DisembarkAll();
-			Assert.IsTrue(group.pawns.All(pawn =>
-				!pawn.InVehicle() && !pawn.Spawned && pawn.InVehicleCaravan()));
+  [Test, LoadIfBiotechActive]
+  [TestDescription("Mechanoids successfully disembark from the vehicle.")]
+  private void DisembarkMechanoidsSpawned()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      mechanoids = 1
+    });
+    group.Spawn();
 
-			Pawn mechanoid =
-				PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, Faction.OfPlayer);
-			Assert.IsNotNull(mechanoid);
-			Assert.AreEqual(mechanoid.Faction, Faction.OfPlayer);
-			Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
-			Expect.IsTrue(mechanoid.InVehicle());
-			Expect.IsTrue(mechanoid.InVehicleCaravan());
-			group.vehicle.DisembarkPawn(mechanoid);
-			Expect.IsFalse(mechanoid.InVehicle());
-			Expect.IsTrue(mechanoid.InVehicleCaravan());
-			vehicleCaravan.RemovePawn(mechanoid);
-			Assert.IsFalse(mechanoid.InVehicleCaravan());
-			mechanoid.Destroy();
-		}
-		vehicleCaravan.RemoveAllPawns();
-	}
+    Pawn mechanoid = group.pawns[0];
+    Assert.IsFalse(mechanoid.Spawned);
+    Assert.IsTrue(mechanoid.InVehicle());
 
-	// TODO
-	[Test]
-	private void ReservationChecks()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 1,
-			passengers = 1,
-			animals = 1,
-		});
+    group.vehicle.DisembarkPawn(mechanoid);
+    Expect.IsTrue(mechanoid.Spawned);
+    Expect.IsFalse(mechanoid.InVehicle());
+  }
 
-		TestUtils.ForceSpawn(group.vehicle);
-		Assert.IsTrue(group.vehicle.Spawned);
+  [Test]
+  [TestDescription("Verify that drivers and passengers are recached in vehicle lists.")]
+  private void PawnListCaching()
+  {
+    const int Drivers = 1;
+    const int Passengers = 1;
 
-		VehicleReservationManager reservationMgr =
-			group.vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
-		Assert.IsNotNull(reservationMgr);
-		VehicleHandlerReservation reservation =
-			reservationMgr.GetReservation<VehicleHandlerReservation>(group.vehicle);
-		Assert.IsNull(reservation);
-	}
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = Drivers,
+      passengers = Passengers
+    });
+    TestUtils.ForceSpawn(group.vehicle);
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+    Assert.AreEqual(group.pawns.Count, Drivers + Passengers);
 
-	[Test]
-	private void RoleTicking()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 1
-		});
+    Pawn colonist = group.pawns.FirstOrDefault(pawn => pawn.IsColonist);
+    Assert.IsNotNull(colonist);
+    Assert.IsTrue(group.vehicle.TryAddPawn(colonist));
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 1);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 1);
 
-		group.Spawn();
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, Drivers + Passengers);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, Drivers + Passengers);
+  }
 
-		// Vehicle parent
-		using (TickObserver<VehiclePawn> observer = new(group.vehicle))
-		{
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
+  [Test]
+  [TestDescription("Verify that animals are not cached in vehicle lists as they are added to inventory")]
+  private void PawnListCachingAnimals()
+  {
+    const int Animals = 1;
 
-		Pawn pawn = group.pawns.First();
-		Assert.IsFalse(pawn.Spawned);
-		Assert.IsTrue(pawn.InVehicle());
-		// Internal roles
-		using (TickObserver<Pawn> observer = new(pawn))
-		{
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
-	}
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      animals = Animals
+    });
+    TestUtils.ForceSpawn(group.vehicle);
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+    Assert.AreEqual(group.pawns.Count, Animals);
 
-	[Test]
-	private void VariableTickRate()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 1
-		});
+    Pawn animal = group.pawns.FirstOrDefault(pawn => pawn.IsAnimal);
+    Assert.IsNotNull(animal);
+    Assert.IsTrue(group.vehicle.TryAddPawn(animal));
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+  }
 
-		group.Spawn();
+  [Test, LoadIfBiotechActive]
+  [TestDescription("Verify that mechanoids are not cached in vehicle lists as they are added to inventory")]
+  private void PawnListCachingMechs()
+  {
+    const int Mechanoids = 1;
 
-		// Vehicle VTR's with no pawns onboard
-		group.DisembarkAll();
-		group.vehicle.ignition.Drafted = false;
-		Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == 0);
-		Assert.IsFalse(group.vehicle.Drafted);
-		Expect.AreEqual(group.vehicle.UpdateRateTicks, VehiclePawn.MaxTickInterval);
-		group.BoardAll();
-		Expect.AreEqual(group.vehicle.UpdateRateTicks, GenTicks.GetCameraUpdateRate(group.vehicle));
-	}
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      mechanoids = Mechanoids
+    });
+    TestUtils.ForceSpawn(group.vehicle);
+    Assert.IsTrue(group.vehicle.Spawned);
+    Assert.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Assert.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+    Assert.AreEqual(group.pawns.Count, Mechanoids);
 
-	[Test]
-	private void RoleTickingCaravan()
-	{
-		using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
-		{
-			drivers = 2,
-			passengers = 2,
-			animals = 2
-		});
-		group.BoardAll();
+    Pawn mech = group.pawns.FirstOrDefault(pawn => pawn.IsColonyMech);
+    Assert.IsNotNull(mech);
+    Assert.IsTrue(group.vehicle.TryAddPawn(mech));
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.AllPawnsAboard.Count, 0);
+    Expect.AreEqual(group.vehicle.AllColonistsAboard.Count, 0);
+  }
 
-		VehicleCaravan vehicleCaravan =
-			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
-		Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
-		Assert.IsTrue(vehicleCaravan.PawnsListForReading.ContainsAllOf(group.pawns));
+  [Test]
+  private void BoardingUnboardingCaravan()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 2,
+      passengers = 2,
+      animals = 2,
+    });
 
-		using (TickObserver<VehiclePawn> observer = new(group.vehicle))
-		{
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
 
-		Pawn pawn = group.vehicle.AllPawnsAboard.FirstOrDefault();
-		Assert.IsNotNull(pawn);
-		Assert.IsTrue(pawn.InVehicle());
-		using (TickObserver<Pawn> observer = new(pawn))
-		{
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
+    // Colonists can board
+    for (int i = 0; i < group.pawns.Count; i++)
+    {
+      Pawn pawn = group.pawns[i];
+      Expect.IsTrue(group.vehicle.TryAddPawn(pawn), $"Boarded {i + 1}/{group.pawns.Count}");
+    }
+    Assert.IsTrue(group.pawns.All(pawn =>
+      pawn.InVehicle() && !pawn.Spawned && pawn.InVehicleCaravan()));
 
-		Pawn dismountedPawn = group.DisembarkOne();
-		Assert.IsNotNull(dismountedPawn);
-		Assert.IsFalse(dismountedPawn.InVehicle());
-		using (TickObserver<Pawn> observer = new(dismountedPawn))
-		{
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
+    // Colonist cannot board full vehicle
+    Pawn failColonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+    Assert.IsNotNull(failColonist);
+    Assert.AreEqual(failColonist.Faction, Faction.OfPlayer);
+    Expect.IsFalse(group.vehicle.TryAddPawn(failColonist));
 
-		ThingWithComps food = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.MealSimple);
-		food.stackCount = 1;
-		group.vehicle.inventory.TryAddAndUnforbid(food);
-		Assert.AreEqual(food.ParentHolder, group.vehicle.inventory);
-		using (TickObserver<ThingWithComps> observer = new(food))
-		{
-			using TickerTypeRollback rb = new(ref food.def.tickerType);
-			food.def.tickerType = TickerType.Normal;
-			Find.TickManager.DoSingleTick();
-			Expect.AreEqual(observer.TickCount, 1);
-		}
+    failColonist.Destroy();
 
-		vehicleCaravan.RemoveAllPawns();
-	}
+    if (ModsConfig.BiotechActive)
+    {
+      group.DisembarkAll();
+      Assert.IsTrue(group.pawns.All(pawn =>
+        !pawn.InVehicle() && !pawn.Spawned && pawn.InVehicleCaravan()));
 
-	[Test] // TODO
-	private void RoleTickingAerialVehicle()
-	{
-	}
+      Pawn mechanoid =
+        PawnGenerator.GeneratePawn(PawnKindDefOf.Mech_Warqueen, Faction.OfPlayer);
+      Assert.IsNotNull(mechanoid);
+      Assert.AreEqual(mechanoid.Faction, Faction.OfPlayer);
+      Expect.IsTrue(group.vehicle.TryAddPawn(mechanoid));
+      Expect.IsTrue(mechanoid.InVehicle());
+      Expect.IsTrue(mechanoid.InVehicleCaravan());
+      group.vehicle.DisembarkPawn(mechanoid);
+      Expect.IsFalse(mechanoid.InVehicle());
+      Expect.IsTrue(mechanoid.InVehicleCaravan());
+      vehicleCaravan.RemovePawn(mechanoid);
+      Assert.IsFalse(mechanoid.InVehicleCaravan());
+      mechanoid.Destroy();
+    }
+    vehicleCaravan.RemoveAllPawns();
+  }
+
+  // TODO
+  [Test]
+  private void ReservationChecks()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      passengers = 1,
+      animals = 1,
+    });
+
+    TestUtils.ForceSpawn(group.vehicle);
+    Assert.IsTrue(group.vehicle.Spawned);
+
+    VehicleReservationManager reservationMgr =
+      group.vehicle.Map.GetCachedMapComponent<VehicleReservationManager>();
+    Assert.IsNotNull(reservationMgr);
+    VehicleHandlerReservation reservation =
+      reservationMgr.GetReservation<VehicleHandlerReservation>(group.vehicle);
+    Assert.IsNull(reservation);
+  }
+
+  [Test]
+  private void RoleTicking()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1
+    });
+
+    group.Spawn();
+
+    // Vehicle parent
+    using (TickObserver<VehiclePawn> observer = new(group.vehicle))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    Pawn pawn = group.pawns.First();
+    Assert.IsFalse(pawn.Spawned);
+    Assert.IsTrue(pawn.InVehicle());
+    // Internal roles
+    using (TickObserver<Pawn> observer = new(pawn))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+  }
+
+  [Test]
+  private void VariableTickRate()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1
+    });
+
+    group.Spawn();
+
+    // Vehicle VTR's with no pawns onboard
+    group.DisembarkAll();
+    group.vehicle.ignition.Drafted = false;
+    Assert.IsTrue(group.vehicle.AllPawnsAboard.Count == 0);
+    Assert.IsFalse(group.vehicle.Drafted);
+    Expect.AreEqual(group.vehicle.UpdateRateTicks, VehiclePawn.MaxTickInterval);
+    group.BoardAll();
+    Expect.AreEqual(group.vehicle.UpdateRateTicks, GenTicks.GetCameraUpdateRate(group.vehicle));
+  }
+
+  [Test]
+  private void RoleTickingCaravan()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 2,
+      passengers = 2,
+      animals = 2
+    });
+    group.BoardAll();
+
+    VehicleCaravan vehicleCaravan =
+      CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
+    Assert.IsTrue(vehicleCaravan.PawnsListForReading.ContainsAllOf(group.pawns));
+
+    using (TickObserver<VehiclePawn> observer = new(group.vehicle))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    Pawn pawn = group.vehicle.AllPawnsAboard.FirstOrDefault();
+    Assert.IsNotNull(pawn);
+    Assert.IsTrue(pawn.InVehicle());
+    using (TickObserver<Pawn> observer = new(pawn))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    Pawn dismountedPawn = group.DisembarkOne();
+    Assert.IsNotNull(dismountedPawn);
+    Assert.IsFalse(dismountedPawn.InVehicle());
+    using (TickObserver<Pawn> observer = new(dismountedPawn))
+    {
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    ThingWithComps food = (ThingWithComps)ThingMaker.MakeThing(ThingDefOf.MealSimple);
+    food.stackCount = 1;
+    group.vehicle.inventory.TryAddAndUnforbid(food);
+    Assert.AreEqual(food.ParentHolder, group.vehicle.inventory);
+    using (TickObserver<ThingWithComps> observer = new(food))
+    {
+      using TickerTypeRollback rb = new(ref food.def.tickerType);
+      food.def.tickerType = TickerType.Normal;
+      Find.TickManager.DoSingleTick();
+      Expect.AreEqual(observer.TickCount, 1);
+    }
+
+    vehicleCaravan.RemoveAllPawns();
+  }
+
+  [Test, Disabled]
+  private void RoleTickingAerialVehicle()
+  {
+    // TODO
+    throw new NotImplementedException();
+  }
 }

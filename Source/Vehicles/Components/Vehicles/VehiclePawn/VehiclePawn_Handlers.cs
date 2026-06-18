@@ -288,24 +288,29 @@ public partial class VehiclePawn
   }
 
   [Pure]
+  public VehicleRoleHandler GetNextAvailableHandler(Pawn pawn)
+  {
+    return pawn.IsColonistPlayerOrSlave() ?
+      GetNextAvailableHandler(pawn, HandlingType.Any) :
+      GetNextAvailableHandler(pawn, HandlingType.None);
+  }
+
+  [Pure]
   public VehicleRoleHandler GetNextAvailableHandler(Pawn pawn, HandlingType handlingTypeFlag)
   {
     foreach (VehicleRoleHandler handler in handlers)
     {
+      if (!handler.AreSlotsAvailableAndReservable)
+        continue;
+
       // HandlingType.None has an explicit check for no handling types, otherwise HasFlag would
       // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
-      if (handlingTypeFlag == HandlingType.None)
+      if (handlingTypeFlag is HandlingType.None or HandlingType.Any && handler.role.HandlingTypes == HandlingType.None)
       {
-        if (handler.role.HandlingTypes == HandlingType.None ||
-          handler.AreSlotsAvailableAndReservable)
-        {
-          return handler;
-        }
-        continue;
+        return handler;
       }
 
-      if (handler.CanOperateRole(pawn) && (handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
-        handler.AreSlotsAvailableAndReservable)
+      if (handler.CanOperateRole(pawn) && (handler.role.HandlingTypes & handlingTypeFlag) != 0)
       {
         return handler;
       }
