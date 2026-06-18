@@ -10,15 +10,12 @@ namespace Vehicles.World;
 [PublicAPI]
 public class VehicleWorldObjectsHolder : WorldComponent
 {
-	private static List<AerialVehicleInFlight> aerialVehicles = [];
-	private static List<VehicleCaravan> vehicleCaravans = [];
-	private static List<StashedVehicle> stashedVehicles = [];
+	private List<AerialVehicleInFlight> aerialVehicles = [];
+	private List<VehicleCaravan> vehicleCaravans = [];
+	private List<StashedVehicle> stashedVehicles = [];
 
 	public VehicleWorldObjectsHolder(RimWorld.Planet.World world) : base(world)
 	{
-		aerialVehicles.RemoveAll(a => a is null);
-		vehicleCaravans.RemoveAll(c => c is null);
-		stashedVehicles.RemoveAll(b => b is null);
 	}
 
 	// TODO 1.6.2136 - SOS2
@@ -130,5 +127,5 @@ public class VehicleWorldObjectsHolder : WorldComponent
 			vehicleCaravans.RemoveAll(c => c is null);
 			stashedVehicles.RemoveAll(b => b is null);
 		}
-	}
+  }
 }
