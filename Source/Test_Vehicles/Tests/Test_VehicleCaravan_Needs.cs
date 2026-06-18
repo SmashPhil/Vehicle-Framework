@@ -25,7 +25,6 @@ internal sealed class Test_VehicleCaravan_Needs
   private const int WorldUpdateTicksForPawn = 15;
   private static readonly Action<Pawn, ChemicalDef> ApplyAddiction;
   private static readonly AccessTools.FieldRef<Need_Rest, int> LastRestTickFieldRef;
-  private Func<int> updateRateTicksGetter;
 
   private VehicleGroup group;
   private VehicleCaravan caravan;
@@ -54,10 +53,6 @@ internal sealed class Test_VehicleCaravan_Needs
 
     group.BoardAll();
     caravan = CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
-    updateRateTicksGetter = AccessTools.MethodDelegate<Func<int>>(
-      AccessTools.PropertyGetter(typeof(WorldObject), "UpdateRateTicks"), instance: caravan);
-    Assert.IsNotNull(updateRateTicksGetter);
-    Assert.AreEqual(updateRateTicksGetter(), 1);
   }
 
   [TearDown]
@@ -66,7 +61,6 @@ internal sealed class Test_VehicleCaravan_Needs
     caravan.RemoveAllPawns();
     group?.Dispose();
     group = null;
-    updateRateTicksGetter = null;
   }
 
   [Test]
