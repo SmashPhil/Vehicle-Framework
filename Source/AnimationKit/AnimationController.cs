@@ -7,14 +7,12 @@ namespace AnimationKit;
 
 public sealed class AnimationController : IDisposable
 {
-  private IntPtr handle;
-
   private readonly List<AnimationParameter> parameters = [];
   private readonly List<AnimationLayer> layers = [];
 
   public AnimationController()
   {
-    handle = CreateController();
+    UnsafePtr = CreateController();
   }
 
   ~AnimationController()
@@ -22,33 +20,41 @@ public sealed class AnimationController : IDisposable
     Dispose(disposing: false);
   }
 
-  public bool Disposed => handle != IntPtr.Zero;
+  public bool Disposed => UnsafePtr != IntPtr.Zero;
 
-  public static implicit operator bool(AnimationController controller)
-  {
-    return !controller.Disposed;
-  }
+  private IntPtr UnsafePtr { get; set; }
 
   public AnimationLayer AddLayer(string name)
   {
-    var layer = new AnimationLayer(CreateLayer(handle, name));
+    var layer = new AnimationLayer(UnsafePtr, name);
     layers.Add(layer);
     return layer;
   }
 
-  public void DeleteLayer(string name)
+  public bool DeleteLayer(string name)
   {
-    for (int i = 0; i < layers.Count ; i++)
+    for (int i = 0; i < layers.Count; i++)
     {
       AnimationLayer layer = layers[i];
       if (layer.Name == name)
       {
         layers.RemoveAt(i);
-        DeleteLayer(handle, layer.Handle);
+        DeleteLayer(UnsafePtr, layer.UnsafePtr);
         layer.Dispose();
-        return;
+        return true;
       }
     }
+    return false;
+  }
+
+  public bool DeleteLayer(AnimationLayer layer)
+  {
+    if (!layers.Remove(layer))
+      return false;
+
+    DeleteLayer(UnsafePtr, layer.UnsafePtr);
+    layer.Dispose();
+    return true;
   }
 
   private void Dispose(bool disposing)
@@ -64,8 +70,9 @@ public sealed class AnimationController : IDisposable
       }
       layers.Clear();
     }
-    DeleteController(handle);
-    handle = IntPtr.Zero;
+
+    DeleteController(UnsafePtr);
+    UnsafePtr = IntPtr.Zero;
   }
 
   public void Dispose()
@@ -75,19 +82,15 @@ public sealed class AnimationController : IDisposable
   }
 
   [MustUseReturnValue]
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern IntPtr CreateController();
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void DeleteController(IntPtr controllerPtr);
 
-  [MustUseReturnValue]
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
-  private static extern IntPtr CreateLayer(IntPtr controllerPtr, string name);
-
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void DeleteLayer(IntPtr controllerPtr, IntPtr layerPtr);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
-  private static extern void DeleteLayerByName(IntPtr controllerPtr, IntPtr layerPtr);
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
+  private static extern void DeleteLayerByName(IntPtr controllerPtr, string name);
 }

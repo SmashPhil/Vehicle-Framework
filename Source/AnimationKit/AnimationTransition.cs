@@ -27,9 +27,9 @@ namespace AnimationKit;
 
     public AnimationState ToState { get; internal set; }
 
-    public bool DefaultTransition => FromState != null &&
-      FromState.Type == AnimationState.StateType.Entry &&
-      ToState != null && ToState.Type == AnimationState.StateType.Default;
+    //public bool DefaultTransition => FromState != null &&
+    //  FromState.Type == AnimationState.StateType.Entry &&
+    //  ToState != null && ToState.Type == AnimationState.StateType.Default;
 
     public void Dispose()
     {
