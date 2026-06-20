@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <Description>Animation tool with C# frontend for Vehicle Framework.</Description>
+    <Product>Animation Kit</Product>
+    <RootNamespace>AnimationKit</RootNamespace>
+    <AssemblyName>AnimationKit</AssemblyName>
+    <ProjectGuid>a00a2840-80ad-4b93-bb93-6471d370d6af</ProjectGuid>
+
+    <ModDir>..\..\</ModDir>
+    <OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
+    <RefDir>$(ModDir)\..\..\RimWorldWin64_Data\Managed</RefDir>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="PolySharp" Version="1.*" />
+
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="SmashTools">
+      <HintPath>$(OutDir)\SmashTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

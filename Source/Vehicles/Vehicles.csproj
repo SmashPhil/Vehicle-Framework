@@ -65,6 +65,11 @@
       <Private>False</Private>
     </Reference>
 
+    <Reference Include="AnimationKit">
+      <HintPath>$(OutDir)\AnimationKit.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
     <Reference Include="UpdateLogTool">
       <HintPath>$(OutDir)\UpdateLogTool.dll</HintPath>
       <Private>False</Private>

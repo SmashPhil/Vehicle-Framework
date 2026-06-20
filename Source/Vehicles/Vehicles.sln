@@ -7,6 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Vehicles", "Vehicles.csproj
 	ProjectSection(ProjectDependencies) = postProject
 		{50FB6136-9CFF-4AA0-A78C-76E407D5F7D3} = {50FB6136-9CFF-4AA0-A78C-76E407D5F7D3}
 		{5A968633-76D1-433F-B997-3F5CBC61F6A1} = {5A968633-76D1-433F-B997-3F5CBC61F6A1}
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF} = {A00A2840-80AD-4B93-BB93-6471D370D6AF}
 		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
 	EndProjectSection
 EndProject
@@ -54,6 +55,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_CoreLib", "..\Test_Cor
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools.Analyzer", "..\..\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj", "{D5BDD861-18FC-4F58-B62E-38A850197BE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimationKit", "..\AnimationKit\AnimationKit.csproj", "{A00A2840-80AD-4B93-BB93-6471D370D6AF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5A968633-76D1-433F-B997-3F5CBC61F6A1} = {5A968633-76D1-433F-B997-3F5CBC61F6A1}
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,6 +140,14 @@ Global
 		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{D5BDD861-18FC-4F58-B62E-38A850197BE5}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
