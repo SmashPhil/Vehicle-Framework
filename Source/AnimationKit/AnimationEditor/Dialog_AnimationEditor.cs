@@ -28,6 +28,7 @@ namespace SmashTools.Animations
     static Dialog_AnimationEditor()
     {
       //s_SliderHash = (int)AccessTools.Field(typeof(GUI), nameof(s_SliderHash)).GetValue(null);
+      AnimationLoader.ResolveAllReferences();
     }
 
     public Dialog_AnimationEditor(IAnimator animator)

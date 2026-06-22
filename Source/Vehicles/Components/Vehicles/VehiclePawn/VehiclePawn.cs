@@ -128,11 +128,12 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     }
   }
 
-  [Conditional("ANIMATOR")]
+#if ANIMATOR
   private void UpdateDraftAnimationProperty()
   {
     animator?.SetBool(PropertyIds.IgnitionOn, ignition.Drafted);
   }
+#endif
 
   public void RegisterEvents()
   {

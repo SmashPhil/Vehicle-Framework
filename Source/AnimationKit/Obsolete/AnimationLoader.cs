@@ -33,9 +33,15 @@ public static class AnimationLoader
 
   static AnimationLoader()
   {
+    ParseHelper.Parsers<KeyFrame>.Register(ParseKeyFrame);
     ParseHelper.Parsers<AnimationClip>.Register(ParseAnimationFileByGuid<AnimationClip>);
     ParseHelper.Parsers<AnimationController>.Register(ParseAnimationFileByPath<AnimationController>);
     LoadAll();
+  }
+
+  private static KeyFrame ParseKeyFrame(string entry)
+  {
+    return KeyFrame.FromString(entry);
   }
 
   private static void LoadAll()
