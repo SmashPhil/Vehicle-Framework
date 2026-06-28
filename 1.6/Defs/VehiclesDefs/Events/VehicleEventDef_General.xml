@@ -8,6 +8,14 @@
 	 
 	<!-- Movement -->
 	<Vehicles.VehicleEventDef>
+		<defName>PositionChanged</defName>
+	</Vehicles.VehicleEventDef>
+
+	<Vehicles.VehicleEventDef>
+		<defName>RotationChanged</defName>
+	</Vehicles.VehicleEventDef>
+
+	<Vehicles.VehicleEventDef>
 		<defName>IgnitionOn</defName>
 	</Vehicles.VehicleEventDef>
 	

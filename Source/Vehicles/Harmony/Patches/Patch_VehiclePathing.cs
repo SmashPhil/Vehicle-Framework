@@ -96,13 +96,13 @@ internal class Patch_VehiclePathing : IPatchCategory
         nameof(GenStep_RocksFromGrid.Generate)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
         nameof(DisableRegionUpdatingRockGen)));
-		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.DisableIncrementalDirtying)),
-			prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
-			nameof(BeginPathGridCapture)));
-		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.ReEnableIncrementalDirtying)),
+    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.DisableIncrementalDirtying)),
       prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
-			nameof(EndPathGridCapture)));
-	}
+      nameof(BeginPathGridCapture)));
+    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Pathing), nameof(Pathing.ReEnableIncrementalDirtying)),
+      prefix: new HarmonyMethod(typeof(Patch_VehiclePathing),
+      nameof(EndPathGridCapture)));
+  }
 
   private static bool MultiselectVehicleGotoBlocked(Pawn pawn, ref AcceptanceReport __result)
   {
@@ -293,7 +293,7 @@ internal class Patch_VehiclePathing : IPatchCategory
     {
       if (__instance is VehiclePawn vehicle)
       {
-        vehicle.ReclaimPosition();
+        vehicle.EventRegistry[VehicleEventDefOf.PositionChanged].ExecuteEvents();
       }
       PathingHelper.ThingAffectingRegionsOrientationChanged(__instance, __instance.Map);
     }
@@ -346,19 +346,19 @@ internal class Patch_VehiclePathing : IPatchCategory
     }
   }
 
-	private static void BeginPathGridCapture(Map ___map)
+  private static void BeginPathGridCapture(Map ___map)
   {
     ___map.GetCachedMapComponent<VehiclePathingSystem>()?.BeginCapturingPathGridDirtying();
-	}
+  }
 
-	private static void EndPathGridCapture(Map ___map)
-	{
+  private static void EndPathGridCapture(Map ___map)
+  {
     ___map.GetCachedMapComponent<VehiclePathingSystem>()?.EndCapturingPathGridDirtying();
-	}
+  }
 
-	/* ---- Helper Methods related to patches ---- */
+  /* ---- Helper Methods related to patches ---- */
 
-	private static void SpawnAndNotifyVehicleRegions(Thing thing, Map map)
+  private static void SpawnAndNotifyVehicleRegions(Thing thing, Map map)
   {
     PathingHelper.ThingAffectingRegionsStateChange(thing, map, true);
   }

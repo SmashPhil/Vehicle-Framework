@@ -253,15 +253,15 @@ public partial class VehiclePawn
     {
       Map.thingGrid.Register(this);
       Map.coverGrid.Register(this);
-      RegionListersUpdater.RegisterInRegions(this, this.Map);
-      ReclaimPosition();
-
+      RegionListersUpdater.RegisterInRegions(this, Map);
+      
       CellRect oldRect = this.OccupiedRectShifted(IntVec2.Zero, oldRot);
       CellRect newRect = this.OccupiedRectShifted(IntVec2.Zero, rotationInt);
       foreach (IntVec3 cell in new CellRectOverlap(oldRect, newRect))
       {
         Map.pathing.RecalculatePerceivedPathCostAt(cell);
       }
+      EventRegistry[VehicleEventDefOf.RotationChanged].ExecuteEvents();
     }
   }
 

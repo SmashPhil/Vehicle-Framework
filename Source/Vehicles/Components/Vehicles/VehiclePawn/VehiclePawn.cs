@@ -151,10 +151,11 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     this.AddEvent(VehicleEventDefOf.PawnRemoved, RecachePawnCount);
     this.AddEvent(VehicleEventDefOf.PawnChangedSeats, RecachePawnCount, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.PawnKilled, RecachePawnCount);
+    this.AddEvent(VehicleEventDefOf.PositionChanged, ReclaimPosition);
+    this.AddEvent(VehicleEventDefOf.RotationChanged, ReclaimPosition);
     this.AddEvent(VehicleEventDefOf.MoveStart, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.MoveStop, ResetIdleTicks);
-    this.AddEvent(VehicleEventDefOf.IgnitionOn, ResetIdleTicks,
-      UpdateDraftController, ResetIdleTicks);
+    this.AddEvent(VehicleEventDefOf.IgnitionOn, ResetIdleTicks, UpdateDraftController, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.IgnitionOff, UpdateDraftController, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.DamageTaken, statHandler.MarkAllDirty, Notify_TookDamage, ResetIdleTicks);
     this.AddEvent(VehicleEventDefOf.Repaired, statHandler.MarkAllDirty);
@@ -293,7 +294,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 #endif
 
     if (PropertyBlock == null)
-      LongEventHandler.ExecuteWhenFinished(() => PropertyBlock = new MaterialPropertyBlock());
+    {
+      UnityThread.ExecuteOnMainThread(() => PropertyBlock = new MaterialPropertyBlock());
+    }
 
     // Ensure SustainerTarget and sustainer manager is given a clean slate to work with
     ReleaseSustainerTarget();
