@@ -5,13 +5,14 @@ using UnityEngine;
 
 namespace AnimationKit;
 
+[PublicAPI]
 public sealed class Transform : IDisposable
 {
   private IntPtr handle;
 
-  public Transform()
+  public Transform(int entityId)
   {
-    handle = CreateNativeTransform();
+    handle = CreateTransform(entityId);
   }
 
   ~Transform()
@@ -75,7 +76,7 @@ public sealed class Transform : IDisposable
     {
       // TODO: dispose managed state (managed objects)
     }
-    DeleteNativeTransform(handle);
+    DeleteTransform(handle);
     handle = IntPtr.Zero;
   }
 
@@ -86,27 +87,27 @@ public sealed class Transform : IDisposable
   }
 
   [MustUseReturnValue]
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
-  private static extern IntPtr CreateNativeTransform();
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
+  private static extern IntPtr CreateTransform(int id);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
-  private static extern void DeleteNativeTransform(IntPtr ptr);
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
+  private static extern void DeleteTransform(IntPtr ptr);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void GetPositionInjected(IntPtr ptr, out Vector3 position);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void SetPositionInjected(IntPtr ptr, ref readonly Vector3 position);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void GetRotationInjected(IntPtr ptr, out Quaternion rotation);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void SetRotationInjected(IntPtr ptr, ref readonly Quaternion rotation);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void GetScaleInjected(IntPtr ptr, out Vector3 scale);
 
-  [DllImport("animation_kit.dll", CallingConvention = CallingConvention.Cdecl)]
+  [DllImport("animation_kit", CallingConvention = CallingConvention.Cdecl)]
   private static extern void SetScaleInjected(IntPtr ptr, ref readonly Vector3 scale);
 }

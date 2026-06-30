@@ -74,12 +74,6 @@ public partial class VehiclePawn
 
   public MaterialPropertyBlock PropertyBlock { get; private set; }
 
-  ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
-
-  AnimationManager IAnimator.Manager => animator;
-
-  string IAnimationObject.ObjectId => nameof(VehiclePawn);
-
   public Transform Transform => transform;
 
   public float Angle

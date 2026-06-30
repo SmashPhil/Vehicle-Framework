@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
+using AnimationKit;
 using CoreLib.Performance;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Animations;
 using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Compatibility;
@@ -28,6 +27,8 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
   public new bool Drafted => ignition.Drafted;
 
   public VehicleDef VehicleDef => def as VehicleDef;
+
+  int IAnimator.EntityId => thingIDNumber;
 
   public int AverageSkillOfCapablePawns(SkillDef skill)
   {
@@ -285,9 +286,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 #if ANIMATOR
     if (VehicleDef.drawProperties.controller != null)
     {
-      animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
-      animator.SetBool(PropertyIds.Disabled, CanMove);
-      animator.PostLoad();
+      //animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
+      //animator.SetBool(PropertyIds.Disabled, CanMove);
+      //animator.PostLoad();
       this.AddEvent(VehicleEventDefOf.IgnitionOn, UpdateDraftAnimationProperty);
       this.AddEvent(VehicleEventDefOf.IgnitionOff, UpdateDraftAnimationProperty);
     }
