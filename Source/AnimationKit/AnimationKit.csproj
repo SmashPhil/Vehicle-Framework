@@ -13,6 +13,12 @@
     <RefDir>$(ModDir)\..\..\RimWorldWin64_Data\Managed</RefDir>
   </PropertyGroup>
 
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Test_AnimationKit</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
   <!-- Dependencies -->
   <ItemGroup>
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />

@@ -20,7 +20,7 @@ public sealed class AnimationController : IDisposable
     Dispose(disposing: false);
   }
 
-  public bool Disposed => UnsafePtr != IntPtr.Zero;
+  public bool Disposed => UnsafePtr == IntPtr.Zero;
 
   private IntPtr UnsafePtr { get; set; }
 

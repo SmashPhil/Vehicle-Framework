@@ -1164,8 +1164,8 @@ public partial class VehiclePawn
 
   public void OpenInNewAnimator()
   {
-    Dialog_AnimationEditor dialogGraphEditor = new(this);
-    Find.WindowStack.Add(dialogGraphEditor);
+    //Dialog_AnimationEditor dialogGraphEditor = new(this);
+    //Find.WindowStack.Add(dialogGraphEditor);
   }
 
   public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)

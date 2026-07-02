@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
-using AnimationKit;
 using CoreLib.Performance;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Compatibility;
 using Vehicles.Rendering;
@@ -12,9 +10,9 @@ using Verse;
 
 namespace Vehicles;
 
-public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
-                                   IAnimationTarget, IAnimator, ITransformable,
-                                   IEventManager<VehicleEventDef>, IMaterialCacheTarget
+public partial class VehiclePawn : Pawn,
+  IInspectable, IThingHolderTickable, IAnimationTarget,
+  IEventManager<VehicleEventDef>, IMaterialCacheTarget
 {
   private static readonly AccessTools.FieldRef<Pawn_DraftController, bool> DraftedIntFieldRef =
     AccessTools.FieldRefAccess<Pawn_DraftController, bool>(
@@ -27,8 +25,6 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
   public new bool Drafted => ignition.Drafted;
 
   public VehicleDef VehicleDef => def as VehicleDef;
-
-  int IAnimator.EntityId => thingIDNumber;
 
   public int AverageSkillOfCapablePawns(SkillDef skill)
   {
@@ -404,7 +400,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
       case LoadSaveMode.PostLoadInit:
         CompUpgradeTree?.ReloadUnlocks();
         UpdateDraftController();
-      break;
+        break;
       case LoadSaveMode.Inactive or LoadSaveMode.ResolvingCrossRefs:
         break;
     }

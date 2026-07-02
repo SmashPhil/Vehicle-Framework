@@ -8,14 +8,22 @@ using Verse;
 
 namespace AnimationKit;
 
-public class AnimationManager : IExposable
+public class Animator : IExposable, IDisposable
 {
-  //public readonly IAnimator animator;
-  public readonly AnimationController controller;
+  private readonly IAnimator animator;
+  private readonly AnimationController controller;
+  private readonly NativeBuffer buffer;
 
-  public AnimationManager(IAnimator animator, AnimationController controller)
+  public Animator(IAnimator animator, AnimationController controller)
   {
+    this.animator = animator;
     this.controller = controller;
+    buffer = null;
+  }
+
+  public void Dispose()
+  {
+    buffer?.Dispose();
   }
 
   public void Tick()

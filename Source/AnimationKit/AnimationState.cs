@@ -19,7 +19,7 @@ public class AnimationState : IDisposable
 
   internal IntPtr UnsafePtr { get; private set; }
 
-  public bool Disposed { get; private set; }
+  public bool Disposed => UnsafePtr == IntPtr.Zero;
 
   public string Name
   {
@@ -60,7 +60,6 @@ public class AnimationState : IDisposable
     }
 
     // AnimationLayer parent owns this object, deletion of parent will delete this object
-    Disposed = true;
     UnsafePtr = IntPtr.Zero;
   }
 

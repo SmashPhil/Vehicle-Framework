@@ -21,7 +21,7 @@ public sealed class AnimationLayer : IDisposable
 
   internal IntPtr UnsafePtr { get; private set; }
 
-  public bool Disposed { get; private set; }
+  public bool Disposed => UnsafePtr == IntPtr.Zero;
 
   public string Name
   {
@@ -49,7 +49,6 @@ public sealed class AnimationLayer : IDisposable
 
     // layer is owned by the parent controller, we only need to flag it as freed so we don't
     // accidentally cause UAF crash.
-    Disposed = true;
     UnsafePtr = IntPtr.Zero;
   }
 

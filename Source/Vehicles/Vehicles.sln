@@ -62,6 +62,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AnimationKit", "..\Animatio
 		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_AnimationKit", "..\Test_AnimationKit\Test_AnimationKit.csproj", "{DC715750-3F8E-4E4D-819F-65DEF04D9E89}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5A968633-76D1-433F-B997-3F5CBC61F6A1} = {5A968633-76D1-433F-B997-3F5CBC61F6A1}
+		{A00A2840-80AD-4B93-BB93-6471D370D6AF} = {A00A2840-80AD-4B93-BB93-6471D370D6AF}
+		{B6B2FD58-D7EC-482A-927D-EBB012A468A8} = {B6B2FD58-D7EC-482A-927D-EBB012A468A8}
+		{CBD9893C-47BE-405E-89F7-2342F47D26BC} = {CBD9893C-47BE-405E-89F7-2342F47D26BC}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -148,6 +156,14 @@ Global
 		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{A00A2840-80AD-4B93-BB93-6471D370D6AF}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

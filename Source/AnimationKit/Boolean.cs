@@ -4,9 +4,8 @@ using System.Runtime.InteropServices;
 namespace AnimationKit;
 
 /// <summary>
-/// Blittable boolean type
+/// Blittable boolean type wrapper
 /// </summary>
-[StructLayout(LayoutKind.Sequential)]
 public readonly struct Boolean(bool value) : IEquatable<Boolean>
 {
   private readonly byte value = value ? (byte)1 : (byte)0;
@@ -14,6 +13,8 @@ public readonly struct Boolean(bool value) : IEquatable<Boolean>
   public static implicit operator bool(Boolean b) => b.value != 0;
 
   public static implicit operator Boolean(bool value) => new(value);
+
+  public static implicit operator byte(Boolean b) => b.value;
 
   public bool Equals(Boolean other)
   {

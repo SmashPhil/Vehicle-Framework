@@ -9,8 +9,8 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
-using Transform = SmashTools.Rendering.Transform;
 using static Vehicles.Config.FeatureFlags;
+using Transform = SmashTools.Rendering.Transform;
 
 namespace Vehicles;
 
