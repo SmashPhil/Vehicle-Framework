@@ -780,6 +780,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
   protected override void Tick()
   {
     base.Tick();
+    vehicleTweener.TweenerTick();
     vehiclePather.PatherTick();
 
     if (vehiclePather.MovingNow)

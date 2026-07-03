@@ -170,11 +170,6 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(Caravan_PathFollower.MovingNow)),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(VehicleCaravanMovingNow)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(Caravan_Tweener),
-        nameof(Caravan_Tweener.TweenerTickInterval)),
-      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
-        nameof(VehicleCaravanTweenerTick)));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Caravan_BedsTracker), "RecalculateUsedBeds"),
       prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
       nameof(RecalculateUsedBedsInVehicleCaravan)));
@@ -1043,12 +1038,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   private static bool VehicleCaravanTweenerTick(Caravan ___caravan)
   {
-    if (___caravan is VehicleCaravan vehicleCaravan)
-    {
-      vehicleCaravan.vehicleTweener.TweenerTick();
-      return false;
-    }
-    return true;
+    return ___caravan is not VehicleCaravan;
   }
 
   /// <summary>
