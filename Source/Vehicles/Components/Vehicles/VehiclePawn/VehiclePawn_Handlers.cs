@@ -527,20 +527,10 @@ public partial class VehiclePawn
           EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
         }
       }
+      return;
     }
-    else if (Spawned)
-    {
-      using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
-      {
-        for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
-        {
-          if (inventory.innerContainer[i] is Pawn pawn)
-            DisembarkPawn(pawn);
-        }
-      }
-      EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
-    }
-    else
+
+    if (!Spawned)
     {
       // Invalid operation but better to send the pawns to world and let the game decide how to
       // handle them
@@ -554,6 +544,24 @@ public partial class VehiclePawn
           EventRegistry[VehicleEventDefOf.PawnRemoved].ExecuteEvents();
         }
       }
+    }
+
+    bool anyPawnsExited = false;
+    using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
+    {
+      for (int i = inventory.innerContainer.Count - 1; i >= 0; i--)
+      {
+        if (inventory.innerContainer[i] is Pawn pawn)
+        {
+          DisembarkPawn(pawn);
+          anyPawnsExited = true;
+        }
+      }
+    }
+
+    if (anyPawnsExited)
+    {
+      EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
     }
   }
 
@@ -572,20 +580,10 @@ public partial class VehiclePawn
           EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
         }
       }
+      return;
     }
-    else if (Spawned)
-    {
-      using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
-      {
-        for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
-        {
-          DisembarkPawn(AllPawnsAboard[i]);
-        }
-      }
-      EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
-      Assert.IsTrue(AllPawnsAboard.Count == 0);
-    }
-    else
+
+    if (!Spawned)
     {
       // Invalid operation but better to send the pawns to world and let the game decide how to
       // handle them
@@ -600,5 +598,18 @@ public partial class VehiclePawn
         }
       }
     }
+
+    if (AllPawnsAboard.Count == 0)
+      return;
+
+    using (new EventDisabler<VehicleEventDef>(EventRegistry[VehicleEventDefOf.PawnExited]))
+    {
+      for (int i = AllPawnsAboard.Count - 1; i >= 0; i--)
+      {
+        DisembarkPawn(AllPawnsAboard[i]);
+      }
+    }
+    EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
+    Assert.IsTrue(AllPawnsAboard.Count == 0);
   }
 }

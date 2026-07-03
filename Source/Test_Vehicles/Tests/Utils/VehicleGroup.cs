@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
 
 namespace Vehicles.Testing;
 
+[PublicAPI]
 public class VehicleGroup : IDisposable
 {
   public readonly VehiclePawn vehicle;
@@ -47,7 +49,9 @@ public class VehicleGroup : IDisposable
     foreach (Pawn pawn in pawns)
     {
       if (pawn.Spawned)
+      {
         pawn.DeSpawn();
+      }
       Assert.IsFalse(pawn.Spawned);
     }
   }
@@ -57,7 +61,9 @@ public class VehicleGroup : IDisposable
     foreach (Pawn pawn in pawns)
     {
       if (pawn.Spawned)
+      {
         pawn.DeSpawn();
+      }
       Assert.IsFalse(pawn.Spawned);
     }
   }
@@ -87,11 +93,17 @@ public class VehicleGroup : IDisposable
     Pawn pawn = pawns.First();
     vehicle.DisembarkPawn(pawn);
     if (vehicle.Spawned)
+    {
       Assert.IsTrue(pawn.Spawned);
+    }
     else if (vehicle.InVehicleCaravan())
+    {
       Assert.IsTrue(pawn.InVehicleCaravan());
+    }
     else
-      throw new NotImplementedException("Unhandled disembarking situation.");
+    {
+      throw new InvalidOperationException("Unhandled disembarking situation.");
+    }
     return pawn;
   }
 
@@ -103,9 +115,13 @@ public class VehicleGroup : IDisposable
     {
       // ReSharper disable once ConvertIfStatementToConditionalTernaryExpression
       if (vehicle.InVehicleCaravan())
+      {
         Assert.IsTrue(pawn.InVehicleCaravan());
+      }
       else
+      {
         Assert.IsTrue(pawn.Spawned);
+      }
     }
   }
 
@@ -116,12 +132,16 @@ public class VehicleGroup : IDisposable
       vehicle.RemovePawn(pawn);
       Assert.IsFalse(pawn.InVehicle());
       if (!pawn.Destroyed)
+      {
         pawn.Destroy();
+      }
       Assert.IsTrue(pawn.Destroyed);
     }
     Assert.IsTrue(vehicle.AllPawnsAboard.Count == 0);
     if (!vehicle.Destroyed)
+    {
       vehicle.Destroy();
+    }
     Assert.IsTrue(vehicle.Destroyed);
   }
 

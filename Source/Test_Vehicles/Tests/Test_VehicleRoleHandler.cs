@@ -344,6 +344,7 @@ internal sealed class Test_VehicleRoleHandler
 
     VehicleCaravan vehicleCaravan =
       CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    using ScopeWorldObject sc = new(vehicleCaravan);
     Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
 
     // Colonists can board
@@ -357,11 +358,10 @@ internal sealed class Test_VehicleRoleHandler
 
     // Colonist cannot board full vehicle
     Pawn failColonist = PawnGenerator.GeneratePawn(PawnKindDefOf.Colonist, Faction.OfPlayer);
+    using ScopeEntity se = new(failColonist);
     Assert.IsNotNull(failColonist);
     Assert.AreEqual(failColonist.Faction, Faction.OfPlayer);
     Expect.IsFalse(group.vehicle.TryAddPawn(failColonist));
-
-    failColonist.Destroy();
 
     if (ModsConfig.BiotechActive)
     {
@@ -383,7 +383,6 @@ internal sealed class Test_VehicleRoleHandler
       Assert.IsFalse(mechanoid.InVehicleCaravan());
       mechanoid.Destroy();
     }
-    vehicleCaravan.RemoveAllPawns();
   }
 
   // TODO
@@ -469,6 +468,7 @@ internal sealed class Test_VehicleRoleHandler
 
     VehicleCaravan vehicleCaravan =
       CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, 1, true);
+    using ScopeWorldObject sc = new(vehicleCaravan);
     Assert.AreEqual(group.vehicle.GetVehicleCaravan(), vehicleCaravan);
     Assert.IsTrue(vehicleCaravan.PawnsListForReading.ContainsAllOf(group.pawns));
 
