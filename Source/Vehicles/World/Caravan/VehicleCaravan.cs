@@ -511,11 +511,13 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
     int pawnCount = 0;
     foreach (Pawn pawn in PawnsListForReading)
     {
-      if (pawn.IsColonistPlayerOrSlave() || pawn.IsColonyMech)
-      {
-        total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
-        pawnCount++;
-      }
+      if (!pawn.IsColonistPlayerOrSlave() && !pawn.IsColonyMech)
+        continue;
+      if (StatDefOf.ConstructionSpeed.Worker.IsDisabledFor(pawn))
+        continue;
+
+      total += pawn.GetStatValue(StatDefOf.ConstructionSpeed);
+      pawnCount++;
     }
     float average = 1;
     if (pawnCount > 0)
