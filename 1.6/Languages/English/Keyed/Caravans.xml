@@ -13,6 +13,7 @@
   <VF_ImpassableBiome>Biome impassable for this vehicle.</VF_ImpassableBiome>
   <VF_CaravanDisabled>Caravaning disabled.</VF_CaravanDisabled>
   <VF_CaravanCantMove>Unable to move.</VF_CaravanCantMove>
+  <VF_CaravanCantReachExit>Unable to reach map edge.</VF_CaravanCantReachExit>
   <VF_CantMergeAerialVehicle>Cannot merge aerial vehicles.</VF_CantMergeAerialVehicle>
   
   <VF_RecoverVehicles>Recover vehicles</VF_RecoverVehicles>
