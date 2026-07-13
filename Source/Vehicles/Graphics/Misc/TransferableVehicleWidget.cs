@@ -8,6 +8,7 @@ using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Verse.Sound;
+using Vehicles;
 using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles.World;
@@ -273,6 +274,17 @@ public sealed class TransferableVehicleWidget : IDisposable
 
     if (!canCaravan)
       TooltipHandler.TipRegionByKey(checkboxRect, disableReason);
+
+    // Vehicle Exit Check: show warning icon for blocked vehicles
+    if (Patch_FormCaravanDialog.BlockedVehicles != null &&
+      Patch_FormCaravanDialog.BlockedVehicles.Contains(transferable.AnyThing))
+    {
+      Rect warningRect = new(iconBar.xMax - CheckboxSize - 4f - 24f, iconBar.y, 24f, 24f);
+      GUI.DrawTexture(warningRect,
+        ContentFinder<Texture2D>.Get("UI/Designators/RoadAreaOff"));
+      TooltipHandler.TipRegion(warningRect,
+        "VF_CaravanCantReachExit".Translate());
+    }
 
     if (checkOn != transferable.CountToTransfer > 0)
     {
