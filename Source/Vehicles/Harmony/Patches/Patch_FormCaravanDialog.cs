@@ -16,7 +16,6 @@ using UnityEngine.Assertions;
 using Vehicles.Compatibility;
 using Vehicles.World;
 using Verse;
-using Verse.AI;
 using Verse.Sound;
 
 namespace Vehicles;
@@ -41,14 +40,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   private static readonly Type SplitCaravanTabEnumType;
   private static readonly MethodInfo IgnoreInventoryModeProp;
   private static readonly AccessTools.FieldRef<Dialog_FormCaravan, bool> ReformFieldRef;
-  private static readonly AccessTools.FieldRef<Dialog_FormCaravan, Map> FormMapRef =
-    AccessTools.FieldRefAccess<Dialog_FormCaravan, Map>("map");
 
   private static Type gizmoStateMachineType;
 
   private static TransferableVehicleWidget vehiclesTransfer;
   private static int selectedTab;
-  internal static HashSet<Thing> BlockedVehicles;
 
   static Patch_FormCaravanDialog()
   {
@@ -75,22 +71,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     foreach (TransferableOneWay transferable in transferables)
     {
       if (transferable is { AnyThing: VehiclePawn, CountToTransfer: > 0 })
-        return true;
-    }
-    return false;
-  }
-
-  private static bool VehicleCanExit(VehiclePawn vehicle)
-  {
-    Map map = vehicle.Map;
-    Rot4[] dirs = [Rot4.North, Rot4.East, Rot4.South, Rot4.West];
-    foreach (Rot4 dir in dirs)
-    {
-      if (CellFinderExtended.TryFindRandomEdgeCellWith(
-        (IntVec3 cell) => !cell.Fogged(map) &&
-          vehicle.CanReachVehicle(cell, PathEndMode.OnCell, Danger.Deadly) &&
-          vehicle.DrivableRectOnCell(cell, Ext_Vehicles.DestinationHitboxReq.AnyRotation),
-        map, dir, vehicle.VehicleDef, CellFinder.EdgeRoadChance_Always, out _))
         return true;
     }
     return false;
@@ -338,26 +318,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         }
       }
     }
-
-    // Vehicle Exit Check: compute blocked set
-    BlockedVehicles = null;
-    Map map = FormMapRef(__instance);
-    if (map != null)
-    {
-      HashSet<Thing> blocked = null;
-      foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
-      {
-        if (pawn is not VehiclePawn vehicle)
-          continue;
-        if (!vehicle.VehicleDef.canCaravan)
-          continue;
-        if (!vehicle.CanMove)
-          continue;
-        if (!VehicleCanExit(vehicle))
-          (blocked ??= []).Add(vehicle);
-      }
-      BlockedVehicles = blocked;
-    }
   }
 
   /// <summary>
@@ -456,7 +416,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       ___tabsList.Clear();
       selectedTab = TabVehicles;
       CaravanHelper.assignedSeats.Clear();
-      BlockedVehicles = null;
     }
   }
 
