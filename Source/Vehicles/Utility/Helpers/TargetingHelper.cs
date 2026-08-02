@@ -36,6 +36,11 @@ public static class TargetingHelper
 		return false;
 	}
 
+	internal static bool IsHostileToVehicleOrFaction(VehiclePawn vehicle, Thing target)
+	{
+		return vehicle.HostileTo(target) || target.HostileTo(vehicle.Faction);
+	}
+
 	/// <summary>
 	/// Best attack target for VehicleTurret
 	/// </summary>

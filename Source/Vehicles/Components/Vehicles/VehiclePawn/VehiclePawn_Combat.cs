@@ -69,7 +69,7 @@ public partial class VehiclePawn
     {
       if (Map.thingGrid.ThingAt(cell, ThingCategory.Pawn) is Pawn pawn and not VehiclePawn)
       {
-        if (pawn.Faction.HostileTo(Faction) || Faction == null ||
+        if (TargetingHelper.IsHostileToVehicleOrFaction(this, pawn) || Faction == null ||
           Rand.Chance(VehicleDamager.FriendlyFireChance(this, pawn)))
         {
           (float pawnDamage, float vehicleDamage) = CalculateImpactDamage(pawn, this, moveSpeed);
