@@ -72,25 +72,23 @@ internal class PathGridCalculator : IPathGridCalculator
     return (ushort)thingPathCost;
   }
 
-  private static ushort TerrainCost(TerrainDef terrainDef, VehicleDef vehicleDef)
+  internal static ushort TerrainCost(TerrainDef terrainDef, VehicleDef vehicleDef)
   {
     int pathCost = terrainDef.pathCost;
     if (vehicleDef.properties.customTerrainCosts.TryGetValue(terrainDef, out int customPathCost))
     {
       pathCost = customPathCost;
     }
-    else if (terrainDef.passability == Traversability.Impassable)
+    else if (terrainDef.passability == Traversability.Impassable ||
+        (vehicleDef.properties.defaultImpassable & DefaultImpassable.Terrain) != 0)
     {
       return ImpassableCost;
     }
-    else if ((vehicleDef.properties.defaultImpassable & DefaultImpassable.Terrain) != 0)
-    {
-      return ImpassableCost;
-    }
+
     return (ushort)pathCost;
   }
 
-  private static ushort WeatherCost(WeatherBuildupCategory weatherCategory, VehicleDef vehicleDef)
+  internal static ushort WeatherCost(WeatherBuildupCategory weatherCategory, VehicleDef vehicleDef)
   {
     if (!vehicleDef.properties.customWeatherCosts.TryGetValue(weatherCategory, out int weatherPathCost))
     {

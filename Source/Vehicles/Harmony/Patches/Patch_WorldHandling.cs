@@ -3,7 +3,6 @@ using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
 using SmashTools.Patching;
-using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
@@ -18,13 +17,15 @@ internal class Patch_WorldHandling : IPatchCategory
 	void IPatchCategory.PatchMethods()
 	{
 		HarmonyPatcher.Patch(
-			original: AccessTools.Method(typeof(WorldPawns), nameof(WorldPawns.GetSituation)),
-			prefix: null,
+			original: AccessTools.Method(typeof(WorldPawns),
+        nameof(WorldPawns.GetSituation)),
 			postfix: new HarmonyMethod(typeof(Patch_WorldHandling),
 				nameof(SituationBoardedVehicle)));
 		HarmonyPatcher.Patch(
-			original: AccessTools.Method(typeof(GameEnder), nameof(GameEnder.CheckOrUpdateGameOver)),
-			postfix: new HarmonyMethod(typeof(Patch_WorldHandling), nameof(GameEnderWithVehicles)));
+      original: AccessTools.Method(typeof(GameEnder),
+        nameof(GameEnder.CheckOrUpdateGameOver)),
+			postfix: new HarmonyMethod(typeof(Patch_WorldHandling),
+        nameof(GameEnderWithVehicles)));
 		HarmonyPatcher.Patch(original: AccessTools.Method(typeof(WorldObjectsHolder), "AddToCache"),
 			postfix: new HarmonyMethod(typeof(Patch_WorldHandling),
 				nameof(AddVehicleObjectToCache)));

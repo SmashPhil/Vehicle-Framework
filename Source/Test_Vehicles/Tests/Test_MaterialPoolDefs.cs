@@ -103,7 +103,7 @@ internal sealed class Test_MaterialPoolDefs : Test_VehicleDefTest
   }
 
   [Test]
-  private void PatternDefs([DefParameter] PatternDef patternDef)
+  private void PatternDefs([DefParameters] PatternDef patternDef)
   {
     Expect.IsTrue(RGBMaterialPool.TargetCached(patternDef), "Pattern was not cached on startup.");
     Expect.AreEqual(patternDef.MaterialCount, RGBMaterialPool.GetAll(patternDef)?.Length);

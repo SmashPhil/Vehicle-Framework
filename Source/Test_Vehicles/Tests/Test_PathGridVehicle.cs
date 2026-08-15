@@ -8,7 +8,7 @@ namespace Vehicles.Testing;
 
 // TODO - this can be refactored with mocked path grid
 [TestFixture(TestType.Playing)]
-internal sealed class Test_PathGridVehicle([DefParameter] VehicleDef vehicleDef)
+internal sealed class Test_PathGridVehicle([DefParameters] VehicleDef vehicleDef)
   : Test_MapTest
 {
   private VehicleGroup group;

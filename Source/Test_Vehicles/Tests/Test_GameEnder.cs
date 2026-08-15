@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
@@ -32,12 +33,7 @@ internal sealed class Test_GameEnder
     anchorer = new PawnAnchorer();
     Assert.IsTrue(Find.Maps.Count == 1);
     Map map = Find.CurrentMap;
-    // Kill everything. We can't do a for loop here since events (e.g. Man In Black) can trigger on
-    // pawn deaths, spawning another pawn on the map. Just keep going until everything is dead.
-    while (map.mapPawns.AllPawnsCount > 0)
-    {
-      map.mapPawns.AllPawns[0].Destroy();
-    }
+    MapUtils.KillEverything(map);
   }
 
   [OneTimeSetUp]
