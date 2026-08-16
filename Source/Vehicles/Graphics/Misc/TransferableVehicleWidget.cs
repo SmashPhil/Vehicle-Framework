@@ -8,6 +8,7 @@ using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Verse.Sound;
+using Vehicles;
 using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles.World;
@@ -30,6 +31,9 @@ public sealed class TransferableVehicleWidget : IDisposable
   private static readonly Texture2D PawnIcon =
     ContentFinder<Texture2D>.Get("UI/Icons/HostilityResponse/Flee");
 
+  private static readonly Texture2D ExitWarningIcon =
+    ContentFinder<Texture2D>.Get("UI/Designators/RoadAreaOff");
+
   private static readonly Texture2D EfficiencyHillsIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyHills");
   private static readonly Texture2D EfficiencyRiverIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyRiver");
   private static readonly Texture2D EfficiencyRoadsIcon = ContentFinder<Texture2D>.Get("UI/Icons/EfficiencyRoads");
@@ -50,6 +54,7 @@ public sealed class TransferableVehicleWidget : IDisposable
   private readonly TransferableSorter sortSecondary;
 
   private readonly HashSet<VehicleDef> impassableOnTile = [];
+  private readonly HashSet<Thing> blockedVehicles = [];
 
   private Vector2 scrollPosition;
 
@@ -115,6 +120,24 @@ public sealed class TransferableVehicleWidget : IDisposable
         {
           impassableOnTile.Add(vehicleDef);
         }
+      }
+    }
+
+    // Vehicle Exit Check: mark blocked vehicles
+    blockedVehicles.Clear();
+    Map map = Find.CurrentMap;
+    if (map != null)
+    {
+      foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+      {
+        if (pawn is not VehiclePawn vehicle)
+          continue;
+        if (!vehicle.VehicleDef.canCaravan)
+          continue;
+        if (!vehicle.CanMove)
+          continue;
+        if (!vehicle.CanReachVehicleMapEdge())
+          blockedVehicles.Add(vehicle);
       }
     }
   }
@@ -268,11 +291,19 @@ public sealed class TransferableVehicleWidget : IDisposable
 
     // Assign seats checkbox
     bool checkOn = transferable.CountToTransfer > 0;
+    bool isBlocked = vehicle != null && blockedVehicles.Contains(vehicle);
     Rect checkboxRect = new(iconBar.xMax - CheckboxSize, iconBar.y, CheckboxSize, CheckboxSize);
-    Widgets.Checkbox(checkboxRect.position, ref checkOn, disabled: !canCaravan, size: CheckboxSize);
+    Widgets.Checkbox(checkboxRect.position, ref checkOn, disabled: !canCaravan || isBlocked, size: CheckboxSize);
 
     if (!canCaravan)
       TooltipHandler.TipRegionByKey(checkboxRect, disableReason);
+
+    if (isBlocked)
+    {
+      Rect warningRect = new(iconBar.xMax - CheckboxSize - 4f - 24f, iconBar.y, 24f, 24f);
+      GUI.DrawTexture(warningRect, ExitWarningIcon);
+      TooltipHandler.TipRegion(warningRect, "VF_CaravanCantReachExit".Translate());
+    }
 
     if (checkOn != transferable.CountToTransfer > 0)
     {
