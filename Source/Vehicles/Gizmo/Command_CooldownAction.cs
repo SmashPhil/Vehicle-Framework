@@ -49,6 +49,11 @@ public class Command_CooldownAction : Command_Turret
     }
   }
 
+  public void HaltTurret()
+  {
+    turret.SetTarget(LocalTargetInfo.Invalid);
+  }
+
   public override GizmoResult GizmoOnGUI(Vector2 topLeft, float maxWidth, GizmoRenderParms parms)
   {
     // We need to do a lazy init since turret field is populated by object initializer
@@ -142,7 +147,7 @@ public class Command_CooldownAction : Command_Turret
         }
         return new GizmoResult(GizmoState.Mouseover);
       }
-      turret.SetTarget(LocalTargetInfo.Invalid);
+      HaltTurret();
       return new GizmoResult(GizmoState.Clear);
     }
 

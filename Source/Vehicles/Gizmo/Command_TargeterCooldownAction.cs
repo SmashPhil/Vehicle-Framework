@@ -17,12 +17,14 @@ public class Command_TargeterCooldownAction : Command_CooldownAction
   {
     if (turret.ReloadTicks <= 0)
     {
-      turret.SetTarget(LocalTargetInfo.Invalid);
-      TurretTargeter.BeginTargeting(targetingParams, delegate(LocalTargetInfo target)
-      {
-        turret.SetTarget(target);
-        turret.ResetPrefireTimer();
-      }, turret);
+      HaltTurret();
+      TurretTargeter.BeginTargeting(targetingParams, CommitTarget, turret);
     }
+  }
+
+  public void CommitTarget(LocalTargetInfo target)
+  {
+    turret.SetTarget(target);
+    turret.ResetPrefireTimer();
   }
 }
