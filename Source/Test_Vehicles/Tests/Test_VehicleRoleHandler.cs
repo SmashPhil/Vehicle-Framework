@@ -10,8 +10,7 @@ using TickerTypeRollback = CoreLib.ScopedValueRollback<Verse.TickerType>;
 
 namespace Vehicles.Testing;
 
-// Validation of vehicle functionality needs to occur before
-[TestFixture(TestType.Playing), ExecutionPriority(Priority.AboveNormal)]
+[TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.TickBehavior)]
 [TestDescription("VehicleRoleHandler behavior and all logic surrounding board and disembark.")]
 internal sealed class Test_VehicleRoleHandler

@@ -174,7 +174,7 @@ public class VehicleGroup : IDisposable
     TestDefGenerator.ClearStatWorkerCaches(vehicleDef);
     vehicleDef.RecacheMovementPermissions();
 
-    int totalSlots = settings.passengers + settings.prisoners + settings.extraSlots;
+    int totalSlots = settings.passengers + settings.prisoners + settings.slaves + settings.extraSlots;
     if (totalSlots > 0)
     {
       vehicleDef.properties.roles =
@@ -245,6 +245,13 @@ public class VehicleGroup : IDisposable
       Assert.AreEqual(animal.Faction, settings.faction);
       group.pawns.Add(animal);
     }
+    for (int i = 0; i < settings.slaves; i++)
+    {
+      Pawn slave = PawnGenerator.GeneratePawn(PawnKindDefOf.Slave, settings.faction);
+      Assert.IsNotNull(slave);
+      Assert.AreEqual(slave.Faction, settings.faction);
+      group.pawns.Add(slave);
+    }
     Assert.IsTrue(settings.mechanoids == 0 || ModsConfig.BiotechActive);
     for (int i = 0; i < settings.mechanoids; i++)
     {
@@ -252,6 +259,14 @@ public class VehicleGroup : IDisposable
       Assert.IsNotNull(mech);
       Assert.AreEqual(mech.Faction, settings.faction);
       group.pawns.Add(mech);
+    }
+    Assert.IsTrue(settings.subhumans == 0 || ModsConfig.AnomalyActive);
+    for (int i = 0; i < settings.subhumans; i++)
+    {
+      Pawn subhuman = PawnGenerator.GeneratePawn(PawnKindDefOf.Ghoul, settings.faction);
+      Assert.IsNotNull(subhuman);
+      Assert.AreEqual(subhuman.Faction, settings.faction);
+      group.pawns.Add(subhuman);
     }
     return group;
   }
@@ -279,7 +294,11 @@ public class VehicleGroup : IDisposable
     public int passengers;
     public int prisoners;
     public int animals;
+    public int slaves;
+    [MayRequireBiotech]
     public int mechanoids;
+    [MayRequireAnomaly]
+    public int subhumans;
     public int extraSlots;
 
     public bool destroyInventory;

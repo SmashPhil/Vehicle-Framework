@@ -37,8 +37,8 @@ internal class Patch_MapHandling : IPatchCategory
       postfix: new HarmonyMethod(typeof(Patch_MapHandling),
         nameof(AdjustSettlement)));
     HarmonyPatcher.Patch(
-      original: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AnyPawnBlockingMapRemoval))
-       .GetGetMethod(),
+      original: AccessTools.Property(typeof(MapPawns),
+        nameof(MapPawns.AnyPawnBlockingMapRemoval)).GetGetMethod(),
       postfix: new HarmonyMethod(typeof(Patch_MapHandling),
         nameof(AnyVehicleBlockingMapRemoval)));
     HarmonyPatcher.Patch(
@@ -66,7 +66,7 @@ internal class Patch_MapHandling : IPatchCategory
 
   /// <summary>
   /// Apply ModSettings multiplier to river size to enable players to tweak the map to
-  /// better suit vehicles. (eg. more water for boats or less for more land vehicle usage)
+  /// better suit vehicles. (e.g. more water for boats or less for more land vehicle usage)
   /// </summary>
   private static void RiverNodeWidth(ref float __result)
   {
@@ -87,11 +87,12 @@ internal class Patch_MapHandling : IPatchCategory
   }
 
   /// <summary>
-  /// Ensure map is not removed with vehicles that contain pawns or maps currenty being targeted for landing.
+  /// Ensure map is not removed with autonomous vehicles, maps currenty being targeted for landing,
+  /// or maps being scouted by aerial vehicles.
   /// </summary>
   public static void AnyVehicleBlockingMapRemoval(ref bool __result, Map ___map)
   {
-    if (__result is false)
+    if (!__result)
     {
       if (LandingTargeter.Instance.IsTargeting && Current.Game.CurrentMap == ___map ||
         MapHelper.AnyAerialVehiclesInRecon(___map))
@@ -99,6 +100,7 @@ internal class Patch_MapHandling : IPatchCategory
         __result = true;
         return;
       }
+
       foreach (VehiclePawn vehicle in ___map.GetDetachedMapComponent<VehiclePositionManager>()
        .AllClaimants)
       {

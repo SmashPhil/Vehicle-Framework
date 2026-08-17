@@ -24,6 +24,7 @@ internal sealed class Test_TerrainGrid : Test_MapTest
       .FirstOrDefault(PathingHelper.ShouldCreateRegions);
     group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
+      vehicleDef = vehicleDef,
       permissions = VehiclePermissions.Mobile,
       passengers = 1
     });
@@ -64,7 +65,7 @@ internal sealed class Test_TerrainGrid : Test_MapTest
     VehiclePathGrid pathGrid = pathData.VehiclePathGrid;
 
     DebugHelper.DestroyArea(terrainArea, map, replaceTerrain: passableTerrain);
-    Expect.IsTrue(AreaCost(vehicleDef, pathGrid, in terrainArea, passableTerrain));
+    ValidateAreaCost(vehicleDef, pathGrid, in terrainArea, passableTerrain);
   }
 
   [Test]
@@ -77,10 +78,8 @@ internal sealed class Test_TerrainGrid : Test_MapTest
     VehiclePathGrid pathGrid = pathData.VehiclePathGrid;
 
     DebugHelper.DestroyArea(terrainArea, map, replaceTerrain: impassableTerrain);
-    Expect.IsTrue(AreaCost(vehicleDef, pathGrid, in terrainArea, impassableTerrain),
-      "PathGrid Updated");
-    Expect.IsFalse(VehiclePathGrid.PassableTerrainCost(vehicleDef, impassableTerrain, out _),
-      "PathGrid Impassable");
+    ValidateAreaCost(vehicleDef, pathGrid, in terrainArea, impassableTerrain);
+    Expect.IsFalse(VehiclePathGrid.PassableTerrainCost(vehicleDef, impassableTerrain, out _));
   }
 
   [Test]
@@ -103,34 +102,34 @@ internal sealed class Test_TerrainGrid : Test_MapTest
     Expect.IsFalse(regionGrid.AnyInvalidRegions);
   }
 
-	private static bool AreaCost(VehicleDef vehicleDef, VehiclePathGrid pathGrid,
-		ref readonly CellRect cellRect, TerrainDef terrainDef)
-	{
-		int weatherDusting = vehicleDef.properties.customWeatherCosts.TryGetValue(WeatherBuildupCategory.None);
-		int expected = VehiclePathGrid.TerrainCostAt(vehicleDef, terrainDef);
-		foreach (IntVec3 cell in cellRect)
-		{
-			// TODO - Fix when refactoring with mock vehicles. Lazy workaround since
-			// these tests should be using mock vehicles anyway.
-			int actualCost = pathGrid.CalculatedCostAt(cell);
-			if (actualCost != VehiclePathGrid.ImpassableCost)
-				actualCost -= weatherDusting;
+  private static void ValidateAreaCost(VehicleDef vehicleDef, VehiclePathGrid pathGrid,
+    ref readonly CellRect cellRect, TerrainDef terrainDef)
+  {
+    int weatherDusting = vehicleDef.properties.customWeatherCosts.TryGetValue(WeatherBuildupCategory.None);
+    int expected = PathGridCalculator.TerrainCost(terrainDef, vehicleDef);
+    foreach (IntVec3 cell in cellRect)
+    {
+      // TODO - Fix when refactoring with mock vehicles. Lazy workaround since these tests should
+      // be using mock vehicles anyway.
+      int actualCost = pathGrid.CalculatedCostAt(cell);
+      if (actualCost != VehiclePathGrid.ImpassableCost)
+      {
+        actualCost -= weatherDusting;
+      }
 
-			if (actualCost != expected)
-				return false;
-		}
-		return true;
-	}
+      Assert.AreEqual(expected, actualCost);
+    }
+  }
 
-	private static bool Regions(VehicleRegionGrid regionGrid, ref readonly CellRect cellRect,
-		bool valid)
-	{
-		foreach (IntVec3 cell in cellRect)
-		{
-			VehicleRegion region = regionGrid.GetValidRegionAt(cell);
-			if ((region is not null) != valid)
-				return false;
-		}
-		return true;
-	}
+  private static bool Regions(VehicleRegionGrid regionGrid, ref readonly CellRect cellRect,
+    bool valid)
+  {
+    foreach (IntVec3 cell in cellRect)
+    {
+      VehicleRegion region = regionGrid.GetValidRegionAt(cell);
+      if ((region is not null) != valid)
+        return false;
+    }
+    return true;
+  }
 }

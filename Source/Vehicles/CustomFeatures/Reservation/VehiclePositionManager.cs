@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using CoreLib;
 using JetBrains.Annotations;
 using SmashTools;
+using SmashTools.Performance;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
@@ -47,19 +48,20 @@ public class VehiclePositionManager : DetachedMapComponent
 
   internal NativeArray<int>.ReadOnly ThingIdGrid => thingIdGrid.AsReadOnly();
 
+  // TODO 1.7 - Change to ReadOnlyList
   /// <summary>
   /// Gets the list of vehicles that are tracking claim state via this manager.
   /// </summary>
   /// <remarks>
   /// Access and mutation are expected on the main thread. This collection is provided for
   /// hot-path access patterns and is <b>not</b> synchronized.
-  /// <para>Main-thread only.</para>
+  /// <para>Main thread or long-event thread only.</para>
   /// </remarks>
   public List<VehiclePawn> AllClaimants
   {
     get
     {
-      Assert.IsTrue(UnityData.IsInMainThread);
+      Assert.IsTrue(LongEventUtils.InMainOrEventThread);
       return claimants;
     }
   }
@@ -145,7 +147,7 @@ public class VehiclePositionManager : DetachedMapComponent
   {
     // NOTE - Updating position manager is done from VehiclePathFollower. This allows us to have a thread-unsafe list
     // accessor for hot paths. Reading claims can be done concurrently, but writing must be from the main thread.
-    Assert.IsTrue(UnityData.IsInMainThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
     ReleaseClaimed(vehicle);
     IntVec2 size = vehicle.VehicleDef.Size;
     EntityRect occupiedRect = new(cell.x, cell.z, size.x, size.z, new Orientation(rot.AsInt));
@@ -178,7 +180,7 @@ public class VehiclePositionManager : DetachedMapComponent
   /// <exception cref="UnityEngine.Assertions.AssertionException">Thrown if invoked off the main thread.</exception>
   public void ReleaseClaimed(VehiclePawn vehicle)
   {
-    Assert.IsTrue(UnityData.IsInMainThread);
+    Assert.IsTrue(LongEventUtils.InMainOrEventThread);
     if (occupiedRects.TryGetValue(vehicle, out EntityRect rect))
     {
       CellIndices indices = map.cellIndices;

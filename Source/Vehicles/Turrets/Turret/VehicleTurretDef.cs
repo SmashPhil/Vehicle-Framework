@@ -260,7 +260,7 @@ public class VehicleTurretDef : Def, ITweakFields
     string rotationSpeedReadout = autoSnapTargeting ?
       "VF_Instant".Translate() :
       "VF_RotationSpeedValue".Translate(Mathf.RoundToInt(rotationSpeed * 60));
-    // rotationSpeed in infoCard is deg/sec (x60 of rotationSpeed) so it's more human readable.
+    // rotationSpeed in infoCard is deg/sec (x60 of rotationSpeed) so it's more human-readable.
     yield return new VehicleStatDrawEntry(LabelCap, displayOrder, "VF_RotationSpeed".Translate(),
       rotationSpeedReadout, "VF_RotationSpeedTooltip".Translate(), 3000);
 

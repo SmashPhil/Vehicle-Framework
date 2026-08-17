@@ -3,8 +3,6 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
-using JetBrains.Annotations;
-using RimWorld;
 using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
@@ -12,7 +10,6 @@ using Verse;
 
 namespace Vehicles;
 
-[UsedWithReflection]
 internal class Patch_Combat : IPatchCategory
 {
   PatchSequence IPatchCategory.PatchAt => PatchSequence.Async;

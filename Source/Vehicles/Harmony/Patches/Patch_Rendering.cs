@@ -1,35 +1,19 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using CoreLib;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
 using SmashTools.Patching;
 using UnityEngine;
 using Vehicles.Rendering;
-using Vehicles.World;
 using Verse;
-using OpCodes = System.Reflection.Emit.OpCodes;
 
 namespace Vehicles;
 
 internal class Patch_Rendering : IPatchCategory
 {
-  /// <summary>
-  /// Const values from <see cref="CellInspectorDrawer"/>
-  /// </summary>
-  public const float DistFromMouse = 26f;
-
-  public const float LabelColumnWidth = 130f;
-  public const float InfoColumnWidth = 170f;
-  public const float WindowPadding = 12f;
-  public const float ColumnPadding = 12f;
   private const float LineHeight = 24f;
   private const float ThingIconSize = 22f;
   private const float WindowWidth = 336f;
-
-  private static readonly List<Pawn> TmpPawns = [];
 
   private static readonly FastInvokeHandler RenderPulsingOverlayInvoker;
 
@@ -58,9 +42,6 @@ internal class Patch_Rendering : IPatchCategory
       original: AccessTools.Method(typeof(ColonistBarColonistDrawer), "DrawIcons"), prefix: null,
       postfix: new HarmonyMethod(typeof(Patch_Rendering),
         nameof(DrawIconsVehicles)));
-    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(ColonistBar), "CheckRecacheEntries"),
-      transpiler: new HarmonyMethod(typeof(Patch_Rendering),
-        nameof(CheckRecacheVehicleEntriesTranspiler)));
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(SelectionDrawer), "DrawSelectionBracketFor"),
       prefix: new HarmonyMethod(typeof(Patch_Rendering),
@@ -105,7 +86,7 @@ internal class Patch_Rendering : IPatchCategory
   /// <summary>
   /// Use own Vehicle rotation to disallow moving rotation for various tasks such as Drafted
   /// </summary>
-  public static bool UpdateVehicleRotation(Pawn ___pawn)
+  private static bool UpdateVehicleRotation(Pawn ___pawn)
   {
     if (___pawn is VehiclePawn vehicle)
     {
@@ -131,7 +112,7 @@ internal class Patch_Rendering : IPatchCategory
   /// </summary>
   /// <param name="rect"></param>
   /// <param name="colonist"></param>
-  public static void DrawIconsVehicles(Rect rect, Pawn colonist)
+  private static void DrawIconsVehicles(Rect rect, Pawn colonist)
   {
     if (colonist.Dead || colonist.ParentHolder is not VehicleRoleHandler handler)
       return;
@@ -151,107 +132,10 @@ internal class Patch_Rendering : IPatchCategory
     vector.x += num;
   }
 
-  public static IEnumerable<CodeInstruction> CheckRecacheVehicleEntriesTranspiler(
-    IEnumerable<CodeInstruction> instructions)
-  {
-    List<CodeInstruction> instructionList = instructions.ToList();
-
-    MethodInfo clearCachedEntriesMethod =
-      AccessTools.Method(typeof(List<int>), nameof(List<int>.Clear));
-    MethodInfo freeColonistsGetter =
-      AccessTools.PropertyGetter(typeof(MapPawns), nameof(MapPawns.FreeColonists));
-    for (int i = 0; i < instructionList.Count; i++)
-    {
-      CodeInstruction instruction = instructionList[i];
-
-      if (instruction.Calls(freeColonistsGetter))
-      {
-        // ReSharper disable once RedundantAssignment
-        yield return instruction; // callvirt MapPawns::get_FreeColonists
-        instruction = instructionList[++i]; // callvirt List`<Pawn>::AddRange
-                                            // ldsfld ColonistBar::tmpPawns
-        yield return instruction;
-        instruction = instructionList[++i];
-
-        // ColonistBar.tmpMaps[i]
-        yield return new CodeInstruction(opcode: OpCodes.Ldsfld,
-          operand: AccessTools.Field(typeof(ColonistBar), "tmpMaps"));
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_1);
-        yield return new CodeInstruction(opcode: OpCodes.Callvirt,
-          operand: AccessTools.PropertyGetter(typeof(List<Map>), "Item"));
-        // ColonistBar.tmpPawns
-        yield return new CodeInstruction(opcode: OpCodes.Ldsfld,
-          operand: AccessTools.Field(typeof(ColonistBar), "tmpPawns"));
-        // Patch_Rendering::RecacheLocalVehicleEntries(map, tmpPawns)
-        yield return new CodeInstruction(opcode: OpCodes.Call,
-          operand: AccessTools.Method(typeof(Patch_Rendering), nameof(RecacheLocalVehicleEntries)));
-      }
-      else if (instruction.Calls(clearCachedEntriesMethod))
-      {
-        // TODO
-        yield return instruction; //CALLVIRT : List<int32>.Clear
-        instruction = instructionList[++i];
-
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
-          operand: AccessTools.Field(typeof(ColonistBar), "cachedEntries"));
-        yield return new CodeInstruction(opcode: OpCodes.Ldloca, operand: 0);
-        yield return new CodeInstruction(opcode: OpCodes.Call,
-          operand: AccessTools.Method(typeof(Patch_Rendering),
-            nameof(RecacheAerialVehicleEntries)));
-      }
-
-      yield return instruction;
-    }
-  }
-
-  private static void RecacheLocalVehicleEntries(Map map, List<Pawn> tmpPawns)
-  {
-    VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
-    foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
-    {
-      if (vehicle.Faction != Faction.OfPlayer)
-        continue;
-
-      if (vehicle.AllPawnsAboard.Count > 0)
-      {
-        foreach (Pawn pawn in vehicle.AllPawnsAboard)
-        {
-          if (pawn is { IsColonist: true })
-            tmpPawns.Add(pawn);
-        }
-      }
-    }
-  }
-
-  private static void RecacheAerialVehicleEntries(List<ColonistBar.Entry> cachedEntries,
-    ref int group)
-  {
-    foreach (AerialVehicleInFlight aerialVehicle in Find.World.GetComponent<VehicleWorldObjectsHolder>()
-     .AerialVehicles)
-    {
-      if (!aerialVehicle.IsPlayerControlled)
-        continue;
-
-      using ClearOnDispose<Pawn> cod = new(TmpPawns);
-      foreach (Pawn pawn in aerialVehicle.Vehicle.AllPawnsAboard)
-      {
-        if (pawn is { IsColonist: true })
-          TmpPawns.Add(pawn);
-      }
-      PlayerPawnsDisplayOrderUtility.Sort(TmpPawns);
-      foreach (Pawn pawn in TmpPawns)
-      {
-        cachedEntries.Add(new ColonistBar.Entry(pawn, null, group));
-      }
-      group++;
-    }
-  }
-
   /// <summary>
   /// Draw diagonal and shifted brackets for Boats
   /// </summary>
-  public static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
+  private static bool DrawSelectionBracketsVehicles(object obj, Material overrideMat)
   {
     VehiclePawn vehicle = obj as VehiclePawn ?? (obj as VehicleBuilding)?.vehicle;
     if (vehicle != null)
@@ -279,7 +163,7 @@ internal class Patch_Rendering : IPatchCategory
   /// <summary>
   /// Divert render call to instead render full vehicle in UI
   /// </summary>
-  public static bool CellInspectorDrawVehicle(Thing thing, ref int ___numLines)
+  private static bool CellInspectorDrawVehicle(Thing thing, ref int ___numLines)
   {
     if (thing is VehiclePawn vehicle)
     {
@@ -311,7 +195,7 @@ internal class Patch_Rendering : IPatchCategory
     return true;
   }
 
-  public static bool ProcessVehiclePostTickVisuals(Pawn __instance, int ticksPassed,
+  private static bool ProcessVehiclePostTickVisuals(Pawn __instance, int ticksPassed,
     CellRect viewRect)
   {
     if (__instance is VehiclePawn vehicle)

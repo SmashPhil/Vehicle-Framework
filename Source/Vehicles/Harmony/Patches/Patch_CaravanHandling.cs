@@ -179,12 +179,6 @@ internal class Patch_CaravanHandling : IPatchCategory
       nameof(GainComfortFromVehicle)));
 
     HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(SettlementDefeatUtility),
-        nameof(SettlementDefeatUtility.CheckDefeated)),
-      transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
-        nameof(CheckDefeatedWithVehiclesTranspiler)));
-
-    HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(Tale_DoublePawn), nameof(Tale_DoublePawn.Concerns)),
       prefix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(ConcernNullThing)));
@@ -798,31 +792,6 @@ internal class Patch_CaravanHandling : IPatchCategory
       return false;
     }
     return true;
-  }
-
-  // TODO - Need better transpiler to retrieve all map pawns
-  private static IEnumerable<CodeInstruction> CheckDefeatedWithVehiclesTranspiler(
-    IEnumerable<CodeInstruction> instructions)
-  {
-    List<CodeInstruction> instructionList = instructions.ToList();
-
-    for (int i = 0; i < instructionList.Count; i++)
-    {
-      CodeInstruction instruction = instructionList[i];
-
-      if (instruction.Calls(AccessTools.Property(typeof(MapPawns), nameof(MapPawns.FreeColonists))
-       .GetGetMethod()))
-      {
-        yield return new CodeInstruction(opcode: OpCodes.Callvirt,
-          operand: AccessTools.Property(typeof(MapPawns), nameof(MapPawns.AllPawnsSpawned))
-           .GetGetMethod());
-        yield return new CodeInstruction(opcode: OpCodes.Call,
-          operand: AccessTools.Method(typeof(CaravanHelper),
-            nameof(CaravanHelper.GrabPawnsFromMapPawnsInVehicle)));
-        instruction = instructionList[++i];
-      }
-      yield return instruction;
-    }
   }
 
   // REDO

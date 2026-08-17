@@ -293,6 +293,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     return pathCost < ImpassableCost;
   }
 
+  // TODO 1.7 - Remove in favor of PathGridCalculator::TerrainCost
   public static int TerrainCostAt(VehicleDef vehicleDef, TerrainDef terrainDef,
     StringBuilder stringBuilder = null)
   {

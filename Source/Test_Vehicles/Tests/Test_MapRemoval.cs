@@ -14,6 +14,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
 {
   private const int DefaultMapSize = 50;
 
+  protected Map map;
   protected T mapParent;
 
   protected abstract WorldObjectDef WorldObjectDef { get; }
@@ -37,7 +38,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
     mapParent.Tile = tile;
     mapParent.SetFaction(Faction);
     Find.WorldObjects.Add(mapParent);
-    Map map = MapGenerator.GenerateMap(new IntVec3(DefaultMapSize, 1, DefaultMapSize), mapParent,
+    map = MapGenerator.GenerateMap(new IntVec3(DefaultMapSize, 1, DefaultMapSize), mapParent,
       mapParent.MapGeneratorDef);
     CameraJumper.TryJump(map.Center, map);
     PostGenerateMap();
@@ -48,10 +49,14 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
   {
     if (mapParent?.Map is { Disposed: false })
     {
-      Map map = mapParent.Map;
       Current.Game.DeinitAndRemoveMap(map, false);
-      mapParent.Destroy();
       Assert.IsTrue(map is { Disposed: true });
+      map = null;
+    }
+
+    if (mapParent is { Destroyed: false })
+    {
+      mapParent.Destroy();
       Assert.IsTrue(mapParent is { Destroyed: true });
       mapParent = null;
     }
@@ -66,8 +71,10 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       passengers = 1
     });
     group.Spawn();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
     group.DisembarkAll();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -80,6 +87,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       animals = 1
     });
     group.Spawn();
+    Expect.IsFalse(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -92,6 +100,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
     });
     group.Spawn();
     Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsFalse(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -104,8 +113,10 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       passengers = 1
     });
     group.Spawn();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
     group.DisembarkAll();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -118,6 +129,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       animals = 1
     });
     group.Spawn();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -130,6 +142,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
     });
     group.Spawn();
     Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -143,8 +156,10 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.Spawn();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
     group.DisembarkAll();
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -158,6 +173,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
       comps = [CompGenerator.CompPropertiesVehicleLauncher]
     });
     group.Spawn();
+    Expect.IsFalse(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -171,6 +187,7 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
     });
     group.Spawn();
     Assert.IsTrue(group.pawns.NullOrEmpty());
+    Expect.IsFalse(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsTrue(mapParent.ShouldRemoveMapNow(out _));
   }
 
@@ -189,13 +206,15 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
         group.vehicle.CompVehicleLauncher.Props.skyfallerIncoming, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    GenSpawn.Spawn(skyfaller, map.Center, map, Rot4.North);
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 
   [Test]
   protected void VehicleSkyfallerLeaving()
   {
+    Assert.IsNotNull(map);
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
       permissions = VehiclePermissions.Mobile,
@@ -208,8 +227,9 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
         group.vehicle.CompVehicleLauncher.Props.skyfallerLeaving, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
-    Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
+    GenSpawn.Spawn(skyfaller, map.Center, map, Rot4.North);
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
+    Expect.IsFalse(map.Parent.ShouldRemoveMapNow(out _));
   }
 
   [Test]
@@ -227,7 +247,8 @@ internal abstract class Test_MapRemoval<T> where T : MapParent
         group.vehicle.CompVehicleLauncher.Props.skyfallerCrashing, group.vehicle);
     Assert.IsNotNull(skyfaller);
     using ScopeEntity se = new(skyfaller);
-    GenSpawn.Spawn(skyfaller, Find.CurrentMap.Center, Find.CurrentMap, Rot4.North);
+    GenSpawn.Spawn(skyfaller, map.Center, map, Rot4.North);
+    Expect.IsTrue(map.mapPawns.AnyPawnBlockingMapRemoval);
     Expect.IsFalse(mapParent.ShouldRemoveMapNow(out _));
   }
 }
