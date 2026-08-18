@@ -328,7 +328,7 @@ public static class CaravanHelper
 		bool sendMessage = true)
   {
     List<Pawn> pawnList = [.. pawns];
-    List<VehicleDef> vehicleDefs = pawnList.OfType<VehiclePawn>().UniqueVehicleDefs();
+    List<VehicleDef> vehicleDefs = pawnList.UniqueVehicleDefsInList();
 		if (!GenWorldClosest.TryFindClosestTile(exitFromTile,
           x => AllVehiclesPassableAt(vehicleDefs, x), out exitFromTile))
 		{
