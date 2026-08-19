@@ -84,7 +84,7 @@ internal class Patch_JobSystem : IPatchCategory
           }
           else
           {
-            pawn.jobs.StartJob(JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, -1),
+            pawn.jobs.StartJob(JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, pawn),
               JobCondition.Incompletable);
           }
           startingErrorRecoverJob = false;
@@ -112,7 +112,7 @@ internal class Patch_JobSystem : IPatchCategory
       {
         JobMaker.ReturnToPool(__result);
       }
-      __result = JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle);
+      __result = JobMaker.MakeJob(JobDefOf_Vehicles.IdleVehicle, pawn);
       return false;
     }
     return true;
