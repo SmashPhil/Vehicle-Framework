@@ -136,8 +136,7 @@ public static class CaravanHelper
 			VehicleDef largestVehicle = vehicleDefs.MaxBy(vehicleDef => vehicleDef.Size.z);
 			foreach (PlanetTile tile in NeighborTiles)
 			{
-				if (vehicleDefs.Exists(vehicleDef =>
-					!Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef)))
+				if (!AllVehiclesPassableAt(vehicleDefs, tile))
 					continue;
 
 				CaravanExitMapUtility.GetExitMapEdges(grid, currentTileID, tile, out Rot4 primary,
@@ -179,7 +178,7 @@ public static class CaravanHelper
 	}
 
 	/// <summary>
-	/// Vehicle has enough room to house all pawns 
+	/// Vehicle has enough room to house all pawns
 	/// </summary>
 	/// <param name="pawns"></param>
 	/// <returns></returns>
@@ -327,32 +326,35 @@ public static class CaravanHelper
 	public static VehicleCaravan ExitMapAndCreateVehicleCaravan(IEnumerable<Pawn> pawns,
 		Faction faction, PlanetTile exitFromTile, PlanetTile directionTile, PlanetTile destinationTile,
 		bool sendMessage = true)
-	{
-		if (!GenWorldClosest.TryFindClosestPassableTile(exitFromTile, out exitFromTile))
+  {
+    List<Pawn> pawnList = [.. pawns];
+    List<VehicleDef> vehicleDefs = pawnList.UniqueVehicleDefsInList();
+		if (!GenWorldClosest.TryFindClosestTile(exitFromTile,
+          x => AllVehiclesPassableAt(vehicleDefs, x), out exitFromTile))
 		{
 			Log.Error("Could not find any passable tile for a new caravan.");
 			return null;
 		}
-		if (Find.World.Impassable(directionTile))
+		if (!AllVehiclesPassableAt(vehicleDefs, directionTile))
 		{
 			directionTile = exitFromTile;
 		}
 
-		List<Pawn> pawnList = [];
+		List<Pawn> dismountedPawns = [];
 
 		Map map = null;
-		foreach (Pawn pawn in pawns)
+		foreach (Pawn pawn in pawnList)
 		{
 			if (!pawn.InVehicle())
-				pawnList.Add(pawn);
+				dismountedPawns.Add(pawn);
 			AddVehicleCaravanExitTaleIfShould(pawn);
 			map ??= pawn.MapHeld;
 		}
-		VehicleCaravan caravan = MakeVehicleCaravan(pawnList, faction, exitFromTile, false);
+		VehicleCaravan caravan = MakeVehicleCaravan(dismountedPawns, faction, exitFromTile, false);
 		Rot4 exitDir = map != null ?
 			Find.WorldGrid.GetRotFromTo(exitFromTile, directionTile) :
 			Rot4.Invalid;
-		foreach (Pawn pawn in pawnList)
+		foreach (Pawn pawn in dismountedPawns)
 		{
 			pawn.ExitMap(false, exitDir);
 		}
@@ -579,7 +581,7 @@ public static class CaravanHelper
 	}
 
 	/// <summary>
-	/// Get vehicle with the most free space that is able to hold cargo 
+	/// Get vehicle with the most free space that is able to hold cargo
 	/// </summary>
 	/// <param name="pawn"></param>
 	public static VehiclePawn UsableVehicleWithTheMostFreeSpace(Pawn pawn)
@@ -825,4 +827,15 @@ public static class CaravanHelper
 		}
 		return null;
 	}
+
+  private static bool AllVehiclesPassableAt(List<VehicleDef> vehicleDefs, PlanetTile tile)
+  {
+    WorldVehiclePathGrid vehiclePathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
+    foreach (VehicleDef vehicleDef in vehicleDefs)
+    {
+      if (!vehiclePathGrid.Passable(tile, vehicleDef))
+        return false;
+    }
+    return true;
+  }
 }
