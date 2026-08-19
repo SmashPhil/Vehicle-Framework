@@ -36,6 +36,11 @@ public static class TargetingHelper
 		return false;
 	}
 
+	internal static bool IsHostileToVehicleOrFaction(VehiclePawn vehicle, Thing target)
+	{
+		return vehicle.HostileTo(target) || target.HostileTo(vehicle.Faction);
+	}
+
 	/// <summary>
 	/// Best attack target for VehicleTurret
 	/// </summary>
@@ -81,7 +86,7 @@ public static class TargetingHelper
 			{
 				return false;
 			}
-			if (!searcherPawn.HostileTo(thing))
+			if (!IsHostileToVehicleOrFaction(searcherPawn, thing))
 			{
 				return false;
 			}
@@ -162,8 +167,14 @@ public static class TargetingHelper
 			return true;
 		};
 
-		List<IAttackTarget> tmpTargets =
-			[.. searcherPawn.Map.attackTargetsCache.GetPotentialTargetsFor(searcherPawn)];
+		var attackTargetsCache = searcherPawn.Map.attackTargetsCache;
+		HashSet<IAttackTarget> targetSet = [.. attackTargetsCache.GetPotentialTargetsFor(searcherPawn)];
+		if (searcherPawn.Faction != null)
+		{
+			targetSet.UnionWith(attackTargetsCache.TargetsHostileToFaction(searcherPawn.Faction));
+		}
+		List<IAttackTarget> tmpTargets = [.. targetSet];
+
 		bool flag = false;
 		for (int i = 0; i < tmpTargets.Count; i++)
 		{
