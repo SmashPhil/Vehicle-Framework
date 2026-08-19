@@ -340,21 +340,21 @@ public static class CaravanHelper
 			directionTile = exitFromTile;
 		}
 
-		List<Pawn> pawnList2 = [];
+		List<Pawn> dismountedPawns = [];
 
 		Map map = null;
 		foreach (Pawn pawn in pawnList)
 		{
 			if (!pawn.InVehicle())
-				pawnList2.Add(pawn);
+				dismountedPawns.Add(pawn);
 			AddVehicleCaravanExitTaleIfShould(pawn);
 			map ??= pawn.MapHeld;
 		}
-		VehicleCaravan caravan = MakeVehicleCaravan(pawnList2, faction, exitFromTile, false);
+		VehicleCaravan caravan = MakeVehicleCaravan(dismountedPawns, faction, exitFromTile, false);
 		Rot4 exitDir = map != null ?
 			Find.WorldGrid.GetRotFromTo(exitFromTile, directionTile) :
 			Rot4.Invalid;
-		foreach (Pawn pawn in pawnList2)
+		foreach (Pawn pawn in dismountedPawns)
 		{
 			pawn.ExitMap(false, exitDir);
 		}
@@ -830,9 +830,10 @@ public static class CaravanHelper
 
   private static bool AllVehiclesPassableAt(List<VehicleDef> vehicleDefs, PlanetTile tile)
   {
+    WorldVehiclePathGrid vehiclePathGrid = Find.World.GetComponent<WorldVehiclePathGrid>();
     foreach (VehicleDef vehicleDef in vehicleDefs)
     {
-      if (!Find.World.GetComponent<WorldVehiclePathGrid>().Passable(tile, vehicleDef))
+      if (!vehiclePathGrid.Passable(tile, vehicleDef))
         return false;
     }
     return true;
