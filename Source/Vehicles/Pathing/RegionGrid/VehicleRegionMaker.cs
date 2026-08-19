@@ -308,6 +308,7 @@ public class VehicleRegionMaker : VehicleGridManager
 
     private readonly VehicleRegionMaker regionMaker;
 
+    private readonly Map map;
     private readonly int mapWidth;
     private readonly int mapHeight;
     private readonly IPathingManager pathing;
@@ -321,7 +322,7 @@ public class VehicleRegionMaker : VehicleGridManager
     {
       this.regionMaker = regionMaker;
       pathing = regionMaker.pathing;
-      Map map = regionMaker.map;
+      map = regionMaker.map;
       (mapWidth, mapHeight) = (map.Size.x, map.Size.z);
     }
 
@@ -376,13 +377,15 @@ public class VehicleRegionMaker : VehicleGridManager
         Region.extentsClose.maxZ = cell.z;
       }
 
-      if (cell.x == CreatedFor.SizePadding ||
-          cell.x == mapWidth - 1 - CreatedFor.SizePadding ||
-          cell.z == CreatedFor.SizePadding ||
-          cell.z == mapHeight - 1 - CreatedFor.SizePadding)
-      {
-        Region.touchesMapEdge = true;
-      }
+      Region.touchesMapEdge |= TouchesEdge(map, cell, CreatedFor);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static bool TouchesEdge(Map map, IntVec3 cell, VehicleDef vehicleDef)
+    {
+      int maxLength = vehicleDef.MaxLength;
+      return cell.x == maxLength || cell.x == map.Size.x - 1 - maxLength ||
+             cell.z == maxLength || cell.z == map.Size.z - 1 - maxLength;
     }
 
     private bool IsChunkTouchingEdge(IntVec3 cell)
@@ -392,6 +395,7 @@ public class VehicleRegionMaker : VehicleGridManager
              cellRect.maxZ == mapHeight - 1;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static int CellToChunkIndex(IntVec3 cell)
     {
       int relativeX = cell.x - (cell.x - cell.x % VehicleRegion.ChunkSize);

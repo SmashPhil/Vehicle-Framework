@@ -265,9 +265,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   {
     List<TransferableOneWay> vehicles = [];
     List<TransferableOneWay> pawns = [];
+    Map map = null;
     foreach (TransferableOneWay transferable in transferables)
     {
-      switch (transferable.AnyThing)
+      Thing thing = transferable.AnyThing;
+      switch (thing)
       {
         case VehiclePawn:
           vehicles.Add(transferable);
@@ -276,10 +278,14 @@ internal class Patch_FormCaravanDialog : IPatchCategory
           pawns.Add(transferable);
           break;
       }
+      map ??= thing?.Map;
     }
 
     vehiclesTransfer?.Dispose();
-    vehiclesTransfer = new TransferableVehicleWidget("VF_Vehicles".Translate(), vehicles, pawns, tile: tile);
+    if (map != null)
+    {
+      vehiclesTransfer = new TransferableVehicleWidget(map, vehicles, pawns, tile: tile);
+    }
   }
 
   /// <summary>

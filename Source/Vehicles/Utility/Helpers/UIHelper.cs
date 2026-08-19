@@ -68,7 +68,7 @@ public static class UIHelper
 			}
 		}
 		vehicleWidget =
-			new TransferableVehicleWidget("VF_Vehicles".Translate(), vehicles, pawns, tile: tile);
+			new TransferableVehicleWidget(Find.CurrentMap, vehicles, pawns, tile: tile);
 		pawnWidget.AddSection("ColonistsSection".Translate(),
 			source.Where(t => t.AnyThing is Pawn { IsFreeColonist: true }));
 		pawnWidget.AddSection("PrisonersSection".Translate(),

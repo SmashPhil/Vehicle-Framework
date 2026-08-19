@@ -8,7 +8,6 @@ using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
 using Verse.Sound;
-using Vehicles;
 using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles.World;
@@ -45,6 +44,7 @@ public sealed class TransferableVehicleWidget : IDisposable
 
   private static bool showVehicleProps = true;
 
+  private readonly Map map;
   private readonly Section vehicleSection;
   private readonly List<TransferableOneWay> pawns;
   private readonly PlanetTile tile;
@@ -54,7 +54,7 @@ public sealed class TransferableVehicleWidget : IDisposable
   private readonly TransferableSorter sortSecondary;
 
   private readonly HashSet<VehicleDef> impassableOnTile = [];
-  private readonly HashSet<Thing> blockedVehicles = [];
+  private readonly HashSet<VehiclePawn> blockedVehicles = [];
 
   private Vector2 scrollPosition;
 
@@ -66,12 +66,12 @@ public sealed class TransferableVehicleWidget : IDisposable
     AllSorterDefs.AddRange(DefDatabase<TransferableVehicleSorterDef>.AllDefsListForReading);
   }
 
-  public TransferableVehicleWidget(string title, List<TransferableOneWay> vehicles,
+  public TransferableVehicleWidget(Map map, List<TransferableOneWay> vehicles,
     List<TransferableOneWay> pawns, PlanetTile tile = default)
   {
     vehicleSection = new Section
     {
-      title = title,
+      title = "VF_Vehicles".Translate(),
       transferables = vehicles
     };
     vehicleSection.portraits = new List<VehiclePortrait>(vehicles.Count);
@@ -79,7 +79,7 @@ public sealed class TransferableVehicleWidget : IDisposable
     {
       vehicleSection.portraits.Add(new VehiclePortrait());
     }
-
+    this.map = map;
     this.pawns = pawns;
     this.tile = tile;
 
@@ -123,21 +123,20 @@ public sealed class TransferableVehicleWidget : IDisposable
       }
     }
 
+    var positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
     // Vehicle Exit Check: mark blocked vehicles
     blockedVehicles.Clear();
-    Map map = Find.CurrentMap;
     if (map != null)
     {
-      foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+      foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
       {
-        if (pawn is not VehiclePawn vehicle)
+        if (!vehicle.VehicleDef.canCaravan || !vehicle.CanMove)
           continue;
-        if (!vehicle.VehicleDef.canCaravan)
-          continue;
-        if (!vehicle.CanMove)
-          continue;
+
         if (!vehicle.CanReachVehicleMapEdge())
+        {
           blockedVehicles.Add(vehicle);
+        }
       }
     }
   }

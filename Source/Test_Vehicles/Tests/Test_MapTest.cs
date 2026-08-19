@@ -32,7 +32,7 @@ internal abstract class Test_MapTest
 
 	protected static Faction Faction => Faction.OfPlayer;
 
-	protected virtual bool ShouldTest(VehicleDef vehicleDef)
+  protected virtual bool ShouldTest(VehicleDef vehicleDef)
 	{
 		return true;
 	}

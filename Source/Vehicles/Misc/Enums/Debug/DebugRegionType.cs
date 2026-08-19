@@ -11,4 +11,5 @@ public enum DebugRegionType
   Links = 1 << 2,
   PathCosts = 1 << 3,
   References = 1 << 4,
+  EdgeTouch = 1 << 5
 }

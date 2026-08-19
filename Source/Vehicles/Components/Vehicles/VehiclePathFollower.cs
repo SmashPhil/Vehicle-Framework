@@ -703,6 +703,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
       return;
     }
 
+    // TODO - This stops the vehicle 1 cell short, this check needs to be refactored
     Rot4 nextRot = Ext_Map.DirectionToCell(vehicle.Position, nextCell);
     if (nextRot.IsValid && vehicle.PawnOccupiedCells(nextCell, nextRot)
      .Any(cell => !cell.InBounds(vehicle.Map)))

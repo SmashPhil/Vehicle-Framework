@@ -433,7 +433,7 @@ public sealed class VehicleRegion : IPoolable
         // Flash every other second
         if (Mathf.RoundToInt(Time.realtimeSinceStartup * 2f) % 2 == 1)
         {
-          Material mat = DebugSolidColorMats.MaterialOf(Color.magenta * new Color(1f, 1f, 1f, 0.25f));
+          Material mat = DebugSolidColorMats.MaterialOf(new Color(1f, 0, 1f, 0.25f));
           List<IntVec3> cells = regionLink.span.Cells.ToList();
           foreach (IntVec3 cell in cells)
           {
@@ -441,6 +441,18 @@ public sealed class VehicleRegion : IPoolable
           }
           GenDraw.DrawFieldEdges(cells, Color.white);
         }
+      }
+    }
+
+    if ((debugRegionType & DebugRegionType.EdgeTouch) != 0)
+    {
+      Material mat = DebugSolidColorMats.MaterialOf(touchesMapEdge ?
+        new Color(1, 1, 0, 0.25f) :
+        new Color(1, 0, 0, 0.25f));
+      List<IntVec3> cells = Cells.ToList();
+      foreach (IntVec3 cell in cells)
+      {
+        CellRenderer.RenderCell(cell, mat);
       }
     }
   }

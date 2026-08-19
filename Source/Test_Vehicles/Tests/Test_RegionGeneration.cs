@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CoreLib.Performance;
 using DevTools.Testing;
 using HarmonyLib;
+using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using Priority = DevTools.Testing.Priority;
@@ -9,6 +11,8 @@ using Priority = DevTools.Testing.Priority;
 namespace Vehicles.Testing;
 
 [TestFixture(TestType.Playing)]
+[TestCategory(TestCategoryNames.MapGeneration, TestCategoryNames.Pathing)]
+[TestDescription("Vehicle region generation across vehicle sizes.")]
 internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] IntVec2 size) : Test_MapTest
 {
   private static readonly
@@ -18,7 +22,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
 
   private VehicleGroup group;
   private readonly HashSet<VehicleRegion> regions = [];
-  
+
   private MockPathingManager pathing;
   private RegionData regionData;
 
@@ -39,7 +43,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
   }
 
   [SetUp, ExecutionPriority(Priority.First)]
-  public void SetUp()
+  private void SetUp()
   {
     group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
     {
@@ -54,7 +58,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
   }
 
   [TearDown]
-  public void TearDown()
+  private void TearDown()
   {
     group.Dispose();
     Assert.IsFalse(group.vehicle.Spawned);
@@ -63,7 +67,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
   }
 
   [SetUp]
-  public void PreWarmObjectPool()
+  private void PreWarmObjectPool()
   {
     // Prewarm object pools, if spans change without invalidating the links, it will
     // not send the link to pool before requesting a new one. It will still utilize
@@ -78,7 +82,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
 
   [Test]
   [TestDescription("Passability changes dirty regions and trigger region regeneration lazily.")]
-  public void RegenerateChunk()
+  private void RegenerateChunk()
   {
     CellRect testArea = TestArea(group.vehicle.VehicleDef);
     FillArea(testArea);
@@ -93,7 +97,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
 
   [Test]
   [TestDescription("Consecutive region updates use object pool instead of creating new regions.")]
-  public void RegionPooling()
+  private void RegionPooling()
   {
     using var rc = new ObjectCountWatcher<VehicleRegion>();
     using var rlc = new ObjectCountWatcher<VehicleRegionLink>();
@@ -119,7 +123,7 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
 
   [Test]
   [TestDescription("Full chunk filled with impassable entities leaves no invalid regions afterward.")]
-  public void AllImpassable()
+  private void AllImpassable()
   {
     CellRect testArea = TestArea(group.vehicle.VehicleDef);
     FillArea(testArea);
@@ -127,8 +131,10 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
     Assert.IsFalse(RegionGrid.AnyInvalidRegions);
   }
 
+  // TODO VF-58
   [Test, Disabled]
-  public void Padding(/*[Parameters(1, 2, 3, 4)] int width*/)
+  [TestDescription("Vehicle size padding determines neighboring cells floodfilled from region.")]
+  private void Padding(/*[Parameters(1, 2, 3, 4)] int width*/)
   {
     CellRect testArea = TestArea(group.vehicle.VehicleDef);
     IntVec3 center = testArea.CenterCell;
@@ -146,7 +152,8 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
   }
 
   [Test]
-  public void LinksToNeighbors()
+  [TestDescription("Regions share valid links with cardinal-neighboring chunks.")]
+  private void LinksToNeighbors()
   {
     CellRect testArea = TestArea(group.vehicle.VehicleDef);
     IntVec3 center = testArea.CenterCell;
@@ -185,6 +192,49 @@ internal sealed class Test_RegionGeneration([ParametersSource("VehicleSizes")] I
       VehicleRegionLink neighborLink = neighborLinks.items.FirstOrDefault(link =>
         link.LinksRegions(region, neighbor));
       return regionLink == neighborLink;
+    }
+  }
+
+  [Test]
+  [TestDescription("Regions touching the map edge are marked correctly.")]
+  private void TouchesMapEdge()
+  {
+    VehicleDef vehicleDef = group.vehicle.VehicleDef;
+    int padding = EdgePadding(Mathf.Max(vehicleDef.Size.x, vehicleDef.Size.z));
+    VehicleRegionGrid regionGrid = pathing.RegionData.regionGridManager[RegionGridType.Normal];
+    foreach (VehicleRegion region in regionGrid.AllRegionsNoRebuildInvalidAllowed)
+    {
+      Assert.IsNotNull(region);
+      Assert.IsTrue(region.valid);
+      bool expectedTouchMapEdge = false;
+      foreach (IntVec3 cell in region.Cells)
+      {
+        bool touchesLeft = cell.x == padding;
+        bool touchesBottom = cell.z == padding;
+        bool touchesRight = cell.x == map.Size.x - 1 - padding;
+        bool touchesTop = cell.z == map.Size.z - 1 - padding;
+        expectedTouchMapEdge = touchesLeft || touchesBottom || touchesRight || touchesTop;
+        if (expectedTouchMapEdge)
+          break;
+      }
+      Expect.AreEqual(expectedTouchMapEdge, region.touchesMapEdge);
+    }
+    return;
+
+    static int EdgePadding(int size)
+    {
+      return size switch
+      {
+        0 => 0,
+        1 => 0,
+        2 => 1,
+        3 => 1,
+        4 => 2,
+        5 => 2,
+        6 => 3,
+        7 => 3,
+        _ => throw new NotImplementedException()
+      };
     }
   }
 

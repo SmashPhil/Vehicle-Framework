@@ -1,4 +1,5 @@
-﻿using SmashTools;
+﻿using System.Runtime.CompilerServices;
+using UnityEngine;
 using Verse;
 
 namespace Vehicles;
@@ -12,7 +13,7 @@ internal sealed class RegionSourceNormal : IRegionSource
     if (!pathGrid.Walkable(cell))
       return RegionType.None;
 
-    if (HugsEdge(manager.Map, cell, vehicleDef))
+    if (HangsOverEdge(manager.Map, cell, vehicleDef))
       return RegionType.None;
 
     if (!VerifyCardinalCellSpace(manager, cell, vehicleDef))
@@ -21,17 +22,18 @@ internal sealed class RegionSourceNormal : IRegionSource
     return RegionType.Normal;
   }
 
-  private static bool HugsEdge(Map map, IntVec3 pos, VehicleDef vehicleDef)
+  /// <summary>
+  /// Checks cardinal rotations of the vehicle to determine if it will go out of bounds for either rotation.
+  /// </summary>
+  /// <returns>
+  /// <see langword="true"/> if either cardinal rect is out of bounds, <see langword="false"/> otherwise.
+  /// </returns>
+  [MethodImpl(MethodImplOptions.AggressiveInlining)]
+  private static bool HangsOverEdge(Map map, IntVec3 cell, VehicleDef vehicleDef)
   {
-    CellRect verticalRect = vehicleDef.VehicleRect(pos, Rot8.North);
-    CellRect horizontalRect = vehicleDef.VehicleRect(pos, Rot8.East);
-
-    foreach (IntVec3 cell in new CellRectOverlap(verticalRect, horizontalRect))
-    {
-      if (!cell.InBounds(map))
-        return true;
-    }
-    return false;
+    int padding = vehicleDef.MaxLength;
+    return cell.x - padding < 0 || cell.x + padding >= map.Size.x ||
+           cell.z - padding < 0 || cell.z + padding >= map.Size.z;
   }
 
   private static bool VerifyCardinalCellSpace(IPathingManager manager, IntVec3 cell, VehicleDef vehicleDef)

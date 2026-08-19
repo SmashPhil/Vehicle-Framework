@@ -114,6 +114,11 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
   /// </summary>
   public int SizePadding { get; private set; }
 
+  /// <summary>
+  /// Max length this vehicle extends from its true position.
+  /// </summary>
+  public int MaxLength => Mathf.FloorToInt(Mathf.Max(Size.x, Size.z) / 2f);
+
   public MaterialPropertyBlock PropertyBlock { get; private set; }
 
   public VehicleFleshTypeDef BodyType => kindDef.RaceProps.FleshType as VehicleFleshTypeDef;
