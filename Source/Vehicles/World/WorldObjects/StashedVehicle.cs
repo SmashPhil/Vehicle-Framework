@@ -11,7 +11,7 @@ using Verse;
 
 namespace Vehicles.World;
 
-public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
+public class StashedVehicle : DynamicDrawnWorldObject, IVehicleWorldObject
 {
 	private ThingOwner<Thing> stash = [];
 
@@ -31,6 +31,10 @@ public class StashedVehicle : DynamicDrawnWorldObject, IThingHolder
 			}
 		}
 	}
+
+  public bool CanDismount => false;
+
+  public IEnumerable<Pawn> DismountedPawns => [];
 
 	public override Material Material
 	{
