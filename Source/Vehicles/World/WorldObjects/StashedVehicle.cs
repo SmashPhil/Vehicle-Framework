@@ -32,9 +32,9 @@ public class StashedVehicle : DynamicDrawnWorldObject, IVehicleWorldObject
 		}
 	}
 
-  public bool CanDismount => false;
+  bool IVehicleWorldObject.CanDismount => false;
 
-  public IEnumerable<Pawn> DismountedPawns => [];
+  IEnumerable<Pawn> IVehicleWorldObject.DismountedPawns => [];
 
 	public override Material Material
 	{
