@@ -97,10 +97,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 	}
 
 	// All pawns will be in the AerialVehicle at all times.
-	public IEnumerable<Pawn> DismountedPawns
-	{
-		get { yield break; }
-	}
+  public IEnumerable<Pawn> DismountedPawns => [];
 
 	public override Material Material
 	{
