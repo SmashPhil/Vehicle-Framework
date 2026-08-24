@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using CoreLib;
@@ -13,6 +14,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.Sound;
+using Trace = SmashTools.Trace;
 
 namespace Vehicles.World;
 
@@ -796,6 +798,7 @@ public class VehicleCaravan : Caravan, IVehicleWorldObject, ITargeterSource<Glob
 
   protected override void TickInterval(int delta)
   {
+    base.TickInterval(delta);
     RecacheStatAverages();
     if (VehiclesNeedRepairs && Repairing)
     {
