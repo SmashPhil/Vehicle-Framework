@@ -13,7 +13,7 @@ namespace Vehicles.World;
 
 public class StashedVehicle : DynamicDrawnWorldObject, IVehicleWorldObject
 {
-	private ThingOwner<Thing> stash = [];
+	private ThingOwner<Thing> stash;
 
 	private static readonly StringBuilder InspectStringBuilder = new();
 	private static readonly Dictionary<VehicleDef, int> VehicleCounts = [];
@@ -52,6 +52,11 @@ public class StashedVehicle : DynamicDrawnWorldObject, IVehicleWorldObject
 			return cachedMaterial;
 		}
 	}
+
+  public StashedVehicle()
+  {
+    stash = [with(this)];
+  }
 
 	public override void Draw()
 	{

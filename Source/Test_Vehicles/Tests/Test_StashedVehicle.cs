@@ -107,12 +107,15 @@ internal sealed class Test_StashedVehicle
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
 		Assert.IsNotNull(vehicleCaravan);
+    Expect.AreEqual(vehicleCaravan, group.vehicle.ParentHolder);
 		using ScopeWorldObject swo = new(vehicleCaravan);
 		group.DisembarkOne();
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
 		using ScopeWorldObject swc = new(stashedVehicle);
 		using ScopeWorldObject sc = new(caravan);
+
+    Expect.AreEqual(stashedVehicle, group.vehicle.ParentHolder);
 		Expect.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle));
 		CheckAnyNonWorldPawns.Invoke(caravan, null);
 		Expect.AreEqual(caravan.PawnsListForReading.Count, Drivers + Passengers + Animals);
@@ -135,6 +138,7 @@ internal sealed class Test_StashedVehicle
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([vehicle], Faction.OfPlayer, map.Tile, true);
 		Assert.IsNotNull(vehicleCaravan);
+    Expect.AreEqual(vehicleCaravan, vehicle.ParentHolder);
 		using ScopeWorldObject svc = new(vehicleCaravan);
 		vehicleCaravan.Tile = map.Tile;
 
@@ -143,6 +147,8 @@ internal sealed class Test_StashedVehicle
 		Assert.IsNotNull(caravan);
 		using ScopeWorldObject ssv = new(stashedVehicle);
 		using ScopeWorldObject sc = new(caravan);
+
+    Expect.AreEqual(stashedVehicle, vehicle.ParentHolder);
 		Expect.IsTrue(stashedVehicle.Vehicles.Contains(vehicle), "Vehicle Stashed");
 
 		Assert.IsNotNull(caravan);
@@ -186,12 +192,14 @@ internal sealed class Test_StashedVehicle
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
 		Assert.IsNotNull(vehicleCaravan);
+    Expect.AreEqual(vehicleCaravan, group.vehicle.ParentHolder);
 		using ScopeWorldObject svc = new(vehicleCaravan);
 		vehicleCaravan.Tile = map.Tile;
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
 		Assert.IsNotNull(stashedVehicle);
 		Assert.IsNotNull(caravan);
+    Expect.AreEqual(stashedVehicle, group.vehicle.ParentHolder);
 		using ScopeWorldObject ssv = new(stashedVehicle);
 		using ScopeWorldObject sc = new(caravan);
 
@@ -207,6 +215,7 @@ internal sealed class Test_StashedVehicle
 		}
 
 		VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
+    Expect.AreEqual(mergedVehicleCaravan, group.vehicle.ParentHolder);
 		using ScopeWorldObject smvc = new(mergedVehicleCaravan);
 		mergedVehicleCaravan.RecacheVehicles();
 		// +1 for vehicle
@@ -234,17 +243,20 @@ internal sealed class Test_StashedVehicle
 
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
+    Expect.AreEqual(vehicleCaravan, group.vehicle.ParentHolder);
 		vehicleCaravan.Tile = map.Tile;
 		using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
 		SaveTester.Write();
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    Expect.AreEqual(stashedVehicle, group.vehicle.ParentHolder);
 		Assert.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle), "Vehicle Stashed");
 		Assert.IsNotNull(caravan);
 		using ScopeWorldObject scopeStash = new(stashedVehicle);
 		SaveTester.Write();
 
 		VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
+    Expect.AreEqual(mergedVehicleCaravan, group.vehicle.ParentHolder);
 		Assert.IsNotNull(mergedVehicleCaravan);
 		using ScopeWorldObject scopeMerge = new(mergedVehicleCaravan);
 		SaveTester.Write();
@@ -267,10 +279,12 @@ internal sealed class Test_StashedVehicle
 
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([group.vehicle], Faction.OfPlayer, map.Tile, true);
+    Expect.AreEqual(vehicleCaravan, group.vehicle.ParentHolder);
 		vehicleCaravan.Tile = map.Tile;
 		using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
+    Expect.AreEqual(stashedVehicle, group.vehicle.ParentHolder);
 		Assert.IsTrue(stashedVehicle.Vehicles.Contains(group.vehicle), "Vehicle Stashed");
 		Assert.IsNotNull(caravan);
 		Assert.IsFalse(stashedVehicle.GetDirectlyHeldThings().dontTickContents);
@@ -313,12 +327,14 @@ internal sealed class Test_StashedVehicle
 
 		VehicleCaravan vehicleCaravan =
 			CaravanHelper.MakeVehicleCaravan([vehicle], Faction.OfPlayer, map.Tile, true);
+    Expect.AreEqual(vehicleCaravan, vehicle.ParentHolder);
 		using ScopeWorldObject scopeCaravan = new(vehicleCaravan);
 		vehicleCaravan.Tile = map.Tile;
 
 		StashedVehicle stashedVehicle = StashedVehicle.Create(vehicleCaravan, out Caravan caravan);
 		using ScopeWorldObject scopeStash = new(stashedVehicle);
 
+    Expect.AreEqual(stashedVehicle, vehicle.ParentHolder);
 		Expect.IsTrue(stashedVehicle.Vehicles.Contains(vehicle), "Vehicle Stashed");
 
 		Find.WorldPawns.gc.CancelGCPass();
@@ -338,6 +354,8 @@ internal sealed class Test_StashedVehicle
 
 		VehicleCaravan mergedVehicleCaravan = stashedVehicle.Notify_CaravanArrived(caravan);
 		using ScopeWorldObject scopeMergeCaravan = new(mergedVehicleCaravan);
+
+    Expect.AreEqual(mergedVehicleCaravan, vehicle.ParentHolder);
 		Assert.IsNotNull(mergedVehicleCaravan);
 		Assert.IsTrue(mergedVehicleCaravan.ContainsPawn(vehicle), "Vehicle Merged Into Caravan");
 
