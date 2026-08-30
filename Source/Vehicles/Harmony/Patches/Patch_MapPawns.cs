@@ -77,20 +77,17 @@ internal class Patch_MapPawns : IPatchCategory
     }
   }
 
-  private static void AllPawnsInVehiclesUnspawned(List<Pawn> ___allPawnsUnspawnedResult)
+  private static void AllPawnsInVehiclesUnspawned(Map ___map, List<Pawn> ___allPawnsUnspawnedResult)
   {
-    foreach (Map map in Find.Maps)
+    VehiclePositionManager positionMgr = ___map.GetDetachedMapComponent<VehiclePositionManager>();
+    foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
     {
-      VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
-      foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
-      {
-        if (vehicle.AllPawnsAboard.Count == 0)
-          continue;
+      if (vehicle.AllPawnsAboard.Count == 0)
+        continue;
 
-        foreach (Pawn pawn in vehicle.AllPawnsAboard)
-        {
-          ___allPawnsUnspawnedResult.Add(pawn);
-        }
+      foreach (Pawn pawn in vehicle.AllPawnsAboard)
+      {
+        ___allPawnsUnspawnedResult.Add(pawn);
       }
     }
   }
