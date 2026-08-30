@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
-using SmashTools.Rendering;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
@@ -49,7 +48,7 @@ public class Command_CooldownAction : Command_Turret
     }
   }
 
-  public void HaltTurret()
+  protected void HaltTurret()
   {
     turret.SetTarget(LocalTargetInfo.Invalid);
   }

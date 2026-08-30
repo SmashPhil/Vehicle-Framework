@@ -22,7 +22,7 @@ public class Command_TargeterCooldownAction : Command_CooldownAction
     }
   }
 
-  public void CommitTarget(LocalTargetInfo target)
+  private void CommitTarget(LocalTargetInfo target)
   {
     turret.SetTarget(target);
     turret.ResetPrefireTimer();
