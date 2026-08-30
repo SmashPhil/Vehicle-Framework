@@ -23,12 +23,8 @@
 -->
 
 <Project>
-
     <!-- User settings -->
     <PropertyGroup>
-        <!-- Path to RimWorld root folder (optional, overrides auto-detection) -->
-        <RimWorldDirectory>D:\SteamLibrary\steamapps\common\RimWorld</RimWorldDirectory>
-
         <!-- Require exact patch match? Set to false for wildcard match -->
         <UseStrictRimWorldVersionComparison>false</UseStrictRimWorldVersionComparison>
 
