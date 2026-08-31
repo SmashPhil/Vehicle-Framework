@@ -79,9 +79,6 @@ public sealed class VehiclePortrait : IDisposable
   /// <param name="request">BlitRequest if render texture needs to be redrawn.</param>
   public void Draw(Rect rect, in BlitRequest request)
   {
-    if (Event.current.type != EventType.Repaint)
-      return;
-
     using WidgetGroupScope group = new(rect);
     Rect vehicleRect = rect.AtZero();
     if (IsFeatureEnabled(BlitTexturePortraits))
