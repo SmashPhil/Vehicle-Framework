@@ -144,6 +144,11 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       original: AccessTools.Method(typeof(Dialog_FormCaravan), "DoBottomButtons"),
       transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(StartRoutePlanningForVehiclesTranspiler)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Dialog_FormCaravan),
+        nameof(Dialog_FormCaravan.Notify_ChoseRoute)),
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(ChooseVehicleStartingTileTranspiler)));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Dialog_FormCaravan), "TrySend"),
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(TryAndSendWithVehicles)));
@@ -622,9 +627,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     MethodInfo startPlanningMethod =
       AccessTools.Method(typeof(WorldRoutePlanner), nameof(WorldRoutePlanner.Start),
         parameters: [typeof(Dialog_FormCaravan)]);
-    FieldInfo mapField = AccessTools.Field(typeof(Dialog_FormCaravan), "map");
-    FieldInfo autoSelectTravelSuppliesField =
-      AccessTools.Field(typeof(Dialog_FormCaravan), "autoSelectTravelSupplies");
     for (int i = 0; i < instructionList.Count; i++)
     {
       CodeInstruction instruction = instructionList[i];
@@ -634,13 +636,6 @@ internal class Patch_FormCaravanDialog : IPatchCategory
         // Callvirt WorldRoutePlanner::Start(Dialog_FormCaravan)
         instruction = instructionList[++i];
         // ON STACK - WorldRoutePlanner instance, Dialog_FormCaravan instance
-        // this.map
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldfld, operand: mapField);
-        // this.autoSelectTravelSupplies
-        yield return new CodeInstruction(opcode: OpCodes.Ldarg_0);
-        yield return new CodeInstruction(opcode: OpCodes.Ldfld,
-          operand: autoSelectTravelSuppliesField);
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_FormCaravanDialog),
             nameof(WorldRoutePannerReroute)));
@@ -651,7 +646,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
 
   // NOTE - It's easier to pass in the world route planner since it's already on the stack
   private static void WorldRoutePannerReroute(WorldRoutePlanner routePlanner,
-    Dialog_FormCaravan formCaravan, Map map, bool autoSelectTravelSupplies)
+    Dialog_FormCaravan formCaravan)
   {
     if (VehiclesSelected(formCaravan.transferables))
     {
@@ -666,31 +661,44 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       {
         Find.WindowStack.Add(formCaravan);
         formCaravan.Notify_NoLongerChoosingRoute();
-      }, ChoseVehicleRoute);
+      }, formCaravan.Notify_ChoseRoute);
     }
     else
     {
       routePlanner.Start(formCaravan);
     }
-    return;
+  }
 
-    void ChoseVehicleRoute(PlanetTile tile)
+  private static IEnumerable<CodeInstruction> ChooseVehicleStartingTileTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    MethodInfo bestExitTileMethod = AccessTools.Method(typeof(CaravanExitMapUtility),
+      nameof(CaravanExitMapUtility.BestExitTileToGoTo),
+      parameters: [typeof(PlanetTile), typeof(Map)]);
+    MethodInfo replacement = AccessTools.Method(typeof(Patch_FormCaravanDialog),
+      nameof(BestExitTileToGoTo));
+
+    foreach (CodeInstruction instruction in instructions)
     {
-      CaravanFormation.formation.DestinationTile = tile;
-      List<VehicleDef> vehicleDefs = TransferableUtility
-       .GetPawnsFromTransferables(formCaravan.transferables)
-       .UniqueVehicleDefsInList();
-      CaravanFormation.formation.StartingTile =
-        CaravanHelper.BestExitTileToGoTo(vehicleDefs, tile, map);
-      CaravanFormation.formation.TicksToArriveDirty = true;
-      CaravanFormation.formation.DaysWorthOfFoodDirty = true;
-
-      formCaravan.soundAppear.PlayOneShotOnCamera();
-      if (autoSelectTravelSupplies)
+      if (instruction.Calls(bestExitTileMethod))
       {
-        CaravanFormation.formation.SelectApproximateBestTravelSupplies();
+        yield return new CodeInstruction(OpCodes.Ldarg_0);
+        instruction.operand = replacement;
       }
+      yield return instruction;
     }
+  }
+
+  private static PlanetTile BestExitTileToGoTo(PlanetTile destinationTile, Map map,
+    Dialog_FormCaravan formCaravan)
+  {
+    if (!VehiclesSelected(formCaravan.transferables))
+      return CaravanExitMapUtility.BestExitTileToGoTo(destinationTile, map);
+
+    List<VehicleDef> vehicleDefs = TransferableUtility
+     .GetPawnsFromTransferables(formCaravan.transferables)
+     .UniqueVehicleDefsInList();
+    return CaravanHelper.BestExitTileToGoTo(vehicleDefs, destinationTile, map);
   }
 
   /// <summary>
