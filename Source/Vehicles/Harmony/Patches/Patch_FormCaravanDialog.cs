@@ -282,10 +282,9 @@ internal class Patch_FormCaravanDialog : IPatchCategory
     }
 
     vehiclesTransfer?.Dispose();
-    if (map != null)
-    {
-      vehiclesTransfer = new TransferableVehicleWidget(map, vehicles, pawns, tile: tile);
-    }
+    vehiclesTransfer = map != null ?
+      new TransferableVehicleWidget(vehicles, pawns, map) :
+      new TransferableVehicleWidget(vehicles, pawns, tile);
   }
 
   /// <summary>

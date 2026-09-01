@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -44,7 +45,6 @@ public sealed class TransferableVehicleWidget : IDisposable
 
   private static bool showVehicleProps = true;
 
-  private readonly Map map;
   private readonly Section vehicleSection;
   private readonly List<TransferableOneWay> pawns;
   private readonly PlanetTile tile;
@@ -66,8 +66,7 @@ public sealed class TransferableVehicleWidget : IDisposable
     AllSorterDefs.AddRange(DefDatabase<TransferableVehicleSorterDef>.AllDefsListForReading);
   }
 
-  public TransferableVehicleWidget(Map map, List<TransferableOneWay> vehicles,
-    List<TransferableOneWay> pawns, PlanetTile tile = default)
+  public TransferableVehicleWidget(List<TransferableOneWay> vehicles, List<TransferableOneWay> pawns, PlanetTile tile)
   {
     vehicleSection = new Section
     {
@@ -79,7 +78,6 @@ public sealed class TransferableVehicleWidget : IDisposable
     {
       vehicleSection.portraits.Add(new VehiclePortrait());
     }
-    this.map = map;
     this.pawns = pawns;
     this.tile = tile;
 
@@ -87,6 +85,24 @@ public sealed class TransferableVehicleWidget : IDisposable
     sortSecondary = new TransferableSorter(this, TransferableVehicleSorterDefOf.CargoCapacity);
 
     Init();
+  }
+
+  public TransferableVehicleWidget(List<TransferableOneWay> vehicles, List<TransferableOneWay> pawns, [NotNull] Map map) :
+    this(vehicles, pawns, map.Tile)
+  {
+    // Vehicle Exit Check: mark blocked vehicles
+    blockedVehicles.Clear();
+    var positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
+    foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
+    {
+      if (!vehicle.VehicleDef.canCaravan || !vehicle.CanMove)
+        continue;
+
+      if (!vehicle.CanReachVehicleMapEdge())
+      {
+        blockedVehicles.Add(vehicle);
+      }
+    }
   }
 
   private float Height { get; set; } = -1;
@@ -119,23 +135,6 @@ public sealed class TransferableVehicleWidget : IDisposable
         if (!worldVehiclePathGrid.Passable(tile, vehicleDef))
         {
           impassableOnTile.Add(vehicleDef);
-        }
-      }
-    }
-
-    var positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
-    // Vehicle Exit Check: mark blocked vehicles
-    blockedVehicles.Clear();
-    if (map != null)
-    {
-      foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
-      {
-        if (!vehicle.VehicleDef.canCaravan || !vehicle.CanMove)
-          continue;
-
-        if (!vehicle.CanReachVehicleMapEdge())
-        {
-          blockedVehicles.Add(vehicle);
         }
       }
     }
