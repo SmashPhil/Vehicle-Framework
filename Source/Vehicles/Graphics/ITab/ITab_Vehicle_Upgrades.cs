@@ -432,7 +432,7 @@ public class ITab_Vehicle_Upgrades : ITab
   private void DrawUpgradeNodes(Rect rect)
   {
     Rect detailRect = InfoNode != null ? GetDetailRect(rect) : Rect.zero;
-    bool isOverDetail = Mouse.IsOver(detailRect);
+    bool isOverDetail = InfoNode != null && Mouse.IsOver(detailRect);
     foreach (UpgradeNode upgradeNode in Vehicle.CompUpgradeTree.Props.def.nodes)
     {
       if (upgradeNode.hidden)
@@ -494,7 +494,8 @@ public class ITab_Vehicle_Upgrades : ITab
     }
     if (InfoNode != null)
     {
-      DrawInfoPanel(detailRect);
+      // SelectedNode may have changed, we need to refetch the detail rect.
+      DrawInfoPanel(GetDetailRect(rect));
     }
   }
 
