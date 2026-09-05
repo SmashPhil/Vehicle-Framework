@@ -340,7 +340,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     Map.GetCachedMapComponent<ListerVehiclesRepairable>().NotifyVehicleSpawned(this);
     ResetRenderStatus();
 
-    UnityThread.ExecuteOnMainThread(ReclaimPosition);
+    ReclaimPosition();
     if (!respawningAfterLoad)
     {
       // Pawn::SpawnSetup checks game over condition, but we need to redo this after registering the position.
@@ -352,7 +352,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
   {
     // Needs to occur before comps so vehicle can initialize managers before comps access them
     if (Scribe.mode == LoadSaveMode.PostLoadInit)
+    {
       PostLoad();
+    }
 
     base.ExposeData();
 

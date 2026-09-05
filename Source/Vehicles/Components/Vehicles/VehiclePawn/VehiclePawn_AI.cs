@@ -1,6 +1,7 @@
 ﻿using System;
 using RimWorld;
 using SmashTools;
+using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 
@@ -110,6 +111,9 @@ public partial class VehiclePawn
   /// <remarks>Shorthand for <see cref="VehiclePositionManager.ClaimPosition(VehiclePawn)"/></remarks>
   public void ReclaimPosition()
   {
+    // If the vehicle is despawned in the same frame it was spawned, the map will may be null by
+    // the time it tries to reclaim its position.
+    Assert.IsTrue(Spawned, "Trying to reclaim position while despawned.");
     Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
   }
 
