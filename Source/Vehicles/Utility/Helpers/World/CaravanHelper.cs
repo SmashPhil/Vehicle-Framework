@@ -26,10 +26,8 @@ public static class CaravanHelper
 	private static int pawnsBeingAdded;
 
 	/// <summary>
-	/// VehicleCaravan is able to be created and embark given list of pawns
+	/// VehicleCaravan can be created and embark given list of pawns
 	/// </summary>
-	/// <param name="pawns"></param>
-	/// <returns></returns>
 	public static bool AbleToEmbark(List<Pawn> pawns)
 	{
 		return HasEnoughSpacePawns(pawns) && HasEnoughPawnsToEmbark(pawns);
@@ -358,11 +356,13 @@ public static class CaravanHelper
 		{
 			pawn.ExitMap(false, exitDir);
 		}
-		// NOTE - use pawns NOT PawnsListForReading, don't add boarded to world pawns or they'll get ticked twice
+		// NOTE: use pawns NOT PawnsListForReading. Don't add boarded to world pawns, or they'll get ticked twice.
 		foreach (Pawn pawn in caravan.pawns)
 		{
-			if (!pawn.IsWorldPawn())
-				Find.WorldPawns.PassToWorld(pawn);
+      if (!pawn.IsWorldPawn())
+      {
+        Find.WorldPawns.PassToWorld(pawn);
+      }
 		}
 		if (map != null)
 		{

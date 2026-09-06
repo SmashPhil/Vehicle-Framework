@@ -831,6 +831,7 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   private static void SplitCaravanPostOpen(Dialog_SplitCaravan __instance, List<TabRecord> ___tabsList,
     Caravan ___caravan)
   {
+    CaravanHelper.assignedSeats.Clear();
     selectedTab = TabVehicles;
     CaravanFormation.splitter = new SplitInfo(__instance, ___caravan);
     ___tabsList.Clear();
