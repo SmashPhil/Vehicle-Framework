@@ -94,7 +94,7 @@ public class VehicleSkyfaller_Arriving : VehicleSkyfaller
     {
       GenSpawn.Spawn(vehicle, Position, Map, LandingRotation);
       vehicle.TryDamageObstructions();
-      if (VehicleMod.settings.main.deployOnLanding)
+      if (VehicleMod.settings.main.deployOnLanding || vehicle.Faction != Faction.OfPlayer)
       {
         vehicle.CompVehicleLauncher.SetTimedDeployment();
       }
