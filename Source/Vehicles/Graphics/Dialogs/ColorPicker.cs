@@ -1,17 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using Verse;
 
 namespace Vehicles;
 
-public class ColorPicker
+public class ColorPicker : IDisposable
 {
 	private static readonly Color Blackist = new(0.06f, 0.06f, 0.06f);
 
 	private bool draggingColorPicker;
 	private bool draggingHue;
 
-	private readonly Texture2D colorChart = new(255, 255);
-	private readonly Texture2D hueChart = new(1, 255);
+	private Texture2D colorChart = new(255, 255);
+	private Texture2D hueChart = new(1, 255);
 
 	public delegate void SetColor(float h, float s, float v);
 
@@ -34,6 +35,14 @@ public class ColorPicker
 		}
 		colorChart.Apply(false);
 	}
+
+  public void Dispose()
+  {
+    UnityEngine.Object.Destroy(colorChart);
+    colorChart = null;
+    UnityEngine.Object.Destroy(hueChart);
+    hueChart = null;
+  }
 
 	/// <summary>
 	/// Draw ColorPicker and HuePicker

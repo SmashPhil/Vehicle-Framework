@@ -29,7 +29,7 @@ public class Dialog_VehiclePainter : Window
   private static PatternDef selectedPattern;
 
   // Color Picker
-  private readonly ColorPicker colorPicker = new();
+  private ColorPicker colorPicker;
 
   private float hue;
   private float saturation;
@@ -301,6 +301,7 @@ public class Dialog_VehiclePainter : Window
     IsClosing = true;
     CursorSettings.Reset();
 
+    colorPicker.Dispose();
     portrait.Dispose();
     foreach (VehiclePortrait samplePortrait in samplePortraits)
     {
@@ -311,6 +312,7 @@ public class Dialog_VehiclePainter : Window
   public override void PostOpen()
   {
     base.PostOpen();
+    colorPicker = new ColorPicker();
     hex = ColorToHex(CurrentColor);
     MarkAllDirty();
   }
