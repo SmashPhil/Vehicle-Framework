@@ -529,6 +529,7 @@ public class AerialVehicleInFlight : DynamicDrawnWorldObject, IVehicleWorldObjec
 
 	void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
 	{
+		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, innerContainer);
 	}
 
 	ThingOwner IThingHolder.GetDirectlyHeldThings()
