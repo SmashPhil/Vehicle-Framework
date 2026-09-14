@@ -138,50 +138,50 @@ public static class CaravanFormation
       SoundDefOf.Tick_High.PlayOneShotOnCamera();
       formCaravan.Close(false);
     }
-    return;
+  }
 
-    bool TryFormAndSendCaravan()
+  private static bool TryFormAndSendCaravan()
+  {
+    Assert.IsNotNull(formation);
+    foreach (Pawn pawn in formation.pawns)
     {
-      foreach (Pawn pawn in formation.pawns)
+      if (pawn is VehiclePawn vehicle)
       {
-        if (pawn is VehiclePawn vehicle)
-        {
-          vehicle.DisembarkAll();
-        }
+        vehicle.DisembarkAll();
       }
-      if (!CheckForErrors())
-      {
-        return false;
-      }
-      Direction8Way direction8WayFromTo =
-        Find.WorldGrid.GetDirection8WayFromTo(formation.Dialog.CurrentTile, formation.StartingTile);
-      if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: true, out IntVec3 intVec))
-      {
-        if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: false, out intVec))
-        {
-          Messages.Message(
-            "CaravanCouldNotFindExitSpot".Translate(direction8WayFromTo.LabelShort()),
-            MessageTypeDefOf.RejectInput, false);
-          return false;
-        }
-        Messages.Message(
-          "CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()),
-          new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.CautionInput, false);
-      }
-      if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
-      {
-        Messages.Message(
-          "CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()),
-          new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.RejectInput, false);
-        return false;
-      }
-      formation.RecacheTransferables();
-      VehicleCaravanFormingUtility.StartFormingCaravan(formation.Dialog.transferables,
-        meetingPoint, intVec, formation.StartingTile, formation.DestinationTile);
-      Messages.Message("CaravanFormationProcessStarted".Translate(), formation.vehicles[0],
-        MessageTypeDefOf.PositiveEvent, false);
-      return true;
     }
+    if (!CheckForErrors())
+    {
+      return false;
+    }
+    Direction8Way direction8WayFromTo =
+      Find.WorldGrid.GetDirection8WayFromTo(formation.Dialog.CurrentTile, formation.StartingTile);
+    if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: true, out IntVec3 intVec))
+    {
+      if (!TryFindExitSpot(formation.pawns, reachableForEveryColonist: false, out intVec))
+      {
+        Messages.Message(
+          "CaravanCouldNotFindExitSpot".Translate(direction8WayFromTo.LabelShort()),
+          MessageTypeDefOf.RejectInput, false);
+        return false;
+      }
+      Messages.Message(
+        "CaravanCouldNotFindReachableExitSpot".Translate(direction8WayFromTo.LabelShort()),
+        new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.CautionInput, false);
+    }
+    if (!TryFindRandomPackingSpot(intVec, out IntVec3 meetingPoint))
+    {
+      Messages.Message(
+        "CaravanCouldNotFindPackingSpot".Translate(direction8WayFromTo.LabelShort()),
+        new GlobalTargetInfo(intVec, formation.Map), MessageTypeDefOf.RejectInput, false);
+      return false;
+    }
+    formation.RecacheTransferables();
+    VehicleCaravanFormingUtility.StartFormingCaravan(formation.Dialog.transferables,
+      meetingPoint, intVec, formation.StartingTile, formation.DestinationTile);
+    Messages.Message("CaravanFormationProcessStarted".Translate(), formation.vehicles[0],
+      MessageTypeDefOf.PositiveEvent, false);
+    return true;
   }
 
   private static void ReformInstantly()
