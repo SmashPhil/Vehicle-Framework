@@ -144,7 +144,14 @@ public sealed class LordJob_FormAndSendVehicles : LordJob_FormAndSendCaravan, IV
 
 	public void ForceCaravanLeave()
 	{
-		lord.GotoToil(Board.source);
+		LordToil currentToil = lord.CurLordToil;
+		if (currentToil == Board.source || currentToil == Leave.source || currentToil == Leave.pause)
+			return;
+
+		Transition transition = new(currentToil, Board.source);
+		transition.AddPreAction(new TransitionAction_EndAllJobs());
+		transition.AddPostAction(new TransitionAction_EndAllJobs());
+		transition.Execute(lord);
 	}
 
 	public AssignedSeat GetAssignedSeat(Pawn pawn)
