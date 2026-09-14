@@ -44,6 +44,8 @@ public sealed class LordJob_TravelWithVehicle : LordJob, IVehicleAssigner, IVehi
 
   public override bool ShouldExistWithoutPawns => false;
 
+  public override bool IsCaravanSendable => true;
+
   public IntVec3 MeetingSpot => meetingSpot;
 
   public IntVec3 Destination => destination;
