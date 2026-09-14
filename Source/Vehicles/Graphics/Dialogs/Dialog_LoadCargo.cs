@@ -114,19 +114,15 @@ namespace Vehicles
 			Rect rect2 = new Rect(rect.width / 2f - BottomButtonSize.x / 2f, rect.height - 55f - 17f, BottomButtonSize.x, BottomButtonSize.y);
 			if (Widgets.ButtonText(rect2, "AcceptButton".Translate(), true, true, true))
 			{
-				List<TransferableOneWay> cargoToTransfer = transferables.Where(t => t.CountToTransfer > 0).ToList();
-				vehicle.cargoToLoad = cargoToTransfer;
-				vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(vehicle, ReservationType.LoadVehicle);
-				Close(true);
+				Accept();
 			}
 			if (Widgets.ButtonText(new Rect(rect2.x - 10f - BottomButtonSize.x, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "ResetButton".Translate(), true, true, true))
 			{
-				SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
-				CalculateAndRecacheTransferables();
+				Reset();
 			}
 			if (Widgets.ButtonText(new Rect(rect2.xMax + 10f, rect2.y, BottomButtonSize.x, BottomButtonSize.y), "CancelButton".Translate(), true, true, true))
 			{
-				Close(true);
+				Cancel();
 			}
 			if (Prefs.DevMode)
 			{
@@ -134,22 +130,7 @@ namespace Vehicles
 				float num = BottomButtonSize.y / 2f;
 				if (Widgets.ButtonText(new Rect(0f, rect.height - 55f - 17f, width, num), "Dev: Pack Instantly", true, true, true))
 				{
-					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-					for(int i = 0; i < transferables.Count; i++)
-					{
-						List<Thing> things = transferables[i].things;
-						int countToTransfer = transferables[i].CountToTransfer;
-						Action<Thing, IThingHolder> transferred = null;
-						if(transferred is null)
-						{
-							transferred = delegate(Thing thing, IThingHolder originalHolder)
-							{
-								vehicle.AddOrTransfer(thing);
-							};
-						}
-						TransferableUtility.Transfer(things, countToTransfer, transferred);
-					}
-					Close(false);
+					PackInstantly();
 				}
 				if (Widgets.ButtonText(new Rect(0f, rect.height - 55f - 17f + num, width, num), "Dev: Select everything", true, true, true))
 				{
@@ -157,6 +138,38 @@ namespace Vehicles
 					SetToSendEverything();
 				}
 			}
+		}
+
+		private void Accept()
+		{
+			List<TransferableOneWay> cargoToTransfer = transferables.Where(t => t.CountToTransfer > 0).ToList();
+			vehicle.cargoToLoad = cargoToTransfer;
+			vehicle.Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(vehicle, ReservationType.LoadVehicle);
+			Close(true);
+		}
+
+		private void Reset()
+		{
+			SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
+			CalculateAndRecacheTransferables();
+		}
+
+		private void Cancel()
+		{
+			Close(true);
+		}
+
+		private void PackInstantly()
+		{
+			SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+			for (int i = 0; i < transferables.Count; i++)
+			{
+				List<Thing> things = transferables[i].things;
+				int countToTransfer = transferables[i].CountToTransfer;
+				TransferableUtility.Transfer(things, countToTransfer,
+					(thing, _) => vehicle.AddOrTransfer(thing));
+			}
+			Close(false);
 		}
 
 		public void DrawCargoNumbers(Rect rect)

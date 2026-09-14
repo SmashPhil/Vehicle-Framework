@@ -578,7 +578,7 @@ public partial class VehiclePawn
         defaultLabel = "VF_LoadCargo".Translate(),
         icon = VehicleDef.LoadCargoIcon,
         hotKey = KeyBindingDefOf.Misc2,
-        action = delegate { Find.WindowStack.Add(new Dialog_LoadCargo(this)); }
+        action = OpenLoadCargoDialog
       };
       if (upgrading)
       {
@@ -931,6 +931,11 @@ public partial class VehiclePawn
         }
       }
     }
+  }
+
+  private void OpenLoadCargoDialog()
+  {
+    Find.WindowStack.Add(new Dialog_LoadCargo(this));
   }
 
   public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
