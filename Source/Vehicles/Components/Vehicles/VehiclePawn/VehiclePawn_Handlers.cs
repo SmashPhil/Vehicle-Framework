@@ -22,6 +22,12 @@ public partial class VehiclePawn
 
   public List<VehicleRoleHandler> Handlers => handlers;
 
+  void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
+  {
+    base.GetChildHolders(outChildren);
+    outChildren.AddRange(handlers);
+  }
+
   public List<VehicleRoleHandler> OccupiedHandlers { get; private set; } = [];
 
   public List<Pawn> AllPawnsAboard { get; private set; } = [];
