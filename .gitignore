@@ -355,3 +355,4 @@ healthchecksdb
 MigrationBackup/
 /Source/Vehicles/Properties/launchSettings.json
 /quick-translate.bat
+/Version.txt

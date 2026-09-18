@@ -7,7 +7,7 @@ set -euo pipefail
 MAJOR="$1"
 MINOR="$2"
 START_DATE="${3:-07-DEC-2019}"
-USE_REVISION="${4:-false}"
+USE_REVISION="${4:-true}"
 VERSION_FILE="${5:-false}"
 
 CREATE_VERSION_FILE=false
@@ -15,8 +15,8 @@ if [[ "$VERSION_FILE" == "true" ]]; then
   CREATE_VERSION_FILE=true
 fi
 
-REVISION=false
-if [[ "$USE_REVISION" == "true" ]]; then
+REVISION=true
+if [[ "$USE_REVISION" == "false" ]]; then
   REVISION=true
 fi
 

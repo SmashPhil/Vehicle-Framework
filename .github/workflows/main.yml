@@ -7,6 +7,9 @@ on:
 
 env:
   PROJECT_PATH: "Source/Vehicles/Vehicles.sln"
+  VERSION_MAJOR: "1"
+  VERSION_MINOR: "6"
+  PROJECT_START: "07-DEC-2019"
 
 jobs:
   build:
@@ -18,12 +21,11 @@ jobs:
         with:
           submodules: recursive
       
-      - name: Get Version
+      - name: Generate Build Version
         shell: bash
         run: |
-          full="$(tr -d '[:space:]' < Version.txt)"
-          version_str="$(echo "$full" | cut -d. -f1-2)"
-          echo "VERSION=$version_str" >> "$GITHUB_ENV"
+          chmod +x Build/IncrementVersion.sh
+          Build/IncrementVersion.sh "$VERSION_MAJOR" "$VERSION_MINOR" "$PROJECT_START" true true
 
       - name: Setup .Net
         uses: actions/setup-dotnet@v4
@@ -40,7 +42,7 @@ jobs:
         shell: bash
         run: |
           chmod +x Build/ExtractTranslations.sh
-          Build/ExtractTranslations.sh "$VERSION"
+          Build/ExtractTranslations.sh "${VERSION_MAJOR}.${VERSION_MINOR}"
 
       - name: Get Build Version
         run: |
