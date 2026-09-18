@@ -16,14 +16,13 @@
   </PropertyGroup>
 
   <!-- Version Increment -->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(IncrementVersion)' == 'true'">
-
+  <Target Name="IncrementModVersion" AfterTargets="PostBuildEvent" Condition="'$(IncrementVersion)' == 'true'">
     <Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/IncrementVersion.ps1&quot; 1 6 &quot;07-DEC-2019&quot; -VersionFile true" />
     <Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/IncrementVersion.sh&quot; 1 6 &quot;07-DEC-2019&quot; true true" />
   </Target>
 
   <!-- Localization Files -->
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent" Condition="'$(UpdateLocalization)' == 'true'">
+  <Target Name="UpdateLocalization" AfterTargets="PostBuildEvent" Condition="'$(UpdateLocalization)' == 'true'">
     <Exec Condition="'$(OS)' == 'Windows_NT'" Command="PowerShell.exe -ExecutionPolicy Bypass -file &quot;../../Build/ExtractTranslations.ps1&quot; &quot;1.6&quot;" />
     <Exec Condition="'$(OS)' != 'Windows_NT'" Command="bash &quot;../../Build/ExtractTranslations.sh&quot; &quot;1.6&quot;" />
   </Target>
