@@ -39,6 +39,11 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(PawnBanishUtility), nameof(PawnBanishUtility.Banish),
+        [typeof(Pawn), typeof(PlanetTile), typeof(bool)]),
+      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling), nameof(PrepareVehicleBanishment)),
+      postfix: new HarmonyMethod(typeof(Patch_CaravanHandling), nameof(RemoveBanishedPassenger)));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(CaravanVisibilityCalculator),
         nameof(CaravanVisibilityCalculator.Visibility),
         parameters: [typeof(List<Pawn>), typeof(bool), typeof(StringBuilder)]),
@@ -268,6 +273,25 @@ internal class Patch_CaravanHandling : IPatchCategory
       original: AccessTools.Method(typeof(TradeDeal), "InSellablePosition"),
       postfix: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(NegotiatorInVehicle)));
+  }
+
+  private static void PrepareVehicleBanishment(Pawn pawn, out VehiclePawn __state)
+  {
+    __state = pawn.ParentHolder is VehicleRoleHandler handler &&
+      (pawn.Faction == Faction.OfPlayer || pawn.HostFaction == Faction.OfPlayer)
+        ? handler.vehicle
+        : null;
+    if (__state is { Spawned: true })
+      __state.DisembarkPawn(pawn);
+  }
+
+  private static void RemoveBanishedPassenger(Pawn pawn, VehiclePawn __state)
+  {
+    if (__state != null && pawn.Faction != Faction.OfPlayer &&
+      pawn.HostFaction != Faction.OfPlayer && __state.RemovePawn(pawn))
+    {
+      Find.WorldPawns.PassToWorld(pawn);
+    }
   }
 
   private static IEnumerable<CodeInstruction> VehicleVisibilityInCaravanTranspiler(
