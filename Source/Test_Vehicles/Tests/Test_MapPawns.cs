@@ -140,6 +140,22 @@ internal sealed class Test_MapPawns
   }
 
   [Test]
+  private void AllMapsPlayerPawnsAreUnique()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      faction = Faction.OfPlayer
+    });
+    group.BoardAll();
+    group.Spawn();
+    Pawn pawn = group.pawns[0];
+    int occurrences = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+      .Count(candidate => candidate == pawn);
+    Expect.AreEqual(expected: 1, occurrences);
+  }
+
+  [Test]
   private void SpawnedPawnsInFaction()
   {
     Faction faction = Faction.OfPlayer;
