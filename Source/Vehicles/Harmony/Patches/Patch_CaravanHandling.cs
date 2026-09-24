@@ -370,7 +370,7 @@ internal class Patch_CaravanHandling : IPatchCategory
       {
         yield return instruction; //CALL : MassUtility.GearAndInventoryMass
         instruction = instructionList[++i];
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 4);
+        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 3);
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_CaravanHandling),
             nameof(PawnMassUsageInVehicle)));
@@ -380,8 +380,10 @@ internal class Patch_CaravanHandling : IPatchCategory
     }
   }
 
-  private static float PawnMassUsageInVehicle(float massUsage, Pawn pawn)
+  private static float PawnMassUsageInVehicle(float massUsage, Thing thing)
   {
+    if (thing switch { Pawn p => p, Corpse c => c.InnerPawn, _ => null } is not { } pawn)
+      return 0;
     if (pawn.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
       return 0;
     return massUsage;
