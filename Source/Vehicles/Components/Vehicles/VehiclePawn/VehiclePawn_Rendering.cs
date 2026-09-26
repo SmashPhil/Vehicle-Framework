@@ -630,6 +630,18 @@ public partial class VehiclePawn
         {
           if (target.Thing is Pawn pawn)
           {
+            if (pawn.Map.mapPawns.FreeColonistsSpawned.Contains(pawn) && !pawn.Downed)
+            {
+              // Non-downed colonist should be eligible for drafting.
+              // When they aren't available for drafting such as participaiting in Ideology ritual, or similar modded
+              // activity, loading them into vehicle and maybe departing on vehicle could break that activity.
+              AcceptanceReport allowDrafting = pawn.GetLord()?.AllowsDrafting(pawn) ?? AcceptanceReport.WasAccepted;
+              if (!allowDrafting)
+              {
+                Messages.Message(allowDrafting.Reason, MessageTypeDefOf.RejectInput, historical: false);
+                return;
+              }
+            }
             if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
             {
               // Role validation should still apply to downed pawns since they will be loaded into a role by another
