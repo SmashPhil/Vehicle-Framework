@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <RootNamespace>AnimationKit</RootNamespace>
+    <AssemblyName>Test_AnimationKit</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
+    <!--<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />-->
+
+    <Reference Include="DevTools">
+      <HintPath>$(OutDir)\DevTools.dll</HintPath>
+    </Reference>
+
+    <Reference Include="AnimationKit">
+      <HintPath>$(OutDir)\AnimationKit.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="SmashTools">
+      <HintPath>$(OutDir)\SmashTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Tests\" />
+  </ItemGroup>
+</Project>

@@ -16,9 +16,6 @@ public sealed class FeatureFlags
   public const string Acceleration = "Acceleration";
 
   public const string PathFinderV2 = "PathFinderV2";
-  // TODO 1.8 - Remove
-  public const string BurstLib = "BurstLib";
-
   public const string BlitTexturePortraits = "BlitTexturePortraits";
 
   private readonly List<IFeatureFlag> features;

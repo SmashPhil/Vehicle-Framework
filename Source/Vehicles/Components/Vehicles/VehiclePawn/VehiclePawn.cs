@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Diagnostics;
 using CoreLib.Performance;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Animations;
-using SmashTools.Rendering;
 using UnityEngine;
 using Vehicles.Compatibility;
 using Vehicles.Rendering;
@@ -13,9 +10,9 @@ using Verse;
 
 namespace Vehicles;
 
-public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
-                                   IAnimationTarget, IAnimator, ITransformable,
-                                   IEventManager<VehicleEventDef>, IMaterialCacheTarget
+public partial class VehiclePawn : Pawn,
+  IInspectable, IThingHolderTickable, IAnimationTarget,
+  IEventManager<VehicleEventDef>, IMaterialCacheTarget
 {
   private static readonly AccessTools.FieldRef<Pawn_DraftController, bool> DraftedIntFieldRef =
     AccessTools.FieldRefAccess<Pawn_DraftController, bool>(
@@ -128,11 +125,12 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
     }
   }
 
-  [Conditional("ANIMATOR")]
+#if ANIMATOR
   private void UpdateDraftAnimationProperty()
   {
     animator?.SetBool(PropertyIds.IgnitionOn, ignition.Drafted);
   }
+#endif
 
   public void RegisterEvents()
   {
@@ -285,9 +283,9 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
 #if ANIMATOR
     if (VehicleDef.drawProperties.controller != null)
     {
-      animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
-      animator.SetBool(PropertyIds.Disabled, CanMove);
-      animator.PostLoad();
+      //animator ??= new AnimationManager(this, VehicleDef.drawProperties.controller);
+      //animator.SetBool(PropertyIds.Disabled, CanMove);
+      //animator.PostLoad();
       this.AddEvent(VehicleEventDefOf.IgnitionOn, UpdateDraftAnimationProperty);
       this.AddEvent(VehicleEventDefOf.IgnitionOff, UpdateDraftAnimationProperty);
     }
@@ -407,7 +405,7 @@ public partial class VehiclePawn : Pawn, IInspectable, IThingHolderTickable,
       case LoadSaveMode.PostLoadInit:
         CompUpgradeTree?.ReloadUnlocks();
         UpdateDraftController();
-      break;
+        break;
       case LoadSaveMode.Inactive or LoadSaveMode.ResolvingCrossRefs:
         break;
     }
