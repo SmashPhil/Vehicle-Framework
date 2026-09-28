@@ -63,7 +63,9 @@ public class VehicleMod : Mod
 		GameEvent.OnNewGame += GizmoHelper.ResetDesignatorStatuses;
 		GameEvent.OnLoadGame += GizmoHelper.ResetDesignatorStatuses;
 		GameEvent.OnGenerateImpliedDefs += ImpliedDefGeneratorVehicles;
-	}
+
+    DllInjector.LoadAllNativeAssemblies(content);
+  }
 
 	public static bool ModifiableSettings => settings.main.modifiableSettings;
 

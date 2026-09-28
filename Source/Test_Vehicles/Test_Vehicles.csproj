@@ -67,6 +67,11 @@
 			<Private>False</Private>
 		</Reference>
 
+    <Reference Include="AnimationKit">
+      <HintPath>$(OutDir)\AnimationKit.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
 		<Reference Include="Vehicles">
 			<HintPath>$(OutDir)\Vehicles.dll</HintPath>
 			<Private>False</Private>
