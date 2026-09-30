@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <!-- Labels and Titles -->
+  <VehicleFramework>Vehicle Framework</VehicleFramework>
+  <VF_Vehicles>Vehicles</VF_Vehicles>
+  
+  <!-- Gizmos / Float Menus -->
+  <VF_LoadCargo>Load cargo</VF_LoadCargo>
+  <VF_HaulPawnToVehicle>Load into {0_labelShort}</VF_HaulPawnToVehicle>
+  <VF_CarryToVehicle>Carry {0_labelShort} to {1_labelShort}</VF_CarryToVehicle>
+  <VF_RescueToVehicle>Rescue {0_labelShort} to {1_labelShort}</VF_RescueToVehicle>
+  <VF_CantLoadInVehicle>Cannot load {0_labelShort} in {1_labelShort}</VF_CantLoadInVehicle>
+  <VF_NoRoleAvailable>No seat available.</VF_NoRoleAvailable>
+  <VF_DisembarkAllPawns>Unload everyone</VF_DisembarkAllPawns>
+  <VF_DisembarkSinglePawn>Unload {0}</VF_DisembarkSinglePawn>
+  <VF_GearForward>Forward</VF_GearForward>
+  <VF_GearReverse>Reverse</VF_GearReverse>
+  <VF_DisembarkNoExit>Unable to exit vehicle. No valid cells to exit onto.</VF_DisembarkNoExit>
+  <VF_DisabledByVehicleUpgrading>{0} is being upgraded.</VF_DisabledByVehicleUpgrading>
+  
+  <VF_StopVehicle>Stop</VF_StopVehicle>
+  <VF_UndraftVehicle>Turn off</VF_UndraftVehicle>
+  <VF_DraftVehicleDesc>Drafts vehicle allowing it to move. This will consume fuel if applicable even if the vehicle is idle.</VF_DraftVehicleDesc>
+  <VF_StopVehicleDesc>Stop the vehicle immediately.</VF_StopVehicleDesc>
+  <VF_UndraftVehicleDesc>Undrafts vehicle, disabling the consumption of fuel and disallowing movement.</VF_UndraftVehicleDesc>
+  <VF_RefuelFromInventoryCount>Refuel {0}x {1}</VF_RefuelFromInventoryCount>
+  <VF_RefuelFromInventoryDesc>Refuel {0} using fuel stored in cargo.</VF_RefuelFromInventoryDesc>
+  <VF_VehicleFullyFueled>{0} is already fully fueled.</VF_VehicleFullyFueled>
+  <VF_NoFuelInVehicle>No fuel in {0}.</VF_NoFuelInVehicle>
+  <VF_CantRefuelWhileFlying>Cannot refuel {0} while inflight.</VF_CantRefuelWhileFlying>
+  <VF_VehicleFuelCost>Fuel: {0}</VF_VehicleFuelCost>
+  <VF_TransferToVehicle_Order>Transfer to vehicle</VF_TransferToVehicle_Order>
+  <VF_TransferToVehicle_Order_Desc>Transfer selected thing(s) to the target vehicle's cargo.</VF_TransferToVehicle_Order_Desc>
+  <VF_TransferToVehicle_Cancel>Cancel transfer</VF_TransferToVehicle_Cancel>
+  <VF_TransferToVehicle_Cancel_Desc>Cancel transfer of selected thing(s) to any vehicle's cargo.</VF_TransferToVehicle_Cancel_Desc>
+  <!-- UI / Buttons -->
+  
+  <VF_RandomVehicle>Random Vehicle</VF_RandomVehicle>
+  <VF_ShowAllItemsOnMap>Show All Items On Map</VF_ShowAllItemsOnMap>
+  <VF_ResetColorPalettes>Reset All Palettes</VF_ResetColorPalettes>
+  <VF_ResetColorPalettesConfirmation>Are you sure you want to reset all saved palettes back to default settings? This action cannot be undone.</VF_ResetColorPalettesConfirmation>
+  <VF_RotateVehicleRendering>Rotate vehicle</VF_RotateVehicleRendering>
+  <VF_SaveColorPalette>Save Palette</VF_SaveColorPalette>
+  
+  <VF_ColorOne>Color 1</VF_ColorOne>
+  <VF_ColorTwo>Color 2</VF_ColorTwo>
+  <VF_ColorThree>Color 3</VF_ColorThree>
+  <VF_ColorPickerHex>Hex</VF_ColorPickerHex>
+  <!-- Stats -->
+  
+  <VF_JobSettings>Job Settings</VF_JobSettings>
+  <VF_VehicleAgeReadout>Produced: {0}</VF_VehicleAgeReadout>
+  <!-- Info Card -->
+  
+  <VF_StatsReport_CargoWeight>Cargo: {0}</VF_StatsReport_CargoWeight>
+  <VF_StatsReport_Deployed>Deployed</VF_StatsReport_Deployed>
+  
+  <VF_CrewCount>Crew</VF_CrewCount>
+  <VF_CrewCountDesc>Number of crew and passengers that can fit inside of this vehicle.</VF_CrewCountDesc>
+  <VF_PaintableDesc>Vehicle can be painted through color menu.</VF_PaintableDesc>
+  <VF_Upgradeable>Upgradeable</VF_Upgradeable>
+  <VF_UpgradeableDesc>Vehicle can be modifed through an upgrade tree</VF_UpgradeableDesc>
+  <VF_FuelType>Fuel Type</VF_FuelType>
+  <VF_FuelTypeDesc>What resource this vehicle consumes in order to operate.</VF_FuelTypeDesc>
+  <VF_CancelUpgrade>Cancel the upgrade that is in progress for {0}.</VF_CancelUpgrade>
+  <!-- Designators -->
+  
+  <VF_RoadZoneExpand>Road area</VF_RoadZoneExpand>
+  <VF_RoadZoneExpandDesc>Create an area where vehicles will prioritize or avoid moving through.
+
+'Prioritize' areas applied on the edge of the map will designate where vehicle caravans should enter from.</VF_RoadZoneExpandDesc>
+  <VF_RoadZoneClear>Clear road area</VF_RoadZoneClear>
+  <VF_RoadZoneClearDesc>Removes road zone. Vehicles will no longer have modified movement over the area.</VF_RoadZoneClearDesc>
+  <!-- Tooltips -->
+  
+  <VF_RenameVehicleTooltip>Assign or clear name.</VF_RenameVehicleTooltip>
+  <VF_RecolorTooltip>Paint vehicle</VF_RecolorTooltip>
+  <VF_DoubleClickShuttleTarget>Click to Confirm Destination</VF_DoubleClickShuttleTarget>
+  <VF_SwapColors>Cycle colors between each other.\n\nColorOne &gt; ColorTwo &gt; ColorThree</VF_SwapColors>
+  <VF_StartFishing>Fish</VF_StartFishing>
+  <VF_StartFishingDesc>Gather fish from the water.</VF_StartFishingDesc>
+  <VF_NoFishermenTooltip>No colonists onboard that are capable of fishing.</VF_NoFishermenTooltip>
+  <VF_NoFishAtSpot>No fish at this location.</VF_NoFishAtSpot>
+  <VF_ExplosiveComponent>Explosive</VF_ExplosiveComponent>
+  <VF_EditPawnOverlayRendererTooltip>Edit Pawn Overlay</VF_EditPawnOverlayRendererTooltip>
+  <VF_ComponentClickMoreInfoTooltip>Click for detailed information.</VF_ComponentClickMoreInfoTooltip>
+  <!-- Turrets -->
+  
+  <VF_Deploy>Deploy</VF_Deploy>
+  <VF_Undeploy>Undeploy</VF_Undeploy>
+  <VF_DeployDescription>Deploy vehicle to enable use of turrets.</VF_DeployDescription>
+  <VF_MustBeDeployed>Must be deployed.</VF_MustBeDeployed>
+  <VF_MustBeUndeployed>Must be undeployed.</VF_MustBeUndeployed>
+  <VF_VehicleRestriction_Stationary>Cannot fire while moving.</VF_VehicleRestriction_Stationary>
+  <VF_TurretComponentDisabled>{0} needs repairs.</VF_TurretComponentDisabled>
+  <!-- Color Picker -->
+  
+  <VF_Patterns>Patterns</VF_Patterns>
+  <VF_Skins>Skins</VF_Skins>
+  <VF_PatternZoom>Zoom</VF_PatternZoom>
+  <VF_PatternZoomTooltip>Scale the pattern up or down.</VF_PatternZoomTooltip>
+  <VF_PatternDisplacementX>Displacement X</VF_PatternDisplacementX>
+  <VF_PatternDisplacementY>Displacement Y</VF_PatternDisplacementY>
+  <VF_PatternDisplacementXTooltip>Moves texture along the horizontal axis.</VF_PatternDisplacementXTooltip>
+  <VF_PatternDisplacementYTooltip>Moves texture along the vertical axis.</VF_PatternDisplacementYTooltip>
+  
+  <VF_Electricity>Electricity</VF_Electricity>
+  <VF_ElectricFlick>Toggle connecting to the power grid.</VF_ElectricFlick>
+  <VF_ElectricFlickDesc>When on top of a power conduit, this connects to the power grid and transfers energy to recharge its battery.
+
+Currently connected: {0}</VF_ElectricFlickDesc>
+  <VF_OutOfFuel>Cannot move. {0} needs more fuel.</VF_OutOfFuel>
+  
+  <VF_AutoAssign>Autofill</VF_AutoAssign>
+  <VF_Assigned>Assigned</VF_Assigned>
+  <VF_ApplyButton>Apply</VF_ApplyButton>
+  <VF_Colonists>Colonists</VF_Colonists>
+  <VF_ClearSeats>Clear</VF_ClearSeats>
+  <VF_RemoveFromRole>Remove</VF_RemoveFromRole>
+  <VF_AddToRole>Add</VF_AddToRole>
+  <VF_RoutePlannerButtonTip>Click to enter the planning mode for Vehicles where you can select specific vehicles you own, and plan your journey. Pathing is adjusted based on the vehicles selected.</VF_RoutePlannerButtonTip>
+  <VF_SelectVehiclesForPlanner>Select vehicles</VF_SelectVehiclesForPlanner>
+  <VF_StartVehicleRoutePlanner>Start route</VF_StartVehicleRoutePlanner>
+  <VF_OkName>Confirm name</VF_OkName>
+  <VF_RemoveName>Remove name</VF_RemoveName>
+  <!-- Aerial Vehicles -->
+  
+  <VF_NoFlightSpeed>Unable to launch with Flight Speed = 0</VF_NoFlightSpeed>
+  <VF_CannotLaunchWhileMoving>Cannot launch while {0} is moving.</VF_CannotLaunchWhileMoving>
+  <VF_CannotLaunchImmobile>{0} cannot launch without being able to move.</VF_CannotLaunchImmobile>
+  <VF_CannotLaunchRotated>{0} cannot launch at an angle.</VF_CannotLaunchRotated>
+  <VF_CannotLaunchOverEncumbered>{0} cannot launch while over-encumbered.</VF_CannotLaunchOverEncumbered>
+  
+  <VF_TabCargo>Cargo</VF_TabCargo>
+  <VF_TabPassengers>Pawns</VF_TabPassengers>
+  <VF_TabComponents>Health</VF_TabComponents>
+  <VF_TabUpgrades>Customize</VF_TabUpgrades>
+  
+  <VF_ComponentHealth>Health</VF_ComponentHealth>
+  <VF_ComponentEfficiency>Efficiency</VF_ComponentEfficiency>
+  <VF_ComponentArmor>Armor</VF_ComponentArmor>
+  <VF_Depth>Depth</VF_Depth>
+  <VF_Depth_Internal>Internal</VF_Depth_Internal>
+  <VF_Depth_External>External</VF_Depth_External>
+  <VF_Depth_Undefined>Undefined</VF_Depth_Undefined>
+  <VF_EfficiencyEffector>Stats Effected</VF_EfficiencyEffector>
+  <VF_BaseArmorRating>Base armor rating: {0}</VF_BaseArmorRating>
+  
+  <VF_NoFuelReturnTrip>No return trip</VF_NoFuelReturnTrip>
+  <VF_NotEnoughFuel>Out of range</VF_NotEnoughFuel>
+  <VF_NoSpaceFlight>{0} is incapable of space flight.</VF_NoSpaceFlight>
+  <VF_ConfirmationCancelLanding>Cancel landing in this map? Aerial vehicle will be kicked out to the world map.</VF_ConfirmationCancelLanding>
+  <VF_PawnsLeftBehindConfirm>Not enough seats</VF_PawnsLeftBehindConfirm>
+  <VF_PawnsLeftBehindConfirmDesc>Leave</VF_PawnsLeftBehindConfirmDesc>
+  <!-- Header Titles -->
+  
+  <VF_Cargo>Cargo</VF_Cargo>
+  <VF_Properties>Properties</VF_Properties>
+  <VF_LauncherProperties>Launch Properties</VF_LauncherProperties>
+  <VF_FueledTravelPropertes>Fuel</VF_FueledTravelPropertes>
+  <VF_JobLimitations>Max Workers per Job</VF_JobLimitations>
+</LanguageData>
+

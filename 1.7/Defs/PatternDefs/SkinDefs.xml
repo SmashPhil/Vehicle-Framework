@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.SkinDef>
+		<defName>Jungle</defName>
+		<label>Jungle</label>
+		<path>Graphics/Skins/Jungle/Jungle</path>
+	</Vehicles.SkinDef>
+</Defs>

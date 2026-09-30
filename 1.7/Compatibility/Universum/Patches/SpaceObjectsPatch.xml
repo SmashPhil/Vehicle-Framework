@@ -1,0 +1,9 @@
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/WorldObjectDef[defName = "Universum_ObjectHolder"]</xpath>
+		<value>
+			<li Class = "Vehicles.SpaceObjectDefModExtension" />
+		</value>
+	</Operation>
+</Patch>

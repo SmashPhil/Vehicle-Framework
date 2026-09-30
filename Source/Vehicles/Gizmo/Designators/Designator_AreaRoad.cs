@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using RimWorld;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using UnityEngine;
 using Verse;
 using static Vehicles.Config.FeatureFlags;

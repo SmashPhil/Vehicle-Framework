@@ -4,7 +4,7 @@ using CoreLib;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using UnityEngine.Assertions;
 using UpdateLogTool;
 using Vehicles.Config;

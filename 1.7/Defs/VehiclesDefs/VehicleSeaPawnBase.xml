@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleDef Name="BaseSeaVehicle" ParentName="BaseVehiclePawn" Abstract="True">
+		<properties>
+			<defaultImpassable>
+        <li>Terrain</li>
+        <li>Biomes</li>
+      </defaultImpassable>
+
+			<customTerrainCosts AllowTerrainWithTag="Water" PathCost="1"/>
+      
+			<customBiomeCosts>
+				<li>
+					<key>Ocean</key>
+					<value>1</value>
+				</li>
+				<li>
+					<key>Lake</key>
+					<value>1</value>
+				</li>
+			</customBiomeCosts>
+		</properties>
+	</Vehicles.VehicleDef>
+</Defs>

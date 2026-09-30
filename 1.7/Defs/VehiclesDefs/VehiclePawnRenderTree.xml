@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<PawnRenderTreeDef>
+		<defName>PointlessVehicleRenderTree</defName>
+		<root Class="PawnRenderNodeProperties_Parent">
+			<debugLabel>Root</debugLabel>
+			<tagDef>Root</tagDef>
+		</root>
+	</PawnRenderTreeDef>
+</Defs>

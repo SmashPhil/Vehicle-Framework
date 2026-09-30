@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Patch>
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/FactionDef[@Name = "PirateBandBase"]</xpath>
+		<value>
+			<li Class = "Vehicles.VehicleRaiderDefModExtension"/>
+		</value>
+	</Operation>
+
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/FactionDef[@Name = "OutlanderFactionBase"]</xpath>
+		<value>
+			<li Class = "Vehicles.VehicleRaiderDefModExtension"/>
+		</value>
+	</Operation>
+
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/FactionDef[@Name = "TribeBase"]</xpath>
+		<value>
+			<li Class = "Vehicles.VehicleRaiderDefModExtension"/>
+		</value>
+	</Operation>
+
+	<Operation Class = "PatchOperationAddModExtension">
+		<xpath>Defs/FactionDef[@Name = "AncientsBase"]</xpath>
+		<value>
+			<li Class = "Vehicles.VehicleRaiderDefModExtension"/>
+		</value>
+	</Operation>
+</Patch>

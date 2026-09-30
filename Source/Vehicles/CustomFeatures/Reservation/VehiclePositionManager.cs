@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
 using Verse;
-using NativeArrayUtility = SmashTools.Burst.NativeArrayUtility;
+using NativeArrayUtility = SmashTools.PathFinder.NativeArrayUtility;
 
 namespace Vehicles;
 

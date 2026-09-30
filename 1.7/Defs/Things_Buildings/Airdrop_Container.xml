@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ThingDef>
+		<defName>Airdrop</defName>
+		<label>Airdrop</label>
+		<thingClass>Vehicles.Airdrop</thingClass>
+		
+		<category>Building</category>
+		<altitudeLayer>Building</altitudeLayer>
+		<passability>PassThroughOnly</passability>
+		<tickerType>Never</tickerType>
+		
+		<graphicData>
+			<texPath>Graphics/Parachute/AirDropCrate2x2</texPath>
+			<graphicClass>Graphic_Single</graphicClass>
+			<shaderType>Cutout</shaderType>
+			<drawSize>(2, 2)</drawSize>
+		</graphicData>
+		
+		<size>(1, 1)</size>
+		<fillPercent>0.3</fillPercent>
+		<blockWind>true</blockWind>
+		<castEdgeShadows>true</castEdgeShadows>
+		<leaveResourcesWhenKilled>false</leaveResourcesWhenKilled>
+		<rotatable>false</rotatable>
+		<selectable>true</selectable>
+		
+		<building/>
+		
+		<statBases>
+			<MaxHitPoints>300</MaxHitPoints>
+			<WorkToBuild>200</WorkToBuild>
+			<Flammability>0.5</Flammability>
+		</statBases>
+		
+		<inspectorTabs>
+			<li>Vehicles.ITab_Airdrop_Container</li>
+		</inspectorTabs>
+	</ThingDef>
+</Defs>

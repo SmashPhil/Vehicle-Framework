@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_MainSettings>Main</VF_MainSettings>
+  <VF_ListSearchText>Search...</VF_ListSearchText>
+  <VF_SettingsDisabledTooltip>Settings have been locked for this vehicle and cannot be modified.</VF_SettingsDisabledTooltip>
+  <VF_NonUpgradeableSettingsTooltip>This vehicle cannot be upgraded.</VF_NonUpgradeableSettingsTooltip>
+  <VF_RecolorDefaultMaskTooltip>Change default pattern</VF_RecolorDefaultMaskTooltip>
+  
+  <VF_WorldMapGen>World/Map Generation</VF_WorldMapGen>
+  <VF_BeachGenMultiplier>Beach Size Multiplier</VF_BeachGenMultiplier>
+  <VF_BeachGenMultiplierTooltip>Increase the amount of water on the coastline.</VF_BeachGenMultiplierTooltip>
+  <VF_RiverGenMultiplier>River Size Multiplier</VF_RiverGenMultiplier>
+  <VF_RiverGenMultiplierTooltip>Increase the width of rivers on maps.</VF_RiverGenMultiplierTooltip>
+  <VF_AdjustSettlementRadius>Settlement Relocation</VF_AdjustSettlementRadius>
+  <VF_AdjustSettlementRadiusTooltip>Adjust settlements to nearby features for vehicle travel.</VF_AdjustSettlementRadiusTooltip>
+  <VF_AdjustCoastWeight>Coastal weight</VF_AdjustCoastWeight>
+  <VF_AdjustRiverWeight>River weight</VF_AdjustRiverWeight>
+  <VF_WorldTiles>tiles</VF_WorldTiles>
+  
+  <VF_SettingsGeneral>General</VF_SettingsGeneral>
+  <VF_WillRequireRestart>This action requires a restart to take effect.</VF_WillRequireRestart>
+  <VF_ModifiableSettings>Modifiable Settings</VF_ModifiableSettings>
+  <VF_ModifiableSettingsTooltip>Toggle Modifiable Settings. Restarting with this disabled will bypass generation of modifiable settings.
+	
+Determines whether Vehicles should use values from the mod settings or Defs</VF_ModifiableSettingsTooltip>
+  <VF_CustomShaders>Use RGB Shaders</VF_CustomShaders>
+  <VF_CustomShadersTooltip>Enable use of custom shaders provided by the framework.</VF_CustomShadersTooltip>
+  <VF_DiagonalVehicleRendering>Allow Diagonal Rendering</VF_DiagonalVehicleRendering>
+  <VF_DiagonalVehicleRenderingTooltip>Vehicles that support diagonal rendering will do so when set to diagonal rotations (NorthEast, SouthEast, SouthWest, NorthWest)</VF_DiagonalVehicleRenderingTooltip>
+  
+  <VF_SmoothVehiclePathing>Smooth Vehicle Paths</VF_SmoothVehiclePathing>
+  <VF_SmoothVehiclePathingTooltip>Vehicle pathing will have an additional "turn" cost, preventing unnecessary zig zag patterns from shortest path.</VF_SmoothVehiclePathingTooltip>
+  <VF_UseHandBrakes>Use Hand Brakes</VF_UseHandBrakes>
+  <VF_UseHandBrakesTooltip>Vehicles will apply hand brakes when signaled to stop, decelerating faster at the cost of some health.</VF_UseHandBrakesTooltip>
+  
+  <VF_RoadBiomeCostPathing>Ignore Biomes on Roads</VF_RoadBiomeCostPathing>
+  <VF_RoadBiomeCostPathingTooltip>Vehicle Caravans moving over roads on the world map ignore biome path costs.</VF_RoadBiomeCostPathingTooltip>
+  <VF_MultiplePawnsPerJob>Multi-Pawn Jobs</VF_MultiplePawnsPerJob>
+  <VF_MultiplePawnsPerJobTooltip>Allows vehicle related jobs to allow more than 1 pawn to reserve and work on it. Max allowed pawns determined by modders.</VF_MultiplePawnsPerJobTooltip>
+  
+  <VF_UseBurstLib>Use Burst</VF_UseBurstLib>
+  <VF_UseBurstLibTooltip>Load external burst library for better performance.</VF_UseBurstLibTooltip>
+  <VF_BurstDisabledFromCrash>RimWorld crashed while attempting to load Vehicle Framework's external burst library.  It has been disabled to prevent further crashes, but can re-enabled from the mod settings.  This won't affect gameplay, the external burst library is only for performance.</VF_BurstDisabledFromCrash>
+  
+  <VF_GraphicsSettings>Graphics</VF_GraphicsSettings>
+  <VF_PerformanceSettings>Performance</VF_PerformanceSettings>
+  <VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
+  <VF_PassiveWaterWavesTooltip>Generate passive waves when boat is idle.</VF_PassiveWaterWavesTooltip>
+  <VF_AerialVehicleEffects>Aerial Vehicle Effects</VF_AerialVehicleEffects>
+  <VF_AerialVehicleEffectsTooltip>When aerial vehicles takeoff and land, spawn flecks and render overlay textures.</VF_AerialVehicleEffectsTooltip>
+  
+  <VF_MeleeDamageMultiplier>Melee Damage Multiplier</VF_MeleeDamageMultiplier>
+  <VF_RangedDamageMultiplier>Ranged Damage Multiplier</VF_RangedDamageMultiplier>
+  <VF_ExplosiveDamageMultiplier>Explosive Damage Multiplier</VF_ExplosiveDamageMultiplier>
+  
+  <VF_VehicleTurrets>Vehicle Turrets</VF_VehicleTurrets>
+  <VF_TurretOverheatMechanics>Turret Overheating</VF_TurretOverheatMechanics>
+  <VF_TurretOverheatMechanicsTooltip>Some turrets have overheat mechanics to prevent nonstop firing without consequences. Keep this enabled?</VF_TurretOverheatMechanicsTooltip>
+  
+  <VF_Fishing>Fishing</VF_Fishing>
+  <VF_FishingInactive>Fishing (Inactive)</VF_FishingInactive>
+  <VF_FishingMultiplier>Fishing Multiplier</VF_FishingMultiplier>
+  <VF_FishingMultiplierTooltip>Adjust the amount of fish gathered from fishing boat.</VF_FishingMultiplierTooltip>
+  <VF_FishingSkill>Fishing Skill</VF_FishingSkill>
+  <VF_FishingSkillTooltip>How much exp is given by fishing on a boat</VF_FishingSkillTooltip>
+  
+  <VF_AerialVehicles>Aerial</VF_AerialVehicles>
+  <VF_DrawLandingGhost>Draw Landing Spot</VF_DrawLandingGhost>
+  <VF_DrawLandingGhostTooltip>Draws a transparent 'blueprint' where an aerial vehicle is landing.</VF_DrawLandingGhostTooltip>
+  <VF_RocketsBurnRadius>Rockets Burn</VF_RocketsBurnRadius>
+  <VF_RocketsBurnRadiusTooltip>Allow aerial vehicles which support this feature to burn all things within a small radius upon takeoff and landing.</VF_RocketsBurnRadiusTooltip>
+  <VF_DynamicDrawing>Dynamic Drawing</VF_DynamicDrawing>
+  <VF_DynamicDrawingTooltip>Render aerial vehicles on the world map when zoomed in.</VF_DynamicDrawingTooltip>
+  <VF_DeployOnLanding>Deploy on Landing</VF_DeployOnLanding>
+  <VF_DeployOnLandingTooltip>When an aerial vehicle lands all pawns onboard will be unloaded.</VF_DeployOnLandingTooltip>
+  <VF_DelayOnLanding>Delay on Landing</VF_DelayOnLanding>
+  <VF_DelayOnLandingTooltip>When an aerial vehicle lands the deployment of all pawns will be delayed.</VF_DelayOnLandingTooltip>
+  <VF_DelaySeconds>seconds</VF_DelaySeconds>
+  <VF_AirDefensesActive>Air Defenses</VF_AirDefensesActive>
+  <VF_AirDefensesActiveTooltip>Certain world objects are able to utilize air defenses to shoot down nearby aircraft.</VF_AirDefensesActiveTooltip>
+  
+  <VF_CombatSettings>Combat</VF_CombatSettings>
+  <VF_ShellExplosionsOnWater>Reduce Explosions on Water</VF_ShellExplosionsOnWater>
+  <VF_ShellExplosionsOnWaterTooltip>Explosive shells over water have their explosion radius reduced and sound effect changed to a splash.</VF_ShellExplosionsOnWaterTooltip>
+  <VF_RunOverPawns>Run Over Pawns</VF_RunOverPawns>
+  <VF_RunOverPawnsTooltip>Vehicles can run over pawns and apply blunt damage based on mass and speed.</VF_RunOverPawnsTooltip>
+  <VF_ChanceToRunOverFriendlies>Friendly Fire Chance</VF_ChanceToRunOverFriendlies>
+  <VF_ChanceToRunOverFriendliesTooltip>Chance to run over friendly pawns.</VF_ChanceToRunOverFriendliesTooltip>
+  
+  <VF_VehicleStats>Stats</VF_VehicleStats>
+  
+  <VF_Upgrades>Upgrades</VF_Upgrades>
+  <VF_OverrideDrawColor>Override Draw Color</VF_OverrideDrawColor>
+  <VF_OverrideDrawColorTooltip>When any upgrade is applied that comes with a pattern or draw color, the previous paint job will be overridden.</VF_OverrideDrawColorTooltip>
+</LanguageData>
+

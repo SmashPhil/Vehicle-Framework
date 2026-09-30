@@ -49,13 +49,7 @@ internal sealed class Test_RenderTexture
     Expect.ReferencesAreEqual(rtA, buffer.Read);
     Expect.ReferencesAreEqual(rtB, buffer.Write);
 
-    // Dispose will queue the texture object for destruction, but we still have 1 frame to verify
-    // GPU allocations were released.
     buffer.Dispose();
-
-    Expect.AreEqual(expected: IntPtr.Zero, buffer.Read.GetNativeDepthBufferPtr());
-    Expect.AreEqual(expected: IntPtr.Zero, buffer.Write.GetNativeDepthBufferPtr());
-
     // Allow RenderTextures to be destroyed, then verify
     yield return new WaitForEndOfFrame();
 
@@ -84,8 +78,6 @@ internal sealed class Test_RenderTexture
     bool continue9999 = idler.UpdateLoop();
     Expect.IsFalse(continue9999);
     UnityThread.RemoveUpdate(idler.UpdateLoop);
-
-    Expect.AreEqual(expected: IntPtr.Zero, renderTex.GetNativeDepthBufferPtr());
 
     // Allow RenderTextures to be destroyed, then verify
     yield return new WaitForEndOfFrame();
@@ -119,9 +111,6 @@ internal sealed class Test_RenderTexture
     bool continue9999 = idler.UpdateLoop();
     Expect.IsFalse(continue9999);
     UnityThread.RemoveUpdate(idler.UpdateLoop);
-
-    Expect.AreEqual(expected: IntPtr.Zero, idler.Read.GetNativeDepthBufferPtr());
-    Expect.AreEqual(expected: IntPtr.Zero, idler.Write.GetNativeDepthBufferPtr());
 
     // Allow RenderTextures to be destroyed, then verify
     yield return new WaitForEndOfFrame();

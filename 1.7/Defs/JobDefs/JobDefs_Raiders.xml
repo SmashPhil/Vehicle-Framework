@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<JobDef>
+		<defName>SabotageVehicle</defName>
+		<driverClass>Vehicles.JobDriver_SabotageVehicle</driverClass>
+		<reportString>Sabotaging TargetA.</reportString>
+		<casualInterruptible>false</casualInterruptible>
+	</JobDef>
+</Defs>

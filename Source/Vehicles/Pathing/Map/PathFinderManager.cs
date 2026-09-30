@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using SmashTools.Performance;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
 using Verse;
-using BurstPathFinder = SmashTools.Burst.PathFinder;
-using PathRequest = SmashTools.Burst.PathRequest;
+using BurstPathFinder = SmashTools.PathFinder.PathFinder;
+using PathRequest = SmashTools.PathFinder.PathRequest;
 
 namespace Vehicles;
 

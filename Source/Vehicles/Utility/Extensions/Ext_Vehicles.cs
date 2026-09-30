@@ -6,7 +6,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;

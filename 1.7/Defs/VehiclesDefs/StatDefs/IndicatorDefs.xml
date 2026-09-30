@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.IndicatorDef>
+		<defName>VF_Explosive</defName>
+		<label>Explosive</label>
+		<iconPath>UI/Icons/WarningIcon</iconPath>
+	</Vehicles.IndicatorDef>
+	
+	<Vehicles.IndicatorDef>
+		<defName>VF_Leaker</defName>
+		<label>Leaks Fuel</label>
+		<iconPath>UI/Icons/WarningIcon</iconPath>
+	</Vehicles.IndicatorDef>
+</Defs>

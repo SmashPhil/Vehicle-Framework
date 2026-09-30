@@ -1,10 +1,9 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using CoreLib.Collections;
 using DevTools.Benchmarking;
 using DevTools.Testing;
-using Unity.Profiling;
-using UnityEngine.Assertions;
 
 namespace CoreLib.Testing;
 
@@ -79,16 +78,19 @@ internal class Test_ReadOnlyArray
   {
     int[] array = [1, 2, 3];
     ReadOnlyArray<int> view = new(array);
-    using ProfilerRecorder recorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Used Memory");
-    long bytes = recorder.CurrentValue;
-    Assert.IsTrue(recorder.Valid);
 
+    // Warmup JIT since it allocates on first pass
+    foreach (int item in view)
+    {
+      DeadCodeHelper.Consume(item);
+    }
+
+    long bytes = GC.GetAllocatedBytesForCurrentThread();
     foreach (int item in view)
     {
       // JIT keeps eliminating this loop in release builds
       DeadCodeHelper.Consume(item);
     }
-
-    Expect.AreEqual(expected: bytes, recorder.CurrentValue);
+    Expect.AreEqual(expected: bytes, GC.GetAllocatedBytesForCurrentThread());
   }
 }

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<SoundDef>
+		<defName>Explode_BombWater</defName>
+		<context>MapOnly</context>
+		<eventNames />
+		<maxSimultaneous>10</maxSimultaneous>
+		<subSounds>
+			<li>
+				<muteWhenPaused>False</muteWhenPaused>
+				<grains>
+					<li Class = "AudioGrain_Clip">
+						<clipPath>Explosives/Explosion_BombWater</clipPath>
+					</li>				
+				</grains>
+				<volumeRange>
+					<min>30</min>
+					<max>40</max>
+				</volumeRange>
+				<distRange>
+					<min>0</min>
+					<max>150</max>
+				</distRange>
+			</li>
+		</subSounds>
+	</SoundDef>
+	
+	<SoundDef>
+		<defName>Explosion_PirateCannon</defName>
+		<context>MapOnly</context>
+		<eventNames />
+		<maxSimultaneous>5</maxSimultaneous>
+		<subSounds>
+			<li>
+				<muteWhenPaused>True</muteWhenPaused>
+				<grains>
+					<li Class = "AudioGrain_Clip">
+						<clipPath>Explosives/Explosion_PirateCannon</clipPath>
+					</li>
+				</grains>
+				<volumeRange>
+					<min>15</min>
+					<max>30</max>
+				</volumeRange>
+				<distRange>
+					<min>0</min>
+					<max>200</max>
+				</distRange>
+			</li>
+		</subSounds>
+	</SoundDef>
+	
+	<SoundDef>
+		<defName>ShipBigConstruction</defName>
+		<sustain>False</sustain>
+		<context>MapOnly</context>
+		<eventNames />
+		<maxSimultaneous>5</maxSimultaneous>
+		<priorityMode>PrioritizeNearest</priorityMode>
+		<subSounds>
+			<li>	
+				<muteWhenPaused>False</muteWhenPaused>
+				<grains>
+					<li Class = "AudioGrain_Clip">
+						<clipPath>Ship/ShipBell_1</clipPath>
+					</li>
+				</grains>
+				<volumeRange>
+					<min>40</min>
+					<max>45</max>
+				</volumeRange>
+				<distRange>
+					<min>0</min>
+					<max>50</max>
+				</distRange>
+			</li>
+		</subSounds>
+	</SoundDef>
+</Defs>

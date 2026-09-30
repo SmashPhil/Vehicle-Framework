@@ -1,72 +1,62 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<Authors>Smash Phil</Authors>
-		<FileVersion>1.6.0</FileVersion>
-		<AssemblyVersion>1.6.0</AssemblyVersion>
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <RootNamespace>SmashTools</RootNamespace>
+    <AssemblyName>Test_SmashTools</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+  </PropertyGroup>
 
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-		<ProjectGuid>{6CBE5790-6C3E-4290-95A5-785466A0A7F0}</ProjectGuid>
-		<RootNamespace>SmashTools</RootNamespace>
-		<AssemblyName>Test_SmashTools</AssemblyName>
-		<ModDir>..\..\</ModDir>
-		<OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
-	</PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>false</Optimize>
-		<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="PolySharp" Version="1.*" />
 
-	<ItemGroup Condition="'$(UseLocalBurstLib)' != 'true'">
-		<PackageReference Include="SmashTools.Burst" Version="1.2.4" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(UseLocalBurstLib)' == 'true'">
-		<Reference Include="SmashToolsBurst">
-			<HintPath>$(OutDir)\SmashToolsBurst.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-	</ItemGroup>
+    <Reference Include="DevTools">
+      <HintPath>$(OutDir)\DevTools.dll</HintPath>
+    </Reference>
 
-	<ItemGroup>
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-		<PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-		<PackageReference Include="PolySharp" Version="1.*" />
+    <Reference Include="SmashTools">
+      <HintPath>$(OutDir)\SmashTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-		<Reference Include="DevTools">
-			<HintPath>$(OutDir)\DevTools.dll</HintPath>
-		</Reference>
+    <Reference Include="SmashTools.PathFinder">
+      <HintPath>$(OutDir)\SmashTools.PathFinder.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-		<Reference Include="SmashTools">
-			<HintPath>$(OutDir)\SmashTools.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-		<Reference Include="CoreLib">
-			<HintPath>$(OutDir)\CoreLib.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-
-    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
+    <ProjectReference
+      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>

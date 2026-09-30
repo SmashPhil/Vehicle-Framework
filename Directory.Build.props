@@ -3,13 +3,14 @@
     <Configurations>Debug;Unstable;Release;ReleaseTesting;</Configurations>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <FileVersion>1.6.0</FileVersion>
-    <AssemblyVersion>1.6.0</AssemblyVersion>
+    <FileVersion>1.7.0</FileVersion>
+    <AssemblyVersion>1.7.0</AssemblyVersion>
 
     <GenerateDocumentationFile>False</GenerateDocumentationFile>
+    <GenerateDependencyFile>false</GenerateDependencyFile>
     <Deterministic>true</Deterministic>
     <OutputType>Library</OutputType>
-    <TargetFramework>net48</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <LangVersion>preview</LangVersion>
     <FileAlignment>512</FileAlignment>
     <AppDesignerFolder>Properties</AppDesignerFolder>
@@ -19,9 +20,12 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    
+
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseLocalBurstLib>false</UseLocalBurstLib>
+    <UseKrafsPackageRef>false</UseKrafsPackageRef>
+
+    <ModDir>$(MSBuildThisFileDirectory)</ModDir>
+    <RefDir>$(ModDir)..\..\</RefDir>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -43,4 +47,42 @@
     <Optimize>true</Optimize>
     <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true' AND '$(AnalyzerProject)' != 'true'">
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true' AND '$(AnalyzerProject)' != 'true'">
+    <Reference Include="System">
+      <HintPath>$(RefDir)\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>$(RefDir)\System.Xml.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <HintPath>$(RefDir)\System.Xml.Linq.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="mscorlib">
+      <HintPath>$(RefDir)\mscorlib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityStubs">
+      <HintPath>$(RefDir)\UnityStubs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RefDir)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Waylith">
+      <HintPath>$(RefDir)\Waylith.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Waylith.UnityCompat">
+      <HintPath>$(RefDir)\Waylith.UnityCompat.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
 </Project>

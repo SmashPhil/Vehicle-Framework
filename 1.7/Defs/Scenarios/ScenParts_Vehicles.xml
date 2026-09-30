@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <ScenPartDef>
+    <defName>StartingVehicle</defName>
+    <label>start with vehicle(s)</label>
+    <scenPartClass>Vehicles.ScenPart_StartingVehicle</scenPartClass>
+    <category>StartingImportant</category>
+    <selectionWeight>1.0</selectionWeight>
+    <summaryPriority>310</summaryPriority>
+  </ScenPartDef>
+</Defs>
