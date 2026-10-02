@@ -5,7 +5,6 @@ using CoreLib.Collections;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
-using static Vehicles.VehiclePathingSystem;
 
 namespace Vehicles;
 
@@ -16,15 +15,15 @@ public class PathDataContainer
   private readonly IPathingManager manager;
   private readonly List<VehicleDef> vehicleDefs;
 
-  private readonly VehiclePathData[] pathDatas;
+  private readonly PathData[] pathDatas;
 
-  private readonly Ref<VehicleDef> buildingFor = new();
+  private VehicleDef buildingFor;
 
   public PathDataContainer(IPathingManager manager, List<VehicleDef> vehicleDefs)
   {
     this.manager = manager;
     this.vehicleDefs = vehicleDefs;
-    pathDatas = new VehiclePathData[vehicleDefs.Count];
+    pathDatas = new PathData[vehicleDefs.Count];
   }
 
   public PathData this[int index] => pathDatas[index];
@@ -34,7 +33,7 @@ public class PathDataContainer
     get
     {
 #if DEBUG
-      if (buildingFor.Value == def)
+      if (buildingFor == def)
       {
         Trace.Fail(
           "Trying to pull PathData by indexing when it's currently in the middle of generation.");
@@ -57,13 +56,13 @@ public class PathDataContainer
     }
   }
 
-  private VehiclePathData CreatePathData(IPathGridCalculator calculator, VehicleDef vehicleDef,
+  private PathData CreatePathData(IPathGridCalculator calculator, VehicleDef vehicleDef,
     [CanBeNull] IPathFinder<PathSettings> pathFinder)
   {
-    VehiclePathData pathData;
-    using (new ScopedReferenceRollback<VehicleDef>(buildingFor, vehicleDef))
+    PathData pathData;
+    using (new ScopedRollback<VehicleDef>(ref buildingFor, vehicleDef))
     {
-      pathData = new VehiclePathData(manager, vehicleDef)
+      pathData = new PathData(manager, vehicleDef)
       {
         VehiclePathFinder = pathFinder as VehiclePathFinder,
         // TODO - may need refactor later, pathfinder isn't necessarily the only grid that needs synchronizing
@@ -73,15 +72,12 @@ public class PathDataContainer
       if (pathData.IsOwner)
       {
         pathData.RegionData = new RegionData(manager, vehicleDef, pathFinder);
-        // TODO 1.7 - Remove
-        pathData.ReachabilityData = new VehiclePathingSystem.VehicleReachabilitySettings(pathData.RegionData);
       }
       else
       {
         // Will return itself if it's an owner
         VehicleDef ownerDef = manager.GridOwners.GetOwner(vehicleDef);
         pathData.RegionData = pathDatas[ownerDef.DefIndex].RegionData;
-        pathData.ReachabilityData = pathDatas[ownerDef.DefIndex].ReachabilityData;
       }
 
       pathDatas[vehicleDef.DefIndex] = pathData;
@@ -111,12 +107,6 @@ public class PathData
   // Region grid is currently disabled.
   public bool Suspended => !VehicleRegionAndRoomUpdater.Enabled;
 
-  // Internal setter added for legacy support (for now). Only mods referencing these old systems
-  // will need them. These will be removed in the near future.
-  // TODO 1.7 - Remove
-  [Obsolete("Access classes directly from properties.")]
-  public VehiclePathingSystem.VehicleReachabilitySettings ReachabilityData { get; internal set; }
-
   internal RegionData RegionData { get; set; }
 
   public VehiclePathGrid VehiclePathGrid { get; internal set; }
@@ -127,10 +117,6 @@ public class PathData
   public VehiclePathFinder VehiclePathFinder { get; internal set; }
 
   public VehicleReachability VehicleReachability => RegionData.reachability;
-
-  // TODO 1.6.2144 - Remove
-  [Obsolete("Fetch from region grid manager.")]
-  public VehicleRegionGrid VehicleRegionGrid => VehicleRegionGridManager[RegionGridType.Normal];
 
   public VehicleRegionGridManager VehicleRegionGridManager => RegionData.regionGridManager;
 

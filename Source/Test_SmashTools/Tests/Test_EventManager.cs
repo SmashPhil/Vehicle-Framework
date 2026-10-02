@@ -43,7 +43,7 @@ internal sealed class Test_EventManager
     Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
 
-    using (new ScopedValueRollback<int>(ref integer))
+    using (new ScopedRollback<int>(ref integer))
     {
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Assert.AreEqual(integer, 1);
@@ -52,7 +52,7 @@ internal sealed class Test_EventManager
     Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
 
-    using (new ScopedValueRollback<int>(ref integer))
+    using (new ScopedRollback<int>(ref integer))
     {
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Assert.AreEqual(integer, 1);
@@ -71,7 +71,7 @@ internal sealed class Test_EventManager
     Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
 
-    using (new ScopedValueRollback<int>(ref integer))
+    using (new ScopedRollback<int>(ref integer))
     {
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Assert.AreEqual(integer, 1);
@@ -80,7 +80,7 @@ internal sealed class Test_EventManager
     Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
 
-    using (new ScopedValueRollback<int>(ref integer))
+    using (new ScopedRollback<int>(ref integer))
     {
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Assert.AreEqual(integer, DefaultState);
@@ -119,7 +119,7 @@ internal sealed class Test_EventManager
       Expect.IsTrue(obj.EventRegistry[EventType.Two].Enabled);
       Expect.IsTrue(obj.EventRegistry[EventType.Three].Enabled);
       // All events disabled
-      using ScopedValueRollback<int> svr = new(ref integer);
+      using ScopedRollback<int> svr = new(ref integer);
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Expect.AreEqual(integer, DefaultState);
       obj.EventRegistry[EventType.Two].ExecuteEvents();
@@ -146,7 +146,7 @@ internal sealed class Test_EventManager
       Assert.IsFalse(obj.EventRegistry[EventType.Two].Enabled);
       Assert.IsTrue(obj.EventRegistry[EventType.Three].Enabled);
       // Only EventType::Two events are disabled
-      using ScopedValueRollback<int> svr = new(ref integer);
+      using ScopedRollback<int> svr = new(ref integer);
       obj.EventRegistry[EventType.One].ExecuteEvents();
       Expect.AreEqual(integer, 1);
       obj.EventRegistry[EventType.Two].ExecuteEvents();

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using CoreLib;
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace CoreLib.Testing;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]
@@ -15,12 +14,55 @@ internal class Test_ScopedRollback
   private void UnmanagedValue()
   {
     int x = 1;
-    using (new DevTools.Testing.ScopedValueRollback<int>(ref x))
+    using (new ScopedRollback<int>(ref x))
     {
       x = 5;
       Assert.AreEqual(x, 5);
     }
     Expect.AreEqual(x, 1);
+  }
+
+  [Test]
+  [TestDescription("Unmanaged value is rolled back.")]
+  private void UnmanagedValuePreassign()
+  {
+    int x = 1;
+    using (new ScopedRollback<int>(ref x, 5))
+    {
+      Assert.AreEqual(x, 5);
+    }
+    Expect.AreEqual(x, 1);
+  }
+
+  [Test]
+  [TestDescription("Managed reference is rolled back.")]
+  private void ManagedReference()
+  {
+    object a = new();
+    object b = new();
+    object obj = a;
+    Expect.ReferencesAreEqual(obj, a);
+    using (new ScopedRollback<object>(ref obj))
+    {
+      obj = b;
+      Expect.ReferencesAreEqual(obj, b);
+    }
+    Expect.ReferencesAreEqual(obj, a);
+  }
+
+  [Test]
+  [TestDescription("Managed reference is rolled back.")]
+  private void ManagedReferencePreassign()
+  {
+    object a = new();
+    object b = new();
+    object obj = a;
+    Expect.ReferencesAreEqual(obj, a);
+    using (new ScopedRollback<object>(ref obj, b))
+    {
+      Expect.ReferencesAreEqual(obj, b);
+    }
+    Expect.ReferencesAreEqual(obj, a);
   }
 
   [Test]
@@ -51,35 +93,5 @@ internal class Test_ScopedRollback
       Assert.AreEqual(intSet.Count, 5);
     }
     Expect.AreEqual(intSet.Count, 0);
-  }
-
-  [Test]
-  [TestDescription("Revert reference type field between 2 references.")]
-  private void ReferenceField()
-  {
-    const string Old = "Initial";
-    const string New = "Temporary";
-
-    TestObject obj = new(Old);
-    Assert.AreEqual(obj.name, Old);
-    // Manual assignment in scope
-    using (new ScopedReferenceRollback<TestObject, string>(obj, nameof(TestObject.name)))
-    {
-      obj.name = New;
-      Expect.AreEqual(obj.name, New);
-    }
-    Expect.AreEqual(obj.name, Old);
-
-    // FieldRef pre-assignment
-    using (new ScopedReferenceRollback<TestObject, string>(obj, nameof(TestObject.name), New))
-    {
-      Expect.AreEqual(obj.name, New);
-    }
-    Expect.AreEqual(obj.name, Old);
-  }
-
-  private class TestObject(string name)
-  {
-    public string name = name;
   }
 }

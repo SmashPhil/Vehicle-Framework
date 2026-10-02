@@ -57,7 +57,7 @@ internal sealed class Test_DeferredGridUrgency
   [TestDescription("Player Faction vehicles use deferred generation in player maps.")]
   private void PlayerOnPlayerFactionMap()
   {
-    using ScopedReferenceRollback<MapParent, Faction> srr = new(mapping.map.Parent, "factionInt", Faction.OfPlayer);
+    using ScopedFieldRollback<MapParent, Faction> srr = new(mapping.map.Parent, "factionInt", Faction.OfPlayer);
     Assert.IsTrue(group.vehicle.Faction.IsPlayer);
     Expect.AreEqual(DeferredGridGeneration.Urgency.Deferred, DeferredGridGeneration.UrgencyFor(group.vehicle));
   }
@@ -67,7 +67,7 @@ internal sealed class Test_DeferredGridUrgency
   private void PlayerOnNpcFactionMap()
   {
     // Non-player factions must generate urgently, this will happen on event maps regardless of generation tick
-    using ScopedReferenceRollback<MapParent, Faction> srr = new(mapping.map.Parent, "factionInt", Faction.OfPirates);
+    using ScopedFieldRollback<MapParent, Faction> srr = new(mapping.map.Parent, "factionInt", Faction.OfPirates);
     Expect.AreEqual(DeferredGridGeneration.Urgency.Urgent, DeferredGridGeneration.UrgencyFor(mapping.map));
   }
 
