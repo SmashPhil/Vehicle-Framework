@@ -43,21 +43,6 @@ public static class MapHelper
 	}
 
 	/// <summary>
-	/// Active skyfallers in a map should prevent the map from being closed
-	/// </summary>
-	[Obsolete("Will be removed in 1.7")] // TODO 1.7 - Remove
-	public static bool AnyVehicleSkyfallersBlockingMap(Map map)
-	{
-		VehiclePositionManager positionMgr = map.GetDetachedMapComponent<VehiclePositionManager>();
-		foreach (VehiclePawn vehicle in positionMgr.AllClaimants)
-		{
-			if (vehicle.ParentHolder is VehicleSkyfaller)
-				return true;
-		}
-		return false;
-	}
-
-	/// <summary>
 	/// Any active aerial vehicles currently providing recon on the map
 	/// </summary>
 	/// <param name="map"></param>

@@ -11,27 +11,7 @@ namespace Vehicles;
 [PublicAPI]
 public class JobDriver_CarryPawnToVehicle : JobDriver
 {
-  // TODO 1.7 - Remove
-  [Obsolete("No longer in use. Will be removed in 1.7", error: true)]
-  public VehicleRoleHandler VehicleHandler
-  {
-    get
-    {
-      if (job is Job_Vehicle jobVehicle)
-      {
-        return jobVehicle.handler;
-      }
-      VehicleRoleHandler operationalHandler = Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(Pawn));
-      operationalHandler ??= Vehicle.handlers.FirstOrDefault(handler => handler.CanOperateRole(Pawn));
-      return operationalHandler;
-    }
-  }
-
   public VehiclePawn Vehicle => job.GetTarget(TargetIndex.B).Thing as VehiclePawn;
-
-  // TODO 1.7 - Remove
-  [Obsolete("Use PawnToCarry instead.")]
-  public Pawn Pawn => (Pawn)job.GetTarget(TargetIndex.A).Thing;
 
   public Pawn PawnToCarry => job.GetTarget(TargetIndex.A).Thing as Pawn;
 

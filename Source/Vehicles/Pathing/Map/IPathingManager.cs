@@ -26,9 +26,9 @@ public interface IPathingManager
   /// <returns><see langword="true"/> if path data is suspended, <see langword="false"/> if otherwise.</returns>
   bool IsPathDataSuspended([NotNull] VehicleDef vehicleDef);
 
-  // TODO 1.7 - Decouple from an explicit path grid, right now too many systems depend on this relationship.
+  // TODO - Decouple from an explicit path grid, right now too many systems depend on this relationship.
   VehiclePathGrid GetPathGrid(VehicleDef vehicleDef);
 
-  // TODO 1.7 - Decouple from an explicit grid manager, right now too many systems depend on this relationship.
+  // TODO - Decouple from an explicit grid manager, right now too many systems depend on this relationship.
   VehicleRegionGridManager GetRegionGridManager(VehicleDef vehicleDef);
 }

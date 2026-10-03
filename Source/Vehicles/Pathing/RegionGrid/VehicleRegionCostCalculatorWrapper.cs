@@ -30,12 +30,6 @@ public class VehicleRegionCostCalculatorWrapper
   private int cachedSecondBestLinkCost;
   private bool cachedRegionIsDestination;
 
-  // TODO 1.7 - Remove. Even though it's implicitly convertible to IPathingManager, this is an API breaking change.
-  public VehicleRegionCostCalculatorWrapper(VehiclePathingSystem mapping, VehicleDef vehicleDef) :
-    this((IPathingManager)mapping, vehicleDef)
-  {
-  }
-
   public VehicleRegionCostCalculatorWrapper(IPathingManager manager, VehicleDef vehicleDef)
   {
     this.manager = manager;

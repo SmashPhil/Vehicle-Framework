@@ -14,8 +14,7 @@ internal sealed class Test_EventListener
   {
     TestObject obj = new();
     obj.FillEventsEnum();
-    Assert.IsNotNull(obj.EventRegistry.map);
-    Assert.AreEqual(obj.EventRegistry.map.Count, Enum.GetValues(typeof(EventType)).Length);
+    Assert.AreEqual(obj.EventRegistry.Count, Enum.GetValues<EventType>().Length);
     using EventListener<EventType> listener = new(obj, EventType.Yes);
     Expect.AreEqual(listener.CountRaised, 0);
     obj.EventRegistry[EventType.Yes].ExecuteEvents();
@@ -27,8 +26,7 @@ internal sealed class Test_EventListener
   {
     TestObject obj = new();
     obj.FillEventsEnum();
-    Assert.IsNotNull(obj.EventRegistry.map);
-    Assert.AreEqual(obj.EventRegistry.map.Count, Enum.GetValues(typeof(EventType)).Length);
+    Assert.AreEqual(obj.EventRegistry.Count, Enum.GetValues<EventType>().Length);
     using EventListener<EventType> listener = new(obj, EventType.Yes);
     Expect.AreEqual(listener.CountRaised, 0);
     obj.EventRegistry[EventType.No].ExecuteEvents();

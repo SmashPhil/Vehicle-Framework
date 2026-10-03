@@ -105,7 +105,7 @@ public abstract class VehicleSkyfaller : Thing, IThingHolderTickable, IRoofColla
     Graphics.DrawMesh(MeshPool.plane10Back, matrix, material, 0, null, 0, shadowPropertyBlock);
   }
 
-  // TODO 1.7 - Remove in favor of compact generator class
+  // TODO 1.8 - Remove in favor of compact generator class
   private void PackVehicle()
   {
     if (vehicle.Spawned)

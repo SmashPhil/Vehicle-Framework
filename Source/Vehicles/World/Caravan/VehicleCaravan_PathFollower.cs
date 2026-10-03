@@ -300,7 +300,7 @@ public sealed class VehicleCaravan_PathFollower : IExposable
     return CostToMove(caravan, start, end);
   }
 
-  [Obsolete]
+  [Obsolete("Use other overload for CostToMove")] // TODO 1.8 - Remove
   public static int CostToMove(VehicleCaravan caravan, PlanetTile start, PlanetTile end, int? ticksAbs)
   {
     return CostToMove(caravan.VehiclesListForReading, caravan.TicksPerMove, start, end,
@@ -313,8 +313,7 @@ public sealed class VehicleCaravan_PathFollower : IExposable
     return CostToMove(caravan.VehiclesListForReading, in data);
   }
 
-  // TODO 1.7 - Switch to TicksPerMoveData
-  [Obsolete]
+  [Obsolete("Use other overload for CostToMove")] // TODO 1.8 - Remove
   public static int CostToMove(List<VehicleDef> vehicleDefs, int ticksPerMove, PlanetTile start,
     PlanetTile end, int? ticksAbs = null, StringBuilder explanation = null,
     string caravanTicksPerMoveExplanation = null)

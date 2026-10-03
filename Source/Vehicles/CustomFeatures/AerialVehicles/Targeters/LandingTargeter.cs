@@ -10,7 +10,7 @@ using Verse.Sound;
 
 namespace Vehicles;
 
-// TODO 1.7 - This whole class is a disaster, get rid of it!
+// TODO 1.8 - This whole class is a disaster, get rid of it!
 public class LandingTargeter : BaseTargeter
 {
 	public const int PingPongTickLength = 100;

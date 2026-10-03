@@ -22,13 +22,6 @@ public class ComponentRequirement
 		Component = vehicle.statHandler.GetComponent(key);
 	}
 
-  // TODO 1.7 - Rename to Init
-  [Obsolete("Use Init instead.")]
-	public void RegisterEvents(VehiclePawn vehicle)
-  {
-    Init(vehicle);
-  }
-
   public void Init(VehiclePawn vehicle)
   {
     vehicle.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);

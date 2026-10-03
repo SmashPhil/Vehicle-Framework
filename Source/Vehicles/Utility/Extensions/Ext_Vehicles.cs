@@ -6,7 +6,6 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using SmashTools.PathFinder;
 using SmashTools.Performance;
 using UnityEngine;
 using UnityEngine.Assertions;
@@ -18,7 +17,7 @@ using Verse.Sound;
 
 namespace Vehicles;
 
-// TODO 1.7 - Clean up all the extension methods for Drivable and Standable
+// TODO 1.8 - Clean up all the extension methods for Drivable and Standable
 [PublicAPI]
 [StaticConstructorOnStartup]
 public static class Ext_Vehicles
@@ -996,7 +995,7 @@ public static class Ext_Vehicles
       (thingHolder as Pawn_InventoryTracker)?.pawn as VehiclePawn;
   }
 
-  // TODO 1.7 - Remove
+  // TODO 1.8 - Remove
   /// <summary>
   /// Check if <paramref name="pawn"/> is in a vehicle.
   /// </summary>

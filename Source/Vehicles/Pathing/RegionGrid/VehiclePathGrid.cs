@@ -157,7 +157,6 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
 
     OnWritingToGrid?.Invoke();
     bool walkable = WalkableFast(cell);
-    // TODO 1.7 - convert all calculate functions to ushort return types
     costGrid[map.cellIndices.CellToIndex(cell)] = CalculatedCostAt(cell);
     bool walkabilityChanged = WalkableFast(cell) != walkable;
 
@@ -180,7 +179,6 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     }
   }
 
-  // TODO 1.7 - Remove
   /// <summary>
   /// Calculate cost at <paramref name="cell"/>
   /// </summary>
@@ -285,7 +283,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     return thingPathCost;
   }
 
-  // TODO 1.7 - Get rid of the unused out parameter 'pathCost'
+  // TODO 1.8 - Get rid of the unused out parameter 'pathCost'
   public static bool PassableTerrainCost(VehicleDef vehicleDef, TerrainDef terrainDef,
     out int pathCost, StringBuilder stringBuilder = null)
   {
@@ -293,7 +291,7 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
     return pathCost < ImpassableCost;
   }
 
-  // TODO 1.7 - Remove in favor of PathGridCalculator::TerrainCost
+  // TODO 1.8 - Remove in favor of PathGridCalculator::TerrainCost
   public static int TerrainCostAt(VehicleDef vehicleDef, TerrainDef terrainDef,
     StringBuilder stringBuilder = null)
   {

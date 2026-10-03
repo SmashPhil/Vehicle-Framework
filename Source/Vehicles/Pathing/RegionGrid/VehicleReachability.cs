@@ -43,7 +43,7 @@ public sealed class VehicleReachability : VehicleGridManager
     chunkSearch = new ChunkSearch(pathing, createdFor, cache);
   }
 
-  // TODO 1.7 - Can be optimized, this triggers for the full map for RecalcAll
+  // TODO 1.8 - Can be optimized, this triggers for the full map for RecalcAll
   private void ClearCache(IntVec3 _)
   {
     cache.Clear();

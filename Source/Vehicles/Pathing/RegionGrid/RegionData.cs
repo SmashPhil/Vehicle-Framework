@@ -14,7 +14,6 @@ internal class RegionData
 
   private readonly VehicleGridManager[] gridManagers;
 
-  // TODO 1.7 - Decouple pathfinder from reachability
   public RegionData(IPathingManager pathing, VehicleDef vehicleDef, [CanBeNull] IPathFinder<PathSettings> pathFinder)
   {
     regionMaker = new VehicleRegionMaker(pathing, vehicleDef);

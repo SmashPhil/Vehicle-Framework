@@ -24,8 +24,7 @@ internal sealed class Test_EventManager
   {
     TestObject obj = new();
     obj.FillEventsEnum();
-    Assert.IsNotNull(obj.EventRegistry.map);
-    Assert.AreEqual(obj.EventRegistry.map.Count, Enum.GetValues(typeof(EventType)).Length);
+    Assert.AreEqual(obj.EventRegistry.Count, Enum.GetValues<EventType>().Length);
     Expect.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
     Expect.IsTrue(obj.EventRegistry[EventType.Two].Enabled);

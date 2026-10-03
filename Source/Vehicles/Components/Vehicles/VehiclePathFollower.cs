@@ -55,13 +55,13 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private List<IntVec3> bumperCells;
 
-  // TODO 1.7 - Fix access modifiers
+  // TODO 1.8 - Fix access modifiers
   public IntVec3 nextCell;
   private IntVec3 lastCell;
   public IntVec3 lastPathedTargetPosition;
   private LocalTargetInfo destination;
 
-  // TODO 1.7 - Fix access modifiers and opt for getter for Tween class
+  // TODO 1.8 - Fix access modifiers and opt for getter for Tween class
   public float nextCellCostLeft;
   public float nextCellCostTotal = 1f;
 
@@ -109,7 +109,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
   private VehicleReachability Reachability { get; set; }
 
-  // TODO 1.7 - Remove
   public LocalTargetInfo Destination => destination;
 
   internal float PathCostLeft { get; private set; }
@@ -202,12 +201,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
-  // TODO 1.7 - Remove
-  [Obsolete]
-  public void PostGenerationSetup()
-  {
-  }
-
   public void RegisterEvents()
   {
     vehicle.AddEvent(VehicleEventDefOf.PawnExited, RecalculatePermissions);
@@ -230,13 +223,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     controller.RegisterEvents();
   }
 
-  // TODO 1.7 - Remove
-  [Obsolete("Will be removed in 1.7")]
-  public void SetEndRotation(Rot8 rot)
-  {
-    endRot = rot;
-  }
-
   void IExposable.ExposeData()
   {
     Scribe_Deep.Look(ref controller, nameof(controller), ctorArgs: this);
@@ -244,7 +230,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
 
     if (Scribe.mode == LoadSaveMode.LoadingVars)
     {
-      // TODO 1.7 - REMOVE
+      // TODO 1.8 - REMOVE
       bool moving = false;
       Scribe_Values.Look(ref moving, nameof(moving));
       if (moving) status = PathingStatus.Moving;
@@ -267,7 +253,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     }
   }
 
-  // TODO 1.7 - Remove PathEndMode parameter
   public void StartPath(LocalTargetInfo dest, PathEndMode peMode, bool ignoreReachability = false)
   {
     if (!vehicle.Drafted)
@@ -1096,8 +1081,7 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     Stopping
   }
 
-  // TODO 1.7 - update access modifier
-  public enum PathRequest
+  private enum PathRequest
   {
     None,
     Wait,
@@ -1106,7 +1090,6 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     NeedNew
   }
 
-  // TODO 1.7 - update access modifier
   public enum PathRequestStatus
   {
     None,

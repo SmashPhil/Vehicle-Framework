@@ -52,7 +52,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
 
   internal PathGridScalar ScalarGrid { get; private set; }
 
-  // TODO 1.7 - FIX
+  // TODO
   // There is a circular reference between this, VehiclePathGrid, and VehicleReachability, so the order of
   // initialization is very touchy. Will need to refactor how path grid handles initial map generation.
   internal void Init()

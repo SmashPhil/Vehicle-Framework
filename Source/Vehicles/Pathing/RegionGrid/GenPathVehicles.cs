@@ -10,13 +10,10 @@ namespace Vehicles
 	/// </summary>
 	public static class GenPathVehicles
 	{
-		/// <summary>
-		/// Determine and resolve PathMode for <paramref name="vehicle"/> following certain conditions
-		/// </summary>
-		/// <param name="vehicle"></param>
-		/// <param name="dest"></param>
-		/// <param name="peMode"></param>
-		public static TargetInfo ResolvePathMode(VehicleDef vehicleDef, Map map, TargetInfo dest, ref PathEndMode peMode)
+    /// <summary>
+    /// Determine and resolve PathMode for <paramref name="vehicleDef"/> following certain conditions
+    /// </summary>
+    public static TargetInfo ResolvePathMode(VehicleDef vehicleDef, Map map, TargetInfo dest, ref PathEndMode peMode)
 		{
 			if (dest.HasThing && dest.Thing.Spawned)
 			{
@@ -30,7 +27,7 @@ namespace Vehicles
 					Log.Error("Pathed to cell " + dest + " with PathEndMode.InteractionCell.");
 				}
 				peMode = PathEndMode.OnCell;
-				return new TargetInfo(dest.Thing.InteractionCell, dest.Thing.Map, false);
+				return new TargetInfo(dest.Thing.InteractionCell, dest.Thing.Map);
 			}
 			if (peMode == PathEndMode.ClosestTouch)
 			{
