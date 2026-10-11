@@ -888,7 +888,7 @@ internal sealed class Test_VehicleCaravan
     using ScopeWorldObject swo3 = new(mergedCaravan);
 
 		Expect.AreEqual(mergedCaravan.PawnsListForReading.Count,
-			group1.pawns.Count + PawnsInVanillaCaravan + 2 /* for vehicles */);
+			group1.pawns.Count + group2.pawns.Count + PawnsInVanillaCaravan + 2 /* for vehicles */);
 
 		// After being merged into the vanilla caravan, it was swapped into the vehicle caravan,
 		// so this merged caravan is neither the vanilla one nor any other.
