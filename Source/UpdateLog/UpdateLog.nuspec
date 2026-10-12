@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package >
+  <metadata>
+    <id>UpdateLog</id>
+    <version>1.4.1352</version>
+    <title>RimWorld Update Log</title>
+    <authors>Smash Phil</authors>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <license type="expression">MIT</license>
+    <icon>updatelog.png</icon>
+    <projectUrl>https://github.com/SmashPhil/UpdateLog</projectUrl>
+    <description>UpdateNews modder tool for generating RichText descriptions to be displayed upon updating a Mod.</description>
+    <releaseNotes>Added custom bracket creation.</releaseNotes>
+    <copyright>Copyright 2021</copyright>
+    <dependencies>
+      <group targetFramework=".NetFramework4.7.2" />
+    </dependencies>
+  </metadata>
+  <files>
+	  <file src="updatelog.png" target="" />
+  </files>
+</package>
