@@ -33,7 +33,6 @@
   <ItemGroup>
     <!-- Nuget -->
     <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-    <PackageReference Include="PolySharp" Version="1.*" />
 
     <!--Local -->
     <Reference Include="CoreLib">

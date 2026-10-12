@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 // TODO - this can be refactored with mocked path grid
 [TestFixture(TestType.Playing)]

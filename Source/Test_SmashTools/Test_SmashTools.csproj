@@ -7,33 +7,9 @@
     <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>false</Optimize>
-    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS</DefineConstants>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-    <PackageReference Include="PolySharp" Version="1.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 
     <Reference Include="DevTools">
       <HintPath>$(OutDir)\DevTools.dll</HintPath>
@@ -54,6 +30,10 @@
       <Private>False</Private>
     </Reference>
 
+    <ProjectReference 
+      Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj" 
+      OutputItemType="Analyzer" 
+      ReferenceOutputAssembly="false" />
     <ProjectReference
       Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
       OutputItemType="Analyzer"

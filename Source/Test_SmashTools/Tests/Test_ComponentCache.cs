@@ -5,7 +5,7 @@ using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.Playing), ExecutionPriority(Priority.First)]
 [TestCategory(TestCategoryNames.ComponentCache)]

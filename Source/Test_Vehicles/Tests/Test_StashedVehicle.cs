@@ -11,7 +11,7 @@ using Verse;
 using Priority = DevTools.Testing.Priority;
 using TickerTypeRollback = CoreLib.ScopedRollback<Verse.TickerType>;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(

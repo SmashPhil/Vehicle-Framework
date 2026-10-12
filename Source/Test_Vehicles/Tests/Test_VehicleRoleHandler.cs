@@ -8,7 +8,7 @@ using Vehicles.World;
 using Verse;
 using TickerTypeRollback = CoreLib.ScopedRollback<Verse.TickerType>;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.TickBehavior)]

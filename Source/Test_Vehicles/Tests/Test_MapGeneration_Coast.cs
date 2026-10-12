@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
@@ -7,7 +8,7 @@ using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration)]

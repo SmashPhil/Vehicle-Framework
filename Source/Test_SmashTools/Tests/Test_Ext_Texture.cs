@@ -3,7 +3,7 @@ using DevTools.Testing;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]

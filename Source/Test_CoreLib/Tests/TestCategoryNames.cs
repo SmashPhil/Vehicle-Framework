@@ -1,4 +1,4 @@
-﻿namespace CoreLib.Testing;
+﻿namespace CoreLib.Tests;
 
 public static class TestCategoryNames
 {

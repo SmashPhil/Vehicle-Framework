@@ -5,23 +5,21 @@
     <Product>Test_SmashTools.PathFinder</Product>
     <RootNamespace>SmashTools.PathFinder</RootNamespace>
     <AssemblyName>Test_SmashTools.PathFinder</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
   </PropertyGroup>
-
-  <!-- AssemblyInfo -->
-  <ItemGroup>
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-      <_Parameter1>Test_SmashTools.PathFinder</_Parameter1>
-    </AssemblyAttribute>
-  </ItemGroup>
 
   <!-- Dependencies -->
   <ItemGroup>
     <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-    <PackageReference Include="PolySharp" Version="1.*" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 
     <Reference Include="CoreLib">
       <HintPath>$(OutDir)\CoreLib.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+
+    <Reference Include="DevTools">
+      <HintPath>$(OutDir)\DevTools.dll</HintPath>
     </Reference>
 
     <Reference Include="SmashTools.PathFinder">
@@ -29,7 +27,14 @@
       <Private>False</Private>
     </Reference>
 
-    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>

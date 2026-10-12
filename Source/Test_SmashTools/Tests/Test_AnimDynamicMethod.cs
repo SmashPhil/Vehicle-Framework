@@ -9,7 +9,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription(

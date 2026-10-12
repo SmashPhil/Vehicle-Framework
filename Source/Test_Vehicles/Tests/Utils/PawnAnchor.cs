@@ -4,7 +4,7 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 /// <summary>
 /// Generate and keep a single pawn alive on the map when object goes out of scope so test map

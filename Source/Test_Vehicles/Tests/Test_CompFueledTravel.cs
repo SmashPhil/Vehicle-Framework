@@ -11,7 +11,7 @@ using Verse;
 using ScopedPathStatus =
   DevTools.Testing.ScopedFieldRollback<Vehicles.VehiclePathFollower, Vehicles.VehiclePathFollower.PathingStatus>;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn, TestCategoryNames.Events)]

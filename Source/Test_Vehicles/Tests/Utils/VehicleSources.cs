@@ -1,7 +1,7 @@
 ﻿using JetBrains.Annotations;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 internal static class VehicleSources
 {

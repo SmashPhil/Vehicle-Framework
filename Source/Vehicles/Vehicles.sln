@@ -58,6 +58,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools.PathFinder", "..
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_SmashTools.PathFinder", "..\Test_SmashTools.PathFinder\Test_SmashTools.PathFinder.csproj", "{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5A968633-76D1-433F-B997-3F5CBC61F6A1} = {5A968633-76D1-433F-B997-3F5CBC61F6A1}
+		{8A657931-56B6-646A-B403-D06B4F3F0EBF} = {8A657931-56B6-646A-B403-D06B4F3F0EBF}
+		{CBD9893C-47BE-405E-89F7-2342F47D26BC} = {CBD9893C-47BE-405E-89F7-2342F47D26BC}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTools.TestAdapter", "..\..\DevTools\DevTools.TestAdapter\DevTools.TestAdapter.csproj", "{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DevTools.Analyzer", "..\..\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj", "{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -142,11 +151,25 @@ Global
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{BD0EDBB6-9794-4ACE-9E49-CA017FD9E430}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{D44750AE-BB2E-49A9-ADEB-C105BF9488AB}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{C0BB7C7E-2C42-4BEC-86F1-5F86A568685C}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

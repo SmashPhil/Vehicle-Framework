@@ -1,18 +1,18 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
-using SmashTools;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 using Verse.Noise;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration)]

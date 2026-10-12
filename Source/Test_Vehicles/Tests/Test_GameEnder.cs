@@ -10,7 +10,7 @@ using Vehicles.World;
 using Verse;
 using Priority = DevTools.Testing.Priority;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestDescription("Vehicles with passengers are checked for game ending conditions.")]

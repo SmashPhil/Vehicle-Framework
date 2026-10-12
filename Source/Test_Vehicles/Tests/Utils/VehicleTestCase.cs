@@ -2,7 +2,7 @@
 using DevTools.Testing;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 public readonly struct VehicleTestCase : IDisposable
 {

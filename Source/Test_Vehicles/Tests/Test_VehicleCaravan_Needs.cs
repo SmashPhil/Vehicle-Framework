@@ -10,7 +10,7 @@ using Vehicles.Compatibility;
 using Vehicles.World;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(

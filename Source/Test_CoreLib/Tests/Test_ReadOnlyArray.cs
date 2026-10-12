@@ -5,7 +5,7 @@ using CoreLib.Collections;
 using DevTools.Benchmarking;
 using DevTools.Testing;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Struct wrapper object for read-only access to array.")]

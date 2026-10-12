@@ -2,9 +2,9 @@
 using CoreLib;
 using DevTools.Testing;
 using UnityEngine;
-using static CoreLib.ShuntingYard<SmashTools.Testing.Test_ShuntingYard.OperatorType, int>;
+using static CoreLib.ShuntingYard<SmashTools.Tests.Test_ShuntingYard.OperatorType, int>;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [Disabled]
 [TestFixture(TestType.MainMenu)]

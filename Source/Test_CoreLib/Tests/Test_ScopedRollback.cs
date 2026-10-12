@@ -2,7 +2,7 @@
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]

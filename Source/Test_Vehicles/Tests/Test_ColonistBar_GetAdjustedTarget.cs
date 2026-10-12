@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 // Validation of vehicle functionality needs to occur before
 [TestFixture(TestType.Playing)]

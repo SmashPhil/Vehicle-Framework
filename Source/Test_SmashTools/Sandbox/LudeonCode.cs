@@ -3,7 +3,7 @@ using DevTools.Testing;
 using Verse;
 
 // ReSharper disable all
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [Disabled]
@@ -70,7 +70,7 @@ public sealed class LudeonCode
     Expect.Throws<NullReferenceException>(() =>
       ParseHelper.ParseAction("SmashTools.TestFixture_LudeonCode.ParseHelperAction"));
     Expect.Throws<NullReferenceException>(() =>
-      ParseHelper.ParseAction("SmashTools.Testing.TestFixture_LudeonCode.ParseHelperAction"));
+      ParseHelper.ParseAction("SmashTools.Tests.TestFixture_LudeonCode.ParseHelperAction"));
     Expect.Throws<NullReferenceException>(() =>
       ParseHelper.ParseAction("12+1?l8`.+InvalidMethodName"));
   }

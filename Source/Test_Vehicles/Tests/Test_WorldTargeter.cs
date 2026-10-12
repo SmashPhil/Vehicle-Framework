@@ -3,7 +3,7 @@ using RimWorld;
 using UnityEngine.Assertions;
 using Vehicles.World;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(

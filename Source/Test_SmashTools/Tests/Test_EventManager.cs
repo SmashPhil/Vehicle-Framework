@@ -1,8 +1,9 @@
 ﻿using System;
+using DevTools;
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Events)]

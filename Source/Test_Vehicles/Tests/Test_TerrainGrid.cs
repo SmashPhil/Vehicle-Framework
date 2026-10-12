@@ -4,7 +4,7 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 internal sealed class Test_TerrainGrid : Test_MapTest

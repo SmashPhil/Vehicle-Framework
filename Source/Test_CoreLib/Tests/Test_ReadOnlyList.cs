@@ -5,7 +5,7 @@ using DevTools.Benchmarking;
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Struct wrapper object for read-only access to list.")]

@@ -3,7 +3,7 @@ using CoreLib.Collections;
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("IEnumerable extensions that build off linq and other similar utility methods.")]

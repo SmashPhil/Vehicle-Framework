@@ -19,7 +19,7 @@ end_of_line = lf
 
 [*.cs]
 trim_trailing_whitespace = true
-max_line_length = 100
+max_line_length = 120
 # Warnings
 dotnet_diagnostic.IDE0130.severity = none
 dotnet_diagnostic.IDE0160.severity = none

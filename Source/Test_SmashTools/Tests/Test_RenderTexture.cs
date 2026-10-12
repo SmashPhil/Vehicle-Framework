@@ -6,7 +6,7 @@ using SmashTools.Rendering;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Render texture utils.")]

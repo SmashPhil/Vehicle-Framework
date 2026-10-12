@@ -2,7 +2,7 @@
 using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("IPoolable interface and its behavior with ObjectPool")]
