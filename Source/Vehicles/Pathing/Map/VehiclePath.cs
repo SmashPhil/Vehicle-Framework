@@ -56,7 +56,7 @@ public class VehiclePathReceipt : IPathPromise
   }
 }
 
-// TODO 1.7 - Remove and use CoreLib.Path fully
+// TODO 1.8 - Remove and use CoreLib.Path fully
 [PublicAPI]
 public class VehiclePath : Path, IDisposable
 {

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+  <!-- 1 / 60 ticks -->
+	<Vehicles.VehicleEventDef>
+		<defName>ScanShort</defName>
+	</Vehicles.VehicleEventDef>
+	
+  <!-- 1 / 250 ticks -->
+	<Vehicles.VehicleEventDef>
+		<defName>ScanRare</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

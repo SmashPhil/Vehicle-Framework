@@ -30,7 +30,7 @@ public sealed class VehicleRegion : IPoolable
   public ThreadLocal<uint[]>
     closedIndex = new(() => new uint[VehicleRegionTraverser.WorkerCount]);
 
-  // TODO 1.7 - Change access modifiers, these should not be modifiable outside of this class
+  // TODO 1.8 - Change access modifiers, these should not be modifiable outside of this class
   public CellRect extentsClose;
   public CellRect extentsLimit;
 
@@ -351,17 +351,6 @@ public sealed class VehicleRegion : IPoolable
   }
 
   /// <summary>
-  /// Doesn't take movement ticks into account
-  /// </summary>
-  // TODO 1.7 - Remove
-  [Obsolete("Will be removed in 1.7"), PublicAPI]
-  public static int EuclideanDistance(IntVec3 cell, VehicleRegionLink link)
-  {
-    IntVec3 diff = cell - link.anchor;
-    return Mathf.RoundToInt(Mathf.Sqrt(Mathf.Pow(diff.x, 2) + Mathf.Pow(diff.z, 2)));
-  }
-
-  /// <summary>
   /// <paramref name="traverseParms"/> allows this region
   /// </summary>
   public bool Allows(in TraverseParms traverseParms)
@@ -381,16 +370,6 @@ public sealed class VehicleRegion : IPoolable
   public override string ToString()
   {
     return $"VehicleRegion_{Id}";
-  }
-
-  /// <summary>
-  /// Debug draw field edges of this region
-  /// </summary>
-  // TODO 1.7 - Remove
-  [Obsolete("Use DebugDraw overload with DebugRegionType instead."), PublicAPI]
-  public void DebugDraw()
-  {
-    GenDraw.DrawFieldEdges(Cells.ToList(), new Color(0f, 0f, 1f, 0.5f));
   }
 
   /// <summary>

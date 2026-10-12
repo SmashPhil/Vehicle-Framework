@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <NotAllowed>Disabled</NotAllowed>
+  <DriverNeeded>Colonist Driven</DriverNeeded>
+  <NoDriverNeeded>AI Driven</NoDriverNeeded>
+  
+  <Misc>Other</Misc>
+  <Transport>Transport</Transport>
+  <Trader>Trader</Trader>
+  <Combat>Combat</Combat>
+  <Hybrid>Hybrid</Hybrid>
+  
+  <Manual>Manual</Manual>
+  <Opportunistic>Opportunistic</Opportunistic>
+  <Automatic>Automatic</Automatic>
+  
+  <VF_VehicleTracksNone>None</VF_VehicleTracksNone>
+  <VF_VehicleTracksVanilla>Vanilla</VF_VehicleTracksVanilla>
+  <VF_VehicleTracksFull>Full</VF_VehicleTracksFull>
+  
+  <VF_RoadType_Prioritize>Prioritize</VF_RoadType_Prioritize>
+  <VF_RoadType_Avoid>Avoid</VF_RoadType_Avoid>
+</LanguageData>
+

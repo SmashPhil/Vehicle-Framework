@@ -117,7 +117,7 @@ public partial class VehiclePawn
     Map.GetDetachedMapComponent<VehiclePositionManager>().ClaimPosition(this);
   }
 
-  // TODO 1.7 - Remove and use EventManager instead. These types of notify functions are nonsense,
+  // TODO 1.8 - Remove and use EventManager instead. These types of notify functions are nonsense,
   // and old carryovers from RimWorld
   public new virtual void Notify_Teleported(bool endCurrentJob = true, bool resetTweenedPos = true)
   {

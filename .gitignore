@@ -33,7 +33,7 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
-/1.6/Assemblies
+/*/Assemblies
 /1.6/Burst
 
 # Visual Studio 2015/2017 cache/options directory

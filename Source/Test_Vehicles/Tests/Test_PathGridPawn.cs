@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 internal sealed class Test_PathGridPawn([DefParameters] VehicleDef vehicleDef)

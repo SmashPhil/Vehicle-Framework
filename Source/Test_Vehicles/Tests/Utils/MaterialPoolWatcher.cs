@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 internal class MaterialPoolWatcher : IDisposable
 {

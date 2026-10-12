@@ -2,7 +2,7 @@
 using CoreLib.Performance;
 using DevTools.Testing;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Timer util for delaying the invocation of some action.")]

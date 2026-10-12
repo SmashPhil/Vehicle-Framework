@@ -3,7 +3,7 @@ using RimWorld;
 using SmashTools;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn, TestCategoryNames.Events)]

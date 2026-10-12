@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Verse.AI;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn, TestCategoryNames.Pathing)]

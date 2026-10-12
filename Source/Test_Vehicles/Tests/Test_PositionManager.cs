@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 internal sealed class Test_PositionManager([ParametersSource("VehicleSizes")] IntVec2 size) : Test_MapTest

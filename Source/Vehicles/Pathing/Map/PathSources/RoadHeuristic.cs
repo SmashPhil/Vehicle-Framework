@@ -1,5 +1,5 @@
 ﻿using JetBrains.Annotations;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using Unity.Mathematics;
 using Verse;
 

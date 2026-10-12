@@ -1,6 +1,6 @@
 ﻿using CoreLib;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using Unity.Mathematics;
 using UnityEngine;
 using Verse;

@@ -9,7 +9,7 @@ using HarmonyLib;
 using SmashTools.Patching;
 using UnityEngine.Assertions;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]

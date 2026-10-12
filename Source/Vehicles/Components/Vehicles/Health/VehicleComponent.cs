@@ -85,13 +85,13 @@ public class VehicleComponent : IExposable, ITweakFields
 		vehicle?.EventRegistry[VehicleEventDefOf.HealthChanged].ExecuteEvents();
 	}
 
-	// TODO 1.7 - Remove vehicle param
+	// TODO 1.8 - Remove vehicle param
 	public void TakeDamage(VehiclePawn _, DamageInfo dinfo, bool ignoreArmor = false)
 	{
 		TakeDamage(null, ref dinfo, ignoreArmor: ignoreArmor);
 	}
 
-	// TODO 1.7 - Remove vehicle param
+	// TODO 1.8 - Remove vehicle param
 	public virtual Penetration TakeDamage(VehiclePawn _, ref DamageInfo dinfo,
 		bool ignoreArmor = false)
 	{

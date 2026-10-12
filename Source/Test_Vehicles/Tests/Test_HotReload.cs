@@ -3,7 +3,7 @@ using System.Linq;
 using DevTools.Testing;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 internal sealed class Test_HotReload

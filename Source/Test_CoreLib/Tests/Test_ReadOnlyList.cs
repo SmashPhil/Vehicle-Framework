@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using CoreLib.Collections;
 using DevTools.Benchmarking;
 using DevTools.Testing;
-using Unity.Profiling;
 using UnityEngine.Assertions;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Struct wrapper object for read-only access to list.")]
@@ -126,14 +125,19 @@ internal class Test_ReadOnlyList
   {
     List<int> list = [1, 2, 3];
     ReadOnlyList<int> view = new(list);
-    using ProfilerRecorder recorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "GC Used Memory");
-    long bytes = recorder.CurrentValue;
-    Assert.IsTrue(recorder.Valid);
+
+    // Warmup JIT since it allocates on first pass
+    foreach (int item in view)
+    {
+      DeadCodeHelper.Consume(item);
+    }
+
+    long bytes = GC.GetAllocatedBytesForCurrentThread();
     foreach (int item in view)
     {
       // JIT keeps eliminating this loop in release builds
       DeadCodeHelper.Consume(item);
     }
-    Assert.AreEqual(expected: bytes, recorder.CurrentValue);
+    Expect.AreEqual(expected: bytes, GC.GetAllocatedBytesForCurrentThread());
   }
 }

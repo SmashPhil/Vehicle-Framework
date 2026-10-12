@@ -125,28 +125,11 @@ public static class VehicleTabHelper_Health
 			case ITab_Vehicle_Health.VehicleHealthTab.Overview:
 				DrawVehicleInformation(rect, vehicle);
 			break;
-			case ITab_Vehicle_Health.VehicleHealthTab.JobSettings:
-				//DrawJobSettings(rect, vehicle);
-			break;
 			default:
 				throw new NotImplementedException(nameof(onTab));
 		}
 		Widgets.EndGroup();
 	}
-
-	// TODO 1.7 - Rip out job tab, it's completely unused
-	//private static void DrawJobSettings(Rect leftRect, VehiclePawn vehicle)
-	//{
-	//  float curY = 0;
-	//  Rect rect = new Rect(0f, curY, leftRect.width, 34f);
-
-	//  rect.SplitVertically(rect.width / 2, out Rect _, out Rect buttonRect);
-
-	//  if (Widgets.ButtonText(buttonRect, "ResetButton".Translate()))
-	//  {
-	//    //vehicle.jobLimitations.Clear();
-	//  }
-	//}
 
 	private static void DrawVehicleInformation(Rect leftRect, VehiclePawn vehicle)
 	{

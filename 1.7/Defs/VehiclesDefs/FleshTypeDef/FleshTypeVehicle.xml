@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleFleshTypeDef Name = "VehicleFleshBase" Abstract = "True">
+		<isOrganic>false</isOrganic>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+	</Vehicles.VehicleFleshTypeDef>
+	
+	<!-- Make sure you use VehicleFleshTypeDef or child type so it can register as non-fleshy -->
+	<Vehicles.VehicleFleshTypeDef ParentName = "VehicleFleshBase">
+		<defName>WoodenVehicle</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		
+		<nonPenetrationEffect>DamageDiminished_General</nonPenetrationEffect>
+		<diminishedEffect>DamageDiminished_General</diminishedEffect>
+		<deflectionEffect>Deflect_General</deflectionEffect>
+		<deflectionEffectBullet>Deflect_General_Bullet</deflectionEffectBullet>
+		
+		<soundImpactDeflect>Deflect_Metal</soundImpactDeflect>
+		<soundImpactDiminished>BulletImpact_Wood</soundImpactDiminished>
+		<soundImpactNonPenetrated>BulletImpact_Wood</soundImpactNonPenetrated>
+		<soundImpactPenetrated>BulletImpact_Wood</soundImpactPenetrated>
+		
+		<!-- Change Later -->
+		<genericWounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</genericWounds>
+	</Vehicles.VehicleFleshTypeDef>
+	
+	<Vehicles.VehicleFleshTypeDef ParentName = "VehicleFleshBase">
+		<defName>MetalVehicle</defName>
+		<corpseCategory>CorpsesMechanoid</corpseCategory>
+		
+		<nonPenetrationEffect>DamageDiminished_Metal</nonPenetrationEffect>
+		<diminishedEffect>DamageDiminished_Metal</diminishedEffect>
+		<deflectionEffect>Deflect_Metal</deflectionEffect>
+		<deflectionEffectBullet>Deflect_Metal_Bullet</deflectionEffectBullet>
+		
+		<soundImpactDeflect>Deflect_Metal</soundImpactDeflect>
+		<soundImpactDiminished>BulletImpact_Metal</soundImpactDiminished>
+		<soundImpactNonPenetrated>BulletImpact_Metal</soundImpactNonPenetrated>
+		<soundImpactPenetrated>BulletImpact_Metal</soundImpactPenetrated>
+		
+		<!-- Change Later -->
+		<genericWounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</genericWounds>
+	</Vehicles.VehicleFleshTypeDef>
+	
+	<Vehicles.VehicleFleshTypeDef ParentName = "VehicleFleshBase">
+		<defName>SpacerVehicle</defName>
+		
+		<nonPenetrationEffect>DamageDiminished_Metal</nonPenetrationEffect>
+		<diminishedEffect>DamageDiminished_Metal</diminishedEffect>
+		<deflectionEffect>Deflect_Metal</deflectionEffect>
+		<deflectionEffectBullet>Deflect_Metal_Bullet</deflectionEffectBullet>
+		
+		<soundImpactDeflect>Deflect_Metal</soundImpactDeflect>
+		<soundImpactDiminished>BulletImpact_Metal</soundImpactDiminished>
+		<soundImpactNonPenetrated>BulletImpact_Metal</soundImpactNonPenetrated>
+		<soundImpactPenetrated>BulletImpact_Metal</soundImpactPenetrated>
+		
+		<!-- Change Later -->
+		<genericWounds>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechA</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechB</texture>
+			</li>
+			<li>
+				<texture>Things/Pawn/Wounds/WoundMechC</texture>
+			</li>
+		</genericWounds>
+	</Vehicles.VehicleFleshTypeDef>
+</Defs>

@@ -93,7 +93,7 @@ public class CrashSite : MapParent
     ticksTillReinforcements = Mathf.RoundToInt(pathToSite.TotalCost * scaleFactor.RandomInRange);
   }
 
-  // TODO 1.7 - convert into Site with site part for followup raid
+  // TODO 1.8 - convert into Site with site part for followup raid
   public override bool ShouldRemoveMapNow(out bool alsoRemoveWorldObject)
   {
     alsoRemoveWorldObject = false;

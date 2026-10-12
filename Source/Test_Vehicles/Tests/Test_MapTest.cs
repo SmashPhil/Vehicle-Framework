@@ -8,7 +8,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 internal abstract class Test_MapTest
 {

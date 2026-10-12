@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<Vehicles.VehicleRaidParamsDef Name = "CombatParamsBase" Abstract = "True">
+		<factions>
+			<li>OutlanderCivil</li>
+			<li>OutlanderRough</li>
+			<li>Pirate</li>
+		</factions>
+		
+		<arrivalModes>
+			<li>EdgeWalkIn</li>
+			<li>EdgeWalkInGroups</li>
+			<li>EdgeWalkInDistributed</li>
+		</arrivalModes>
+		
+		<inventory>
+			<li>
+				<thingDef>Steel</thingDef>
+				<countRange>150~250</countRange>
+			</li>
+		</inventory>
+	</Vehicles.VehicleRaidParamsDef>
+	
+	<Vehicles.VehicleRaidParamsDef ParentName = "CombatParamsBase">
+		<defName>IndustrialLandCombat</defName>
+	</Vehicles.VehicleRaidParamsDef>
+</Defs>

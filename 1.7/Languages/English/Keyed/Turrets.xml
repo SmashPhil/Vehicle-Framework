@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_ReloadVehicleTurret>Reload</VF_ReloadVehicleTurret>
+  
+  <VF_ToggleAutoTargeting>Toggle automatic targeting</VF_ToggleAutoTargeting>
+  <VF_ToggleAutoTargetingDesc>This determines whether the turret will automatically target enemies.  If enabled, any enemies within range will be engaged.
+
+Automatic targeting is currently {0}.</VF_ToggleAutoTargetingDesc>
+  <VF_AutoTargetingDisabled>AutoTargeting is not allowed for this turret.</VF_AutoTargetingDisabled>
+  
+  <VF_VehicleTurrets_NoAmmoToReload>No usable ammo.</VF_VehicleTurrets_NoAmmoToReload>
+  
+  <VF_SetReloadLevel>Set auto-reloading level for to {0}.</VF_SetReloadLevel>
+  <VF_SetReloadLevelTooltip>Configure Ammo Level</VF_SetReloadLevelTooltip>
+</LanguageData>
+

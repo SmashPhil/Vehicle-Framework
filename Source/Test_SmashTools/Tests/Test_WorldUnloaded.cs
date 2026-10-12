@@ -1,6 +1,6 @@
 ﻿using DevTools.Testing;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.PostGameExit)]
 [TestCategory(TestCategoryNames.ComponentCache)]

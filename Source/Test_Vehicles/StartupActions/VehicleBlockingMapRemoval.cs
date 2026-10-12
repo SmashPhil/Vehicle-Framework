@@ -10,7 +10,7 @@ using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 internal static class VehicleBlockingMapRemoval
 {

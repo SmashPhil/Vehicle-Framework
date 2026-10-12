@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<!-- Vehicle base -->
+	<Vehicles.VehicleBuildDef Name="VehicleBaseBuildable" Abstract="True">
+		<thingClass>Vehicles.VehicleBuilding</thingClass>
+		<selectable>true</selectable>
+		<altitudeLayer>Building</altitudeLayer>
+		<terrainAffordanceNeeded>Heavy</terrainAffordanceNeeded>
+		<constructEffect>ConstructMetal</constructEffect>
+		<leaveResourcesWhenKilled>true</leaveResourcesWhenKilled>
+		<passability>Impassable</passability>
+		<fillPercent>1</fillPercent>
+		<neverMultiSelect>true</neverMultiSelect>
+		<designationCategory>VF_Vehicles</designationCategory>
+		<clearBuildingArea>true</clearBuildingArea>
+		<category>Building</category>
+		<rotatable>true</rotatable>
+		<blockWind>true</blockWind>
+		<useHitPoints>true</useHitPoints>
+		
+		<building>
+			<canPlaceOverImpassablePlant>false</canPlaceOverImpassablePlant>
+			<paintable>false</paintable>
+		</building>
+	</Vehicles.VehicleBuildDef>
+	
+	<!-- Vehicle base -->
+	<Vehicles.VehicleBuildDef Name="VehicleBoatBaseBuildable" ParentName="VehicleBaseBuildable" Abstract="True">
+		<terrainAffordanceNeeded>ShallowWater</terrainAffordanceNeeded>
+	</Vehicles.VehicleBuildDef>
+</Defs>

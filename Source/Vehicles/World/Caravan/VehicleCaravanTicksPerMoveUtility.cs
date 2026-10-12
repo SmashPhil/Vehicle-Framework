@@ -60,7 +60,6 @@ public static class VehicleCaravanTicksPerMoveUtility
     return Mathf.Lerp(2f, 1f, t);
   }
 
-  // TODO 1.7 - Remove null case for caravan, it's unused
   [MustUseReturnValue]
   public static int GetTicksPerMove(Caravan caravan, StringBuilder explanation = null)
   {
@@ -218,7 +217,8 @@ public static class VehicleCaravanTicksPerMoveUtility
     return ApproxTilesPerDay(caravan.VehiclesListForReading, data);
   }
 
-  [MustUseReturnValue, Obsolete]
+  [MustUseReturnValue]
+  [Obsolete("Use other overload for CostToMove")] // TODO 1.8 - Remove
   public static float ApproxTilesPerDay(List<VehicleDef> vehicleDefs, int ticksPerMove,
     PlanetTile tile, PlanetTile nextTile,
     StringBuilder explanation = null,

@@ -4,7 +4,7 @@ using CoreLib;
 using HarmonyLib;
 using RimWorld;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using UnityEngine.Assertions;
 using UpdateLogTool;
 using Vehicles.Config;
@@ -33,8 +33,6 @@ public static class VehicleHarmony
 
   public static List<VehicleDef> AllMoveableVehicleDefs { get; internal set; }
 
-  public static bool BurstEnabled { get; }
-
   static VehicleHarmony()
   {
     Assert.IsTrue(UnityData.IsInMainThread);
@@ -47,41 +45,6 @@ public static class VehicleHarmony
 #else
     Log.Message($"{LogLabel} version {VehicleMod.metaData.ModVersion}");
 #endif
-
-    if (IsFeatureEnabled(BurstLib) && VehicleMod.settings.main.useBurstLib)
-    {
-      if (VehicleMod.settings.main.testingBurst)
-      {
-        VehicleMod.settings.main.testingBurst = false;
-        VehicleMod.settings.main.useBurstLib = false;
-        VehicleMod.settings.Write();
-        _ = new DeferredInvoker(action: delegate
-          {
-            Find.WindowStack.Add(new Dialog_MessageBox("VF_BurstDisabledFromCrash".Translate()));
-          }, condition: () => Current.ProgramState == ProgramState.Entry && Find.WindowStack != null,
-          settings: new DeferredInvoker.Settings { timeoutMs = 1000 });
-      }
-      else
-      {
-        string modVersion = VehicleMod.metaData.ModVersion;
-        if (modVersion != VehicleMod.settings.main.testedBurstOn)
-        {
-          using BurstProbation bp = new();
-          using BurstCheck burst = new();
-          BurstEnabled = BurstAssemblyLoader.LoadAllFor(VehicleMod.content) && burst.IsBurstLibLoaded();
-          Log.Message($"{LogLabel} Burst enabled: {BurstEnabled.ToStringYesNo()}");
-          if (BurstEnabled)
-          {
-            burst.RunTests();
-            VehicleMod.settings.main.testedBurstOn = modVersion;
-          }
-          else
-          {
-            Log.Warning($"{LogLabel} Unable to load burst lib.");
-          }
-        }
-      }
-    }
 
     Utilities.InvokeWithLogging(ResolveAllReferences);
     Utilities.InvokeWithLogging(PostDefDatabaseCalls);

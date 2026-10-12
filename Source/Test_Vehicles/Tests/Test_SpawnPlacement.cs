@@ -4,7 +4,7 @@ using SmashTools;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 // NOTE - Both GenAdj.OccupiedRect and GenSpawn.Spawn have patches that adjust positions for
 // vehicles. We can verify the adjustment keeps the vehicle stable (and doesn't shift positions)

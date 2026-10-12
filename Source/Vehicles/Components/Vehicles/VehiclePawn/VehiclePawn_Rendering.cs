@@ -146,17 +146,13 @@ public partial class VehiclePawn
     }
   }
 
-  // TODO 1.6.2144 - Remove
-  [Obsolete("Vehicles should call DrawTracker instead of the vanilla implementation", error: true)]
-  public new VehicleDrawTracker Drawer => DrawTracker;
-
   public VehicleDrawTracker DrawTracker => drawTracker;
 
   public Graphic_Vehicle VehicleGraphic
   {
     get
     {
-      // TODO 1.7 - Move away from lazy-init graphic since it can end up being called outside the main thread.
+      // TODO 1.8 - Move away from lazy-init graphic since it can end up being called outside the main thread.
       graphic ??= GenerateGraphic();
       return graphic;
     }
@@ -996,17 +992,9 @@ public partial class VehiclePawn
     }
   }
 
-  public void PromptToBoardVehicle(Pawn pawn, VehicleRoleHandler handler)
+  public void PromptToBoardVehicle([NotNull] Pawn pawn, [NotNull] VehicleRoleHandler handler)
   {
-    // TODO 1.7 - Switch to ArgumentNullException
-    if (handler == null)
-    {
-      Messages.Message("VF_HandlerNotEnoughRoom".Translate(pawn, this),
-        MessageTypeDefOf.RejectInput,
-        historical: false);
-      return;
-    }
-
+    ArgumentNullException.ThrowIfNull(handler);
     Job job = JobMaker.MakeJob(JobDefOf_Vehicles.Board, this);
     GiveLoadJob(pawn, handler);
     pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
@@ -1053,8 +1041,7 @@ public partial class VehiclePawn
     });
   }
 
-  // TODO 1.7 - Rename parameter, I think someone has a patch on this method and changing the
-  // name will break parameter binding.
+  // Someone has a patch on this method and changing the name will break parameter binding.
   // ReSharper disable once ParameterHidesMember
   public void SetRetexture(RetextureDef retextureDef)
   {

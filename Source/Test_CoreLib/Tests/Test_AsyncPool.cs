@@ -3,9 +3,9 @@ using CoreLib.Performance;
 using DevTools.Testing;
 using UnityEngine.Assertions;
 using AsyncPool =
-  CoreLib.Performance.AsyncPool<CoreLib.Testing.Test_AsyncPool.TestObject>;
+  CoreLib.Performance.AsyncPool<CoreLib.Tests.Test_AsyncPool.TestObject>;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Thread safe global object pool.")]

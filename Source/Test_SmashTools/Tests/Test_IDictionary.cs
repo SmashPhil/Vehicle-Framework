@@ -4,7 +4,7 @@ using DevTools.Testing;
 using UnityEngine.Assertions;
 
 // ReSharper disable AccessToModifiedClosure
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]

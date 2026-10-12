@@ -1,4 +1,4 @@
-﻿namespace CoreLib.Testing;
+﻿namespace CoreLib.Tests;
 
 public static class TestCategoryNames
 {
@@ -10,4 +10,5 @@ public static class TestCategoryNames
   public const string Performance = "Performance";
 
   public const string Collections = "Collections";
+  public const string Utils = "Utils";
 }

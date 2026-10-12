@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Utility class for synchronization and temporary update loops.")]
@@ -57,7 +57,7 @@ internal class Test_UnityThread
   {
     using MockOnGUI onGui = new();
     Assert.IsFalse(onGui.invoked);
-    UnityThread.RemoveOnGUI(onGui.OnGUI);
+    UnityThread.RemoveOnGui(onGui.OnGUI);
     yield return null;
     Assert.IsFalse(onGui.invoked);
   }
@@ -166,7 +166,7 @@ internal class Test_UnityThread
 
     public MockOnGUI()
     {
-      UnityThread.StartGUI(OnGUI);
+      UnityThread.StartGui(OnGUI);
     }
 
     public bool OnGUI()

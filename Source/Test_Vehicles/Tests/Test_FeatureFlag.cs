@@ -3,7 +3,7 @@ using DevTools.Testing;
 using Vehicles.Config;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Feature flag toggles based on build configuration.")]

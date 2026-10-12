@@ -41,8 +41,6 @@ public class VehicleIgnitionController : IExposable
 
 			if (value)
 			{
-				// TODO 1.7 - I don't think vehicles can be dormant, but too late to remove it right now
-				vehicle.GetCachedComp<CompCanBeDormant>()?.WakeUp();
 				vehicle.EventRegistry[VehicleEventDefOf.IgnitionOn].ExecuteEvents();
 			}
 			else

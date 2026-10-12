@@ -8,7 +8,7 @@ using Verse;
 
 namespace Vehicles;
 
-// TODO 1.7 - Could be renamed to better indicate it's only for auto-loading turrets
+// TODO 1.8 - Could be renamed to better indicate it's only for autoloading turrets
 public sealed class JobDriver_GiveItemToVehicle : JobDriverGetItemForVehicleBase
 {
 	protected override string ListerTag => ReservationType.LoadTurret;

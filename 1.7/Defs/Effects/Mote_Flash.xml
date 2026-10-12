@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<ThingDef ParentName="MoteBase">
+		<defName>Mote_CannonFlash</defName>
+		<altitudeLayer>MoteOverhead</altitudeLayer>
+		<mote>
+			<solidTime>0.01</solidTime>
+			<fadeOutTime>0.01</fadeOutTime>
+		</mote>
+		<graphicData>
+			<texPath>Things/Mote/ExplosionFlash</texPath>
+			<shaderType>MoteGlow</shaderType>
+		</graphicData>
+	</ThingDef>
+</Defs>

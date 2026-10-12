@@ -10,7 +10,7 @@ using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
 using Verse;
-using NativeArrayUtility = SmashTools.Burst.NativeArrayUtility;
+using NativeArrayUtility = SmashTools.PathFinder.NativeArrayUtility;
 
 namespace Vehicles;
 
@@ -48,7 +48,7 @@ public class VehiclePositionManager : DetachedMapComponent
 
   internal NativeArray<int>.ReadOnly ThingIdGrid => thingIdGrid.AsReadOnly();
 
-  // TODO 1.7 - Change to ReadOnlyList
+  // TODO 1.8 - Change to ReadOnlyList
   /// <summary>
   /// Gets the list of vehicles that are tracking claim state via this manager.
   /// </summary>

@@ -2,7 +2,7 @@
 using RimWorld.Planet;
 using Verse;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 internal static class TestUtils
 {

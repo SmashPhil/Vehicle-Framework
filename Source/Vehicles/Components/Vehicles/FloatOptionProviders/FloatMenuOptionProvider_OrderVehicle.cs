@@ -73,7 +73,7 @@ public class FloatMenuOptionProvider_OrderVehicle : FloatMenuOptionProvider_Vehi
     return option;
   }
 
-  // TODO 1.7 - Merge with TryFindNearestStandableCell check above
+  // TODO 1.8 - Merge with TryFindNearestStandableCell check above
   public static AcceptanceReport VehicleCanGoto(VehiclePawn vehicle, IntVec3 gotoLoc)
   {
     return vehicle.CanReachVehicle(gotoLoc, PathEndMode.OnCell, Danger.Deadly) ?

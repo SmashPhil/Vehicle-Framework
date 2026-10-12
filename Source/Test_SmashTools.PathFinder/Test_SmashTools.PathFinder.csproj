@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <Product>Test_SmashTools.PathFinder</Product>
+    <RootNamespace>SmashTools.PathFinder</RootNamespace>
+    <AssemblyName>Test_SmashTools.PathFinder</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="DevTools">
+      <HintPath>$(OutDir)\DevTools.dll</HintPath>
+    </Reference>
+
+    <Reference Include="SmashTools.PathFinder">
+      <HintPath>$(OutDir)\SmashTools.PathFinder.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <ProjectReference
+      Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
+    <ProjectReference
+      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
+      OutputItemType="Analyzer"
+      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

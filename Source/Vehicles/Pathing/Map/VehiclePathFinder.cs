@@ -103,12 +103,6 @@ public class VehiclePathFinder : IPathFinder<PathSettings>
     contextPool = new ObjectPool<PathFinderContext>(10, preWarm: 5);
   }
 
-  // TODO 1.7 - Remove. Even though it's implicitly convertible to IPathingManager, this is an API breaking change.
-  [Obsolete, UsedImplicitly]
-  public VehiclePathFinder(VehiclePathingSystem mapping, VehicleDef vehicleDef) : this(mapping)
-  {
-  }
-
   /// <summary>
   /// Find path from <paramref name="start"/> to <paramref name="start"/> internal algorithm call
   /// </summary>

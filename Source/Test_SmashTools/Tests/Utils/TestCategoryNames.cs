@@ -1,4 +1,4 @@
-﻿namespace SmashTools.Testing;
+﻿namespace SmashTools.Tests;
 
 public static class TestCategoryNames
 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using JetBrains.Annotations;
@@ -11,7 +12,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Verse.Noise;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration)]
@@ -70,8 +71,8 @@ internal sealed class Test_MapGeneration_River
     RiverMock riverMock = new(tile, testDef);
     using ScopedMethodHook smh = new(GetRiverWidthAt, postfix: GetRiverWidthPostfixMethod,
       finalizer: GetRiverWidthFinalizerMethod);
-    using ScopedValueRollback<float> setting = new(ref VehicleMod.settings.main.riverMultiplier);
-    using ScopedValueRollback<float> svr = new(ref expectedWidth);
+    using ScopedRollback<float> setting = new(ref VehicleMod.settings.main.riverMultiplier);
+    using ScopedRollback<float> svr = new(ref expectedWidth);
 
     // 0%
     VehicleMod.settings.main.riverMultiplier = SectionMain.RiverMultMin;
@@ -111,7 +112,7 @@ internal sealed class Test_MapGeneration_River
     public readonly TileMutatorDef def;
     public readonly RiverNode node;
 
-    private readonly ScopedReferenceRollback<TileMutatorWorker_River, ModuleBase> perlinRollback;
+    private readonly ScopedFieldRollback<TileMutatorWorker_River, ModuleBase> perlinRollback;
 
     public RiverMock(PlanetTile tile, TileMutatorDef def)
     {
@@ -126,7 +127,7 @@ internal sealed class Test_MapGeneration_River
       Worker = def.Worker as TileMutatorWorker_River;
       Perlin perlin = new(PerlinFreq, PerlinLacunarity, PerlinPersistence, PerlinOctaves, PerlinSeed, QualityMode.Low);
       perlinRollback =
-        new ScopedReferenceRollback<TileMutatorWorker_River, ModuleBase>(Worker, RiverWidthPerlinNoiseName, perlin);
+        new ScopedFieldRollback<TileMutatorWorker_River, ModuleBase>(Worker, RiverWidthPerlinNoiseName, perlin);
       this.def = def;
       TileMutatorDef existingDef = tile.Tile.Mutators.FirstOrDefault(mutDef => mutDef == def);
       if (existingDef == null)

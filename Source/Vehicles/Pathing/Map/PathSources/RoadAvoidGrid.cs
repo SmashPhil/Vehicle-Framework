@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 using RimWorld;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using Verse;
 
 namespace Vehicles;

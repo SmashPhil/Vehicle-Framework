@@ -4,7 +4,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
-using static Vehicles.Testing.VehicleGroup;
+using static Vehicles.Tests.VehicleGroup;
 
 namespace Vehicles;
 
