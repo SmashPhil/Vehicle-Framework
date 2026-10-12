@@ -994,7 +994,7 @@ public partial class VehiclePawn
 
   public void PromptToBoardVehicle([NotNull] Pawn pawn, [NotNull] VehicleRoleHandler handler)
   {
-    ArgumentNullException.ThrowIfNull(handler); ;
+    ArgumentNullException.ThrowIfNull(handler);
     Job job = JobMaker.MakeJob(JobDefOf_Vehicles.Board, this);
     GiveLoadJob(pawn, handler);
     pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
