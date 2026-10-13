@@ -50,7 +50,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true' AND '$(AnalyzerProject)' != 'true'">
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.*" />
   </ItemGroup>
   <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true' AND '$(AnalyzerProject)' != 'true'">
     <Reference Include="System">
