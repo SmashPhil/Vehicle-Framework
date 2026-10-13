@@ -43,7 +43,7 @@ public sealed class FeatureFlags
       Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
       Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
-      Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release)
+      //Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release)
     ]);
     return flags;
   }
