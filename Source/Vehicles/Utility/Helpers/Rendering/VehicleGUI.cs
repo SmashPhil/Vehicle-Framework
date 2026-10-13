@@ -93,6 +93,9 @@ public static class VehicleGui
   public static void Blit(RenderTexture renderTexture, Rect rect, in BlitRequest request,
     float iconScale = 1, bool forceCentering = false)
   {
+    if (Event.current is not { type: EventType.Repaint })
+      return;
+
     RenderTextureDrawer.Init(renderTexture);
     try
     {
