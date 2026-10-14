@@ -22,7 +22,7 @@
     </li>
     <li>
       <name>Vanilla Expanded</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -40,7 +40,7 @@
     </li>
     <li>
       <name>Save Our Ship 2</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -55,7 +55,7 @@
     </li>
     <li>
       <name>Vehicle Map Framework</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -70,7 +70,7 @@
     </li>
     <li>
       <name>Trains of the Rim</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -85,7 +85,7 @@
     </li>
     <li>
       <name>Caravan Item Selection</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -100,7 +100,7 @@
     </li>
     <li>
       <name>Visit Settlements</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>
@@ -115,7 +115,7 @@
     </li>
     <li>
       <name>Enter Here</name>
-      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -batchmode</commandLineArgs>
+      <commandLineArgs>-disable-compute-shaders --pid &quot;SmashPhil.VehicleFramework&quot; -s -NoWindow</commandLineArgs>
       <loadWithMods>
         <li>brrainz.harmony</li>
         <li>ludeon.rimworld</li>

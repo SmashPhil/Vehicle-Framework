@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Usage: bash Build/CopySources.sh [settings-path]
-# Requires Bash 4+, awk, cmp and standard filesystem utilities.
+# Section format: [source-directory -> destination-directory]
+# .cs paths are relative to the source directory and copied into a Generated/ directory
 
 set -euo pipefail
 
@@ -18,20 +19,33 @@ relative_path() {
     printf '%s' "$value"
 }
 
+trim() {
+    local value="$1"
+    value="${value#"${value%%[![:space:]]*}"}"
+    value="${value%"${value##*[![:space:]]}"}"
+    printf '%s' "$value"
+}
+
 declare -a sources=() outputs=() namespaces=()
 declare -A seen=()
 destination=''
+source_directory=''
 line_number=0
 while IFS= read -r line || [[ -n "$line" ]]; do
     line_number=$((line_number + 1))
     line="${line#$'\xef\xbb\xbf'}"
-    line="${line#"${line%%[![:space:]]*}"}"
-    line="${line%"${line##*[![:space:]]}"}"
+    line="$(trim "$line")"
     [[ -z "$line" || "$line" = \;* || "$line" = \#* ]] && continue
     if [[ "$line" =~ ^\[([^]]+)\]$ ]]; then
-        section="$(relative_path "${BASH_REMATCH[1]}")"
-        destination="$repo_root/$section/Generated"
-        namespace="${section##*/}"
+        section="${BASH_REMATCH[1]}"
+        [[ "$section" == *'->'* && "${section#*->}" != *'->'* ]] ||
+            fail "Expected [source-directory -> destination-directory] at line $line_number"
+        source_directory="$(relative_path "$(trim "${section%%->*}")")"
+        destination_directory="$(relative_path "$(trim "${section#*->}")")"
+        [[ -d "$repo_root/$source_directory" ]] ||
+            fail "Source directory not found at line $line_number: $source_directory"
+        destination="$repo_root/$destination_directory/Generated"
+        namespace="${destination_directory##*/}"
         [[ "$namespace" =~ ^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$ ]] ||
             fail "Invalid destination namespace: $namespace"
         continue
@@ -39,9 +53,8 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -n "$destination" ]] || fail "Source before destination section at line $line_number"
     relative="$(relative_path "$line")"
     [[ "${relative,,}" = *.cs ]] || fail "Expected a .cs source: $relative"
-    source="$repo_root/$relative"
-    [[ -f "$source" ]] || source="$repo_root/SmashTools/$relative"
-    [[ -f "$source" ]] || fail "Source not found at line $line_number: $relative (checked repository and SmashTools)"
+    source="$repo_root/$source_directory/$relative"
+    [[ -f "$source" ]] || fail "Source not found at line $line_number: $source_directory/$relative"
     output="$destination/${relative##*/}"
     key="${output,,}"
     [[ -z "${seen[$key]+present}" ]] || fail "Duplicate destination: $output"
