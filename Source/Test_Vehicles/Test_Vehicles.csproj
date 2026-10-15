@@ -32,7 +32,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 
     <Reference Include="DevTools">
@@ -60,13 +60,7 @@
       <Private>False</Private>
     </Reference>
 
-    <ProjectReference
-      Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
-    <ProjectReference
-      Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj"
-      OutputItemType="Analyzer"
-      ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

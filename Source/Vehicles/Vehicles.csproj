@@ -32,7 +32,7 @@
   <!-- Dependencies -->
   <ItemGroup>
     <!-- Nuget -->
-    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
 
     <!--Local -->
     <Reference Include="CoreLib">
