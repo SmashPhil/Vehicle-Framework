@@ -25,7 +25,7 @@ If you are a modder that wishes to use the framework, joining the Discord server
 
 ## Requirements
 
-- RimWorld `1.4`, `1.5`, or `1.6`
+- RimWorld `1.4`, `1.5`, `1.6`, or `1.7`
 - [Harmony](https://steamcommunity.com/workshop/filedetails/?id=2009463077)
 
 Load order:
@@ -70,7 +70,7 @@ Use the package ID below when declaring a dependency:
 ```bash
 git clone --recursive https://github.com/SmashPhil/Vehicle-Framework.git
 cd Vehicle-Framework
-git submodule update --init --recursive
+git submodule update --init
 ```
 
 ## Bug reports and feedback
