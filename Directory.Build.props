@@ -49,10 +49,10 @@
     <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;PROFILER;</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true' AND '$(AnalyzerProject)' != 'true'">
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true' AND '$(UseRimWorldRefs)' != 'false'">
     <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.*" />
   </ItemGroup>
-  <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true' AND '$(AnalyzerProject)' != 'true'">
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true' AND '$(UseRimWorldRefs)' != 'false'">
     <Reference Include="System">
       <HintPath>$(RefDir)\System.dll</HintPath>
       <Private>False</Private>

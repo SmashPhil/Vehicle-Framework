@@ -1,6 +1,6 @@
 # Copies source snapshots without adding dependencies to destination projects.
 # Reads ../ExportSettings.ini (or -SettingsPath). Format:
-#   [DevTools/DevTools]
+#   [SmashTools -> DevTools/DevTools]
 #   Core/Utils/Ref.cs
 
 [CmdletBinding()]
@@ -29,15 +29,26 @@ if (!(Test-Path -LiteralPath $SettingsPath -PathType Leaf)) {
 $jobs = @()
 $outputs = @{}
 $destination = $null
+$sourceRoot = $null
 $lineNumber = 0
 foreach ($rawLine in [IO.File]::ReadAllLines($SettingsPath)) {
     $lineNumber++
     $line = $rawLine.Trim()
     if (!$line -or $line.StartsWith(';') -or $line.StartsWith('#')) { continue }
     if ($line -match '^\[([^\]]+)\]$') {
-        $section = Get-RelativePath $Matches[1]
-        $destination = Join-Path $repoRoot "$section/Generated"
-        $namespace = ($section -split '/')[-1]
+        $section = $Matches[1]
+        $separator = $section.IndexOf('->')
+        if ($separator -lt 0 -or $section.IndexOf('->', $separator + 2) -ge 0) {
+            throw "Expected [source-directory -> destination-directory] at line $lineNumber"
+        }
+        $sourceDirectory = Get-RelativePath $section.Substring(0, $separator)
+        $destinationDirectory = Get-RelativePath $section.Substring($separator + 2)
+        $sourceRoot = Join-Path $repoRoot $sourceDirectory
+        if (!(Test-Path -LiteralPath $sourceRoot -PathType Container)) {
+            throw "Source directory not found at line ${lineNumber}: $sourceDirectory"
+        }
+        $destination = Join-Path $repoRoot "$destinationDirectory/Generated"
+        $namespace = ($destinationDirectory -split '/')[-1]
         if ($namespace -notmatch '^[A-Za-z_][A-Za-z0-9_]*(\.[A-Za-z_][A-Za-z0-9_]*)*$') {
             throw "Invalid destination namespace: $namespace"
         }
@@ -46,12 +57,9 @@ foreach ($rawLine in [IO.File]::ReadAllLines($SettingsPath)) {
     if (!$destination) { throw "Source before destination section at line $lineNumber" }
     $relative = Get-RelativePath $line
     if ([IO.Path]::GetExtension($relative) -ne '.cs') { throw "Expected a .cs source: $relative" }
-    $source = Join-Path $repoRoot $relative
+    $source = Join-Path $sourceRoot $relative
     if (!(Test-Path -LiteralPath $source -PathType Leaf)) {
-        $source = Join-Path $repoRoot "SmashTools/$relative"
-    }
-    if (!(Test-Path -LiteralPath $source -PathType Leaf)) {
-        throw "Source not found at line ${lineNumber}: $relative (checked repository and SmashTools)"
+        throw "Source not found at line ${lineNumber}: $sourceDirectory/$relative"
     }
     $output = Join-Path $destination ([IO.Path]::GetFileName($relative))
     if ($outputs.ContainsKey($output)) { throw "Duplicate destination: $output" }
