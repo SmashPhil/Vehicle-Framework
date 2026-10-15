@@ -64,13 +64,7 @@
 			<HintPath>$(OutDir)\Vehicles.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
-    
-    <Reference Include="Vehicles">
-      <HintPath>$(OutDir)\Vehicles.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
 
     <ProjectReference Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 </Project>

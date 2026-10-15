@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Authors>Smash Phil</Authors>
+		<Description>Developer tool SDK for RimWorld mods. Primarily used by Vehicle Framework.</Description>
+		<Product>CoreLib</Product>
+    <RootNamespace>CoreLib</RootNamespace>
+    <AssemblyName>CoreLib</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+	</PropertyGroup>
+
+  <PropertyGroup>
+    <UseRimWorldRefs>false</UseRimWorldRefs>
+  </PropertyGroup>
+
+	<!-- AssemblyInfo -->
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>SmashTools</_Parameter1>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>Test_SmashTools</_Parameter1>
+		</AssemblyAttribute>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+			<_Parameter1>Test_CoreLib</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="System">
+      <HintPath>$(RefDir)\System.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml">
+      <HintPath>$(RefDir)\System.Xml.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <HintPath>$(RefDir)\System.Xml.Linq.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityStubs">
+      <HintPath>$(RefDir)\UnityStubs.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+	<!-- Build Events -->
+	<Target Name="PostClean" AfterTargets="Clean">
+		<RemoveDir Directories="$(OutDir)" />
+	</Target>
+
+	<ItemGroup>
+		<Folder Include="Algorithms\" />
+	</ItemGroup>
+</Project>

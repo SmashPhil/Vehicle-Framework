@@ -1,6 +1,3 @@
-[submodule "SmashTools"]
-	path = SmashTools
-	url = https://github.com/SmashPhil/SmashTools
 [submodule "DevTools"]
 	path = DevTools
 	url = https://github.com/SmashPhil/DevTools.git
