@@ -1,0 +1,7 @@
+<RunSettings>
+  <TestRunParameters>
+    <Parameter name="DevTools.PackageId" value="SmashPhil.VehicleFramework" />
+    <!-- Set to value="%RIMWORLD_EXE%"" if rimworld exe path is defined as env var -->
+    <Parameter name="DevTools.RimWorldExePath" value="%RIMWORLD_EXE%" />
+  </TestRunParameters>
+</RunSettings>

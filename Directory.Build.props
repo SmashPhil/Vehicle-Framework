@@ -27,6 +27,7 @@
 
     <ModDir>$(MSBuildThisFileDirectory)</ModDir>
     <RefDir>$(ModDir)..\..\</RefDir>
+    <RunSettingsFilePath>$(ModDir)\.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
