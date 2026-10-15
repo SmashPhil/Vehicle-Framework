@@ -7,30 +7,6 @@
     <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
   </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>false</Optimize>
-		<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
-	</PropertyGroup>
-
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;BURST</DefineConstants>
-	</PropertyGroup>
-
 	<ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 

@@ -170,7 +170,6 @@ Global
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{DC715750-3F8E-4E4D-819F-65DEF04D9E89}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
