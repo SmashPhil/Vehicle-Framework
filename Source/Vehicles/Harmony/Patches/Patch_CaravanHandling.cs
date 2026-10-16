@@ -372,7 +372,7 @@ internal class Patch_CaravanHandling : IPatchCategory
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_CaravanHandling),
             nameof(PawnCapacityInVehicle)));
-        instruction = instructionList[++i]; //CALL : MassUtility.Capacity
+        instruction = instructionList[++i]; // CALL : MassUtility.Capacity
       }
 
       yield return instruction;
@@ -392,7 +392,7 @@ internal class Patch_CaravanHandling : IPatchCategory
 
       if (instruction.Calls(capacityMethod))
       {
-        yield return instruction; //CALL : MassUtility.GearAndInventoryMass
+        yield return instruction; // CALL : MassUtility.GearAndInventoryMass
         instruction = instructionList[++i];
         yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 3);
         yield return new CodeInstruction(opcode: OpCodes.Call,
