@@ -587,84 +587,7 @@ public partial class VehiclePawn
     {
       defaultLabel = "VF_HaulPawnToVehicle".Translate(this),
       icon = VehicleTex.HaulPawnToVehicle,
-      action = delegate
-      {
-        SoundDefOf.Click.PlayOneShotOnCamera();
-        HaulTargeter.BeginTargeting(new TargetingParameters
-        {
-          canTargetPawns = true,
-          canTargetBuildings = false,
-          neverTargetHostileFaction = true,
-          canTargetItems = false,
-          thingCategory = ThingCategory.Pawn,
-          validator = delegate (TargetInfo target)
-          {
-            if (!target.HasThing)
-            {
-              return false;
-            }
-
-            if (target.Thing is Pawn pawn)
-            {
-              if (pawn is VehiclePawn)
-              {
-                return false;
-              }
-
-              return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech ||
-                pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
-            }
-            return false;
-          }
-        }, delegate (LocalTargetInfo target)
-        {
-          if (target.Thing is Pawn pawn)
-          {
-            if (pawn.Map.mapPawns.FreeColonistsSpawned.Contains(pawn) && !pawn.Downed)
-            {
-              // Non-downed colonist should be eligible for drafting.
-              // When they aren't available for drafting such as participaiting in Ideology ritual, or similar modded
-              // activity, loading them into vehicle and maybe departing on vehicle could break that activity.
-              AcceptanceReport allowDrafting = pawn.GetLord()?.AllowsDrafting(pawn) ?? AcceptanceReport.WasAccepted;
-              if (!allowDrafting)
-              {
-                Messages.Message(allowDrafting.Reason, MessageTypeDefOf.RejectInput, historical: false);
-                return;
-              }
-            }
-            if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
-            {
-              // Role validation should still apply to downed pawns since they will be loaded into a role by another
-              // colonist. They only skip the job assignment from PromptToBoardVehicle since they have to be loaded.
-              VehicleRoleHandler role = GetNextAvailableHandler(pawn);
-              if (role == null)
-              {
-                Messages.Message("VF_NoRoleAvailable".Translate(), MessageTypeDefOf.RejectInput, historical: false);
-                return;
-              }
-              if (!pawn.Downed)
-              {
-                PromptToBoardVehicle(pawn, role);
-                return;
-              }
-            }
-          }
-
-          Thing thing = target.Thing;
-          thing.CancelTransferToAnyOtherVehicle(this);
-          thing.TransferToVehicle(this);
-          TransferableOneWay transferable = new()
-          {
-            things = [thing],
-          };
-          transferable.AdjustTo(thing.stackCount);
-          if (!cargoToLoad.Exists(cargo => cargo.AnyThing == thing))
-          {
-            cargoToLoad.Add(transferable);
-          }
-          Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
-        }, this);
-      }
+      action = StartHaulTargeting
     };
     if (upgrading)
     {
@@ -932,6 +855,90 @@ public partial class VehiclePawn
           };
         }
       }
+    }
+  }
+
+  private void StartHaulTargeting()
+  {
+    SoundDefOf.Click.PlayOneShotOnCamera();
+    HaulTargeter.BeginTargeting(new TargetingParameters
+    {
+      canTargetPawns = true,
+      canTargetBuildings = false,
+      neverTargetHostileFaction = true,
+      canTargetItems = false,
+      thingCategory = ThingCategory.Pawn,
+      validator = Validator
+    }, OnConfirm, this);
+    return;
+
+    static bool Validator(TargetInfo target)
+    {
+      if (!target.HasThing)
+      {
+        return false;
+      }
+
+      if (target.Thing is Pawn pawn)
+      {
+        if (pawn is VehiclePawn)
+        {
+          return false;
+        }
+
+        return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech ||
+               pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
+      }
+      return false;
+    }
+
+    void OnConfirm(LocalTargetInfo target)
+    {
+      if (target.Thing is Pawn pawn)
+      {
+        if (pawn.Map.mapPawns.FreeColonistsSpawned.Contains(pawn) && !pawn.Downed)
+        {
+          // Non-downed colonist should be eligible for drafting.
+          // When they aren't available for drafting such as participaiting in Ideology ritual, or similar modded
+          // activity, loading them into vehicle and maybe departing on vehicle could break that activity.
+          AcceptanceReport allowDrafting = pawn.GetLord()?.AllowsDrafting(pawn) ?? AcceptanceReport.WasAccepted;
+          if (!allowDrafting)
+          {
+            Messages.Message(allowDrafting.Reason, MessageTypeDefOf.RejectInput, historical: false);
+            return;
+          }
+        }
+        if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
+        {
+          // Role validation should still apply to downed pawns since they will be loaded into a role by another
+          // colonist. They only skip the job assignment from PromptToBoardVehicle since they have to be loaded.
+          VehicleRoleHandler role = GetNextAvailableHandler(pawn);
+          if (role == null)
+          {
+            Messages.Message("VF_NoRoleAvailable".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+            return;
+          }
+          if (!pawn.Downed)
+          {
+            PromptToBoardVehicle(pawn, role);
+            return;
+          }
+        }
+      }
+
+      Thing thing = target.Thing;
+      thing.CancelTransferToAnyOtherVehicle(this);
+      thing.TransferToVehicle(this);
+      TransferableOneWay transferable = new()
+      {
+        things = [thing],
+      };
+      transferable.AdjustTo(thing.stackCount);
+      if (!cargoToLoad.Exists(cargo => cargo.AnyThing == thing))
+      {
+        cargoToLoad.Add(transferable);
+      }
+      Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
     }
   }
 
