@@ -1,42 +1,43 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
+using JetBrains.Annotations;
 using RimWorld;
 using Verse;
 
 namespace Vehicles.World;
 
+[PublicAPI]
 public static class AerialVehicleAbandonOrBanishHelper
 {
   public static void TryAbandonOrBanishViaInterface(Thing thing,
     AerialVehicleInFlight aerialVehicle)
   {
-    Pawn pawn = thing as Pawn;
-    if (pawn == null)
+    if (thing is Pawn pawn)
     {
-      Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation(
-        "ConfirmAbandonItemDialog".Translate(thing.Label), delegate
+      if (!aerialVehicle.Vehicle.AllCapablePawns.Any(
+            innerPawn => innerPawn != pawn && !innerPawn.NonHumanlikeOrWildMan()))
+      {
+        Messages.Message("MessageCantBanishLastColonist".Translate(), aerialVehicle,
+          MessageTypeDefOf.RejectInput, historical: false);
+        return;
+      }
+      PawnBanishUtility.ShowBanishPawnConfirmationDialog(pawn);
+      return;
+    }
+
+    Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation(
+      "ConfirmAbandonItemDialog".Translate(thing.Label), delegate
+      {
+        Pawn ownerOf = GetOwnerOf(aerialVehicle, thing);
+        if (ownerOf == null)
         {
-          Pawn ownerOf = GetOwnerOf(aerialVehicle, thing);
-          if (ownerOf == null)
-          {
-            Log.Error($"Could not find owner of {thing}");
-            return;
-          }
-          thing.Notify_AbandonedAtTile(aerialVehicle.Tile);
-          ownerOf.inventory.innerContainer.Remove(thing);
-          thing.Destroy(DestroyMode.Vanish);
-        }, true, null, WindowLayer.Dialog);
-      Find.WindowStack.Add(window);
-      return;
-    }
-    if (!aerialVehicle.Vehicle.AllCapablePawns.Any((Pawn innerPawn) =>
-      innerPawn != pawn && !innerPawn.NonHumanlikeOrWildMan()))
-    {
-      Messages.Message("MessageCantBanishLastColonist".Translate(), aerialVehicle,
-        MessageTypeDefOf.RejectInput, historical: false);
-      return;
-    }
-    PawnBanishUtility.ShowBanishPawnConfirmationDialog(pawn);
+          Log.Error($"Could not find owner of {thing}");
+          return;
+        }
+        thing.Notify_AbandonedAtTile(aerialVehicle.Tile);
+        ownerOf.inventory.innerContainer.Remove(thing);
+        thing.Destroy();
+      }, true);
+    Find.WindowStack.Add(window);
   }
 
   public static void TryAbandonOrBanishViaInterface(TransferableImmutable transferable,
@@ -50,20 +51,19 @@ public static class AerialVehicleAbandonOrBanishHelper
     Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation(
       "ConfirmAbandonItemDialog".Translate(transferable.LabelWithTotalStackCount), delegate
       {
-        for (int i = 0; i < transferable.things.Count; i++)
+        foreach (Thing thing in transferable.things)
         {
-          Thing thing = transferable.things[i];
           Pawn ownerOf = GetOwnerOf(aerialVehicle, thing);
           if (ownerOf == null)
           {
-            Log.Error("Could not find owner of " + thing);
+            Log.Error($"Could not find owner of {thing}");
             return;
           }
           thing.Notify_AbandonedAtTile(aerialVehicle.Tile);
           ownerOf.inventory.innerContainer.Remove(thing);
-          thing.Destroy(DestroyMode.Vanish);
+          thing.Destroy();
         }
-      }, true, null, WindowLayer.Dialog);
+      }, destructive: true);
     Find.WindowStack.Add(window);
   }
 
@@ -71,7 +71,7 @@ public static class AerialVehicleAbandonOrBanishHelper
     AerialVehicleInFlight aerialVehicle)
   {
     Find.WindowStack.Add(new Dialog_Slider("AbandonSliderText".Translate(thing.LabelNoCount), 1,
-      thing.stackCount, delegate(int x)
+      thing.stackCount, delegate (int x)
       {
         Pawn ownerOf = GetOwnerOf(aerialVehicle, thing);
         if (ownerOf == null)
@@ -83,22 +83,22 @@ public static class AerialVehicleAbandonOrBanishHelper
         {
           thing.Notify_AbandonedAtTile(aerialVehicle.Tile);
           ownerOf.inventory.innerContainer.Remove(thing);
-          thing.Destroy(DestroyMode.Vanish);
+          thing.Destroy();
         }
         else
         {
           Thing thingSplit = thing.SplitOff(x);
           thingSplit.Notify_AbandonedAtTile(aerialVehicle.Tile);
-          thingSplit.Destroy(DestroyMode.Vanish);
+          thingSplit.Destroy();
         }
-      }, int.MinValue, 1f));
+      }));
   }
 
   public static void TryAbandonSpecificCountViaInterface(TransferableImmutable transferable,
     AerialVehicleInFlight aerialVehicle)
   {
     Find.WindowStack.Add(new Dialog_Slider("AbandonSliderText".Translate(transferable.Label), 1,
-      transferable.TotalStackCount, delegate(int x)
+      transferable.TotalStackCount, delegate (int x)
       {
         int num = x;
         int num2 = 0;
@@ -116,18 +116,18 @@ public static class AerialVehicleAbandonOrBanishHelper
             num -= thing.stackCount;
             thing.Notify_AbandonedAtTile(aerialVehicle.Tile);
             ownerOf.inventory.innerContainer.Remove(thing);
-            thing.Destroy(DestroyMode.Vanish);
+            thing.Destroy();
           }
           else
           {
             Thing thing2 = thing.SplitOff(num);
             thing2.Notify_AbandonedAtTile(aerialVehicle.Tile);
-            thing2.Destroy(DestroyMode.Vanish);
+            thing2.Destroy();
             num = 0;
           }
           num2++;
         }
-      }, int.MinValue, 1f));
+      }));
   }
 
   public static string GetAbandonOrBanishButtonTooltip(Thing thing, bool abandonSpecificCount)
@@ -152,7 +152,7 @@ public static class AerialVehicleAbandonOrBanishHelper
   private static string GetAbandonItemButtonTooltip(int currentStackCount,
     bool abandonSpecificCount)
   {
-    StringBuilder stringBuilder = new StringBuilder();
+    StringBuilder stringBuilder = new();
     if (currentStackCount == 1)
     {
       stringBuilder.AppendLine("AbandonTip".Translate());

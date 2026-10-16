@@ -106,7 +106,7 @@ internal sealed class Test_AerialVehicle
   }
 
   [Test]
-  private void WorldPawnGC()
+  private void WorldPawnGc()
   {
     using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(mockSettings);
     group.BoardAll();
