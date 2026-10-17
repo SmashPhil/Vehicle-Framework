@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThingDef Name="VehicleSkyfallerBase" ParentName="EtherealThingBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller</thingClass>
+		<useHitPoints>false</useHitPoints>
+		<drawOffscreen>true</drawOffscreen>
+		<tickerType>Normal</tickerType>
+		<altitudeLayer>Skyfaller</altitudeLayer>
+		<drawerType>RealtimeOnly</drawerType>
+		<skyfaller>
+			<shadow>Things/Skyfaller/SkyfallerShadowDropPod</shadow>
+			<shadowSize>(3, 3)</shadowSize>
+		</skyfaller>
+	</ThingDef>
+	
+	<ThingDef Name="VehicleSkyfallerCrashingBase" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_Crashing</thingClass>
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadowSize>(3, 3)</shadowSize>
+			<explosionRadius>8</explosionRadius>
+			<explosionDamage>Bomb</explosionDamage>
+			<rotateGraphicTowardsDirection>true</rotateGraphicTowardsDirection>
+			<speed>2</speed>
+			<ticksToImpactRange>
+				<min>300</min>
+				<max>350</max>
+			</ticksToImpactRange>
+		</skyfaller>
+	</ThingDef>
+	
+	<ThingDef Name="VehicleSkyfallerStrafe" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_Strafe</thingClass>
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadowSize>(3, 3)</shadowSize>
+			<rotateGraphicTowardsDirection>true</rotateGraphicTowardsDirection>
+		</skyfaller>
+	</ThingDef>
+	
+	<ThingDef Name="VehicleSkyfallerBomb" ParentName="VehicleSkyfallerBase" Abstract="True">
+		<thingClass>Vehicles.VehicleSkyfaller_Bomb</thingClass>
+		<skyfaller>
+			<movementType>ConstantSpeed</movementType>
+			<shadowSize>(3, 3)</shadowSize>
+			<rotateGraphicTowardsDirection>true</rotateGraphicTowardsDirection>
+		</skyfaller>
+	</ThingDef>
+</Defs>

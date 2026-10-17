@@ -15,7 +15,7 @@ using Vehicles.World;
 using Verse;
 using Verse.AI.Group;
 using OpCodes = System.Reflection.Emit.OpCodes;
-
+using MethodInvoker = HarmonyLib.MethodInvoker;
 
 namespace Vehicles;
 
@@ -39,6 +39,11 @@ internal class Patch_CaravanHandling : IPatchCategory
 
   void IPatchCategory.PatchMethods()
   {
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(PawnBanishUtility), nameof(PawnBanishUtility.Banish),
+        [typeof(Pawn), typeof(PlanetTile), typeof(bool)]),
+      prefix: new HarmonyMethod(typeof(Patch_CaravanHandling), nameof(PrepareVehicleBanishment)),
+      postfix: new HarmonyMethod(typeof(Patch_CaravanHandling), nameof(RemoveBanishedPassenger)));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(CaravanVisibilityCalculator),
         nameof(CaravanVisibilityCalculator.Visibility),
         parameters: [typeof(List<Pawn>), typeof(bool), typeof(StringBuilder)]),
@@ -270,6 +275,25 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(NegotiatorInVehicle)));
   }
 
+  private static void PrepareVehicleBanishment(Pawn pawn, out VehiclePawn __state)
+  {
+    __state = pawn.ParentHolder is VehicleRoleHandler handler &&
+      (pawn.Faction == Faction.OfPlayer || pawn.HostFaction == Faction.OfPlayer)
+        ? handler.vehicle
+        : null;
+    if (__state is { Spawned: true })
+      __state.DisembarkPawn(pawn);
+  }
+
+  private static void RemoveBanishedPassenger(Pawn pawn, VehiclePawn __state)
+  {
+    if (__state != null && pawn.Faction != Faction.OfPlayer &&
+      pawn.HostFaction != Faction.OfPlayer && __state.RemovePawn(pawn))
+    {
+      Find.WorldPawns.PassToWorld(pawn);
+    }
+  }
+
   private static IEnumerable<CodeInstruction> VehicleVisibilityInCaravanTranspiler(
     IEnumerable<CodeInstruction> instructions)
   {
@@ -348,7 +372,7 @@ internal class Patch_CaravanHandling : IPatchCategory
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_CaravanHandling),
             nameof(PawnCapacityInVehicle)));
-        instruction = instructionList[++i]; //CALL : MassUtility.Capacity
+        instruction = instructionList[++i]; // CALL : MassUtility.Capacity
       }
 
       yield return instruction;
@@ -368,9 +392,9 @@ internal class Patch_CaravanHandling : IPatchCategory
 
       if (instruction.Calls(capacityMethod))
       {
-        yield return instruction; //CALL : MassUtility.GearAndInventoryMass
+        yield return instruction; // CALL : MassUtility.GearAndInventoryMass
         instruction = instructionList[++i];
-        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 4);
+        yield return new CodeInstruction(opcode: OpCodes.Ldloc_S, operand: 3);
         yield return new CodeInstruction(opcode: OpCodes.Call,
           operand: AccessTools.Method(typeof(Patch_CaravanHandling),
             nameof(PawnMassUsageInVehicle)));
@@ -380,8 +404,10 @@ internal class Patch_CaravanHandling : IPatchCategory
     }
   }
 
-  private static float PawnMassUsageInVehicle(float massUsage, Pawn pawn)
+  private static float PawnMassUsageInVehicle(float massUsage, Thing thing)
   {
+    if (thing switch { Pawn p => p, Corpse c => c.InnerPawn, _ => null } is not { } pawn)
+      return 0;
     if (pawn.InVehicle() || CaravanHelper.assignedSeats.IsAssigned(pawn))
       return 0;
     return massUsage;

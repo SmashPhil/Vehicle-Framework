@@ -9,14 +9,13 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Vehicles.Rendering;
 using Verse;
-using Transform = SmashTools.Rendering.Transform;
 using static Vehicles.Config.FeatureFlags;
+using Transform = SmashTools.Rendering.Transform;
 
 namespace Vehicles;
 
 [PublicAPI]
-public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
-                              IParallelRenderer, IBlitTarget, ITransformable,
+public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarget, ITransformable,
                               ITweakFields
 {
   public GraphicDataOverlay data;
@@ -91,8 +90,6 @@ public class GraphicOverlay : IAnimationObject, IMaterialCacheTarget,
   public string Name => $"{vehicleDef.Name}_{data.graphicData.texPath}";
 
   public MaterialPropertyBlock PropertyBlock { get; private set; }
-
-  string IAnimationObject.ObjectId => data.identifier ?? nameof(GraphicOverlay);
 
   public Graphic_DynamicShadow ShadowGraphic => graphicShadow;
 

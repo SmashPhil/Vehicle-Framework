@@ -2,7 +2,7 @@
 using RimWorld;
 using RimWorld.Planet;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestDescription("Maps account for vehicles when checking removal conditions.")]
 internal sealed class Test_MapRemoval_DestroyedSettlement : Test_MapRemoval<DestroyedSettlement>

@@ -1,4 +1,4 @@
-﻿namespace Vehicles.Testing;
+﻿namespace Vehicles.Tests;
 
 public static class CompGenerator
 {

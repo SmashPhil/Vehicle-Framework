@@ -60,7 +60,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
 	public CompProperties_VehicleTurrets Props => (CompProperties_VehicleTurrets)props;
 
-  // TODO 1.7 - Change to ReadOnlyList from CoreLib
+  // TODO 1.8 - Change to ReadOnlyList from CoreLib
 	public IReadOnlyList<VehicleTurret> Turrets => turrets;
 
 	public IEnumerable<(ThingDef thingDef, float count)> Refunds
@@ -652,7 +652,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 
 		turret.loadConfig ??= new AutoLoadConfig(turret);
 
-		// TODO 1.7 - Remove deprecated method of saving quota levels.
+		// TODO 1.8 - Remove deprecated method of saving quota levels.
 		if (!backupQuotas.NullOrEmpty())
 		{
 			for (int i = 0; i < backupQuotas.Count; i++)

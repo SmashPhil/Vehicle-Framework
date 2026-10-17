@@ -2,7 +2,7 @@
 using DevTools.Testing;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 internal class Test_VehicleDefTest
 {

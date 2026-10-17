@@ -8,7 +8,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Priority = DevTools.Testing.Priority;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration, TestCategoryNames.Pathing)]

@@ -3,7 +3,7 @@ using DevTools.Testing;
 using UnityEngine;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.VehicleTurret, TestCategoryNames.Def)]

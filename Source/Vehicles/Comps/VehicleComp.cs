@@ -40,7 +40,7 @@ public class VehicleComp : ThingComp
     return 0;
   }
 
-  // TODO 1.7 - Rename to PostPostLoadInit
+  // TODO 1.8 - Rename to PostPostLoadInit
   public virtual void PostLoad()
   {
   }

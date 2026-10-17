@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <Product>SmashTools.PathFinder</Product>
+    <RootNamespace>SmashTools.PathFinder</RootNamespace>
+    <AssemblyName>SmashTools.PathFinder</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+  </PropertyGroup>
+
+  <!-- AssemblyInfo -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Test_SmashTools.PathFinder</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
+
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <ProjectReference Include="$(ModDir)\Source\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+</Project>

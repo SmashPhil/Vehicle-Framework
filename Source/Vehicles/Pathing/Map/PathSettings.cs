@@ -3,7 +3,7 @@ using System.Threading;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using Verse;
 
 namespace Vehicles;

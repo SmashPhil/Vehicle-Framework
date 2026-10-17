@@ -3,7 +3,7 @@ using RimWorld;
 using RimWorld.Planet;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [LoadIfOdysseyActive]
 [TestDescription("Maps account for vehicles when checking removal conditions.")]

@@ -6,7 +6,7 @@ using RimWorld;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehiclePawn)]
@@ -137,6 +137,22 @@ internal sealed class Test_MapPawns
     Expect.AreEqual(expected: 1, map.mapPawns.AllPawnsUnspawned.Count);
     Expect.IsTrue(map.mapPawns.AllPawnsUnspawned.Contains(group.pawns[0]));
     Expect.IsFalse(map.mapPawns.AllPawnsUnspawned.Contains(group.vehicle));
+  }
+
+  [Test]
+  private void AllMapsPlayerPawnsAreUnique()
+  {
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(new VehicleGroup.MockSettings
+    {
+      drivers = 1,
+      faction = Faction.OfPlayer
+    });
+    group.BoardAll();
+    group.Spawn();
+    Pawn pawn = group.pawns[0];
+    int occurrences = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+      .Count(candidate => candidate == pawn);
+    Expect.AreEqual(expected: 1, occurrences);
   }
 
   [Test]

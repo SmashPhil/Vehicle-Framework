@@ -1,7 +1,7 @@
 ﻿using DevTools.Testing;
 using UnityEngine.Assertions;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.VehicleTurret, TestCategoryNames.TickBehavior, TestCategoryNames.Events)]

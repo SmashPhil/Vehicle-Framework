@@ -2,13 +2,14 @@
   <name>Vehicle Framework</name>
   <author>Smash Phil</author>
   <packageId>SmashPhil.VehicleFramework</packageId>
-  <modVersion>1.6.2458 rev17690</modVersion>
+  <modVersion>1.7.2503 rev7834</modVersion>
   <description><![CDATA[Framework which allows the creation of vehicles in RimWorld.]]></description>
   <modIconPath>UI/Icons/DefaultVehicleIcon</modIconPath>
   <supportedVersions>
     <li>1.4</li>
     <li>1.5</li>
     <li>1.6</li>
+    <li>1.7</li>
   </supportedVersions>
   <loadAfter>
     <li>brrainz.harmony</li>
@@ -31,8 +32,12 @@
     </li>
   </modDependencies>
   <incompatibleWith>
+    <!-- Completely breaks Vehicle Framework -->
     <li>majorhoff.rimthreaded</li>
     <li>side1iner.possessionsplus</li>
+    <!-- Major bugs -->
     <li>vanillaexpanded.outposts</li>
+    <!-- Claims to fix a VF bug but only suppresses exceptions -->
+    <li>community.vf.compatibilityfixes</li>
   </incompatibleWith>
 </ModMetaData>

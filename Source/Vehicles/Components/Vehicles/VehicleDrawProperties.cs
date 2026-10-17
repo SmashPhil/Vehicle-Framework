@@ -42,7 +42,7 @@ public class VehicleDrawProperties
 
   public AnimationController controller;
 
-  // TODO 1.7 - this is nonsense, 2 similarly named lists with different purposes. This should be implemented
+  // TODO 1.8 - this is nonsense, 2 similarly named lists with different purposes. This should be implemented
   // as an auto-property with an appropriate name to make it clear this is cached list of overlay instances.
   [Unsaved]
   public readonly List<GraphicOverlay> overlays = [];

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LanguageData>
+  <VF_VehicleEnabled>Enabled</VF_VehicleEnabled>
+  <VF_VehicleDisabled>Disabled</VF_VehicleDisabled>
+  <VF_VehiclePlayerOnly>Player Only</VF_VehiclePlayerOnly>
+  <VF_VehicleRaiderOnly>NPC Only</VF_VehicleRaiderOnly>
+  
+  <VF_EnableButtonTooltip>If disabled this vehicle will not be available in-game. Applies to both the player and NPC factions.</VF_EnableButtonTooltip>
+  
+  <VF_MovementPermissions>Control Type</VF_MovementPermissions>
+  <VF_NavigationType>Navigation</VF_NavigationType>
+  <VF_NavigationTypeTooltip>Navigation category for the World Map. Dictates when the Vehicle may move on the World Map.</VF_NavigationTypeTooltip>
+  
+  <VF_Nameable>Can Assign Name</VF_Nameable>
+  <VF_NameableTooltip>Allow naming of this vehicle. Name will appear over the vehicle and will replace the displayed label.</VF_NameableTooltip>
+  
+  <VF_CombatPower>Combat Power</VF_CombatPower>
+  <VF_CombatPowerTooltip>Combat points vehicle costs in order to generate in an event.</VF_CombatPowerTooltip>
+  
+  <VF_CanCaravan>Caravan</VF_CanCaravan>
+  <VF_CanCaravanTooltip>Vehicle is able to be taken on caravans.</VF_CanCaravanTooltip>
+  
+  <VF_SaveableFieldDisabledConditionTooltip>Disabled. {0}</VF_SaveableFieldDisabledConditionTooltip>
+  <VF_DisabledSingleModDependencyTooltip>Disabled. Compatible mod not in active mod list: {0}</VF_DisabledSingleModDependencyTooltip>
+  <VF_DisabledMultipleModsDependencyTooltip>Disabled. Compatible mods not in active mod list: {0}</VF_DisabledMultipleModsDependencyTooltip>
+  <VF_SaveableFieldDisabledTooltip>Disabled for this Vehicle Type.</VF_SaveableFieldDisabledTooltip>
+  <VF_SaveableFieldLockedTooltip>Setting is locked for this Vehicle.</VF_SaveableFieldLockedTooltip>
+  <VF_DebugDisabledTooltip>Disabled for all Vehicles at this time.</VF_DebugDisabledTooltip>
+  <VF_GizmoDisabledTooltip>Disabled in the mod settings.</VF_GizmoDisabledTooltip>
+  
+  <VF_CollisionMultiplier>Pawn Damage</VF_CollisionMultiplier>
+  <VF_CollisionMultiplierTooltip>Multiplier for damage applied to pawns being run over by vehicles.</VF_CollisionMultiplierTooltip>
+  <VF_CollisionVehicleMultiplier>Vehicle Damage</VF_CollisionVehicleMultiplier>
+  <VF_CollisionVehicleMultiplierTooltip>Multiplier for damage applied to the vehicle when running over a pawn.</VF_CollisionVehicleMultiplierTooltip>
+  
+  <VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
+  <VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_EMPStuns>EMP Stuns</VF_EMPStuns>
+  <VF_EMPStunsTooltip>EMP weapons will temporarily disable this vehicle.</VF_EMPStunsTooltip>
+  <VF_CanAdaptToEMP>Can Adapt</VF_CanAdaptToEMP>
+  <VF_CanAdaptToEMPTooltip>Can adapt to emp damage and become temporarily immune from stuns.</VF_CanAdaptToEMPTooltip>
+  <VF_VehicleCannotStun>Vehicle has no stunnable components.</VF_VehicleCannotStun>
+  <VF_FishingEnabled>Can Fish</VF_FishingEnabled>
+  <VF_FishingEnabledTooltip>Enables fishing when stationary over water.</VF_FishingEnabledTooltip>
+  
+  <VF_JobLimitations>Vehicle Jobs</VF_JobLimitations>
+  <VF_MaxWorkers>Max Workers</VF_MaxWorkers>
+  
+  <VF_OffRoadMultiplier>Off Road Multiplier</VF_OffRoadMultiplier>
+  <VF_OffRoadMultiplierTooltip>PathCost multiplier for traveling on roads.</VF_OffRoadMultiplierTooltip>
+  <VF_WinterSpeedMultiplier>Winter Speed Multiplier</VF_WinterSpeedMultiplier>
+  <VF_WinterSpeedMultiplierTooltip>PathCost multiplier for traveling during winter.</VF_WinterSpeedMultiplierTooltip>
+  <VF_WorldSpeedMultiplier>World Speed Multiplier</VF_WorldSpeedMultiplier>
+  <VF_WorldSpeedMultiplierTooltip>Multiplier to MoveSpeed when on the world map in a caravan.</VF_WorldSpeedMultiplierTooltip>
+  
+  <VF_DeployTime>Deploy Time</VF_DeployTime>
+  
+  <VF_DischargePerTick>Discharge Rate</VF_DischargePerTick>
+  <VF_DischargePerTickTooltip>Amount per tick in which battery loses its charge.</VF_DischargePerTickTooltip>
+  <VF_TicksPerCharge>Charge Rate</VF_TicksPerCharge>
+  <VF_TicksPerChargeTooltip>Charge amount per tick applied to battery.</VF_TicksPerChargeTooltip>
+  <VF_NotElectricPowered>Not electric powered.</VF_NotElectricPowered>
+  <VF_PerDay>/ day</VF_PerDay>
+  <VF_Fuel>Fuel</VF_Fuel>
+  <VF_FuelConsumptionRate>Fuel Consumption Rate</VF_FuelConsumptionRate>
+  <VF_FuelConsumptionRateTooltip>Fuel consumed per day.  Idle vehicles consume 50% less fuel.</VF_FuelConsumptionRateTooltip>
+  <VF_FuelCapacity>Fuel Capacity</VF_FuelCapacity>
+  <VF_FuelCapacityTooltip>Amount of fuel that can be stored</VF_FuelCapacityTooltip>
+  <VF_FuelConsumptionRateWorldMultiplier>Fuel World %</VF_FuelConsumptionRateWorldMultiplier>
+  <VF_FuelConsumptionRateWorldMultiplierTooltip>Fuel consumption multiplier on the world map</VF_FuelConsumptionRateWorldMultiplierTooltip>
+  <VF_AutoRefuelPercent>Auto Refuel %</VF_AutoRefuelPercent>
+  <VF_AutoRefuelPercentTooltip>Colonists will attempt to refuel the vehicle when fuel gets below this percent.</VF_AutoRefuelPercentTooltip>
+  <VF_TargetFuelConfigurable>Fuel Level Configurable</VF_TargetFuelConfigurable>
+  <VF_TargetFuelConfigurableTooltip>Max fuel level can be configured.</VF_TargetFuelConfigurableTooltip>
+  <VF_AmbientHeat>Ambient Heat</VF_AmbientHeat>
+  <VF_AmbientHeatTooltip>Heat emitted when fuel is being consumed.</VF_AmbientHeatTooltip>
+  
+  <VF_ReconDistance>Recon Distance</VF_ReconDistance>
+  <VF_ReconDistanceTooltip>Distance in tiles the shuttle will be able to perform recon of a site or settlement.</VF_ReconDistanceTooltip>
+  <VF_FuelConsumptionWorld>Fuel Consumption %</VF_FuelConsumptionWorld>
+  <VF_FuelConsumptionWorldTooltip>Fuel consumption multiplier on the world map.</VF_FuelConsumptionWorldTooltip>
+  <VF_LaunchFixedMaxDistance>Fixed Max Distance</VF_LaunchFixedMaxDistance>
+  <VF_LaunchFixedMaxDistanceTooltip>Set a fixed max distance this vehicle can fly regardless of fuel level.</VF_LaunchFixedMaxDistanceTooltip>
+  <VF_LaunchFixedMaxDistanceDisabled>None</VF_LaunchFixedMaxDistanceDisabled>
+  <VF_ControlInFlight>Control in Flight</VF_ControlInFlight>
+  <VF_ControlInFlightTooltip>Control the aerial vehicle while it is in flight. Allows for changing of flight paths midflight, choosing your landing after loading a map, and strafing maps that have not yet been loaded.</VF_ControlInFlightTooltip>
+  <VF_CanRoofPunch>Can Roof Punch</VF_CanRoofPunch>
+  <VF_CanRoofPunchTooltip>Vehicle can punch through roofs when landing.</VF_CanRoofPunchTooltip>
+  <VF_SpaceFlight>Space Faring</VF_SpaceFlight>
+  <VF_SpaceFlightTooltip>Vehicle is capable of launching to and taking off from space objects.</VF_SpaceFlightTooltip>
+  <VF_SignalJamming>Signal Jammer</VF_SignalJamming>
+  <VF_SignalJammingTooltip>Vehicle is capable of jamming signals in order to visit certain orbital platforms.</VF_SignalJammingTooltip>
+  <VF_RateOfClimb>Rate of Climb</VF_RateOfClimb>
+  <VF_RateOfClimbTooltip>Amount the vehicle ascends per tick.</VF_RateOfClimbTooltip>
+  <VF_MaxAltitude>Max Altitude</VF_MaxAltitude>
+  <VF_MaxAltitudeTooltip>Maximum altitude this vehicle can achieve when in flight.</VF_MaxAltitudeTooltip>
+  <VF_MaxFallRate>Max Fall Rate</VF_MaxFallRate>
+  <VF_MaxFallRateTooltip>Max amount this vehicle will descend when shot down or out of fuel.</VF_MaxFallRateTooltip>
+  <VF_Instant>Instant</VF_Instant>
+  
+  <VF_Rotatable>Rotatable</VF_Rotatable>
+  <VF_RotatableTooltip>Whether turret can rotate to aim toward its target, or is static and can only shoot in the direction it's facing.</VF_RotatableTooltip>
+  <VF_MagazineCapacity>Magazine Capacity</VF_MagazineCapacity>
+  <VF_MagazineCapacityTooltip>How many shots this turret can shoot before having to reload.</VF_MagazineCapacityTooltip>
+  <VF_MinRange>Min Range</VF_MinRange>
+  <VF_MinRangeTooltip>The minimum range of this turret.</VF_MinRangeTooltip>
+  <VF_MaxRange>Max Range</VF_MaxRange>
+  <VF_MaxRangeTooltip>The maximum range of this turret.</VF_MaxRangeTooltip>
+  <VF_WarmupTime>Warmup Time</VF_WarmupTime>
+  <VF_WarmupTimeValue>{0}s</VF_WarmupTimeValue>
+  <VF_WarmupTimeTooltip>Amount of time it takes for this turret to shoot.</VF_WarmupTimeTooltip>
+  <VF_ReloadTime>Reload Time</VF_ReloadTime>
+  <VF_ReloadTimeValue>{0}s</VF_ReloadTimeValue>
+  <VF_ReloadTimeTooltip>Amount of time it takes to reload this turret.</VF_ReloadTimeTooltip>
+  <VF_RotationSpeed>Rotation Speed</VF_RotationSpeed>
+  <VF_RotationSpeedValue>{0} deg/s</VF_RotationSpeedValue>
+  <VF_RotationSpeedTooltip>How quickly this turret rotates to face its target.</VF_RotationSpeedTooltip>
+  <VF_FireModes>Firing Modes</VF_FireModes>
+  <VF_FireModesTooltip>Rates of fire this turret can be set to.</VF_FireModesTooltip>
+  <VF_RateOfFire>Rate of fire</VF_RateOfFire>
+  <VF_RateOfFireValue>{0} rounds / minute</VF_RateOfFireValue>
+  <VF_ShotsPerBurst>Shots per burst</VF_ShotsPerBurst>
+  <VF_ShotGroup>Shot Group</VF_ShotGroup>
+  <VF_ShotGroupValue>{0} cells</VF_ShotGroupValue>
+</LanguageData>
+

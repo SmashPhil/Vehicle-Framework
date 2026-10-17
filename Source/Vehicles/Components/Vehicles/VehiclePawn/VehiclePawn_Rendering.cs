@@ -74,12 +74,6 @@ public partial class VehiclePawn
 
   public MaterialPropertyBlock PropertyBlock { get; private set; }
 
-  ModContentPack IAnimator.ModContentPack => VehicleDef.modContentPack;
-
-  AnimationManager IAnimator.Manager => animator;
-
-  string IAnimationObject.ObjectId => nameof(VehiclePawn);
-
   public Transform Transform => transform;
 
   public float Angle
@@ -146,17 +140,13 @@ public partial class VehiclePawn
     }
   }
 
-  // TODO 1.6.2144 - Remove
-  [Obsolete("Vehicles should call DrawTracker instead of the vanilla implementation", error: true)]
-  public new VehicleDrawTracker Drawer => DrawTracker;
-
   public VehicleDrawTracker DrawTracker => drawTracker;
 
   public Graphic_Vehicle VehicleGraphic
   {
     get
     {
-      // TODO 1.7 - Move away from lazy-init graphic since it can end up being called outside the main thread.
+      // TODO 1.8 - Move away from lazy-init graphic since it can end up being called outside the main thread.
       graphic ??= GenerateGraphic();
       return graphic;
     }
@@ -578,7 +568,7 @@ public partial class VehiclePawn
         defaultLabel = "VF_LoadCargo".Translate(),
         icon = VehicleDef.LoadCargoIcon,
         hotKey = KeyBindingDefOf.Misc2,
-        action = delegate { Find.WindowStack.Add(new Dialog_LoadCargo(this)); }
+        action = OpenLoadCargoDialog
       };
       if (upgrading)
       {
@@ -597,72 +587,7 @@ public partial class VehiclePawn
     {
       defaultLabel = "VF_HaulPawnToVehicle".Translate(this),
       icon = VehicleTex.HaulPawnToVehicle,
-      action = delegate
-      {
-        SoundDefOf.Click.PlayOneShotOnCamera();
-        HaulTargeter.BeginTargeting(new TargetingParameters
-        {
-          canTargetPawns = true,
-          canTargetBuildings = false,
-          neverTargetHostileFaction = true,
-          canTargetItems = false,
-          thingCategory = ThingCategory.Pawn,
-          validator = delegate (TargetInfo target)
-          {
-            if (!target.HasThing)
-            {
-              return false;
-            }
-
-            if (target.Thing is Pawn pawn)
-            {
-              if (pawn is VehiclePawn)
-              {
-                return false;
-              }
-
-              return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech ||
-                pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
-            }
-            return false;
-          }
-        }, delegate (LocalTargetInfo target)
-        {
-          if (target.Thing is Pawn pawn)
-          {
-            if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
-            {
-              // Role validation should still apply to downed pawns since they will be loaded into a role by another
-              // colonist. They only skip the job assignment from PromptToBoardVehicle since they have to be loaded.
-              VehicleRoleHandler role = GetNextAvailableHandler(pawn);
-              if (role == null)
-              {
-                Messages.Message("VF_NoRoleAvailable".Translate(), MessageTypeDefOf.RejectInput, historical: false);
-                return;
-              }
-              if (!pawn.Downed)
-              {
-                PromptToBoardVehicle(pawn, role);
-                return;
-              }
-            }
-          }
-
-          Thing thing = target.Thing;
-          thing.CancelTransferToAnyOtherVehicle(this);
-          thing.TransferToVehicle(this);
-          TransferableOneWay transferable = new()
-          {
-            things = [thing],
-          };
-          transferable.AdjustTo(thing.stackCount);
-          if (!cargoToLoad.Exists(cargo => cargo.AnyThing == thing))
-          {
-            cargoToLoad.Add(transferable);
-          }
-          Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
-        }, this);
-      }
+      action = StartHaulTargeting
     };
     if (upgrading)
     {
@@ -933,6 +858,95 @@ public partial class VehiclePawn
     }
   }
 
+  private void StartHaulTargeting()
+  {
+    SoundDefOf.Click.PlayOneShotOnCamera();
+    HaulTargeter.BeginTargeting(new TargetingParameters
+    {
+      canTargetPawns = true,
+      canTargetBuildings = false,
+      neverTargetHostileFaction = true,
+      canTargetItems = false,
+      thingCategory = ThingCategory.Pawn,
+      validator = Validator
+    }, OnConfirm, this);
+    return;
+
+    static bool Validator(TargetInfo target)
+    {
+      if (!target.HasThing)
+      {
+        return false;
+      }
+
+      if (target.Thing is Pawn pawn)
+      {
+        if (pawn is VehiclePawn)
+        {
+          return false;
+        }
+
+        return pawn.Faction == Faction.OfPlayer || pawn.IsColonist || pawn.IsColonyMech ||
+               pawn.IsSlaveOfColony || pawn.IsPrisonerOfColony;
+      }
+      return false;
+    }
+
+    void OnConfirm(LocalTargetInfo target)
+    {
+      if (target.Thing is Pawn pawn)
+      {
+        if (pawn.Map.mapPawns.FreeColonistsSpawned.Contains(pawn) && !pawn.Downed)
+        {
+          // Non-downed colonist should be eligible for drafting.
+          // When they aren't available for drafting such as participaiting in Ideology ritual, or similar modded
+          // activity, loading them into vehicle and maybe departing on vehicle could break that activity.
+          AcceptanceReport allowDrafting = pawn.GetLord()?.AllowsDrafting(pawn) ?? AcceptanceReport.WasAccepted;
+          if (!allowDrafting)
+          {
+            Messages.Message(allowDrafting.Reason, MessageTypeDefOf.RejectInput, historical: false);
+            return;
+          }
+        }
+        if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
+        {
+          // Role validation should still apply to downed pawns since they will be loaded into a role by another
+          // colonist. They only skip the job assignment from PromptToBoardVehicle since they have to be loaded.
+          VehicleRoleHandler role = GetNextAvailableHandler(pawn);
+          if (role == null)
+          {
+            Messages.Message("VF_NoRoleAvailable".Translate(), MessageTypeDefOf.RejectInput, historical: false);
+            return;
+          }
+          if (!pawn.Downed)
+          {
+            PromptToBoardVehicle(pawn, role);
+            return;
+          }
+        }
+      }
+
+      Thing thing = target.Thing;
+      thing.CancelTransferToAnyOtherVehicle(this);
+      thing.TransferToVehicle(this);
+      TransferableOneWay transferable = new()
+      {
+        things = [thing],
+      };
+      transferable.AdjustTo(thing.stackCount);
+      if (!cargoToLoad.Exists(cargo => cargo.AnyThing == thing))
+      {
+        cargoToLoad.Add(transferable);
+      }
+      Map.GetCachedMapComponent<VehicleReservationManager>().RegisterLister(this, ReservationType.LoadVehicle);
+    }
+  }
+
+  private void OpenLoadCargoDialog()
+  {
+    Find.WindowStack.Add(new Dialog_LoadCargo(this));
+  }
+
   public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
   {
     if (selPawn is null)
@@ -996,17 +1010,9 @@ public partial class VehiclePawn
     }
   }
 
-  public void PromptToBoardVehicle(Pawn pawn, VehicleRoleHandler handler)
+  public void PromptToBoardVehicle([NotNull] Pawn pawn, [NotNull] VehicleRoleHandler handler)
   {
-    // TODO 1.7 - Switch to ArgumentNullException
-    if (handler == null)
-    {
-      Messages.Message("VF_HandlerNotEnoughRoom".Translate(pawn, this),
-        MessageTypeDefOf.RejectInput,
-        historical: false);
-      return;
-    }
-
+    ArgumentNullException.ThrowIfNull(handler);
     Job job = JobMaker.MakeJob(JobDefOf_Vehicles.Board, this);
     GiveLoadJob(pawn, handler);
     pawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
@@ -1053,8 +1059,7 @@ public partial class VehiclePawn
     });
   }
 
-  // TODO 1.7 - Rename parameter, I think someone has a patch on this method and changing the
-  // name will break parameter binding.
+  // Someone has a patch on this method and changing the name will break parameter binding.
   // ReSharper disable once ParameterHidesMember
   public void SetRetexture(RetextureDef retextureDef)
   {
@@ -1170,8 +1175,8 @@ public partial class VehiclePawn
 
   public void OpenInNewAnimator()
   {
-    Dialog_AnimationEditor dialogGraphEditor = new(this);
-    Find.WindowStack.Add(dialogGraphEditor);
+    //Dialog_AnimationEditor dialogGraphEditor = new(this);
+    //Find.WindowStack.Add(dialogGraphEditor);
   }
 
   public void MultiplePawnFloatMenuOptions(List<Pawn> pawns)

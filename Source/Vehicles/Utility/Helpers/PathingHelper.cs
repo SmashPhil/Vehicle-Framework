@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
@@ -437,24 +437,6 @@ public static class PathingHelper
         pathData.VehiclePathGrid.RecalculatePerceivedPathCostAt(cell);
       }
     }
-  }
-
-  // TODO 1.7 - these 2 functions can be removed
-  /// <summary>
-  /// Check if cell is currently claimed by a vehicle
-  /// </summary>
-  /// <param name="map"></param>
-  /// <param name="cell"></param>
-  public static bool VehicleImpassableInCell(Map map, IntVec3 cell)
-  {
-    return map.GetDetachedMapComponent<VehiclePositionManager>().ClaimedBy(cell) is
-      { VehicleDef.passability: Traversability.Impassable };
-  }
-
-  /// <see cref="VehicleImpassableInCell(Map, IntVec3)"/>
-  public static bool VehicleImpassableInCell(Map map, int x, int z)
-  {
-    return VehicleImpassableInCell(map, new IntVec3(x, 0, z));
   }
 
   public static bool TryFindNearestStandableCell(VehiclePawn vehicle, IntVec3 cell,

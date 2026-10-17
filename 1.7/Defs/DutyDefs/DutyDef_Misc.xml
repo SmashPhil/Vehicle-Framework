@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+	<DutyDef>
+		<defName>VF_WaitVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>VF_BoardVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="ThinkNode_Subtree">
+					<treeDef>SatisfyBasicNeeds</treeDef>
+				</li>
+				<li Class="Vehicles.JobGiver_BoardVehicle"/>
+				<li Class="JobGiver_WanderAnywhere"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>TravelOrWaitVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_GotoTravelDestinationVehicle" />
+				<li Class="Vehicles.JobGiver_AwaitOrders"/>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+
+	<DutyDef>
+		<defName>FollowVehicle</defName>
+		<thinkNode Class="ThinkNode_Priority">
+			<subNodes>
+				<li Class="Vehicles.JobGiver_FollowVehicle" />
+				<li Class="ThinkNode_ForbidOutsideFlagRadius">
+					<maxDistToSquadFlag>16</maxDistToSquadFlag>
+				</li>
+				<li Class="JobGiver_WanderNearDutyLocation">
+					<wanderRadius>3</wanderRadius>
+				</li>
+			</subNodes>
+		</thinkNode>
+	</DutyDef>
+</Defs>

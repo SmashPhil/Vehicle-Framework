@@ -3,7 +3,7 @@ using DevTools.Testing;
 using CoreLib.Performance;
 using UnityEngine.Assertions;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription("Local object pool for specific types of objects used within the same context.")]

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <Description>Developer tool SDK for RimWorld mods. Primarily used by Vehicle Framework.</Description>
+    <Product>SmashTools.Rendering</Product>
+    <RootNamespace>SmashTools.Rendering</RootNamespace>
+    <AssemblyName>SmashTools.Rendering</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+    <!-- RimWorld.dll throws warning MSB3270 as it's not published for AnyCPU -->
+    <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
+  </PropertyGroup>
+
+  <!-- Dependencies -->
+  <ItemGroup>
+    <PackageReference Include="Krafs.Publicizer" Version="2.3.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
+
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <ProjectReference Include="$(ModDir)\Source\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(RefDir)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="RimWorld">
+      <HintPath>$(RefDir)\RimWorld.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.Glfw">
+      <HintPath>$(RefDir)\Brutal.Glfw.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.ImGui">
+      <HintPath>$(RefDir)\Brutal.ImGui.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.Core.Common">
+      <HintPath>$(RefDir)\Brutal.Core.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.Core.Numerics">
+      <HintPath>$(RefDir)\Brutal.Core.Numerics.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.Vulkan">
+      <HintPath>$(RefDir)\Brutal.Vulkan.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+
+    <Reference Include="Brutal.Vulkan.Abstractions">
+      <HintPath>$(RefDir)\Brutal.Vulkan.Abstractions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Publicize Include="Assembly-CSharp:Verse.WindowStack.windows" />
+    <Publicize Include="RimWorld:RimWorldWaylith.Imgui.ImGuiGuiBackend" />
+    <Publicize Include="RimWorld:RimWorldWaylith.Imgui.ImGuiHost" />
+    <Publicize Include="RimWorld:RimWorldWaylith.Imgui.ImGuiHost.context" />
+    <Publicize Include="RimWorld:RimWorldWaylith.Imgui.ImGuiDrawSnapshot" />
+    <Publicize Include="RimWorld:RimWorldWaylith.Rendering.CameraTextureBaker" />
+    <Publicize Include="System.Runtime:System.Object.MemberwiseClone" />
+    <Publicize Include="UnityStubs:UnityEngine.InputSystem.Controls.ButtonControl.SetPressed" />
+    <Publicize Include="UnityStubs:UnityEngine.InputSystem.Controls.ButtonControl._wasPressedThisFrame" />
+    <Publicize Include="UnityStubs:UnityEngine.InputSystem.Controls.ButtonControl._wasReleasedThisFrame" />
+    <Publicize Include="UnityStubs:UnityEngine.InputSystem.Controls.ButtonControl._wasRepeatedThisFrame" />
+    <Publicize Include="UnityStubs:UnityEngine.InputSystem.Pointer.SetPosition" />
+    <Publicize Include="Waylith:Waylith.EngineApplication.RenderContext" />
+  </ItemGroup>
+</Project>

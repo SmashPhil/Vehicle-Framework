@@ -5,7 +5,7 @@ using DevTools.Testing;
 using HarmonyLib;
 using Verse;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 // ReSharper disable all
 #pragma warning disable CS8500

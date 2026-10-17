@@ -5,7 +5,7 @@ using UnityEngine.Assertions;
 using Vehicles.World;
 using Priority = DevTools.Testing.Priority;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestDescription("Maps account for vehicles when checking removal conditions.")]
 internal sealed class Test_MapRemoval_CrashSite : Test_MapRemoval<CrashSite>

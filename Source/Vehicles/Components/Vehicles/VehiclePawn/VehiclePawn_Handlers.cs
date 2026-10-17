@@ -15,12 +15,18 @@ public partial class VehiclePawn
   // Assigned seat for to boarding role
   private List<AssignedSeat> boardingAssignments = [];
 
-  // TODO 1.7 - Change access modifier
+  // TODO 1.8 - Change access modifier
   public List<VehicleRoleHandler> handlers = [];
 
   /* ----- Caches for VehicleHandlers ----- */
 
   public List<VehicleRoleHandler> Handlers => handlers;
+
+  void IThingHolder.GetChildHolders(List<IThingHolder> outChildren)
+  {
+    base.GetChildHolders(outChildren);
+    outChildren.AddRange(handlers);
+  }
 
   public List<VehicleRoleHandler> OccupiedHandlers { get; private set; } = [];
 
@@ -61,10 +67,6 @@ public partial class VehiclePawn
   }
 
 #pragma warning disable 618
-
-  // TODO 1.7 - Rename to 'HasEnoughOperators'
-  [Obsolete("Use HasEnoughOperators instead. Will be removed in 1.7")]
-  public bool CanMoveWithOperators => HasEnoughOperators;
 
   /// <summary>
   /// Vehicle handler requirements are satisfied
@@ -260,28 +262,6 @@ public partial class VehiclePawn
     foreach (VehicleRoleHandler handler in handlers)
     {
       if (handler.AreSlotsAvailableAndReservable)
-        return handler;
-    }
-    return null;
-  }
-
-  [Pure] // TODO 1.7 - Remove, pawn is required for permissions check
-  [Obsolete("Use overload with pawn for permissions check.")]
-  public VehicleRoleHandler GetNextAvailableHandler(HandlingType handlingTypeFlag)
-  {
-    foreach (VehicleRoleHandler handler in handlers)
-    {
-      // None has an explicit check for no handling types, otherwise HasFlag would
-      // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
-      if (handlingTypeFlag == HandlingType.None)
-      {
-        if (handler.role.HandlingTypes == HandlingType.None ||
-          handler.AreSlotsAvailableAndReservable)
-          return handler;
-        continue;
-      }
-      if ((handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
-        handler.AreSlotsAvailableAndReservable)
         return handler;
     }
     return null;

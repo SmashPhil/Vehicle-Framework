@@ -25,7 +25,7 @@ public class ChunkSearch
 
   private uint reachedIndex = 1;
 
-  // TODO 1.7 - Remove
+  // TODO 1.8 - Remove
   public ChunkSearch(VehiclePathingSystem pathingSystem, VehicleDef vehicleDef,
     [CanBeNull] VehicleReachabilityCache cache)
   {

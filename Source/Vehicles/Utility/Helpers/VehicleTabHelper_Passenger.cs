@@ -276,62 +276,7 @@ public static class VehicleTabHelper_Passenger
     }
     try
     {
-      if (transferToHolder is VehicleRoleHandler { AreSlotsAvailable: false } transferToHandler)
-      {
-        if (hoveringOverPawn != null &&
-          draggedPawn.ParentHolder is VehicleRoleHandler curHandler &&
-          curHandler != transferToHolder && transferToHandler.CanOperateRole(draggedPawn) &&
-          curHandler.CanOperateRole(hoveringOverPawn))
-        {
-          curHandler.thingOwner.Swap(transferToHandler.thingOwner, draggedPawn,
-            hoveringOverPawn);
-          SoundDefOf.Click.PlayOneShotOnCamera();
-          transferToHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
-        }
-        else
-        {
-          Messages.Message("VF_HandlerNotEnoughRoom".Translate(draggedPawn, transferToHandler.role.label),
-            MessageTypeDefOf.RejectInput);
-        }
-      }
-      else if (draggedPawn.ParentHolder != transferToHolder)
-      {
-        switch (transferToHolder)
-        {
-          case VehicleRoleHandler targetHandler:
-            if (!targetHandler.CanOperateRole(draggedPawn))
-            {
-              bool canAssign = (targetHandler.role.HandlingTypes & HandlingType.Movement) == 0;
-              MessageTypeDef msgTypeDef = canAssign ?
-                MessageTypeDefOf.CautionInput :
-                MessageTypeDefOf.RejectInput;
-              Messages.Message("VF_IncapableStatusForRole".Translate(draggedPawn.LabelShortCap), msgTypeDef);
-
-              if (!canAssign)
-                return;
-            }
-            break;
-          case Pawn_InventoryTracker:
-            if (!draggedPawn.ShouldAlwaysTransferToVehiclesCargo())
-            {
-              Messages.Message("VF_CannotAddToCargo".Translate(draggedPawn.LabelShortCap),
-                MessageTypeDefOf.RejectInput);
-              return;
-            }
-            break;
-        }
-
-        IThingHolder previousHolder = draggedPawn.ParentHolder;
-        if (!transferToHolder.GetDirectlyHeldThings()
-         .TryAddOrTransfer(draggedPawn, canMergeWithExistingStacks: false))
-        {
-          Log.Warning($"Unable to add {draggedPawn} to {transferToHolder}.");
-          return;
-        }
-        SoundDefOf.Click.PlayOneShotOnCamera();
-        OnPawnChangedSeats(previousHolder);
-        draggedPawn.GetVehicleCaravan()?.RecacheVehicles();
-      }
+      TransferPawn(draggedPawn, hoveringOverPawn, transferToHolder);
     }
     finally
     {
@@ -339,17 +284,80 @@ public static class VehicleTabHelper_Passenger
     }
   }
 
-  private static void OnPawnChangedSeats(IThingHolder previousHolder)
+  private static void TransferPawn(Pawn pawn, Pawn hoveredPawn, IThingHolder targetHolder)
+  {
+    if (pawn == null || targetHolder == null)
+      return;
+
+    if (targetHolder is VehicleRoleHandler { AreSlotsAvailable: false } transferToHandler)
+    {
+      if (hoveredPawn != null &&
+        pawn.ParentHolder is VehicleRoleHandler curHandler &&
+        curHandler != targetHolder && transferToHandler.CanOperateRole(pawn) &&
+        curHandler.CanOperateRole(hoveredPawn))
+      {
+        curHandler.thingOwner.Swap(transferToHandler.thingOwner, pawn, hoveredPawn);
+        SoundDefOf.Click.PlayOneShotOnCamera();
+        transferToHandler.vehicle.EventRegistry[VehicleEventDefOf.PawnChangedSeats].ExecuteEvents();
+      }
+      else
+      {
+        Messages.Message("VF_HandlerNotEnoughRoom".Translate(pawn, transferToHandler.role.label),
+          MessageTypeDefOf.RejectInput);
+      }
+    }
+    else if (pawn.ParentHolder != targetHolder)
+    {
+      switch (targetHolder)
+      {
+        case VehicleRoleHandler targetHandler:
+          if (!targetHandler.CanOperateRole(pawn))
+          {
+            bool canAssign = (targetHandler.role.HandlingTypes & HandlingType.Movement) == 0;
+            MessageTypeDef msgTypeDef = canAssign ?
+              MessageTypeDefOf.CautionInput :
+              MessageTypeDefOf.RejectInput;
+            Messages.Message("VF_IncapableStatusForRole".Translate(pawn.LabelShortCap), msgTypeDef);
+
+            if (!canAssign)
+              return;
+          }
+          break;
+        case Pawn_InventoryTracker:
+          if (!pawn.ShouldAlwaysTransferToVehiclesCargo())
+          {
+            Messages.Message("VF_CannotAddToCargo".Translate(pawn.LabelShortCap),
+              MessageTypeDefOf.RejectInput);
+            return;
+          }
+          break;
+      }
+
+      IThingHolder previousHolder = pawn.ParentHolder;
+      if (!targetHolder.GetDirectlyHeldThings()
+       .TryAddOrTransfer(pawn, canMergeWithExistingStacks: false))
+      {
+        Log.Warning($"Unable to add {pawn} to {targetHolder}.");
+        return;
+      }
+      SoundDefOf.Click.PlayOneShotOnCamera();
+      OnPawnChangedSeats(pawn, previousHolder, targetHolder);
+      pawn.GetVehicleCaravan()?.RecacheVehicles();
+    }
+  }
+
+  private static void OnPawnChangedSeats(Pawn pawn, IThingHolder previousHolder,
+    IThingHolder targetHolder)
   {
     VehiclePawn fromVehicle = GetVehicle(previousHolder);
-    VehiclePawn toVehicle = GetVehicle(transferToHolder);
+    VehiclePawn toVehicle = GetVehicle(targetHolder);
 
     pawnSeatChanged = true;
     if (fromVehicle != null && toVehicle == null)
     {
-      if (!draggedPawn.Spawned && !draggedPawn.IsWorldPawn())
+      if (!pawn.Spawned && !pawn.IsWorldPawn())
       {
-        Find.WorldPawns.PassToWorld(draggedPawn);
+        Find.WorldPawns.PassToWorld(pawn);
       }
       fromVehicle.EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
     }
@@ -361,9 +369,9 @@ public static class VehicleTabHelper_Passenger
       }
       else
       {
-        if (!draggedPawn.Spawned && draggedPawn.IsWorldPawn())
+        if (!pawn.Spawned && pawn.IsWorldPawn())
         {
-          Find.WorldPawns.RemovePawn(draggedPawn);
+          Find.WorldPawns.RemovePawn(pawn);
         }
         fromVehicle?.EventRegistry[VehicleEventDefOf.PawnExited].ExecuteEvents();
         toVehicle.EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();

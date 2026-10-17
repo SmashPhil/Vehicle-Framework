@@ -2,7 +2,7 @@
 using DevTools.Testing;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.ParallelRenderer, TestCategoryNames.Memory, TestCategoryNames.Def)]
@@ -103,10 +103,13 @@ internal sealed class Test_MaterialPoolDefs : Test_VehicleDefTest
   }
 
   [Test]
-  private void PatternDefs([DefParameters] PatternDef patternDef)
+  private void PatternDefs()
   {
-    Expect.IsTrue(RGBMaterialPool.TargetCached(patternDef), "Pattern was not cached on startup.");
-    Expect.AreEqual(patternDef.MaterialCount, RGBMaterialPool.GetAll(patternDef)?.Length);
+    foreach (PatternDef patternDef in DefDatabase<PatternDef>.AllDefsListForReading)
+    {
+      Expect.IsTrue(RGBMaterialPool.TargetCached(patternDef), $"Pattern {patternDef} was not cached on startup.");
+      Expect.AreEqual(patternDef.MaterialCount, RGBMaterialPool.GetAll(patternDef)?.Length);
+    }
   }
 
   [Test]

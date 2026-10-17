@@ -9,9 +9,9 @@ using UnityEngine.Assertions;
 using Vehicles.World;
 using Verse;
 using Priority = DevTools.Testing.Priority;
-using TickerTypeRollback = CoreLib.ScopedValueRollback<Verse.TickerType>;
+using TickerTypeRollback = CoreLib.ScopedRollback<Verse.TickerType>;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(

@@ -12,6 +12,7 @@ public static class MemoTrigger
   public const string AnimalsTied = "AllAnimalsTiedDown";
   public const string SlavesGathered = "AllSlavesGathered";
   public const string ExitMap = "ReadyToExitMap";
+  public const string ForceDepartNow = "ForceDepartNow";
 
   public const string RemovedPawn = "RemovedPawn";
 }

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsMoving</defName>
+        <label>Is Moving</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsDisabled</defName>
+        <label>Is Disabled</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+
+    <SmashTools.Animations.AnimationParameterDef>
+        <defName>VF_VehicleIsIgnitionOn</defName>
+        <label>Is Drafted</label>
+        <type>Bool</type>
+    </SmashTools.Animations.AnimationParameterDef>
+</Defs>

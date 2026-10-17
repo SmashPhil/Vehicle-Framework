@@ -3,7 +3,7 @@ using DevTools.Testing;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace CoreLib.Testing;
+namespace CoreLib.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestDescription(

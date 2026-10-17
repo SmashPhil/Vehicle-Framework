@@ -12,7 +12,7 @@ namespace Vehicles;
 [PublicAPI]
 public static class Ext_Thing
 {
-  // TODO 1.7 - Move to RoleHelper
+  // TODO 1.8 - Move to RoleHelper
   extension(Pawn pawn)
   {
     public bool ShouldAlwaysTransferToVehiclesCargo()
@@ -20,7 +20,7 @@ public static class Ext_Thing
       return pawn.IsAnimal || pawn.IsColonyMech;
     }
 
-    // TODO 1.7 - Remove
+    // TODO 1.8 - Remove
     // Placing pawns in cargo used to allow downed pawns, but this has resulted in unexpected behavior for players
     // expecting the pawn to be inside a passenger role. They should instead be placed in the least impactful role
     // possible, e.g. HandlingTypes None > Turret, with Movement being disallowed entirely.

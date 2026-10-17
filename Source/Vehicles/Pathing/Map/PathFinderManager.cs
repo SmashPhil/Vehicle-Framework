@@ -4,14 +4,14 @@ using System.Threading.Tasks;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 using SmashTools;
-using SmashTools.Burst;
+using SmashTools.PathFinder;
 using SmashTools.Performance;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine.Assertions;
 using Verse;
-using BurstPathFinder = SmashTools.Burst.PathFinder;
-using PathRequest = SmashTools.Burst.PathRequest;
+using BurstPathFinder = SmashTools.PathFinder.PathFinder;
+using PathRequest = SmashTools.PathFinder.PathRequest;
 
 namespace Vehicles;
 
@@ -52,7 +52,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
 
   internal PathGridScalar ScalarGrid { get; private set; }
 
-  // TODO 1.7 - FIX
+  // TODO
   // There is a circular reference between this, VehiclePathGrid, and VehicleReachability, so the order of
   // initialization is very touchy. Will need to refactor how path grid handles initial map generation.
   internal void Init()

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
@@ -7,7 +8,7 @@ using RimWorld.Planet;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.MapGeneration)]
@@ -66,9 +67,9 @@ internal sealed class Test_MapGeneration_Coast
     Assert.IsTrue(tile.Valid);
     using ScopedMethodHook smh = new(CoastOffset, postfix: CoastOffsetPostfixMethod,
       finalizer: CoastOffsetFinalizerMethod);
-    using ScopedValueRollback<float> setting = new(ref VehicleMod.settings.main.beachMultiplier);
-    using ScopedValueRollback<float> svrMin = new(ref expectedOffsetMin);
-    using ScopedValueRollback<float> svrMax = new(ref expectedOffsetMax);
+    using ScopedRollback<float> setting = new(ref VehicleMod.settings.main.beachMultiplier);
+    using ScopedRollback<float> svrMin = new(ref expectedOffsetMin);
+    using ScopedRollback<float> svrMax = new(ref expectedOffsetMax);
 
     // TileMutatorWorker_Coast::CoastOffset
     const float CoastOffsetMin = 0.1f;

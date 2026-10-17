@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using Verse;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 // TODO - Testing layered graphics, right now only parent and child primary graphics are checked.
 

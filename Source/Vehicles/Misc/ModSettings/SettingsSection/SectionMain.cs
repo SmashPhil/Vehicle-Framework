@@ -55,10 +55,6 @@ public class SectionMain : SettingsSection
   public bool ignoreBiomeCostOnRoads = true;
   public bool multiplePawnsPerJob = true;
 
-  internal string testedBurstOn;
-  public bool useBurstLib = true;
-  public bool testingBurst = false;
-
   // Graphics
   public bool passiveWaterWaves = true;
   public bool aerialVehicleEffects = true;
@@ -114,9 +110,6 @@ public class SectionMain : SettingsSection
     ignoreBiomeCostOnRoads = true;
     multiplePawnsPerJob = true;
 
-    useBurstLib = true;
-    testingBurst = false;
-
     meleeDamageMultiplier = 1;
     rangedDamageMultiplier = 1;
     explosiveDamageMultiplier = 1;
@@ -164,8 +157,6 @@ public class SectionMain : SettingsSection
 
     Scribe_Values.Look(ref ignoreBiomeCostOnRoads, nameof(ignoreBiomeCostOnRoads), defaultValue: true);
     Scribe_Values.Look(ref multiplePawnsPerJob, nameof(multiplePawnsPerJob), defaultValue: true);
-    Scribe_Values.Look(ref useBurstLib, nameof(useBurstLib), defaultValue: true);
-    Scribe_Values.Look(ref testingBurst, nameof(testingBurst), defaultValue: false);
 
     Scribe_Values.Look(ref meleeDamageMultiplier, nameof(meleeDamageMultiplier), defaultValue: 1);
     Scribe_Values.Look(ref rangedDamageMultiplier, nameof(rangedDamageMultiplier), defaultValue: 1);
@@ -249,12 +240,6 @@ public class SectionMain : SettingsSection
       listingStandard.CheckboxLabeled("VF_MultiplePawnsPerJob".Translate(),
         ref multiplePawnsPerJob, "VF_MultiplePawnsPerJobTooltip".Translate());
 
-      if (IsFeatureEnabled(BurstLib))
-      {
-        listingStandard.CheckboxLabeledWithMessage("VF_UseBurstLib".Translate(),
-          delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
-          ref useBurstLib, "VF_UseBurstLibTooltip".Translate());
-      }
       listingStandard.Gap(8);
 
       // Graphics

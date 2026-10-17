@@ -4,7 +4,7 @@
 	<!-- Simplified version of StatDefs that are vehicle specific -->
 	<Vehicles.VehicleStatDef>
 		<defName>MoveSpeed</defName>
-		<label>Move speed</label>
+		<label>Move Speed</label>
 		<description>Speed of movement in cells per second.</description>
 		<workerClass>Vehicles.VehicleStatWorker_MoveSpeed</workerClass>
 		<category>VehicleBasics</category>
@@ -39,26 +39,6 @@
 			</li>
 		</parts>
 	</Vehicles.VehicleStatDef>
-
-	<Vehicles.VehicleStatDef>
-		<defName>AccelerationRate</defName>
-		<label>Acceleration rate</label>
-		<description>The rate at which the care accelerates in cells per second.</description>
-		<category>VehicleBasics</category>
-		<defaultBaseValue>0</defaultBaseValue>
-		<minValue>0</minValue>
-		<hideAtValue>0</hideAtValue>
-		<toStringStyle>FloatTwo</toStringStyle>
-		<formatString>{0} c/s&#x00B2;</formatString>
-		<operationType>Average</operationType>
-		<displayPriorityInCategory>80</displayPriorityInCategory>
-
-		<modSettingsInfo>
-			<settingsType>SliderFloat</settingsType>
-			<roundDecimalPlaces>1</roundDecimalPlaces>
-			<increment>0.1</increment>
-		</modSettingsInfo>
-	</Vehicles.VehicleStatDef>
 	
 	<Vehicles.VehicleStatDef>
 		<defName>CargoCapacity</defName>
@@ -81,7 +61,7 @@
 	
 	<Vehicles.VehicleStatDef>
 		<defName>RepairRate</defName>
-		<label>Repair rate</label>
+		<label>Repair Rate</label>
 		<description>The amount of health that is repaired per second.</description>
 		<category>VehicleBasics</category>
 		<defaultBaseValue>1</defaultBaseValue>
@@ -129,7 +109,7 @@
 	
 	<Vehicles.VehicleStatDef>
 		<defName>BodyIntegrity</defName>
-		<label>Body integrity</label>
+		<label>Body Integrity</label>
 		<description>The average of all vehicle parts' health. If the integrity of the vehicle reaches 0, it will disintegrate into a fraction of its build cost.</description>
 		<workerClass>Vehicles.VehicleStatWorker_BodyIntegrity</workerClass>
 		<category>VehicleBasics</category>
@@ -147,7 +127,7 @@
 
   <Vehicles.VehicleStatDef>
     <defName>WorkToSabotage</defName>
-    <label>Work to sabotage</label>
+    <label>Work To Sabotage</label>
     <description>The base amount of work it takes to sabotage a vehicle.</description>
 
     <defaultBaseValue>50</defaultBaseValue>

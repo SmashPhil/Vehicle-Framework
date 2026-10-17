@@ -8,7 +8,7 @@ using Verse;
 using TestType = DevTools.Testing.TestType;
 
 // ReSharper disable AccessToDisposedClosure
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
 internal sealed class Test_DeferredGridGeneration

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using JetBrains.Annotations;
 using Verse;
 
 namespace Vehicles.Config;
 
+[PublicAPI]
 public sealed class FeatureFlags
 {
   public const string Raiders = "Raiders";
@@ -14,8 +16,6 @@ public sealed class FeatureFlags
   public const string Acceleration = "Acceleration";
 
   public const string PathFinderV2 = "PathFinderV2";
-  public const string BurstLib = "BurstLib";
-
   public const string BlitTexturePortraits = "BlitTexturePortraits";
 
   private readonly List<IFeatureFlag> features;
@@ -39,9 +39,8 @@ public sealed class FeatureFlags
       Feature.Create(Fishing, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
-      Feature.Create(BurstLib, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
       Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
-      Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release)
+      //Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release)
     ]);
     return flags;
   }

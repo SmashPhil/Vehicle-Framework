@@ -3,7 +3,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Priority = DevTools.Testing.Priority;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [Disabled] // TODO VF-391
 [TestFixture(TestType.Playing)]

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using CoreLib.PathFinding;
 using CoreLib.Performance;
-using JetBrains.Annotations;
 using RimWorld;
 using RimWorld.Planet;
 using SmashTools;
@@ -16,7 +15,6 @@ namespace Vehicles;
 /// <summary>
 /// MapComponent container for all pathing related subcomponents for vehicles
 /// </summary>
-[StaticConstructorOnStartup] // TODO 1.7 - Verify if SCOS is still needed
 public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingManager
 {
   private const GridSelection DefaultGrids = GridSelection.All;
@@ -24,17 +22,10 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
 
   private int ownerCleanIndex;
 
-  // TODO 1.7 - set access modifier to private
   public DedicatedThread dedicatedThread;
   public DeferredGridGeneration deferredGridGeneration;
 
   private int defGridCalculatedDayOfYear;
-
-  // TODO 1.6.2144 - VehicleMapFramework has a direct patch on this.
-#pragma warning disable CS0618
-  [UsedImplicitly]
-  private VehiclePathData[] vehicleData;
-#pragma warning restore CS0618
 
   public VehiclePathingSystem(Map map) : base(map)
   {
@@ -61,9 +52,6 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
 
   internal VehiclePathFinder VehiclePathFinder { get; private set; }
 
-  [Obsolete]
-  public bool DebouncingPathGridDirtying => PathGridDebouncer != null;
-
   /// <summary>
   /// <see cref="dedicatedThread"/> is initialized and running.
   /// </summary>
@@ -80,23 +68,20 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
   /// where it will never be executed.</remarks>
   public bool ThreadAvailable => ThreadAlive && !dedicatedThread.IsSuspended;
 
-  // TODO 1.7 - Switch to PathData
-#pragma warning disable CS0618
   /// <summary>
   /// Generates all path data if they haven't been already and fetches
   /// <see cref="PathData"/> for <paramref name="vehicleDef"/>.
   /// </summary>
-  public VehiclePathData this[VehicleDef vehicleDef]
+  public PathData this[VehicleDef vehicleDef]
   {
     get
     {
       if (vehicleDef == null)
         throw new ArgumentNullException(nameof(vehicleDef));
 
-      return (VehiclePathData)PathData[vehicleDef.DefIndex];
+      return PathData[vehicleDef.DefIndex];
     }
   }
-#pragma warning restore CS0618
 
   bool IPathingManager.IsPathDataSuspended(VehicleDef vehicleDef)
   {
@@ -276,10 +261,6 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
 
     PathData = new PathDataContainer(this, DefDatabase<VehicleDef>.AllDefsListForReading);
     PathData.GenerateAllPathData(new PathGridCalculator(), PathFinder);
-
-#pragma warning disable CS0618 // Type or member is obsolete
-    vehicleData = new VehiclePathData[PathData.AllPathData.Length];
-#pragma warning restore CS0618 // Type or member is obsolete
 
     DisableAllRegionUpdaters();
 
@@ -472,12 +453,6 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
     PathFinderManager?.Dispose();
   }
 
-  // TODO 1.6.2144 - Referenced by VehicleMapFramework
-  [Obsolete("This reference has been moved to PathData.", error: true)]
-  private void GeneratePathData()
-  {
-  }
-
   [Flags]
   public enum GridSelection
   {
@@ -501,63 +476,5 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
     Lazy,
     Deferred,
     Forced,
-  }
-
-  [PublicAPI, Obsolete("Use Vehicles.PathData instead.")]
-  public class VehiclePathData : PathData
-  {
-    internal VehiclePathData(IPathingManager manager, VehicleDef vehicleDef)
-      : base(manager, vehicleDef)
-    {
-    }
-  }
-
-  [Obsolete("No longer used, this was split out into RegionData, but access to region classes should go through VehiclePathingSystem.")]
-  public class VehicleReachabilitySettings
-  {
-    internal readonly VehicleRegionMaker regionMaker;
-    internal readonly VehicleRegionGridManager regionGridManager;
-    internal readonly VehicleRegionAndRoomUpdater regionAndRoomUpdater;
-    internal readonly VehicleRegionDirtyer regionDirtyer;
-    internal readonly VehicleReachability reachability;
-
-    private readonly VehicleGridManager[] gridManagers;
-
-    public VehicleReachabilitySettings(VehiclePathingSystem pathingSystem, VehicleDef vehicleDef)
-    {
-      regionMaker = new VehicleRegionMaker(pathingSystem, vehicleDef);
-      regionDirtyer = new VehicleRegionDirtyer(pathingSystem, vehicleDef, regionMaker);
-      regionAndRoomUpdater = new VehicleRegionAndRoomUpdater(pathingSystem, vehicleDef, regionDirtyer);
-      regionGridManager = new VehicleRegionGridManager(pathingSystem, vehicleDef, regionMaker, regionDirtyer);
-      reachability = new VehicleReachability(pathingSystem, vehicleDef, pathingSystem.PathFinder);
-
-      gridManagers = [regionMaker, regionDirtyer, regionAndRoomUpdater, regionGridManager, reachability];
-    }
-
-    internal VehicleReachabilitySettings(RegionData data)
-    {
-      regionMaker = data.regionMaker;
-      regionDirtyer = data.regionDirtyer;
-      regionAndRoomUpdater = data.regionAndRoomUpdater;
-      regionGridManager = data.regionGridManager;
-      reachability = data.reachability;
-      gridManagers = [regionMaker, regionDirtyer, regionAndRoomUpdater, regionGridManager, reachability];
-    }
-
-    public void PostInit()
-    {
-      foreach (var gridManager in gridManagers)
-      {
-        gridManager.PostInit();
-      }
-    }
-
-    public void ChangeOwner(VehicleDef vehicleDef)
-    {
-      foreach (var gridManager in gridManagers)
-      {
-        gridManager.ChangeOwner(vehicleDef);
-      }
-    }
   }
 }

@@ -38,16 +38,16 @@ public class UpgradeNode
 
 	public List<string> replaces;
 
-	// TODO - Remove in 1.7 in favor of disable conditions
+	// TODO - Remove in 1.8 in favor of disable conditions
 	public string disableIfUpgradeNodeEnabled;
 
-	// TODO - Remove in 1.7 in favor of disable conditions
+	// TODO - Remove in 1.8 in favor of disable conditions
 	public List<string> disableIfUpgradeNodesEnabled;
 
 	public List<ResearchProjectDef> researchPrerequisites = [];
 	public List<string> prerequisiteNodes = [];
 
-	[LoadAlias("costList")] // TODO 1.7 - switch to costList
+	[LoadAlias("costList")] // TODO 1.8 - switch to costList
 	public List<ThingDefCountClass> ingredients = [];
 
 	public float refundFraction = 0.5f; //Default in vanilla deconstructing is 50%

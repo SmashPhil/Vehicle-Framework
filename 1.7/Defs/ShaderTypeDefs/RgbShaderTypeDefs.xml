@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+	<ShaderTypeDef>
+		<defName>CutoutComplexRGB</defName>
+		<shaderPath>ShaderRGB</shaderPath>
+	</ShaderTypeDef>
+	
+	<ShaderTypeDef>
+		<defName>CutoutComplexPattern</defName>
+		<shaderPath>ShaderRGBPattern</shaderPath>
+	</ShaderTypeDef>
+	
+	<ShaderTypeDef>
+		<defName>CutoutComplexSkin</defName>
+		<shaderPath>ShaderRGBSkin</shaderPath>
+	</ShaderTypeDef>
+</Defs>

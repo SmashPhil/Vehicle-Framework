@@ -1,77 +1,70 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<Authors>Smash Phil</Authors>
-		<FileVersion>1.6.0</FileVersion>
-		<AssemblyVersion>1.6.0</AssemblyVersion>
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <RootNamespace>Vehicles</RootNamespace>
+    <AssemblyName>Test_Vehicles</AssemblyName>
+    <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
+  </PropertyGroup>
 
-		<ProjectGuid>{EA833AE8-18BE-4802-A7E9-ABBB48DEA7A3}</ProjectGuid>
-		<RootNamespace>Vehicles</RootNamespace>
-		<AssemblyName>Test_Vehicles</AssemblyName>
-		<LangVersion>preview</LangVersion>
-		<ModDir>..\..\</ModDir>
-		<OutDir>$(ModDir)\1.6\Assemblies\</OutDir>
-	</PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>false</Optimize>
+    <DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>false</Optimize>
-		<DefineConstants>TRACE;DEBUG;UNITY_ASSERTIONS;</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unstable|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;UNSTABLE;UNITY_ASSERTIONS</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS</DefineConstants>
-	</PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
+  </PropertyGroup>
 
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'ReleaseTesting|AnyCPU'">
-		<DebugSymbols>true</DebugSymbols>
-		<Optimize>true</Optimize>
-		<DefineConstants>TRACE;RELEASE;UNITY_ASSERTIONS;DEV_TOOLS;</DefineConstants>
-	</PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony.Ref" Version="2.4.3" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
 
-	<ItemGroup Condition="'$(UseLocalBurstLib)' != 'true'">
-		<PackageReference Include="SmashTools.Burst" Version="1.2.4" GeneratePathProperty="true" />
-	</ItemGroup>
-	<ItemGroup Condition="'$(UseLocalBurstLib)' == 'true'">
-		<Reference Include="SmashTools.Burst">
-			<HintPath>$(OutDir)\SmashToolsBurst.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
-	</ItemGroup>
+    <Reference Include="DevTools">
+      <HintPath>$(OutDir)\DevTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-	<ItemGroup>
-		<PackageReference Include="Krafs.Rimworld.Ref" Version="1.6.*" />
-		<PackageReference Include="Lib.Harmony.Ref" Version="2.4.2" />
-		<PackageReference Include="PolySharp" Version="1.*" />
+    <Reference Include="CoreLib">
+      <HintPath>$(OutDir)\CoreLib.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-		<Reference Include="DevTools">
-			<HintPath>$(OutDir)\DevTools.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
+    <Reference Include="SmashTools">
+      <HintPath>$(OutDir)\SmashTools.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
-		<Reference Include="CoreLib">
-			<HintPath>$(OutDir)\CoreLib.dll</HintPath>
+		<Reference Include="SmashTools.PathFinder">
+			<HintPath>$(OutDir)\SmashTools.PathFinder.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 
-		<Reference Include="SmashTools">
-			<HintPath>$(OutDir)\SmashTools.dll</HintPath>
-			<Private>False</Private>
-		</Reference>
+    <Reference Include="AnimationKit">
+      <HintPath>$(OutDir)\AnimationKit.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
 
 		<Reference Include="Vehicles">
 			<HintPath>$(OutDir)\Vehicles.dll</HintPath>
 			<Private>False</Private>
 		</Reference>
 
-    <ProjectReference Include="$(ModDir)\SmashTools\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-	</ItemGroup>
+    <ProjectReference Include="$(ModDir)\DevTools\DevTools.Analyzer\DevTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
 </Project>

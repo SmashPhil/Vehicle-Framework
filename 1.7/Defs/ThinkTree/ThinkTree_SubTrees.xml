@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<ThinkTreeDef>
+		<defName>Vehicle_DeSpawned</defName>
+		<thinkRoot Class="ThinkNode_ConditionalSpawned">
+      <invert>true</invert>
+      <subNodes>
+        <li Class="ThinkNode_ConditionalSpawnedOrAnyParentSpawned">
+          <subNodes>
+            <li Class="JobGiver_Carried" />
+          </subNodes>
+        </li>
+        <li Class= "Vehicles.JobGiver_AwaitOrdersDeSpawned"/>
+      </subNodes>
+    </thinkRoot>
+	</ThinkTreeDef>
+</Defs>

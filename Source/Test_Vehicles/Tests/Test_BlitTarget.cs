@@ -2,7 +2,7 @@
 using UnityEngine.Assertions;
 using Vehicles.Rendering;
 
-namespace Vehicles.Testing;
+namespace Vehicles.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.ParallelRenderer)]

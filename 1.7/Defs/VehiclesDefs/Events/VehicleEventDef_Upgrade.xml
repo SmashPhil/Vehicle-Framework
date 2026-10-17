@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Defs>
+	<Vehicles.VehicleEventDef>
+		<defName>UpgradeEnqueued</defName>
+	</Vehicles.VehicleEventDef>
+	
+	<Vehicles.VehicleEventDef>
+		<defName>UpgradeCompleted</defName>
+	</Vehicles.VehicleEventDef>
+
+  <Vehicles.VehicleEventDef>
+		<defName>UpgradeCanceled</defName>
+	</Vehicles.VehicleEventDef>
+
+	<Vehicles.VehicleEventDef>
+		<defName>UpgradeRefundEnqueued</defName>
+	</Vehicles.VehicleEventDef>
+
+	<Vehicles.VehicleEventDef>
+		<defName>UpgradeRefundCompleted</defName>
+	</Vehicles.VehicleEventDef>
+</Defs>

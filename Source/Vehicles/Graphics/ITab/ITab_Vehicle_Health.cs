@@ -45,7 +45,6 @@ public class ITab_Vehicle_Health : ITab
 
 	public enum VehicleHealthTab
 	{
-		Overview,
-		JobSettings
+		Overview
 	}
 }

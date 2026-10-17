@@ -3,7 +3,7 @@ using System.Linq;
 using DevTools.Testing;
 using Verse;
 
-namespace SmashTools.Testing;
+namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Utils)]
