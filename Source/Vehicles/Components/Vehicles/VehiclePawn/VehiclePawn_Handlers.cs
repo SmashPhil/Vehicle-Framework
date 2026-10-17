@@ -426,6 +426,7 @@ public partial class VehiclePawn
 
     if (result)
     {
+      while (cargoToLoad?.RemoveThing(pawn) == true);
       EventRegistry[VehicleEventDefOf.PawnEntered].ExecuteEvents();
     }
 
