@@ -12,7 +12,8 @@ namespace Vehicles;
 
 public partial class VehiclePawn : Pawn,
   IInspectable, IThingHolderTickable, IAnimationTarget,
-  IEventManager<VehicleEventDef>, IMaterialCacheTarget
+  IEventManager<VehicleEventDef>, IMaterialCacheTarget,
+  ISearchableContents
 {
   private static readonly AccessTools.FieldRef<Pawn_DraftController, bool> DraftedIntFieldRef =
     AccessTools.FieldRefAccess<Pawn_DraftController, bool>(
@@ -343,6 +344,14 @@ public partial class VehiclePawn : Pawn,
     {
       // Pawn::SpawnSetup checks game over condition, but we need to redo this after registering the position.
       UnityThread.ExecuteOnMainThread(Find.GameEnder.CheckOrUpdateGameOver);
+    }
+  }
+
+  public new ThingOwner SearchableContents
+  {
+    get
+    {
+      return this.inventory.innerContainer;
     }
   }
 
