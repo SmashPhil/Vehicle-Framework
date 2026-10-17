@@ -474,13 +474,13 @@ public static class CaravanHelper
 			Trace.Fail("Unable to swap to VehicleCaravan. Caravan has no vehicles in pawn list.");
 			return null;
 		}
-		VehiclePawn vehicle = null;
+		List<VehiclePawn> vehicles = [];
 		List<Pawn> pawns = [];
 		foreach (Pawn pawn in caravan.pawns.InnerListForReading)
 		{
-			if (pawn is VehiclePawn caravanVehicle)
+			if (pawn is VehiclePawn vehicle)
 			{
-				vehicle = caravanVehicle;
+        vehicles.Add(vehicle);
 			}
 			else
 			{
@@ -490,8 +490,8 @@ public static class CaravanHelper
 		PlanetTile tile = caravan.Tile;
 		caravan.RemoveAllPawns();
 		caravan.Destroy();
-		RoleHelper.Distribute([vehicle], pawns);
-		VehicleCaravan vehicleCaravan = MakeVehicleCaravan([vehicle, .. pawns], Faction.OfPlayer, tile, true);
+		RoleHelper.Distribute(vehicles, pawns);
+		VehicleCaravan vehicleCaravan = MakeVehicleCaravan([.. vehicles, .. pawns], Faction.OfPlayer, tile, true);
 		return vehicleCaravan;
 
 		static bool IsVehicle(Pawn pawn)
