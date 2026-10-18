@@ -235,6 +235,28 @@ public partial class VehiclePawn
     }
   }
 
+  // TODO 1.8 - Remove
+  [Obsolete("Use overload with pawn for permissions check.", error: true)]
+  public VehicleRoleHandler GetNextAvailableHandler(HandlingType handlingTypeFlag)
+  {
+    foreach (VehicleRoleHandler handler in handlers)
+    {
+      // None has an explicit check for no handling types, otherwise HasFlag would
+      // always be true. Use GetAnyAvailableHandler if HandlingType does not matter.
+      if (handlingTypeFlag == HandlingType.None)
+      {
+        if (handler.role.HandlingTypes == HandlingType.None ||
+            handler.AreSlotsAvailableAndReservable)
+          return handler;
+        continue;
+      }
+      if ((handler.role.HandlingTypes & handlingTypeFlag) == handlingTypeFlag &&
+          handler.AreSlotsAvailableAndReservable)
+        return handler;
+    }
+    return null;
+  }
+
   [Pure]
   public VehicleRoleHandler GetHandler(string roleKey)
   {
