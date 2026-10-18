@@ -4,8 +4,6 @@ using UnityEngine;
 
 namespace CoreLib;
 
-// TODO 1.7 - Remove. Since burst is no longer supported, there's no need to build and import separately
-// into Unity which required a bridge class for logging.
 [PublicAPI]
 public static class Logger
 {

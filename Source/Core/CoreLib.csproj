@@ -7,11 +7,9 @@
     <RootNamespace>CoreLib</RootNamespace>
     <AssemblyName>CoreLib</AssemblyName>
     <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
-	</PropertyGroup>
 
-  <PropertyGroup>
     <UseRimWorldRefs>false</UseRimWorldRefs>
-  </PropertyGroup>
+	</PropertyGroup>
 
 	<!-- AssemblyInfo -->
 	<ItemGroup>

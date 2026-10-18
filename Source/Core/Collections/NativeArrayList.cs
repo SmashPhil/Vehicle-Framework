@@ -140,7 +140,6 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     return handle;
   }
 
-  [BurstDiscard]
   private void SetPtrToBuffer(int index, T* ptr)
   {
     m_Buffer[index] = new BufferItem
