@@ -6,7 +6,7 @@ using Verse;
 namespace Vehicles.Tests;
 
 [TestFixture(TestType.Playing)]
-internal sealed class Test_PathGridPawn([DefParameters] VehicleDef vehicleDef)
+internal sealed class Test_PathGridPawn([DefsSource] VehicleDef vehicleDef)
   : Test_MapTest
 {
   private VehicleGroup group;
