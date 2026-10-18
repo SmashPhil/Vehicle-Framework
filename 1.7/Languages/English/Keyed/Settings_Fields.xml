@@ -34,7 +34,7 @@
   <VF_CollisionVehicleMultiplierTooltip>Multiplier for damage applied to the vehicle when running over a pawn.</VF_CollisionVehicleMultiplierTooltip>
   
   <VF_ManhunterTargetsVehicle>Manhunter Targets</VF_ManhunterTargetsVehicle>
-  <VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle.</VF_ManhunterTargetsVehicleTooltip>
+  <VF_ManhunterTargetsVehicleTooltip>Manhunter animals will target this vehicle if any colonist is inside. If the vehicle is empty, it will not be targeted.</VF_ManhunterTargetsVehicleTooltip>
   <VF_EMPStuns>EMP Stuns</VF_EMPStuns>
   <VF_EMPStunsTooltip>EMP weapons will temporarily disable this vehicle.</VF_EMPStunsTooltip>
   <VF_CanAdaptToEMP>Can Adapt</VF_CanAdaptToEMP>
