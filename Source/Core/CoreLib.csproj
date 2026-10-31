@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-	<PropertyGroup>
-		<Authors>Smash Phil</Authors>
-		<Description>Developer tool SDK for RimWorld mods. Primarily used by Vehicle Framework.</Description>
-		<Product>CoreLib</Product>
+  <PropertyGroup>
+    <Authors>Smash Phil</Authors>
+    <Description>Developer tool SDK for RimWorld mods. Primarily used by Vehicle Framework.</Description>
+    <Product>CoreLib</Product>
     <RootNamespace>CoreLib</RootNamespace>
     <AssemblyName>CoreLib</AssemblyName>
     <OutDir>$(ModDir)\1.7\Assemblies\</OutDir>
 
-    <UseRimWorldRefs>false</UseRimWorldRefs>
-	</PropertyGroup>
+    <!-- CI build relies on krafs -->
+    <UseKrafsPackageRef>false</UseKrafsPackageRef>
+    <UseRimWorldRefs>$(UseKrafsPackageRef)</UseRimWorldRefs>
+  </PropertyGroup>
 
-	<!-- AssemblyInfo -->
-	<ItemGroup>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>SmashTools</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>Test_SmashTools</_Parameter1>
-		</AssemblyAttribute>
-		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
-			<_Parameter1>Test_CoreLib</_Parameter1>
-		</AssemblyAttribute>
-	</ItemGroup>
-
+  <!-- AssemblyInfo -->
   <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>SmashTools</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Test_SmashTools</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>Test_CoreLib</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true'">
     <Reference Include="System">
       <HintPath>$(RefDir)\System.dll</HintPath>
       <Private>False</Private>
@@ -43,12 +45,12 @@
     </Reference>
   </ItemGroup>
 
-	<!-- Build Events -->
-	<Target Name="PostClean" AfterTargets="Clean">
-		<RemoveDir Directories="$(OutDir)" />
-	</Target>
+  <!-- Build Events -->
+  <Target Name="PostClean" AfterTargets="Clean">
+    <RemoveDir Directories="$(OutDir)" />
+  </Target>
 
-	<ItemGroup>
-		<Folder Include="Algorithms\" />
-	</ItemGroup>
+  <ItemGroup>
+    <Folder Include="Algorithms\" />
+  </ItemGroup>
 </Project>
