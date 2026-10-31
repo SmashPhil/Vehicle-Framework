@@ -211,11 +211,14 @@ public class VehicleGroup : IDisposable
     for (int i = 0; i < settings.drivers + settings.passengers; i++)
     {
       PawnGenerationRequest request = new(PawnKindDefOf.Colonist,
-        settings.faction, fixedBiologicalAge: 30, forceNoBackstory: true)
+        settings.faction,
+        fixedBiologicalAge: 30,
+        forceNoBackstory: true)
       {
         ForceNoIdeo = settings.forceNoIdeology
       };
       Pawn colonist = PawnGenerator.GeneratePawn(request);
+      FixRimWorldIdeoRegression(colonist, request.ForceNoIdeo);
       Assert.IsNotNull(colonist);
       Assert.AreEqual(colonist.Faction, settings.faction);
       if (settings.destroyInventory)
@@ -235,6 +238,7 @@ public class VehicleGroup : IDisposable
         ForceNoIdeo = settings.forceNoIdeology
       };
       Pawn prisoner = PawnGenerator.GeneratePawn(request);
+      FixRimWorldIdeoRegression(prisoner, request.ForceNoIdeo);
       prisoner.guest?.CapturedBy(Faction.OfPlayer);
       group.pawns.Add(prisoner);
     }
@@ -269,6 +273,16 @@ public class VehicleGroup : IDisposable
       group.pawns.Add(subhuman);
     }
     return group;
+
+    // BUG: RimWorld doesn't actually force no ideo, so we need to manually set it null. Seems
+    // like this was a regression in 2021 and unlikely to be fixed soon.
+    static void FixRimWorldIdeoRegression(Pawn pawn, bool forceNoIdeo)
+    {
+      if (forceNoIdeo)
+      {
+        pawn.ideo?.SetIdeo(null);
+      }
+    }
   }
 
   public class MockSettings

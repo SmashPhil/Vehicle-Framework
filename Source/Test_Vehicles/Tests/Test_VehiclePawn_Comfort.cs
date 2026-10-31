@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using DevTools.Testing;
-using HarmonyLib;
 using RimWorld;
 using RimWorld.Planet;
 using UnityEngine.Assertions;
@@ -19,8 +18,6 @@ namespace Vehicles.Tests;
 internal sealed class Test_VehiclePawn_Comfort
 {
 	private const int TickDelta = 15;
-
-	private static readonly FastInvokeHandler TickInterval = MethodInvoker.GetHandler(AccessTools.Method(typeof(Pawn), "TickInterval"));
 
 	private static bool InPassengerRole(Pawn pawn)
 	{
