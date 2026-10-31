@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using CoreLib.Performance;
 using DevTools.Testing;
+using UnityEngine;
 
 namespace CoreLib.Tests;
 
@@ -26,20 +27,19 @@ internal class Test_Debouncer
 		debouncer.Invoke();
 		Expect.AreEqual(obj.InvocationCount, 0);
 		yield return null;
-		Expect.IsTrue(debouncer.TimeRemaining < DebounceDelaySeconds);
+		Expect.LessThan(debouncer.TimeRemaining, DebounceDelaySeconds);
 	}
 
 	[Test]
 	[TestDescription("The scheduled action fires exactly once when the debouncer expires.")]
 	private IEnumerator InvokeOnExpiration()
 	{
-		// Frame takes ~16.7ms at 60fps so setting the debouncer to a low delay should guarantee execution.
-		const int SingleFrame = 1; // ms
+		const int ExpiryTime = 1; // ms
 
 		TestObject obj = new();
-		Debouncer debouncer = new(obj.Action, SingleFrame);
+		Debouncer debouncer = new(obj.Action, ExpiryTime);
 		debouncer.Invoke();
-		yield return null;
+		yield return new WaitForSecondsRealtime(0.02f);
 		Expect.AreApproximatelyEqual(debouncer.TimeRemaining, 0);
 		Expect.AreEqual(obj.InvocationCount, 1);
 	}
@@ -48,20 +48,19 @@ internal class Test_Debouncer
 	[TestDescription("After the first action invokes, a subsequent Invoke() resets and reschedules the debouncer.")]
 	private IEnumerator InvokeAfterExpiration()
 	{
-		// Frame takes ~16.7ms at 60fps so setting the debouncer to a low delay should guarantee execution.
-		const int SingleFrame = 1; // ms
+		const int ExpiryTime = 1; // ms
 
 		TestObject obj = new();
-		Debouncer debouncer = new(obj.Action, SingleFrame);
+		Debouncer debouncer = new(obj.Action, ExpiryTime);
 		debouncer.Invoke();
-		yield return null;
-		Expect.AreApproximatelyEqual(debouncer.TimeRemaining, 0);
+    yield return new WaitForSecondsRealtime(0.02f);
+    Expect.AreApproximatelyEqual(debouncer.TimeRemaining, 0);
 		Expect.AreEqual(obj.InvocationCount, 1);
 		debouncer.Invoke();
-		Expect.AreApproximatelyEqual(debouncer.TimeRemaining, SingleFrame / 1000f);
+		Expect.AreApproximatelyEqual(debouncer.TimeRemaining, ExpiryTime / 1000f);
 		Expect.AreEqual(obj.InvocationCount, 1);
-		yield return null;
-		Expect.AreApproximatelyEqual(debouncer.TimeRemaining, 0);
+    yield return new WaitForSecondsRealtime(0.02f);
+    Expect.AreApproximatelyEqual(debouncer.TimeRemaining, 0);
 		Expect.AreEqual(obj.InvocationCount, 2);
 	}
 

@@ -46,15 +46,15 @@ public sealed class UnityThread : MonoBehaviour
     Instance = InjectToScene();
   }
 
-  private static UnityThread Instance { get; }
+  internal static UnityThread Instance { get; }
 
-  public static bool IsInMainThread => mainThreadId == Thread.CurrentThread.ManagedThreadId;
+  public static bool IsInMainThread => mainThreadId == Environment.CurrentManagedThreadId;
 
   internal static int ActionQueueCount => Instance ? Instance.actionQueue.Count : 0;
 
   private void Awake()
   {
-    mainThreadId = Thread.CurrentThread.ManagedThreadId;
+    mainThreadId = Environment.CurrentManagedThreadId;
   }
 
   private void Update()
