@@ -534,8 +534,7 @@ public class CompVehicleLauncher : VehicleComp, ILauncher, ITargeterSource<Globa
       }
       catch (Exception ex)
       {
-        SmashLog.Error(
-          $"{entry} is not a valid <struct>DeploymentTimer</struct> format. Exception: {ex}");
+        Log.Error($"{entry} is not a valid DeploymentTimer format. Exception: {ex}");
         return Default;
       }
     }

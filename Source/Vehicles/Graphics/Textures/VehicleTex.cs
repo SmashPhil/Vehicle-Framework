@@ -190,8 +190,8 @@ public static class VehicleTex
 				}
 				else
 				{
-					SmashLog.Error(
-						$"Unable to create GraphicData of type <type>{vehicleDef.graphicData?.GetType().ToStringSafe() ?? "Null"} for {vehicleDef.defName}.\n{tasks}");
+					Log.Error(
+						$"Unable to create GraphicData of type {vehicleDef.graphicData?.GetType().ToStringSafe() ?? "Null"} for {vehicleDef.defName}.\n{tasks}");
 				}
 			}
 			catch (Exception ex)

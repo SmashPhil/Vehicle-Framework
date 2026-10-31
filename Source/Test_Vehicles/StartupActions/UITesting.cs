@@ -40,8 +40,7 @@ namespace Vehicles
           p is VehiclePawn vehicle && vehicle.CompUpgradeTree != null);
         if (map is null || vehicle is null)
         {
-          SmashLog.Error(
-            $"Unable to execute startup action <method>TestFixtureUpgradeMenu</method> post load.");
+          Log.Error("Unable to execute startup action TestFixtureUpgradeMenu post load.");
           return;
         }
         CameraJumper.TryJump(vehicle);
@@ -57,8 +56,8 @@ namespace Vehicles
         Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
         if (map is null)
         {
-          SmashLog.Error(
-            $"Unable to execute startup action <method>{nameof(StartupAction_ColorDialog)}</method> post load. No map.");
+          Log.Error(
+            $"Unable to execute startup action {nameof(StartupAction_ColorDialog)} post load. No map.");
           return;
         }
         VehiclePawn vehicle = (VehiclePawn)map.mapPawns.AllPawns.FirstOrDefault(p =>
@@ -70,8 +69,8 @@ namespace Vehicles
             vehicleDef.graphicData.shaderType.Shader.SupportsRGBMaskTex()).ToList();
           if (vehicleDefs.NullOrEmpty())
           {
-            SmashLog.Error(
-              $"Unable to execute startup action <method>{nameof(StartupAction_ColorDialog)}</method>. No vehicle defs to use as test case.");
+            Log.Error(
+              $"Unable to execute startup action {nameof(StartupAction_ColorDialog)}. No vehicle defs to use as test case.");
             return;
           }
           VehicleDef vehicleDef = vehicleDefs.FirstOrDefault();
@@ -123,7 +122,7 @@ namespace Vehicles
         Map map = Find.CurrentMap ?? Find.Maps.FirstOrDefault();
         if (map is null)
         {
-          SmashLog.Error(
+          Log.Error(
             $"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No map.");
           return;
         }
@@ -139,8 +138,9 @@ namespace Vehicles
              .FirstOrDefault(); // Use any vehicle just to get the animator open
           if (vehicleDef is null)
           {
-            SmashLog.Error(
-              $"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. No vehicle defs to use as test case.");
+            Log.Error(
+              $"Unable to execute startup action {nameof(StartupAction_AnimationEditor)}. " +
+              $"No vehicle defs to use as test case.");
             return;
           }
           vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, Faction.OfPlayer);
@@ -169,8 +169,8 @@ namespace Vehicles
       }
       else
       {
-        SmashLog.Error(
-          $"Tried to startup action <type>{nameof(StartupAction_VehicleAreaManager)}</type> with null current map.");
+        Log.Error(
+          $"Tried to startup action {nameof(StartupAction_VehicleAreaManager)} with null current map.");
       }
     }
   }

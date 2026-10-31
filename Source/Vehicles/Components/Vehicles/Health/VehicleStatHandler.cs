@@ -413,8 +413,8 @@ public class VehicleStatHandler : IExposable, ITweakFields
 			{
 				if (!componentLocations.TryGetValue(cell, out var list))
 				{
-					SmashLog.Error(
-						$"Unable to add to internal component list for <field>{cell}</field>. Component = {component.props.key}");
+					Log.Error(
+						$"Unable to add to internal component list for {cell}. Component = {component.props.key}");
 					continue;
 				}
 

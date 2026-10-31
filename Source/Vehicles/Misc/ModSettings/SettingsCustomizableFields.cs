@@ -131,7 +131,7 @@ public static class SettingsCustomizableFields
           }
           else
           {
-            SmashLog.Error(
+            Log.Error(
               $"Unable to generate customizable setting {field.Name} for {def.defName}. Fields of type " +
               $"Dictionary<T> must implement ResolvePostToSettings method to be manually resolved.");
           }

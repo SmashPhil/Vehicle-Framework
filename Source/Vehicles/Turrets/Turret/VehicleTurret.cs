@@ -365,8 +365,8 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 		{
 			if (currentFireMode < 0 || currentFireMode >= def.fireModes.Count)
 			{
-				SmashLog.ErrorOnce(
-					$"Unable to retrieve fire mode at index {currentFireMode}. Outside of bounds for <field>fireModes</field> defined in <field>def</field>. Defaulting to first fireMode.",
+				Log.ErrorOnce(
+					$"Unable to retrieve fire mode at index {currentFireMode}. Outside of bounds for fireModes. Defaulting to first.",
 					GetHashCode() ^ currentFireMode);
 				return def.fireModes.FirstOrDefault();
 			}

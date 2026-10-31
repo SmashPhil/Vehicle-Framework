@@ -38,27 +38,6 @@ public class ProjectSetup : Mod
     GameEvent.OnMainMenu += StartupTest.ExecuteOnStartupTesting;
 #endif
 
-    // Logging
-#if DEBUG
-    // Just removing brackets from stacktrace for clarity. Let's not force other modders to deal
-    // with the performance hit of constant regex filtering in release builds.
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(Log), nameof(Log.Message),
-        parameters: [typeof(string)]),
-      transpiler: new HarmonyMethod(typeof(SmashLog),
-        nameof(SmashLog.RemoveRichTextFromDebugLogTranspiler)));
-    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Log), nameof(Log.Warning)),
-      transpiler: new HarmonyMethod(typeof(SmashLog),
-        nameof(SmashLog.RemoveRichTextFromDebugLogWarningTranspiler)));
-    HarmonyPatcher.Patch(original: AccessTools.Method(typeof(Log), nameof(Log.Error)),
-      transpiler: new HarmonyMethod(typeof(SmashLog),
-        nameof(SmashLog.RemoveRichTextFromDebugLogErrorTranspiler)));
-    HarmonyPatcher.Patch(
-      original: AccessTools.Method(typeof(EditWindow_Log), "DoMessageDetails"),
-      transpiler: new HarmonyMethod(typeof(SmashLog),
-        nameof(SmashLog.RemoveRichTextMessageDetailsTranspiler)));
-#endif
-
     XmlParseHelper.RegisterParseTypes();
     HarmonyPatcher.Run(PatchSequence.Mod);
     HarmonyPatcher.Run(PatchSequence.Async);
@@ -77,8 +56,7 @@ public class ProjectSetup : Mod
       }
       catch (Exception ex)
       {
-        SmashLog.Error(
-          $"Exception thrown running constructor of type <type>{type}</type>. Ex=\"{ex}\"");
+        Log.Error($"Exception thrown running constructor of type {type}. Ex=\"{ex}\"");
       }
     }
   }

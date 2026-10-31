@@ -247,8 +247,8 @@ public static class VehicleGraphics
     }
     catch (Exception ex)
     {
-      SmashLog.Error(
-        $"Exception thrown while trying to draw Graphics <type>VehicleDef</type>=\"{vehicleDef?.defName ?? "Null"}\" Exception={ex}");
+      Log.Error(
+        $"Exception thrown while trying to draw Graphics for \"{vehicleDef?.defName ?? "Null"}\" Exception={ex}");
     }
     finally
     {

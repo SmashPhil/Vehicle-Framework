@@ -99,8 +99,8 @@ public static class AltitudeMeter
     }
     catch (Exception ex)
     {
-      SmashLog.Error(
-        $"Exception thrown while trying to draw <type>AltitudeMeter</type> for {aerialVehicle?.Label ?? "NULL"}. Exception=\"{ex}\"");
+      Log.Error(
+        $"Exception thrown while trying to draw AltitudeMeter for {aerialVehicle?.Label ?? "NULL"}. Exception=\"{ex}\"");
     }
   }
 }
