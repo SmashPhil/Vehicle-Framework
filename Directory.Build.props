@@ -23,7 +23,7 @@
     <DebugSymbols>true</DebugSymbols>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseKrafsPackageRef>false</UseKrafsPackageRef>
+    <UseKrafsPackageRef>true</UseKrafsPackageRef>
 
     <ModDir>$(MSBuildThisFileDirectory)</ModDir>
     <RefDir>$(ModDir)..\..\</RefDir>
@@ -51,7 +51,7 @@
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseKrafsPackageRef)' == 'true' AND '$(UseRimWorldRefs)' != 'false'">
-    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.*" />
+    <PackageReference Include="Krafs.Rimworld.Ref" Version="1.7.*-*" />
   </ItemGroup>
   <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true' AND '$(UseRimWorldRefs)' != 'false'">
     <Reference Include="System">

@@ -27,7 +27,7 @@
     <ProjectReference Include="$(ModDir)\Source\SmashTools.Analyzer\SmashTools.Analyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
-  <ItemGroup>
+  <ItemGroup Condition="'$(UseKrafsPackageRef)' != 'true'">
     <Reference Include="Assembly-CSharp">
       <HintPath>$(RefDir)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
