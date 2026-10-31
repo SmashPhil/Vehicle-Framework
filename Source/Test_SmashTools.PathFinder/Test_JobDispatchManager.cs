@@ -1,4 +1,5 @@
 using System.Collections;
+using CoreLib;
 using CoreLib.Jobs;
 using DevTools.Testing;
 using UnityEngine;
@@ -28,7 +29,7 @@ internal class Test_JobDispatchManager
   }
 
   [Test]
-  public void OnDestroyRegistered()
+  public void CompleteAllOnDestroy()
   {
     GameObject gameObject = new(ObjName);
     MockDispatcher mock = new();
@@ -37,7 +38,7 @@ internal class Test_JobDispatchManager
       gameObject.AddComponent<JobDispatchManager>();
       JobDispatchManager.Register(mock);
       Object.DestroyImmediate(gameObject);
-      Assert.IsTrue(mock.onDestroyCalled);
+      Assert.IsTrue(mock.completedAll);
     }
     finally
     {
@@ -49,7 +50,7 @@ internal class Test_JobDispatchManager
   }
 
   [Test]
-  public void OnDestroyDeregistered()
+  public void CompleteAllOnDeregister()
   {
     GameObject gameObject = new(ObjName);
     MockDispatcher mock = new();
@@ -60,7 +61,7 @@ internal class Test_JobDispatchManager
       JobDispatchManager.Deregister(mock);
 
       Object.DestroyImmediate(gameObject);
-      Assert.IsFalse(mock.onDestroyCalled);
+      Assert.IsTrue(mock.completedAll);
     }
     finally
     {
@@ -97,16 +98,16 @@ internal class Test_JobDispatchManager
   private class MockDispatcher : IJobDispatcher
   {
     public int lateUpdateCalls;
-    public bool onDestroyCalled;
+    public bool completedAll;
 
     public void LateUpdate()
     {
       lateUpdateCalls++;
     }
 
-    public void OnDestroy()
+    public void CompleteAll()
     {
-      onDestroyCalled = true;
+      completedAll = true;
     }
   }
 }

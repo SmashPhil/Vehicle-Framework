@@ -1,6 +1,5 @@
 ﻿using CoreLib.Jobs;
 using CoreLib.Performance;
-using UnityEngine;
 using Verse;
 
 namespace SmashTools.Jobs;
@@ -10,28 +9,16 @@ internal static class JobDispatch
 {
   static JobDispatch()
   {
-    GameEvent.OnNewGame += CreateDispatchManager;
-    GameEvent.OnLoadGame += CreateDispatchManager;
-    GameEvent.OnGameDisposing += DestroyDispatchManager;
+    GameEvent.OnNewGame += CompleteAllJobs;
+    GameEvent.OnLoadGame += CompleteAllJobs;
+    GameEvent.OnGameDisposing += CompleteAllJobs;
   }
 
-  private static void CreateDispatchManager()
-  {
-    LongEventHandler.ExecuteWhenFinished(static delegate
-    {
-      if (!JobDispatchManager.Exists)
-      {
-        GameObject go = new("DispatchManager");
-        go.AddComponent<JobDispatchManager>();
-      }
-    });
-  }
-
-  private static void DestroyDispatchManager()
+  private static void CompleteAllJobs()
   {
     if (JobDispatchManager.Exists)
     {
-      UnityThread.ExecuteOnMainThreadAndWait(JobDispatchManager.Destroy);
+      UnityThread.ExecuteOnMainThreadAndWait(JobDispatchManager.CompleteAll);
     }
   }
 }
