@@ -17,7 +17,6 @@ using static Vehicles.Config.FeatureFlags;
 namespace Vehicles;
 
 [PublicAPI]
-[StaticConstructorOnStartup]
 public static class RGBMaterialPool
 {
   // UI Only shows Rot4 rotations, there's no need to allocate for diagonals
@@ -26,19 +25,8 @@ public static class RGBMaterialPool
   private static readonly Dictionary<IMaterialCacheTarget, Material[]> Cache = [];
   private static readonly Dictionary<IMaterialCacheTarget, Material[]> UiCache = [];
 
-  // TODO - Quickest way to get set up with ui shaders, may need revisit down the road.
-  private static readonly Dictionary<Shader, Shader> ShaderToUiShader = [];
-
   public static event Action<IMaterialCacheTarget> OnTargetCached;
   public static event Action<IMaterialCacheTarget> OnTargetRemoved;
-
-  static RGBMaterialPool()
-  {
-    ShaderToUiShader[VehicleShaderTypeDefOf.CutoutComplexRGB.Shader] = ShaderDatabase.LoadShader("ShaderRGBUI");
-    ShaderToUiShader[VehicleShaderTypeDefOf.CutoutComplexPattern.Shader] =
-      ShaderDatabase.LoadShader("ShaderRGBPatternUI");
-    ShaderToUiShader[VehicleShaderTypeDefOf.CutoutComplexSkin.Shader] = ShaderDatabase.LoadShader("ShaderRGBSkinUI");
-  }
 
   public static int Count => Cache.Count;
 
@@ -339,7 +327,7 @@ public static class RGBMaterialPool
       {
         Material uiMaterial = uiMaterials[i];
         uiMaterial.shader = material.shader;
-        if (uiMaterial.shader && ShaderToUiShader.TryGetValue(uiMaterial.shader, out Shader uiShader))
+        if (uiMaterial.shader && ShaderDatabase.TryGetUIShader(uiMaterial.shader, out Shader uiShader))
         {
           uiMaterial.shader = uiShader;
         }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Defs>
+  <ShaderDef>
+    <defName>CutoutComplexRGB</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGB.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>true</depthWrite>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+  
+  <ShaderDef>
+    <defName>CutoutComplexRGBUI</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGBUI.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>false</depthWrite>
+      <depthTest>false</depthTest>
+      <cullMode>None</cullMode>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+
+  <ShaderDef>
+    <defName>CutoutComplexSkin</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGBSkin.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>true</depthWrite>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+
+  <ShaderDef>
+    <defName>CutoutComplexSkinUI</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGBSkinUI.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>false</depthWrite>
+      <depthTest>false</depthTest>
+      <cullMode>None</cullMode>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+
+  <ShaderDef>
+    <defName>CutoutComplexPattern</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGBPattern.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>true</depthWrite>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+  
+  <ShaderDef>
+    <defName>CutoutComplexPatternUI</defName>
+    <shaderProgram>
+      <fragmentShaderFileName>ShaderRGBPatternUI.frag.glsl</fragmentShaderFileName>
+      <transparent>true</transparent>
+      <depthWrite>false</depthWrite>
+      <depthTest>false</depthTest>
+      <cullMode>None</cullMode>
+      <renderQueue>2900</renderQueue>
+    </shaderProgram>
+  </ShaderDef>
+</Defs>
