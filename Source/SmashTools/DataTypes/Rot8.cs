@@ -429,7 +429,7 @@ namespace SmashTools
     {
       if (angle % 45 != 0)
       {
-        SmashLog.Error($"Cannot rotate <type>Rot8</type> with angle non-multiple of 45.");
+        Log.Error("Cannot rotate Rot8 with angle non-multiple of 45.");
         return this;
       }
       int rotate = Mathf.RoundToInt(angle / 45);

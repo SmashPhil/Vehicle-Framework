@@ -97,6 +97,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmashTools.Rendering", "..\
 		{F6058ED0-A7C4-8151-3C21-2EB00352F7B7} = {F6058ED0-A7C4-8151-3C21-2EB00352F7B7}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test_DevTools", "..\..\DevTools\Test_DevTools\Test_DevTools.csproj", "{915D35B2-F3CF-42E7-90F7-03F7FD01B756}"
+	ProjectSection(ProjectDependencies) = postProject
+		{CBD9893C-47BE-405E-89F7-2342F47D26BC} = {CBD9893C-47BE-405E-89F7-2342F47D26BC}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -222,6 +227,14 @@ Global
 		{D9C4375A-ABE3-E35D-D0E8-23B8858AC5F9}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
 		{D9C4375A-ABE3-E35D-D0E8-23B8858AC5F9}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
 		{D9C4375A-ABE3-E35D-D0E8-23B8858AC5F9}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Release|Any CPU.Build.0 = Release|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.ReleaseTesting|Any CPU.ActiveCfg = ReleaseTesting|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.ReleaseTesting|Any CPU.Build.0 = ReleaseTesting|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Unstable|Any CPU.ActiveCfg = Unstable|Any CPU
+		{915D35B2-F3CF-42E7-90F7-03F7FD01B756}.Unstable|Any CPU.Build.0 = Unstable|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

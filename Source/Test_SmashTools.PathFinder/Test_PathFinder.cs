@@ -25,7 +25,10 @@ internal class Test_PathFinder
   {
     Expect.Throws<ArgumentNullException>(delegate
     {
-      _ = new PathFinder(new PathFinder.Settings());
+      _ = new PathFinder(new PathFinder.Settings
+      {
+        pathGrid = default
+      });
     });
   }
 

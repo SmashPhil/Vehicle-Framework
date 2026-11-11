@@ -30,13 +30,13 @@ jobs:
       - name: Setup .Net
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 9.0.x
+          dotnet-version: 10.0.x
 
       - name: Restore Packages
-        run: dotnet restore "$PROJECT_PATH" -p:UseKrafsPackageRef=false
+        run: dotnet restore "$PROJECT_PATH" -p:UseKrafsPackageRef=true
         
       - name: Compile
-        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:UseKrafsPackageRef=false
+        run: dotnet build "$PROJECT_PATH" --configuration Debug --no-restore -p:UseKrafsPackageRef=true
 
       - name: Extract Localization Files
         shell: bash

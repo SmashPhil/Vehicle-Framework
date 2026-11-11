@@ -184,15 +184,15 @@ namespace Vehicles
         {
           if (unityObject is not T obj)
           {
-            SmashLog.Error(
-              $"Asset has loaded successfully from path=<text>\"{path}\"</text> but is not of type <type>{typeof(T)}</type>. Actual type is <type>{unityObject.GetType()}</type>.");
+            Log.Error($"Asset has loaded successfully from path=\"{path}\" but is not of type {typeof(T)}. " +
+                      $"Actual type is {unityObject.GetType()}.");
             return null;
           }
           assetLookup.Add(path, unityObject);
           return obj;
         }
       }
-      SmashLog.Error($"Unable to locate asset at path=\"{path}\".");
+      Log.Error($"Unable to locate asset at path=\"{path}\".");
       return null;
     }
 

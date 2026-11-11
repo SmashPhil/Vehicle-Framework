@@ -40,6 +40,7 @@ public static class HarmonyPatcher
 		foreach (Type type in mod.AllInterfaceClassImplementations<IPatchCategory>())
 		{
 			IPatchCategory patch = (IPatchCategory)Activator.CreateInstance(type, nonPublic: true);
+      Assert.IsNotNull(patch);
 			Patches.AddOrAppend(patch.PatchAt, patch);
 		}
 	}
@@ -170,9 +171,9 @@ public static class HarmonyPatcher
 			transpilers += CountPatches(patches.Transpilers);
 			finalizers += CountPatches(patches.Finalizers);
 		}
-		SmashLog.Message(
-			$"<color=orange>[{Mod.Name.Replace(" ", "")}]</color> <success>{prefixes + postfixes + transpilers + finalizers} " +
-			$"patches successfully applied.</success>\nPrefixes: {prefixes} Postfixes: {postfixes} Transpilers: {transpilers} Finalizers: {finalizers}");
+		Log.Message(
+			$"<color=orange>[{Mod.Name.Replace(" ", "")}]</color> <color=#007d00>{prefixes + postfixes + transpilers + finalizers} " +
+			$"patches successfully applied.</color>\nPrefixes: {prefixes} Postfixes: {postfixes} Transpilers: {transpilers} Finalizers: {finalizers}");
 		return;
 
 		static int CountPatches(IReadOnlyCollection<Patch> patches)

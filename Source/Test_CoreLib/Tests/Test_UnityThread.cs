@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 using System.Threading;
 using CoreLib.Performance;
 using DevTools.Testing;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Waylith;
 using Object = UnityEngine.Object;
+using Time = UnityEngine.Time;
 
 namespace CoreLib.Tests;
 
@@ -36,9 +39,9 @@ internal class Test_UnityThread
   [Test]
   private IEnumerator AddOnGUI()
   {
-    using MockOnGUI onGui = new();
+    using MockOnGui onGui = new();
     Assert.IsFalse(onGui.invoked);
-    yield return null;
+    yield return onGui.WaitForOnGUI();
     Assert.IsTrue(onGui.invoked);
   }
 
@@ -55,10 +58,10 @@ internal class Test_UnityThread
   [Test]
   private IEnumerator RemoveOnGUI()
   {
-    using MockOnGUI onGui = new();
+    using MockOnGui onGui = new();
     Assert.IsFalse(onGui.invoked);
     UnityThread.RemoveOnGui(onGui.OnGUI);
-    yield return null;
+    yield return onGui.WaitForOnGUI();
     Assert.IsFalse(onGui.invoked);
   }
 
@@ -160,13 +163,28 @@ internal class Test_UnityThread
     }
   }
 
-  private class MockOnGUI : IDisposable
+  private class MockOnGui : IDisposable
   {
+    private static readonly MethodInfo UnityThreadOnGui =
+      typeof(UnityThread).GetMethod("OnGUI", BindingFlags.Instance | BindingFlags.NonPublic);
+
     public bool invoked;
 
-    public MockOnGUI()
+    public MockOnGui()
     {
       UnityThread.StartGui(OnGUI);
+    }
+
+    public IEnumerator WaitForOnGUI()
+    {
+      if (EngineApplication.Instance.Options is { Headless: true })
+      {
+        UnityThreadOnGui.Invoke(UnityThread.Instance, []);
+      }
+      else
+      {
+        yield return null;
+      }
     }
 
     public bool OnGUI()

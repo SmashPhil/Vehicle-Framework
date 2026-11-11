@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using Verse;
 
+// TODO 1.8 - Delete
 namespace SmashTools
 {
 	[AttributeUsage(AttributeTargets.Class)]
@@ -19,7 +20,7 @@ namespace SmashTools
 				}
 				catch (Exception ex)
 				{
-					SmashLog.Error($"Exception thrown running constructor of type <type>{type}</type>. Ex=\"{ex}\"");
+					Log.Error($"Exception thrown running constructor of type <type>{type}</type>. Ex=\"{ex}\"");
 				}
 			}
 		}

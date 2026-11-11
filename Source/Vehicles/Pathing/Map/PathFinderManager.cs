@@ -98,6 +98,7 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
     foreach (Type type in types)
     {
       IPathCostGrid source = (IPathCostGrid)Activator.CreateInstance(type, map, this);
+      Assert.IsNotNull(source);
       costGrids[index] = source;
       dirtyGrids[index] = new DirtyGrid(map);
       source.Index = index++;

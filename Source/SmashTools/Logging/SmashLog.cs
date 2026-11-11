@@ -10,7 +10,8 @@ using Verse;
 
 namespace SmashTools;
 
-[StaticConstructorOnStartup]
+// TODO 1.8 - Delete entirely
+[Obsolete("Use normal logging instead.", error: true), StaticConstructorOnStartup]
 public static class SmashLog
 {
   private static string RichTextRegex = @"(<i>)|(<\/i>)|(<b>)|(<\/b>)|(<color.*?>|<\/color>)";

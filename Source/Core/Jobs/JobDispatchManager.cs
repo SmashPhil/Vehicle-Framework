@@ -2,6 +2,7 @@
 using CoreLib.Performance;
 using JetBrains.Annotations;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace CoreLib.Jobs;
 
@@ -29,40 +30,45 @@ public sealed class JobDispatchManager : MonoBehaviour
 
   private void OnDestroy()
   {
-    DestroyDispatchers();
+    CompleteAll();
   }
 
-  public static void Destroy()
+  public static void CompleteAll()
   {
-    if (!UnityThread.IsInMainThread)
+    if (!instance)
+      return;
+
+    UnityThread.ExecuteOnMainThreadAndWait(delegate
     {
-      Logger.Error("Trying to destroy JobDispatchManager outside of the main thread.");
-      UnityThread.ExecuteOnMainThreadAndWait(() => Object.Destroy(instance));
-    }
-    else
-    {
-      Object.Destroy(instance);
-    }
+      if (instance.dispatchers.Count == 0)
+        return;
+
+      foreach (IJobDispatcher dispatcher in instance.dispatchers)
+      {
+        dispatcher.CompleteAll();
+      }
+    });
   }
 
   public static void Register(IJobDispatcher dispatcher)
   {
+    Assert.IsTrue(UnityThread.IsInMainThread);
+    if (Exists)
+    {
+      GameObject go = new("DispatchManager");
+      go.AddComponent<JobDispatchManager>();
+      DontDestroyOnLoad(go);
+    }
     instance.dispatchers.Add(dispatcher);
   }
 
   public static void Deregister(IJobDispatcher dispatcher)
   {
-    instance.dispatchers.Remove(dispatcher);
-  }
-
-  private void DestroyDispatchers()
-  {
-    if (dispatchers.Count == 0)
-      return;
-
-    foreach (IJobDispatcher dispatcher in dispatchers)
+    Assert.IsTrue(UnityThread.IsInMainThread);
+    if (instance)
     {
-      dispatcher.OnDestroy();
+      dispatcher.CompleteAll();
+      instance.dispatchers.Remove(dispatcher);
     }
   }
 }

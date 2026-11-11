@@ -90,7 +90,9 @@ public class Dijkstra<T>
     path.Add(start);
 
     if (!path[path.Count - 1].Equals(start))
-      SmashLog.Error($"BFS was unable to solve path from {start} to {destination}.");
+    {
+      Log.Error($"BFS was unable to solve path from {start} to {destination}.");
+    }
   }
 
   protected struct Node

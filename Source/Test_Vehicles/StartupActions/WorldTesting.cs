@@ -19,7 +19,7 @@ public static class WorldTesting
 				Find.WorldObjects.Settlements.FirstOrDefault(settlement => settlement.Faction.IsPlayer);
 			if (settlement == null)
 			{
-				SmashLog.Error(
+				Log.Error(
 					$"Unable to execute startup action {nameof(WorldTesting)}. No map to form player caravan from.");
 				return;
 			}

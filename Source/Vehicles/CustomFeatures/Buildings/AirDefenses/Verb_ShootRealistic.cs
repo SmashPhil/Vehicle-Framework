@@ -263,8 +263,8 @@ namespace Vehicles
             }
             catch (Exception ex)
             {
-              SmashLog.Error(
-                $"Failed to spawn mote at {loc}. MoteDef = <field>{moteProps.moteDef?.defName ?? "Null"}</field> Exception = {ex}");
+              Log.Error(
+                $"Failed to spawn mote at {loc}. MoteDef = {moteProps.moteDef?.defName ?? "Null"} Exception = {ex}");
             }
           }
         }

@@ -38,8 +38,7 @@ public class VehicleJobLimitations
     }
     catch (Exception ex)
     {
-      SmashLog.Error(
-        $"{entry} is not a valid <struct>VehicleJobLimitations</struct> format. Exception: {ex}");
+      Log.Error($"{entry} is not a valid VehicleJobLimitations format. Exception: {ex}");
       return Invalid;
     }
   }

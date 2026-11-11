@@ -85,8 +85,7 @@ public class VehicleRegionMaker : VehicleGridManager
     }
     catch (Exception ex)
     {
-      SmashLog.ErrorLabel(VehicleHarmony.LogLabel,
-        $"Exception thrown while generating region at {root}. Exception={ex}");
+      Log.Error($"{VehicleHarmony.LogLabel} Exception thrown while generating region at {root}. Exception={ex}");
       region = null;
       return RegionResult.Failed;
     }

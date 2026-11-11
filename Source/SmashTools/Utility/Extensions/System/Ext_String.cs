@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Verse;
-
-namespace SmashTools;
+﻿namespace SmashTools;
 
 public static class Ext_String
 {

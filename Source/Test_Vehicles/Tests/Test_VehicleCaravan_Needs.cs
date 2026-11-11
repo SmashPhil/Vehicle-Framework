@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DevTools;
 using DevTools.Testing;
 using HarmonyLib;
 using RimWorld;
@@ -123,6 +125,9 @@ internal sealed class Test_VehicleCaravan_Needs
     // Disable drug desire as it can set a negative degree (Teetotaler) and disable drug addictions
     Pawn addict = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Colonist,
       Faction.OfPlayer, prohibitedTraits: [TraitDefOf.DrugDesire], fixedBiologicalAge: 30));
+    // Pawn can spawn with another addiction hediff, which obscures alcohol addiction and fails when
+    // trying to fetch drug from CaravanInventoryUtility::TryGetDrugToSatisfyChemicalNeed
+    addict.health.RemoveAllHediffs();
     Assert.IsNotNull(addict);
     Assert.AreEqual(addict.Faction, Faction.OfPlayer);
     ApplyAddiction(addict, ChemicalDefOf.Alcohol);
@@ -131,7 +136,6 @@ internal sealed class Test_VehicleCaravan_Needs
     group.pawns.Add(addict);
     group.BoardAll();
 
-    Assert.IsNotNull(addict);
     Assert.AreEqual(addict.UpdateRateTicks, WorldUpdateTicksForPawn);
     Assert.IsTrue(addict.needs.TryGetNeed(out Need_Chemical need));
     Assert.IsNotNull(need);
@@ -177,8 +181,7 @@ internal sealed class Test_VehicleCaravan_Needs
       Faction.OfPlayer, prohibitedTraits: [TraitDefOf.DrugDesire], fixedBiologicalAge: 30));
     Assert.IsNotNull(addict);
     Assert.AreEqual(addict.Faction, Faction.OfPlayer);
-    Hediff_ChemicalDependency addictionHediff =
-      (Hediff_ChemicalDependency)addict.health.AddHediff(HediffDefOf.GeneticDrugNeed);
+    var addictionHediff = (Hediff_ChemicalDependency)addict.health.AddHediff(HediffDefOf.GeneticDrugNeed);
     Assert.IsNotNull(addictionHediff);
     addictionHediff.chemical = ChemicalDefOf.Alcohol;
     group.pawns.Add(addict);
@@ -214,7 +217,7 @@ internal sealed class Test_VehicleCaravan_Needs
     addict.Destroy();
   }
 
-	[Test]
+  [Test]
   private void JoyNeeds()
   {
     const int JoyTickInterval = 1250;

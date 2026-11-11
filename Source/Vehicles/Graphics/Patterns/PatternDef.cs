@@ -64,7 +64,7 @@ public class PatternDef : Def, IMaterialCacheTarget
 
     if (patterns[0] is null)
     {
-      SmashLog.Error($"Unable to find Texture2D for <field>path</field> at {path}.");
+      Log.Error($"Unable to find Texture2D {path}.");
       return;
     }
     if (IsDefault)

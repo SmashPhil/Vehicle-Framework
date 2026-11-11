@@ -93,8 +93,8 @@ public class Graphic_Rgb : Graphic
       {
         return rgbData;
       }
-      SmashLog.ErrorOnce(
-        $"Unable to retrieve <field>DataRGB</field> for <type>{GetType()}</type>. GraphicData type = {data?.GetType().ToString() ?? "Null"}",
+      Log.ErrorOnce(
+        $"Unable to retrieve DataRGB for {GetType()}. GraphicData type = {data?.GetType().ToString() ?? "Null"}",
         GetHashCode());
       return null;
     }
