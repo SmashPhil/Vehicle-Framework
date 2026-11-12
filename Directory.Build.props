@@ -22,11 +22,12 @@
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
 
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks> 
     <UseKrafsPackageRef>true</UseKrafsPackageRef>
 
     <ModDir>$(MSBuildThisFileDirectory)</ModDir>
-    <RefDir>$(ModDir)..\..\</RefDir>
+    <RefDir>$([MSBuild]::NormalizeDirectory('$(ModDir)', '..', '..'))</RefDir>
+    <RefDir Condition="Exists('$(RefDir)RimWorld.app\Contents\MacOS\Assembly-CSharp.dll')">$(RefDir)RimWorld.app\Contents\MacOS\</RefDir>
     <RunSettingsFilePath>$(ModDir)\.runsettings</RunSettingsFilePath>
   </PropertyGroup>
 

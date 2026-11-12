@@ -6,19 +6,23 @@
     <exclude>.gitattributes</exclude>
     <exclude>.gitmodules</exclude>
     <exclude>.gitignore</exclude>
+    <exclude>.editorconfig</exclude>
+    <exclude>.localization</exclude>
+    <exclude>.runsettings</exclude>
     <exclude>.vs</exclude>
     <exclude>1.4\Assemblies\0Harmony.dll</exclude>
     <exclude>1.4\Defs\Ignore</exclude>
     <exclude>1.5\Assemblies\0Harmony.dll</exclude>
     <exclude>1.5\Defs\Ignore</exclude>
     <exclude>1.6\Defs\Ignore</exclude>
+    <exclude>1.7\Defs\Ignore</exclude>
+    <exclude>1.7\Assemblies-Native</exclude>
     <exclude>About\PreviewArt</exclude>
     <exclude>Build</exclude>
     <exclude>DevTools</exclude>
-    <exclude>SmashTools</exclude>
-    <exclude>UpdateLog</exclude>
     <exclude>Source</exclude>
-    <exclude>Textures\Ignore</exclude>
-    <exclude>UpdateTodoList.txt</exclude>
+    <exclude>Directory.Build.props</exclude>
+    <exclude>ExportSettings.ini</exclude>
+    <exclude>quick-translate.bat</exclude>
   </Excluded>
 </Configuration>
