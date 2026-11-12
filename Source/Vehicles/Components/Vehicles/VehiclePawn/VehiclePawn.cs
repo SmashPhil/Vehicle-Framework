@@ -430,7 +430,7 @@ public partial class VehiclePawn : Pawn,
       patternData = new PatternData(VehicleDef.graphicData.color,
         VehicleDef.graphicData.colorTwo,
         VehicleDef.graphicData.colorThree,
-        PatternDefOf.Default, Vector2.zero, 0);
+        PatternDefOf.Default);
       retextureDef = null;
       patternToPaint = null;
     }

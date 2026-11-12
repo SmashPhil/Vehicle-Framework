@@ -381,11 +381,12 @@ public partial class VehiclePawn
     if (graphicData.shaderType.Shader.SupportsRGBMaskTex())
     {
       RGBMaterialPool.CacheMaterialsFor(this);
-      GraphicDatabaseRGB
-       .Remove(this); // Clear cached graphic to pick up potential retexture changes
+      // Clear cached graphic to pick up potential retexture changes
+      GraphicDatabaseRGB.Remove(this);
       graphicData.Init(this);
       newGraphic = (Graphic_Vehicle)graphicData.Graphic;
-      RGBMaterialPool.SetProperties(this, patternData, newGraphic.TexAt, newGraphic.MaskAt);
+      RGBMaterialPool.SetTextures(this, newGraphic.TexAt, newGraphic.MaskAt);
+      RGBMaterialPool.SetProperties(this, patternData);
     }
     else
     {

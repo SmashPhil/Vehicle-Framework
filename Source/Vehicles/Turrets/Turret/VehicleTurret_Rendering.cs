@@ -605,11 +605,9 @@ public partial class VehicleTurret
       Material material;
       if (graphic.Shader.SupportsRGBMaskTex())
       {
-        material = RGBMaterialPool.GetUi(target, Rot8.North);
-        if (turret.def.matchParentColor)
-        {
-          RGBMaterialPool.SetProperties(target, request.patternData, graphic.TexAt, graphic.MaskAt);
-        }
+        material = turret.def.matchParentColor
+          ? RGBMaterialPool.PrepareUiMaterial(target, Rot8.North, request.patternData)
+          : RGBMaterialPool.PrepareUiMaterial(target, Rot4.North, graphic.DataRgb);
       }
       else
       {
@@ -827,7 +825,8 @@ public partial class VehicleTurret
       RGBMaterialPool.CacheMaterialsFor(cacheTarget, patternData.patternDef);
       cachedGraphicData.Init(cacheTarget);
       graphic = (Graphic_Turret)cachedGraphicData.Graphic;
-      RGBMaterialPool.SetProperties(cacheTarget, cachedGraphicData, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetTextures(cacheTarget, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetProperties(cacheTarget, cachedGraphicData);
     }
     else
     {

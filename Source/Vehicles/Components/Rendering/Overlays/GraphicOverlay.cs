@@ -137,8 +137,9 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
           RGBMaterialPool.CacheMaterialsFor(this);
           graphicData.Init(this);
           graphic = graphicData.Graphic;
-          Graphic_Rgb graphicRGB = (Graphic_Rgb)graphic;
-          RGBMaterialPool.SetProperties(this, patternData, graphicRGB.TexAt, graphicRGB.MaskAt);
+          Graphic_Rgb graphicRgb = (Graphic_Rgb)graphic;
+          RGBMaterialPool.SetTextures(this, graphicRgb.TexAt, graphicRgb.MaskAt);
+          RGBMaterialPool.SetProperties(this, patternData);
         }
         else
         {
@@ -252,7 +253,8 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
       graphicDataOverlay.graphicData.Init(graphicOverlay);
       PatternData patternData = vehicle.patternData;
       Graphic_Rgb graphic = (Graphic_Rgb)graphicOverlay.Graphic;
-      RGBMaterialPool.SetProperties(graphicOverlay, patternData, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetTextures(graphicOverlay, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetProperties(graphicOverlay, patternData);
     }
     else
     {
@@ -285,7 +287,8 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
         new PatternData(vehicleDef.graphicData));
 
       Graphic_Rgb graphic = (Graphic_Rgb)graphicOverlay.Graphic;
-      RGBMaterialPool.SetProperties(graphicOverlay, patternData, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetTextures(graphicOverlay, graphic.TexAt, graphic.MaskAt);
+      RGBMaterialPool.SetProperties(graphicOverlay, patternData);
     }
     else
     {
@@ -309,17 +312,7 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
     Material material = null;
     if (graphic.Shader.SupportsRGBMaskTex())
     {
-      material = RGBMaterialPool.GetUi(this, request.rot);
-      if (graphic is Graphic_Rgb graphicRgb)
-      {
-        RGBMaterialPool.SetProperties(this, request.patternData, graphicRgb.TexAt, graphicRgb.MaskAt);
-      }
-      else
-      {
-        RGBMaterialPool.SetProperties(this, request.patternData,
-          forRot => Graphic.MatAt(forRot).mainTexture as Texture2D,
-          forRot => Graphic.MatAt(forRot).GetMaskTexture());
-      }
+      material = RGBMaterialPool.PrepareUiMaterial(this, request.rot, request.patternData);
     }
     else if (IsFeatureEnabled(BlitTexturePortraits))
     {

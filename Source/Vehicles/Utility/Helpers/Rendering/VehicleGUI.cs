@@ -84,8 +84,7 @@ public static class VehicleGui
     Material material = null;
     if (graphic.Shader.SupportsRGBMaskTex())
     {
-      material = RGBMaterialPool.GetUi(vehicleDef, rotDrawn);
-      RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
+      material = RGBMaterialPool.PrepareUiMaterial(vehicleDef, rotDrawn, pattern);
     }
     return new BlitData(adjustedRect, mainTex, material, rotDrawn, pattern);
   }
@@ -138,6 +137,8 @@ public static class VehicleGui
     }
   }
 
+  // TODO 1.8 - Remove
+  [Obsolete("Use DrawVehicleOnGUI with BlitRequest instead.", error: true)]
   public static void DrawVehicleDefOnGUI(Rect rect, VehicleDef vehicleDef,
     PatternData patternData = null, Rot8? rot = null)
   {
@@ -197,23 +198,11 @@ public static class VehicleGui
     Graphic graphic = graphicOverlay.Graphic;
     bool canMask = graphic.Shader.SupportsRGBMaskTex();
 
-    Material material = canMask ? RGBMaterialPool.GetUi(graphicOverlay, rot) : null;
+    Material material = canMask ?
+      RGBMaterialPool.PrepareUiMaterial(graphicOverlay, rot, patternData) :
+      null;
 
     Texture2D texture = graphic.MatAt(rot).mainTexture as Texture2D;
-    if (canMask)
-    {
-      if (graphic is Graphic_Rgb graphicRgb)
-      {
-        RGBMaterialPool.SetProperties(graphicOverlay, patternData, graphicRgb.TexAt,
-          graphicRgb.MaskAt);
-      }
-      else
-      {
-        RGBMaterialPool.SetProperties(graphicOverlay, patternData,
-          forRot => graphic.MatAt(forRot).mainTexture as Texture2D,
-          forRot => graphic.MatAt(forRot).GetMaskTexture());
-      }
-    }
     // TODO - vehicleDef.PropertyBlock here would be incorrect for VehiclePawn instance rendering. Will
     // need a refactor later if and when I get to drawing all of this via material property blocks.
     RenderData overlayRenderData = new(overlayRect, texture, material, vehicleDef.PropertyBlock,
@@ -224,6 +213,7 @@ public static class VehicleGui
   /// <summary>
   /// Retrieve <seealso cref="VehicleTurret"/> GUI data for rendering, adjusted by settings UI properties for <paramref name="vehicleDef"/>
   /// </summary>
+  [Obsolete("Use DrawVehicleOnGUI with BlitRequest instead.", error: true)]
   private static void AddAllTurretSettingsGUIProperties(Rect rect,
     VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData)
   {
@@ -240,12 +230,9 @@ public static class VehicleGui
           Rect turretRect = VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot);
           Graphic_Turret graphic = turretDrawData.graphic;
           bool canMask = graphic.Shader.SupportsRGBMaskTex();
-          Material material = canMask ? RGBMaterialPool.GetUi(turretDrawData, Rot4.North) : null;
-          if (canMask && turret.def.matchParentColor)
-          {
-            RGBMaterialPool.SetProperties(turretDrawData, patternData, graphic.TexAt,
-              graphic.MaskAt);
-          }
+          Material material = canMask ?
+            RGBMaterialPool.PrepareUiMaterial(turretDrawData, Rot4.North, patternData) :
+            null;
           RenderData turretRenderData = new(turretRect, graphic.TexAt(Rot8.North),
             material, turretDrawData.PropertyBlock, turretDrawData.graphicData.drawOffset.y,
             turret.defaultAngleRotated + rot.AsAngle);
@@ -255,6 +242,7 @@ public static class VehicleGui
     }
   }
 
+  [Obsolete("Use DrawVehicleOnGUI with BlitRequest instead.", error: true)]
   private static void AddTurretSettingsGUIProperties(Rect rect, VehicleDef vehicleDef,
     VehicleTurret turret, Rot8 rot, PatternData patternData, float iconScale = 1)
   {
@@ -267,11 +255,9 @@ public static class VehicleGui
       VehicleGraphics.TurretRect(rect, vehicleDef, turret, rot, iconScale: iconScale);
     Graphic_Turret graphic = turret.Graphic;
     bool canMask = turret.Graphic.Shader.SupportsRGBMaskTex();
-    Material material = canMask ? RGBMaterialPool.GetUi(turret, Rot4.North) : null;
-    if (canMask && turret.def.matchParentColor)
-    {
-      RGBMaterialPool.SetProperties(turret, patternData, graphic.TexAt, graphic.MaskAt);
-    }
+    Material material = canMask ?
+      RGBMaterialPool.PrepareUiMaterial(turret, Rot4.North, patternData) :
+      null;
     RenderData turretRenderData = new(turretRect, turret.Texture, material,
       turret.PropertyBlock, turret.GraphicData.drawOffset.y,
       turret.defaultAngleRotated + rot.AsAngle);

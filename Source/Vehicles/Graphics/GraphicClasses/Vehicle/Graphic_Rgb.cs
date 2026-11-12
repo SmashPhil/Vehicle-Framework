@@ -273,14 +273,13 @@ public class Graphic_Rgb : Graphic
 
     for (int i = 0; i < MatCount; i++)
     {
-      textures[i] =
-        ContentFinder<Texture2D>.Get(path + pathExtensions[i],
-          false); //Autosizes depending on the MatCount
+      // Autosizes depending on the MatCount
+      textures[i] = ContentFinder<Texture2D>.Get(path + pathExtensions[i], reportFailure: false); 
     }
 
     if (!textures[0])
     {
-      textures[0] = ContentFinder<Texture2D>.Get(path, false);
+      textures[0] = ContentFinder<Texture2D>.Get(path, reportFailure: false);
     }
 
     if (MatCount >= 4)
@@ -305,8 +304,7 @@ public class Graphic_Rgb : Graphic
       }
       if (!textures[0])
       {
-        Log.Error("Failed to find any textures at " + path + " while constructing " +
-          this.ToStringSafe());
+        Log.Error($"Failed to find any textures at {path} while constructing {this}");
         return;
       }
       if (!textures[2])

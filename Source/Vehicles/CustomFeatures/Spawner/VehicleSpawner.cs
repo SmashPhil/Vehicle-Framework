@@ -90,8 +90,7 @@ namespace Vehicles
 				if (!randomize)
 				{
 					PatternData fallback = vehicleDef.graphicData;
-					fallback ??= new PatternData(Color.white, Color.white, Color.white,
-						PatternDefOf.Default, displacement: Vector2.zero, tiles: 0);
+					fallback ??= new PatternData(Color.white, Color.white, Color.white, PatternDefOf.Default);
 					GraphicDataRGB graphicData =
 						VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(vehicleDef.defName, fallback: fallback);
 					patternData.Copy(graphicData);

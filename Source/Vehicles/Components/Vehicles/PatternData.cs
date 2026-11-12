@@ -32,13 +32,17 @@ public class PatternData : IExposable
 	{
 	}
 
-	public PatternData(Color color, Color colorTwo, Color colorThree, PatternDef patternDef,
-		Vector2 displacement, float tiles)
+  public PatternData(Color color, Color colorTwo, Color colorThree, PatternDef patternDef)
+  {
+    this.color = color;
+    this.colorTwo = colorTwo;
+    this.colorThree = colorThree;
+    this.patternDef = patternDef;
+  }
+
+  public PatternData(Color color, Color colorTwo, Color colorThree, PatternDef patternDef,
+		Vector2 displacement, float tiles) : this(color, colorTwo, colorThree, patternDef)
 	{
-		this.color = color;
-		this.colorTwo = colorTwo;
-		this.colorThree = colorThree;
-		this.patternDef = patternDef;
 		this.displacement = displacement;
 		this.tiles = tiles;
 	}

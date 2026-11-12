@@ -91,8 +91,7 @@ internal class Patch_Components : IPatchCategory
 			{
 				defaultPatternData = vehicle.VehicleDef.graphicData != null ?
 					new PatternData(vehicle.VehicleDef.graphicData) :
-					new PatternData(Color.white, Color.white, Color.white,
-						PatternDefOf.Default, Vector2.zero, 0);
+					new PatternData(Color.white, Color.white, Color.white, PatternDefOf.Default);
 			}
 			vehicle.patternData = new PatternData(defaultPatternData);
 			if (vehicle.Stuff != null)

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using CoreLib.Performance;
 using JetBrains.Annotations;
 using RimWorld;
 using SmashTools;
@@ -19,8 +20,6 @@ namespace Vehicles;
 public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget, ITweakFields,
                           IBlitTarget, IDisposable
 {
-  private static readonly int NullShaderErrorCode = "NullShaderVehicleDef".GetHashCode();
-
   [PostToSettings]
   public VehicleEnabled.For enabled = VehicleEnabled.For.Everyone;
 
@@ -276,6 +275,7 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
 
   private void VerifyGraphicData()
   {
+    Assert.IsTrue(UnityThread.IsInMainThread);
     PropertyBlock = new MaterialPropertyBlock();
     Portrait = new VehiclePortrait(new VehiclePortrait.Config
     {
@@ -302,8 +302,8 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
         VehicleMod.settings.vehicles.defaultGraphics.TryGetValue(defName,
           new PatternData(graphicData));
       patternData.ExposeDataPostDefDatabase();
-      RGBMaterialPool.SetProperties(this, patternData, graphicData.Graphic.TexAt,
-        graphicData.Graphic.MaskAt);
+      RGBMaterialPool.SetTextures(this, graphicData.Graphic.TexAt, graphicData.Graphic.MaskAt);
+      RGBMaterialPool.SetProperties(this, patternData);
     }
     else
     {
@@ -726,19 +726,17 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
     if (!shader && RGBMaterialPool.TargetCached(this))
     {
       Log.ErrorOnce($"Null shader for {this} when requesting blit data. Defaulting to pattern shader.",
-        NullShaderErrorCode);
+        "NullShaderVehicleDef".GetHashCode());
       shader = request.patternData.patternDef?.ShaderTypeDef?.Shader;
     }
 
     if (shader.SupportsRGBMaskTex())
     {
-      RGBMaterialPool.SetProperties(this, request.patternData, graphicVehicle.TexAt,
-        graphicVehicle.MaskAt);
-      material = RGBMaterialPool.GetUi(this, request.rot);
+      material = RGBMaterialPool.PrepareUiMaterial(this, request.rot, request.patternData);
     }
 
-    bool flip = request.rot == Rot8.East && graphicVehicle.EastFlipped ||
-                request.rot == Rot8.West && graphicVehicle.WestFlipped;
-    yield return new RenderData(adjustedRect, mainTex, material, PropertyBlock, 0, 0, flip);
+    bool flip = (request.rot == Rot8.East && graphicVehicle.EastFlipped) ||
+                (request.rot == Rot8.West && graphicVehicle.WestFlipped);
+    yield return new RenderData(adjustedRect, mainTex, material, PropertyBlock, layer: 0, angle: 0, flip);
   }
 }

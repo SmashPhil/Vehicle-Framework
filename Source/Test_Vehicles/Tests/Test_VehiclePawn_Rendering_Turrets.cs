@@ -1,6 +1,11 @@
-﻿using DevTools.Testing;
+﻿using System.Linq;
+using DevTools.Testing;
+using HarmonyLib;
 using RimWorld;
+using SmashTools.Rendering;
+using UnityEngine;
 using UnityEngine.Assertions;
+using Vehicles.Rendering;
 
 namespace Vehicles.Tests;
 
@@ -28,6 +33,60 @@ internal sealed class Test_VehiclePawn_Rendering_Turrets
     Assert.AreEqual(compTurrets.Turrets.Count, 1);
     Assert.AreEqual(group.vehicle.DrawTracker.ParallelRenderers.Count, 2);
     Expect.ReferencesAreEqual(group.vehicle.DrawTracker.ParallelRenderers[1], compTurrets.Turrets[0]);
+  }
+
+  [Test]
+  private void TurretUiMaterialMatchesParentColor()
+  {
+    if (!VehicleMod.settings.main.useCustomShaders)
+    {
+      Test.Skip("Can't test shader property copying when useCustomShaders is disabled.");
+      return;
+    }
+    VehicleGroup.MockSettings settings = GetTurretSettings();
+    VehicleTurretDef turretDef = ((CompProperties_VehicleTurrets)settings.comps[0]).turrets[0].def;
+    turretDef.matchParentColor = true;
+    turretDef.graphicData.shaderType = VehicleShaderTypeDefOf.CutoutComplexRGB;
+    turretDef.graphicData.color = Color.blue;
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(settings);
+    group.Spawn();
+    VehicleTurret turret = group.vehicle.CompVehicleTurrets.Turrets[0];
+
+    group.vehicle.DrawColor = Color.red;
+    Material material = GetTurretUiMaterial(turret, group.vehicle);
+    Expect.AreEqual(Color.red, material.GetColor(AdditionalShaderPropertyIDs.ColorOne));
+
+    group.vehicle.DrawColor = Color.green;
+    material = GetTurretUiMaterial(turret, group.vehicle);
+    Expect.AreEqual(Color.green, material.GetColor(AdditionalShaderPropertyIDs.ColorOne));
+  }
+
+  [Test]
+  private void TurretUiMaterialKeepsOwnColor()
+  {
+    if (!VehicleMod.settings.main.useCustomShaders)
+    {
+      Test.Skip("Can't test shader property copying when useCustomShaders is disabled.");
+      return;
+    }
+    VehicleGroup.MockSettings settings = GetTurretSettings();
+    VehicleTurretDef turretDef = ((CompProperties_VehicleTurrets)settings.comps[0]).turrets[0].def;
+    turretDef.matchParentColor = false;
+    turretDef.graphicData.shaderType = VehicleShaderTypeDefOf.CutoutComplexRGB;
+    turretDef.graphicData.color = Color.blue;
+
+    using VehicleGroup group = VehicleGroup.CreateBasicVehicleGroup(settings);
+    group.Spawn();
+    VehicleTurret turret = group.vehicle.CompVehicleTurrets.Turrets[0];
+
+    group.vehicle.DrawColor = Color.red;
+    Material material = GetTurretUiMaterial(turret, group.vehicle);
+    Expect.AreEqual(Color.blue, material.GetColor(AdditionalShaderPropertyIDs.ColorOne));
+
+    group.vehicle.DrawColor = Color.green;
+    material = GetTurretUiMaterial(turret, group.vehicle);
+    Expect.AreEqual(Color.blue, material.GetColor(AdditionalShaderPropertyIDs.ColorOne));
   }
 
   [Test]
@@ -143,6 +202,17 @@ internal sealed class Test_VehiclePawn_Rendering_Turrets
     Assert.AreEqual(group.vehicle.DrawTracker.ParallelRenderers.Count, 2);
     Expect.ReferencesAreEqual(group.vehicle.DrawTracker.ParallelRenderers[0], group.vehicle.DrawTracker.renderer);
     Expect.ReferencesAreEqual(group.vehicle.DrawTracker.ParallelRenderers[1], compTurrets.Turrets[0]);
+  }
+
+  private static Material GetTurretUiMaterial(VehicleTurret turret, VehiclePawn vehicle)
+  {
+    BlitRequest request = BlitRequest.For(vehicle);
+    RenderData renderData = ((IBlitTarget)turret)
+     .GetRenderData(new Rect(0, 0, 64, 64), request)
+     .First();
+    Material material = (Material)AccessTools.Field(typeof(RenderData), "material").GetValue(renderData);
+    Assert.IsNotNull(material);
+    return material;
   }
 
   private static VehicleGroup.MockSettings GetTurretSettings()

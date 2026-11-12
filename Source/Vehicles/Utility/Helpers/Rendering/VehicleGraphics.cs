@@ -73,7 +73,7 @@ public static class VehicleGraphics
     return new Rect(rect.x + offsetX, rect.y + offsetY, scaledWidth, scaledHeight);
   }
 
-  [Obsolete("Use VehiclePortrait with BlitRequest instead.")]
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static void DrawVehicle(Rect rect, VehiclePawn vehicle, Rot8? rot = null,
     List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null,
     List<string> excludeTurrets = null)
@@ -82,7 +82,7 @@ public static class VehicleGraphics
       extraTurrets: extraTurrets, excludeTurrets: excludeTurrets);
   }
 
-  [Obsolete("Use VehiclePortrait with BlitRequest instead.")]
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static void DrawVehicle(Rect rect, VehiclePawn vehicle, PatternData patternData,
     Rot8? rot = null, bool withoutTurrets = false, List<GraphicOverlay> extraOverlays = null,
     List<VehicleTurret> extraTurrets = null, List<string> excludeTurrets = null)
@@ -113,7 +113,7 @@ public static class VehicleGraphics
       if (graphic.Shader.SupportsRGBMaskTex())
       {
         material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
-        RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
+        RGBMaterialPool.SetProperties(vehicleDef, pattern);
       }
 
       if (vehicle.CompVehicleTurrets != null)
@@ -169,9 +169,7 @@ public static class VehicleGraphics
   /// Draw <paramref name="vehicleDef"/>
   /// </summary>
   /// <remarks><paramref name="material"/> may overwrite material used for vehicle</remarks>
-  /// <param name="rect"></param>
-  /// <param name="vehicleDef"></param>
-  /// <param name="material"></param>
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static void DrawVehicleDef(Rect rect, VehicleDef vehicleDef,
     PatternData patternData = null, Rot8? rot = null, bool withoutTurrets = false,
     List<GraphicOverlay> extraOverlays = null, List<VehicleTurret> extraTurrets = null,
@@ -205,7 +203,7 @@ public static class VehicleGraphics
       if (graphic.Shader.SupportsRGBMaskTex())
       {
         material = RGBMaterialPool.Get(vehicleDef, rotDrawn);
-        RGBMaterialPool.SetProperties(vehicleDef, pattern, graphic.TexAt, graphic.MaskAt);
+        RGBMaterialPool.SetProperties(vehicleDef, pattern);
       }
 
       if (vehicleDef.GetSortedCompProperties<CompProperties_VehicleTurrets>() is
@@ -256,6 +254,7 @@ public static class VehicleGraphics
     }
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static IEnumerable<RenderData> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect,
     VehiclePawn vehicle, Rot8 rot, PatternData pattern = null,
     List<GraphicOverlay> extraOverlays = null)
@@ -282,6 +281,7 @@ public static class VehicleGraphics
     }
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static IEnumerable<RenderData> RetrieveAllOverlaySettingsGraphicsProperties(Rect rect,
     VehicleDef vehicleDef, Rot8 rot, PatternData pattern = null,
     List<GraphicOverlay> extraOverlays = null)
@@ -307,6 +307,7 @@ public static class VehicleGraphics
     }
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static RenderData RetrieveOverlaySettingsGraphicsProperties(Rect rect,
     VehicleDef vehicleDef, Rot8 rot, GraphicOverlay graphicOverlay, PatternData pattern)
   {
@@ -321,7 +322,7 @@ public static class VehicleGraphics
       material = RGBMaterialPool.Get(graphicOverlay, rot);
       if (graphicRgb.Shader.SupportsRGBMaskTex())
       {
-        RGBMaterialPool.SetProperties(graphicOverlay, pattern, graphicRgb.TexAt, graphicRgb.MaskAt);
+        RGBMaterialPool.SetProperties(graphicOverlay, pattern);
       }
     }
     else if (graphic.Shader.SupportsMaskTex())
@@ -344,11 +345,7 @@ public static class VehicleGraphics
   /// <summary>
   /// Retrieve <seealso cref="VehicleTurret"/> GUI data for rendering, adjusted by settings UI properties for <paramref name="vehicleDef"/>
   /// </summary>
-  /// <param name="rect"></param>
-  /// <param name="vehicleDef"></param>
-  /// <param name="turrets"></param>
-  /// <param name="patternData"></param>
-  /// <param name="rot"></param>
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static IEnumerable<RenderData> RetrieveAllTurretSettingsGraphicsProperties(Rect rect,
     VehicleDef vehicleDef, Rot8 rot, IEnumerable<VehicleTurret> turrets, PatternData patternData,
     List<string> excludeTurrets = null)
@@ -381,8 +378,7 @@ public static class VehicleGraphics
           if (patternData != null && turretDrawData.graphic.Shader.SupportsRGBMaskTex())
           {
             material = RGBMaterialPool.Get(turretDrawData, Rot8.North);
-            RGBMaterialPool.SetProperties(turretDrawData, patternData,
-              turretDrawData.graphic.TexAt, turretDrawData.graphic.MaskAt);
+            RGBMaterialPool.SetProperties(turretDrawData, patternData);
           }
           else if (turretDrawData.graphic.Shader.SupportsMaskTex())
           {
@@ -397,6 +393,7 @@ public static class VehicleGraphics
     }
   }
 
+  [Obsolete("Use VehiclePortrait with BlitRequest instead.", error: true)]
   public static RenderData RetrieveTurretSettingsGraphicsProperties(Rect rect,
     VehicleDef vehicleDef, Rot8 rot, VehicleTurret turret, PatternData patternData)
   {
@@ -405,8 +402,7 @@ public static class VehicleGraphics
     if (patternData != null && turret.Graphic.Shader.SupportsRGBMaskTex())
     {
       material = RGBMaterialPool.Get(turret, Rot8.North);
-      RGBMaterialPool.SetProperties(turret, patternData, turret.Graphic.TexAt,
-        turret.Graphic.MaskAt);
+      RGBMaterialPool.SetProperties(turret, patternData);
     }
     else if (turret.Graphic.Shader.SupportsMaskTex())
     {
