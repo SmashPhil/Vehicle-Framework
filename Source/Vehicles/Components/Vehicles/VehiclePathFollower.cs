@@ -223,6 +223,11 @@ public sealed class VehiclePathFollower : IExposable, IDisposable
     controller.RegisterEvents();
   }
 
+  public void SetEndRotation(Rot8 rot)
+  {
+    endRot = rot;
+  }
+
   void IExposable.ExposeData()
   {
     Scribe_Deep.Look(ref controller, nameof(controller), ctorArgs: this);
