@@ -61,8 +61,17 @@ public partial class VehiclePawn
 
   public bool CanPaintNow => patternToPaint != null;
 
-  public bool Nameable => SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef),
-    nameof(VehicleDef.nameable), VehicleDef.nameable);
+  public bool Nameable
+  {
+    get
+    {
+      if (Faction != Faction.OfPlayer)
+        return false;
+
+      return SettingsCache.TryGetValue(VehicleDef, typeof(VehicleDef),
+        nameof(VehicleDef.nameable), VehicleDef.nameable);
+    }
+  }
 
   public override Vector3 DrawPos => DrawTracker.DrawPos + transform.position;
 
