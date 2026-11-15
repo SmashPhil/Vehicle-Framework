@@ -355,7 +355,10 @@ public partial class VehiclePawn
   {
     if (UnityData.IsInMainThread)
     {
-      RGBMaterialPool.SetProperties(this, patternData);
+      if (VehicleGraphic.data.shaderType.Shader.SupportsRGBMaskTex())
+      {
+        RGBMaterialPool.SetProperties(this, patternData);
+      }
       foreach (ThingComp thingComp in AllComps)
       {
         if (thingComp is VehicleComp vehicleComp)

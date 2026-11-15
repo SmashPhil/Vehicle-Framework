@@ -135,15 +135,23 @@ public class CompUpgradeTree : VehicleComp, IRefundable
 
 	public bool PrerequisitesMet(UpgradeNode node)
 	{
-		if (node.prerequisiteNodes.NullOrEmpty())
-			return true;
-
-		foreach (string prerequisiteKey in node.prerequisiteNodes)
-		{
-			if (!upgrades.Contains(prerequisiteKey))
-				return false;
-		}
-		return true;
+    if (!node.prerequisiteNodes.NullOrEmpty())
+    {
+      foreach (string prerequisiteKey in node.prerequisiteNodes)
+      {
+        if (!upgrades.Contains(prerequisiteKey))
+          return false;
+      }
+    }
+    if (!node.researchPrerequisites.NullOrEmpty())
+    {
+      foreach (ResearchProjectDef project in node.researchPrerequisites)
+      {
+        if (!project.IsFinished)
+          return false;
+      }
+    }
+    return true;
 	}
 
 	public bool Disabled(UpgradeNode node)

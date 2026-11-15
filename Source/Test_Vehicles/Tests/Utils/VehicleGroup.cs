@@ -19,6 +19,8 @@ public class VehicleGroup : IDisposable
     this.vehicle = vehicle;
   }
 
+  private bool HasTransientDef { get; set; }
+
   // NOTE - many tests rely on the behavior that spawning the vehicle group will immediately board all pawns.
   // This should not be changed without first checking every location a vehicle group is spawned.
   public void Spawn()
@@ -142,6 +144,10 @@ public class VehicleGroup : IDisposable
     {
       vehicle.Destroy();
     }
+    if (HasTransientDef)
+    {
+      vehicle.VehicleDef.Dispose();
+    }
     Assert.IsTrue(vehicle.Destroyed);
   }
 
@@ -203,11 +209,21 @@ public class VehicleGroup : IDisposable
 
   public static VehicleGroup CreateBasicVehicleGroup(MockSettings settings)
   {
-    VehicleDef vehicleDef = settings.vehicleDef ?? CreateVehicleDef(settings);
+    VehicleDef vehicleDef;
+    bool transientDef = false;
+    if (settings.vehicleDef != null)
+    {
+      vehicleDef = settings.vehicleDef;
+    }
+    else
+    {
+      vehicleDef = CreateVehicleDef(settings);
+      transientDef = true;
+    }
 
     // VehicleDef needs to be complete by this point for PostGeneration events
     VehiclePawn vehicle = VehicleSpawner.GenerateVehicle(vehicleDef, settings.faction);
-    VehicleGroup group = new(vehicle);
+    VehicleGroup group = new(vehicle) { HasTransientDef = transientDef };
     for (int i = 0; i < settings.drivers + settings.passengers; i++)
     {
       PawnGenerationRequest request = new(PawnKindDefOf.Colonist,
