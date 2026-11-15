@@ -25,7 +25,8 @@ public class WorkGiver_PackVehicle : WorkGiver_CarryToVehicle<TransferableOneWay
 
       // Filter out pawns that no longer have space in the vehicle. If we don't filter them out
       // before the job is assigned, they will attempt to be loaded repeatedly.
-      if (!pawn.Spawned || vehicle.GetNextAvailableHandler(cargoPawn) == null)
+      if (!cargoPawn.Spawned || (!cargoPawn.ShouldAlwaysTransferToVehiclesCargo() &&
+                                 vehicle.GetNextAvailableHandler(cargoPawn) == null))
       {
         vehicle.cargoToLoad.RemoveAt(i);
       }
