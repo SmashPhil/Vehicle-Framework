@@ -644,9 +644,13 @@ public partial class VehicleTurret
           if (Mathf.Approximately(restrictedTheta, 0))
           {
             if (MaxRange < DefaultMaxRange)
+            {
               GenDraw.DrawCircleOutline(results.position, MaxRange);
+            }
             if (MinRange > 0)
-              GenDraw.DrawCircleOutline(results.position, MaxRange);
+            {
+              GenDraw.DrawCircleOutline(results.position, MinRange, SimpleColor.Red);
+            }
           }
           else
           {
