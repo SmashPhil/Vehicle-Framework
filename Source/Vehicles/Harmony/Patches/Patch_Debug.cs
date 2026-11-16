@@ -114,6 +114,11 @@ internal class Patch_Debug : IPatchCategory
 		for (int i = __result.Count - 1; i >= 0; i--)
 		{
 			string defName = __result[i].label;
+			int start = defName.LastIndexOf('{');
+			if (start >= 0 && defName.EndsWith("}", StringComparison.Ordinal))
+			{
+				defName = defName.Substring(start + 1, defName.Length - start - 2);
+			}
 			PawnKindDef pawnKindDef = DefDatabase<PawnKindDef>.GetNamed(defName);
 			if (pawnKindDef?.race is VehicleDef)
 			{
