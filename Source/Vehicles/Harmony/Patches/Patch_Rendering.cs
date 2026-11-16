@@ -58,6 +58,24 @@ internal class Patch_Rendering : IPatchCategory
       original: AccessTools.Method(typeof(GhostDrawer), nameof(GhostDrawer.DrawGhostThing)),
       postfix: new HarmonyMethod(typeof(Patch_Rendering),
         nameof(DrawGhostVehicle)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Widgets), nameof(Widgets.ThingIcon),
+        parameters: [typeof(Rect), typeof(Thing), typeof(float), typeof(Rot4?), typeof(bool), typeof(float), typeof(bool)]),
+      prefix: new HarmonyMethod(AccessTools.Method(typeof(Patch_Rendering),
+        nameof(DrawVehicleIcon)), priority: Priority.First));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Widgets), nameof(Widgets.ThingIcon),
+        parameters: [typeof(Rect), typeof(ThingDef), typeof(ThingDef), typeof(ThingStyleDef),
+          typeof(float), typeof(Color?), typeof(int?), typeof(float)]),
+      prefix: new HarmonyMethod(AccessTools.Method(typeof(Patch_Rendering),
+        nameof(DrawVehicleDefIcon)), priority: Priority.First));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(Widgets), nameof(Widgets.DefIcon),
+        parameters: [typeof(Rect), typeof(Def), typeof(ThingDef), typeof(float),
+          typeof(ThingStyleDef), typeof(bool), typeof(Color?), typeof(Material),
+          typeof(int?), typeof(float)]),
+      prefix: new HarmonyMethod(AccessTools.Method(typeof(Patch_Rendering),
+        nameof(DrawVehicleBuildDefIcon)), priority: Priority.First));
     HarmonyPatcher.Patch(original: AccessTools.Method(typeof(GenThing), nameof(GenThing.TrueCenter),
         parameters: [typeof(Thing)]),
       prefix: new HarmonyMethod(typeof(Patch_Rendering),
@@ -221,6 +239,47 @@ internal class Patch_Rendering : IPatchCategory
       };
       VehicleGhostUtility.DrawGhostOverlays(in data, baseGraphic, angle: 0);
     }
+  }
+
+  // NOTE: Vanilla uses scale 0.85 as the default for gizmos, but for vehicles the optimal draw scale is 1.
+  // The hardcoded 1x scale is intentional in this case, and for any such cases where the scale should not
+  // be 1, call VehicleGui::DrawVehicleOnGUI directly.
+  private static bool DrawVehicleIcon(Rect rect, Thing thing, Rot4? rot, bool grayscale = false)
+  {
+    if (thing is VehiclePawn vehicle)
+    {
+      BlitRequest request = BlitRequest.For(vehicle);
+      if (rot != null)
+      {
+        request.rot = rot.Value;
+      }
+      using var grayUiScope = GUIState.DisableIf(grayscale);
+      VehicleGui.DrawVehicleOnGUI(rect.ContractedBy(1), request, iconScale: 1);
+      return false;
+    }
+    return true;
+  }
+
+  private static bool DrawVehicleDefIcon(Rect rect, ThingDef thingDef)
+  {
+    if (thingDef is VehicleDef vehicleDef)
+    {
+      BlitRequest request = BlitRequest.For(vehicleDef);
+      VehicleGui.DrawVehicleOnGUI(rect.ContractedBy(1), request, iconScale: 1);
+      return false;
+    }
+    return true;
+  }
+
+  private static bool DrawVehicleBuildDefIcon(Rect rect, Def def, ThingDef stuffDef, float scale,
+    ThingStyleDef thingStyleDef, Color? color, int? graphicIndexOverride, float alpha)
+  {
+    if (def is VehicleBuildDef buildDef)
+    {
+      Widgets.ThingIcon(rect, buildDef.thingToSpawn, stuffDef, thingStyleDef, scale, color, graphicIndexOverride, alpha);
+      return false;
+    }
+    return true;
   }
 
   private static bool TrueCenterVehicle(Thing t, ref Vector3 __result)

@@ -36,10 +36,6 @@ internal class Patch_Gizmos : IPatchCategory
 			postfix: new HarmonyMethod(typeof(Patch_Gizmos),
 				nameof(GizmosForVehicleCaravans)));
 		HarmonyPatcher.Patch(
-			original: AccessTools.Method(typeof(Designator_Build), nameof(Designator_Build.GizmoOnGUI)),
-			prefix: new HarmonyMethod(typeof(Patch_Gizmos),
-				nameof(VehicleMaterialOnBuildGizmo)));
-		HarmonyPatcher.Patch(
 			original: AccessTools.Method(typeof(BuildCopyCommandUtility),
 				nameof(BuildCopyCommandUtility.BuildCopyCommand)),
 			prefix: new HarmonyMethod(typeof(Patch_Gizmos),
@@ -202,24 +198,6 @@ internal class Patch_Gizmos : IPatchCategory
 				__result = gizmos;
 			}
 		}
-	}
-
-	private static bool VehicleMaterialOnBuildGizmo(Vector2 topLeft, float maxWidth,
-		BuildableDef ___entDef, ref GizmoResult __result, Designator_Build __instance,
-		GizmoRenderParms parms)
-	{
-		if (___entDef is VehicleBuildDef def)
-		{
-			float width = __instance.GetWidth(maxWidth);
-			__result = VehicleGui.GizmoOnGUIWithMaterial(__instance,
-				new Rect(topLeft.x, topLeft.y, width, width), parms, def);
-			if (def.MadeFromStuff)
-			{
-				Designator_Dropdown.DrawExtraOptionsIcon(topLeft, __instance.GetWidth(maxWidth));
-			}
-			return false;
-		}
-		return true;
 	}
 
 	private static bool VehicleMaterialOnCopyBuildGizmo(BuildableDef buildable, ThingDef stuff,
