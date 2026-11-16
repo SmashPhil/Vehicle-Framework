@@ -8,6 +8,7 @@ using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
+using UnityEngine.Assertions;
 
 namespace SmashTools.PathFinder;
 
@@ -140,12 +141,14 @@ public sealed class PathFinder : IDisposable, IPathGridSync
 
   public PathReceipt RequestPath(in PathRequest request)
   {
+    Assert.IsTrue(UnityThread.IsInMainThread);
     if (!IsValidDestination(request))
     {
       PathReceipt invalidReceipt = new(request, default);
       return invalidReceipt;
     }
     PathReceipt receipt = CreateReceipt(request);
+    receipt.OnPathDataReleased += UntrackPathRequest;
     SnapshotGrid(receipt);
 
     HeuristicGrid.Data heuristicData = request.heuristic;
@@ -386,9 +389,9 @@ public sealed class PathFinder : IDisposable, IPathGridSync
       jobsToComplete.Dispose();
     }
 
-    foreach (PathReceipt receipt in scheduledJobs)
+    for (int i = scheduledJobs.Count; --i >= 0;)
     {
-      receipt.Dispose();
+      scheduledJobs[i].Dispose();
     }
     scheduledJobs.Clear();
   }
@@ -408,6 +411,12 @@ public sealed class PathFinder : IDisposable, IPathGridSync
     emptyScalar.Dispose();
 
     IndexLookupCache.Release(mapSize);
+  }
+
+  private void UntrackPathRequest(PathReceipt receipt)
+  {
+    receipt.OnPathDataReleased -= UntrackPathRequest;
+    scheduledJobs.Remove(receipt);
   }
 
   private static NativeArrayList<short> PackCostOffsets(in PathRequest request, Allocator allocator)

@@ -1,17 +1,22 @@
+using System;
 using CoreLib;
 using CoreLib.PathFinding;
 using CoreLib.Performance;
 using JetBrains.Annotations;
 using Unity.Jobs;
+using UnityEngine.Assertions;
 
 namespace SmashTools.PathFinder
 {
   [PublicAPI]
-  public class PathReceipt : IPathPromise
+  public sealed class PathReceipt : IPathPromise
   {
     private PathData pathData;
-
     private IObjectPool<PathData> dataPool;
+
+    private bool disposed;
+
+    internal event Action<PathReceipt> OnPathDataReleased;
 
     internal PathReceipt(PathRequest request, PathData pathData)
     {
@@ -35,6 +40,7 @@ namespace SmashTools.PathFinder
 
     public Path GetPath()
     {
+      Assert.IsTrue(UnityThread.IsInMainThread);
       JobHandle.Complete();
       Path path = new();
       if (!pathData.path.IsCreated)
@@ -56,7 +62,12 @@ namespace SmashTools.PathFinder
 
     public void Dispose()
     {
+      if (disposed)
+        return;
+
       JobHandle.Complete();
+      disposed = true;
+
       if (dataPool != null)
       {
         pathData.Reset();
@@ -66,6 +77,7 @@ namespace SmashTools.PathFinder
       {
         pathData.Dispose();
       }
+      OnPathDataReleased?.Invoke(this);
     }
   }
 }
