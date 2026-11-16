@@ -76,7 +76,7 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public bool EmptyTank => Fuel <= 0f;
 
-  public bool FullTank => Mathf.Approximately(fuel, TargetFuelLevel);
+  public bool FullTank => FuelCountToFull <= 0;
 
   public int FuelCountToFull => Mathf.CeilToInt(TargetFuelLevel - Fuel);
 
@@ -480,12 +480,15 @@ public class CompFueledTravel : VehicleComp, IRefundable
 
   public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
   {
-    yield return new FloatMenuOption("Refuel".Translate().ToString(),
-      delegate
-      {
-        Job job = JobMaker.MakeJob(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
-        selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
-      });
+    if (!FullTank)
+    {
+      yield return new FloatMenuOption("Refuel".Translate().ToString(),
+        delegate
+        {
+          Job job = JobMaker.MakeJob(JobDefOf_Vehicles.RefuelVehicle, parent, ClosestFuelAvailable(selPawn));
+          selPawn.jobs.TryTakeOrderedJob(job, JobTag.DraftedOrder);
+        });
+    }
   }
 
   public override void CompCaravanInspectString(StringBuilder stringBuilder)
