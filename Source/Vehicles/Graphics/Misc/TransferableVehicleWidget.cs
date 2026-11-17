@@ -308,10 +308,14 @@ public sealed class TransferableVehicleWidget : IDisposable
       SoundDefOf.Click.PlayOneShotOnCamera();
       if (checkOn)
       {
-        if (vehicle != null)
+        if (vehicle != null && !vehicle.Handlers.NullOrEmpty())
+        {
           Find.WindowStack.Add(new Dialog_AssignSeats(CaravanFormation.Current, pawns, transferable));
+        }
         else
+        {
           transferable.ForceTo(transferable.GetMaximumToTransfer());
+        }
       }
       else
       {
