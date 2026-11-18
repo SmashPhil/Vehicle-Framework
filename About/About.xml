@@ -14,6 +14,9 @@
   <loadAfter>
     <li>brrainz.harmony</li>
   </loadAfter>
+  <forceLoadBefore>
+    <li>CETeam.CombatExtended</li>
+  </forceLoadBefore>
   <forceLoadAfter>
     <li>brrainz.harmony</li>
     <li>Ludeon.RimWorld</li>
