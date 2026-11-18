@@ -276,7 +276,15 @@ internal class Patch_Rendering : IPatchCategory
   {
     if (def is VehicleBuildDef buildDef)
     {
-      Widgets.ThingIcon(rect, buildDef.thingToSpawn, stuffDef, thingStyleDef, scale, color, graphicIndexOverride, alpha);
+      if (buildDef.thingToSpawn != null)
+      {
+        Widgets.ThingIcon(rect, buildDef.thingToSpawn, stuffDef, thingStyleDef, scale, color, graphicIndexOverride, alpha);
+      }
+      else
+      {
+        Log.ErrorOnce($"VehicleBuildDef {buildDef.defName} has null thing to spawn",
+          Gen.HashCombineInt(buildDef.GetHashCode(), "Patch_Rendering.DrawVehicleBuildDefIcon".GetHashCode()));
+      }
       return false;
     }
     return true;
