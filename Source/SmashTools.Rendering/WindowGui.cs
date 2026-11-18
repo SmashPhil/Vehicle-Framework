@@ -36,7 +36,7 @@ internal sealed class WindowGui : IDisposable
 
     // ImGuiHost sets current context in constructor
     using ContextScope ctx = new(imguiContext);
-    host = new ImGuiHost(appClone, renderContext.FramesInFlight + 1);
+    host = new ImGuiHost(appClone.GraphicsDevice!, renderContext, renderContext.FramesInFlight + 1);
     imguiContext = host.context;
     backend = new ImGuiGuiBackend(host, textureBaker: null);
     textBackend = host.TmpFontBackend;
@@ -65,7 +65,7 @@ internal sealed class WindowGui : IDisposable
 
     using Host.Frame hostFrame = host.BeginFrameScope(frameNumber++, 1f / 60);
     using Backend.Frame backendFrame = backend.BeginFrameScope();
-    // Glfw callbacks only enqueue. Dispatch on the next PrePollEvents after the previous poll has completed with
+    // Waylith callbacks only enqueue. Dispatch on the next PrePollEvents after the previous poll has completed with
     // this window's backend and GUI state active.
     while (input.TryDequeue(out Event pending))
     {

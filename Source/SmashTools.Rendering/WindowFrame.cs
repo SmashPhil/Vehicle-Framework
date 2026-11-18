@@ -1,5 +1,4 @@
 using System;
-using Brutal.GlfwApi;
 using Brutal.VulkanApi;
 using Brutal.VulkanApi.Abstractions;
 using JetBrains.Annotations;
@@ -9,6 +8,7 @@ using Verse;
 using Waylith;
 using Waylith.Graphics;
 using Waylith.Rendering;
+using Waylith.Windowing;
 using int2 = Brutal.Numerics.int2;
 
 namespace SmashTools.Rendering;
@@ -23,13 +23,15 @@ public sealed class WindowFrame : IDisposable
 
   private readonly EngineApplication app = EngineApplication.Instance;
 
-  private GlfwWindow glfwWindow;
+  private IWindow platformWindow;
+  private WindowHandler handler;
   private WindowRenderContext renderContext;
   private WindowGui gui;
   private WindowInput input;
   private FrameResult pendingRecovery = FrameResult.Success;
 
   private bool disposed;
+  private bool closeRequested;
 
   public WindowFrame([NotNull] Window window, in WindowContext context)
   {
@@ -59,29 +61,28 @@ public sealed class WindowFrame : IDisposable
     if (!UnityData.IsInMainThread)
       throw new InvalidOperationException("Window must be opened on the main thread.");
 
-    if (glfwWindow != null)
-      return;
-
-    if (app == null || app.Headless || app.RenderContext == null)
+    if (app?.WindowSystem is null || app.Headless || app.RenderContext == null)
       throw new InvalidOperationException("A graphical application is required.");
 
-    Glfw.WindowHint(GlfwWindowHint.ClientApi, 0);
-    Glfw.WindowHint(GlfwWindowHint.Visible, 0);
-    Glfw.WindowHint(GlfwWindowHint.Decorated, context.drawTitleBar ? 1 : 0);
-    Glfw.WindowHint(GlfwWindowHint.Resizable, 1);
-    Glfw.WindowHint(GlfwWindowHint.Floating, 0);
-    Glfw.WindowHint(GlfwWindowHint.Maximized, 0);
-    Glfw.WindowHint(GlfwWindowHint.FocusOnShow, 1);
-    glfwWindow = Glfw.CreateWindow(new GlfwWindow.CreateInfo
+    handler = new WindowHandler(this);
+    WindowOptions options = new()
     {
       Title = context.title,
-      Size = size
-    });
+      Size = WindowSize.Logical(size.X, size.Y),
+      Kind = WindowKind.Toplevel,
+      Visible = false,
+      Decorated = context.drawTitleBar,
+      Resizable = true
+    };
+    platformWindow = app.WindowSystem.CreateWindow(options, handler);
+    app.BeforeGraphicsShutdown += OnGraphicsShutdown;
+  }
 
-    CreateRenderContext();
+  private void Show()
+  {
     app.WaitForRenderThreadIdle();
     gui = new WindowGui(app, windowStack, renderContext);
-    input = new WindowInput(glfwWindow);
+    input = new WindowInput(platformWindow);
 
     // Calls pre- and post-open
     VkExtent2D extent = renderContext.GetExtent();
@@ -92,26 +93,21 @@ public sealed class WindowFrame : IDisposable
     }
 
     app.PrePollEvents += Update;
-    app.BeforeGraphicsShutdown += OnGraphicsShutdown;
-    glfwWindow.Visible = true;
+    platformWindow.Show();
   }
 
-  private void CreateRenderContext()
+  private void CreateRenderContext(IWindow presentingWindow, SurfaceHandle surfaceHandle)
   {
-    int result = Glfw.CreateWindowSurface(app.VulkanInstance.VkHandle, glfwWindow, out ulong handle);
-
-    if (result != 0 || handle == 0)
-    {
-      throw new InvalidOperationException(
-        $"Could not create window surface: Vulkan result {result}.");
-    }
-
     if (app.Headless || app.RenderContext == null || app.GraphicsDevice == null)
     {
       throw new InvalidOperationException("Cannot create ApplicationWindow in headless mode.");
     }
 
-    var surface = new VkSurfaceKHR((nint)handle);
+    VkSurfaceKHR surface = WindowSurfaces.Create(app.VulkanInstance, surfaceHandle);
+    if (surface.IsNull())
+    {
+      throw new InvalidOperationException("Could not create window surface.");
+    }
     try
     {
       if (!app.PhysicalDevice.GetSurfaceSupportKHR(app.GraphicsDevice.PresentFamilyIndex, surface))
@@ -120,12 +116,17 @@ public sealed class WindowFrame : IDisposable
           "The application's present queue cannot present to this window.");
       }
 
+      PhysicalSize surfaceSize = presentingWindow.SurfaceSize.IsZero
+        ? WindowSize.Logical(size.X, size.Y).ToPhysical(presentingWindow.ScaleFactor)
+        : presentingWindow.SurfaceSize;
       app.GraphicsDevice.WaitIdleAndRun(() =>
       {
         renderContext = new WindowRenderContext(
           graphicsDevice: app.GraphicsDevice,
-          window: glfwWindow,
+          presentingWindow: presentingWindow,
+          surfaceHandle: surfaceHandle,
           surface: surface,
+          surfaceSize: surfaceSize,
           colorFormat: app.RenderContext.ColorFormat,
           depthFormat: VkFormat.Undefined,
           requestedPresentMode: VkPresentModeKHR.FifoKHR,
@@ -149,7 +150,7 @@ public sealed class WindowFrame : IDisposable
     }
 
     VkExtent2D extent;
-    if (glfwWindow.ShouldClose)
+    if (closeRequested)
     {
       bool removed;
       extent = renderContext.GetExtent();
@@ -159,7 +160,7 @@ public sealed class WindowFrame : IDisposable
       }
       if (!removed)
       {
-        glfwWindow.ShouldClose = false;
+        closeRequested = false;
       }
       else
       {
@@ -168,9 +169,20 @@ public sealed class WindowFrame : IDisposable
       return;
     }
 
+    if (renderContext.IsSurfaceDetached && pendingRecovery != FrameResult.SurfaceLost)
+      return;
+
     // Don't acquire swapchain images while minimized.
     if (renderContext.IsFramebufferMinimized())
       return;
+
+    if (platformWindow.IsInResizeSession &&
+        pendingRecovery != FrameResult.SurfaceLost &&
+        (pendingRecovery == FrameResult.NeedsResize ||
+         renderContext.HasFramebufferSizeMismatch()))
+    {
+      return;
+    }
 
     if (pendingRecovery == FrameResult.SurfaceLost)
     {
@@ -191,20 +203,14 @@ public sealed class WindowFrame : IDisposable
   private void Rebuild(bool recreateSurface)
   {
     app.WaitForRenderThreadIdle();
-    app.GraphicsDevice!.WaitIdleAndRun(() =>
+    if (recreateSurface)
     {
-      gui?.Dispose();
-      gui = null;
-      if (recreateSurface)
-      {
-        renderContext.RecreateSurfaceAndRebuild();
-      }
-      else
-      {
-        renderContext.Rebuild();
-      }
-      gui = new WindowGui(app, windowStack, renderContext);
-    });
+      renderContext.RecreateSurfaceAndRebuild();
+    }
+    else
+    {
+      renderContext.Rebuild();
+    }
   }
 
   private unsafe void RenderFrame()
@@ -266,8 +272,7 @@ public sealed class WindowFrame : IDisposable
 
   private void CloseAllWindows()
   {
-    VkExtent2D extent = renderContext.GetExtent();
-    using WindowStackContext wsc = new(windowStack, extent.Width, extent.Height);
+    using WindowStackContext wsc = new(windowStack);
     foreach (Window windowToRemove in windowStack.windows.ToArray())
     {
       windowStack.TryRemove(windowToRemove, doCloseSound: false);
@@ -280,7 +285,7 @@ public sealed class WindowFrame : IDisposable
       return;
 
     if (!UnityData.IsInMainThread)
-      throw new InvalidOperationException("ApplicationWindow must be disposed on the main thread.");
+      throw new InvalidOperationException("WindowFrame must be disposed on the main thread.");
 
     app.PrePollEvents -= Update;
     app.BeforeGraphicsShutdown -= OnGraphicsShutdown;
@@ -300,9 +305,199 @@ public sealed class WindowFrame : IDisposable
     input?.Dispose();
     input = null;
 
-    glfwWindow?.Dispose();
-    glfwWindow = null;
+    platformWindow?.Dispose();
+    platformWindow = null;
 
     disposed = true;
+  }
+
+  private sealed class WindowHandler(WindowFrame parent) : IWindowHandler
+  {
+    void IWindowHandler.OnSurfaceCreated(IWindow window, SurfaceHandle surfaceHandle)
+    {
+      if (parent.renderContext is { IsSurfaceDetached: true } context)
+      {
+        context.AttachSurface(surfaceHandle);
+        context.SetSurfaceSize(window.SurfaceSize);
+        parent.pendingRecovery = FrameResult.SurfaceLost;
+        return;
+      }
+
+      if (parent.renderContext != null)
+        return;
+
+      parent.CreateRenderContext(window, surfaceHandle);
+      parent.Show();
+    }
+
+    void IWindowHandler.OnSurfaceDestroyed(IWindow window, SurfaceDestroyReason reason)
+    {
+      if (reason != SurfaceDestroyReason.Lost)
+        return;
+
+      WindowRenderContext context = parent.renderContext;
+      if (context is null)
+        return;
+
+      parent.app.WaitForRenderThreadIdle();
+      parent.app.GraphicsDevice!.WaitIdleAndRun(context.DetachSurface);
+      parent.pendingRecovery = FrameResult.Success;
+    }
+
+    bool IWindowHandler.OnCloseRequested(IWindow window)
+    {
+      parent.closeRequested = true;
+      return false;
+    }
+
+    void IWindowHandler.OnResized(IWindow window, in ResizeEvent e)
+    {
+      parent.renderContext?.SetSurfaceSize(e.SurfaceSize);
+    }
+
+    LogicalSize? IWindowHandler.OnScaleFactorChanged(IWindow window, double newScale, LogicalSize suggested)
+    {
+      return null;
+    }
+
+    void IWindowHandler.OnMoved(IWindow window, PhysicalPosition outerPosition)
+    {
+    }
+
+    void IWindowHandler.OnStateChanged(IWindow window, WindowStates state)
+    {
+    }
+
+    void IWindowHandler.OnStateRequestDenied(IWindow window, WindowStates requested)
+    {
+    }
+
+    void IWindowHandler.OnFocusChanged(IWindow window, bool focused)
+    {
+      parent.input?.OnFocusChanged(focused);
+    }
+
+    void IWindowHandler.OnOcclusionChanged(IWindow window, bool occluded)
+    {
+    }
+
+    void IWindowHandler.OnRedrawRequested(IWindow window)
+    {
+    }
+
+    bool IWindowHandler.OnKeyDown(IWindow window, in KeyEvent e)
+    {
+      return false;
+    }
+
+    bool IWindowHandler.OnKeyUp(IWindow window, in KeyEvent e)
+    {
+      return false;
+    }
+
+    void IWindowHandler.OnModifiersChanged(IWindow window, Modifiers modifiers)
+    {
+    }
+
+    void IWindowHandler.OnCompositionUpdated(IWindow window, in CompositionEvent e)
+    {
+    }
+
+    void IWindowHandler.OnTextInput(IWindow window, in TextInputEvent e)
+    {
+    }
+
+    void IWindowHandler.OnInputPaneChanged(IWindow window, in InputPaneEvent e)
+    {
+    }
+
+    void IWindowHandler.OnPointerEntered(IWindow window, in PointerEvent e)
+    {
+      parent.input?.OnPointerEntered(in e);
+    }
+
+    void IWindowHandler.OnPointerExited(IWindow window, in PointerEvent e)
+    {
+      parent.input?.OnPointerExited(in e);
+    }
+
+    void IWindowHandler.OnPointerMoved(IWindow window, in PointerEvent e)
+    {
+      parent.input?.OnPointerMoved(in e);
+    }
+
+    void IWindowHandler.OnPointerPressed(IWindow window, in PointerEvent e)
+    {
+      parent.input?.OnPointerButton(in e, pressed: true);
+    }
+
+    void IWindowHandler.OnPointerReleased(IWindow window, in PointerEvent e)
+    {
+      parent.input?.OnPointerButton(in e, pressed: false);
+    }
+
+    void IWindowHandler.OnPointerCanceled(IWindow window, in PointerEvent e)
+    {
+    }
+
+    void IWindowHandler.OnPointerCaptureLost(IWindow window, PointerId id)
+    {
+    }
+
+    void IWindowHandler.OnScrolled(IWindow window, in ScrollEvent e)
+    {
+      parent.input?.OnScrolled(in e);
+    }
+
+    void IWindowHandler.OnGesture(IWindow window, in GestureEvent e)
+    {
+    }
+
+    DragResponse IWindowHandler.OnDragEnter(IWindow window, in DragEvent e)
+    {
+      return DragResponse.Reject;
+    }
+
+    DragResponse IWindowHandler.OnDragOver(IWindow window, in DragEvent e)
+    {
+      return DragResponse.Reject;
+    }
+
+    void IWindowHandler.OnDragLeave(IWindow window)
+    {
+    }
+
+    void IWindowHandler.OnDrop(IWindow window, in DropEvent e)
+    {
+    }
+
+    void IWindowHandler.OnSafeAreaChanged(IWindow window, LogicalInsets insets)
+    {
+    }
+
+    void IWindowHandler.OnResizeSessionChanged(IWindow window, bool active)
+    {
+      parent.renderContext?.SetResizeSession(active);
+    }
+
+    void IWindowHandler.OnFrameReady(IWindow window, in Waylith.Windowing.FrameTiming timing)
+    {
+    }
+
+    void IWindowHandler.OnCurrentMonitorChanged(IWindow window, IMonitor monitor)
+    {
+    }
+
+    void IWindowHandler.OnPopupDismissed(IWindow window)
+    {
+    }
+
+    void IWindowHandler.OnPopupPositioned(IWindow window, LogicalRect relativeToParent)
+    {
+    }
+
+    void IWindowHandler.OnPointerConstraintActiveChanged(IWindow window, bool active)
+    {
+    }
   }
 }

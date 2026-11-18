@@ -38,8 +38,8 @@
       <Private>False</Private>
     </Reference>
 
-    <Reference Include="Brutal.Glfw">
-      <HintPath>$(RefDir)\Brutal.Glfw.dll</HintPath>
+    <Reference Include="Waylith.Windowing">
+      <HintPath>$(RefDir)\Waylith.Windowing.dll</HintPath>
       <Private>False</Private>
     </Reference>
 

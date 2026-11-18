@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using Brutal.GlfwApi;
-using Brutal.Numerics;
 using UnityEngine;
 using UnityEngine.InputSystem.Controls;
 using Verse;
+using Waylith.Windowing;
 using Mouse = UnityEngine.InputSystem.Mouse;
 
 namespace SmashTools.Rendering;
@@ -16,69 +14,56 @@ internal sealed class WindowInput : IDisposable
   private const int InputSystemButtonCount = 5;
   private const int TrackedMouseButtonCount = 8;
 
-  private readonly GlfwWindow source;
+  private readonly IWindow source;
   private readonly Queue<Event> events = new();
   private readonly bool[] held = new bool[TrackedMouseButtonCount];
   private readonly bool[] renderedHeld = new bool[TrackedMouseButtonCount];
   private readonly int[] clicks = new int[TrackedMouseButtonCount];
-  private readonly double[] lastClickTime = new double[TrackedMouseButtonCount];
-  private readonly Vector2[] lastClickPosition = new Vector2[TrackedMouseButtonCount];
 
   private Vector2 mouse;
   private bool inside;
 
-  public WindowInput(GlfwWindow source)
+  public WindowInput(IWindow source)
   {
     this.source = source;
-    mouse = DoubleToVector(source.CursorPos);
-    inside = mouse is { x: >= 0, y: >= 0 } && mouse.x < source.Size.X && mouse.y < source.Size.Y;
-
-    source.OnMouseButton += OnMouseButton;
-    source.OnCursorPos += OnCursorPos;
-    source.OnCursorEnter += OnCursorEnter;
-    source.OnScroll += OnScroll;
-    source.OnFocus += OnFocus;
+    mouse = new Vector2(-10000, -10000);
   }
 
   [MethodImpl(MethodImplOptions.AggressiveInlining)]
-  private static Vector2 DoubleToVector(double2 value)
+  private static Vector2 ToVector(LogicalPosition position)
   {
-    return new Vector2((float)value.X, (float)value.Y);
+    return new Vector2((float)position.X, (float)position.Y);
   }
 
   private Vector2 ToPixels(Vector2 position)
   {
-    int2 size = source.Size;
-    int2 pixels = source.FramebufferSize;
-    return new Vector2(position.x * pixels.X / Math.Max(1, size.X),
-      position.y * pixels.Y / Math.Max(1, size.Y));
+    LogicalSize size = source.Size;
+    PhysicalSize pixels = source.SurfaceSize;
+    return new Vector2(
+      (float)(position.x * pixels.Width / Math.Max(1d, size.Width)),
+      (float)(position.y * pixels.Height / Math.Max(1d, size.Height)));
   }
 
-  private EventModifiers Modifiers()
+  private static EventModifiers ToEventModifiers(Modifiers modifiers)
   {
     EventModifiers result = EventModifiers.None;
-    if (KeyDown(GlfwKey.LeftShift) || KeyDown(GlfwKey.RightShift))
+    if ((modifiers & Modifiers.Shift) != Modifiers.None)
     {
       result |= EventModifiers.Shift;
     }
-    if (KeyDown(GlfwKey.LeftControl) || KeyDown(GlfwKey.RightControl))
+    if ((modifiers & Modifiers.Control) != Modifiers.None)
     {
       result |= EventModifiers.Control;
     }
-    if (KeyDown(GlfwKey.LeftAlt) || KeyDown(GlfwKey.RightAlt))
+    if ((modifiers & Modifiers.Alt) != Modifiers.None)
     {
       result |= EventModifiers.Alt;
     }
-    if (KeyDown(GlfwKey.LeftSuper) || KeyDown(GlfwKey.RightSuper))
+    if ((modifiers & Modifiers.Super) != Modifiers.None)
     {
       result |= EventModifiers.Command;
     }
     return result;
-  }
-
-  private bool KeyDown(GlfwKey key)
-  {
-    return source.GetKey(key) is GlfwKeyAction.Press or GlfwKeyAction.Repeat;
   }
 
   private bool IsHeld(int button)
@@ -101,7 +86,8 @@ internal sealed class WindowInput : IDisposable
 
   public Event CreateEvent(EventType type, Vector2? position = null)
   {
-    return NewEvent(type, position ?? (inside ? ToPixels(mouse) : new Vector2(-10000, -10000)), Modifiers());
+    return NewEvent(type, position ?? (inside ? ToPixels(mouse) : new Vector2(-10000, -10000)),
+      ToEventModifiers(source.Modifiers));
   }
 
   public bool TryDequeue(out Event value)
@@ -151,8 +137,8 @@ internal sealed class WindowInput : IDisposable
           0 => mouse.leftButton,
           1 => mouse.rightButton,
           2 => mouse.middleButton,
-          3 => mouse.forwardButton,
-          _ => mouse.backButton
+          3 => mouse.backButton,
+          _ => mouse.forwardButton
         };
         buttons[i] = button;
         pressed[i] = button.isPressed;
@@ -188,99 +174,120 @@ internal sealed class WindowInput : IDisposable
     }
   }
 
-  private void OnMouseButton(GlfwWindow sender, GlfwMouseButton button,
-    GlfwButtonAction action, GlfwModifier modifiers)
+  internal void OnPointerEntered(in PointerEvent e)
   {
-    int index = (int)button;
-    if ((uint)index >= held.Length)
-      return;
-
-    mouse = DoubleToVector(sender.CursorPos);
-    inside = Contains(mouse);
-    bool pressed = action == GlfwButtonAction.Press;
-    if (!pressed && !held[index])
-      return;
-
-    held[index] = pressed;
-    if (pressed)
+    if (e.Kind != PointerKind.Mouse)
     {
-      const float MultiClickInterval = 0.5f; // seconds
-      const float MaxMultiClickDistance = 25;
-      double now = (double)Stopwatch.GetTimestamp() / Stopwatch.Frequency;
-      clicks[index] = now - lastClickTime[index] <= MultiClickInterval &&
-        (mouse - lastClickPosition[index]).sqrMagnitude <= MaxMultiClickDistance ?
-        clicks[index] + 1 : 1;
-      lastClickTime[index] = now;
-      lastClickPosition[index] = mouse;
+      return;
     }
-    const GlfwModifier EventModifierMask = GlfwModifier.Shift | GlfwModifier.Control |
-                                           GlfwModifier.Alt | GlfwModifier.Super;
-    Event value = NewEvent(pressed ? EventType.MouseDown : EventType.MouseUp, mouse,
-      (EventModifiers)(modifiers & EventModifierMask));
-    value.button = index;
-    value.clickCount = clicks[index];
-    events.Enqueue(value);
+
+    mouse = ToVector(e.Position.Logical);
+    inside = true;
   }
 
-  private void OnCursorPos(GlfwWindow sender, double2 position)
+  internal void OnPointerExited(in PointerEvent e)
   {
-    Vector2 previous = mouse;
-    mouse = DoubleToVector(position);
-    inside = Contains(mouse);
-    int button = Array.FindIndex(held, down => down);
-    if (button == -1)
+    if (e.Kind != PointerKind.Mouse)
+    {
       return;
+    }
 
-    Event value = NewEvent(button >= 0 ? EventType.MouseDrag : EventType.MouseMove, mouse, Modifiers());
+    mouse = ToVector(e.Position.Logical);
+    inside = false;
+  }
+
+  internal void OnPointerMoved(in PointerEvent e)
+  {
+    if (e.Kind != PointerKind.Mouse)
+    {
+      return;
+    }
+
+    Vector2 previous = mouse;
+    mouse = ToVector(e.Position.Logical);
+    inside = Contains(mouse);
+
+    int button = Array.FindIndex(held, down => down);
+    Event value = NewEvent(button >= 0 ? EventType.MouseDrag : EventType.MouseMove,
+      mouse, ToEventModifiers(e.Modifiers));
     value.button = Math.Max(0, button);
     value.delta = mouse - previous;
     events.Enqueue(value);
   }
 
-  private void OnCursorEnter(GlfwWindow sender, bool entered)
-  {
-    inside = entered;
-    mouse = DoubleToVector(sender.CursorPos);
-  }
-
   private bool Contains(Vector2 position)
   {
-    return position is { x: >= 0, y: >= 0 } && position.x < source.Size.X && position.y < source.Size.Y;
+    return position is { x: >= 0, y: >= 0 } &&
+      position.x < source.Size.Width && position.y < source.Size.Height;
   }
 
-  private void OnScroll(GlfwWindow sender, double2 offset)
+  internal void OnPointerButton(in PointerEvent e, bool pressed)
   {
-    mouse = DoubleToVector(sender.CursorPos);
-    Event value = NewEvent(EventType.ScrollWheel, mouse, Modifiers());
-    value.delta = DoubleToVector(offset) * -3f;
+    PointerButton? button = e.Button;
+    if (e.Kind != PointerKind.Mouse || !button.HasValue)
+    {
+      return;
+    }
+
+    int index = (int)button.Value;
+    if ((uint)index >= held.Length)
+    {
+      return;
+    }
+
+    mouse = ToVector(e.Position.Logical);
+    inside = Contains(mouse);
+
+    if (!pressed && !held[index])
+    {
+      return;
+    }
+
+    held[index] = pressed;
+    if (pressed)
+    {
+      clicks[index] = Math.Max(1, e.ClickCount);
+    }
+
+    Event value = NewEvent(pressed ? EventType.MouseDown : EventType.MouseUp,
+      mouse, ToEventModifiers(e.Modifiers));
+    value.button = index;
+    value.clickCount = clicks[index];
     events.Enqueue(value);
   }
 
-  private void OnFocus(GlfwWindow sender, GlfwFocusEvent focus)
+  internal void OnScrolled(in ScrollEvent e)
   {
-    if (focus != GlfwFocusEvent.LostFocus)
-      return;
+    mouse = ToVector(e.Position.Logical);
 
-    events.Clear();
-    for (int i = 0; i < held.Length; i++)
+    Event value = NewEvent(EventType.ScrollWheel, mouse,
+      ToEventModifiers(e.Modifiers));
+    float scale = e.Delta.Unit == ScrollUnit.Pixels ? -0.3f : -3f;
+    value.delta = new Vector2((float)e.Delta.X * scale,
+      (float)e.Delta.Y * scale);
+    events.Enqueue(value);
+  }
+
+  internal void OnFocusChanged(bool focused)
+  {
+    if (!focused)
     {
-      if (!held[i])
-        continue;
+      events.Clear();
+      for (int i = 0; i < held.Length; i++)
+      {
+        if (!held[i])
+          continue;
 
-      held[i] = false;
-      Event value = NewEvent(EventType.MouseUp, new Vector2(-10000, -10000), EventModifiers.None);
-      value.button = i;
-      events.Enqueue(value);
+        held[i] = false;
+        Event value = NewEvent(EventType.MouseUp, new Vector2(-10000, -10000), EventModifiers.None);
+        value.button = i;
+        events.Enqueue(value);
+      }
     }
   }
 
   public void Dispose()
   {
-    source.OnMouseButton -= OnMouseButton;
-    source.OnCursorPos -= OnCursorPos;
-    source.OnCursorEnter -= OnCursorEnter;
-    source.OnScroll -= OnScroll;
-    source.OnFocus -= OnFocus;
     events.Clear();
   }
 }

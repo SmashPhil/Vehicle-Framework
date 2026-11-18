@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Assertions;
 using Verse;
 using Waylith.UnityCompat;
 
@@ -16,10 +17,8 @@ internal readonly struct WindowStackContext : IDisposable
   private readonly int previousWindowHeight;
   private readonly bool previousFullScreen;
 
-  public WindowStackContext(WindowStack windowStack, int width, int height)
+  public WindowStackContext(WindowStack windowStack)
   {
-    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
-    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
     root = Find.UIRoot;
     previous = root?.windows;
     UnityScreenState screen = UnityRuntime.Current!.Screen;
@@ -32,9 +31,15 @@ internal readonly struct WindowStackContext : IDisposable
     previousFullScreen = screen.FullScreen;
 
     root?.windows = windowStack;
+  }
+
+  public WindowStackContext(WindowStack windowStack, int width, int height) : this(windowStack)
+  {
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(width);
+    ArgumentOutOfRangeException.ThrowIfNegativeOrZero(height);
     UI.screenWidth = width;
     UI.screenHeight = height;
-    UnityRuntime.Current.ConfigureScreen(width, height);
+    UnityRuntime.Current!.ConfigureScreen(width, height);
     UnityRuntime.Current.ConfigureScreenWindow(width, height);
   }
 
