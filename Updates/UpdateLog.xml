@@ -1,38 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <UpdateLog>
   <!--Can utilize Version.txt file placed in mod's root directory-->
-  <currentVersion>1.7.2534</currentVersion>
+  <currentVersion>1.7.2537</currentVersion>
   <!--Startup,GameInit,LoadedGame,NewGame-->
   <updateOn>Startup</updateOn>
   <!--Full description shown in update page-->
   <description>&lt;title&gt;New Features&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicle pathfinding has been overhauled. Worst-case paths can calculate around 100x faster. New diagonal hitboxes used for pathfinding may produce slightly different paths.
-- Vehicles now support acceleration through the AccelerationRate stat. Vehicle modders do not need to add the Vanilla Vehicles Expanded comp controller or change existing VehicleDefs.
-- Pawns carrying a downed pawn can now right-click a vehicle to load them directly. The existing “Load Into Vehicle” gizmo remains available.
-- Map-wide item searches now include vehicle cargo.
-- A new raider event deploys paratroopers by parachute.
+- Added ability for modders to define research prerequisites for upgrades.
 
 &lt;title&gt;Additional Changes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Vehicles parked with pawns now disembark them after five in-game hours. The idle warning also includes pawns in vehicle cargo.
-- Rapid stops now use hand brakes, with tire screech and wear to wheel components. (exact same mechanic as Vanilla Vehicles Expanded, with reduced sound effect time)
-- Vehicles with no crew requirement for movement can form caravans without a colonist. (aka autonomous vehicles)
-- Passengers' CaravanBonusSpeedFactor now contributes to vehicle caravan travel speed.
-- The Form Caravan dialog warns when a vehicle cannot reach the map edge and prevents selecting it for the caravan.
+- Removed Vanilla Outposts Expanded from incompatible list. While the compatibility issue still exists, the two mods can coexist and marking them incompatible was causing too much confusion. You can run them together, but avoid travelling to outposts with vehicles.
 
 &lt;title&gt;Bug Fixes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
-- Improved how vehicles appear in the UI so they no longer clip outside their frame. Turrets and overlays no longer shift incorrectly at UI scales above 1.
-- Fixed vehicle hitboxes, region edges, blocked paths, corner cases, and collision checks affecting pathfinding and reachability.
-- Fixed caravan splitting and merging, pawns' needs in caravans, and the starting tile for boats.
-- Fixed vehicles disappearing when a regular caravan was converted into a vehicle caravan
-- Fixed mental states and breaks being applied to vehicles.
-- Fixed psycasts and abilities being unable to target vehicles.
-- Fixed launch range and fuel checks for aerial vehicles.
-- Fixed being unable to reform a caravan at a site when every colonist was in a vehicle.
-- Fixed passengers losing ideology roles after leaving a vehicle.
-- Fixed banished pawns remaining inside vehicles.
-- Fixed turrets retaining targets after running out of ammo and failing to reload when switching ammo types.
-- Fixed vehicles failing to target or run over hostile manhunter animals.
-- Fixed vehicle caravan speed calculations, their world-map display, and repairs using the crew's construction speed correctly.
+- Fixed animals and mechs not being carried to vehicles when designated for loading.
+- Fixed pathfinding crash from stale requests remaining tracked by the pathfinder.
+- Fixed turret min range not drawing its red outline on the map.
+- Fixed vehicle icons not drawing through vehicle icon drawer in ResearchTab, Designator Groups, etc.
+- Fixed incorrect fuel tank check when assigning a job for refueling a vehicle with target fuel level less than 100%.
+- Fixed debug labels not handling translations correctly.
 
 &lt;title&gt;Final Notes&lt;/title&gt;&lt;font&gt;Tiny&lt;/font&gt;
 There have been many changes since the 1.6 release, so some vehicle mods may need to be updated with Vehicle-Framework 1.7 in order to work.
