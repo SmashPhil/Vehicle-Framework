@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using RimWorldWaylith.Imgui;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 internal static class Host
 {

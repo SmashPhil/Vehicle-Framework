@@ -9,7 +9,7 @@ using Waylith;
 using Waylith.Graphics;
 using Waylith.Rendering;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 /// <summary>
 /// Hosts Gui passes for <see cref="Window"/>'s contents into a glfw window

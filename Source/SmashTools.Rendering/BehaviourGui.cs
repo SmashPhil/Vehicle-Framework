@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 internal readonly struct BehaviourGui : IDisposable
 {

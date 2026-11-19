@@ -7,7 +7,7 @@ using Verse;
 using Waylith.Windowing;
 using Mouse = UnityEngine.InputSystem.Mouse;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 internal sealed class WindowInput : IDisposable
 {

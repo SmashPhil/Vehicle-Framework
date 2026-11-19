@@ -3,7 +3,7 @@ using UnityEngine.Assertions;
 using Verse;
 using Waylith.UnityCompat;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 internal readonly struct WindowStackContext : IDisposable
 {

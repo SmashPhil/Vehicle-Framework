@@ -1,7 +1,7 @@
 ﻿using Brutal.Numerics;
 using JetBrains.Annotations;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 
 [PublicAPI]

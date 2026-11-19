@@ -11,7 +11,7 @@ using Waylith.Rendering;
 using Waylith.Windowing;
 using int2 = Brutal.Numerics.int2;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 [PublicAPI]
 public sealed class WindowFrame : IDisposable

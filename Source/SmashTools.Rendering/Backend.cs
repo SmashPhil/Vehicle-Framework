@@ -2,7 +2,7 @@
 using RimWorldWaylith.Imgui;
 using UnityEngine;
 
-namespace SmashTools.Rendering;
+namespace SmashTools.Windowing;
 
 internal static class Backend
 {
