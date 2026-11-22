@@ -935,7 +935,7 @@ public class CompVehicleTurrets : VehicleAIComp, IRefundable
 	{
 		foreach (VehicleTurret turret in turrets)
 		{
-			turret.component?.RecacheComponent(Vehicle);
+			turret.component?.RecacheComponent();
 		}
 	}
 

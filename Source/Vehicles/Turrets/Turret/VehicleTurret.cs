@@ -1429,7 +1429,9 @@ public partial class VehicleTurret : IExposable, ILoadReferenceable, ITweakField
 				RGBMaterialPool.Release(turretDrawData);
 			}
 		}
-	}
+    component?.Dispose();
+    component = null;
+  }
 
 	/// <summary>
 	/// PostLoad method after vehicle's PostLoadInit load step is finished.

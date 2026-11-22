@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoreLib.Performance;
 using JetBrains.Annotations;
+using SmashTools.Performance;
+using Verse;
 
 namespace SmashTools;
 
@@ -167,7 +170,6 @@ public class EventTrigger : IEventControl
         count++;
       }
     }
-
     return count;
   }
 
@@ -182,13 +184,28 @@ public class EventTrigger : IEventControl
 
   /// <summary>
   /// Executes all registered callbacks.  Persistent callbacks run every time; single-use callbacks
-  /// run once and are then removed.  If <see cref="IEventControl.Enabled"/> is <see langword="false"/>, this method does nothing.
+  /// run once and are then removed.  If <see cref="IEventControl.Enabled"/> is <see langword="false"/>,
+  /// this method does nothing.
   /// </summary>
   public void ExecuteEvents()
   {
     if (!Enabled || !manager.Enabled)
       return;
 
+    if (!LongEventUtils.InMainOrEventThread)
+    {
+      Log.ErrorOnce("Invoking event outside any known thread, deferring to main thread.",
+        "EventTriggerAsync".GetHashCode());
+      UnityThread.ExecuteOnMainThread(Execute);
+    }
+    else
+    {
+      Execute();
+    }
+  }
+
+  private void Execute()
+  {
     foreach (Trigger trigger in persistents)
     {
       trigger.action();
@@ -197,8 +214,8 @@ public class EventTrigger : IEventControl
     for (int i = singles.Count - 1; i >= 0; i--)
     {
       Trigger trigger = singles[i];
-      trigger.action();
       singles.RemoveAt(i);
+      trigger.action();
     }
   }
 

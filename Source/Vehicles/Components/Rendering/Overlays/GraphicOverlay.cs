@@ -27,6 +27,8 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
 
   private PreRenderResults results;
 
+  private ComponentRequirement component;
+
   // ReSharper disable once ReplaceWithFieldKeyword
   [TweakField]
   private Graphic graphic;
@@ -54,9 +56,13 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
     this.vehicle = vehicle;
     this.vehicleDef = vehicle.VehicleDef;
 
-    this.vehicle.AddEvent(VehicleEventDefOf.Destroyed, Destroy);
-    data.component?.Init(vehicle);
-
+    this.vehicle.AddSingleEvent(VehicleEventDefOf.Destroyed, Destroy);
+    if (data.component != null)
+    {
+      component = ComponentRequirement.CopyFrom(data.component);
+      component.Init(vehicle);
+    }
+    
     if (data.dynamicShadows)
     {
       ShadowData shadowData = new()
@@ -178,7 +184,7 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
   private PreRenderResults ParallelGetPreRenderResults(ref readonly TransformData transformData,
     bool forceDraw = false)
   {
-    if (data.component is { MeetsRequirements: false })
+    if (component is { MeetsRequirements: false })
     {
       // Skip rendering if health percent is below set amount for rendering
       return new PreRenderResults { valid = true, draw = false };
@@ -226,7 +232,10 @@ public class GraphicOverlay : IMaterialCacheTarget, IParallelRenderer, IBlitTarg
   public void Destroy()
   {
     vehicle.RemoveEvent(VehicleEventDefOf.ColorChanged, Notify_ColorChanged);
+    vehicle.RemoveSingleEvent(VehicleEventDefOf.Destroyed, Destroy);
     RGBMaterialPool.Release(this);
+    component?.Dispose();
+    component = null;
   }
 
   public static GraphicOverlay Create(GraphicDataOverlay graphicDataOverlay, VehiclePawn vehicle)

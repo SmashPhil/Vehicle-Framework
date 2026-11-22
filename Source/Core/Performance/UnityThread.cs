@@ -174,6 +174,7 @@ public sealed class UnityThread : MonoBehaviour
     Instance.actionQueue.Enqueue(action);
   }
 
+  // TODO 1.8 - Add bool return to capture timeouts
   /// <summary>
   /// Posts an action to run on the main thread, blocking until completion or timeout.
   /// </summary>

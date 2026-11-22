@@ -1,48 +1,86 @@
 ﻿using System;
 using JetBrains.Annotations;
 using SmashTools;
+using UnityEngine.Assertions;
+using Verse;
 
 namespace Vehicles;
 
 [PublicAPI]
-public class ComponentRequirement
+public class ComponentRequirement : IDisposable
 {
-	private string key;
-	private float healthPercent;
-	private ComparisonType comparison = ComparisonType.GreaterThan;
+  public const ComparisonType DefaultComparison = ComparisonType.GreaterThan;
 
-	public VehicleComponent Component { get; private set; }
+  private string key;
+  private float healthPercent;
+  private ComparisonType comparison = DefaultComparison;
 
-	public string Label => Component.props.label;
+  [Unsaved]
+  private VehiclePawn vehicle;
 
-	public bool MeetsRequirements { get; private set; } = true;
+  /// <summary>
+  /// For Xml-Deserialization only
+  /// </summary>
+  [UsedWithReflection]
+  public ComponentRequirement()
+  {
+  }
 
-	public void RecacheComponent(VehiclePawn vehicle)
-	{
-		Component = vehicle.statHandler.GetComponent(key);
-	}
+  public ComponentRequirement(string key, float healthPercent, ComparisonType comparison = DefaultComparison)
+  {
+    this.key = key;
+    this.healthPercent = healthPercent;
+    this.comparison = comparison;
+  }
+
+  public VehicleComponent Component { get; private set; }
+
+  public string Label => Component.props.label;
+
+  public bool MeetsRequirements { get; private set; } = true;
+
+  // TODO 1.8 - Remove
+  [Obsolete("Use zero-argument overload instead.", error: true)]
+  public void RecacheComponent(VehiclePawn vehicle)
+  {
+    Assert.AreEqual(vehicle, this.vehicle);
+    RecacheComponent();
+  }
+
+  public void RecacheComponent()
+  {
+    Assert.IsNotNull(vehicle);
+    Component = vehicle.statHandler.GetComponent(key);
+  }
 
   public void Init(VehiclePawn vehicle)
   {
-    vehicle.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    if (this.vehicle != null)
+    {
+      Trace.Fail("Trying to double init ComponentRequirement.");
+      return;
+    }
+    this.vehicle = vehicle;
     vehicle.AddEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
-    RecacheComponent(vehicle);
+    RecacheComponent();
     OnHealthChanged();
   }
 
-	private void OnHealthChanged()
-	{
-		MeetsRequirements =
-			Component != null && comparison.Compare(Component.HealthPercent, healthPercent);
-	}
+  private void OnHealthChanged()
+  {
+    MeetsRequirements =
+      Component != null && comparison.Compare(Component.HealthPercent, healthPercent);
+  }
 
-	public static ComponentRequirement CopyFrom(ComponentRequirement reference)
-	{
-		return new ComponentRequirement
-		{
-			key = reference.key,
-			healthPercent = reference.healthPercent,
-			comparison = reference.comparison,
-		};
-	}
+  public static ComponentRequirement CopyFrom(ComponentRequirement reference)
+  {
+    return new ComponentRequirement(reference.key, reference.healthPercent, reference.comparison);
+
+  }
+
+  public void Dispose()
+  {
+    vehicle?.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    vehicle = null;
+  }
 }
