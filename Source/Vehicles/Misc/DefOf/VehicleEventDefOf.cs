@@ -12,6 +12,7 @@ public static class VehicleEventDefOf
   // Movement
   public static VehicleEventDef PositionChanged;
   public static VehicleEventDef RotationChanged;
+  public static VehicleEventDef AngleChanged;
   public static VehicleEventDef IgnitionOn;
 	public static VehicleEventDef IgnitionOff;
 	public static VehicleEventDef Braking;

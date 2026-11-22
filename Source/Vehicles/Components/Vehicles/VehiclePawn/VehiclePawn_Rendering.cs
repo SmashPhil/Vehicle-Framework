@@ -98,11 +98,13 @@ public partial class VehiclePawn
     }
     set
     {
-      if (Mathf.Approximately(value, angle))
+      float setTo = Reverse ? -value : value;
+      if (Mathf.Approximately(setTo, angle))
         return;
 
       // Flips across axis (negative = NE & SW, positive = NW & SE)
-      angle = Reverse ? -value : value;
+      angle = setTo;
+      EventRegistry[VehicleEventDefOf.AngleChanged].ExecuteEvents();
     }
   }
 
@@ -447,7 +449,7 @@ public partial class VehiclePawn
   {
     if (vehiclePather.Moving)
     {
-      angle = (vehiclePather.nextCell - Position) switch
+      Angle = (vehiclePather.nextCell - Position) switch
       {
         { x: > 0, z: > 0 } => -45,
         { x: > 0, z: < 0 } => 45,

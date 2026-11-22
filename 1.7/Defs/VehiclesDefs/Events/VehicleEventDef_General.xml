@@ -16,6 +16,10 @@
 	</Vehicles.VehicleEventDef>
 
 	<Vehicles.VehicleEventDef>
+		<defName>AngleChanged</defName>
+	</Vehicles.VehicleEventDef>
+
+	<Vehicles.VehicleEventDef>
 		<defName>IgnitionOn</defName>
 	</Vehicles.VehicleEventDef>
 	
