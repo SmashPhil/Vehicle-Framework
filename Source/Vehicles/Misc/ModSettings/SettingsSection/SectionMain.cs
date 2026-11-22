@@ -167,7 +167,7 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
     Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
     Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
-    Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
+    //Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
 
     Scribe_Values.Look(ref fishingMultiplier, nameof(fishingMultiplier), defaultValue: DefaultFishingMultiplier);
     Scribe_Values.Look(ref fishingSkillIncrease, nameof(fishingSkillIncrease), defaultValue: DefaultFishingSkillGain);
@@ -252,8 +252,9 @@ public class SectionMain : SettingsSection
       listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),
         delegate { return new Message("VF_WillRequireRestart".Translate(), MessageTypeDefOf.CautionInput); },
         ref useCustomShaders, "VF_CustomShadersTooltip".Translate());
-      listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(),
-        ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
+      // TODO 1.8 - Remove entirely along with its field
+      //listingStandard.CheckboxLabeled("VF_DiagonalVehicleRendering".Translate(),
+      //  ref allowDiagonalRendering, "VF_DiagonalVehicleRenderingTooltip".Translate());
 
       listingStandard.Gap(8);
 
