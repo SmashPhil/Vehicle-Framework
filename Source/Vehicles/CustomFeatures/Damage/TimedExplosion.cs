@@ -4,6 +4,7 @@ using System.Reflection;
 using HarmonyLib;
 using JetBrains.Annotations;
 using RimWorld;
+using SmashTools;
 using SmashTools.Rendering;
 using UnityEngine;
 using Verse;

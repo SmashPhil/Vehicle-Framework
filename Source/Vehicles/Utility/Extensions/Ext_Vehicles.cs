@@ -145,8 +145,8 @@ public static class Ext_Vehicles
     return pawns.Count <= (totalRoom - reserved);
   }
 
-  [Pure]
-  public static IntVec2 MirrorRotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size)
+  [Pure, Obsolete("Use Ext_Cell instead.")] // TODO 1.8
+  public static IntVec2 MirrorRotatedBy(IntVec2 cell, Rot4 rot, IntVec2 size)
   {
     if (size is { x: 1, z: 1 })
       return cell;
@@ -184,8 +184,8 @@ public static class Ext_Vehicles
   /// Rotation is opposite of <paramref name="rot"/> ie. rotating 'east' will return a cell as if
   /// the cell were rotated counter-clockwise (or rotating based on the vehicle facing east). 
   ///</remarks>
-  [Pure]
-  public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size)
+  [Pure, Obsolete("Use Ext_Cell instead.")] // TODO 1.8
+  public static IntVec2 RotatedBy(IntVec2 cell, Rot4 rot, IntVec2 size)
   {
     if (size is { x: 1, z: 1 })
       return cell;
