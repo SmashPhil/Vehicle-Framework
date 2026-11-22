@@ -5,6 +5,7 @@ using JetBrains.Annotations;
 
 namespace CoreLib.Performance;
 
+// TODO 1.8 - Move to Collections.Concurrent
 /// <summary>
 /// Copy contents of list and store in temporary object for enumeration.
 /// </summary>
@@ -14,7 +15,7 @@ public readonly struct ListSnapshot<T> : IDisposable, IEnumerable<T>
 {
   public readonly List<T> items;
 
-  public ListSnapshot(List<T> listToCopy)
+  public ListSnapshot([NotNull] List<T> listToCopy)
   {
     items = AsyncPool<List<T>>.Get();
     items.AddRange(listToCopy);
@@ -28,13 +29,18 @@ public readonly struct ListSnapshot<T> : IDisposable, IEnumerable<T>
     AsyncPool<List<T>>.Return(items);
   }
 
-  IEnumerator IEnumerable.GetEnumerator()
+  public List<T>.Enumerator GetEnumerator()
   {
     return items.GetEnumerator();
   }
 
+  IEnumerator IEnumerable.GetEnumerator()
+  {
+    return GetEnumerator();
+  }
+
   IEnumerator<T> IEnumerable<T>.GetEnumerator()
   {
-    return items.GetEnumerator();
+    return GetEnumerator();
   }
 }
