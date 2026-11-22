@@ -1,4 +1,5 @@
 ﻿using System;
+using CoreLib;
 using CoreLib.Collections;
 using Unity.Collections;
 using Unity.Mathematics;
@@ -95,11 +96,11 @@ namespace SmashTools.PathFinder
       // Bump generation
       if (closeStatus == ushort.MaxValue - 1)
       {
-        BurstUtils.MemClear(gCosts);
-        BurstUtils.MemClear(heading);
-        BurstUtils.MemClear(parents);
-        BurstUtils.MemClear(turnCooldown);
-        BurstUtils.MemClear(visited);
+        NativeUtils.MemClear(gCosts);
+        NativeUtils.MemClear(heading);
+        NativeUtils.MemClear(parents);
+        NativeUtils.MemClear(turnCooldown);
+        NativeUtils.MemClear(visited);
         ResetStatus();
       }
       else

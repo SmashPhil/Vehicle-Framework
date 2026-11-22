@@ -1,8 +1,10 @@
+using System;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 
 namespace SmashTools.PathFinder
 {
+  [Obsolete("Use NativeUtils instead")]
   public static class BurstUtils
   {
     public static unsafe void MemClear<T>(NativeArray<T> array) where T : unmanaged
