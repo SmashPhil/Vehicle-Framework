@@ -242,6 +242,11 @@ internal class Patch_CaravanHandling : IPatchCategory
         nameof(Settlement_TraderTracker.GiveSoldThingToPlayer)),
       transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
         nameof(GiveSoldThingToVehicleTranspiler)));
+    HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(CompCauseGameCondition_PsychicSuppression),
+        nameof(CompCauseGameCondition_PsychicSuppression.CompTick)),
+      transpiler: new HarmonyMethod(typeof(Patch_CaravanHandling),
+        nameof(TickSuppressionOnPawnsInVehicleCaravanTranspiler)));
 
     HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(CaravanUtility), nameof(CaravanUtility.GetCaravan)),
@@ -1185,6 +1190,32 @@ internal class Patch_CaravanHandling : IPatchCategory
         instruction = instructionList[++i];
       }
 
+      yield return instruction;
+    }
+  }
+
+  private static IEnumerable<CodeInstruction> TickSuppressionOnPawnsInVehicleCaravanTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    FieldInfo pawnsField = AccessTools.Field(typeof(Caravan), nameof(Caravan.pawns));
+    MethodInfo pawnsGetter =
+      AccessTools.PropertyGetter(typeof(Caravan), nameof(Caravan.PawnsListForReading));
+    MethodInfo ownerEnumerator =
+      AccessTools.Method(typeof(ThingOwner<Pawn>), nameof(ThingOwner<>.GetEnumerator));
+    MethodInfo listEnumerator =
+      AccessTools.Method(typeof(List<Pawn>), nameof(List<>.GetEnumerator));
+    List<CodeInstruction> instructionList = instructions.ToList();
+
+    for (int i = 0; i < instructionList.Count; i++)
+    {
+      CodeInstruction instruction = instructionList[i];
+      if (i + 1 < instructionList.Count && instruction.LoadsField(pawnsField) &&
+        instructionList[i + 1].Calls(ownerEnumerator))
+      {
+        instruction.opcode = OpCodes.Callvirt;
+        instruction.operand = pawnsGetter;
+        instructionList[i + 1].operand = listEnumerator;
+      }
       yield return instruction;
     }
   }
