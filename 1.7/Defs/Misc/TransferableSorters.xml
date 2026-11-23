@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <Vehicles.TransferableVehicleSorterDef>
-    <defName>Type</defName>
+    <defName>VF_Type</defName>
     <label>type</label>
     <comparerClass>Vehicles.TransferableComparer_VehicleType</comparerClass>
   </Vehicles.TransferableVehicleSorterDef>
   
   <Vehicles.TransferableVehicleSorterDef>
-    <defName>MoveSpeed</defName>
+    <defName>VF_MoveSpeed</defName>
     <label>move speed</label>
     <comparerClass>Vehicles.TransferableComparer_MoveSpeed</comparerClass>
   </Vehicles.TransferableVehicleSorterDef>
 
   <Vehicles.TransferableVehicleSorterDef>
-    <defName>CargoCapacity</defName>
+    <defName>VF_CargoCapacity</defName>
     <label>cargo capacity</label>
     <comparerClass>Vehicles.TransferableComparer_CargoCapacity</comparerClass>
   </Vehicles.TransferableVehicleSorterDef>
 
   <Vehicles.TransferableVehicleSorterDef>
-    <defName>Mass</defName>
+    <defName>VF_Mass</defName>
     <label>mass</label>
     <comparerClass>Vehicles.TransferableComparer_Mass</comparerClass>
   </Vehicles.TransferableVehicleSorterDef>

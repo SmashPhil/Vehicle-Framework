@@ -100,6 +100,10 @@ internal class Patch_FormCaravanDialog : IPatchCategory
       prefix: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
         nameof(CanAdjustPawnTransferable)));
     HarmonyPatcher.Patch(
+      original: AccessTools.Method(typeof(TransferableUIUtility), "OpenSorterChangeFloatMenu"),
+      transpiler: new HarmonyMethod(typeof(Patch_FormCaravanDialog),
+        nameof(HideVehicleSortersTranspiler)));
+    HarmonyPatcher.Patch(
       original: AccessTools.Method(typeof(TilesPerDayCalculator),
         nameof(TilesPerDayCalculator.ApproxTilesPerDay),
         [typeof(Caravan), typeof(StringBuilder)]),
@@ -204,6 +208,42 @@ internal class Patch_FormCaravanDialog : IPatchCategory
   {
     if (trad.AnyThing is Pawn pawn)
       readOnly = CaravanHelper.assignedSeats.IsAssigned(pawn) || pawn.InVehicle();
+  }
+
+  /// <summary>
+  /// Vehicle sorters are registered in DefDatabase&lt;TransferableSorterDef&gt; as well, so vanilla
+  /// sort menus list them for regular items. They only apply to vehicles, so swap the def list
+  /// for one without them.
+  /// </summary>
+  private static IEnumerable<CodeInstruction> HideVehicleSortersTranspiler(
+    IEnumerable<CodeInstruction> instructions)
+  {
+    MethodInfo allSorterDefs = AccessTools.PropertyGetter(
+      typeof(DefDatabase<TransferableSorterDef>),
+      nameof(DefDatabase<>.AllDefsListForReading));
+    MethodInfo nonVehicleSorterDefs =
+      AccessTools.Method(typeof(Patch_FormCaravanDialog), nameof(NonVehicleSorterDefs));
+    bool patched = false;
+    foreach (CodeInstruction instruction in instructions)
+    {
+      if (instruction.Calls(allSorterDefs))
+      {
+        instruction.opcode = OpCodes.Call;
+        instruction.operand = nonVehicleSorterDefs;
+        patched = true;
+      }
+      yield return instruction;
+    }
+    if (!patched)
+      Log.Error("[Vehicles] Unable to hide vehicle sorters from vanilla transferable sort menus.");
+  }
+
+  private static List<TransferableSorterDef> nonVehicleSorterDefs;
+
+  private static List<TransferableSorterDef> NonVehicleSorterDefs()
+  {
+    return nonVehicleSorterDefs ??= DefDatabase<TransferableSorterDef>.AllDefsListForReading
+     .Where(sorterDef => sorterDef is not TransferableVehicleSorterDef).ToList();
   }
 
   /// <summary>
