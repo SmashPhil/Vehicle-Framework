@@ -156,6 +156,7 @@ Currently connected: {0}</VF_ElectricFlickDesc>
   
   <VF_Cargo>Cargo</VF_Cargo>
   <VF_Properties>Properties</VF_Properties>
+  <VF_LightProperties>Lighting</VF_LightProperties>
   <VF_LauncherProperties>Launch Properties</VF_LauncherProperties>
   <VF_FueledTravelPropertes>Fuel</VF_FueledTravelPropertes>
   <VF_JobLimitations>Max Workers per Job</VF_JobLimitations>

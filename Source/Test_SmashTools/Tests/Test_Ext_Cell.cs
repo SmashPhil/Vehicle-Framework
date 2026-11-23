@@ -18,6 +18,10 @@ internal class Test_Ext_Cell
     Expect.AreEqual(new IntVec2(-1, 0), offset.RotatedBy(Rot4.East, size), "East");
     Expect.AreEqual(new IntVec2(0, -1), offset.RotatedBy(Rot4.South, size), "South");
     Expect.AreEqual(new IntVec2(1, 0), offset.RotatedBy(Rot4.West, size), "West");
+    Expect.AreEqual(new IntVec2(-1, 1), offset.RotatedBy(Rot8.NorthEast, size), "NorthEast");
+    Expect.AreEqual(new IntVec2(-1, -1), offset.RotatedBy(Rot8.SouthEast, size), "SouthEast");
+    Expect.AreEqual(new IntVec2(1, -1), offset.RotatedBy(Rot8.SouthWest, size), "SouthWest");
+    Expect.AreEqual(new IntVec2(1, 1), offset.RotatedBy(Rot8.NorthWest, size), "NorthWest");
   }
 
   [Test]
@@ -42,6 +46,10 @@ internal class Test_Ext_Cell
     Expect.AreEqual(new IntVec2(-2, 1), offset.RotatedBy(Rot4.East, size), "East");
     Expect.AreEqual(new IntVec2(-1, -2), offset.RotatedBy(Rot4.South, size), "South");
     Expect.AreEqual(new IntVec2(2, -1), offset.RotatedBy(Rot4.West, size), "West");
+    Expect.AreEqual(new IntVec2(-1, 2), offset.RotatedBy(Rot8.NorthEast, size), "NorthEast");
+    Expect.AreEqual(new IntVec2(-2, -1), offset.RotatedBy(Rot8.SouthEast, size), "SouthEast");
+    Expect.AreEqual(new IntVec2(1, -2), offset.RotatedBy(Rot8.SouthWest, size), "SouthWest");
+    Expect.AreEqual(new IntVec2(2, 1), offset.RotatedBy(Rot8.NorthWest, size), "NorthWest");
   }
 
   [Test]
@@ -66,6 +74,10 @@ internal class Test_Ext_Cell
     Expect.AreEqual(new IntVec2(-2, 1), offset.RotatedBy(Rot4.East, size), "East");
     Expect.AreEqual(new IntVec2(0, -1), offset.RotatedBy(Rot4.South, size), "South");
     Expect.AreEqual(new IntVec2(3, 0), offset.RotatedBy(Rot4.West, size), "West");
+    Expect.AreEqual(new IntVec2(-1, 2), offset.RotatedBy(Rot8.NorthEast, size), "NorthEast");
+    Expect.AreEqual(new IntVec2(-2, -1), offset.RotatedBy(Rot8.SouthEast, size), "SouthEast");
+    Expect.AreEqual(new IntVec2(2, -2), offset.RotatedBy(Rot8.SouthWest, size), "SouthWest");
+    Expect.AreEqual(new IntVec2(2, 2), offset.RotatedBy(Rot8.NorthWest, size), "NorthWest");
   }
 
   [Test]
@@ -90,6 +102,10 @@ internal class Test_Ext_Cell
     Expect.AreEqual(new IntVec2(0, 0), root.RotatedBy(Rot4.East, size), "East");
     Expect.AreEqual(new IntVec2(1, 1), root.RotatedBy(Rot4.South, size), "South");
     Expect.AreEqual(new IntVec2(1, 1), root.RotatedBy(Rot4.West, size), "West");
+    Expect.AreEqual(new IntVec2(0, 0), root.RotatedBy(Rot8.NorthEast, size), "NorthEast");
+    Expect.AreEqual(new IntVec2(0, 0), root.RotatedBy(Rot8.SouthEast, size), "SouthEast");
+    Expect.AreEqual(new IntVec2(1, 0), root.RotatedBy(Rot8.SouthWest, size), "SouthWest");
+    Expect.AreEqual(new IntVec2(0, 1), root.RotatedBy(Rot8.NorthWest, size), "NorthWest");
   }
 
   [Test]

@@ -1,4 +1,5 @@
 ﻿using JetBrains.Annotations;
+using UnityEngine;
 using Verse;
 
 namespace SmashTools;
@@ -12,12 +13,13 @@ public static class Ext_Cell
   /// <summary>
   /// Rotates <paramref name="cell"/> opposite <paramref name="rot"/>, adjusting for even-sized footprints.
   /// </summary>
+  /// <remarks>Diagonal facings rotate 45 degrees from their nearest cardinal facing and round to whole cells.</remarks>
   /// <param name="cell">Offset from the footprint's root cell.</param>
   /// <param name="rot">Facing to rotate against.</param>
   /// <param name="size">Unrotated footprint size.</param>
   /// <returns>The rotated offset.</returns>
   [Pure]
-  public static IntVec2 RotatedBy(this IntVec2 cell, Rot4 rot, IntVec2 size)
+  public static IntVec2 RotatedBy(this IntVec2 cell, Rot8 rot, IntVec2 size)
   {
     switch (rot.AsInt)
     {
@@ -48,6 +50,16 @@ public static class Ext_Cell
           west.z++;
         }
         return west;
+      case 4:
+      case 5:
+      case 6:
+      case 7:
+        Rot4 cardinal = rot;
+        IntVec2 cardinalCell = cell.RotatedBy(cardinal, size);
+        Vector2 diagonal = Ext_Math.RotatePointCounterClockwise(
+          cardinalCell.x, cardinalCell.z, rot.AsRotationAngle);
+        return new IntVec2(Mathf.RoundToInt(diagonal.x),
+          Mathf.RoundToInt(diagonal.y));
       default:
         return cell;
     }

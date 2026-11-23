@@ -14,6 +14,7 @@ public sealed class FeatureFlags
   public const string VehicleCaravanProps = "VehicleCaravanProps";
   public const string BetterAutoLoadConfig = "BetterAutoLoadConfig";
   public const string Acceleration = "Acceleration";
+  public const string Headlights = "Headlights";
 
   public const string PathFinderV2 = "PathFinderV2";
   public const string BlitTexturePortraits = "BlitTexturePortraits";
@@ -40,6 +41,7 @@ public sealed class FeatureFlags
       Feature.Create(TradeableVehicles, Build.Configuration.Debug, Build.Configuration.Unstable),
       Feature.Create(Acceleration, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
       Feature.Create(PathFinderV2, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release),
+      Feature.Create(Headlights, Build.Configuration.Debug, Build.Configuration.Unstable)
       //Feature.Create(BlitTexturePortraits, Build.Configuration.Debug, Build.Configuration.Unstable, Build.Configuration.Release)
     ]);
     return flags;

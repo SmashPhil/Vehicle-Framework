@@ -59,6 +59,9 @@ public class VehicleDef : ThingDef, IDefIndex<VehicleDef>, IMaterialCacheTarget,
   [PostToSettings(Label = "VF_Properties", Translate = true, ParentHolder = true)]
   public VehicleProperties properties;
 
+  [PostToSettings(Label = "VF_LightProperties", Translate = true, ParentHolder = true)]
+  public LightProperties lighting;
+
   //[TweakField]
   //[PostToSettings(Label = "VF_NPCProperties", Translate = true, ParentHolder = true)]
   public VehicleNPCProperties npcProperties;

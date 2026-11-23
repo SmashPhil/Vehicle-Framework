@@ -57,6 +57,8 @@ public class SectionMain : SettingsSection
 
   // Graphics
   public bool passiveWaterWaves = true;
+  public bool headlights = true;
+  public float headlightLightLevel = 0.3f;
   public bool aerialVehicleEffects = true;
   public bool useCustomShaders = true;
   public bool allowDiagonalRendering = true;
@@ -119,6 +121,8 @@ public class SectionMain : SettingsSection
 
     // Graphics
     passiveWaterWaves = true;
+    headlights = true;
+    headlightLightLevel = 0.3f;
     aerialVehicleEffects = true;
     useCustomShaders = true;
     allowDiagonalRendering = true;
@@ -165,6 +169,8 @@ public class SectionMain : SettingsSection
     Scribe_Values.Look(ref overheatMechanics, nameof(overheatMechanics), defaultValue: true);
 
     Scribe_Values.Look(ref passiveWaterWaves, nameof(passiveWaterWaves), defaultValue: true);
+    Scribe_Values.Look(ref headlights, nameof(headlights), defaultValue: true);
+    Scribe_Values.Look(ref headlightLightLevel, nameof(headlightLightLevel), defaultValue: 0.3f);
     Scribe_Values.Look(ref aerialVehicleEffects, nameof(aerialVehicleEffects), defaultValue: true);
     Scribe_Values.Look(ref useCustomShaders, nameof(useCustomShaders), defaultValue: true);
     //Scribe_Values.Look(ref allowDiagonalRendering, nameof(allowDiagonalRendering), defaultValue: true);
@@ -247,6 +253,17 @@ public class SectionMain : SettingsSection
         GameFont.Small, TextAnchor.MiddleCenter);
       listingStandard.CheckboxLabeled("VF_PassiveWaterWaves".Translate(), ref passiveWaterWaves,
         "VF_PassiveWaterWavesTooltip".Translate());
+      if (IsFeatureEnabled(Headlights))
+      {
+        listingStandard.CheckboxLabeled("VF_VehicleHeadlights".Translate(), ref headlights,
+          "VF_VehicleHeadlightsTooltip".Translate());
+        if (headlights)
+        {
+          listingStandard.SliderPercentLabeled("VF_HeadlightsLightLevel".Translate(),
+            "VF_HeadlightsLightLevelTooltip".Translate(), "%", ref headlightLightLevel,
+            min: 0, max: 1);
+        }
+      }
       listingStandard.CheckboxLabeled("VF_AerialVehicleEffects".Translate(),
         ref aerialVehicleEffects, "VF_AerialVehicleEffectsTooltip".Translate());
       listingStandard.CheckboxLabeledWithMessage("VF_CustomShaders".Translate(),

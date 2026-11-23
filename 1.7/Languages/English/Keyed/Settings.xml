@@ -46,6 +46,10 @@ Determines whether Vehicles should use values from the mod settings or Defs</VF_
   <VF_PerformanceSettings>Performance</VF_PerformanceSettings>
   <VF_PassiveWaterWaves>Passive Water Waves</VF_PassiveWaterWaves>
   <VF_PassiveWaterWavesTooltip>Generate passive waves when boat is idle.</VF_PassiveWaterWavesTooltip>
+  <VF_VehicleHeadlights>Headlights</VF_VehicleHeadlights>
+  <VF_VehicleHeadlightsTooltip>Enable vehicles to turn on lights that move with it.</VF_VehicleHeadlightsTooltip>
+  <VF_HeadlightsLightLevel>Lights on at</VF_HeadlightsLightLevel>
+  <VF_HeadlightsLightLevelTooltip>At what light level vehicles should turn on their headlights.</VF_HeadlightsLightLevelTooltip>
   <VF_AerialVehicleEffects>Aerial Vehicle Effects</VF_AerialVehicleEffects>
   <VF_AerialVehicleEffectsTooltip>When aerial vehicles takeoff and land, spawn flecks and render overlay textures.</VF_AerialVehicleEffectsTooltip>
   

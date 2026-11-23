@@ -7,6 +7,7 @@ using UnityEngine;
 using Vehicles.Compatibility;
 using Vehicles.Rendering;
 using Verse;
+using static Vehicles.Config.FeatureFlags;
 
 namespace Vehicles;
 
@@ -273,6 +274,10 @@ public partial class VehiclePawn : Pawn,
     vehicleAI = new VehicleAI(this);
     drawTracker = new VehicleDrawTracker(this);
     sustainers ??= new VehicleSustainers(this);
+    if (IsFeatureEnabled(Headlights))
+    {
+      lighting = new LightController(this);
+    }
   }
 
   public override void SpawnSetup(Map map, bool respawningAfterLoad)
@@ -296,7 +301,7 @@ public partial class VehiclePawn : Pawn,
     {
       UnityThread.ExecuteOnMainThread(() => PropertyBlock = new MaterialPropertyBlock());
     }
-
+    
     // Ensure SustainerTarget and sustainer manager is given a clean slate to work with
     ReleaseSustainerTarget();
     EventRegistry[VehicleEventDefOf.Spawned].ExecuteEvents();

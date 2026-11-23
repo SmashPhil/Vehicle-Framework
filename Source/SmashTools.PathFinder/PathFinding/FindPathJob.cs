@@ -49,11 +49,11 @@ internal struct FindPathJob<TProvider, THeuristic> : IJob
     turnCost = request.turnCost;
     turnFactor = request.turnFactor;
     turnCooldown = request.turnCooldown;
-    start = request.start.x + request.start.z * pathData.mapSize.x;
-    end = request.end.x + request.end.z * pathData.mapSize.x;
-    xEnd = end % pathData.mapSize.x;
-    yEnd = end / pathData.mapSize.x;
-    maxIterations = pathData.mapSize.x * pathData.mapSize.y;
+    start = request.start.x + request.start.z * width;
+    end = request.end.x + request.end.z * width;
+    xEnd = end % width;
+    yEnd = end / width;
+    maxIterations = width * height;
     useScalar = request.useScalar;
     scalarFactor = request.scalarFactor;
     scalar = request.scalar;

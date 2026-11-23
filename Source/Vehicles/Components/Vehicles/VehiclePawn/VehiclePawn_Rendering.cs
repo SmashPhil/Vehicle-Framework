@@ -31,6 +31,8 @@ public partial class VehiclePawn
   [AnimationProperty, TweakField]
   private VehicleDrawTracker drawTracker;
 
+  private LightController lighting;
+
   public PatternData patternData;
 
   private RetextureDef retextureDef;
