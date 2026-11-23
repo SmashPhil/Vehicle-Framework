@@ -1,104 +1,102 @@
 ﻿using System;
-using System.Collections.Generic;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
-using SmashTools;
 
-namespace Vehicles
+namespace Vehicles;
+
+public class ITab_Vehicle_Cargo : ITab_Airdrop_Container
 {
-  public class ITab_Vehicle_Cargo : ITab_Airdrop_Container
+  public ITab_Vehicle_Cargo()
   {
-    public ITab_Vehicle_Cargo()
+    size = new Vector2(460f, 450f);
+    labelKey = "VF_TabCargo";
+  }
+
+  public override bool IsVisible => !Vehicle.beached;
+
+  protected override string InventoryLabelKey => "VF_Cargo";
+
+  protected override bool AllowDropping => true;
+
+  protected override bool ShowQuickFilter => true;
+
+  private VehiclePawn Vehicle
+  {
+    get
     {
-      size = new Vector2(460f, 450f);
-      labelKey = "VF_TabCargo";
-    }
-
-    public override bool IsVisible => !Vehicle.beached;
-
-    protected override string InventoryLabelKey => "VF_Cargo";
-
-    protected override bool AllowDropping => true;
-
-    private VehiclePawn Vehicle
-    {
-      get
+      if (SelPawn is VehiclePawn vehicle)
       {
-        if (SelPawn is VehiclePawn vehicle)
-        {
-          return vehicle;
-        }
-        throw new InvalidOperationException("Cargo tab on non-pawn ship " + SelThing);
+        return vehicle;
+      }
+      throw new InvalidOperationException("Cargo tab on non-pawn ship " + SelThing);
+    }
+  }
+
+  protected override void DrawAdditionalRows(ref float curY, Rect rect)
+  {
+    foreach (TransferableOneWay transferable in Vehicle.cargoToLoad)
+    {
+      if (transferable.AnyThing != null && transferable.CountToTransfer > 0 &&
+        !Vehicle.inventory.innerContainer.Contains(transferable.AnyThing) &&
+        MatchesQuickFilter(transferable.AnyThing))
+      {
+        DrawThingRow(ref curY, rect.width, transferable.AnyThing, transferable.CountToTransfer,
+          false, true);
       }
     }
+  }
 
-    protected override void DrawAdditionalRows(ref float curY, Rect rect)
+  protected override void DrawHeader(ref float curY, float width)
+  {
+    Rect rect = new(0f, curY, width, StandardLineHeight);
+    float mass = MassUtility.GearAndInventoryMass(Vehicle);
+    float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
+    Widgets.Label(rect,
+      "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
+
+    Rect rectDropAll = new(rect.xMax - ThingDropButtonSize, curY, ThingDropButtonSize,
+      ThingDropButtonSize);
+    if (AllowDropping && Inventory.Any)
     {
-      foreach (TransferableOneWay transferable in Vehicle.cargoToLoad)
+      TooltipHandler.TipRegion(rectDropAll, "EjectAll".Translate());
+      if (Widgets.ButtonImageFitted(rectDropAll, TexData.Drop))
       {
-        if (transferable.AnyThing != null && transferable.CountToTransfer > 0 &&
-          !Vehicle.inventory.innerContainer.Contains(transferable.AnyThing))
-        {
-          DrawThingRow(ref curY, rect.width, transferable.AnyThing, transferable.CountToTransfer,
-            false, true);
-        }
+        SoundDefOf.Tick_High.PlayOneShotOnCamera();
+        InterfaceDropAll();
       }
     }
+    curY += StandardLineHeight;
 
-    protected override void DrawHeader(ref float curY, float width)
+    Rect marketValueRect = new(0f, curY, width, StandardLineHeight);
+    float marketValue = 0;
+    foreach (Thing thing in Inventory)
     {
-      Rect rect = new(0f, curY, width, StandardLineHeight);
-      float mass = MassUtility.GearAndInventoryMass(Vehicle);
-      float capacity = Vehicle.GetStatValue(VehicleStatDefOf.CargoCapacity);
-      Widgets.Label(rect,
-        "MassCarried".Translate(mass.ToString("0.##"), capacity.ToString("0.##")));
-
-      Rect rectDropAll = new Rect(rect.xMax - ThingDropButtonSize, curY, ThingDropButtonSize,
-        ThingDropButtonSize);
-      if (AllowDropping && Inventory.Any)
-      {
-        TooltipHandler.TipRegion(rectDropAll, "EjectAll".Translate());
-        if (Widgets.ButtonImageFitted(rectDropAll, TexData.Drop))
-        {
-          SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
-          InterfaceDropAll();
-        }
-      }
-      curY += StandardLineHeight;
-
-      Rect marketValueRect = new Rect(0f, curY, width, StandardLineHeight);
-      float marketValue = 0;
-      foreach (Thing thing in Inventory)
-      {
-        marketValue += thing.MarketValue * thing.stackCount;
-      }
-      Widgets.Label(marketValueRect,
-        GenText.CapitalizeFirst(StatDefOf.MarketValue.label, StatDefOf.MarketValue) + ": " +
-        marketValue.ToString("F0"));
-      curY += StandardLineHeight;
+      marketValue += thing.MarketValue * thing.stackCount;
     }
+    Widgets.Label(marketValueRect,
+      $"{StatDefOf.MarketValue.label.CapitalizeFirst(StatDefOf.MarketValue)}: {marketValue:F0}");
+    curY += StandardLineHeight;
+  }
 
-    protected override bool InterfaceDrop(Thing thing)
+  protected override bool InterfaceDrop(Thing thing)
+  {
+    bool result = base.InterfaceDrop(thing);
+    if (result)
     {
-      bool result = base.InterfaceDrop(thing);
-      if (result)
-      {
-        Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
-      }
-      return result;
+      Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
     }
+    return result;
+  }
 
-    protected override bool InterfaceDropAll()
+  protected override bool InterfaceDropAll()
+  {
+    bool result = base.InterfaceDropAll();
+    if (result)
     {
-      bool result = base.InterfaceDropAll();
-      if (result)
-      {
-        Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
-      }
-      return result;
+      Vehicle.EventRegistry[VehicleEventDefOf.CargoRemoved].ExecuteEvents();
     }
+    return result;
   }
 }
