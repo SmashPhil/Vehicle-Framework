@@ -530,8 +530,13 @@ public class ITab_Vehicle_Upgrades : ITab
     float labelHeight = Text.CalcHeight(InfoNode.label, detailWidth);
     Text.Font = GameFont.Small;
     float descriptionHeight = Text.CalcHeight(InfoNode.description, detailWidth);
+    float researchPrerequisitesHeight = GetResearchPrerequisitesHeight(InfoNode, detailWidth);
     float totalCalculatedHeight =
-      labelHeight + descriptionHeight + ingredientsHeight + 30 + padding;
+      labelHeight + descriptionHeight + ingredientsHeight + researchPrerequisitesHeight + 30 + padding;
+    if (researchPrerequisitesHeight > 0)
+    {
+      totalCalculatedHeight += 5;
+    }
     if (SelectedNode != null)
     {
       totalCalculatedHeight += 10; //5 padding from description to line, and line to bottom rect
@@ -594,6 +599,14 @@ public class ITab_Vehicle_Upgrades : ITab
       descriptionHeight);
     Widgets.Label(descriptionRect, InfoNode.description);
 
+    float contentBottom = descriptionRect.yMax;
+    if (!InfoNode.researchPrerequisites.NullOrEmpty())
+    {
+      contentBottom += 5;
+      contentBottom = DrawResearchPrerequisites(new Rect(innerInfoRect.x, contentBottom,
+        innerInfoRect.width, 0));
+    }
+
     if (SelectedNode != null)
     {
       bool hasGraphics = SelectedNode.HasGraphics;
@@ -601,11 +614,11 @@ public class ITab_Vehicle_Upgrades : ITab
 
       if (hasGraphics || showUpgradeList)
       {
-        Widgets.DrawLineHorizontal(rect.x, descriptionRect.yMax + 5, rect.width,
+        Widgets.DrawLineHorizontal(rect.x, contentBottom + 5, rect.width,
           UIElements.MenuSectionBgBorderColor);
       }
 
-      Rect textEntryRect = new(innerInfoRect.x, descriptionRect.yMax + 10, innerInfoRect.width,
+      Rect textEntryRect = new(innerInfoRect.x, contentBottom + 10, innerInfoRect.width,
         textEntryHeight);
       //if (showUpgradeList)
       //{
@@ -625,6 +638,36 @@ public class ITab_Vehicle_Upgrades : ITab
       Rect tempButtonRect = buttonRect;
       tempButtonRect.width = innerInfoRect.width;
     }
+  }
+
+  private static float GetResearchPrerequisitesHeight(UpgradeNode node, float width)
+  {
+    if (node.researchPrerequisites.NullOrEmpty())
+      return 0;
+
+    float height = Text.CalcHeight($"{"Prerequisites".Translate()}:", width);
+    foreach (ResearchProjectDef project in node.researchPrerequisites)
+    {
+      height += Text.CalcHeight($"- {project.LabelCap}", width - 6);
+    }
+    return height;
+  }
+
+  private float DrawResearchPrerequisites(Rect rect)
+  {
+    float y = rect.y;
+    using TextBlock colorBlock = new(Color.white);
+    Widgets.Label(rect, ref y, $"{"Prerequisites".Translate()}:");
+    rect.xMin += 6;
+
+    bool unlocked = Vehicle.CompUpgradeTree.NodeUnlocked(InfoNode);
+    foreach (ResearchProjectDef project in InfoNode.researchPrerequisites)
+    {
+      using TextBlock statusColor = new(unlocked ? Color.white :
+        project.IsFinished ? Color.green : ColorLibrary.RedReadable);
+      Widgets.Label(rect, ref y, $"- {project.LabelCap}");
+    }
+    return y;
   }
 
   private void DrawVehicleGraphicComparison(Rect rect)
