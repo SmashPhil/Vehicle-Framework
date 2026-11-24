@@ -24,6 +24,7 @@ max_line_length = 120
 dotnet_diagnostic.IDE0130.severity = none
 dotnet_diagnostic.IDE0160.severity = none
 dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.CA2211.severity = none
 resharper_check_namespace_highlighting = none
 resharper_convert_to_primary_constructor_highlighting = none
 resharper_invert_if_highlighting = none

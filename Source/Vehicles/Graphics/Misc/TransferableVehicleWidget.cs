@@ -41,7 +41,7 @@ public sealed class TransferableVehicleWidget : IDisposable
   private static readonly Rect SortersRect = new(0f, 0f, 350f, 27f);
   private static readonly Color CardColor = new(1f, 1f, 1f, 0.04f);
 
-  private static readonly List<TransferableSorterDef> AllSorterDefs = [];
+  private static readonly DefSorter AllSorterDefs = new();
 
   private static bool showVehicleProps = true;
 
@@ -63,10 +63,14 @@ public sealed class TransferableVehicleWidget : IDisposable
     AllSorterDefs.Add(DefDatabase<TransferableSorterDef>.GetNamed("None"));
     AllSorterDefs.Add(DefDatabase<TransferableSorterDef>.GetNamed("Name"));
     AllSorterDefs.Add(TransferableSorterDefOf.MarketValue);
-    AllSorterDefs.AddRange(DefDatabase<TransferableVehicleSorterDef>.AllDefsListForReading);
+    foreach (TransferableVehicleSorterDef sorterDef in DefDatabase<TransferableVehicleSorterDef>.AllDefsListForReading)
+    {
+      AllSorterDefs.Add(sorterDef);
+    }
   }
 
-  public TransferableVehicleWidget(List<TransferableOneWay> vehicles, List<TransferableOneWay> pawns, PlanetTile tile)
+  public TransferableVehicleWidget(
+    List<TransferableOneWay> vehicles, List<TransferableOneWay> pawns, PlanetTile tile)
   {
     vehicleSection = new Section
     {
@@ -81,13 +85,16 @@ public sealed class TransferableVehicleWidget : IDisposable
     this.pawns = pawns;
     this.tile = tile;
 
-    sortPrimary = new TransferableSorter(this, TransferableVehicleSorterDefOf.Type);
-    sortSecondary = new TransferableSorter(this, TransferableVehicleSorterDefOf.CargoCapacity);
+    sortPrimary = new TransferableSorter(this,
+      AllSorterDefs.Get(TransferableVehicleSorterDefOf.Type));
+    sortSecondary = new TransferableSorter(this,
+      AllSorterDefs.Get(TransferableVehicleSorterDefOf.CargoCapacity));
 
     Init();
   }
 
-  public TransferableVehicleWidget(List<TransferableOneWay> vehicles, List<TransferableOneWay> pawns, [NotNull] Map map) :
+  public TransferableVehicleWidget(List<TransferableOneWay> vehicles,
+    List<TransferableOneWay> pawns, [NotNull] Map map) :
     this(vehicles, pawns, map.Tile)
   {
     // Vehicle Exit Check: mark blocked vehicles
@@ -151,8 +158,8 @@ public sealed class TransferableVehicleWidget : IDisposable
     if (result != 0)
       return result;
 
-    result = sortPrimary.sorterDef.Comparer.Compare(left, right);
-    return result != 0 ? result : sortSecondary.sorterDef.Comparer.Compare(left, right);
+    result = sortPrimary.Comparer.Compare(left, right);
+    return result != 0 ? result : sortSecondary.Comparer.Compare(left, right);
   }
 
   private void CacheTransferables()
@@ -179,9 +186,7 @@ public sealed class TransferableVehicleWidget : IDisposable
       CacheTransferables();
 
     using TextBlock textBlock = new(GameFont.Small);
-    DoTransferableSorters(sortPrimary.sorterDef, sortSecondary.sorterDef, sortPrimary.Sort,
-      sortSecondary.Sort);
-
+    DoTransferableSorters(sortPrimary, sortSecondary, sortPrimary.Sort, sortSecondary.Sort);
     Rect mainRect = new(inRect.x, inRect.y + TopAreaHeight, inRect.width, inRect.height - TopAreaHeight);
 
     if (IsFeatureEnabled(VehicleCaravanProps))
@@ -376,9 +381,6 @@ public sealed class TransferableVehicleWidget : IDisposable
     DrawMoveSpeed(lineRect, transferable);
     lineRect.y += lineRect.height + LinePadding;
 
-    //DrawMass(rect, transferable, availableMass);
-    //lineRect.y += lineRect.height * LinePadding;
-
     DrawCargoCapacity(lineRect, transferable);
     lineRect.y += lineRect.height + LinePadding;
 
@@ -468,28 +470,6 @@ public sealed class TransferableVehicleWidget : IDisposable
     }
   }
 
-  //private static void DrawMass(Rect rect, TransferableOneWay trad, float massCapacity)
-  //{
-  //  Widgets.DrawHighlightIfMouseover(rect);
-  //  rect.SplitVertically(rect.width / 2, out Rect labelRect, out Rect valueRect);
-  //  TooltipHandler.TipRegion(rect, "ItemWeightTip".Translate());
-  //  using TextBlock fontBlock = new(GameFont.Small, TextAnchor.MiddleRight);
-
-  //  using (new TextBlock(TextAnchor.MiddleLeft))
-  //  {
-  //    Widgets.Label(labelRect, VehicleStatDefOf.Mass.LabelCap);
-  //  }
-  //  float mass = trad.AnyThing is VehiclePawn vehicle ?
-  //    vehicle.statHandler.GetStatValue(VehicleStatDefOf.Mass) :
-  //    (trad.ThingDef as VehicleDef).GetStatValueAbstract(VehicleStatDefOf.Mass);
-
-  //  using (new TextBlock(TextAnchor.MiddleRight,
-  //    mass > massCapacity ? TransferableOneWayWidget.ItemMassColor : ColorLibrary.RedReadable))
-  //  {
-  //    Widgets.Label(valueRect, mass.ToStringMass());
-  //  }
-  //}
-
   private static void DrawCargoCapacity(Rect rect, TransferableOneWay trad)
   {
     Widgets.DrawHighlightIfMouseover(rect);
@@ -528,8 +508,8 @@ public sealed class TransferableVehicleWidget : IDisposable
     }
   }
 
-  private static void DoTransferableSorters(TransferableSorterDef sorterPrimary, TransferableSorterDef sorterSecondary,
-    Action<TransferableSorterDef> primarySetter, Action<TransferableSorterDef> secondarySetter)
+  private static void DoTransferableSorters(TransferableSorter sorterPrimary, TransferableSorter sorterSecondary,
+    Action<DefSorter.Sorter> primarySetter, Action<DefSorter.Sorter> secondarySetter)
   {
     const float TopBarHeight = 27;
     const float LabelWidth = 60;
@@ -544,36 +524,74 @@ public sealed class TransferableVehicleWidget : IDisposable
       Widgets.Label(labelRect, "SortBy".Translate());
     }
     Rect buttonRect = new(labelRect.xMax + ButtonGap, 0f, ButtonWidth, TopBarHeight);
-    if (Widgets.ButtonText(buttonRect, sorterPrimary.LabelCap.Truncate(buttonRect.width - 2f)))
+    if (Widgets.ButtonText(buttonRect, sorterPrimary.Def.LabelCap.Truncate(buttonRect.width - 2f)))
     {
       OpenSorterChangeFloatMenu(primarySetter);
     }
     buttonRect.x += buttonRect.width + ButtonGap;
-    if (Widgets.ButtonText(buttonRect, sorterSecondary.LabelCap.Truncate(buttonRect.width - 2f)))
+    if (Widgets.ButtonText(buttonRect, sorterSecondary.Def.LabelCap.Truncate(buttonRect.width - 2f)))
     {
       OpenSorterChangeFloatMenu(secondarySetter);
     }
     Widgets.EndGroup();
     return;
 
-    static void OpenSorterChangeFloatMenu(Action<TransferableSorterDef> sorterSetter)
+    static void OpenSorterChangeFloatMenu(Action<DefSorter.Sorter> sorterSetter)
     {
       List<FloatMenuOption> list = [];
-      foreach (TransferableSorterDef sorterDef in AllSorterDefs)
+      foreach (DefSorter.Sorter sorter in AllSorterDefs.sorters)
       {
-        list.Add(new FloatMenuOption(sorterDef.LabelCap, () => sorterSetter(sorterDef)));
+        list.Add(new FloatMenuOption(sorter.def.LabelCap, () => sorterSetter(sorter)));
       }
       Find.WindowStack.Add(new FloatMenu(list));
     }
   }
 
-  private class TransferableSorter(TransferableVehicleWidget widget, TransferableSorterDef sorterDef)
+  private class DefSorter
   {
-    public TransferableSorterDef sorterDef = sorterDef;
+    public readonly List<Sorter> sorters = [];
 
-    public void Sort(TransferableSorterDef def)
+    public Sorter Get(TransferableVehicleSorterDef sorterDef)
     {
-      sorterDef = def;
+      return sorters.FirstOrDefault(sorter => sorter.def == sorterDef);
+    }
+
+    public void Add(TransferableSorterDef sorterDef)
+    {
+      sorters.Add(new Sorter
+      {
+        def = sorterDef,
+        comparer = sorterDef.Comparer
+      });
+    }
+
+    public void Add(TransferableVehicleSorterDef sorterDef)
+    {
+      sorters.Add(new Sorter
+      {
+        def = sorterDef,
+        comparer = sorterDef.Comparer
+      });
+    }
+
+    internal record Sorter
+    {
+      public Def def;
+      public TransferableComparer comparer;
+    }
+  }
+
+  private class TransferableSorter(TransferableVehicleWidget widget, DefSorter.Sorter sorter)
+  {
+    private DefSorter.Sorter sorter = sorter;
+
+    public Def Def => sorter.def;
+
+    public TransferableComparer Comparer => sorter.comparer;
+
+    public void Sort(DefSorter.Sorter defSorter)
+    {
+      sorter = defSorter;
       widget.CacheTransferables();
     }
   }
