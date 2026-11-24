@@ -13,6 +13,8 @@ namespace Vehicles.Tests;
 [TestFixture(TestType.Playing)]
 [TestCategory(TestCategoryNames.WorldObject)]
 [TestDescription("VehicleCaravans generate a camp, spawn all pawns, and correctly transition from world to local map.")]
+[WarningsAllowed(Warnings.AncientVentPlacement, Warnings.GenStepFrozenRuins)]
+[ErrorsAllowed(Errors.CellFinderCentralSpot)]
 internal sealed class Test_VehicleCaravan_EnterMap
 {
   private static readonly IntVec3 TestMapSize = new(75, 1, 75);

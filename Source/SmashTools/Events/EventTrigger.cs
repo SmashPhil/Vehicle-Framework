@@ -75,11 +75,33 @@ public class EventTrigger : IEventControl
   /// <summary>
   /// Adds a persistent callback under the given key.
   /// </summary>
+  /// <param name="owner">Object instance that owns this event.</param>
+  /// <param name="key">A grouping key for the callback.</param>
+  /// <param name="action">The callback to invoke on execution.</param>
+  public void Add(object owner, string key, Action action)
+  {
+    persistents.Add(new Trigger(owner, key, action));
+  }
+
+  /// <summary>
+  /// Adds a single-use callback under the given key. It will be removed after its first execution.
+  /// </summary>
+  /// <param name="owner">Object instance that owns this event.</param>
+  /// <param name="key">A grouping key for the callback.</param>
+  /// <param name="action">The callback to invoke once on execution.</param>
+  public void AddSingle(object owner, string key, Action action)
+  {
+    singles.Add(new Trigger(owner, key, action));
+  }
+
+  /// <summary>
+  /// Adds a persistent callback under the given key.
+  /// </summary>
   /// <param name="key">A grouping key for the callback.</param>
   /// <param name="action">The callback to invoke on execution.</param>
   public void Add(string key, Action action)
   {
-    persistents.Add(new Trigger(key, action));
+    persistents.Add(new Trigger(owner: null, key, action));
   }
 
   /// <summary>
@@ -89,7 +111,7 @@ public class EventTrigger : IEventControl
   /// <param name="action">The callback to invoke once on execution.</param>
   public void AddSingle(string key, Action action)
   {
-    singles.Add(new Trigger(key, action));
+    singles.Add(new Trigger(owner: null, key, action));
   }
 
   /// <summary>
@@ -125,6 +147,27 @@ public class EventTrigger : IEventControl
     {
       Trigger trigger = persistents[i];
       if (trigger.action == action)
+      {
+        persistents.RemoveAt(i);
+        count++;
+      }
+    }
+    return count;
+  }
+
+  /// <summary>
+  /// Removes persistent callbacks matching both the owning instance and the action.
+  /// </summary>
+  /// <param name="instance">The instance that owns the callbacks.</param>
+  /// <param name="action">The callback to remove.</param>
+  /// <returns>The number of callbacks removed.</returns>
+  public int Remove(object instance, Action action)
+  {
+    int count = 0;
+    for (int i = persistents.Count - 1; i >= 0; i--)
+    {
+      Trigger trigger = persistents[i];
+      if (trigger.owner == instance && trigger.action == action)
       {
         persistents.RemoveAt(i);
         count++;
@@ -222,8 +265,10 @@ public class EventTrigger : IEventControl
   /// <summary>
   /// Internal struct representing a single registered callback and its optional grouping key.
   /// </summary>
-  private readonly struct Trigger(string key, Action action)
+  private readonly struct Trigger(object owner, string key, Action action)
   {
+    public readonly object owner = owner;
+
     /// <summary>The grouping key for this callback; may be <see langword="null"/>.</summary>
     public readonly string key = key;
 

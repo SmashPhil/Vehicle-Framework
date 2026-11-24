@@ -72,6 +72,21 @@ public static class Ext_EventManager
   }
 
   /// <summary>
+  /// Adds persistent callbacks for an event and tracks them under the owning instance.
+  /// </summary>
+  /// <typeparam name="T">The event key type.</typeparam>
+  /// <param name="manager">The event manager.</param>
+  /// <param name="instance">The instance used to remove these callbacks later.</param>
+  /// <param name="event">The event key whose trigger receives the callbacks.</param>
+  /// <param name="action">The first callback to add.</param>
+  /// <param name="actions">Additional callbacks to add.</param>
+  public static void AddEvent<T>(this IEventManager<T> manager, object instance, T @event, Action action,
+    params Action[] actions)
+  {
+    manager.EventRegistry.AddEvent(instance, @event, action, actions);
+  }
+
+  /// <summary>
   /// Adds one or more actions to be invoked when the specified event fires.
   /// </summary>
   /// <typeparam name="T">The event key type.</typeparam>
@@ -179,6 +194,30 @@ public static class Ext_EventManager
   public static void RemoveEvent<T>(this IEventManager<T> manager, T @event, Action action)
   {
     manager.EventRegistry[@event].Remove(action);
+  }
+
+  /// <summary>
+  /// Removes persistent callbacks for the event that match both the instance and the action.
+  /// </summary>
+  /// <typeparam name="T">The event key type.</typeparam>
+  /// <param name="manager">The event manager.</param>
+  /// <param name="instance">The instance that owns the callbacks.</param>
+  /// <param name="event">The event key.</param>
+  /// <param name="action">The callback to remove.</param>
+  public static void RemoveEvent<T>(this IEventManager<T> manager, object instance, T @event, Action action)
+  {
+    manager.EventRegistry[@event].Remove(instance, action);
+  }
+
+  /// <summary>
+  /// Removes persistent callbacks tracked under the specified instance across all event keys.
+  /// </summary>
+  /// <typeparam name="T">The event key type.</typeparam>
+  /// <param name="manager">The event manager.</param>
+  /// <param name="instance">The instance whose callbacks to remove.</param>
+  public static void RemoveAllEvents<T>(this IEventManager<T> manager, object instance)
+  {
+    manager.EventRegistry.RemoveAllEvents(instance);
   }
 
   /// <summary>

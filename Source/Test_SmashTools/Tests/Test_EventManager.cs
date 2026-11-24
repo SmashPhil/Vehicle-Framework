@@ -7,7 +7,7 @@ namespace SmashTools.Tests;
 
 [TestFixture(TestType.MainMenu)]
 [TestCategory(TestCategoryNames.Events)]
-[TestDescription("Expansive event system for providing more control over event triggers and registration.")]
+[TestDescription("Event system for providing more control over event triggers and registration.")]
 internal sealed class Test_EventManager
 {
   private const int DefaultState = -1;
@@ -60,6 +60,211 @@ internal sealed class Test_EventManager
     Assert.AreEqual(integer, DefaultState);
     Assert.IsTrue(obj.EventRegistry[EventType.One].Enabled);
     Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+  }
+
+  [Test]
+  private void EventInstance()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 1);
+  }
+
+  [Test]
+  private void RemoveAllEvents()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+    obj.AddEvent(instance, EventType.Two, SetIntTwo);
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+    Expect.AreEqual(obj.EventRegistry[EventType.Two].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveAllEventsOtherInstance()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    object otherInstance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+    obj.AddEvent(otherInstance, EventType.One, SetIntTwo);
+
+    obj.RemoveAllEvents(instance);
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 2);
+  }
+
+  [Test]
+  private void RemoveAllEventsSharedAction()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    object otherInstance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+    obj.AddEvent(otherInstance, EventType.One, SetIntOne);
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+  }
+
+  [Test]
+  private void RemoveAllEventsAdditionalActions()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne, SetIntTwo);
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveAllEventsWithKey()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.EventRegistry.AddEvent(instance, EventType.One, SetIntOne, "key");
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveInstanceActionPreservesOtherAction()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne, SetIntTwo);
+
+    obj.EventRegistry[EventType.One].Remove(instance, SetIntOne);
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 2);
+  }
+
+  [Test]
+  private void RemoveAllEventsPreservesUntrackedAction()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+    obj.AddEvent(EventType.One, SetIntOne);
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+  }
+
+  [Test]
+  private void RemoveAllEventsPreservesUntrackedSingleEvent()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+    obj.AddSingleEvent(EventType.One, SetIntOne);
+
+    obj.RemoveAllEvents(instance);
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 1);
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveEventByActionRemovesTrackedAndUntracked()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(EventType.One, SetIntOne);
+    obj.AddEvent(instance, EventType.One, SetIntOne);
+
+    obj.RemoveEvent(EventType.One, SetIntOne);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveEventByActionPreservesInstanceAction()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(EventType.One, SetIntOne);
+    obj.AddEvent(instance, EventType.One, SetIntTwo);
+
+    obj.RemoveEvent(EventType.One, SetIntOne);
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 2);
+  }
+
+  [Test]
+  private void RemoveEventByKeyRemovesTrackedAndUntracked()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(EventType.One, SetIntOne, "key");
+    obj.EventRegistry.AddEvent(instance, EventType.One, SetIntTwo, "key");
+
+    obj.RemoveEvent(EventType.One, "key");
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
+  }
+
+  [Test]
+  private void RemoveEventByKeyPreservesOtherInstanceKey()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.AddEvent(EventType.One, SetIntOne, "untracked");
+    obj.EventRegistry.AddEvent(instance, EventType.One, SetIntTwo, "tracked");
+
+    obj.RemoveEvent(EventType.One, "untracked");
+
+    Assert.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 1);
+    obj.EventRegistry[EventType.One].ExecuteEvents();
+    Expect.AreEqual(integer, 2);
+  }
+
+  [Test]
+  private void RemoveAllEventsWithKeyAdditionalActions()
+  {
+    TestObject obj = new();
+    obj.FillEventsEnum();
+    object instance = new();
+    obj.EventRegistry.AddEvent(instance, EventType.One, SetIntOne, "key", SetIntTwo);
+
+    obj.RemoveAllEvents(instance);
+
+    Expect.AreEqual(obj.EventRegistry[EventType.One].TotalEventCount, 0);
   }
 
   [Test]
