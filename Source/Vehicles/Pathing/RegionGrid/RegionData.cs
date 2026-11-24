@@ -1,10 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using CoreLib.PathFinding;
 using JetBrains.Annotations;
 
 namespace Vehicles;
 
-internal class RegionData
+internal sealed class RegionData : IDisposable
 {
   internal readonly VehicleRegionMaker regionMaker;
   internal readonly VehicleRegionGridManager regionGridManager;
@@ -40,6 +41,17 @@ internal class RegionData
     foreach (var gridManager in gridManagers)
     {
       gridManager.ChangeOwner(vehicleDef);
+    }
+  }
+
+  public void Dispose()
+  {
+    foreach (VehicleGridManager gridManager in gridManagers)
+    {
+      if (gridManager is { Disposed: false })
+      {
+        gridManager.Dispose();
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using JetBrains.Annotations;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -10,6 +11,15 @@ using Unity.Jobs;
 
 namespace CoreLib.Collections;
 
+/// <summary>
+/// Stores pointers to equally sized native arrays in an allocated native buffer.
+/// </summary>
+/// <remarks>
+/// This container owns the pointer buffer, not the arrays it references. Keep the source arrays allocated
+/// while this container or a job using it may access them, and dispose the source arrays separately.
+/// </remarks>
+/// <typeparam name="T">Unmanaged element type of the referenced arrays.</typeparam>
+[PublicAPI]
 [DebuggerDisplay("Size = {Size}")]
 public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
 {
@@ -23,8 +33,14 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     private DisposeSentinel m_DisposeSentinel;
 #endif
 
+  /// <summary>
+  /// Pointer stored for one source array.
+  /// </summary>
   public struct BufferItem
   {
+    /// <summary>
+    /// Pointer to a source array whose memory remains owned by the caller.
+    /// </summary>
     [NativeDisableUnsafePtrRestriction]
     public T* m_ArrayBlock;
   }
@@ -44,10 +60,21 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
 #endif
   }
 
+  /// <summary>
+  /// Number of source array pointers stored in the buffer.
+  /// </summary>
   public int Size { get; }
 
+  /// <summary>
+  /// Container has allocated its pointer buffer.
+  /// </summary>
   public bool IsCreated => m_Buffer.IsCreated;
 
+  /// <summary>
+  /// Gets the pointer stored at <paramref name="bufferIndex"/>.
+  /// </summary>
+  /// <param name="bufferIndex">Zero-based index of the source array.</param>
+  /// <returns>Pointer to the source array.</returns>
   public T* this[int bufferIndex]
   {
     get
@@ -63,6 +90,12 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     }
   }
 
+  /// <summary>
+  /// Gets an element from the source array at <paramref name="bufferIndex"/>.
+  /// </summary>
+  /// <param name="bufferIndex">Zero-based index of the source array.</param>
+  /// <param name="index">Zero-based index of the element in that array.</param>
+  /// <returns>Value of the element.</returns>
   public T this[int bufferIndex, int index]
   {
     get
@@ -84,6 +117,9 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     }
   }
 
+  /// <summary>
+  /// Frees the pointer buffer without disposing the referenced arrays.
+  /// </summary>
   [WriteAccessRequired]
   public void Dispose()
   {
@@ -110,6 +146,12 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     m_AllocatorLabel = Allocator.Invalid;
   }
 
+  /// <summary>
+  /// Schedules disposal of the pointer buffer after its dependent jobs complete.
+  /// </summary>
+  /// <param name="inputDeps">JobHandle dependency for the disposal.</param>
+  /// <returns>JobHandle of the scheduled disposal, or <paramref name="inputDeps"/> if already disposed.</returns>
+  /// <remarks>The referenced arrays remain owned by the caller.</remarks>
   public JobHandle Dispose(JobHandle inputDeps)
   {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -147,6 +189,14 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     };
   }
 
+  /// <summary>
+  /// Packs pointers to native arrays into a new pointer buffer.
+  /// </summary>
+  /// <param name="arrays">Source arrays to reference.</param>
+  /// <param name="allocator">Allocator configuration for the pointer buffer.</param>
+  /// <returns>A container with one pointer slot for each input array.</returns>
+  /// <exception cref="ArgumentNullException"><paramref name="arrays"/> is null.</exception>
+  /// <exception cref="ArgumentException"><paramref name="arrays"/> is empty or its arrays have different lengths.</exception>
   public static NativeArrayList<T> PackArrayList(NativeArray<T>.ReadOnly[] arrays, Allocator allocator)
   {
     ArgumentNullException.ThrowIfNull(arrays);
@@ -158,13 +208,27 @@ public unsafe struct NativeArrayList<T> : INativeDisposable where T : unmanaged
     {
       NativeArray<T>.ReadOnly array = arrays[i];
       if (array.Length != list.m_Length)
+      {
+        list.Dispose();
         throw new ArgumentException("All arrays must be of uniform length");
-
+      }
       list.SetPtrToBuffer(i, (T*)array.GetUnsafeReadOnlyPtr());
     }
     return list;
   }
 
+  /// <summary>
+  /// Packs pointers to native bit-array storage into a new pointer buffer.
+  /// </summary>
+  /// <param name="arrays">Source bit arrays to reference.</param>
+  /// <param name="allocator">Allocator configuration for the pointer buffer.</param>
+  /// <returns>A container with one pointer slot for each input bit array.</returns>
+  /// <remarks>
+  /// All bit arrays must have the same length; this method does not check their lengths. The caller
+  /// retains ownership of every source bit array.
+  /// </remarks>
+  /// <exception cref="ArgumentNullException"><paramref name="arrays"/> is null.</exception>
+  /// <exception cref="ArgumentException"><paramref name="arrays"/> is empty.</exception>
   public static NativeArrayList<ulong> PackBitArrayList(NativeBitArraySlim.ReadOnly[] arrays, Allocator allocator)
   {
     ArgumentNullException.ThrowIfNull(arrays);

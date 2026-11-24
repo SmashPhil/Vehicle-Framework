@@ -279,7 +279,12 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
       return;
 
     disposed = true;
-    ModifierGrid.Dispose();
+
+    foreach (PathFinderImpl pathFinder in pathFinders)
+    {
+      pathFinder.Dispose();
+    }
+
     if (costGrids != null)
     {
       foreach (IPathCostGrid costGrid in costGrids)
@@ -291,14 +296,16 @@ public sealed class PathFinderManager : IDisposable, IPathFinder<PathSettings>, 
         dirtyGrid.Dispose();
       }
     }
-    foreach (PathFinderImpl pathFinder in pathFinders)
-    {
-      pathFinder.Dispose();
-    }
-
-    ModifierGrid = null;
     costGrids = null;
+    dirtyGrids = null;
     pathFinders = null;
+
+    ModifierGrid.Dispose();
+    HeuristicGrid.Dispose();
+    ScalarGrid.Dispose();
+    ModifierGrid = null;
+    HeuristicGrid = null;
+    ScalarGrid = null;
   }
 
   private class DirtyGrid(Map map) : IDisposable

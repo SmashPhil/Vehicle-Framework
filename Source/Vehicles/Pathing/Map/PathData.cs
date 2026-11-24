@@ -8,9 +8,7 @@ using SmashTools;
 
 namespace Vehicles;
 
-#pragma warning disable CS0618
-
-public class PathDataContainer
+public sealed class PathDataContainer : IDisposable
 {
   private readonly IPathingManager manager;
   private readonly List<VehicleDef> vehicleDefs;
@@ -46,6 +44,14 @@ public class PathDataContainer
 
   public ReadOnlyArray<PathData> AllPathData => new(pathDatas);
 
+  public void Dispose()
+  {
+    foreach (PathData pathData in pathDatas)
+    {
+      pathData.Dispose();
+    }
+  }
+
   // TODO - Decouple pathfinder from various region classes.
   public void GenerateAllPathData(IPathGridCalculator calculator, [CanBeNull] IPathFinder<PathSettings> pathFinder = null)
   {
@@ -64,9 +70,11 @@ public class PathDataContainer
     {
       pathData = new PathData(manager, vehicleDef)
       {
+#pragma warning disable CS0618
         VehiclePathFinder = pathFinder as VehiclePathFinder,
         // TODO - may need refactor later, pathfinder isn't necessarily the only grid that needs synchronizing
         VehiclePathGrid = new VehiclePathGrid(manager, vehicleDef, calculator)
+#pragma warning restore CS0618
       };
 
       if (pathData.IsOwner)
@@ -91,7 +99,7 @@ public class PathDataContainer
 /// Container for all path related subcomponents specific to a <see cref="VehicleDef"/>.
 /// </summary>
 /// <remarks>Stores data strictly for deviations from vanilla regarding impassable values</remarks>
-public class PathData
+public class PathData : IDisposable
 {
   private readonly IPathingManager manager;
   private readonly VehicleDef vehicleDef;
@@ -133,5 +141,11 @@ public class PathData
     {
       RegionData.PostInit();
     }
+  }
+
+  public void Dispose()
+  {
+    VehiclePathGrid?.Dispose();
+    RegionData?.Dispose();
   }
 }

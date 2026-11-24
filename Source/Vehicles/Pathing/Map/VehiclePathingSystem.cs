@@ -302,6 +302,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
 
   internal void BeginCapturingPathGridDirtying()
   {
+    Trace.IsNull(PathGridDebouncer, "Debouncer not null at begin capture, this will leak.");
     List<IGridDebouncerSource> sources = [];
     foreach (PathData pathData in PathData.AllPathData)
     {
@@ -451,6 +452,7 @@ public sealed class VehiclePathingSystem : MapComponent, IDisposable, IPathingMa
   public void Dispose()
   {
     PathFinderManager?.Dispose();
+    PathData?.Dispose();
   }
 
   [Flags]

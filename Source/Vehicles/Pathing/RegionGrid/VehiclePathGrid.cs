@@ -315,4 +315,13 @@ public sealed class VehiclePathGrid : VehicleGridManager, IGridDebouncerSource
 
     return pathCost;
   }
+
+  public override void Dispose()
+  {
+    if (Disposed)
+      return;
+
+    costGrid.Dispose();
+    base.Dispose();
+  }
 }

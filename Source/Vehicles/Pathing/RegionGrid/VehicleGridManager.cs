@@ -1,8 +1,9 @@
-﻿using Verse;
+﻿using System;
+using Verse;
 
 namespace Vehicles;
 
-public abstract class VehicleGridManager
+public abstract class VehicleGridManager : IDisposable
 {
   protected readonly IPathingManager pathing;
   protected readonly Map map;
@@ -15,6 +16,8 @@ public abstract class VehicleGridManager
     this.createdFor = createdFor;
   }
 
+  protected internal bool Disposed { get; private set; }
+
   public VehicleDef CreatedFor => createdFor;
 
   public virtual void PostInit()
@@ -24,5 +27,14 @@ public abstract class VehicleGridManager
   protected internal virtual void ChangeOwner(VehicleDef newOwner)
   {
     createdFor = newOwner;
+  }
+
+  public virtual void Dispose()
+  {
+    if (Disposed)
+      return;
+
+    Disposed = true;
+    GC.SuppressFinalize(this);
   }
 }
