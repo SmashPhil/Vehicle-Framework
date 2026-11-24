@@ -57,12 +57,12 @@ public sealed class LightController
 
     if (lights.Count > 0)
     {
-      vehicle.AddEvent(VehicleEventDefOf.PositionChanged, DirtyAll);
-      vehicle.AddEvent(VehicleEventDefOf.RotationChanged, DirtyAll);
-      vehicle.AddEvent(VehicleEventDefOf.AngleChanged, DirtyAll);
-      vehicle.AddEvent(VehicleEventDefOf.IgnitionOn, DirtyAll);
-      vehicle.AddEvent(VehicleEventDefOf.IgnitionOff, DirtyAll);
-      vehicle.AddEvent(VehicleEventDefOf.ScanRare, CheckLightLevel);
+      vehicle.AddEvent(this, VehicleEventDefOf.PositionChanged, DirtyAll);
+      vehicle.AddEvent(this, VehicleEventDefOf.RotationChanged, DirtyAll);
+      vehicle.AddEvent(this, VehicleEventDefOf.AngleChanged, DirtyAll);
+      vehicle.AddEvent(this, VehicleEventDefOf.IgnitionOn, DirtyAll);
+      vehicle.AddEvent(this, VehicleEventDefOf.IgnitionOff, DirtyAll);
+      vehicle.AddEvent(this, VehicleEventDefOf.ScanRare, CheckLightLevel);
     }
     CheckLightLevel();
     UpdateLightStates();
@@ -86,13 +86,7 @@ public sealed class LightController
       }
     }
     lights.Clear();
-
-    vehicle.RemoveEvent(VehicleEventDefOf.PositionChanged, DirtyAll);
-    vehicle.RemoveEvent(VehicleEventDefOf.RotationChanged, DirtyAll);
-    vehicle.RemoveEvent(VehicleEventDefOf.AngleChanged, DirtyAll);
-    vehicle.RemoveEvent(VehicleEventDefOf.IgnitionOn, DirtyAll);
-    vehicle.RemoveEvent(VehicleEventDefOf.IgnitionOff, DirtyAll);
-    vehicle.RemoveEvent(VehicleEventDefOf.ScanRare, CheckLightLevel);
+    vehicle.RemoveAllEvents(this);
   }
 
   private void DirtyAll()

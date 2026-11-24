@@ -61,7 +61,7 @@ public class ComponentRequirement : IDisposable
       return;
     }
     this.vehicle = vehicle;
-    vehicle.AddEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    vehicle.AddEvent(this, VehicleEventDefOf.HealthChanged, OnHealthChanged);
     RecacheComponent();
     OnHealthChanged();
   }
@@ -80,7 +80,7 @@ public class ComponentRequirement : IDisposable
 
   public void Dispose()
   {
-    vehicle?.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChanged);
+    vehicle?.RemoveAllEvents(this);
     vehicle = null;
   }
 }

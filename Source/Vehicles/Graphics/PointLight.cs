@@ -43,7 +43,7 @@ internal sealed class PointLight : IDisposable
     {
       component = ComponentRequirement.CopyFrom(props.component);
       component.Init(vehicle);
-      vehicle.AddEvent(VehicleEventDefOf.HealthChanged, OnHealthChange);
+      vehicle.AddEvent(this, VehicleEventDefOf.HealthChanged, OnHealthChange);
     }
     return emitter;
   }
@@ -55,9 +55,9 @@ internal sealed class PointLight : IDisposable
 
   public void Dispose()
   {
+    vehicle.RemoveAllEvents(this);
     if (component != null)
     {
-      vehicle.RemoveEvent(VehicleEventDefOf.HealthChanged, OnHealthChange);
       component.Dispose();
       component = null;
     }
